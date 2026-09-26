@@ -22,6 +22,9 @@
     "UnitIsPlayer",
     "UnitIsFriend",
     "UnitIsUnit",
-    "UnitAffectingCombat"
+    "UnitAffectingCombat",
+    "C_ClassColor",
+    "UnitClass",
+    "GetGuildInfo"
   ]
 }

@@ -1,15 +1,17 @@
--- Friendly player nameplates that always show the name, and show the health bar only while that
--- player is hurt or in combat. Uses Blizzard's own nameplates; only the bar's alpha changes.
+-- Friendly player nameplates that always show the name (in class color, with the guild under
+-- it), and show the health bar only while that player is hurt or in combat. Built on Blizzard's
+-- own nameplates: the bar and name fade, and a label of ours shows while the bar is hidden.
 local _, ns = ...
 
 local pairs, setmetatable = pairs, setmetatable
-local C_CVar, C_NamePlate, C_CurveUtil = C_CVar, C_NamePlate, C_CurveUtil
+local CreateFrame, hooksecurefunc = CreateFrame, hooksecurefunc
+local C_CVar, C_NamePlate, C_CurveUtil, C_ClassColor = C_CVar, C_NamePlate, C_CurveUtil, C_ClassColor
 local InCombatLockdown, UnitHealthPercent = InCombatLockdown, UnitHealthPercent
 local UnitIsPlayer, UnitIsFriend, UnitIsUnit = UnitIsPlayer, UnitIsFriend, UnitIsUnit
-local UnitAffectingCombat = UnitAffectingCombat
+local UnitAffectingCombat, UnitClass, GetGuildInfo = UnitAffectingCombat, UnitClass, GetGuildInfo
 
 local module = ns.NewModule("FriendlyPlates",
-    "Friendly players always show their name; the health bar shows only when hurt or in combat.",
+    "Friendly players always show their name and guild; the health bar shows only when hurt or in combat.",
     {
         enabled = false,
         saved = {}, -- CVar -> the player's own value, put back when the module turns off
@@ -21,32 +23,44 @@ local CVARS = {
     { names = { "nameplateShowFriendlyPlayers", "nameplateShowFriends" }, value = "1" },
     -- Blizzard's names-only mode drops the bar entirely, so it could never come back when hurt.
     { names = { "nameplateShowOnlyNameForFriendlyPlayerUnits", "nameplateShowOnlyNames" }, value = "0" },
+    -- Class color on Blizzard's own name, shown while the bar is up.
+    { names = { "nameplateUseClassColorForFriendlyPlayerUnitNames" }, value = "1" },
 }
 
-local plates = {} -- nameplate unit -> its health bar container, while we manage it
-local touched = setmetatable({}, { __mode = "k" }) -- containers we changed the alpha of
+local weak = { __mode = "k" }
+local plates = {} -- nameplate unit -> { container, name, label }, while we manage it
+local byFrame = setmetatable({}, weak) -- Blizzard unit frame -> the record we last made for it
+local labels = setmetatable({}, weak) -- Blizzard unit frame -> our label frame on it
+local mirrored = setmetatable({}, weak) -- Blizzard name font string -> our label copying it
+local hookedNames = setmetatable({}, weak)
 local curve -- health fraction -> alpha: 1 below full health, 0 at full
+local inverse -- the opposite: 0 below full health, 1 at full
 
 -- Secret values (Forever inherits Midnight's rules) can't be tested; treat them as unknown.
 local function readable(value)
     return not (issecretvalue and issecretvalue(value))
 end
 
-local function buildCurve()
-    if curve or not (C_CurveUtil and C_CurveUtil.CreateCurve and UnitHealthPercent) then
-        return curve
-    end
-    curve = C_CurveUtil.CreateCurve()
-    if Enum.LuaCurveType and Enum.LuaCurveType.Step and curve.SetType then
-        curve:SetType(Enum.LuaCurveType.Step)
-        curve:AddPoint(0, 1)
-        curve:AddPoint(1, 0)
+-- A curve that gives `hurt` below full health and `full` at full health.
+local function buildCurve(hurt, full)
+    local c = C_CurveUtil.CreateCurve()
+    if Enum.LuaCurveType and Enum.LuaCurveType.Step and c.SetType then
+        c:SetType(Enum.LuaCurveType.Step)
+        c:AddPoint(0, hurt)
+        c:AddPoint(1, full)
     else
-        curve:AddPoint(0, 1)
-        curve:AddPoint(0.99, 1)
-        curve:AddPoint(1, 0)
+        c:AddPoint(0, hurt)
+        c:AddPoint(0.99, hurt)
+        c:AddPoint(1, full)
     end
-    return curve
+    return c
+end
+
+local function buildCurves()
+    if curve or not (C_CurveUtil and C_CurveUtil.CreateCurve and UnitHealthPercent) then
+        return
+    end
+    curve, inverse = buildCurve(1, 0), buildCurve(0, 1)
 end
 
 -- CVars -----------------------------------------------------------------------------------------
@@ -113,10 +127,86 @@ end
 
 -- Plates ----------------------------------------------------------------------------------------
 
-local function release(container)
-    if touched[container] then
-        container:SetAlpha(1)
-        touched[container] = nil
+-- Labels: while the bar is hidden, Blizzard's name (which sits above the bar) fades out and our
+-- own label takes its place: the name in class color with "<Guild>" under it, or the name alone
+-- lower down, level with the bar's middle, when there's no guild. The two swap with the same
+-- health curve as the bar, so the client does it even when health is secret.
+
+local NAME_X = -6 -- a little left of the bar's edge, clear of the level on the right
+
+local function createLabel(frame, name)
+    local label = CreateFrame("Frame", nil, frame)
+    label:SetAllPoints(frame)
+    label.name = label:CreateFontString(nil, "OVERLAY")
+    label.guild = label:CreateFontString(nil, "OVERLAY")
+    local fontObject = name.GetFontObject and name:GetFontObject()
+    for _, text in pairs({ label.name, label.guild }) do
+        if fontObject then
+            text:SetFontObject(fontObject)
+        else
+            text:SetFontObject("SystemFont_NamePlate")
+        end
+        text:SetJustifyH("LEFT")
+        text:SetWordWrap(false)
+    end
+    label.guild:SetTextColor(0.9, 0.9, 0.9)
+    return label
+end
+
+local function getLabel(frame, name)
+    local label = labels[frame]
+    if not label then
+        label = createLabel(frame, name)
+        labels[frame] = label
+    end
+    return label
+end
+
+-- Blizzard sets the name text (with surname) itself; ours copies it as it changes.
+local function mirrorName(fontString, text)
+    local label = mirrored[fontString]
+    if label then
+        label.name:SetText(text)
+    end
+end
+
+local function hookName(name)
+    if not hookedNames[name] then
+        hookedNames[name] = true
+        hooksecurefunc(name, "SetText", mirrorName)
+    end
+end
+
+local function layoutLabel(label, container, unit)
+    local _, class = UnitClass(unit)
+    local color = readable(class) and class and C_ClassColor and C_ClassColor.GetClassColor(class)
+    if color then
+        label.name:SetTextColor(color:GetRGB())
+    else
+        label.name:SetTextColor(1, 1, 1)
+    end
+    local guild = GetGuildInfo(unit)
+    label.name:ClearAllPoints()
+    label.guild:ClearAllPoints()
+    if readable(guild) and guild and guild ~= "" then
+        label.name:SetPoint("BOTTOMLEFT", container, "LEFT", NAME_X, 1)
+        label.guild:SetPoint("TOPLEFT", label.name, "BOTTOMLEFT", 0, -1)
+        label.guild:SetFormattedText("<%s>", guild)
+        label.guild:Show()
+    else
+        label.name:SetPoint("LEFT", container, "LEFT", NAME_X, 0)
+        label.guild:Hide()
+    end
+end
+
+local function release(record)
+    record.container:SetAlpha(1)
+    if record.name then
+        record.name:SetAlpha(1)
+        mirrored[record.name] = nil
+    end
+    if record.label then
+        record.label:Hide()
     end
 end
 
@@ -131,20 +221,37 @@ local function isFriendlyPlayer(unit)
 end
 
 local function update(unit)
-    local container = plates[unit]
-    if not container then
+    local record = plates[unit]
+    if not record then
         return
     end
     local inCombat = UnitAffectingCombat(unit)
     if not readable(inCombat) then
         inCombat = UnitAffectingCombat("player")
     end
-    touched[container] = true
+    local label = record.label
     if inCombat or not curve then
-        container:SetAlpha(1)
+        record.container:SetAlpha(1)
+        if label then
+            record.name:SetAlpha(1)
+            label:SetAlpha(0)
+        end
     else
         -- The percent can be secret in combat, so the client maps it to an alpha, not Lua.
-        container:SetAlpha(UnitHealthPercent(unit, true, curve))
+        local shown = UnitHealthPercent(unit, true, curve)
+        record.container:SetAlpha(shown)
+        if label then
+            record.name:SetAlpha(shown)
+            label:SetAlpha(UnitHealthPercent(unit, true, inverse))
+        end
+    end
+end
+
+local function refreshLabel(unit)
+    local record = plates[unit]
+    if record and record.label then
+        record.label.name:SetText(record.name:GetText())
+        layoutLabel(record.label, record.container, unit)
     end
 end
 
@@ -155,20 +262,35 @@ local function add(unit)
     if not container then
         return
     end
-    if isFriendlyPlayer(unit) then
-        plates[unit] = container
-        update(unit)
-    else
-        -- Plates are pooled: one we faded may come back for an enemy or an NPC.
-        release(container)
+    -- Plates are pooled: one we changed may come back for an enemy or an NPC.
+    local old = byFrame[frame]
+    if old then
+        release(old)
+        byFrame[frame] = nil
     end
+    if not isFriendlyPlayer(unit) then
+        return
+    end
+    local record = { container = container }
+    local name = frame.name or frame.Name
+    if name and name.SetText then
+        record.name = name
+        record.label = getLabel(frame, name)
+        record.label:Show()
+        hookName(name)
+        mirrored[name] = record.label
+    end
+    plates[unit] = record
+    byFrame[frame] = record
+    refreshLabel(unit)
+    update(unit)
 end
 
 local function remove(unit)
-    local container = plates[unit]
-    if container then
+    local record = plates[unit]
+    if record then
         plates[unit] = nil
-        release(container)
+        release(record)
     end
 end
 
@@ -178,6 +300,9 @@ function module.OnPlateEvent(event, unit)
     elseif event == "NAME_PLATE_UNIT_REMOVED" then
         remove(unit)
     elseif plates[unit] then
+        if event == "UNIT_NAME_UPDATE" then
+            refreshLabel(unit)
+        end
         update(unit)
     end
 end
@@ -189,10 +314,10 @@ function module.OnPlayerCombat()
 end
 
 local EVENTS = { "NAME_PLATE_UNIT_ADDED", "NAME_PLATE_UNIT_REMOVED", "UNIT_HEALTH", "UNIT_MAXHEALTH",
-    "UNIT_FLAGS" }
+    "UNIT_FLAGS", "UNIT_NAME_UPDATE" }
 
 function module:OnEnable()
-    buildCurve()
+    buildCurves()
     applyCVars()
     for _, event in pairs(EVENTS) do
         ns.On(event, self.OnPlateEvent)
