@@ -12,7 +12,7 @@ local ipairs, format = ipairs, string.format
 local InCombatLockdown = InCombatLockdown
 local L = ns.L
 
-local settings = {} -- module name -> its Blizzard setting objects, to refresh after /fpp toggle
+local settings = {} -- module name -> its Blizzard setting objects, to refresh after /fpp changes
 local mainCategory -- the Forever++ page, for /fpp
 local pages = {} -- module name -> its own page, for ns.OpenSettings(name)
 
@@ -30,6 +30,12 @@ local function addCanvasPage(category, module)
     return Settings.RegisterCanvasLayoutSubcategory(category, frame, module.title or module.name)
 end
 
+local function track(module, setting)
+    local list = settings[module.name] or {}
+    settings[module.name] = list
+    list[#list + 1] = setting
+end
+
 -- The module's on/off checkbox. Each page gets its own setting (the variable names must differ);
 -- all of them read and write through the module, so /fpp and every page agree.
 local function addToggle(category, module, suffix)
@@ -38,9 +44,7 @@ local function addToggle(category, module, suffix)
         module.title or module.name, module.defaults.enabled,
         function() return module.db.enabled end,
         function(value) ns.SetEnabled(module.name, value) end)
-    settings[module.name] = settings[module.name] or {}
-    local list = settings[module.name]
-    list[#list + 1] = setting
+    track(module, setting)
     return Settings.CreateCheckbox(category, setting, module.description)
 end
 
@@ -56,12 +60,8 @@ local function addOption(category, module, option, parent)
         choices and Settings.VarType.String or Settings.VarType.Boolean,
         option.name, module.defaults[option.key],
         function() return module.db[option.key] end,
-        function(value)
-            module.db[option.key] = value
-            if module.OnOptionChanged then
-                module:OnOptionChanged(option.key)
-            end
-        end)
+        function(value) ns.SetOption(module.name, option.key, value) end)
+    track(module, setting)
     local initializer
     if choices then
         initializer = Settings.CreateDropdown(category, setting, function()
@@ -161,7 +161,7 @@ function ns.OpenSettings(name)
     return true
 end
 
----Updates a module's checkboxes after it changed somewhere else (/fpp toggle).
+---Updates a module's checkboxes and dropdowns after it changed somewhere else (/fpp toggle, set).
 ---@param name string
 function ns.RefreshSetting(name)
     if not Settings or not Settings.NotifyUpdate then
