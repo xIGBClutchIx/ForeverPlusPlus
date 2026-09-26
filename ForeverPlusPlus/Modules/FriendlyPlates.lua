@@ -25,7 +25,7 @@ local module = ns.NewModule("FriendlyPlates",
         level = "before", -- "before", "after", or "off"
         guildHighlight = true,
         socialIcons = true,
-        groupIcon = "people", -- "people", "looking", or "role"
+        groupIcon = "role", -- "role" or "looking"
         testIcons = "off", -- debug: "off", "group", or "friend" on every friendly player
         saved = {}, -- CVar -> the player's own value, put back when the module turns off
     })
@@ -78,9 +78,8 @@ module.options = {
         name = "Group Icon",
         description = "Which icon group members get.",
         choices = {
-            { "people", "Guild Crowd" },
-            { "looking", "Looking for Group" },
             { "role", "Their Role (Tank, Healer, Damage)" },
+            { "looking", "Looking for Group" },
         },
     },
     {
@@ -228,7 +227,6 @@ local GUILDMATE_COLOR = { 0.25, 1, 0.25 } -- guild chat's green
 -- `role` picks that role from Blizzard's round role icons.
 local ICON_ART = {
     battlenet = { file = "Interface\\FriendsFrame\\Battlenet-Battleneticon" },
-    people = { file = "Interface\\Icons\\Achievement_GuildPerk_EverybodysFriend", round = true },
     looking = { file = "Interface\\Icons\\INV_Misc_GroupLooking", round = true },
     TANK = { file = "Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES", role = "TANK" },
     HEALER = { file = "Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES", role = "HEALER" },
@@ -246,10 +244,10 @@ local function iconArt(kind, unit)
     local choice = module.db.groupIcon
     if choice == "role" then
         local role = UnitGroupRolesAssigned and UnitGroupRolesAssigned(unit)
-        -- No role (or not in a group, while testing) falls back to the people icon.
-        return readable(role) and ICON_ART[role] and role or "people"
+        -- No role (or not in a group, while testing) falls back to the LFG icon.
+        return readable(role) and ICON_ART[role] and role or "looking"
     end
-    return ICON_ART[choice] and choice or "people"
+    return "looking"
 end
 
 -- Sets an icon's art; only does the work when it changed.
