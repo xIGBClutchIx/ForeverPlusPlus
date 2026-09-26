@@ -25,7 +25,7 @@ Names:
 - `ForeverPlusPlus/`: the shipped addon folder, linked into the client's `Interface\AddOns`.
   - `ForeverPlusPlus.toc`: metadata and load order.
   - `Core.lua`: the shared `ns`: events (`ns.On`, `ns.Off`), saved settings, modules (`ns.NewModule`, `ns.SetEnabled`), `/fpp`, `ns.Print`.
-  - `Modules/*.lua`: one change each. `Example.lua` is the template.
+  - `Modules/*.lua`: one change each (see "Add a module" in `README.md`).
   - `Init.lua`: loaded last; calls `ns.Start()` at `PLAYER_LOGIN`.
 - `README.md`: install and usage for people.
 - `docs/forever-api.md`: what we know about the Forever client API, with sources and how sure we are.

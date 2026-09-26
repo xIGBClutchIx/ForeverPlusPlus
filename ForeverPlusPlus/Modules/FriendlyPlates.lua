@@ -1,6 +1,6 @@
--- Friendly player nameplates that always show the name (in class color, with the guild and level
--- beside it), and show the health bar only while that player is hurt or in combat. Built on Blizzard's
--- own nameplates: the bar and name fade, and a label of ours shows while the bar is hidden.
+-- Friendly player (and optionally NPC) nameplates that always show the name, with the guild and
+-- level beside it, and show the health bar only while that unit is hurt or in combat. Built on
+-- Blizzard's own nameplates: the bar and name fade, and a label of ours shows while it's hidden.
 local _, ns = ...
 
 local pairs, setmetatable = pairs, setmetatable
@@ -17,6 +17,7 @@ local module = ns.NewModule("FriendlyPlates",
         enabled = false,
         classColor = true,
         barWhenHurt = true,
+        npcs = false,
         guildNames = "hidden", -- "hidden" (only without the bar), "always", or "off"
         level = "before", -- "before", "after", or "off"
         saved = {}, -- CVar -> the player's own value, put back when the module turns off
@@ -30,6 +31,12 @@ module.options = {
         name = "Health Bar When Hurt",
         description = "Show the health bar when a friendly player is missing health. "
             .. "When off, it only shows in combat.",
+    },
+    {
+        key = "npcs",
+        name = "Friendly NPCs",
+        description = "Give friendly NPCs the same nameplates: name always, health bar when hurt "
+            .. "or in combat.",
     },
     {
         key = "classColor",
@@ -58,6 +65,8 @@ local CVARS = {
     { names = { "nameplateShowOnlyNameForFriendlyPlayerUnits", "nameplateShowOnlyNames" }, value = "0" },
     -- Blizzard's own name, shown while the bar is up, stays plain white; class color is for ours.
     { names = { "nameplateUseClassColorForFriendlyPlayerUnitNames" }, value = "0" },
+    -- Only while the Friendly NPCs option is on.
+    { names = { "nameplateShowFriendlyNpcs", "nameplateShowFriendlyNPCs" }, value = "1", option = "npcs" },
 }
 
 local weak = { __mode = "k" }
@@ -124,7 +133,13 @@ local function applyCVars()
     local saved = module.db.saved
     for _, entry in pairs(CVARS) do
         local name = findCVar(entry.names)
-        if name then
+        if name and entry.option and not module.db[entry.option] then
+            -- Its option is off: give the player's own value back, if we changed it.
+            if saved[name] ~= nil then
+                C_CVar.SetCVar(name, saved[name])
+                saved[name] = nil
+            end
+        elseif name then
             local current = C_CVar.GetCVar(name)
             if current ~= entry.value then
                 if saved[name] == nil then
@@ -169,6 +184,7 @@ end
 local GUILD_SCALE = 0.9 -- the guild line is a touch smaller than the name
 local GUILD_COLOR = { 0.9, 0.9, 0.9 }
 local LEVEL_GAP = 3 -- pixels between the name and the level
+local NPC_COLOR = { 0.1, 1, 0.1 } -- the green of friendly NPC names in the world
 
 local function newText(parent)
     local text = parent:CreateFontString(nil, "OVERLAY")
@@ -275,12 +291,14 @@ local function layoutLabel(label, record, unit)
     local container = record.container
     matchFont(label, record.name)
     local _, class = UnitClass(unit)
-    local color = module.db.classColor and readable(class) and class and C_ClassColor
-        and C_ClassColor.GetClassColor(class)
+    local color = record.isPlayer and module.db.classColor and readable(class) and class
+        and C_ClassColor and C_ClassColor.GetClassColor(class)
     if color then
         label.name:SetTextColor(color:GetRGB())
-    else
+    elseif record.isPlayer then
         label.name:SetTextColor(1, 1, 1)
+    else
+        label.name:SetTextColor(NPC_COLOR[1], NPC_COLOR[2], NPC_COLOR[3])
     end
     -- The level goes beside the name, and the name shifts by half of it the other way, so the
     -- name and level together are centered over the bar. The guild line stays centered.
@@ -359,14 +377,17 @@ local function release(record)
     end
 end
 
--- A friendly player we can read. Friendly plates in instances are forbidden to addons, and
--- GetNamePlateForUnit doesn't return them, so this only sees the open world.
--- The personal resource display is a friendly player too, so leave out ourselves.
-local function isFriendlyPlayer(unit)
+-- Whether we handle this unit: a friendly player, or a friendly NPC when that option is on, that
+-- we can read. Returns whether it's a player as the second value. Friendly plates in instances
+-- are forbidden to addons, and GetNamePlateForUnit doesn't return them, so this only sees the
+-- open world. The personal resource display is a friendly player too, so leave out ourselves.
+local function isOurs(unit)
     local isPlayer, isFriend, isSelf = UnitIsPlayer(unit), UnitIsFriend("player", unit),
         UnitIsUnit(unit, "player")
-    return readable(isPlayer) and readable(isFriend) and readable(isSelf)
-        and isPlayer and isFriend and not isSelf
+    if not (readable(isPlayer) and readable(isFriend) and readable(isSelf)) then
+        return false
+    end
+    return isFriend and not isSelf and (isPlayer or module.db.npcs), isPlayer
 end
 
 local function update(unit)
@@ -408,14 +429,6 @@ local function refreshLabel(unit)
     end
 end
 
--- Called by Settings when an option changes.
-function module:OnOptionChanged()
-    for unit in pairs(plates) do
-        refreshLabel(unit)
-        update(unit)
-    end
-end
-
 local function add(unit)
     local plate = C_NamePlate.GetNamePlateForUnit(unit)
     local frame = plate and plate.UnitFrame
@@ -429,10 +442,11 @@ local function add(unit)
         release(old)
         byFrame[frame] = nil
     end
-    if not isFriendlyPlayer(unit) then
+    local ours, isPlayer = isOurs(unit)
+    if not ours then
         return
     end
-    local record = { container = container }
+    local record = { container = container, isPlayer = isPlayer }
     local name = frame.name or frame.Name
     if name and name.SetText then
         record.name = name
@@ -455,6 +469,35 @@ local function remove(unit)
     if record then
         plates[unit] = nil
         release(record)
+    end
+end
+
+-- Picks up every plate already on screen (when turning on, or when the NPC option changes).
+local function addAll()
+    for _, plate in pairs(C_NamePlate.GetNamePlates()) do
+        local unit = plate.namePlateUnitToken or (plate.UnitFrame and plate.UnitFrame.unit)
+        if unit then
+            add(unit)
+        end
+    end
+end
+
+-- Called by Settings when an option changes.
+function module:OnOptionChanged(key)
+    if not self.enabled then
+        return
+    end
+    if key == "npcs" then
+        applyCVars()
+        for unit in pairs(plates) do
+            remove(unit)
+        end
+        addAll()
+        return
+    end
+    for unit in pairs(plates) do
+        refreshLabel(unit)
+        update(unit)
     end
 end
 
@@ -489,12 +532,7 @@ function module:OnEnable()
     -- UNIT_FLAGS covers other players' combat; these cover the fallback to our own.
     ns.On("PLAYER_REGEN_DISABLED", self.OnPlayerCombat)
     ns.On("PLAYER_REGEN_ENABLED", self.OnPlayerCombat)
-    for _, plate in pairs(C_NamePlate.GetNamePlates()) do
-        local unit = plate.namePlateUnitToken or (plate.UnitFrame and plate.UnitFrame.unit)
-        if unit then
-            add(unit)
-        end
-    end
+    addAll()
 end
 
 function module:OnDisable()
