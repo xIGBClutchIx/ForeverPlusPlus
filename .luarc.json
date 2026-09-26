@@ -78,6 +78,8 @@
     "PaperDollItemsFrame",
     "GetBuildInfo",
     "C_AddOns",
-    "GetAddOnMetadata"
+    "GetAddOnMetadata",
+    "PTR_IssueReporter",
+    "ItemRefTooltip"
   ]
 }

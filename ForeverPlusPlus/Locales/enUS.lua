@@ -163,6 +163,11 @@ L.DURABILITYBARS_TITLE = "Durability Bars"
 L.DURABILITYBARS_DESC = "Show a small bar beside each item on the character window with how "
     .. "worn it is, from green to red."
 
+-- HideFeedback
+L.HIDEFEEDBACK_TITLE = "Hide Beta Feedback"
+L.HIDEFEEDBACK_DESC = "Hide the beta's \"Press F6 to submit an issue\" line on tooltips and its "
+    .. "bug report button. F6 still reports an issue."
+
 -- CVarBrowser
 L.CVARBROWSER_TITLE = "Console Variables"
 L.CVARBROWSER_DESC = "Browse the game's console variables (CVars) on a page in Settings, and "
