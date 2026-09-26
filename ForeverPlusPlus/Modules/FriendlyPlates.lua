@@ -241,8 +241,7 @@ local function iconArt(kind, unit)
     if kind == "friend" then
         return "battlenet"
     end
-    local choice = module.db.groupIcon
-    if choice == "role" then
+    if module.db.groupIcon ~= "looking" then
         local role = UnitGroupRolesAssigned and UnitGroupRolesAssigned(unit)
         -- No role (or not in a group, while testing) falls back to the LFG icon.
         return readable(role) and ICON_ART[role] and role or "looking"
