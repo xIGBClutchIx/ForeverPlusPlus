@@ -4,7 +4,7 @@
 -- Nothing is hooked until a module first calls in.
 local _, ns = ...
 
-local ipairs, setmetatable, format, rep = ipairs, setmetatable, string.format, string.rep
+local ipairs, setmetatable, format = ipairs, setmetatable, string.format
 local floor, max, UIParent = math.floor, math.max, UIParent
 local TooltipDataProcessor, Enum, C_Item, GameTooltip = TooltipDataProcessor, Enum, C_Item, GameTooltip
 local IsShiftKeyDown, GetMoneyString, C_CurrencyInfo = IsShiftKeyDown, GetMoneyString, C_CurrencyInfo
@@ -145,8 +145,11 @@ end
 
 -- Alignment ----------------------------------------------------------------------------------
 -- "right": coins against the tooltip's right edge. "inline": coins right after the label, with
--- the names padded with spaces so every price line's quantity and coins start in the same column
--- (to within a space's width).
+-- the names padded with a blank texture as wide as the gap, so every price line's quantity and
+-- coins start in the same column. (Spaces only got within a space's width.)
+
+-- Blizzard's transparent texture, drawn as a gap of any width inside text.
+local SPACER = "|TInterface\\Common\\spacer:1:%d|t"
 
 local alignment = "right"
 local names = {} -- every price line's name, to pad to the widest
@@ -173,15 +176,14 @@ local function width(text)
     return measure:GetStringWidth()
 end
 
--- Spaces that pad the name out to the widest registered name.
+-- A gap that pads the name out to the widest registered name.
 local function padding(name)
     local widest = 0
     for _, other in ipairs(names) do
         widest = max(widest, width(other))
     end
-    local space = width(" ")
-    local spaces = space > 0 and floor((widest - width(name)) / space + 0.5) or 0
-    return rep(" ", max(spaces, 0))
+    local gap = floor(widest - width(name) + 0.5)
+    return gap > 0 and format(SPACER, gap) or ""
 end
 
 ---Adds a price line: the name and a gray "x20", then the coins, placed by the alignment.
@@ -195,7 +197,7 @@ function ItemTooltip.AddPrice(tooltip, name, amount, count)
     local r, g, b = HIGHLIGHT_FONT_COLOR:GetRGB()
     if alignment == "inline" then
         -- The padding goes before the quantity, so the "x20"s line up as well as the coins.
-        label = format(L.PRICE_LINE, name .. padding(name), quantity)
+        label = format(L.PRICE_LINE, name, padding(name) .. quantity)
         tooltip:AddLine(format(L.PRICE_INLINE, label, money(amount)), r, g, b)
     else
         tooltip:AddDoubleLine(label, money(amount), r, g, b, r, g, b)

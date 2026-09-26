@@ -154,7 +154,7 @@ L.SELLPRICE_ALIGN_INLINE = "After the Label"
 -- Price lines in item tooltips (SellPrice and AuctionPrices)
 L.PRICE_MODE_STACK = "Whole Stack, Shift for One"
 L.PRICE_MODE_ONE = "One Item, Shift for Stack"
-L.PRICE_LINE = "%s %s" -- line name, quantity (gray)
+L.PRICE_LINE = "%s: %s" -- line name, quantity (gray)
 L.PRICE_QUANTITY = "x%d" -- how many items the price is for
 L.PRICE_INLINE = "%s  %s" -- padded label, coins
 
