@@ -6,11 +6,16 @@ local ipairs, format = ipairs, string.format
 
 local settings = {} -- module name -> Blizzard setting object, to refresh after /fpp toggle
 
--- A module's own on/off option (from `module.options`), shown indented under its checkbox and
--- greyed out while the module is off.
+-- A module's own option (from `module.options`), shown indented under its checkbox and greyed
+-- out while the module is off. A checkbox, or a dropdown when it lists `choices`.
 local function addOption(category, module, option, parent)
+    local choices = option.choices
+    if choices and not (Settings.CreateDropdown and Settings.CreateControlTextContainer) then
+        return -- Probe: dropdowns are Mainline's; leave the option at its default without one.
+    end
     local setting = Settings.RegisterProxySetting(category,
-        format("ForeverPlusPlus_%s_%s", module.name, option.key), Settings.VarType.Boolean,
+        format("ForeverPlusPlus_%s_%s", module.name, option.key),
+        choices and Settings.VarType.String or Settings.VarType.Boolean,
         option.name, module.defaults[option.key],
         function() return module.db[option.key] end,
         function(value)
@@ -19,7 +24,18 @@ local function addOption(category, module, option, parent)
                 module:OnOptionChanged(option.key)
             end
         end)
-    local initializer = Settings.CreateCheckbox(category, setting, option.description)
+    local initializer
+    if choices then
+        initializer = Settings.CreateDropdown(category, setting, function()
+            local container = Settings.CreateControlTextContainer()
+            for _, choice in ipairs(choices) do
+                container:Add(choice[1], choice[2])
+            end
+            return container:GetData()
+        end, option.description)
+    else
+        initializer = Settings.CreateCheckbox(category, setting, option.description)
+    end
     if parent and initializer and initializer.SetParentInitializer then
         initializer:SetParentInitializer(parent, function() return module.db.enabled end)
     end

@@ -34,6 +34,6 @@ Settings are saved in `ForeverPlusPlusDB`, one table per module (`ForeverPlusPlu
 1. Copy `Modules/Example.lua` to `Modules/YourThing.lua` and add it to the TOC before `Init.lua`.
 2. `ns.NewModule("YourThing", "One line on what it does.", { enabled = true, ... })`.
 3. Do the work in `OnEnable`; undo it in `OnDisable` if it can be undone without a reload.
-4. Read settings from `module.db`. For an extra on/off checkbox in Settings, list it in `module.options` (`{ key, name, description }`, with its default in `defaults`) and react in `module:OnOptionChanged(key)`.
+4. Read settings from `module.db`. For an extra option in Settings, list it in `module.options` (`{ key, name, description }`, with its default in `defaults`); it's a checkbox, or a dropdown if it has `choices = { { value, label }, ... }`, and react in `module:OnOptionChanged(key)`.
 
 Change Blizzard frames with `hooksecurefunc` or `HookScript`, and don't touch protected frames in combat (`InCombatLockdown()`).

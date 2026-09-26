@@ -16,12 +16,19 @@ local module = ns.NewModule("FriendlyPlates",
     {
         enabled = false,
         guild = true,
+        level = "before", -- "before", "after", or "off"
         saved = {}, -- CVar -> the player's own value, put back when the module turns off
     })
 
 -- Extra checkboxes under this module's own in Settings (see Settings.lua).
 module.options = {
     { key = "guild", name = "Guild names", description = "Show the guild under friendly player names." },
+    {
+        key = "level",
+        name = "Level",
+        description = "Where the level shows next to the name while the health bar is hidden.",
+        choices = { { "before", "Before the name" }, { "after", "After the name" }, { "off", "Hidden" } },
+    },
 }
 
 -- The CVars that make friendly player nameplates show with a bar. Each entry lists the names
@@ -271,10 +278,15 @@ local function layoutLabel(label, record, unit)
         label.barGuild:Hide()
     end
     local badge = label.level
-    if record.levelFrame then
+    local where = module.db.level
+    if record.levelFrame and where ~= "off" then
         copyBadge(label, record.levelFrame)
         badge:ClearAllPoints()
-        badge:SetPoint("LEFT", label.name, "RIGHT", 3, 0)
+        if where == "after" then
+            badge:SetPoint("LEFT", label.name, "RIGHT", 3, 0)
+        else
+            badge:SetPoint("RIGHT", label.name, "LEFT", -3, 0)
+        end
         local level = UnitLevel(unit)
         if readable(level) and level <= 0 then
             badge.text:SetText("??")
