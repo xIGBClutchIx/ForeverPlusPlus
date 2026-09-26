@@ -61,7 +61,7 @@ Use the interface number with both ends of a range: `local iface = select(4, Get
 ## Realms, names, and game rules
 
 - Forever is realmless in the usual sense. Characters live under ruleset "realms" named like `Classic Beta PvE` and `Classic Beta PvP` in `WTF\Account\<acct>\`. **[local]**
-- `UnitName` can return a **surname** as its second value, not a realm. `C_PlayerInfo.ShouldDisplaySurname()` exists. **[dump]** **[addon]** (Chatify's mention code)
+- `UnitName` returns a **surname** as its second value, not a realm: `UnitName("player")` gave `"Clutch", "Bloodfury"`. **[in-game]** (2026-09-25) `C_PlayerInfo.ShouldDisplaySurname()` exists. **[dump]** **[addon]** (Chatify's mention code)
   - Names can appear as `First Surname` or `First-Surname`; never parse the part after `-` as a realm. **[addon]** (Chatify `Config.lua`)
   - ManiaTip hides realm text on Forever. **[addon]**
 - AceDB (in UnifiedProfileManager and Manners) keys profiles by ruleset on Forever, using `C_GameRules.IsGameRuleActive(Enum.GameRule.HardcoreRuleset / RPRuleset / PvPRuleset)`. **[addon]**
@@ -90,7 +90,7 @@ Absent from the dump **[dump]**, and ForeverPlusPlus should use the right-hand c
 
 Still present **[dump]**: `ReloadUI`, `hooksecurefunc`, `InCombatLockdown`, `GetRealmName`, `UnitFullName`, `GetNumSpecializations`, `GetCVar` / `SetCVar`, `ChatFrame_AddMessageEventFilter`, `UIDropDownMenu_Initialize`, `PlaySound`, `UnitHealthPercent`, `UnitHealthMissing`.
 
-- `ReloadUI()` is reported protected (blocked from addon buttons). Tell players to type `/reload`. **[web]** (forever-addon-kit) **Unverified by us.**
+- `ReloadUI()` works: `/run pcall(ReloadUI)` reloaded the UI. **[in-game]** (2026-09-25, build 70009) forever-addon-kit reported it protected on an earlier build **[web]**. A call from an addon's own button (tainted code) hasn't been tested; if one is blocked, tell players to type `/reload`.
 - Registering an event the client doesn't have (for example `LEARNED_SPELL_IN_TAB`) throws and aborts the file. Only register events that exist, or `pcall` it. **[web]**
 
 ## Namespaces that exist
@@ -99,7 +99,7 @@ From the dumps **[dump]**: `C_AddOns`, `C_Item`, `C_Spell`, `C_Container`, `C_Un
 
 - Retail-only systems also exist in the API (`C_MythicPlus`, `C_ChallengeMode`, `C_Garrison`, `C_DelvesUI`, `C_Housing`, `C_Transmog`, `C_CraftingOrders`, `C_EncounterJournal`, `C_LFGList`). Existing is not the same as usable: the content may be off. Don't build on them without checking in game.
 - There is no `C_Seasons`, `C_Engraving` (Season of Discovery), `C_ClassicPlus`, or `C_Camelot`. **[dump]**
-- The UI helpers `Settings`, `Menu`, `MenuUtil`, `TooltipDataProcessor`, `ChatFrameUtil`, and `BackdropTemplateMixin` are tables, so the dumps (functions and named frames) don't list them. Installed Forever addons use them. **[addon]** Probe before use.
+- The UI helpers `Settings`, `Menu`, `MenuUtil`, `TooltipDataProcessor`, `ChatFrameUtil`, and `BackdropTemplateMixin` are tables, so the dumps (functions and named frames) don't list them. `Settings.RegisterAddOnCategory`, `Menu.ModifyMenu`, and `TooltipDataProcessor.AddTooltipPostCall` are all functions. **[in-game]** (2026-09-25, `/dump`) The others are used by installed Forever addons **[addon]**; probe before use.
 - Named frames present **[dump]**: `AddonCompartmentFrame`, `EditModeManagerFrame`, `MicroMenu`, `ObjectiveTrackerFrame`, `ContainerFrameCombinedBags`, `CooldownViewerSettings`, `DamageMeter`, `PlayerFrame`, `TargetFrame`, `BuffFrame`, `MinimapCluster`, `CharacterFrame`, `WorldMapFrame`, `MerchantFrame`, `GossipFrame`, `QuestFrame`, `LootFrame`.
 - Not in the named-frame dump, likely load-on-demand or missing: `ProfessionsFrame`, `AuctionHouseFrame`, `PlayerSpellsFrame`, `ClassTalentFrame`, `SpellBookFrame`. **Unverified.** Hook them on `ADDON_LOADED`, and check they exist.
 
@@ -107,8 +107,10 @@ From the dumps **[dump]**: `C_AddOns`, `C_Item`, `C_Spell`, `C_Container`, `C_Un
 
 - Classic-style talent trees with points per tree, on Retail's trait system (`C_Traits`). A separate "Legacy" tree panel opens with `ToggleLegacySystemUI` and unlocks at level 25. **[web]** (forever-addon-kit)
 - `C_SpecializationInfo.GetSpecializationInfo(index, ...)` returns `specId, name, description, icon, role, primaryStat, pointsSpent, background, previewPointsSpent, isUnlocked`. **[dump]** (Atraeau api.json)
-  - D4Lib picks the tree with the most `pointsSpent` as the player's "spec". **[addon]** Note D4Lib passes a table as the first argument; the dump documents positional arguments. **Unverified.**
-- Spec IDs are new (reported: Paladin 1486), so Retail spec-ID tables are wrong here. **[web]**
+  - On Cameron's Warrior, `GetSpecializationInfo(1)` returned `1491, "Warrior", "", 626008, "DAMAGER", 4, 0, nil, 0, true`, and `C_SpecializationInfo.GetSpecialization()` returned `1`. **[in-game]** (2026-09-25)
+  - So the "spec" is the whole class: the name is the class name, the description is empty, and `pointsSpent` was 0 with 6 points spent in Arms. It doesn't count talent points, so it can't find a talent tree.
+  - D4Lib picks the tree with the most `pointsSpent` as the player's "spec" **[addon]**. Given the result above, that finds nothing, and it passes a table where the dump documents positional arguments.
+- Spec IDs are new (Warrior 1491 **[in-game]**; Paladin 1486 **[web]**), so Retail spec-ID tables are wrong here.
 
 ## Secret values and combat data
 
@@ -126,7 +128,7 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 ## Secure code and Blizzard systems
 
 - `/cui` confirmed `C_EditMode`, `C_CurveUtil`, and `C_EncodingUtil` exist. **[in-game]**
-- Secure snippets (`WrapScript`, `_onstate-*`, `RunAttribute`) failed before build 70009 because `loadstring_untainted` was deleted too early. Build 70009 fixed the load order. **[web]** (forever-addon-kit, forever-bugs #74) ClutchUI still lists this as an open check. **Unverified by us.**
+- Secure snippets (`WrapScript`, `_onstate-*`, `RunAttribute`) failed before build 70009 because `loadstring_untainted` was deleted too early. Build 70009 fixed the load order. **[web]** (forever-addon-kit, forever-bugs #74) Confirmed: a `SecureHandlerBaseTemplate` frame's `Execute(f, "return 42")` returned `true 42`. **[in-game]** (2026-09-25, build 70009)
   - Never probe `loadstring_untainted` to decide whether snippets work: it is nil after load on every client, Retail included.
 - Blizzard's Cooldown Manager is off by default and, from build 70009, has data for Druid, Mage, Priest, Warrior, and Warlock only. It doesn't support spell ranks. **[web]**
 - After 100 Lua errors in a session, the client stops passing errors to handlers (BugSack goes quiet). Fix error floods first. **[web]**
@@ -143,10 +145,11 @@ Check these in the live client and move them up with a tag and date:
 
 - [ ] Which TOC loads when `_Camelot.toc` and a plain TOC are both present, now that we're on 70009?
 - [ ] Does `[AllowLoadGameType camelot]` load a file on Forever, and `[AllowLoadGameType standard]` skip it?
-- [ ] Is `ReloadUI()` blocked for addon code?
-- [ ] Do secure snippets run on 70009 (for example, a `SecureHandlerBaseTemplate` `Execute` returning a value)?
-- [ ] Are `Settings.RegisterAddOnCategory`, `Menu.ModifyMenu`, and `TooltipDataProcessor.AddTooltipPostCall` all present? (`/dump` each)
-- [ ] What does `C_SpecializationInfo.GetSpecializationInfo(1)` return for a Forever character?
+- [ ] Is `ReloadUI()` blocked when called from an addon's own button? (From `/run` it works.)
+- [x] Secure snippets run on 70009. (2026-09-25)
+- [x] `Settings.RegisterAddOnCategory`, `Menu.ModifyMenu`, and `TooltipDataProcessor.AddTooltipPostCall` are present. (2026-09-25)
+- [x] `C_SpecializationInfo.GetSpecializationInfo(1)` returns a class-level spec with 0 points. (2026-09-25, see Talents)
+- [ ] Which API reports points spent per talent tree? Probably `C_Traits`; check before building on it.
 
 ## Sources
 
