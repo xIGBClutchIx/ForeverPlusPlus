@@ -17,6 +17,7 @@ mklink /J "D:\BattleNet\World of Warcraft\_classic_beta_\Interface\AddOns\Foreve
 - `/fpp list` lists the modules and whether each is on.
 - `/fpp toggle <name>` turns one on or off.
 - `/fpp reset` puts every setting back to its default and reloads.
+- `/fpp cvar [search]` opens the Console Variables page: every CVar with its value and default. Type a new value and press Enter, or click Default. Changes made in combat wait until it ends.
 
 ## Layout
 
@@ -38,6 +39,7 @@ Settings are saved in `ForeverPlusPlusDB`, one table per module (`ForeverPlusPlu
 2. `ns.NewModule("YourThing", ns.L.YOURTHING_DESC, { enabled = true, ... })`. The description is the tooltip in Settings; set `module.title = ns.L.YOURTHING_TITLE` for the name shown there. Put the English for every string the player sees in `Locales/enUS.lua`, keyed with the module's name.
 3. Do the work in `OnEnable`; undo it in `OnDisable` if it can be undone without a reload.
 4. Read settings from `module.db`. For an extra option in Settings, list it in `module.options` (`{ key, name, description }`, with its default in `defaults`); it's a checkbox, or a dropdown if it has `choices = { { value, label }, ... }`, and goes on the Debug page with `debug = true`. React in `module:OnOptionChanged(key)`.
+5. For a page the module draws itself (a list, say), give it `module:BuildPage(frame)`: it gets its own page in Settings, built the first time it's shown, and `ns.OpenSettings(module.name)` opens it. `ns.AddCommand(name, usage, description, fn)` adds `/fpp <name>`.
 
 Change Blizzard frames with `hooksecurefunc` or `HookScript`, and don't touch protected frames in combat (wrap it in `ns.AfterCombat`).
 

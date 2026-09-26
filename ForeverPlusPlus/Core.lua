@@ -250,6 +250,18 @@ end
 
 -- /fpp ----------------------------------------------------------------------------------------
 
+local commands, commandOrder = {}, {} -- name -> { usage, description, fn }, and their order
+
+---Adds `/fpp <name>`, for a module's own command. `fn` gets the text typed after the name.
+---@param name string one lowercase word
+---@param usage string what follows the name in /fpp help, or ""
+---@param description string one line for /fpp help
+---@param fn fun(rest: string)
+function ns.AddCommand(name, usage, description, fn)
+    commands[name] = { usage = usage, description = description, fn = fn }
+    commandOrder[#commandOrder + 1] = name
+end
+
 local function findModule(query)
     query = query:lower()
     for _, name in pairs(ns.order) do
@@ -274,7 +286,9 @@ SLASH_FOREVERPLUSPLUS2 = "/forever++"
 SlashCmdList.FOREVERPLUSPLUS = function(message)
     local command, rest = strsplit(" ", strtrim(message or ""), 2)
     command = (command or ""):lower()
-    if command == "toggle" and rest then
+    if commands[command] then
+        commands[command].fn(rest or "")
+    elseif command == "toggle" and rest then
         local module = findModule(rest)
         if not module then
             ns.Print(format(L.NO_MODULE, rest))
@@ -290,5 +304,10 @@ SlashCmdList.FOREVERPLUSPLUS = function(message)
         list()
         print(format("  /fpp  |cff999999%s|r", L.SLASH_OPEN))
         print(format("  /fpp reset  |cff999999%s|r", L.SLASH_RESET))
+        for _, name in pairs(commandOrder) do
+            local info = commands[name]
+            local usage = info.usage ~= "" and " " .. info.usage or ""
+            print(format("  /fpp %s%s  |cff999999%s|r", name, usage, info.description))
+        end
     end
 end

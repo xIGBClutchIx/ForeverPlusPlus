@@ -1,7 +1,8 @@
 -- The "Forever++" pages in the game's Settings > AddOns list, built from Blizzard's own settings
 -- templates so they look like any other options page:
 --   Forever++        an on/off checkbox per module
---     <Module>       one page per module with options: its on/off checkbox, then its options
+--     <Module>       one page per module with options: its on/off checkbox, then its options,
+--                    or a page the module draws itself when it has `BuildPage`
 --     Debug          options marked `debug = true`, for testing
 -- Without subpages (an older Settings API), everything goes on the main page instead.
 local _, ns = ...
@@ -13,6 +14,21 @@ local L = ns.L
 
 local settings = {} -- module name -> its Blizzard setting objects, to refresh after /fpp toggle
 local mainCategory -- the Forever++ page, for /fpp
+local pages = {} -- module name -> its own page, for ns.OpenSettings(name)
+
+-- A page the module draws itself (`module:BuildPage(frame)`), such as a list. Settings needs the
+-- frame now, so it starts empty; the module fills it the first time it's shown.
+local function addCanvasPage(category, module)
+    local frame = CreateFrame("Frame")
+    local built = false
+    frame:SetScript("OnShow", function(self)
+        if not built then
+            built = true
+            module:BuildPage(self)
+        end
+    end)
+    return Settings.RegisterCanvasLayoutSubcategory(category, frame, module.title or module.name)
+end
 
 -- The module's on/off checkbox. Each page gets its own setting (the variable names must differ);
 -- all of them read and write through the module, so /fpp and every page agree.
@@ -98,7 +114,11 @@ function ns.RegisterSettings()
     for _, name in ipairs(ns.order) do
         local module = ns.modules[name]
         local parent = addToggle(category, module, "")
-        if hasOptions(module, false) then
+        if module.BuildPage then
+            if subpages and Settings.RegisterCanvasLayoutSubcategory then
+                pages[name] = addCanvasPage(category, module)
+            end
+        elseif hasOptions(module, false) then
             if subpages then
                 local page = Settings.RegisterVerticalLayoutSubcategory(category, module.title or name)
                 addOptions(page, module, addToggle(page, module, "_Page"), false)
@@ -123,17 +143,20 @@ function ns.RegisterSettings()
     mainCategory = category
 end
 
----Opens the Forever++ page in Settings (after combat, if the player is in combat).
+---Opens the Forever++ page in Settings, or a module's own page (after combat, if the player is in
+---combat).
+---@param name? string a module with its own page
 ---@return boolean opened false when this client's Settings can't open to it
-function ns.OpenSettings()
-    if not (mainCategory and Settings.OpenToCategory and mainCategory.GetID) then
+function ns.OpenSettings(name)
+    local category = name and pages[name] or mainCategory
+    if not (category and Settings.OpenToCategory and category.GetID) then
         return false
     end
     if InCombatLockdown() then
         ns.Print(L.SETTINGS_AFTER_COMBAT)
     end
     ns.AfterCombat(function()
-        Settings.OpenToCategory(mainCategory:GetID())
+        Settings.OpenToCategory(category:GetID())
     end)
     return true
 end

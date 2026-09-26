@@ -42,6 +42,24 @@ function CVars.Set(saved, names, value)
     end)
 end
 
+---Sets a CVar to a value the player chose, so nothing is remembered to put back. `done(ok)` is
+---called once it has been tried (after combat, if the player is in combat).
+---@param name string
+---@param value string
+---@param done? fun(ok: boolean)
+function CVars.Apply(name, value, done)
+    ns.AfterCombat(function()
+        local ok = false
+        if C_CVar.GetCVar(name) ~= nil then
+            -- SetCVar returns false when the client refuses; treat no answer as done.
+            ok = C_CVar.SetCVar(name, value) ~= false
+        end
+        if done then
+            done(ok)
+        end
+    end)
+end
+
 ---Puts one CVar back to the player's value, if `saved` changed it.
 ---@param saved table
 ---@param names string|string[]

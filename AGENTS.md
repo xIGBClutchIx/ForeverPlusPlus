@@ -24,11 +24,11 @@ Names:
 
 - `ForeverPlusPlus/`: the shipped addon folder, linked into the client's `Interface\AddOns`.
   - `ForeverPlusPlus.toc`: metadata and load order.
-  - `Core.lua`: the shared `ns`: events (`ns.On`, `ns.Off`), `ns.AfterCombat`, saved settings, modules (`ns.NewModule`, `ns.SetEnabled`), `/fpp`, `ns.Print`, and the locale table `ns.L`.
+  - `Core.lua`: the shared `ns`: events (`ns.On`, `ns.Off`), `ns.AfterCombat`, saved settings, modules (`ns.NewModule`, `ns.SetEnabled`), `/fpp` (modules add subcommands with `ns.AddCommand`), `ns.Print`, and the locale table `ns.L`.
   - `Locales/*.lua`: player-facing text. `enUS.lua` has every key and is the fallback; another language's file sets only the keys it translates.
   - `Lib/*.lua`: shared services any module can use, loaded before the modules. `Secret.lua` (`ns.IsReadable`, `ns.HealthStepCurve`), `CVars.lua` (`ns.CVars`: set CVars and put the player's values back, waiting out combat), `Nameplates.lua` (`ns.Nameplates`: plate added/removed/cast callbacks and Forever's plate parts), `Units.lua` (`ns.Units`: in my group, a friend, a guildmate). They cost nothing until a module uses them.
   - `Modules/`: one change each (see "Add a module" in `README.md`). A small module is one file; a bigger one gets a folder of files that share `module.internal`.
-  - `Settings.lua`: the Settings pages (main, one per module with options, Debug).
+  - `Settings.lua`: the Settings pages (main, one per module with options or its own `BuildPage`, Debug).
 - `.github/workflows/check.yml`: on every push, checks Lua 5.1 syntax, ASCII, and that the TOC and the files match.
   - `Init.lua`: loaded last; calls `ns.Start()` at `PLAYER_LOGIN`.
 - `README.md`: install and usage for people.

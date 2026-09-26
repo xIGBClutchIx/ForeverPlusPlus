@@ -144,6 +144,11 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 - Auction house is the modern (Retail) one, but copper prices are allowed and durations are 2, 8, and 24 hours. **[addon]** (Auctionator `Source_Forever`, `IsForever` branches)
 - The Professions window exists but has no crafting orders page. **[addon]** (Auctionator `Professions.lua`)
 
+## Console variables
+
+- `C_Console.GetAllCommands()` (entries with `command`, `help`, `commandType`, where `Enum.ConsoleCommandType.Cvar` marks a CVar) and `C_CVar.GetCVarInfo(name)` (value, default, account, character, locked, secure, read only) are Mainline's. No installed Forever addon uses either. **Unverified**; the CVarBrowser module probes both, and falls back to `C_CVar.GetCVar` / `GetCVarDefault` and exact-name search.
+- `Settings.RegisterCanvasLayoutSubcategory` works on Forever. **[addon]** (Auctionator `PanelConfig.lua`, AceConfigDialog in several addons)
+
 ## Nameplates
 
 - Nameplates are Mainline's: `C_NamePlate.GetNamePlateForUnit` / `GetNamePlates`, `NAME_PLATE_UNIT_ADDED` / `REMOVED`, and `plate.UnitFrame` with `HealthBarsContainer` (holding `healthBar`) and `name`. **[addon]** (ForeverNameplateFont `Core.lua`, MyQuestPlates `Compat.lua`)
@@ -162,6 +167,7 @@ Check these in the live client and move them up with a tag and date:
 
 - [x] `_Camelot.toc` beats `_Mainline.toc` and the plain TOC on 70009. (2026-09-25)
 - [x] `[AllowLoadGameType camelot]` loads on Forever and `standard` doesn't. (2026-09-25)
+- [ ] Does `C_Console.GetAllCommands()` list CVars on Forever, and does `Enum.ConsoleCommandType.Cvar` exist?
 - [ ] Is `ReloadUI()` blocked when called from an addon's own button? (From `/run` it works.)
 - [x] Secure snippets run on 70009. (2026-09-25)
 - [x] `Settings.RegisterAddOnCategory`, `Menu.ModifyMenu`, and `TooltipDataProcessor.AddTooltipPostCall` are present. (2026-09-25)

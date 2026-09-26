@@ -16,5 +16,6 @@ Modules\FriendlyPlates\Module.lua
 Modules\FriendlyPlates\Icons.lua
 Modules\FriendlyPlates\Label.lua
 Modules\FriendlyPlates\Plates.lua
+Modules\CVarBrowser.lua
 Settings.lua
 Init.lua

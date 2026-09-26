@@ -35,6 +35,14 @@
     "C_FriendList",
     "C_BattleNet",
     "UnitGroupRolesAssigned",
-    "GetTexCoordsForRoleSmallCircle"
+    "GetTexCoordsForRoleSmallCircle",
+    "C_Console",
+    "GameTooltip",
+    "NORMAL_FONT_COLOR",
+    "HIGHLIGHT_FONT_COLOR",
+    "CreateDataProvider",
+    "CreateScrollBoxListLinearView",
+    "ScrollUtil",
+    "ScrollBoxConstants"
   ]
 }
