@@ -120,9 +120,6 @@ L.AUCTIONPRICES_SCAN_ON_OPEN = "Scan When Opened"
 L.AUCTIONPRICES_SCAN_ON_OPEN_DESC = "Scan the whole auction house when you open it, at most "
     .. "every 15 minutes. When off, prices still update from your own searches, and /fpp scan "
     .. "scans now."
-L.AUCTIONPRICES_MODE = "Auction Price For"
-L.AUCTIONPRICES_MODE_DESC = "Whether the auction price counts the whole stack or one item, and "
-    .. "what holding Shift shows."
 L.AUCTIONPRICES_SCANNING = "Scanning prices... %d items" -- count so far
 L.AUCTIONPRICES_SCANNED = "Prices updated for %d items" -- count
 L.AUCTIONPRICES_AGE = "Prices scanned %d min ago" -- minutes
@@ -142,19 +139,24 @@ L.AUCTIONPRICES_RESET_COMMAND = "forget the saved auction prices"
 L.SELLPRICE_TITLE = "Stack Sell Price"
 L.SELLPRICE_DESC = "Show the vendor price of the whole stack in item tooltips. Hold Shift to see "
     .. "one item."
-L.SELLPRICE_MODE = "Sell Price For"
-L.SELLPRICE_MODE_DESC = "Whether the sell price counts the whole stack or one item, and what "
-    .. "holding Shift shows."
-L.SELLPRICE_ALIGN = "Price Alignment"
-L.SELLPRICE_ALIGN_DESC = "Where the coins go on the sell price and auction lines. Either way, "
-    .. "they line up with each other."
-L.SELLPRICE_ALIGN_RIGHT = "Right Edge"
-L.SELLPRICE_ALIGN_INLINE = "After the Label"
 
--- Price lines in item tooltips (SellPrice and AuctionPrices)
+-- Price lines in item tooltips (SellPrice and AuctionPrices each have these options)
+L.PRICE_MODE = "Price For"
+L.PRICE_MODE_DESC = "Whether this price counts the whole stack or one item, and what holding "
+    .. "Shift shows."
 L.PRICE_MODE_STACK = "Whole Stack, Shift for One"
 L.PRICE_MODE_ONE = "One Item, Shift for Stack"
-L.PRICE_LINE = "%s: %s" -- line name, quantity (gray)
+L.PRICE_ALIGN = "Price Alignment"
+L.PRICE_ALIGN_DESC = "Where this line's coins go. Price lines set to the same alignment line up "
+    .. "with each other."
+L.PRICE_ALIGN_RIGHT = "Right Edge"
+L.PRICE_ALIGN_INLINE = "After the Label"
+L.PRICE_COLOR = "Quantity Color"
+L.PRICE_COLOR_DESC = "The color of the x20 quantity on this line."
+L.PRICE_COLOR_GRAY = "Gray"
+L.PRICE_COLOR_WHITE = "White"
+L.PRICE_COLOR_YELLOW = "Yellow"
+L.PRICE_LINE = "%s: %s" -- line name, quantity
 L.PRICE_QUANTITY = "x%d" -- how many items the price is for
 L.PRICE_INLINE = "%s  %s" -- padded label, coins
 

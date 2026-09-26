@@ -19,32 +19,22 @@ ItemTooltip.AddName(L.AUCTIONPRICES_LINE)
 
 local SCAN_INTERVAL = 15 * 60 -- seconds between automatic scans, as Auctionator waits
 
-local module = ns.NewModule("AuctionPrices", L.AUCTIONPRICES_DESC, {
+local module = ns.NewModule("AuctionPrices", L.AUCTIONPRICES_DESC, ItemTooltip.PriceDefaults({
     enabled = false,
     scanOnOpen = true,
-    mode = "stack", -- "stack" (Shift for one) or "one" (Shift for the stack)
     -- Per auction house ("Realm-Faction"): { scannedAt = time(), prices = { [itemID] = copper } }.
     -- Data, not a setting: it isn't in module.options.
     houses = {},
-})
+}))
 module.title = L.AUCTIONPRICES_TITLE
 
-module.options = {
+module.options = ItemTooltip.PriceOptions({
     {
         key = "scanOnOpen",
         name = L.AUCTIONPRICES_SCAN_ON_OPEN,
         description = L.AUCTIONPRICES_SCAN_ON_OPEN_DESC,
     },
-    {
-        key = "mode",
-        name = L.AUCTIONPRICES_MODE,
-        description = L.AUCTIONPRICES_MODE_DESC,
-        choices = {
-            { "stack", L.PRICE_MODE_STACK },
-            { "one", L.PRICE_MODE_ONE },
-        },
-    },
-}
+})
 
 -- The auction house this character sees. Realms share one per faction.
 local function house()
@@ -300,7 +290,7 @@ local function addAuctionPrice(tooltip, data)
         return
     end
     local count = ItemTooltip.PriceCount(data, module.db.mode)
-    ItemTooltip.AddPrice(tooltip, L.AUCTIONPRICES_LINE, price * count, count)
+    ItemTooltip.AddPrice(tooltip, L.AUCTIONPRICES_LINE, price * count, count, module.db)
 end
 
 local hooked = false

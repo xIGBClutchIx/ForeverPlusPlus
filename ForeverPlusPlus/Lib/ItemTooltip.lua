@@ -9,6 +9,7 @@ local floor, max, UIParent = math.floor, math.max, UIParent
 local TooltipDataProcessor, Enum, C_Item, GameTooltip = TooltipDataProcessor, Enum, C_Item, GameTooltip
 local IsShiftKeyDown, GetMoneyString, C_CurrencyInfo = IsShiftKeyDown, GetMoneyString, C_CurrencyInfo
 local HIGHLIGHT_FONT_COLOR, GRAY_FONT_COLOR = HIGHLIGHT_FONT_COLOR, GRAY_FONT_COLOR
+local NORMAL_FONT_COLOR = NORMAL_FONT_COLOR
 
 local L = ns.L
 
@@ -151,15 +152,10 @@ end
 -- Blizzard's transparent texture, drawn as a gap of any width inside text.
 local SPACER = "|TInterface\\Common\\spacer:1:%d|t"
 
-local alignment = "right"
 local names = {} -- every price line's name, to pad to the widest
 local measure -- our own hidden font string, for label widths
 
----Sets how price lines place their coins: "right" or "inline".
----@param mode string
-function ItemTooltip.SetAlignment(mode)
-    alignment = mode
-end
+local COLORS = { gray = GRAY_FONT_COLOR, white = HIGHLIGHT_FONT_COLOR, yellow = NORMAL_FONT_COLOR }
 
 ---Registers a price line's name, so inline coins can line up with it.
 ---@param name string
@@ -186,20 +182,58 @@ local function padding(name)
     return gap > 0 and format(SPACER, gap) or ""
 end
 
----Adds a price line: the name and a gray "x20", then the coins, placed by the alignment.
+---Adds a price line: the name and an "x20", then the coins. `db` is the module's settings from
+---`PriceDefaults`: `align` places the coins and `color` colors the quantity.
 ---@param tooltip table
 ---@param name string such as "Sell Price"
 ---@param amount number copper, for all `count` items
 ---@param count number how many items the price is for
-function ItemTooltip.AddPrice(tooltip, name, amount, count)
-    local quantity = GRAY_FONT_COLOR:WrapTextInColorCode(format(L.PRICE_QUANTITY, count))
+---@param db table
+function ItemTooltip.AddPrice(tooltip, name, amount, count, db)
+    local color = COLORS[db.color] or GRAY_FONT_COLOR
+    local quantity = color:WrapTextInColorCode(format(L.PRICE_QUANTITY, count))
     local label = format(L.PRICE_LINE, name, quantity)
     local r, g, b = HIGHLIGHT_FONT_COLOR:GetRGB()
-    if alignment == "inline" then
+    if db.align == "inline" then
         -- The padding goes before the quantity, so the "x20"s line up as well as the coins.
         label = format(L.PRICE_LINE, name, padding(name) .. quantity)
         tooltip:AddLine(format(L.PRICE_INLINE, label, money(amount)), r, g, b)
     else
         tooltip:AddDoubleLine(label, money(amount), r, g, b, r, g, b)
     end
+end
+
+-- Settings every price line has: what it counts, where its coins go, and the quantity's color.
+
+---Adds a price line's settings, with their defaults, to a module's defaults.
+---@param defaults table
+---@return table defaults
+function ItemTooltip.PriceDefaults(defaults)
+    defaults.mode = "stack" -- "stack" (Shift for one) or "one" (Shift for the stack)
+    defaults.align = "right" -- "right" (coins at the tooltip's edge) or "inline" (after the label)
+    defaults.color = "gray" -- the quantity's color: "gray", "white", or "yellow"
+    return defaults
+end
+
+---Adds a price line's options to a module's options, for its Settings page and /fpp set.
+---@param options table
+---@return table options
+function ItemTooltip.PriceOptions(options)
+    options[#options + 1] = {
+        key = "mode", name = L.PRICE_MODE, description = L.PRICE_MODE_DESC,
+        choices = { { "stack", L.PRICE_MODE_STACK }, { "one", L.PRICE_MODE_ONE } },
+    }
+    options[#options + 1] = {
+        key = "align", name = L.PRICE_ALIGN, description = L.PRICE_ALIGN_DESC,
+        choices = { { "right", L.PRICE_ALIGN_RIGHT }, { "inline", L.PRICE_ALIGN_INLINE } },
+    }
+    options[#options + 1] = {
+        key = "color", name = L.PRICE_COLOR, description = L.PRICE_COLOR_DESC,
+        choices = {
+            { "gray", L.PRICE_COLOR_GRAY },
+            { "white", L.PRICE_COLOR_WHITE },
+            { "yellow", L.PRICE_COLOR_YELLOW },
+        },
+    }
+    return options
 end

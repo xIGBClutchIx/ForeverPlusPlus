@@ -9,33 +9,10 @@ local SELL_PRICE = SELL_PRICE
 local L = ns.L
 local ItemTooltip = ns.ItemTooltip
 
-local module = ns.NewModule("SellPrice", L.SELLPRICE_DESC, {
-    enabled = true,
-    mode = "stack", -- "stack" (Shift for one) or "one" (Shift for the stack)
-    align = "right", -- "right" (coins at the tooltip's edge) or "inline" (after the label)
-})
+local module = ns.NewModule("SellPrice", L.SELLPRICE_DESC,
+    ItemTooltip.PriceDefaults({ enabled = true }))
 module.title = L.SELLPRICE_TITLE
-
-module.options = {
-    {
-        key = "mode",
-        name = L.SELLPRICE_MODE,
-        description = L.SELLPRICE_MODE_DESC,
-        choices = {
-            { "stack", L.PRICE_MODE_STACK },
-            { "one", L.PRICE_MODE_ONE },
-        },
-    },
-    {
-        key = "align",
-        name = L.SELLPRICE_ALIGN,
-        description = L.SELLPRICE_ALIGN_DESC,
-        choices = {
-            { "right", L.SELLPRICE_ALIGN_RIGHT },
-            { "inline", L.SELLPRICE_ALIGN_INLINE },
-        },
-    },
-}
+module.options = ItemTooltip.PriceOptions({})
 
 ItemTooltip.AddName(SELL_PRICE)
 
@@ -55,7 +32,7 @@ local function drawSellPrice(tooltip, data, lineData)
         return false
     end
     local count = ItemTooltip.PriceCount(data, module.db.mode)
-    ItemTooltip.AddPrice(tooltip, SELL_PRICE, price * count, count)
+    ItemTooltip.AddPrice(tooltip, SELL_PRICE, price * count, count, module.db)
     return true
 end
 
@@ -68,15 +45,7 @@ function module:OnEnable()
         hooked = true
         ItemTooltip.ReplaceSellPrice(drawSellPrice)
     end
-    ItemTooltip.SetAlignment(self.db.align)
-end
-
-function module:OnOptionChanged(key)
-    if key == "align" and self.enabled then
-        ItemTooltip.SetAlignment(self.db.align)
-    end
 end
 
 function module:OnDisable()
-    ItemTooltip.SetAlignment("right")
 end
