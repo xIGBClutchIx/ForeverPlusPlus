@@ -14,8 +14,14 @@ local module = ns.NewModule("FriendlyPlates",
     "Friendly players always show their name and guild; the health bar shows only when hurt or in combat.",
     {
         enabled = false,
+        guild = true,
         saved = {}, -- CVar -> the player's own value, put back when the module turns off
     })
+
+-- Extra checkboxes under this module's own in Settings (see Settings.lua).
+module.options = {
+    { key = "guild", name = "Guild names", description = "Show the guild under friendly player names." },
+}
 
 -- The CVars that make friendly player nameplates show with a bar. Each entry lists the names
 -- the setting has had, newest first; the first one this client knows is used.
@@ -128,38 +134,55 @@ end
 -- Plates ----------------------------------------------------------------------------------------
 
 -- Labels: while the bar is hidden, Blizzard's name (which sits above the bar) fades out and our
--- own label takes its place: the name in class color with "<Guild>" under it, or the name alone
--- lower down, level with the bar's middle, when there's no guild. The two swap with the same
--- health curve as the bar, so the client does it even when health is secret.
+-- own label takes its place, centered over where the bar was: the name in class color with
+-- "<Guild>" under it, or the name alone at the bar's middle when there's no guild. While the bar
+-- is up, Blizzard's name is back and the guild sits under the bar instead. The two swap with the
+-- same health curve as the bar, so the client does it even when health is secret.
 
-local NAME_X = -6 -- a little left of the bar's edge, clear of the level on the right
+local GUILD_SCALE = 0.9 -- the guild line is a touch smaller than the name
+local GUILD_COLOR = { 0.9, 0.9, 0.9 }
 
-local function createLabel(frame, name)
+local function newText(parent)
+    local text = parent:CreateFontString(nil, "OVERLAY")
+    text:SetFontObject("SystemFont_NamePlate")
+    text:SetJustifyH("CENTER")
+    text:SetWordWrap(false)
+    return text
+end
+
+local function createLabel(frame)
     local label = CreateFrame("Frame", nil, frame)
     label:SetAllPoints(frame)
-    label.name = label:CreateFontString(nil, "OVERLAY")
-    label.guild = label:CreateFontString(nil, "OVERLAY")
-    local fontObject = name.GetFontObject and name:GetFontObject()
-    for _, text in pairs({ label.name, label.guild }) do
-        if fontObject then
-            text:SetFontObject(fontObject)
-        else
-            text:SetFontObject("SystemFont_NamePlate")
-        end
-        text:SetJustifyH("LEFT")
-        text:SetWordWrap(false)
-    end
-    label.guild:SetTextColor(0.9, 0.9, 0.9)
+    label.name = newText(label)
+    label.guild = newText(label)
+    label.guild:SetTextColor(GUILD_COLOR[1], GUILD_COLOR[2], GUILD_COLOR[3])
+    -- A separate frame so it can fade in with the bar while the rest of the label fades out.
+    label.barGuildFrame = CreateFrame("Frame", nil, frame)
+    label.barGuildFrame:SetAllPoints(frame)
+    label.barGuild = newText(label.barGuildFrame)
+    label.barGuild:SetTextColor(GUILD_COLOR[1], GUILD_COLOR[2], GUILD_COLOR[3])
     return label
 end
 
-local function getLabel(frame, name)
+local function getLabel(frame)
     local label = labels[frame]
     if not label then
-        label = createLabel(frame, name)
+        label = createLabel(frame)
         labels[frame] = label
     end
     return label
+end
+
+-- Use the font Blizzard's name is drawn with right now. Its font object can be a different size
+-- (nameplates set the size on the string), which made our copy come out small.
+local function matchFont(label, name)
+    local file, size, flags = name:GetFont()
+    if not (file and size) then
+        return
+    end
+    label.name:SetFont(file, size, flags)
+    label.guild:SetFont(file, size * GUILD_SCALE, flags)
+    label.barGuild:SetFont(file, size * GUILD_SCALE, flags)
 end
 
 -- Blizzard sets the name text (with surname) itself; ours copies it as it changes.
@@ -167,6 +190,7 @@ local function mirrorName(fontString, text)
     local label = mirrored[fontString]
     if label then
         label.name:SetText(text)
+        matchFont(label, fontString)
     end
 end
 
@@ -177,7 +201,9 @@ local function hookName(name)
     end
 end
 
-local function layoutLabel(label, container, unit)
+local function layoutLabel(label, record, unit)
+    local container = record.container
+    matchFont(label, record.name)
     local _, class = UnitClass(unit)
     local color = readable(class) and class and C_ClassColor and C_ClassColor.GetClassColor(class)
     if color then
@@ -185,17 +211,22 @@ local function layoutLabel(label, container, unit)
     else
         label.name:SetTextColor(1, 1, 1)
     end
-    local guild = GetGuildInfo(unit)
+    local guild = module.db.guild and GetGuildInfo(unit)
     label.name:ClearAllPoints()
     label.guild:ClearAllPoints()
+    label.barGuild:ClearAllPoints()
     if readable(guild) and guild and guild ~= "" then
-        label.name:SetPoint("BOTTOMLEFT", container, "LEFT", NAME_X, 1)
-        label.guild:SetPoint("TOPLEFT", label.name, "BOTTOMLEFT", 0, -1)
+        label.name:SetPoint("BOTTOM", container, "CENTER", 0, 1)
+        label.guild:SetPoint("TOP", label.name, "BOTTOM", 0, -1)
         label.guild:SetFormattedText("<%s>", guild)
         label.guild:Show()
+        label.barGuild:SetPoint("TOP", container, "BOTTOM", 0, -2)
+        label.barGuild:SetFormattedText("<%s>", guild)
+        label.barGuild:Show()
     else
-        label.name:SetPoint("LEFT", container, "LEFT", NAME_X, 0)
+        label.name:SetPoint("CENTER", container, "CENTER", 0, 0)
         label.guild:Hide()
+        label.barGuild:Hide()
     end
 end
 
@@ -207,6 +238,7 @@ local function release(record)
     end
     if record.label then
         record.label:Hide()
+        record.label.barGuildFrame:Hide()
     end
 end
 
@@ -235,6 +267,7 @@ local function update(unit)
         if label then
             record.name:SetAlpha(1)
             label:SetAlpha(0)
+            label.barGuildFrame:SetAlpha(1)
         end
     else
         -- The percent can be secret in combat, so the client maps it to an alpha, not Lua.
@@ -242,6 +275,7 @@ local function update(unit)
         record.container:SetAlpha(shown)
         if label then
             record.name:SetAlpha(shown)
+            label.barGuildFrame:SetAlpha(shown)
             label:SetAlpha(UnitHealthPercent(unit, true, inverse))
         end
     end
@@ -251,7 +285,14 @@ local function refreshLabel(unit)
     local record = plates[unit]
     if record and record.label then
         record.label.name:SetText(record.name:GetText())
-        layoutLabel(record.label, record.container, unit)
+        layoutLabel(record.label, record, unit)
+    end
+end
+
+-- Called by Settings when an option changes.
+function module:OnOptionChanged()
+    for unit in pairs(plates) do
+        refreshLabel(unit)
     end
 end
 
@@ -275,8 +316,9 @@ local function add(unit)
     local name = frame.name or frame.Name
     if name and name.SetText then
         record.name = name
-        record.label = getLabel(frame, name)
+        record.label = getLabel(frame)
         record.label:Show()
+        record.label.barGuildFrame:Show()
         hookName(name)
         mirrored[name] = record.label
     end

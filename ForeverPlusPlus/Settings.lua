@@ -6,6 +6,25 @@ local ipairs, format = ipairs, string.format
 
 local settings = {} -- module name -> Blizzard setting object, to refresh after /fpp toggle
 
+-- A module's own on/off option (from `module.options`), shown indented under its checkbox and
+-- greyed out while the module is off.
+local function addOption(category, module, option, parent)
+    local setting = Settings.RegisterProxySetting(category,
+        format("ForeverPlusPlus_%s_%s", module.name, option.key), Settings.VarType.Boolean,
+        option.name, module.defaults[option.key],
+        function() return module.db[option.key] end,
+        function(value)
+            module.db[option.key] = value
+            if module.OnOptionChanged then
+                module:OnOptionChanged(option.key)
+            end
+        end)
+    local initializer = Settings.CreateCheckbox(category, setting, option.description)
+    if parent and initializer and initializer.SetParentInitializer then
+        initializer:SetParentInitializer(parent, function() return module.db.enabled end)
+    end
+end
+
 ---Adds the Forever++ category to Settings > AddOns (called once, after ns.Start).
 function ns.RegisterSettings()
     -- Probe: the Mainline Settings API is on Forever (build 70009), but it's a beta.
@@ -24,8 +43,11 @@ function ns.RegisterSettings()
             module.defaults.enabled,
             function() return module.db.enabled end,
             function(value) ns.SetEnabled(name, value) end)
-        Settings.CreateCheckbox(category, setting, module.description)
+        local parent = Settings.CreateCheckbox(category, setting, module.description)
         settings[name] = setting
+        for _, option in ipairs(module.options or {}) do
+            addOption(category, module, option, parent)
+        end
     end
     Settings.RegisterAddOnCategory(category)
 end
