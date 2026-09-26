@@ -62,6 +62,25 @@ L.FRIENDLYPLATES_TEST_ICONS_OFF = "Off"
 L.FRIENDLYPLATES_TEST_ICONS_GROUP = "Everyone in Group"
 L.FRIENDLYPLATES_TEST_ICONS_FRIEND = "Everyone a Friend"
 
+-- FastLoot
+L.FASTLOOT_TITLE = "Fast Loot"
+L.FASTLOOT_DESC = "With auto loot on, take everything at once instead of waiting for the loot "
+    .. "window."
+
+-- AutoRepair
+L.AUTOREPAIR_TITLE = "Auto Repair"
+L.AUTOREPAIR_DESC = "Repair all your gear when you talk to a merchant who repairs, and say in chat "
+    .. "what it cost. Hold Shift to skip it."
+L.AUTOREPAIR_FUNDS = "Pay With"
+L.AUTOREPAIR_FUNDS_DESC = "Whose money pays for repairs."
+L.AUTOREPAIR_FUNDS_GUILD_FIRST = "Guild Bank, Then Your Own"
+L.AUTOREPAIR_FUNDS_GUILD = "Guild Bank Only"
+L.AUTOREPAIR_FUNDS_OWN = "Your Own Money Only"
+L.AUTOREPAIR_REPAIRED = "Repaired for %s." -- cost
+L.AUTOREPAIR_REPAIRED_GUILD = "Repaired for %s from the guild bank." -- cost
+L.AUTOREPAIR_NO_MONEY = "Not enough money to repair (%s)." -- cost
+L.AUTOREPAIR_NO_GUILD_MONEY = "The guild bank can't pay for repairs (%s)." -- cost
+
 -- CVarBrowser
 L.CVARBROWSER_TITLE = "Console Variables"
 L.CVARBROWSER_DESC = "Browse the game's console variables (CVars) on a page in Settings, and "

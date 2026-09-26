@@ -43,6 +43,21 @@
     "CreateDataProvider",
     "CreateScrollBoxListLinearView",
     "ScrollUtil",
-    "ScrollBoxConstants"
+    "ScrollBoxConstants",
+    "GetTime",
+    "GetNumLootItems",
+    "LootSlot",
+    "IsModifiedClick",
+    "CanMerchantRepair",
+    "GetRepairAllCost",
+    "RepairAllItems",
+    "IsInGuild",
+    "CanGuildBankRepair",
+    "GetGuildBankWithdrawMoney",
+    "GetMoney",
+    "GetMoneyString",
+    "IsShiftKeyDown",
+    "C_Timer",
+    "C_CurrencyInfo"
   ]
 }

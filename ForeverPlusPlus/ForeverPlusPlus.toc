@@ -17,5 +17,7 @@ Modules\FriendlyPlates\Icons.lua
 Modules\FriendlyPlates\Label.lua
 Modules\FriendlyPlates\Plates.lua
 Modules\CVarBrowser.lua
+Modules\FastLoot.lua
+Modules\AutoRepair.lua
 Settings.lua
 Init.lua
