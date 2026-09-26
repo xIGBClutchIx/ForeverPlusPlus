@@ -47,7 +47,6 @@ L.ABOUT_GAME_BUILD = "%s (build %s, interface %s)" -- version, build, interface
 L.ABOUT_WEBSITE = "Website"
 L.ABOUT_ISSUES = "Report a Bug"
 L.ABOUT_COPY = "Select the link and press Ctrl+C to copy it."
-L.ABOUT_MODULES = "Modules"
 L.ABOUT_COMMANDS = "Commands"
 
 -- FriendlyPlates

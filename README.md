@@ -12,7 +12,7 @@ mklink /J "D:\BattleNet\World of Warcraft\_classic_beta_\Interface\AddOns\Foreve
 
 ## Use
 
-- Game Menu > Options > AddOns > Forever++ has a checkbox for each module, the one place to turn it on or off. Modules with options get their own page under it for those options, testing options are on the Debug page, and About shows the version, the game build, links, the modules, and the commands.
+- Game Menu > Options > AddOns > Forever++ has a checkbox for each module, the one place to turn it on or off. Modules with options get their own page under it for those options, testing options are on the Debug page, and About shows the version, the game build, links, and the commands.
 - `/fpp` opens the Forever++ settings.
 - `/fpp list` lists the modules and whether each is on.
 - `/fpp toggle <name>` turns one on or off.

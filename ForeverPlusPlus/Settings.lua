@@ -131,8 +131,8 @@ local function addActions(layout, module)
 end
 
 -- About page ----------------------------------------------------------------------------------
--- The version and who made it, the game build, links, every module and whether it's on, and the
--- /fpp commands. Built the first time it's shown; the module states refresh every time.
+-- The version and who made it, the game build, links, and the /fpp commands. Built the first time
+-- it's shown.
 
 local WEBSITE = "https://github.com/xIGBClutchIx/ForeverPlusPlus"
 local ISSUES = WEBSITE .. "/issues"
@@ -214,17 +214,6 @@ local function buildAbout(frame)
     addLink(frame, y, L.ABOUT_ISSUES, ISSUES)
 
     y = y - 36
-    addHeading(frame, y, L.ABOUT_MODULES)
-    y = y - 24
-    local states = {} -- module name -> its line
-    for _, name in ipairs(ns.order) do
-        local text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-        text:SetPoint("TOPLEFT", 16, y)
-        states[name] = text
-        y = y - 18
-    end
-
-    y = y - 18
     addHeading(frame, y, L.ABOUT_COMMANDS)
     y = y - 24
     for _, line in ipairs(ns.Commands()) do
@@ -236,17 +225,6 @@ local function buildAbout(frame)
         description:SetText(line[2])
         y = y - 16
     end
-
-    -- Module names with a green "on" or red "off" after them, fresh each time the page opens.
-    local function refresh()
-        for name, text in pairs(states) do
-            local module = ns.modules[name]
-            text:SetText(format("%s  %s", module.title or module.name,
-                ns.StateText(module.db.enabled)))
-        end
-    end
-    refresh()
-    frame:HookScript("OnShow", refresh)
 end
 
 ---Adds the Forever++ pages to Settings > AddOns (called once, after ns.Start).

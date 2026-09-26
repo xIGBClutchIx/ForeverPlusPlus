@@ -17,7 +17,7 @@ local module = ns.NewModule("FriendlyPlates", L.FRIENDLYPLATES_DESC, {
     classColor = true,
     barWhenHurt = true,
     npcs = false,
-    guildNames = "hidden", -- "hidden" (only without the bar), "always", or "off"
+    guildNames = "always", -- "always", "hidden" (only without the bar), or "off"
     guildColor = "gray", -- "gray" or "green"
     level = "before", -- "before", "after", or "off"
     guildHighlight = true,
@@ -50,8 +50,8 @@ module.options = {
         name = L.FRIENDLYPLATES_GUILD_NAMES,
         description = L.FRIENDLYPLATES_GUILD_NAMES_DESC,
         choices = {
-            { "hidden", L.FRIENDLYPLATES_GUILD_NAMES_HIDDEN },
             { "always", L.FRIENDLYPLATES_GUILD_NAMES_ALWAYS },
+            { "hidden", L.FRIENDLYPLATES_GUILD_NAMES_HIDDEN },
             { "off", L.FRIENDLYPLATES_GUILD_NAMES_OFF },
         },
     },
