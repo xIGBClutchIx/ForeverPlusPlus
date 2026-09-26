@@ -148,7 +148,8 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 
 ## Console variables
 
-- `C_Console.GetAllCommands()` (entries with `command`, `help`, `commandType`, where `Enum.ConsoleCommandType.Cvar` marks a CVar) and `C_CVar.GetCVarInfo(name)` (value, default, account, character, locked, secure, read only) are Mainline's. No installed Forever addon uses either. **Unverified**; the CVarBrowser module probes both, and falls back to `C_CVar.GetCVar` / `GetCVarDefault` and exact-name search.
+- The console's command list is the global `ConsoleGetAllCommands()` (entries with `command`, `help`, `commandType`, where `Enum.ConsoleCommandType.Cvar` marks a CVar), as on Retail. `C_Console` doesn't exist, so `C_Console.GetAllCommands` gave the CVar browser an empty list. **[local]** (2026-09-26, the `ConsoleGetAllCommands`, `ConsoleCommandType` and `Cvar` strings in `WowB.exe` 70009, next to `ConsoleExec`) **[in-game]** (the empty list)
+- `C_CVar.GetCVarInfo(name)` returns value, default, account, character, locked, secure, read only. **[local]** (its usage string in `WowB.exe`)
 - `Settings.RegisterCanvasLayoutSubcategory` works on Forever. **[addon]** (Auctionator `PanelConfig.lua`, AceConfigDialog in several addons)
 
 ## Nameplates
@@ -174,7 +175,7 @@ Check these in the live client and move them up with a tag and date:
 
 - [x] `_Camelot.toc` beats `_Mainline.toc` and the plain TOC on 70009. (2026-09-25)
 - [x] `[AllowLoadGameType camelot]` loads on Forever and `standard` doesn't. (2026-09-25)
-- [ ] Does `C_Console.GetAllCommands()` list CVars on Forever, and does `Enum.ConsoleCommandType.Cvar` exist?
+- [ ] Does `ConsoleGetAllCommands()` list every CVar on Forever, or only some?
 - [ ] Is `ReloadUI()` blocked when called from an addon's own button? (From `/run` it works.)
 - [x] Secure snippets run on 70009. (2026-09-25)
 - [x] `Settings.RegisterAddOnCategory`, `Menu.ModifyMenu`, and `TooltipDataProcessor.AddTooltipPostCall` are present. (2026-09-25)

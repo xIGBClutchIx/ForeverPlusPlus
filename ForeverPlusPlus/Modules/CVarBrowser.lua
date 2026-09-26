@@ -7,7 +7,10 @@ local _, ns = ...
 local ipairs, type, sort, format, tostring = ipairs, type, table.sort, string.format, tostring
 local strlower, strfind, strtrim, tinsert = string.lower, string.find, strtrim, table.insert
 local CreateFrame, InCombatLockdown = CreateFrame, InCombatLockdown
-local C_CVar, C_Console = C_CVar, C_Console
+local C_CVar = C_CVar
+-- The console's command list. Forever (build 70009) has the global, like Retail; C_Console is a
+-- guess at a later rename.
+local getAllCommands = ConsoleGetAllCommands or (C_Console and C_Console.GetAllCommands)
 local L = ns.L
 
 local module = ns.NewModule("CVarBrowser", L.CVARBROWSER_DESC, { enabled = true })
@@ -25,15 +28,14 @@ local search, changedOnly = "", false
 local listening = false
 local ui -- the page's parts, once built
 
--- Every CVar this client lists. Probe: C_Console.GetAllCommands is Mainline's and not yet seen
--- in a Forever addon; without it the list is empty, but typing an exact name still finds it.
+-- Every CVar this client lists. Without the list, typing an exact name still finds a CVar.
 local function loadAll()
     all = {}
-    if not (C_Console and C_Console.GetAllCommands) then
+    if not getAllCommands then
         return
     end
     local cvarType = Enum.ConsoleCommandType and Enum.ConsoleCommandType.Cvar or 0
-    for _, info in ipairs(C_Console.GetAllCommands() or {}) do
+    for _, info in ipairs(getAllCommands() or {}) do
         local name = info.command
         if info.commandType == cvarType and type(name) == "string" and name ~= "" then
             local key = strlower(name)
@@ -85,7 +87,7 @@ local function refresh()
             rows[#rows + 1] = entry
         end
     end
-    -- An exact name the list doesn't have (a hidden CVar, or no C_Console) still shows, first.
+    -- An exact name the list doesn't have (a hidden CVar, or no command list) still shows, first.
     if query ~= "" and not byKey[query] and C_CVar.GetCVar(search) ~= nil
         and not (changedOnly and not isChanged(search)) then
         tinsert(rows, 1, { name = search, key = query, help = "", text = query })

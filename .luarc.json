@@ -37,6 +37,7 @@
     "UnitGroupRolesAssigned",
     "GetTexCoordsForRoleSmallCircle",
     "C_Console",
+    "ConsoleGetAllCommands",
     "GameTooltip",
     "NORMAL_FONT_COLOR",
     "HIGHLIGHT_FONT_COLOR",
