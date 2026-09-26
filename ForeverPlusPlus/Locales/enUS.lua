@@ -119,7 +119,8 @@ L.AUCTIONPRICES_DESC = "Scan the auction house when you open it, and show the lo
 L.AUCTIONPRICES_SCAN_ON_OPEN = "Scan When Opened"
 L.AUCTIONPRICES_SCAN_ON_OPEN_DESC = "Scan the whole auction house when you open it, at most "
     .. "every 15 minutes. When off, prices still update from your own searches."
-L.AUCTIONPRICES_SCANNED = "Auction prices updated for %d items." -- count
+L.AUCTIONPRICES_SCANNING = "Scanning prices... %d items" -- count so far
+L.AUCTIONPRICES_SCANNED = "Prices updated for %d items" -- count
 L.AUCTIONPRICES_LINE = "Auction:"
 L.AUCTIONPRICES_STACK_LINE = "Auction (%d):" -- stack size
 
