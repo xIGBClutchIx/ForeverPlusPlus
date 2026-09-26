@@ -15,8 +15,16 @@ local readable = ns.IsReadable
 local Units, Nameplates = ns.Units, ns.Nameplates
 
 local GUILD_SCALE = 0.9 -- the guild line is a touch smaller than the name
-local GUILD_COLOR = { 0.9, 0.9, 0.9 }
-local GUILDMATE_COLOR = { 0.25, 1, 0.25 } -- guild chat's green
+-- Guild Name Color choices. Highlighted guildmates get guild chat's green, or white when every
+-- guild is already green, so they still stand out.
+local GUILD_COLORS = {
+    gray = { 0.65, 0.65, 0.65 },
+    green = { 0.25, 1, 0.25 }, -- guild chat's green
+}
+local GUILDMATE_COLORS = {
+    gray = GUILD_COLORS.green,
+    green = { 0.9, 0.9, 0.9 },
+}
 local NPC_COLOR = { 0.1, 1, 0.1 } -- the green of friendly NPC names in the world
 
 local labels = setmetatable({}, { __mode = "k" }) -- Blizzard unit frame -> our label on it
@@ -169,8 +177,9 @@ local function placeGuild(label, record, unit, shift)
         label.barGuild:Hide()
         return
     end
-    local color = module.db.guildHighlight and Units.IsGuildmate(unit) and GUILDMATE_COLOR
-        or GUILD_COLOR
+    local scheme = GUILD_COLORS[module.db.guildColor] and module.db.guildColor or "gray"
+    local color = module.db.guildHighlight and Units.IsGuildmate(unit) and GUILDMATE_COLORS[scheme]
+        or GUILD_COLORS[scheme]
     label.guild:SetTextColor(color[1], color[2], color[3])
     label.barGuild:SetTextColor(color[1], color[2], color[3])
     label.name:SetPoint("BOTTOM", container, "CENTER", shift, 1)
