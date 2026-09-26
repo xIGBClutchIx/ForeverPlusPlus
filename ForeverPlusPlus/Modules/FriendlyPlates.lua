@@ -5,8 +5,7 @@ local _, ns = ...
 
 local pairs, ipairs, setmetatable = pairs, ipairs, setmetatable
 local CreateFrame, hooksecurefunc = CreateFrame, hooksecurefunc
-local C_CVar, C_NamePlate, C_CurveUtil, C_ClassColor = C_CVar, C_NamePlate, C_CurveUtil, C_ClassColor
-local InCombatLockdown, UnitHealthPercent = InCombatLockdown, UnitHealthPercent
+local C_ClassColor, UnitHealthPercent = C_ClassColor, UnitHealthPercent
 local UnitIsPlayer, UnitIsFriend, UnitIsUnit = UnitIsPlayer, UnitIsFriend, UnitIsUnit
 local UnitAffectingCombat, UnitClass, GetGuildInfo = UnitAffectingCombat, UnitClass, GetGuildInfo
 local UnitLevel, UnitGUID, UnitInParty, UnitInRaid = UnitLevel, UnitGUID, UnitInParty, UnitInRaid
@@ -105,106 +104,25 @@ local CVARS = {
 }
 
 local weak = { __mode = "k" }
-local plates = {} -- nameplate unit -> { container, name, label }, while we manage it
-local byFrame = setmetatable({}, weak) -- Blizzard unit frame -> the record we last made for it
+local plates = {} -- nameplate unit -> { container, name, label, ... }, while we manage it
 local labels = setmetatable({}, weak) -- Blizzard unit frame -> our label frame on it
 local mirrored = setmetatable({}, weak) -- Blizzard name font string -> the unit whose label copies it
 local hookedNames = setmetatable({}, weak)
 local curve -- health fraction -> alpha: 1 below full health, 0 at full
 local inverse -- the opposite: 0 below full health, 1 at full
 
--- Secret values (Forever inherits Midnight's rules) can't be tested; treat them as unknown.
-local function readable(value)
-    return not (issecretvalue and issecretvalue(value))
-end
+local readable = ns.IsReadable
+local Nameplates = ns.Nameplates
 
--- A curve that gives `hurt` below full health and `full` at full health.
-local function buildCurve(hurt, full)
-    local c = C_CurveUtil.CreateCurve()
-    if Enum.LuaCurveType and Enum.LuaCurveType.Step and c.SetType then
-        c:SetType(Enum.LuaCurveType.Step)
-        c:AddPoint(0, hurt)
-        c:AddPoint(1, full)
-    else
-        c:AddPoint(0, hurt)
-        c:AddPoint(0.99, hurt)
-        c:AddPoint(1, full)
-    end
-    return c
-end
-
-local function buildCurves()
-    if curve or not (C_CurveUtil and C_CurveUtil.CreateCurve and UnitHealthPercent) then
-        return
-    end
-    curve, inverse = buildCurve(1, 0), buildCurve(0, 1)
-end
-
--- CVars -----------------------------------------------------------------------------------------
--- Nameplate CVars can't change in combat, so this waits for it to end.
-
-local function findCVar(names)
-    for i = 1, #names do
-        if C_CVar.GetCVar(names[i]) ~= nil then
-            return names[i]
-        end
-    end
-end
-
-local waiting = false
-
-local function waitForCombatEnd()
-    if not waiting then
-        waiting = true
-        ns.On("PLAYER_REGEN_ENABLED", module.RetryCVars)
-    end
-end
-
+-- Sets our CVars, or gives the player's own values back for options that are off.
 local function applyCVars()
-    if InCombatLockdown() then
-        waitForCombatEnd()
-        return
-    end
     local saved = module.db.saved
-    for _, entry in pairs(CVARS) do
-        local name = findCVar(entry.names)
-        if name and entry.option and not module.db[entry.option] then
-            -- Its option is off: give the player's own value back, if we changed it.
-            if saved[name] ~= nil then
-                C_CVar.SetCVar(name, saved[name])
-                saved[name] = nil
-            end
-        elseif name then
-            local current = C_CVar.GetCVar(name)
-            if current ~= entry.value then
-                if saved[name] == nil then
-                    saved[name] = current
-                end
-                C_CVar.SetCVar(name, entry.value)
-            end
+    for _, entry in ipairs(CVARS) do
+        if entry.option and not module.db[entry.option] then
+            ns.CVars.Restore(saved, entry.names)
+        else
+            ns.CVars.Set(saved, entry.names, entry.value)
         end
-    end
-end
-
-local function restoreCVars()
-    if InCombatLockdown() then
-        waitForCombatEnd()
-        return
-    end
-    local saved = module.db.saved
-    for name, value in pairs(saved) do
-        C_CVar.SetCVar(name, value)
-        saved[name] = nil
-    end
-end
-
-function module.RetryCVars()
-    waiting = false
-    ns.Off("PLAYER_REGEN_ENABLED", module.RetryCVars)
-    if module.enabled then
-        applyCVars()
-    else
-        restoreCVars()
     end
 end
 
@@ -530,7 +448,7 @@ local function layoutLabel(label, record, unit)
         label.barGuild:SetTextColor(color[1], color[2], color[3])
         label.name:SetPoint("BOTTOM", container, "CENTER", shift, 1)
         -- While they cast, Blizzard's cast bar sits under the bar, so the guild moves below it.
-        local castBar = record.casting and record.castBar
+        local castBar = Nameplates.IsCasting(unit) and record.castBar
         if castBar then
             label.guild:SetPoint("TOP", castBar, "BOTTOM", 0, -1)
             label.barGuild:SetPoint("TOP", castBar, "BOTTOM", 0, -1)
@@ -625,30 +543,22 @@ function refreshLabel(unit)
     end
 end
 
-local function add(unit)
-    local plate = C_NamePlate.GetNamePlateForUnit(unit)
-    local frame = plate and plate.UnitFrame
-    local container = frame and (frame.HealthBarsContainer or frame.healthBar)
-    if not container then
+local function add(unit, frame)
+    local parts = Nameplates.Parts(frame)
+    if not parts.container then
         return
-    end
-    -- Plates are pooled: one we changed may come back for an enemy or an NPC.
-    local old = byFrame[frame]
-    if old then
-        release(old)
-        byFrame[frame] = nil
     end
     local ours, isPlayer = isOurs(unit)
     if not ours then
         return
     end
-    local record = { container = container, isPlayer = isPlayer }
-    local name = frame.name or frame.Name
+    local record = { container = parts.container, isPlayer = isPlayer }
+    local name = parts.name
     if name and name.SetText then
         record.name = name
-        record.levelFrame = frame.LevelFrame -- Forever-only, as of build 70009
-        record.levelDiffFrame = frame.PlayerLevelDiffFrame
-        record.castBar = frame.CastBarsContainer
+        record.levelFrame = parts.level
+        record.levelDiffFrame = parts.levelDiff
+        record.castBar = parts.castBar
         record.label = getLabel(frame)
         record.label:Show()
         record.label.barGuildFrame:Show()
@@ -656,11 +566,11 @@ local function add(unit)
         mirrored[name] = unit
     end
     plates[unit] = record
-    byFrame[frame] = record
     refreshLabel(unit)
     update(unit)
 end
 
+-- Plates are pooled, so everything we changed goes back as the plate leaves.
 local function remove(unit)
     local record = plates[unit]
     if record then
@@ -669,15 +579,15 @@ local function remove(unit)
     end
 end
 
--- Picks up every plate already on screen (when turning on, or when the NPC option changes).
-local function addAll()
-    for _, plate in pairs(C_NamePlate.GetNamePlates()) do
-        local unit = plate.namePlateUnitToken or (plate.UnitFrame and plate.UnitFrame.unit)
-        if unit then
-            add(unit)
+local plateHandlers = {
+    OnAdded = add,
+    OnRemoved = remove,
+    OnCast = function(unit)
+        if plates[unit] then
+            refreshLabel(unit)
         end
-    end
-end
+    end,
+}
 
 -- Called by Settings when an option changes.
 function module:OnOptionChanged(key)
@@ -689,7 +599,7 @@ function module:OnOptionChanged(key)
         for unit in pairs(plates) do
             remove(unit)
         end
-        addAll()
+        Nameplates.ForEach(add)
         return
     end
     for unit in pairs(plates) do
@@ -698,26 +608,8 @@ function module:OnOptionChanged(key)
     end
 end
 
--- Cast events -> whether the unit is casting afterwards.
-local CAST_EVENTS = {
-    UNIT_SPELLCAST_START = true,
-    UNIT_SPELLCAST_CHANNEL_START = true,
-    UNIT_SPELLCAST_STOP = false,
-    UNIT_SPELLCAST_CHANNEL_STOP = false,
-}
-
-function module.OnPlateEvent(event, unit)
-    if event == "NAME_PLATE_UNIT_ADDED" then
-        add(unit)
-    elseif event == "NAME_PLATE_UNIT_REMOVED" then
-        remove(unit)
-    elseif plates[unit] then
-        if CAST_EVENTS[event] ~= nil then
-            -- Only the event says whether a cast started or ended; the cast itself can be secret.
-            plates[unit].casting = CAST_EVENTS[event]
-            refreshLabel(unit)
-            return
-        end
+function module.OnUnitEvent(event, unit)
+    if plates[unit] then
         if event == "UNIT_NAME_UPDATE" or event == "UNIT_LEVEL" then
             refreshLabel(unit)
         end
@@ -738,16 +630,16 @@ function module.OnSocialChange()
     end
 end
 
-local EVENTS = { "NAME_PLATE_UNIT_ADDED", "NAME_PLATE_UNIT_REMOVED", "UNIT_HEALTH", "UNIT_MAXHEALTH",
-    "UNIT_FLAGS", "UNIT_NAME_UPDATE", "UNIT_LEVEL", "UNIT_SPELLCAST_START", "UNIT_SPELLCAST_STOP",
-    "UNIT_SPELLCAST_CHANNEL_START", "UNIT_SPELLCAST_CHANNEL_STOP" }
+local EVENTS = { "UNIT_HEALTH", "UNIT_MAXHEALTH", "UNIT_FLAGS", "UNIT_NAME_UPDATE", "UNIT_LEVEL" }
 local SOCIAL_EVENTS = { "GROUP_ROSTER_UPDATE", "FRIENDLIST_UPDATE" }
 
 function module:OnEnable()
-    buildCurves()
+    if not curve then
+        curve, inverse = ns.HealthStepCurve(1, 0), ns.HealthStepCurve(0, 1)
+    end
     applyCVars()
     for _, event in pairs(EVENTS) do
-        ns.On(event, self.OnPlateEvent)
+        ns.On(event, self.OnUnitEvent)
     end
     for _, event in pairs(SOCIAL_EVENTS) do
         ns.On(event, self.OnSocialChange)
@@ -755,20 +647,18 @@ function module:OnEnable()
     -- UNIT_FLAGS covers other players' combat; these cover the fallback to our own.
     ns.On("PLAYER_REGEN_DISABLED", self.OnPlayerCombat)
     ns.On("PLAYER_REGEN_ENABLED", self.OnPlayerCombat)
-    addAll()
+    Nameplates.Register(self, plateHandlers)
 end
 
 function module:OnDisable()
+    Nameplates.Unregister(self)
     for _, event in pairs(EVENTS) do
-        ns.Off(event, self.OnPlateEvent)
+        ns.Off(event, self.OnUnitEvent)
     end
     for _, event in pairs(SOCIAL_EVENTS) do
         ns.Off(event, self.OnSocialChange)
     end
     ns.Off("PLAYER_REGEN_DISABLED", self.OnPlayerCombat)
     ns.Off("PLAYER_REGEN_ENABLED", self.OnPlayerCombat)
-    for unit in pairs(plates) do
-        remove(unit)
-    end
-    restoreCVars()
+    ns.CVars.RestoreAll(self.db.saved)
 end

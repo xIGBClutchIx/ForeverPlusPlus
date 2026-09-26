@@ -25,6 +25,7 @@ Names:
 - `ForeverPlusPlus/`: the shipped addon folder, linked into the client's `Interface\AddOns`.
   - `ForeverPlusPlus.toc`: metadata and load order.
   - `Core.lua`: the shared `ns`: events (`ns.On`, `ns.Off`), saved settings, modules (`ns.NewModule`, `ns.SetEnabled`), `/fpp`, `ns.Print`.
+  - `Lib/*.lua`: shared services any module can use, loaded before the modules. `Secret.lua` (`ns.IsReadable`, `ns.HealthStepCurve`), `CVars.lua` (`ns.CVars`: set CVars and put the player's values back, waiting out combat), `Nameplates.lua` (`ns.Nameplates`: plate added/removed/cast callbacks and Forever's plate parts). They cost nothing until a module uses them.
   - `Modules/*.lua`: one change each (see "Add a module" in `README.md`).
   - `Init.lua`: loaded last; calls `ns.Start()` at `PLAYER_LOGIN`.
 - `README.md`: install and usage for people.
@@ -63,9 +64,10 @@ When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or f
 
 - Keep changes scoped to the request. Don't reformat or revert unrelated code.
 - One module per change the player can see. A module must work, and be removable, on its own.
+- Plumbing that a second module could want (tracking nameplates, changing CVars, secret-value helpers) goes in `Lib/`, not inside a module. Modules never reach into each other; they share only `Lib/` and `Core.lua`.
 - Default to on only for changes nearly everyone wants; otherwise `enabled = false`.
 - When replacing behavior, delete the old path. No compatibility shims or migrations for unreleased settings.
-- Add a new file to the TOC, after `Core.lua` and before `Init.lua`.
+- Add a new file to the TOC, after `Core.lua` and before `Init.lua`: `Lib/` files before `Modules/`.
 - Update `README.md` in the same change when commands, install steps, or the layout change.
 - Record things learned about the Forever client in `docs/forever-api.md`, tagged with how you know. Promote a fact to "How Forever differs from Classic" above only when it changes how code must be written.
 

@@ -23,6 +23,7 @@ mklink /J "D:\BattleNet\World of Warcraft\_classic_beta_\Interface\AddOns\Foreve
 |---|---|
 | `ForeverPlusPlus.toc` | Load order and metadata; `## Interface: 16001` (Forever) |
 | `Core.lua` | The shared namespace: events (`ns.On`, `ns.Off`), saved settings, modules (`ns.NewModule`), `/fpp`, `ns.Print` |
+| `Lib/*.lua` | Shared services for modules: secret-value helpers, CVar changes, nameplate tracking |
 | `Modules/*.lua` | One change each |
 | `Settings.lua` | The Forever++ pages in Settings > AddOns: module checkboxes, a page per module, and Debug |
 | `Init.lua` | Loaded last; starts the modules at `PLAYER_LOGIN` |

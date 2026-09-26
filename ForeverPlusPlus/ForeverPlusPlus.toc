@@ -7,6 +7,9 @@
 ## IconTexture: Interface\Icons\INV_Misc_Gear_01
 
 Core.lua
+Lib\Secret.lua
+Lib\CVars.lua
+Lib\Nameplates.lua
 Modules\FriendlyPlates.lua
 Settings.lua
 Init.lua
