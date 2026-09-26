@@ -115,14 +115,35 @@ L.AUTOREPAIR_NO_GUILD_MONEY = "The guild bank can't pay for repairs (%s)." -- co
 -- AuctionPrices
 L.AUCTIONPRICES_TITLE = "Auction Prices"
 L.AUCTIONPRICES_DESC = "Scan the auction house when you open it, and show the lowest buyout in "
-    .. "item tooltips. Hold Shift to see the price of the whole stack."
+    .. "item tooltips, under the sell price."
 L.AUCTIONPRICES_SCAN_ON_OPEN = "Scan When Opened"
 L.AUCTIONPRICES_SCAN_ON_OPEN_DESC = "Scan the whole auction house when you open it, at most "
-    .. "every 15 minutes. When off, prices still update from your own searches."
+    .. "every 15 minutes. When off, prices still update from your own searches, and /fpp scan "
+    .. "scans now."
+L.AUCTIONPRICES_MODE = "Auction Price For"
+L.AUCTIONPRICES_MODE_DESC = "Whether the auction price counts the whole stack or one item, and "
+    .. "what holding Shift shows."
 L.AUCTIONPRICES_SCANNING = "Scanning prices... %d items" -- count so far
 L.AUCTIONPRICES_SCANNED = "Prices updated for %d items" -- count
-L.AUCTIONPRICES_LINE = "Auction:"
-L.AUCTIONPRICES_STACK_LINE = "Auction (%d):" -- stack size
+L.AUCTIONPRICES_AGE = "Prices scanned %d min ago" -- minutes
+L.AUCTIONPRICES_COMMAND = "scan the open auction house now"
+L.AUCTIONPRICES_IS_OFF = "Auction Prices is off (/fpp toggle AuctionPrices)."
+L.AUCTIONPRICES_NOT_OPEN = "Open the auction house first."
+L.AUCTIONPRICES_LINE = "Auction"
+
+-- SellPrice
+L.SELLPRICE_TITLE = "Stack Sell Price"
+L.SELLPRICE_DESC = "Show the vendor price of the whole stack in item tooltips. Hold Shift to see "
+    .. "one item."
+L.SELLPRICE_MODE = "Sell Price For"
+L.SELLPRICE_MODE_DESC = "Whether the sell price counts the whole stack or one item, and what "
+    .. "holding Shift shows."
+
+-- Price lines in item tooltips (SellPrice and AuctionPrices)
+L.PRICE_MODE_STACK = "Whole Stack, Shift for One"
+L.PRICE_MODE_ONE = "One Item, Shift for Stack"
+L.PRICE_LABEL = "%s:" -- line name
+L.PRICE_STACK_LABEL = "%s (%d):" -- line name, stack size
 
 -- DurabilityBars
 L.DURABILITYBARS_TITLE = "Durability Bars"

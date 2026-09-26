@@ -1,24 +1,26 @@
 -- Auction Prices: scans the auction house when it opens and shows the lowest buyout in item
--- tooltips. Hold Shift over a stack to see the price of the whole stack too.
+-- tooltips, under the sell price. Like the sell price, it counts the stack (Shift for one), or
+-- the other way round.
 --
 -- The scan is an empty browse search paged to the end, the same one Auctionator's default scan
 -- uses on Forever. C_AuctionHouse.ReplicateItems is in the client too, but it's unproven here,
 -- and Auctionator leaves it off by default. Browse results give the lowest unit price per item.
 local _, ns = ...
 
-local ipairs, format, time = ipairs, string.format, time
-local C_AuctionHouse, C_Item, C_CurrencyInfo, C_Timer = C_AuctionHouse, C_Item, C_CurrencyInfo, C_Timer
-local GetRealmName, UnitFactionGroup, IsShiftKeyDown = GetRealmName, UnitFactionGroup, IsShiftKeyDown
-local GetMoneyString, TooltipDataProcessor, Enum, GameTooltip = GetMoneyString, TooltipDataProcessor, Enum, GameTooltip
-local HIGHLIGHT_FONT_COLOR, CreateFrame, pcall = HIGHLIGHT_FONT_COLOR, CreateFrame, pcall
+local ipairs, format, time, floor = ipairs, string.format, time, math.floor
+local C_AuctionHouse, C_Timer = C_AuctionHouse, C_Timer
+local GetRealmName, UnitFactionGroup = GetRealmName, UnitFactionGroup
+local CreateFrame, pcall = CreateFrame, pcall
 
 local L = ns.L
+local ItemTooltip = ns.ItemTooltip
 
 local SCAN_INTERVAL = 15 * 60 -- seconds between automatic scans, as Auctionator waits
 
 local module = ns.NewModule("AuctionPrices", L.AUCTIONPRICES_DESC, {
     enabled = false,
     scanOnOpen = true,
+    mode = "stack", -- "stack" (Shift for one) or "one" (Shift for the stack)
     -- Per auction house ("Realm-Faction"): { scannedAt = time(), prices = { [itemID] = copper } }.
     -- Data, not a setting: it isn't in module.options.
     houses = {},
@@ -31,15 +33,16 @@ module.options = {
         name = L.AUCTIONPRICES_SCAN_ON_OPEN,
         description = L.AUCTIONPRICES_SCAN_ON_OPEN_DESC,
     },
+    {
+        key = "mode",
+        name = L.AUCTIONPRICES_MODE,
+        description = L.AUCTIONPRICES_MODE_DESC,
+        choices = {
+            { "stack", L.PRICE_MODE_STACK },
+            { "one", L.PRICE_MODE_ONE },
+        },
+    },
 }
-
-local function money(amount)
-    -- Probe: GetMoneyString is Mainline FrameXML; the coin text is the fallback.
-    if GetMoneyString then
-        return GetMoneyString(amount, true)
-    end
-    return C_CurrencyInfo.GetCoinTextureString(amount)
-end
 
 -- The auction house this character sees. Realms share one per faction.
 local function house()
@@ -67,7 +70,8 @@ local function getIndicator()
         indicator = CreateFrame("Frame", nil, parent)
         indicator:SetSize(1, 20)
         indicator:SetPoint("TOPRIGHT", parent, "TOPRIGHT", -30, -1)
-        indicator:SetFrameLevel(parent:GetFrameLevel() + 10)
+        -- Above the window's border and title art, which are child frames of their own.
+        indicator:SetFrameStrata("HIGH")
         indicator.text = indicator:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         indicator.text:SetPoint("RIGHT")
         -- Probe: LoadingSpinnerTemplate is Mainline SharedXML; without it, only the text shows.
@@ -204,13 +208,36 @@ function startScan()
     })
 end
 
-local function onShow()
-    open = true
-    if module.db.scanOnOpen and time() - house().scannedAt >= SCAN_INTERVAL then
-        -- A moment after opening, so Blizzard's window has set itself up first.
-        C_Timer.After(0.5, startScan)
+-- A moment after opening, so Blizzard's window has set itself up first: scan when it's due, or
+-- say how old the prices are.
+local function afterShow()
+    if not open or scanning then
+        return
+    end
+    local age = time() - house().scannedAt
+    if module.db.scanOnOpen and age >= SCAN_INTERVAL then
+        startScan()
+    elseif house().scannedAt > 0 then
+        showIndicator(format(L.AUCTIONPRICES_AGE, floor(age / 60)), false)
     end
 end
+
+local function onShow()
+    open = true
+    C_Timer.After(0.5, afterShow)
+end
+
+-- /fpp scan: scan now, whenever the last one was.
+local function scanCommand()
+    if not module.enabled then
+        ns.Print(L.AUCTIONPRICES_IS_OFF)
+    elseif not open then
+        ns.Print(L.AUCTIONPRICES_NOT_OPEN)
+    else
+        startScan()
+    end
+end
+ns.AddCommand("scan", "", L.AUCTIONPRICES_COMMAND, scanCommand)
 
 local function onClosed()
     open = false
@@ -221,40 +248,18 @@ end
 
 -- Tooltips -----------------------------------------------------------------------------------
 
--- How many items the hovered stack holds, or 1 when it can't tell (links, merchants).
-local function stackCount(data)
-    if data.guid and C_Item.GetItemLocation and C_Item.GetStackCount then
-        local location = C_Item.GetItemLocation(data.guid)
-        if location and location:IsValid() then
-            return C_Item.GetStackCount(location) or 1
-        end
-    end
-    return 1
-end
-
-local function onItemTooltip(tooltip, data)
-    if not module.enabled or not data or not ns.IsReadable(data.id) or not data.id then
+local function addAuctionPrice(tooltip, data)
+    if not module.enabled or not ns.IsReadable(data.id) or not data.id then
         return
     end
     local price = house().prices[data.id]
     if not price then
         return
     end
-    local r, g, b = HIGHLIGHT_FONT_COLOR:GetRGB()
-    tooltip:AddDoubleLine(L.AUCTIONPRICES_LINE, money(price), r, g, b, r, g, b)
-    local count = IsShiftKeyDown() and stackCount(data) or 1
-    if count > 1 then
-        tooltip:AddDoubleLine(format(L.AUCTIONPRICES_STACK_LINE, count), money(price * count),
-            r, g, b, r, g, b)
-    end
-end
-
--- Redraws the item tooltip when Shift goes up or down, so the stack line comes and goes.
-local function onModifier(_, key)
-    local shift = key == "LSHIFT" or key == "RSHIFT"
-    if shift and GameTooltip:IsShown() and GameTooltip.RefreshData then
-        GameTooltip:RefreshData()
-    end
+    local count = ItemTooltip.PriceCount(data, module.db.mode)
+    local label = count > 1 and format(L.PRICE_STACK_LABEL, L.AUCTIONPRICES_LINE, count)
+        or format(L.PRICE_LABEL, L.AUCTIONPRICES_LINE)
+    ItemTooltip.AddMoney(tooltip, label, price * count)
 end
 
 local hooked = false
@@ -264,11 +269,10 @@ function module:OnEnable()
     ns.On("AUCTION_HOUSE_CLOSED", onClosed)
     ns.On("AUCTION_HOUSE_BROWSE_RESULTS_UPDATED", onResultsUpdated)
     ns.On("AUCTION_HOUSE_BROWSE_RESULTS_ADDED", onResultsAdded)
-    ns.On("MODIFIER_STATE_CHANGED", onModifier)
-    -- Post calls can't be removed; onItemTooltip checks module.enabled instead.
+    -- The hook can't be removed; addAuctionPrice checks module.enabled instead.
     if not hooked then
         hooked = true
-        TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, onItemTooltip)
+        ItemTooltip.OnPrices(addAuctionPrice)
     end
 end
 
@@ -277,7 +281,6 @@ function module:OnDisable()
     ns.Off("AUCTION_HOUSE_CLOSED", onClosed)
     ns.Off("AUCTION_HOUSE_BROWSE_RESULTS_UPDATED", onResultsUpdated)
     ns.Off("AUCTION_HOUSE_BROWSE_RESULTS_ADDED", onResultsAdded)
-    ns.Off("MODIFIER_STATE_CHANGED", onModifier)
     ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
     stopScan()
     hideIndicator()

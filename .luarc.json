@@ -65,6 +65,8 @@
     "GetRealmName",
     "UnitFactionGroup",
     "TooltipDataProcessor",
+    "SetTooltipMoney",
+    "SELL_PRICE",
     "GetInventorySlotInfo",
     "GetInventoryItemDurability",
     "PaperDollItemsFrame",
