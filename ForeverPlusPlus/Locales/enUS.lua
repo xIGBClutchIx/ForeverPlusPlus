@@ -16,6 +16,8 @@ L.NO_MODULE = "no module called %s"
 L.OFF_AFTER_RELOAD = "%s turns fully off after /reload."
 L.SLASH_MODULES = "modules (/fpp toggle <name>, /fpp list):"
 L.SLASH_OPEN = "open the settings"
+L.SLASH_LIST = "list the modules and whether each is on"
+L.SLASH_TOGGLE = "turn a module on or off"
 L.SLASH_RESET = "all settings back to defaults (reloads)"
 L.SLASH_OPTIONS = "list its options and their values"
 L.SLASH_SET = "change one (on/off, or a choice)"
@@ -34,6 +36,19 @@ L.OPTION_STATE_ALLOWED = "%s %s is |cffffd100%s|r (%s)." -- module, option, valu
 L.MODULES = "Modules"
 L.DEBUG = "Debug"
 L.SETTINGS_AFTER_COMBAT = "Settings open after combat."
+
+-- Settings: About page
+L.ABOUT = "About"
+L.ABOUT_TAGLINE = "Small additions and changes to the default UI for WoW Forever."
+L.ABOUT_VERSION = "Version"
+L.ABOUT_AUTHOR = "Author"
+L.ABOUT_GAME = "Game"
+L.ABOUT_GAME_BUILD = "%s (build %s, interface %s)" -- version, build, interface
+L.ABOUT_WEBSITE = "Website"
+L.ABOUT_ISSUES = "Report a Bug"
+L.ABOUT_COPY = "Select the link and press Ctrl+C to copy it."
+L.ABOUT_MODULES = "Modules"
+L.ABOUT_COMMANDS = "Commands"
 
 -- FriendlyPlates
 L.FRIENDLYPLATES_TITLE = "Friendly Player Nameplates"

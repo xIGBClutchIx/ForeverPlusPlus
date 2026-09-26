@@ -9,7 +9,9 @@ local _, ns = ...
 
 local ipairs, format = ipairs, string.format
 
-local InCombatLockdown = InCombatLockdown
+local pairs = pairs
+local InCombatLockdown, CreateFrame, GetBuildInfo = InCombatLockdown, CreateFrame, GetBuildInfo
+local C_AddOns, GetAddOnMetadata, GameTooltip = C_AddOns, GetAddOnMetadata, GameTooltip
 local L = ns.L
 
 local settings = {} -- module name -> its Blizzard setting objects, to refresh after /fpp changes
@@ -102,6 +104,140 @@ local function addOptions(category, module, parent, debug)
     end
 end
 
+-- About page ----------------------------------------------------------------------------------
+-- The version and who made it, the game build, links, every module and whether it's on, and the
+-- /fpp commands. Built the first time it's shown; the module states refresh every time.
+
+local WEBSITE = "https://github.com/xIGBClutchIx/ForeverPlusPlus"
+local ISSUES = WEBSITE .. "/issues"
+
+local function metadata(field)
+    local get = (C_AddOns and C_AddOns.GetAddOnMetadata) or GetAddOnMetadata
+    return get and get(ns.name, field) or ""
+end
+
+-- A gold label with a value beside it, the way Blizzard's own info pages look.
+local function addRow(frame, y, label, value)
+    local left = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    left:SetPoint("TOPLEFT", 16, y)
+    left:SetWidth(110)
+    left:SetJustifyH("LEFT")
+    left:SetText(label)
+    local right = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    right:SetPoint("LEFT", left, "RIGHT", 8, 0)
+    right:SetText(value)
+    return right
+end
+
+-- A link can't be clicked in the game, so it sits in a read-only box, selected on click, to copy.
+local function addLink(frame, y, label, url)
+    local left = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    left:SetPoint("TOPLEFT", 16, y)
+    left:SetWidth(110)
+    left:SetJustifyH("LEFT")
+    left:SetText(label)
+    local box = CreateFrame("EditBox", nil, frame, "InputBoxTemplate")
+    box:SetSize(360, 20)
+    box:SetPoint("LEFT", left, "RIGHT", 14, 0)
+    box:SetAutoFocus(false)
+    box:SetText(url)
+    box:SetCursorPosition(0)
+    box:SetScript("OnEditFocusGained", function(self) self:HighlightText() end)
+    box:SetScript("OnEditFocusLost", function(self) self:HighlightText(0, 0) end)
+    box:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+    -- Typing can't change it.
+    box:SetScript("OnTextChanged", function(self, user)
+        if user then
+            self:SetText(url)
+            self:HighlightText()
+        end
+    end)
+    box:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:SetText(L.ABOUT_COPY, nil, nil, nil, nil, true)
+        GameTooltip:Show()
+    end)
+    box:SetScript("OnLeave", function() GameTooltip:Hide() end)
+end
+
+local function addHeading(frame, y, text)
+    local heading = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
+    heading:SetPoint("TOPLEFT", 16, y)
+    heading:SetText(text)
+end
+
+local function buildAbout(frame)
+    local title = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightHuge")
+    title:SetPoint("TOPLEFT", 7, -22)
+    title:SetText(ns.title)
+    local divider = frame:CreateTexture(nil, "ARTWORK")
+    divider:SetAtlas("Options_HorizontalDivider", true)
+    divider:SetPoint("TOP", 0, -50)
+
+    local tagline = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    tagline:SetPoint("TOPLEFT", 16, -64)
+    tagline:SetText(metadata("Notes") ~= "" and metadata("Notes") or L.ABOUT_TAGLINE)
+
+    local version, build, _, interface = GetBuildInfo()
+    local y = -92
+    addRow(frame, y, L.ABOUT_VERSION, metadata("Version"))
+    y = y - 20
+    addRow(frame, y, L.ABOUT_AUTHOR, metadata("Author"))
+    y = y - 20
+    addRow(frame, y, L.ABOUT_GAME, format(L.ABOUT_GAME_BUILD, version, build, interface))
+    y = y - 26
+    addLink(frame, y, L.ABOUT_WEBSITE, WEBSITE)
+    y = y - 24
+    addLink(frame, y, L.ABOUT_ISSUES, ISSUES)
+
+    y = y - 36
+    addHeading(frame, y, L.ABOUT_MODULES)
+    y = y - 24
+    local states = {} -- module name -> its line
+    for _, name in ipairs(ns.order) do
+        local text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        text:SetPoint("TOPLEFT", 16, y)
+        states[name] = text
+        y = y - 18
+    end
+
+    y = y - 18
+    addHeading(frame, y, L.ABOUT_COMMANDS)
+    y = y - 24
+    for _, line in ipairs(ns.Commands()) do
+        local command = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        command:SetPoint("TOPLEFT", 16, y)
+        command:SetText(line[1])
+        local description = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+        description:SetPoint("TOPLEFT", 250, y)
+        description:SetText(line[2])
+        y = y - 16
+    end
+
+    -- Module names with a green "on" or red "off" after them, fresh each time the page opens.
+    local function refresh()
+        for name, text in pairs(states) do
+            local module = ns.modules[name]
+            text:SetText(format("%s  %s", module.title or module.name, module.db.enabled
+                and format("|cff44dd44%s|r", L.ON) or format("|cffdd4444%s|r", L.OFF)))
+        end
+    end
+    refresh()
+    frame:HookScript("OnShow", refresh)
+end
+
+local function addAboutPage(category)
+    local frame = CreateFrame("Frame")
+    local built = false
+    frame:SetScript("OnShow", function(self)
+        if not built then
+            built = true
+            buildAbout(self)
+        end
+    end)
+    Settings.RegisterCanvasLayoutSubcategory(category, frame, L.ABOUT)
+end
+
 ---Adds the Forever++ pages to Settings > AddOns (called once, after ns.Start).
 function ns.RegisterSettings()
     -- Probe: the Mainline Settings API is on Forever (build 70009), but it's a beta.
@@ -138,6 +274,9 @@ function ns.RegisterSettings()
             addHeader(debugLayout, module.title or name)
             addOptions(debugPage, module, nil, true)
         end
+    end
+    if subpages and Settings.RegisterCanvasLayoutSubcategory then
+        addAboutPage(category)
     end
     Settings.RegisterAddOnCategory(category)
     mainCategory = category

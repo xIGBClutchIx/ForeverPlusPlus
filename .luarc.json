@@ -67,6 +67,9 @@
     "TooltipDataProcessor",
     "GetInventorySlotInfo",
     "GetInventoryItemDurability",
-    "PaperDollItemsFrame"
+    "PaperDollItemsFrame",
+    "GetBuildInfo",
+    "C_AddOns",
+    "GetAddOnMetadata"
   ]
 }

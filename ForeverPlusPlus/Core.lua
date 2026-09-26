@@ -422,14 +422,27 @@ SlashCmdList.FOREVERPLUSPLUS = function(message)
         ReloadUI()
     elseif command == "list" or command == "help" or not ns.OpenSettings() then
         list()
-        print(format("  /fpp  |cff999999%s|r", L.SLASH_OPEN))
-        print(format("  /fpp options <module>  |cff999999%s|r", L.SLASH_OPTIONS))
-        print(format("  /fpp set <module> <option> <value>  |cff999999%s|r", L.SLASH_SET))
-        print(format("  /fpp reset  |cff999999%s|r", L.SLASH_RESET))
-        for _, name in pairs(commandOrder) do
-            local info = commands[name]
-            local usage = info.usage ~= "" and " " .. info.usage or ""
-            print(format("  /fpp %s%s  |cff999999%s|r", name, usage, info.description))
+        for _, line in ipairs(ns.Commands()) do
+            print(format("  %s  |cff999999%s|r", line[1], line[2]))
         end
     end
+end
+
+---Every /fpp command, built in and added by modules, for help text and the About page.
+---@return table lines { { "/fpp ...", description }, ... }
+function ns.Commands()
+    local lines = {
+        { "/fpp", L.SLASH_OPEN },
+        { "/fpp list", L.SLASH_LIST },
+        { "/fpp toggle <module>", L.SLASH_TOGGLE },
+        { "/fpp options <module>", L.SLASH_OPTIONS },
+        { "/fpp set <module> <option> <value>", L.SLASH_SET },
+        { "/fpp reset", L.SLASH_RESET },
+    }
+    for _, name in ipairs(commandOrder) do
+        local info = commands[name]
+        local usage = info.usage ~= "" and " " .. info.usage or ""
+        lines[#lines + 1] = { format("/fpp %s%s", name, usage), info.description }
+    end
+    return lines
 end
