@@ -19,5 +19,6 @@ Modules\FriendlyPlates\Plates.lua
 Modules\CVarBrowser.lua
 Modules\FastLoot.lua
 Modules\AutoRepair.lua
+Modules\AuctionPrices.lua
 Settings.lua
 Init.lua

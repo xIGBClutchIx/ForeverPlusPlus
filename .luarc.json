@@ -58,6 +58,11 @@
     "GetMoneyString",
     "IsShiftKeyDown",
     "C_Timer",
-    "C_CurrencyInfo"
+    "C_CurrencyInfo",
+    "C_AuctionHouse",
+    "C_Item",
+    "GetRealmName",
+    "UnitFactionGroup",
+    "TooltipDataProcessor"
   ]
 }

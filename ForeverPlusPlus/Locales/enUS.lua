@@ -93,6 +93,17 @@ L.AUTOREPAIR_REPAIRED_GUILD = "Repaired for %s from the guild bank." -- cost
 L.AUTOREPAIR_NO_MONEY = "Not enough money to repair (%s)." -- cost
 L.AUTOREPAIR_NO_GUILD_MONEY = "The guild bank can't pay for repairs (%s)." -- cost
 
+-- AuctionPrices
+L.AUCTIONPRICES_TITLE = "Auction Prices"
+L.AUCTIONPRICES_DESC = "Scan the auction house when you open it, and show the lowest buyout in "
+    .. "item tooltips. Hold Shift to see the price of the whole stack."
+L.AUCTIONPRICES_SCAN_ON_OPEN = "Scan When Opened"
+L.AUCTIONPRICES_SCAN_ON_OPEN_DESC = "Scan the whole auction house when you open it, at most "
+    .. "every 15 minutes. When off, prices still update from your own searches."
+L.AUCTIONPRICES_SCANNED = "Auction prices updated for %d items." -- count
+L.AUCTIONPRICES_LINE = "Auction:"
+L.AUCTIONPRICES_STACK_LINE = "Auction (%d):" -- stack size
+
 -- CVarBrowser
 L.CVARBROWSER_TITLE = "Console Variables"
 L.CVARBROWSER_DESC = "Browse the game's console variables (CVars) on a page in Settings, and "

@@ -142,6 +142,8 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 - Blizzard's Cooldown Manager is off by default and, from build 70009, has data for Druid, Mage, Priest, Warrior, and Warlock only. It doesn't support spell ranks. **[web]**
 - After 100 Lua errors in a session, the client stops passing errors to handlers (BugSack goes quiet). Fix error floods first. **[web]**
 - Auction house is the modern (Retail) one, but copper prices are allowed and durations are 2, 8, and 24 hours. **[addon]** (Auctionator `Source_Forever`, `IsForever` branches)
+  - A whole-house scan works as an empty browse search: `C_AuctionHouse.SendBrowseQuery({ searchString = "", sorts = {}, filters = {}, itemClassFilters = {} })`, then `RequestMoreBrowseResults()` on each `AUCTION_HOUSE_BROWSE_RESULTS_UPDATED` / `_ADDED` until `HasFullBrowseResults()`. Each result has `itemKey.itemID`, `minPrice` (taken as a unit price), and `totalQuantity`. **[addon]** (Auctionator `Source_ModernAH/IncrementalScan`, its default scan; `TimeOfLastBrowseScan` is set in the saved Auctionator.lua on this client)
+  - `ReplicateItems`, `GetNumReplicateItems`, `GetReplicateItemInfo`, `GetReplicateItemLink`, and `REPLICATE_ITEM_LIST_UPDATE` are in the build 70009 exe, but no one has shown a replicate scan finishing on Forever (Auctionator's is off by default). **[exe]** Unverified in game.
 - The Professions window exists but has no crafting orders page. **[addon]** (Auctionator `Professions.lua`)
 
 ## Console variables
