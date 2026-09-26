@@ -1,8 +1,8 @@
 -- The "Forever++" pages in the game's Settings > AddOns list, built from Blizzard's own settings
 -- templates so they look like any other options page:
---   Forever++        an on/off checkbox per module
---     <Module>       one page per module with options: its on/off checkbox, then its options,
---                    or a page the module draws itself when it has `BuildPage`
+--   Forever++        an on/off checkbox per module (the only place modules turn on and off)
+--     <Module>       one page per module with options, holding just its options, or a page the
+--                    module draws itself when it has `BuildPage`
 --     Debug          options marked `debug = true`, for testing
 -- Without subpages (an older Settings API), everything goes on the main page instead.
 local _, ns = ...
@@ -36,11 +36,11 @@ local function track(module, setting)
     list[#list + 1] = setting
 end
 
--- The module's on/off checkbox. Each page gets its own setting (the variable names must differ);
--- all of them read and write through the module, so /fpp and every page agree.
-local function addToggle(category, module, suffix)
+-- The module's on/off checkbox on the main page. It reads and writes through the module, so
+-- /fpp and the page agree.
+local function addToggle(category, module)
     local setting = Settings.RegisterProxySetting(category,
-        format("ForeverPlusPlus_%s%s", module.name, suffix), Settings.VarType.Boolean,
+        format("ForeverPlusPlus_%s", module.name), Settings.VarType.Boolean,
         module.title or module.name, module.defaults.enabled,
         function() return module.db.enabled end,
         function(value) ns.SetEnabled(module.name, value) end)
@@ -113,7 +113,7 @@ function ns.RegisterSettings()
     addHeader(layout, L.MODULES)
     for _, name in ipairs(ns.order) do
         local module = ns.modules[name]
-        local parent = addToggle(category, module, "")
+        local parent = addToggle(category, module)
         if module.BuildPage then
             if subpages and Settings.RegisterCanvasLayoutSubcategory then
                 pages[name] = addCanvasPage(category, module)
@@ -121,7 +121,7 @@ function ns.RegisterSettings()
         elseif hasOptions(module, false) then
             if subpages then
                 local page = Settings.RegisterVerticalLayoutSubcategory(category, module.title or name)
-                addOptions(page, module, addToggle(page, module, "_Page"), false)
+                addOptions(page, module, nil, false)
             else
                 addOptions(category, module, parent, false)
             end
