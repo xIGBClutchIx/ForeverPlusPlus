@@ -1,5 +1,5 @@
 -- Friendly Player Nameplates: our label. While the bar is hidden, Blizzard's name (which sits above
--- the bar) fades out and our label takes its place, centered over where the bar was: the name in
+-- the bar) fades out and our label takes its place, centered on the plate at the bar's height: the name in
 -- class color with "<Guild>" under it, or the name alone at the bar's middle when there's no
 -- guild, with the level and icons beside it. While the bar is up, Blizzard's name is back and the
 -- guild (and icons) sit with it instead.
@@ -40,6 +40,9 @@ end
 local function createLabel(frame)
     local label = CreateFrame("Frame", nil, frame)
     label:SetAllPoints(frame)
+    -- Empty frames to center on: the bar's row, and the cast bar's (see placeRow).
+    label.row = CreateFrame("Frame", nil, label)
+    label.castRow = CreateFrame("Frame", nil, label)
     label.name = newText(label)
     label.guild = newText(label)
     -- A separate frame so it can fade in with the bar while the rest of the label fades out.
@@ -164,15 +167,28 @@ local function placeLevel(label, record, unit)
     return width
 end
 
+-- The row our label is centered on: the bar's height, but the whole plate's width. The bar sits
+-- left of the plate's middle (the level badge takes its right end), so centering on the bar put
+-- the name left of the player.
+local function placeRow(label, container)
+    local row = label.row
+    row:ClearAllPoints()
+    row:SetPoint("TOP", container, "TOP")
+    row:SetPoint("BOTTOM", container, "BOTTOM")
+    row:SetPoint("LEFT", label, "LEFT")
+    row:SetPoint("RIGHT", label, "RIGHT")
+    return row
+end
+
 local function placeGuild(label, record, unit, shift)
-    local container = record.container
+    local row = placeRow(label, record.container)
     local mode = module.db.guildNames
     local guild = mode ~= "off" and GetGuildInfo(unit)
     label.name:ClearAllPoints()
     label.guild:ClearAllPoints()
     label.barGuild:ClearAllPoints()
     if not (readable(guild) and guild and guild ~= "") then
-        label.name:SetPoint("CENTER", container, "CENTER", shift, 0)
+        label.name:SetPoint("CENTER", row, "CENTER", shift, 0)
         label.guild:Hide()
         label.barGuild:Hide()
         return
@@ -182,15 +198,23 @@ local function placeGuild(label, record, unit, shift)
         or GUILD_COLORS[scheme]
     label.guild:SetTextColor(color[1], color[2], color[3])
     label.barGuild:SetTextColor(color[1], color[2], color[3])
-    label.name:SetPoint("BOTTOM", container, "CENTER", shift, 1)
-    -- While they cast, Blizzard's cast bar sits under the bar, so the guild moves below it.
-    local castBar = Nameplates.IsCasting(unit) and record.castBar
-    if castBar then
-        label.guild:SetPoint("TOP", castBar, "BOTTOM", 0, -1)
-        label.barGuild:SetPoint("TOP", castBar, "BOTTOM", 0, -1)
+    label.name:SetPoint("BOTTOM", row, "CENTER", shift, 1)
+    -- While a cast bar is really showing (under the bar), the guild moves below it. Only then:
+    -- friendly plates can hide cast bars, and a stale cast left a gap under the name.
+    local castBar = record.castBar
+    if Nameplates.IsCasting(unit) and Nameplates.IsCastBarShown(castBar) then
+        -- Centered on the player like the row, at the cast bar's height.
+        local castRow = label.castRow
+        castRow:ClearAllPoints()
+        castRow:SetPoint("TOP", castBar, "TOP")
+        castRow:SetPoint("BOTTOM", castBar, "BOTTOM")
+        castRow:SetPoint("LEFT", label, "LEFT")
+        castRow:SetPoint("RIGHT", label, "RIGHT")
+        label.guild:SetPoint("TOP", castRow, "BOTTOM", 0, -1)
+        label.barGuild:SetPoint("TOP", castRow, "BOTTOM", 0, -1)
     else
-        label.guild:SetPoint("TOP", container, "CENTER", 0, 0)
-        label.barGuild:SetPoint("TOP", container, "BOTTOM", 0, -2)
+        label.guild:SetPoint("TOP", row, "CENTER", 0, 0)
+        label.barGuild:SetPoint("TOP", row, "BOTTOM", 0, -2)
     end
     label.guild:SetFormattedText("<%s>", guild)
     label.guild:Show()

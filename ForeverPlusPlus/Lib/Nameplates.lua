@@ -11,7 +11,8 @@
 -- Friendly plates in instances are forbidden to addons and never show up here.
 local _, ns = ...
 
-local pairs, next, C_NamePlate = pairs, next, C_NamePlate
+local pairs, next, type, C_NamePlate = pairs, next, type, C_NamePlate
+local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
 
 local Nameplates = {}
 ns.Nameplates = Nameplates
@@ -128,11 +129,45 @@ function Nameplates.ForEach(fn)
     end
 end
 
----Whether a cast or channel started on this unit since its plate appeared, and hasn't ended.
+---Whether the unit is casting or channeling. A start event is needed, and the cast API has to
+---agree, so a stop event that never came (an interrupt, a plate that went away) doesn't leave it
+---stuck on. The API's result is only tested for nil, which is safe even when it's secret.
 ---@param unit string
 ---@return boolean
 function Nameplates.IsCasting(unit)
-    return casting[unit] == true
+    if not casting[unit] then
+        return false
+    end
+    local cast = UnitCastingInfo and UnitCastingInfo(unit)
+    local channel = UnitChannelInfo and UnitChannelInfo(unit)
+    if type(cast) == "nil" and type(channel) == "nil" then
+        casting[unit] = nil
+        return false
+    end
+    return true
+end
+
+---Whether Blizzard is drawing a cast bar on this plate right now. Friendly plates can hide cast
+---bars, so casting alone doesn't mean one is there. `castBar` is Parts(frame).castBar, a container
+---whose children are the bars; a visibility we can't read counts as hidden.
+---@param castBar table?
+---@return boolean
+function Nameplates.IsCastBarShown(castBar)
+    if not castBar then
+        return false
+    end
+    local children = { castBar:GetChildren() }
+    if #children == 0 then
+        local shown = castBar:IsVisible()
+        return ns.IsReadable(shown) and shown or false
+    end
+    for i = 1, #children do
+        local shown = children[i]:IsVisible()
+        if ns.IsReadable(shown) and shown then
+            return true
+        end
+    end
+    return false
 end
 
 ---The parts of a nameplate's UnitFrame, under the names Forever uses (build 70009). Any may be
