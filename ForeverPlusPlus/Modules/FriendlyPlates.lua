@@ -3,13 +3,15 @@
 -- Blizzard's own nameplates: the bar and name fade, and a label of ours shows while it's hidden.
 local _, ns = ...
 
-local pairs, setmetatable = pairs, setmetatable
+local pairs, ipairs, setmetatable = pairs, ipairs, setmetatable
 local CreateFrame, hooksecurefunc = CreateFrame, hooksecurefunc
 local C_CVar, C_NamePlate, C_CurveUtil, C_ClassColor = C_CVar, C_NamePlate, C_CurveUtil, C_ClassColor
 local InCombatLockdown, UnitHealthPercent = InCombatLockdown, UnitHealthPercent
 local UnitIsPlayer, UnitIsFriend, UnitIsUnit = UnitIsPlayer, UnitIsFriend, UnitIsUnit
 local UnitAffectingCombat, UnitClass, GetGuildInfo = UnitAffectingCombat, UnitClass, GetGuildInfo
-local UnitLevel = UnitLevel
+local UnitLevel, UnitGUID, UnitInParty, UnitInRaid = UnitLevel, UnitGUID, UnitInParty, UnitInRaid
+local UnitIsInMyGuild, C_FriendList, C_BattleNet, C_Texture =
+    UnitIsInMyGuild, C_FriendList, C_BattleNet, C_Texture
 
 local module = ns.NewModule("FriendlyPlates",
     "Always show friendly players' names. Their health bar appears only when they're hurt or in combat.",
@@ -20,6 +22,8 @@ local module = ns.NewModule("FriendlyPlates",
         npcs = false,
         guildNames = "hidden", -- "hidden" (only without the bar), "always", or "off"
         level = "before", -- "before", "after", or "off"
+        guildHighlight = true,
+        socialIcons = true,
         saved = {}, -- CVar -> the player's own value, put back when the module turns off
     })
 module.title = "Friendly Player Nameplates"
@@ -54,6 +58,17 @@ module.options = {
         name = "Level",
         description = "Where the level shows while the health bar is hidden.",
         choices = { { "before", "Before Name" }, { "after", "After Name" }, { "off", "Hidden" } },
+    },
+    {
+        key = "guildHighlight",
+        name = "Highlight Guildmates",
+        description = "Show the <Guild> line of players in your own guild in guild chat green.",
+    },
+    {
+        key = "socialIcons",
+        name = "Group and Friend Icons",
+        description = "Show a small icon beside the names of your group members and friends "
+            .. "while the health bar is hidden.",
     },
 }
 
@@ -185,6 +200,23 @@ local GUILD_SCALE = 0.9 -- the guild line is a touch smaller than the name
 local GUILD_COLOR = { 0.9, 0.9, 0.9 }
 local LEVEL_GAP = 3 -- pixels between the name and the level
 local NPC_COLOR = { 0.1, 1, 0.1 } -- the green of friendly NPC names in the world
+local GUILDMATE_COLOR = { 0.25, 1, 0.25 } -- guild chat's green
+
+-- Icons beside the name for group members and friends, tried in order until one exists on this
+-- client. Retail atlases; not yet seen on Forever.
+local ICON_ATLASES = {
+    group = { "socialqueuing-icon-group" },
+    friend = { "groupfinder-icon-friend", "PetJournal-FavoritesIcon" },
+}
+local ICON_ORDER = { "group", "friend" }
+
+local function findAtlas(candidates)
+    for i = 1, #candidates do
+        if not (C_Texture and C_Texture.GetAtlasInfo) or C_Texture.GetAtlasInfo(candidates[i]) then
+            return candidates[i]
+        end
+    end
+end
 
 local function newText(parent)
     local text = parent:CreateFontString(nil, "OVERLAY")
@@ -209,6 +241,16 @@ local function createLabel(frame)
     label.level = CreateFrame("Frame", nil, label)
     label.level.text = label.level:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     label.level.text:SetPoint("CENTER")
+    label.icons = {}
+    for kind, candidates in pairs(ICON_ATLASES) do
+        local atlas = findAtlas(candidates)
+        if atlas then
+            local icon = label:CreateTexture(nil, "OVERLAY")
+            icon:SetAtlas(atlas)
+            icon:Hide()
+            label.icons[kind] = icon
+        end
+    end
     return label
 end
 
@@ -267,6 +309,7 @@ local function matchFont(label, name)
         return
     end
     label.name:SetFont(file, size, flags)
+    label.nameSize = size
     label.guild:SetFont(file, size * GUILD_SCALE, flags)
     label.barGuild:SetFont(file, size * GUILD_SCALE, flags)
 end
@@ -287,6 +330,25 @@ local function hookName(name)
     end
 end
 
+local function inGroup(unit)
+    local party, raid = UnitInParty(unit), UnitInRaid(unit)
+    return (readable(party) and party) or (readable(raid) and raid ~= nil) or false
+end
+
+-- On the friends list or Battle.net friends. Identity can be secret, so an unreadable GUID
+-- just means no icon.
+local function isFriend(unit)
+    local guid = UnitGUID(unit)
+    if not (readable(guid) and guid) then
+        return false
+    end
+    if C_FriendList and C_FriendList.IsFriend and C_FriendList.IsFriend(guid) then
+        return true
+    end
+    return C_BattleNet and C_BattleNet.GetAccountInfoByGUID
+        and C_BattleNet.GetAccountInfoByGUID(guid) ~= nil or false
+end
+
 local function layoutLabel(label, record, unit)
     local container = record.container
     matchFont(label, record.name)
@@ -300,11 +362,11 @@ local function layoutLabel(label, record, unit)
     else
         label.name:SetTextColor(NPC_COLOR[1], NPC_COLOR[2], NPC_COLOR[3])
     end
-    -- The level goes beside the name, and the name shifts by half of it the other way, so the
-    -- name and level together are centered over the bar. The guild line stays centered.
+    -- The level goes on one side of the name and the icons on the other. The name then shifts by
+    -- half the difference, so the whole row is centered over the bar. The guild stays centered.
     local badge = label.level
     local where = module.db.level
-    local shift = 0
+    local leftWidth, rightWidth = 0, 0
     if record.levelFrame and where ~= "off" then
         copyBadge(label, record.levelFrame)
         local level = UnitLevel(unit)
@@ -319,26 +381,59 @@ local function layoutLabel(label, record, unit)
             badge:SetWidth(textWidth)
         end
         local width = badge:GetWidth()
-        if readable(width) then
-            shift = (width + LEVEL_GAP) / 2
-        end
+        width = readable(width) and width + LEVEL_GAP or 0
         badge:ClearAllPoints()
         if where == "after" then
-            shift = -shift
+            rightWidth = width
             badge:SetPoint("LEFT", label.name, "RIGHT", LEVEL_GAP, 0)
         else
+            leftWidth = width
             badge:SetPoint("RIGHT", label.name, "LEFT", -LEVEL_GAP, 0)
         end
         badge:Show()
     else
         badge:Hide()
     end
+    -- Icons go on the side the level isn't on, one after another away from the name.
+    local iconsLeft = where == "after"
+    local size = label.nameSize or 12
+    local previous = label.name
+    local iconsWidth = 0
+    for _, kind in ipairs(ICON_ORDER) do
+        local icon = label.icons[kind]
+        if icon then
+            local show = record.isPlayer and module.db.socialIcons
+                and (kind == "group" and inGroup(unit) or kind == "friend" and isFriend(unit))
+            icon:ClearAllPoints()
+            if show then
+                icon:SetSize(size, size)
+                if iconsLeft then
+                    icon:SetPoint("RIGHT", previous, "LEFT", -LEVEL_GAP, 0)
+                else
+                    icon:SetPoint("LEFT", previous, "RIGHT", LEVEL_GAP, 0)
+                end
+                previous = icon
+                iconsWidth = iconsWidth + size + LEVEL_GAP
+            end
+            icon:SetShown(show)
+        end
+    end
+    if iconsLeft then
+        leftWidth = leftWidth + iconsWidth
+    else
+        rightWidth = rightWidth + iconsWidth
+    end
+    local shift = (leftWidth - rightWidth) / 2
     local guildNames = module.db.guildNames
     local guild = guildNames ~= "off" and GetGuildInfo(unit)
     label.name:ClearAllPoints()
     label.guild:ClearAllPoints()
     label.barGuild:ClearAllPoints()
     if readable(guild) and guild and guild ~= "" then
+        local mate = module.db.guildHighlight and UnitIsInMyGuild and UnitIsInMyGuild(unit)
+        local color = (readable(mate) and mate) and GUILDMATE_COLOR or GUILD_COLOR
+        label.guild:SetTextColor(color[1], color[2], color[3])
+        label.barGuild:SetTextColor(color[1], color[2], color[3])
         label.name:SetPoint("BOTTOM", container, "CENTER", shift, 1)
         label.guild:SetPoint("TOP", container, "CENTER", 0, 0)
         label.guild:SetFormattedText("<%s>", guild)
@@ -520,14 +615,25 @@ function module.OnPlayerCombat()
     end
 end
 
+-- Group or friends changed: the icons may need to come or go.
+function module.OnSocialChange()
+    for unit in pairs(plates) do
+        refreshLabel(unit)
+    end
+end
+
 local EVENTS = { "NAME_PLATE_UNIT_ADDED", "NAME_PLATE_UNIT_REMOVED", "UNIT_HEALTH", "UNIT_MAXHEALTH",
     "UNIT_FLAGS", "UNIT_NAME_UPDATE", "UNIT_LEVEL" }
+local SOCIAL_EVENTS = { "GROUP_ROSTER_UPDATE", "FRIENDLIST_UPDATE" }
 
 function module:OnEnable()
     buildCurves()
     applyCVars()
     for _, event in pairs(EVENTS) do
         ns.On(event, self.OnPlateEvent)
+    end
+    for _, event in pairs(SOCIAL_EVENTS) do
+        ns.On(event, self.OnSocialChange)
     end
     -- UNIT_FLAGS covers other players' combat; these cover the fallback to our own.
     ns.On("PLAYER_REGEN_DISABLED", self.OnPlayerCombat)
@@ -538,6 +644,9 @@ end
 function module:OnDisable()
     for _, event in pairs(EVENTS) do
         ns.Off(event, self.OnPlateEvent)
+    end
+    for _, event in pairs(SOCIAL_EVENTS) do
+        ns.Off(event, self.OnSocialChange)
     end
     ns.Off("PLAYER_REGEN_DISABLED", self.OnPlayerCombat)
     ns.Off("PLAYER_REGEN_ENABLED", self.OnPlayerCombat)

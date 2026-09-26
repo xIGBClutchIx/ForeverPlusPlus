@@ -26,6 +26,13 @@
     "C_ClassColor",
     "UnitClass",
     "GetGuildInfo",
-    "UnitLevel"
+    "UnitLevel",
+    "UnitGUID",
+    "UnitInParty",
+    "UnitInRaid",
+    "UnitIsInMyGuild",
+    "C_FriendList",
+    "C_BattleNet",
+    "C_Texture"
   ]
 }
