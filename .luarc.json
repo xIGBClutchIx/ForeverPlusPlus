@@ -32,7 +32,6 @@
     "UnitInRaid",
     "UnitIsInMyGuild",
     "C_FriendList",
-    "C_BattleNet",
-    "C_Texture"
+    "C_BattleNet"
   ]
 }

@@ -10,8 +10,7 @@ local InCombatLockdown, UnitHealthPercent = InCombatLockdown, UnitHealthPercent
 local UnitIsPlayer, UnitIsFriend, UnitIsUnit = UnitIsPlayer, UnitIsFriend, UnitIsUnit
 local UnitAffectingCombat, UnitClass, GetGuildInfo = UnitAffectingCombat, UnitClass, GetGuildInfo
 local UnitLevel, UnitGUID, UnitInParty, UnitInRaid = UnitLevel, UnitGUID, UnitInParty, UnitInRaid
-local UnitIsInMyGuild, C_FriendList, C_BattleNet, C_Texture =
-    UnitIsInMyGuild, C_FriendList, C_BattleNet, C_Texture
+local UnitIsInMyGuild, C_FriendList, C_BattleNet = UnitIsInMyGuild, C_FriendList, C_BattleNet
 
 local module = ns.NewModule("FriendlyPlates",
     "Always show friendly players' names. Their health bar appears only when they're hurt or in combat.",
@@ -24,6 +23,7 @@ local module = ns.NewModule("FriendlyPlates",
         level = "before", -- "before", "after", or "off"
         guildHighlight = true,
         socialIcons = true,
+        iconStyle = "round", -- "round", "battlenet", or "markers"
         testIcons = "off", -- debug: "off", "group", or "friend" on every friendly player
         saved = {}, -- CVar -> the player's own value, put back when the module turns off
     })
@@ -70,6 +70,16 @@ module.options = {
         name = "Group and Friend Icons",
         description = "Show a small icon beside the names of your group members and friends "
             .. "while the health bar is hidden.",
+    },
+    {
+        key = "iconStyle",
+        name = "Icon Style",
+        description = "Which art the group and friend icons use.",
+        choices = {
+            { "round", "Round Icons" },
+            { "battlenet", "Battle.net Logo for Friends" },
+            { "markers", "Raid Markers" },
+        },
     },
     {
         key = "testIcons",
@@ -211,18 +221,45 @@ local LEVEL_GAP = 3 -- pixels between the name and the level
 local NPC_COLOR = { 0.1, 1, 0.1 } -- the green of friendly NPC names in the world
 local GUILDMATE_COLOR = { 0.25, 1, 0.25 } -- guild chat's green
 
--- Icons beside the name for group members and friends, tried in order until one exists on this
--- client. Retail atlases; not yet seen on Forever.
-local ICON_ATLASES = {
-    group = { "socialqueuing-icon-group" },
-    friend = { "groupfinder-icon-friend", "PetJournal-FavoritesIcon" },
+-- Icons beside the name for group members and friends, one set per Icon Style. Each is a texture
+-- file and whether to crop it round (spell-style icons, like a minimap button).
+local ICON_STYLES = {
+    round = {
+        group = { "Interface\\Icons\\INV_Misc_GroupNeedMore", true },
+        friend = { "Interface\\Icons\\Achievement_Reputation_01", true },
+    },
+    battlenet = {
+        group = { "Interface\\Icons\\INV_Misc_GroupNeedMore", true },
+        friend = { "Interface\\FriendsFrame\\Battlenet-Battleneticon", false },
+    },
+    markers = {
+        group = { "Interface\\TargetingFrame\\UI-RaidTargetingIcon_6", false }, -- blue square
+        friend = { "Interface\\TargetingFrame\\UI-RaidTargetingIcon_1", false }, -- yellow star
+    },
 }
 local ICON_ORDER = { "group", "friend" }
+local ICON_SCALE = 1.4 -- icon size against the name's font size
+local ROUND_MASK = "Interface\\CharacterFrame\\TempPortraitAlphaMask"
 
-local function findAtlas(candidates)
-    for i = 1, #candidates do
-        if not (C_Texture and C_Texture.GetAtlasInfo) or C_Texture.GetAtlasInfo(candidates[i]) then
-            return candidates[i]
+-- Sets an icon's art for the chosen style; only does the work when the style changed.
+local function styleIcon(icon, style)
+    local art = (ICON_STYLES[style] or ICON_STYLES.round)[icon.kind]
+    if icon.style == style then
+        return
+    end
+    icon.style = style
+    icon:SetTexture(art[1])
+    if art[2] then
+        icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+        if not icon.masked then
+            icon:AddMaskTexture(icon.mask)
+            icon.masked = true
+        end
+    else
+        icon:SetTexCoord(0, 1, 0, 1)
+        if icon.masked then
+            icon:RemoveMaskTexture(icon.mask)
+            icon.masked = false
         end
     end
 end
@@ -251,14 +288,14 @@ local function createLabel(frame)
     label.level.text = label.level:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     label.level.text:SetPoint("CENTER")
     label.icons = {}
-    for kind, candidates in pairs(ICON_ATLASES) do
-        local atlas = findAtlas(candidates)
-        if atlas then
-            local icon = label:CreateTexture(nil, "OVERLAY")
-            icon:SetAtlas(atlas)
-            icon:Hide()
-            label.icons[kind] = icon
-        end
+    for _, kind in ipairs(ICON_ORDER) do
+        local icon = label:CreateTexture(nil, "OVERLAY")
+        icon.kind = kind
+        icon.mask = label:CreateMaskTexture()
+        icon.mask:SetTexture(ROUND_MASK, "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+        icon.mask:SetAllPoints(icon)
+        icon:Hide()
+        label.icons[kind] = icon
     end
     return label
 end
@@ -405,7 +442,7 @@ local function layoutLabel(label, record, unit)
     end
     -- Icons go on the side the level isn't on, one after another away from the name.
     local iconsLeft = where == "after"
-    local size = label.nameSize or 12
+    local size = (label.nameSize or 12) * ICON_SCALE
     local previous = label.name
     local iconsWidth = 0
     for _, kind in ipairs(ICON_ORDER) do
@@ -416,6 +453,7 @@ local function layoutLabel(label, record, unit)
                     or kind == "group" and inGroup(unit) or kind == "friend" and isFriend(unit))
             icon:ClearAllPoints()
             if show then
+                styleIcon(icon, module.db.iconStyle)
                 icon:SetSize(size, size)
                 if iconsLeft then
                     icon:SetPoint("RIGHT", previous, "LEFT", -LEVEL_GAP, 0)
