@@ -9,6 +9,7 @@ local C_CVar, C_NamePlate, C_CurveUtil, C_ClassColor = C_CVar, C_NamePlate, C_Cu
 local InCombatLockdown, UnitHealthPercent = InCombatLockdown, UnitHealthPercent
 local UnitIsPlayer, UnitIsFriend, UnitIsUnit = UnitIsPlayer, UnitIsFriend, UnitIsUnit
 local UnitAffectingCombat, UnitClass, GetGuildInfo = UnitAffectingCombat, UnitClass, GetGuildInfo
+local UnitLevel = UnitLevel
 
 local module = ns.NewModule("FriendlyPlates",
     "Friendly players always show their name and guild; the health bar shows only when hurt or in combat.",
@@ -161,7 +162,48 @@ local function createLabel(frame)
     label.barGuildFrame:SetAllPoints(frame)
     label.barGuild = newText(label.barGuildFrame)
     label.barGuild:SetTextColor(GUILD_COLOR[1], GUILD_COLOR[2], GUILD_COLOR[3])
+    -- Our copy of the level badge, which sits after the name instead of at the bar's end.
+    label.level = CreateFrame("Frame", nil, label)
+    label.level.text = label.level:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    label.level.text:SetPoint("CENTER")
     return label
+end
+
+-- Copies the look of Forever's level badge (UnitFrame.LevelFrame): its atlas art and its
+-- number's font. The art is copied once per label, since the badge is the same on every plate;
+-- the size is retried until Blizzard has laid its badge out.
+local function copyBadge(label, levelFrame)
+    local badge = label.level
+    local width, height = levelFrame:GetSize()
+    if readable(width) and readable(height) and width and width > 0 then
+        badge:SetSize(width, height)
+    elseif not badge.sized then
+        badge:SetSize(24, 14)
+    end
+    badge.sized = true
+    if badge.copied then
+        return
+    end
+    badge.copied = true
+    local sources = { levelFrame }
+    for _, child in pairs({ levelFrame:GetChildren() }) do
+        sources[#sources + 1] = child
+    end
+    for _, source in pairs(sources) do
+        for _, region in pairs({ source:GetRegions() }) do
+            local kind = region:GetObjectType()
+            if kind == "Texture" and region:GetAtlas() then
+                local texture = badge:CreateTexture(nil, region:GetDrawLayer())
+                texture:SetAtlas(region:GetAtlas())
+                texture:SetAllPoints(badge)
+            elseif kind == "FontString" then
+                local file, size, flags = region:GetFont()
+                if file and size then
+                    badge.text:SetFont(file, size, flags)
+                end
+            end
+        end
+    end
 end
 
 local function getLabel(frame)
@@ -228,10 +270,28 @@ local function layoutLabel(label, record, unit)
         label.guild:Hide()
         label.barGuild:Hide()
     end
+    local badge = label.level
+    if record.levelFrame then
+        copyBadge(label, record.levelFrame)
+        badge:ClearAllPoints()
+        badge:SetPoint("LEFT", label.name, "RIGHT", 3, 0)
+        local level = UnitLevel(unit)
+        if readable(level) and level <= 0 then
+            badge.text:SetText("??")
+        else
+            badge.text:SetText(level)
+        end
+        badge:Show()
+    else
+        badge:Hide()
+    end
 end
 
 local function release(record)
     record.container:SetAlpha(1)
+    if record.levelFrame then
+        record.levelFrame:SetAlpha(1)
+    end
     if record.name then
         record.name:SetAlpha(1)
         mirrored[record.name] = nil
@@ -261,9 +321,12 @@ local function update(unit)
     if not readable(inCombat) then
         inCombat = UnitAffectingCombat("player")
     end
-    local label = record.label
+    local label, levelFrame = record.label, record.levelFrame
     if inCombat or not curve then
         record.container:SetAlpha(1)
+        if label and levelFrame then
+            levelFrame:SetAlpha(1)
+        end
         if label then
             record.name:SetAlpha(1)
             label:SetAlpha(0)
@@ -273,6 +336,9 @@ local function update(unit)
         -- The percent can be secret in combat, so the client maps it to an alpha, not Lua.
         local shown = UnitHealthPercent(unit, true, curve)
         record.container:SetAlpha(shown)
+        if label and levelFrame then
+            levelFrame:SetAlpha(shown)
+        end
         if label then
             record.name:SetAlpha(shown)
             label.barGuildFrame:SetAlpha(shown)
@@ -316,6 +382,7 @@ local function add(unit)
     local name = frame.name or frame.Name
     if name and name.SetText then
         record.name = name
+        record.levelFrame = frame.LevelFrame -- Forever-only, as of build 70009
         record.label = getLabel(frame)
         record.label:Show()
         record.label.barGuildFrame:Show()
@@ -342,7 +409,7 @@ function module.OnPlateEvent(event, unit)
     elseif event == "NAME_PLATE_UNIT_REMOVED" then
         remove(unit)
     elseif plates[unit] then
-        if event == "UNIT_NAME_UPDATE" then
+        if event == "UNIT_NAME_UPDATE" or event == "UNIT_LEVEL" then
             refreshLabel(unit)
         end
         update(unit)
@@ -356,7 +423,7 @@ function module.OnPlayerCombat()
 end
 
 local EVENTS = { "NAME_PLATE_UNIT_ADDED", "NAME_PLATE_UNIT_REMOVED", "UNIT_HEALTH", "UNIT_MAXHEALTH",
-    "UNIT_FLAGS", "UNIT_NAME_UPDATE" }
+    "UNIT_FLAGS", "UNIT_NAME_UPDATE", "UNIT_LEVEL" }
 
 function module:OnEnable()
     buildCurves()

@@ -25,6 +25,7 @@
     "UnitAffectingCombat",
     "C_ClassColor",
     "UnitClass",
-    "GetGuildInfo"
+    "GetGuildInfo",
+    "UnitLevel"
   ]
 }
