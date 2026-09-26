@@ -8,5 +8,6 @@
 
 Core.lua
 Modules\Example.lua
+Modules\FriendlyPlates.lua
 Settings.lua
 Init.lua

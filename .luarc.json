@@ -12,6 +12,16 @@
     "hooksecurefunc",
     "InCombatLockdown",
     "Settings",
-    "CreateSettingsListSectionHeaderInitializer"
+    "CreateSettingsListSectionHeaderInitializer",
+    "C_CVar",
+    "C_NamePlate",
+    "C_CurveUtil",
+    "Enum",
+    "issecretvalue",
+    "UnitHealthPercent",
+    "UnitIsPlayer",
+    "UnitIsFriend",
+    "UnitIsUnit",
+    "UnitAffectingCombat"
   ]
 }

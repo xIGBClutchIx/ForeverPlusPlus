@@ -144,6 +144,13 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 - Auction house is the modern (Retail) one, but copper prices are allowed and durations are 2, 8, and 24 hours. **[addon]** (Auctionator `Source_Forever`, `IsForever` branches)
 - The Professions window exists but has no crafting orders page. **[addon]** (Auctionator `Professions.lua`)
 
+## Nameplates
+
+- Nameplates are Mainline's: `C_NamePlate.GetNamePlateForUnit` / `GetNamePlates`, `NAME_PLATE_UNIT_ADDED` / `REMOVED`, and `plate.UnitFrame` with `HealthBarsContainer` (holding `healthBar`) and `name`. **[addon]** (ForeverNameplateFont `Core.lua`, MyQuestPlates `Compat.lua`)
+- Friendly player plates use CVar `nameplateShowFriendlyPlayers` (older name `nameplateShowFriends`), and Blizzard's names-only mode is `nameplateShowOnlyNameForFriendlyPlayerUnits` (older `nameplateShowOnlyNames`). ForeverNameplateFont tries the new name first and falls back. **[addon]** Which names this client has is **Unverified**; the FriendlyPlates module probes with `C_CVar.GetCVar`.
+- Nameplate CVars can't be set in combat on Retail; Forever++ assumes the same and waits for `PLAYER_REGEN_ENABLED`. **Unverified** on Forever.
+- `C_CurveUtil.CreateCurve()` with `AddPoint` / `SetType(Enum.LuaCurveType.Step)`, evaluated by `UnitHealthPercent(unit, true, curve)`, turns a possibly secret health fraction into an alpha for `SetAlpha`. That's the Midnight pattern (ClutchUI uses `UnitHealthPercent` with `CurveConstants.ScaleTo100`) **[addon]**; the step curve and `SetAlpha` taking its result are **Unverified** on Forever.
+
 ## Fonts
 
 - Text measured before its font file has loaded reads as 0 tall on Forever, even after preloading. Measure with a floor of the font size. **[in-game]** (ClutchUI `Style.TextHeight`, `docs/fonts.md`)
