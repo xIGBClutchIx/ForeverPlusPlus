@@ -19,18 +19,31 @@ local settings = {} -- module name -> its Blizzard setting objects, to refresh a
 local mainCategory -- the Forever++ page, for /fpp
 local pages = {} -- module name -> its own page, for ns.OpenSettings(name)
 
--- A page the module draws itself (`module:BuildPage(frame)`), such as a list. Settings needs the
--- frame now, so it starts empty; the module fills it the first time it's shown.
-local function addCanvasPage(category, module)
+-- A page drawn by `build(frame)` instead of from settings, such as a list. Settings needs the
+-- frame now, so it starts empty and is filled the first time it's shown.
+local function addCanvasPage(category, name, build)
     local frame = CreateFrame("Frame")
     local built = false
     frame:SetScript("OnShow", function(self)
         if not built then
             built = true
-            module:BuildPage(self)
+            build(self)
         end
     end)
-    return Settings.RegisterCanvasLayoutSubcategory(category, frame, module.title or module.name)
+    return Settings.RegisterCanvasLayoutSubcategory(category, frame, name)
+end
+
+---Puts a page's title and the divider under it at the top of a drawn page, like Blizzard's own
+---Settings pages.
+---@param frame table the page
+---@param text string
+function ns.AddPageTitle(frame, text)
+    local title = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightHuge")
+    title:SetPoint("TOPLEFT", 7, -22)
+    title:SetText(text)
+    local divider = frame:CreateTexture(nil, "ARTWORK")
+    divider:SetAtlas("Options_HorizontalDivider", true)
+    divider:SetPoint("TOP", 0, -50)
 end
 
 local function track(module, setting)
@@ -129,13 +142,19 @@ local function metadata(field)
     return get and get(ns.name, field) or ""
 end
 
+-- A gold label at the left of a row, for a value beside it.
+local function addLabel(frame, y, text)
+    local label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    label:SetPoint("TOPLEFT", 16, y)
+    label:SetWidth(110)
+    label:SetJustifyH("LEFT")
+    label:SetText(text)
+    return label
+end
+
 -- A gold label with a value beside it, the way Blizzard's own info pages look.
 local function addRow(frame, y, label, value)
-    local left = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    left:SetPoint("TOPLEFT", 16, y)
-    left:SetWidth(110)
-    left:SetJustifyH("LEFT")
-    left:SetText(label)
+    local left = addLabel(frame, y, label)
     local right = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     right:SetPoint("LEFT", left, "RIGHT", 8, 0)
     right:SetText(value)
@@ -144,11 +163,7 @@ end
 
 -- A link can't be clicked in the game, so it sits in a read-only box, selected on click, to copy.
 local function addLink(frame, y, label, url)
-    local left = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    left:SetPoint("TOPLEFT", 16, y)
-    left:SetWidth(110)
-    left:SetJustifyH("LEFT")
-    left:SetText(label)
+    local left = addLabel(frame, y, label)
     local box = CreateFrame("EditBox", nil, frame, "InputBoxTemplate")
     box:SetSize(360, 20)
     box:SetPoint("LEFT", left, "RIGHT", 14, 0)
@@ -180,12 +195,7 @@ local function addHeading(frame, y, text)
 end
 
 local function buildAbout(frame)
-    local title = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightHuge")
-    title:SetPoint("TOPLEFT", 7, -22)
-    title:SetText(ns.title)
-    local divider = frame:CreateTexture(nil, "ARTWORK")
-    divider:SetAtlas("Options_HorizontalDivider", true)
-    divider:SetPoint("TOP", 0, -50)
+    ns.AddPageTitle(frame, ns.title)
 
     local tagline = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     tagline:SetPoint("TOPLEFT", 16, -64)
@@ -231,24 +241,12 @@ local function buildAbout(frame)
     local function refresh()
         for name, text in pairs(states) do
             local module = ns.modules[name]
-            text:SetText(format("%s  %s", module.title or module.name, module.db.enabled
-                and format("|cff44dd44%s|r", L.ON) or format("|cffdd4444%s|r", L.OFF)))
+            text:SetText(format("%s  %s", module.title or module.name,
+                ns.StateText(module.db.enabled)))
         end
     end
     refresh()
     frame:HookScript("OnShow", refresh)
-end
-
-local function addAboutPage(category)
-    local frame = CreateFrame("Frame")
-    local built = false
-    frame:SetScript("OnShow", function(self)
-        if not built then
-            built = true
-            buildAbout(self)
-        end
-    end)
-    Settings.RegisterCanvasLayoutSubcategory(category, frame, L.ABOUT)
 end
 
 ---Adds the Forever++ pages to Settings > AddOns (called once, after ns.Start).
@@ -280,7 +278,9 @@ function ns.RegisterSettings()
         for _, name in ipairs(ns.order) do
             local module = ns.modules[name]
             if module.BuildPage then
-                pages[name] = addCanvasPage(category, module)
+                pages[name] = addCanvasPage(category, module.title or name, function(frame)
+                    module:BuildPage(frame)
+                end)
             end
         end
     end
@@ -297,7 +297,7 @@ function ns.RegisterSettings()
         end
     end
     if subpages and Settings.RegisterCanvasLayoutSubcategory then
-        addAboutPage(category)
+        addCanvasPage(category, L.ABOUT, buildAbout)
     end
     Settings.RegisterAddOnCategory(category)
     mainCategory = category

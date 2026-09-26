@@ -281,24 +281,20 @@ end
 -- Tooltips -----------------------------------------------------------------------------------
 
 local function addAuctionPrice(tooltip, data)
-    if not module.enabled or not ns.IsReadable(data.id) or not data.id then
-        return
+    local itemID = module.enabled and ItemTooltip.ItemID(data)
+    local price = itemID and house().prices[itemID]
+    if price then
+        ItemTooltip.AddPrice(tooltip, data, L.AUCTIONPRICES_LINE, price, module.db)
     end
-    local price = house().prices[data.id]
-    if not price then
-        return
-    end
-    local count = ItemTooltip.PriceCount(data, module.db.mode)
-    ItemTooltip.AddPrice(tooltip, L.AUCTIONPRICES_LINE, price * count, count, module.db)
 end
 
 local hooked = false
 
 function module:OnEnable()
-    ns.On("AUCTION_HOUSE_SHOW", onShow)
-    ns.On("AUCTION_HOUSE_CLOSED", onClosed)
-    ns.On("AUCTION_HOUSE_BROWSE_RESULTS_UPDATED", onResultsUpdated)
-    ns.On("AUCTION_HOUSE_BROWSE_RESULTS_ADDED", onResultsAdded)
+    self:On("AUCTION_HOUSE_SHOW", onShow)
+    self:On("AUCTION_HOUSE_CLOSED", onClosed)
+    self:On("AUCTION_HOUSE_BROWSE_RESULTS_UPDATED", onResultsUpdated)
+    self:On("AUCTION_HOUSE_BROWSE_RESULTS_ADDED", onResultsAdded)
     -- The hook can't be removed; addAuctionPrice checks module.enabled instead.
     if not hooked then
         hooked = true
@@ -307,10 +303,6 @@ function module:OnEnable()
 end
 
 function module:OnDisable()
-    ns.Off("AUCTION_HOUSE_SHOW", onShow)
-    ns.Off("AUCTION_HOUSE_CLOSED", onClosed)
-    ns.Off("AUCTION_HOUSE_BROWSE_RESULTS_UPDATED", onResultsUpdated)
-    ns.Off("AUCTION_HOUSE_BROWSE_RESULTS_ADDED", onResultsAdded)
     ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
     stopScan()
     hideIndicator()

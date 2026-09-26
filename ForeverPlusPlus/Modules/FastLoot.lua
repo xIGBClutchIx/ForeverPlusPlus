@@ -32,9 +32,9 @@ local function onLootReady()
 end
 
 function module:OnEnable()
-    ns.On("LOOT_READY", onLootReady)
+    self:On("LOOT_READY", onLootReady)
 end
 
+-- Turning off stops LOOT_READY by itself (module:On).
 function module:OnDisable()
-    ns.Off("LOOT_READY", onLootReady)
 end

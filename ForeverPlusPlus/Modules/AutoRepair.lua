@@ -6,10 +6,10 @@ local _, ns = ...
 local format = string.format
 local CanMerchantRepair, GetRepairAllCost, RepairAllItems = CanMerchantRepair, GetRepairAllCost, RepairAllItems
 local IsInGuild, CanGuildBankRepair, GetGuildBankWithdrawMoney = IsInGuild, CanGuildBankRepair, GetGuildBankWithdrawMoney
-local GetMoney, IsShiftKeyDown, C_Timer, C_CurrencyInfo = GetMoney, IsShiftKeyDown, C_Timer, C_CurrencyInfo
-local GetMoneyString = GetMoneyString
+local GetMoney, IsShiftKeyDown, C_Timer = GetMoney, IsShiftKeyDown, C_Timer
 
 local L = ns.L
+local money = ns.Money
 
 local module = ns.NewModule("AutoRepair", L.AUTOREPAIR_DESC, {
     enabled = true,
@@ -29,14 +29,6 @@ module.options = {
         },
     },
 }
-
-local function money(amount)
-    -- Probe: GetMoneyString is Mainline FrameXML; the coin text is the fallback.
-    if GetMoneyString then
-        return GetMoneyString(amount, true)
-    end
-    return C_CurrencyInfo.GetCoinTextureString(amount)
-end
 
 -- The server says whether a guild bank repair worked only afterwards: durability updates when it
 -- did, and an error shows when it didn't (not enough in the bank, or over the daily limit).
@@ -116,10 +108,9 @@ local function onMerchantShow()
 end
 
 function module:OnEnable()
-    ns.On("MERCHANT_SHOW", onMerchantShow)
+    self:On("MERCHANT_SHOW", onMerchantShow)
 end
 
 function module:OnDisable()
-    ns.Off("MERCHANT_SHOW", onMerchantShow)
     stopWaiting()
 end

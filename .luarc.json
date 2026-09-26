@@ -10,6 +10,7 @@
     "strsplit",
     "strtrim",
     "hooksecurefunc",
+    "securecallfunction",
     "InCombatLockdown",
     "GetLocale",
     "Settings",

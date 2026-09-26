@@ -7,11 +7,12 @@ local _, ns = ...
 local ipairs, setmetatable, format = ipairs, setmetatable, string.format
 local floor, max, UIParent = math.floor, math.max, UIParent
 local TooltipDataProcessor, Enum, C_Item, GameTooltip = TooltipDataProcessor, Enum, C_Item, GameTooltip
-local IsShiftKeyDown, GetMoneyString, C_CurrencyInfo = IsShiftKeyDown, GetMoneyString, C_CurrencyInfo
+local IsShiftKeyDown = IsShiftKeyDown
 local HIGHLIGHT_FONT_COLOR, GRAY_FONT_COLOR = HIGHLIGHT_FONT_COLOR, GRAY_FONT_COLOR
 local NORMAL_FONT_COLOR = NORMAL_FONT_COLOR
 
 local L = ns.L
+local money = ns.Money
 
 local ItemTooltip = {}
 ns.ItemTooltip = ItemTooltip
@@ -71,10 +72,12 @@ local function onItem(tooltip, data)
     widest[tooltip] = nil
 end
 
--- Redraws the item tooltip when Shift goes up or down, so lines that depend on it change.
+-- Redraws the item tooltip when Shift goes up or down, so lines that depend on it change. Other
+-- tooltips (units, spells) are left alone.
 local function onModifier(_, key)
     local shift = key == "LSHIFT" or key == "RSHIFT"
-    if shift and GameTooltip:IsShown() and GameTooltip.RefreshData then
+    if shift and GameTooltip:IsShown() and GameTooltip.RefreshData
+        and (not GameTooltip.GetPrimaryTooltipData or itemData(GameTooltip)) then
         GameTooltip:RefreshData()
     end
 end
@@ -129,22 +132,21 @@ function ItemTooltip.StackCount(data)
     return 1
 end
 
----How many items a price line counts: the whole stack, or one while Shift is held. `mode`
----"one" turns that round (one, and the stack with Shift).
+---The item's ID, or nil when it has none or it's secret.
 ---@param data table tooltip data
----@param mode string "stack" or "one"
----@return number
-function ItemTooltip.PriceCount(data, mode)
-    local stack = (mode == "one") == IsShiftKeyDown()
-    return stack and ItemTooltip.StackCount(data) or 1
+---@return number?
+function ItemTooltip.ItemID(data)
+    local id = data.id
+    if ns.IsReadable(id) then
+        return id
+    end
 end
 
-local function money(amount)
-    -- Probe: GetMoneyString is Mainline FrameXML; the coin text is the fallback.
-    if GetMoneyString then
-        return GetMoneyString(amount, true)
-    end
-    return C_CurrencyInfo.GetCoinTextureString(amount)
+-- How many items a price line counts: the whole stack, or one while Shift is held. `mode` "one"
+-- turns that round (one, and the stack with Shift).
+local function priceCount(data, mode)
+    local stack = (mode == "one") == IsShiftKeyDown()
+    return stack and ItemTooltip.StackCount(data) or 1
 end
 
 -- Alignment ----------------------------------------------------------------------------------
@@ -179,14 +181,16 @@ local function padding(tooltip, name)
 end
 
 ---Adds a price line: the name and an "x20", then the coins ("Sell Price x20: <coins>"). `db` is
----the module's settings from `PriceDefaults`: `align` places the coins and `color` colors the
----quantity.
+---the module's settings from `PriceDefaults`: `mode` picks how many items it counts, `align`
+---places the coins and `color` colors the quantity.
 ---@param tooltip table
+---@param data table tooltip data, for the stack's size
 ---@param name string such as "Sell Price"
----@param amount number copper, for all `count` items
----@param count number how many items the price is for
+---@param unitPrice number copper for one item
 ---@param db table
-function ItemTooltip.AddPrice(tooltip, name, amount, count, db)
+function ItemTooltip.AddPrice(tooltip, data, name, unitPrice, db)
+    local count = priceCount(data, db.mode)
+    local amount = unitPrice * count
     local color = COLORS[db.color] or GRAY_FONT_COLOR
     local quantity = color:WrapTextInColorCode(format(L.PRICE_QUANTITY, count))
     -- The padding goes before the quantity, so the "x20"s line up.

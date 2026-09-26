@@ -7,7 +7,7 @@ local _, ns = ...
 local ipairs, type, sort, format, tostring = ipairs, type, table.sort, string.format, tostring
 local strlower, strfind, strtrim, tinsert = string.lower, string.find, strtrim, table.insert
 local CreateFrame, InCombatLockdown = CreateFrame, InCombatLockdown
-local C_CVar = C_CVar
+local C_CVar, C_Timer = C_CVar, C_Timer
 -- The console's command list. Forever (build 70009) has the global, like Retail; C_Console is a
 -- guess at a later rename.
 local getAllCommands = ConsoleGetAllCommands or (C_Console and C_Console.GetAllCommands)
@@ -227,8 +227,20 @@ end
 
 -- Page -----------------------------------------------------------------------------------------
 
-local function onCVarUpdate()
+-- CVAR_UPDATE comes in bursts (the game's Settings can change dozens at once), and each refresh
+-- goes through every CVar, so a burst refreshes once, on the next frame.
+local refreshQueued = false
+
+local function queuedRefresh()
+    refreshQueued = false
     refresh()
+end
+
+local function onCVarUpdate()
+    if not refreshQueued then
+        refreshQueued = true
+        C_Timer.After(0, queuedRefresh)
+    end
 end
 
 -- Follows changes made anywhere (the game's own settings, other addons) while the page is open.
@@ -259,13 +271,7 @@ function module:BuildPage(frame)
     loadAll()
     ui = {}
 
-    local title = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightHuge")
-    title:SetPoint("TOPLEFT", 7, -22)
-    title:SetText(module.title)
-
-    local divider = frame:CreateTexture(nil, "ARTWORK")
-    divider:SetAtlas("Options_HorizontalDivider", true)
-    divider:SetPoint("TOP", 0, -50)
+    ns.AddPageTitle(frame, module.title)
 
     ui.off = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     ui.off:SetPoint("TOPLEFT", 12, -70)

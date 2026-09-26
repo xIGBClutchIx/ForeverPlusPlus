@@ -22,15 +22,14 @@ local function unitPrice(data, lineData)
 end
 
 local function drawSellPrice(tooltip, data, lineData)
-    if not module.enabled or not ns.IsReadable(data.id) or not data.id then
+    if not module.enabled or not ItemTooltip.ItemID(data) then
         return false
     end
     local price = unitPrice(data, lineData)
     if not price or price <= 0 then
         return false
     end
-    local count = ItemTooltip.PriceCount(data, module.db.mode)
-    ItemTooltip.AddPrice(tooltip, SELL_PRICE, price * count, count, module.db)
+    ItemTooltip.AddPrice(tooltip, data, SELL_PRICE, price, module.db)
     return true
 end
 

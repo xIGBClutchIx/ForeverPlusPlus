@@ -3,8 +3,14 @@
 local addonName, ns = ...
 
 local pairs, ipairs, type, print, format, tostring = pairs, ipairs, type, print, string.format, tostring
-local concat, strsplit, strtrim = table.concat, strsplit, strtrim
+local concat, strsplit, strtrim, setmetatable = table.concat, strsplit, strtrim, setmetatable
 local InCombatLockdown, GetLocale = InCombatLockdown, GetLocale
+
+-- Calls a function so that an error in it is reported but doesn't stop the caller, so one broken
+-- handler can't stop the others. Probe: securecallfunction is Mainline's; without it, call plainly.
+local call = securecallfunction or function(fn, ...)
+    return fn(...)
+end
 
 ns.name = addonName
 ns.title = "Forever++"
@@ -15,6 +21,13 @@ ns.order = {}
 ---@param message string
 function ns.Print(message)
     print(format("|cff33d0ffForever++|r %s", message))
+end
+
+---"On" in green or "Off" in red, for a module's state.
+---@param on boolean
+---@return string
+function ns.StateText(on)
+    return on and format("|cff44dd44%s|r", ns.L.ON) or format("|cffdd4444%s|r", ns.L.OFF)
 end
 
 -- Locale --------------------------------------------------------------------------------------
@@ -53,11 +66,11 @@ events:SetScript("OnEvent", function(_, event, ...)
         return
     end
     for i = 1, #list do
-        list[i](event, ...)
+        call(list[i], event, ...)
     end
 end)
 
----Calls `fn(event, ...)` whenever `event` fires.
+---Calls `fn(event, ...)` whenever `event` fires. Adding the same `fn` twice changes nothing.
 ---@param event string
 ---@param fn fun(event: string, ...)
 function ns.On(event, fn)
@@ -66,6 +79,11 @@ function ns.On(event, fn)
         list = {}
         handlers[event] = list
         events:RegisterEvent(event)
+    end
+    for i = 1, #list do
+        if list[i] == fn then
+            return
+        end
     end
     list[#list + 1] = fn
 end
@@ -103,7 +121,7 @@ local function runAfterCombat()
     local waiting = afterCombat
     afterCombat = {}
     for i = 1, #waiting do
-        waiting[i]()
+        call(waiting[i])
     end
 end
 
@@ -165,8 +183,45 @@ end
 
 -- Modules -------------------------------------------------------------------------------------
 
+-- Methods every module has.
+local Module = {}
+Module.__index = Module
+
+---Like ns.On, but the module remembers it and turns it off by itself when the module turns off
+---(if it has OnDisable). Use it for events the module listens to while it's on.
+---@param event string
+---@param fn fun(event: string, ...)
+function Module:On(event, fn)
+    self.events = self.events or {}
+    self.events[#self.events + 1] = { event, fn }
+    ns.On(event, fn)
+end
+
+---Stops one event added with `module:On` before the module turns off.
+---@param event string
+---@param fn function
+function Module:Off(event, fn)
+    ns.Off(event, fn)
+    local list = {}
+    for _, entry in ipairs(self.events or {}) do
+        if entry[1] ~= event or entry[2] ~= fn then
+            list[#list + 1] = entry
+        end
+    end
+    self.events = list
+end
+
+-- Stops every event the module added with `module:On`.
+local function offAll(module)
+    for _, entry in ipairs(module.events or {}) do
+        ns.Off(entry[1], entry[2])
+    end
+    module.events = nil
+end
+
 ---Creates a module: one change to the game's UI, switched on and off on its own. Give it
----`OnEnable` (and `OnDisable` if it can undo itself) and put its settings in `defaults`. Set
+---`OnEnable` (and `OnDisable` if it can undo itself) and put its settings in `defaults`. Events
+---added with `module:On` stop by themselves when it turns off. Set
 ---`module.title` for a friendlier name in Settings (the name stays the /fpp key).
 ---@param name string shown in /fpp
 ---@param description string one line for /fpp
@@ -176,7 +231,8 @@ function ns.NewModule(name, description, defaults)
     if ns.modules[name] then
         error("Forever++: a module called " .. name .. " already exists", 2)
     end
-    local module = { name = name, description = description, defaults = defaults or {} }
+    local module = setmetatable({ name = name, description = description,
+        defaults = defaults or {} }, Module)
     if module.defaults.enabled == nil then
         module.defaults.enabled = true
     end
@@ -204,6 +260,7 @@ local function disable(module)
     module.enabled = false
     if module.OnDisable then
         module:OnDisable()
+        offAll(module)
         module.applied = false
     else
         ns.Print(format(L.OFF_AFTER_RELOAD, module.name))
@@ -288,9 +345,8 @@ local function list()
     ns.Print(L.SLASH_MODULES)
     for _, name in pairs(ns.order) do
         local module = ns.modules[name]
-        local state = module.db.enabled and format("|cff44dd44%s|r", L.ON)
-            or format("|cffdd4444%s|r", L.OFF)
-        print(format("  %s  %s  |cff999999%s|r", state, name, module.description))
+        print(format("  %s  %s  |cff999999%s|r", ns.StateText(module.db.enabled), name,
+            module.description))
     end
 end
 

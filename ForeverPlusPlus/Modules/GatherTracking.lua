@@ -205,23 +205,17 @@ local REAPPLY_EVENTS = { "PLAYER_ENTERING_WORLD", "PLAYER_ALIVE", "PLAYER_UNGHOS
 
 function module:OnEnable()
     for _, event in ipairs(REAPPLY_EVENTS) do
-        ns.On(event, request)
+        self:On(event, request)
     end
-    ns.On("MINIMAP_UPDATE_TRACKING", onTrackingChanged)
-    ns.On("ADDON_ACTION_BLOCKED", onBlocked)
-    ns.On("ADDON_ACTION_FORBIDDEN", onBlocked)
+    self:On("MINIMAP_UPDATE_TRACKING", onTrackingChanged)
+    self:On("ADDON_ACTION_BLOCKED", onBlocked)
+    self:On("ADDON_ACTION_FORBIDDEN", onBlocked)
     onTrackingChanged()
     startSwapping()
     request()
 end
 
 function module:OnDisable()
-    for _, event in ipairs(REAPPLY_EVENTS) do
-        ns.Off(event, request)
-    end
-    ns.Off("MINIMAP_UPDATE_TRACKING", onTrackingChanged)
-    ns.Off("ADDON_ACTION_BLOCKED", onBlocked)
-    ns.Off("ADDON_ACTION_FORBIDDEN", onBlocked)
     stopSwapping()
     want = false
 end

@@ -9,6 +9,7 @@
 Core.lua
 Locales\enUS.lua
 Lib\Secret.lua
+Lib\Money.lua
 Lib\CVars.lua
 Lib\Nameplates.lua
 Lib\Units.lua

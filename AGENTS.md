@@ -26,7 +26,7 @@ Names:
   - `ForeverPlusPlus.toc`: metadata and load order.
   - `Core.lua`: the shared `ns`: events (`ns.On`, `ns.Off`), `ns.AfterCombat`, saved settings, modules (`ns.NewModule`, `ns.SetEnabled`), `/fpp` (modules add subcommands with `ns.AddCommand`), `ns.Print`, and the locale table `ns.L`.
   - `Locales/*.lua`: player-facing text. `enUS.lua` has every key and is the fallback; another language's file sets only the keys it translates.
-  - `Lib/*.lua`: shared services any module can use, loaded before the modules. `Secret.lua` (`ns.IsReadable`, `ns.HealthStepCurve`), `CVars.lua` (`ns.CVars`: set CVars and put the player's values back, waiting out combat), `Nameplates.lua` (`ns.Nameplates`: plate added/removed/cast callbacks and Forever's plate parts), `Units.lua` (`ns.Units`: in my group, a friend, a guildmate), `ItemTooltip.lua` (`ns.ItemTooltip`: price lines together at the sell price, stack counts, Shift redraws). They cost nothing until a module uses them.
+  - `Lib/*.lua`: shared services any module can use, loaded before the modules. `Secret.lua` (`ns.IsReadable`, `ns.HealthStepCurve`), `Money.lua` (`ns.Money`: copper as coin text), `CVars.lua` (`ns.CVars`: set CVars and put the player's values back, waiting out combat), `Nameplates.lua` (`ns.Nameplates`: plate added/removed/cast callbacks and Forever's plate parts), `Units.lua` (`ns.Units`: in my group, a friend, a guildmate), `ItemTooltip.lua` (`ns.ItemTooltip`: price lines together at the sell price, stack counts, Shift redraws). They cost nothing until a module uses them.
   - `Modules/`: one change each (see "Add a module" in `README.md`). A small module is one file; a bigger one gets a folder of files that share `module.internal`.
   - `Settings.lua`: the Settings pages (main, one per module with options or its own `BuildPage`, Debug).
 - `.github/workflows/check.yml`: on every push, checks Lua 5.1 syntax, ASCII, and that the TOC and the files match.
@@ -80,7 +80,7 @@ When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or f
 - Start every file with `local addonName, ns = ...` (or `local _, ns = ...`). Modules share state through `ns`, never `_G`.
 - The only globals are `ForeverPlusPlusDB`, the `SLASH_FOREVERPLUSPLUS*` names, and `SlashCmdList.FOREVERPLUSPLUS`. Add any new client global you use to `.luarc.json`.
 - Cache hot globals as file-level locals: `local pairs, CreateFrame = pairs, CreateFrame`.
-- Use `ns.On` / `ns.Off` for events, not a new frame per module.
+- Use `ns.On` / `ns.Off` for events, not a new frame per module. For events a module listens to while it's on, use `self:On(event, fn)`; they stop by themselves when it turns off.
 - A module that is off costs nothing: no frames, hooks, events, or `OnUpdate` until `OnEnable`. Undo what you can in `OnDisable`; if a change (such as a hook) can only be undone by `/reload`, leave out `OnDisable` and the core says so.
 - Read settings from `module.db`, filled from the defaults passed to `ns.NewModule`.
 - Annotate public functions with LuaLS `---@param` / `---@return`. Match the comment style of `Core.lua`: short, plain, and saying why.

@@ -100,25 +100,22 @@ end
 -- for it anyway in case Forever makes it load on demand.
 local function onAddonLoaded(_, name)
     if name == "Blizzard_UIPanels_Game" and _G.PaperDollItemsFrame then
-        ns.Off("ADDON_LOADED", onAddonLoaded)
+        module:Off("ADDON_LOADED", onAddonLoaded)
         start()
     end
 end
 
 function module:OnEnable()
-    ns.On("UPDATE_INVENTORY_DURABILITY", update)
-    ns.On("PLAYER_EQUIPMENT_CHANGED", update)
+    self:On("UPDATE_INVENTORY_DURABILITY", update)
+    self:On("PLAYER_EQUIPMENT_CHANGED", update)
     if _G.PaperDollItemsFrame then
         start()
     else
-        ns.On("ADDON_LOADED", onAddonLoaded)
+        self:On("ADDON_LOADED", onAddonLoaded)
     end
 end
 
 function module:OnDisable()
-    ns.Off("UPDATE_INVENTORY_DURABILITY", update)
-    ns.Off("PLAYER_EQUIPMENT_CHANGED", update)
-    ns.Off("ADDON_LOADED", onAddonLoaded)
     if container then
         container:Hide()
     end

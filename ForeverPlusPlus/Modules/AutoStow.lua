@@ -69,8 +69,8 @@ local function onCombatEnd()
 end
 
 function module:OnEnable()
-    ns.On("PLAYER_REGEN_ENABLED", onCombatEnd)
-    ns.On("PLAYER_REGEN_DISABLED", cancel)
+    self:On("PLAYER_REGEN_ENABLED", onCombatEnd)
+    self:On("PLAYER_REGEN_DISABLED", cancel)
     -- Drawing or stowing by hand (the Sheath/Unsheath key) is the player's choice; leave it.
     -- Hooks can't be removed, but this one only cancels a pending stow, and while the module is
     -- off there never is one.
@@ -81,7 +81,5 @@ function module:OnEnable()
 end
 
 function module:OnDisable()
-    ns.Off("PLAYER_REGEN_ENABLED", onCombatEnd)
-    ns.Off("PLAYER_REGEN_DISABLED", cancel)
     cancel()
 end

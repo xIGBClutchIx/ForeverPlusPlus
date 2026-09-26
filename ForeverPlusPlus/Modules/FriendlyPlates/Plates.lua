@@ -222,26 +222,18 @@ function module:OnEnable()
     end
     applyCVars()
     for _, event in pairs(EVENTS) do
-        ns.On(event, self.OnUnitEvent)
+        self:On(event, self.OnUnitEvent)
     end
     for _, event in pairs(SOCIAL_EVENTS) do
-        ns.On(event, self.OnSocialChange)
+        self:On(event, self.OnSocialChange)
     end
     -- UNIT_FLAGS covers other players' combat; these cover the fallback to our own.
-    ns.On("PLAYER_REGEN_DISABLED", self.OnPlayerCombat)
-    ns.On("PLAYER_REGEN_ENABLED", self.OnPlayerCombat)
+    self:On("PLAYER_REGEN_DISABLED", self.OnPlayerCombat)
+    self:On("PLAYER_REGEN_ENABLED", self.OnPlayerCombat)
     Nameplates.Register(self, plateHandlers)
 end
 
 function module:OnDisable()
     Nameplates.Unregister(self)
-    for _, event in pairs(EVENTS) do
-        ns.Off(event, self.OnUnitEvent)
-    end
-    for _, event in pairs(SOCIAL_EVENTS) do
-        ns.Off(event, self.OnSocialChange)
-    end
-    ns.Off("PLAYER_REGEN_DISABLED", self.OnPlayerCombat)
-    ns.Off("PLAYER_REGEN_ENABLED", self.OnPlayerCombat)
     ns.CVars.RestoreAll(self.db.saved)
 end
