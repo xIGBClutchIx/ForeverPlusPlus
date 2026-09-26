@@ -108,7 +108,7 @@ local weak = { __mode = "k" }
 local plates = {} -- nameplate unit -> { container, name, label }, while we manage it
 local byFrame = setmetatable({}, weak) -- Blizzard unit frame -> the record we last made for it
 local labels = setmetatable({}, weak) -- Blizzard unit frame -> our label frame on it
-local mirrored = setmetatable({}, weak) -- Blizzard name font string -> our label copying it
+local mirrored = setmetatable({}, weak) -- Blizzard name font string -> the unit whose label copies it
 local hookedNames = setmetatable({}, weak)
 local curve -- health fraction -> alpha: 1 below full health, 0 at full
 local inverse -- the opposite: 0 below full health, 1 at full
@@ -285,6 +285,20 @@ local function newText(parent)
     return text
 end
 
+local function createIcons(parent)
+    local icons = {}
+    for _, kind in ipairs(ICON_ORDER) do
+        local icon = parent:CreateTexture(nil, "OVERLAY")
+        icon.kind = kind
+        icon.mask = parent:CreateMaskTexture()
+        icon.mask:SetTexture(ROUND_MASK, "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+        icon.mask:SetAllPoints(icon)
+        icon:Hide()
+        icons[kind] = icon
+    end
+    return icons
+end
+
 local function createLabel(frame)
     local label = CreateFrame("Frame", nil, frame)
     label:SetAllPoints(frame)
@@ -300,16 +314,9 @@ local function createLabel(frame)
     label.level = CreateFrame("Frame", nil, label)
     label.level.text = label.level:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     label.level.text:SetPoint("CENTER")
-    label.icons = {}
-    for _, kind in ipairs(ICON_ORDER) do
-        local icon = label:CreateTexture(nil, "OVERLAY")
-        icon.kind = kind
-        icon.mask = label:CreateMaskTexture()
-        icon.mask:SetTexture(ROUND_MASK, "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
-        icon.mask:SetAllPoints(icon)
-        icon:Hide()
-        label.icons[kind] = icon
-    end
+    -- One set of icons for each view: beside our name, and beside Blizzard's while the bar is up.
+    label.icons = createIcons(label)
+    label.barIcons = createIcons(label.barGuildFrame)
     return label
 end
 
@@ -373,12 +380,14 @@ local function matchFont(label, name)
     label.barGuild:SetFont(file, size * GUILD_SCALE, flags)
 end
 
--- Blizzard sets the name text (with surname) itself; ours copies it as it changes.
-local function mirrorName(fontString, text)
-    local label = mirrored[fontString]
-    if label then
-        label.name:SetText(text)
-        matchFont(label, fontString)
+local refreshLabel -- defined below
+
+-- Blizzard sets the name text (with surname) itself; ours copies it as it changes, and the
+-- icons beside Blizzard's name move to where the new text ends.
+local function mirrorName(fontString)
+    local unit = mirrored[fontString]
+    if unit then
+        refreshLabel(unit)
     end
 end
 
@@ -406,6 +415,50 @@ local function isFriend(unit)
     end
     return C_BattleNet and C_BattleNet.GetAccountInfoByGUID
         and C_BattleNet.GetAccountInfoByGUID(guid) ~= nil or false
+end
+
+-- Blizzard's name string can be wider than its text (stretched across the bar), so its right edge
+-- isn't where the text ends. Measure from the side it's justified to instead; nil falls back to
+-- the right edge.
+local function barIconOffset(name)
+    local width, justify = name:GetStringWidth(), name:GetJustifyH()
+    if not (readable(width) and width and width > 0) then
+        return nil
+    end
+    if justify == "LEFT" then
+        return { "LEFT", width }
+    elseif justify == "CENTER" then
+        return { "CENTER", width / 2 }
+    end
+end
+
+-- Places one set of icons in a row going away from `anchor` (leftward when `left`), and returns
+-- the width they take. `offset` moves the first icon further out (see barIconOffset).
+local function placeIcons(icons, anchor, left, size, record, unit, offset)
+    local previous, width = anchor, 0
+    local first = true
+    for _, kind in ipairs(ICON_ORDER) do
+        local icon = icons[kind]
+        local show = record.isPlayer and module.db.socialIcons
+            and (module.db.testIcons == kind
+                or kind == "group" and inGroup(unit) or kind == "friend" and isFriend(unit))
+        icon:ClearAllPoints()
+        if show then
+            styleIcon(icon, iconArt(kind, unit))
+            icon:SetSize(size, size)
+            if first and offset then
+                icon:SetPoint("LEFT", previous, offset[1], offset[2] + LEVEL_GAP, 0)
+            elseif left then
+                icon:SetPoint("RIGHT", previous, "LEFT", -LEVEL_GAP, 0)
+            else
+                icon:SetPoint("LEFT", previous, "RIGHT", LEVEL_GAP, 0)
+            end
+            previous, first = icon, false
+            width = width + size + LEVEL_GAP
+        end
+        icon:SetShown(show)
+    end
+    return width
 end
 
 local function layoutLabel(label, record, unit)
@@ -456,29 +509,9 @@ local function layoutLabel(label, record, unit)
     -- Icons go on the side the level isn't on, one after another away from the name.
     local iconsLeft = where == "after"
     local size = (label.nameSize or 12) * ICON_SCALE
-    local previous = label.name
-    local iconsWidth = 0
-    for _, kind in ipairs(ICON_ORDER) do
-        local icon = label.icons[kind]
-        if icon then
-            local show = record.isPlayer and module.db.socialIcons
-                and (module.db.testIcons == kind
-                    or kind == "group" and inGroup(unit) or kind == "friend" and isFriend(unit))
-            icon:ClearAllPoints()
-            if show then
-                styleIcon(icon, iconArt(kind, unit))
-                icon:SetSize(size, size)
-                if iconsLeft then
-                    icon:SetPoint("RIGHT", previous, "LEFT", -LEVEL_GAP, 0)
-                else
-                    icon:SetPoint("LEFT", previous, "RIGHT", LEVEL_GAP, 0)
-                end
-                previous = icon
-                iconsWidth = iconsWidth + size + LEVEL_GAP
-            end
-            icon:SetShown(show)
-        end
-    end
+    local iconsWidth = placeIcons(label.icons, label.name, iconsLeft, size, record, unit)
+    -- With the bar up, the icons follow Blizzard's own name.
+    placeIcons(label.barIcons, record.name, false, size, record, unit, barIconOffset(record.name))
     if iconsLeft then
         leftWidth = leftWidth + iconsWidth
     else
@@ -496,10 +529,17 @@ local function layoutLabel(label, record, unit)
         label.guild:SetTextColor(color[1], color[2], color[3])
         label.barGuild:SetTextColor(color[1], color[2], color[3])
         label.name:SetPoint("BOTTOM", container, "CENTER", shift, 1)
-        label.guild:SetPoint("TOP", container, "CENTER", 0, 0)
+        -- While they cast, Blizzard's cast bar sits under the bar, so the guild moves below it.
+        local castBar = record.casting and record.castBar
+        if castBar then
+            label.guild:SetPoint("TOP", castBar, "BOTTOM", 0, -1)
+            label.barGuild:SetPoint("TOP", castBar, "BOTTOM", 0, -1)
+        else
+            label.guild:SetPoint("TOP", container, "CENTER", 0, 0)
+            label.barGuild:SetPoint("TOP", container, "BOTTOM", 0, -2)
+        end
         label.guild:SetFormattedText("<%s>", guild)
         label.guild:Show()
-        label.barGuild:SetPoint("TOP", container, "BOTTOM", 0, -2)
         label.barGuild:SetFormattedText("<%s>", guild)
         label.barGuild:SetShown(guildNames == "always")
     else
@@ -577,7 +617,7 @@ local function update(unit)
     end
 end
 
-local function refreshLabel(unit)
+function refreshLabel(unit)
     local record = plates[unit]
     if record and record.label then
         record.label.name:SetText(record.name:GetText())
@@ -608,11 +648,12 @@ local function add(unit)
         record.name = name
         record.levelFrame = frame.LevelFrame -- Forever-only, as of build 70009
         record.levelDiffFrame = frame.PlayerLevelDiffFrame
+        record.castBar = frame.CastBarsContainer
         record.label = getLabel(frame)
         record.label:Show()
         record.label.barGuildFrame:Show()
         hookName(name)
-        mirrored[name] = record.label
+        mirrored[name] = unit
     end
     plates[unit] = record
     byFrame[frame] = record
@@ -657,12 +698,26 @@ function module:OnOptionChanged(key)
     end
 end
 
+-- Cast events -> whether the unit is casting afterwards.
+local CAST_EVENTS = {
+    UNIT_SPELLCAST_START = true,
+    UNIT_SPELLCAST_CHANNEL_START = true,
+    UNIT_SPELLCAST_STOP = false,
+    UNIT_SPELLCAST_CHANNEL_STOP = false,
+}
+
 function module.OnPlateEvent(event, unit)
     if event == "NAME_PLATE_UNIT_ADDED" then
         add(unit)
     elseif event == "NAME_PLATE_UNIT_REMOVED" then
         remove(unit)
     elseif plates[unit] then
+        if CAST_EVENTS[event] ~= nil then
+            -- Only the event says whether a cast started or ended; the cast itself can be secret.
+            plates[unit].casting = CAST_EVENTS[event]
+            refreshLabel(unit)
+            return
+        end
         if event == "UNIT_NAME_UPDATE" or event == "UNIT_LEVEL" then
             refreshLabel(unit)
         end
@@ -684,7 +739,8 @@ function module.OnSocialChange()
 end
 
 local EVENTS = { "NAME_PLATE_UNIT_ADDED", "NAME_PLATE_UNIT_REMOVED", "UNIT_HEALTH", "UNIT_MAXHEALTH",
-    "UNIT_FLAGS", "UNIT_NAME_UPDATE", "UNIT_LEVEL" }
+    "UNIT_FLAGS", "UNIT_NAME_UPDATE", "UNIT_LEVEL", "UNIT_SPELLCAST_START", "UNIT_SPELLCAST_STOP",
+    "UNIT_SPELLCAST_CHANNEL_START", "UNIT_SPELLCAST_CHANNEL_STOP" }
 local SOCIAL_EVENTS = { "GROUP_ROSTER_UPDATE", "FRIENDLIST_UPDATE" }
 
 function module:OnEnable()
