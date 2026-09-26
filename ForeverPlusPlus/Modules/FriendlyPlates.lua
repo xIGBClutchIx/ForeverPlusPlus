@@ -24,6 +24,7 @@ local module = ns.NewModule("FriendlyPlates",
         level = "before", -- "before", "after", or "off"
         guildHighlight = true,
         socialIcons = true,
+        testIcons = "off", -- debug: "off", "group", or "friend" on every friendly player
         saved = {}, -- CVar -> the player's own value, put back when the module turns off
     })
 module.title = "Friendly Player Nameplates"
@@ -69,6 +70,14 @@ module.options = {
         name = "Group and Friend Icons",
         description = "Show a small icon beside the names of your group members and friends "
             .. "while the health bar is hidden.",
+    },
+    {
+        key = "testIcons",
+        name = "Test Group and Friend Icons",
+        description = "Show an icon on every friendly player, as if they were all in your group "
+            .. "or all your friends, to check how the icons look.",
+        choices = { { "off", "Off" }, { "group", "Everyone in Group" }, { "friend", "Everyone a Friend" } },
+        debug = true,
     },
 }
 
@@ -403,7 +412,8 @@ local function layoutLabel(label, record, unit)
         local icon = label.icons[kind]
         if icon then
             local show = record.isPlayer and module.db.socialIcons
-                and (kind == "group" and inGroup(unit) or kind == "friend" and isFriend(unit))
+                and (module.db.testIcons == kind
+                    or kind == "group" and inGroup(unit) or kind == "friend" and isFriend(unit))
             icon:ClearAllPoints()
             if show then
                 icon:SetSize(size, size)
