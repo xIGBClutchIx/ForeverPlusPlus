@@ -30,8 +30,8 @@ local CVARS = {
     { names = { "nameplateShowFriendlyPlayers", "nameplateShowFriends" }, value = "1" },
     -- Blizzard's names-only mode drops the bar entirely, so it could never come back when hurt.
     { names = { "nameplateShowOnlyNameForFriendlyPlayerUnits", "nameplateShowOnlyNames" }, value = "0" },
-    -- Class color on Blizzard's own name, shown while the bar is up.
-    { names = { "nameplateUseClassColorForFriendlyPlayerUnitNames" }, value = "1" },
+    -- Blizzard's own name, shown while the bar is up, stays plain white; class color is for ours.
+    { names = { "nameplateUseClassColorForFriendlyPlayerUnitNames" }, value = "0" },
 }
 
 local weak = { __mode = "k" }
@@ -287,11 +287,20 @@ local function layoutLabel(label, record, unit)
     end
 end
 
+-- Blizzard's level at the bar's end. Which of the two frames draws the badge players see isn't
+-- known yet (LevelFrame alone left it showing), so both fade with the bar.
+local function fadeLevel(record, alpha)
+    if record.levelFrame then
+        record.levelFrame:SetAlpha(alpha)
+    end
+    if record.levelDiffFrame then
+        record.levelDiffFrame:SetAlpha(alpha)
+    end
+end
+
 local function release(record)
     record.container:SetAlpha(1)
-    if record.levelFrame then
-        record.levelFrame:SetAlpha(1)
-    end
+    fadeLevel(record, 1)
     if record.name then
         record.name:SetAlpha(1)
         mirrored[record.name] = nil
@@ -321,11 +330,11 @@ local function update(unit)
     if not readable(inCombat) then
         inCombat = UnitAffectingCombat("player")
     end
-    local label, levelFrame = record.label, record.levelFrame
+    local label = record.label
     if inCombat or not curve then
         record.container:SetAlpha(1)
-        if label and levelFrame then
-            levelFrame:SetAlpha(1)
+        if label then
+            fadeLevel(record, 1)
         end
         if label then
             record.name:SetAlpha(1)
@@ -336,8 +345,8 @@ local function update(unit)
         -- The percent can be secret in combat, so the client maps it to an alpha, not Lua.
         local shown = UnitHealthPercent(unit, true, curve)
         record.container:SetAlpha(shown)
-        if label and levelFrame then
-            levelFrame:SetAlpha(shown)
+        if label then
+            fadeLevel(record, shown)
         end
         if label then
             record.name:SetAlpha(shown)
@@ -383,6 +392,7 @@ local function add(unit)
     if name and name.SetText then
         record.name = name
         record.levelFrame = frame.LevelFrame -- Forever-only, as of build 70009
+        record.levelDiffFrame = frame.PlayerLevelDiffFrame
         record.label = getLabel(frame)
         record.label:Show()
         record.label.barGuildFrame:Show()
