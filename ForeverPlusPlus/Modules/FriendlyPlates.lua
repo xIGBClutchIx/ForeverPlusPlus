@@ -149,6 +149,7 @@ end
 
 local GUILD_SCALE = 0.9 -- the guild line is a touch smaller than the name
 local GUILD_COLOR = { 0.9, 0.9, 0.9 }
+local LEVEL_GAP = 3 -- pixels between the name and the level
 
 local function newText(parent)
     local text = parent:CreateFontString(nil, "OVERLAY")
@@ -203,6 +204,7 @@ local function copyBadge(label, levelFrame)
                 local texture = badge:CreateTexture(nil, region:GetDrawLayer())
                 texture:SetAtlas(region:GetAtlas())
                 texture:SetAllPoints(badge)
+                badge.hasArt = true
             elseif kind == "FontString" then
                 local file, size, flags = region:GetFont()
                 if file and size then
@@ -260,42 +262,55 @@ local function layoutLabel(label, record, unit)
     else
         label.name:SetTextColor(1, 1, 1)
     end
-    local guild = module.db.guild and GetGuildInfo(unit)
-    label.name:ClearAllPoints()
-    label.guild:ClearAllPoints()
-    label.barGuild:ClearAllPoints()
-    if readable(guild) and guild and guild ~= "" then
-        label.name:SetPoint("BOTTOM", container, "CENTER", 0, 1)
-        label.guild:SetPoint("TOP", label.name, "BOTTOM", 0, -1)
-        label.guild:SetFormattedText("<%s>", guild)
-        label.guild:Show()
-        label.barGuild:SetPoint("TOP", container, "BOTTOM", 0, -2)
-        label.barGuild:SetFormattedText("<%s>", guild)
-        label.barGuild:Show()
-    else
-        label.name:SetPoint("CENTER", container, "CENTER", 0, 0)
-        label.guild:Hide()
-        label.barGuild:Hide()
-    end
+    -- The level goes beside the name, and the name shifts by half of it the other way, so the
+    -- name and level together are centered over the bar. The guild line stays centered.
     local badge = label.level
     local where = module.db.level
+    local shift = 0
     if record.levelFrame and where ~= "off" then
         copyBadge(label, record.levelFrame)
-        badge:ClearAllPoints()
-        if where == "after" then
-            badge:SetPoint("LEFT", label.name, "RIGHT", 3, 0)
-        else
-            badge:SetPoint("RIGHT", label.name, "LEFT", -3, 0)
-        end
         local level = UnitLevel(unit)
         if readable(level) and level <= 0 then
             badge.text:SetText("??")
         else
             badge.text:SetText(level)
         end
+        -- Without copied art the badge is just the number, so it's as wide as the number.
+        local textWidth = badge.text:GetStringWidth()
+        if not badge.hasArt and readable(textWidth) and textWidth > 0 then
+            badge:SetWidth(textWidth)
+        end
+        local width = badge:GetWidth()
+        if readable(width) then
+            shift = (width + LEVEL_GAP) / 2
+        end
+        badge:ClearAllPoints()
+        if where == "after" then
+            shift = -shift
+            badge:SetPoint("LEFT", label.name, "RIGHT", LEVEL_GAP, 0)
+        else
+            badge:SetPoint("RIGHT", label.name, "LEFT", -LEVEL_GAP, 0)
+        end
         badge:Show()
     else
         badge:Hide()
+    end
+    local guild = module.db.guild and GetGuildInfo(unit)
+    label.name:ClearAllPoints()
+    label.guild:ClearAllPoints()
+    label.barGuild:ClearAllPoints()
+    if readable(guild) and guild and guild ~= "" then
+        label.name:SetPoint("BOTTOM", container, "CENTER", shift, 1)
+        label.guild:SetPoint("TOP", container, "CENTER", 0, 0)
+        label.guild:SetFormattedText("<%s>", guild)
+        label.guild:Show()
+        label.barGuild:SetPoint("TOP", container, "BOTTOM", 0, -2)
+        label.barGuild:SetFormattedText("<%s>", guild)
+        label.barGuild:Show()
+    else
+        label.name:SetPoint("CENTER", container, "CENTER", shift, 0)
+        label.guild:Hide()
+        label.barGuild:Hide()
     end
 end
 
