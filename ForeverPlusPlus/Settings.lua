@@ -2,8 +2,8 @@
 -- templates so they look like any other options page:
 --   Forever++        an on/off checkbox per module (the only place modules turn on and off)
 --     <Module>       one page per module with options, holding just its options (and buttons,
---                    from `module.actions`), or a page the module draws itself when it has
---                    `BuildPage`
+--                    from `module.actions`)
+--     <Tool>         a page a module draws itself (`BuildPage`), after the option pages
 --     Debug          options marked `debug = true`, for testing
 -- Without subpages (an older Settings API), everything goes on the main page instead.
 local _, ns = ...
@@ -263,11 +263,7 @@ function ns.RegisterSettings()
     for _, name in ipairs(ns.order) do
         local module = ns.modules[name]
         local parent = addToggle(category, module)
-        if module.BuildPage then
-            if subpages and Settings.RegisterCanvasLayoutSubcategory then
-                pages[name] = addCanvasPage(category, module)
-            end
-        elseif hasOptions(module, false) or module.actions then
+        if not module.BuildPage and (hasOptions(module, false) or module.actions) then
             if subpages then
                 local page, pageLayout = Settings.RegisterVerticalLayoutSubcategory(category,
                     module.title or name)
@@ -276,6 +272,15 @@ function ns.RegisterSettings()
             else
                 addOptions(category, module, parent, false)
                 addActions(layout, module)
+            end
+        end
+    end
+    -- Pages modules draw themselves (tools such as Console Variables) go last, above Debug.
+    if subpages and Settings.RegisterCanvasLayoutSubcategory then
+        for _, name in ipairs(ns.order) do
+            local module = ns.modules[name]
+            if module.BuildPage then
+                pages[name] = addCanvasPage(category, module)
             end
         end
     end
