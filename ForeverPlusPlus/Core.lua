@@ -3,6 +3,7 @@
 local addonName, ns = ...
 
 local pairs, type, print, format = pairs, type, print, string.format
+local InCombatLockdown = InCombatLockdown
 
 ns.name = addonName
 ns.title = "Forever++"
@@ -67,9 +68,37 @@ function ns.Off(event, fn)
     end
 end
 
+-- Combat --------------------------------------------------------------------------------------
+-- Protected frames and many CVars can't change in combat; changes made then wait for it to end.
+
+local afterCombat = {} -- functions waiting, in order
+
+local function runAfterCombat()
+    ns.Off("PLAYER_REGEN_ENABLED", runAfterCombat)
+    local waiting = afterCombat
+    afterCombat = {}
+    for i = 1, #waiting do
+        waiting[i]()
+    end
+end
+
+---Calls `fn` now, or once combat ends if the player is in combat. Calls run in the order made.
+---@param fn function
+function ns.AfterCombat(fn)
+    if not InCombatLockdown() then
+        fn()
+        return
+    end
+    if #afterCombat == 0 then
+        ns.On("PLAYER_REGEN_ENABLED", runAfterCombat)
+    end
+    afterCombat[#afterCombat + 1] = fn
+end
+
 -- Saved settings ------------------------------------------------------------------------------
 -- ForeverPlusPlusDB = { modules = { [name] = { enabled = bool, ... } } }. Missing values are
--- filled from each module's defaults when the addon loads.
+-- filled from each module's defaults when the addon loads, and settings no module defines any
+-- more (a removed module or option) are dropped.
 
 local function fill(target, defaults)
     for key, value in pairs(defaults) do
@@ -80,6 +109,31 @@ local function fill(target, defaults)
             fill(target[key], value)
         elseif target[key] == nil then
             target[key] = value
+        end
+    end
+end
+
+-- Resets dropdown settings whose saved value is no longer one of the choices.
+local function checkChoices(module)
+    for _, option in pairs(module.options or {}) do
+        if option.choices then
+            local valid = false
+            for _, choice in pairs(option.choices) do
+                valid = valid or choice[1] == module.db[option.key]
+            end
+            if not valid then
+                module.db[option.key] = module.defaults[option.key]
+            end
+        end
+    end
+end
+
+-- Drops a module's top-level settings that its defaults no longer have. Only the top level:
+-- tables inside (like a module's saved CVars) hold data, not settings.
+local function prune(target, defaults)
+    for key in pairs(target) do
+        if defaults[key] == nil then
+            target[key] = nil
         end
     end
 end
@@ -136,11 +190,18 @@ function ns.Start()
     ForeverPlusPlusDB = type(ForeverPlusPlusDB) == "table" and ForeverPlusPlusDB or {}
     ns.db = ForeverPlusPlusDB
     ns.db.modules = ns.db.modules or {}
+    for name in pairs(ns.db.modules) do
+        if not ns.modules[name] then
+            ns.db.modules[name] = nil
+        end
+    end
     for _, name in pairs(ns.order) do
         local module = ns.modules[name]
         ns.db.modules[name] = ns.db.modules[name] or {}
+        prune(ns.db.modules[name], module.defaults)
         fill(ns.db.modules[name], module.defaults)
         module.db = ns.db.modules[name]
+        checkChoices(module)
         if module.OnLoad then
             module:OnLoad()
         end
@@ -175,7 +236,7 @@ local function findModule(query)
 end
 
 local function list()
-    ns.Print("modules (/fpp toggle <name>):")
+    ns.Print("modules (/fpp toggle <name>, /fpp list):")
     for _, name in pairs(ns.order) do
         local module = ns.modules[name]
         local state = module.db.enabled and "|cff44dd44on|r" or "|cffdd4444off|r"
@@ -200,8 +261,9 @@ SlashCmdList.FOREVERPLUSPLUS = function(message)
     elseif command == "reset" then
         ForeverPlusPlusDB = nil
         ReloadUI()
-    else
+    elseif command == "list" or command == "help" or not ns.OpenSettings() then
         list()
+        print("  /fpp  |cff999999open the settings|r")
         print("  /fpp reset  |cff999999all settings back to defaults (reloads)|r")
     end
 end

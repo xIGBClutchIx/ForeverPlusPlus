@@ -24,9 +24,11 @@ Names:
 
 - `ForeverPlusPlus/`: the shipped addon folder, linked into the client's `Interface\AddOns`.
   - `ForeverPlusPlus.toc`: metadata and load order.
-  - `Core.lua`: the shared `ns`: events (`ns.On`, `ns.Off`), saved settings, modules (`ns.NewModule`, `ns.SetEnabled`), `/fpp`, `ns.Print`.
-  - `Lib/*.lua`: shared services any module can use, loaded before the modules. `Secret.lua` (`ns.IsReadable`, `ns.HealthStepCurve`), `CVars.lua` (`ns.CVars`: set CVars and put the player's values back, waiting out combat), `Nameplates.lua` (`ns.Nameplates`: plate added/removed/cast callbacks and Forever's plate parts). They cost nothing until a module uses them.
-  - `Modules/*.lua`: one change each (see "Add a module" in `README.md`).
+  - `Core.lua`: the shared `ns`: events (`ns.On`, `ns.Off`), `ns.AfterCombat`, saved settings, modules (`ns.NewModule`, `ns.SetEnabled`), `/fpp`, `ns.Print`.
+  - `Lib/*.lua`: shared services any module can use, loaded before the modules. `Secret.lua` (`ns.IsReadable`, `ns.HealthStepCurve`), `CVars.lua` (`ns.CVars`: set CVars and put the player's values back, waiting out combat), `Nameplates.lua` (`ns.Nameplates`: plate added/removed/cast callbacks and Forever's plate parts), `Units.lua` (`ns.Units`: in my group, a friend, a guildmate). They cost nothing until a module uses them.
+  - `Modules/`: one change each (see "Add a module" in `README.md`). A small module is one file; a bigger one gets a folder of files that share `module.internal`.
+  - `Settings.lua`: the Settings pages (main, one per module with options, Debug).
+- `.github/workflows/check.yml`: on every push, checks Lua 5.1 syntax, ASCII, and that the TOC and the files match.
   - `Init.lua`: loaded last; calls `ns.Start()` at `PLAYER_LOGIN`.
 - `README.md`: install and usage for people.
 - `docs/forever-api.md`: what we know about the Forever client API, with sources and how sure we are.
@@ -90,7 +92,7 @@ The goal is to add to Blizzard frames without tainting or breaking them.
 - Hook, don't replace: `hooksecurefunc(obj, "Method", fn)`, `frame:HookScript("OnShow", fn)`. Never `SetScript` on a Blizzard object and never overwrite a Blizzard function or mixin method.
 - Never write fields onto Blizzard frames. Keep per-frame state in a weak-keyed table (`setmetatable({}, { __mode = "k" })`).
 - Add your own regions and child frames instead of changing Blizzard's. To hide Blizzard art, prefer `SetAlpha(0)` over `Hide()` / `SetParent`.
-- Don't move, resize, reparent, show, or hide protected frames (action buttons, unit frames, anything secure) in combat. Check `InCombatLockdown()` and defer the change to `PLAYER_REGEN_ENABLED`.
+- Don't move, resize, reparent, show, or hide protected frames (action buttons, unit frames, anything secure) in combat. Wrap the change in `ns.AfterCombat(fn)`, which runs it now or once combat ends.
 - Many Blizzard windows are load-on-demand (`Blizzard_*` addons). Hook them after they load: check `C_AddOns.IsAddOnLoaded` and otherwise wait for `ADDON_LOADED` with that name.
 - Look native: use `GameFontNormal` and related font objects, Blizzard atlases (`SetAtlas`), and Blizzard templates (`UIPanelButtonTemplate`, `UICheckButtonTemplate`, `BackdropTemplate` with Blizzard's own backdrop info) rather than custom art or fonts.
 - If a module ever needs options beyond `/fpp`, put them in Blizzard's Settings panel, not a custom window.

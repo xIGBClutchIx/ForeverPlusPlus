@@ -8,7 +8,10 @@ local _, ns = ...
 
 local ipairs, format = ipairs, string.format
 
+local InCombatLockdown = InCombatLockdown
+
 local settings = {} -- module name -> its Blizzard setting objects, to refresh after /fpp toggle
+local mainCategory -- the Forever++ page, for /fpp
 
 -- The module's on/off checkbox. Each page gets its own setting (the variable names must differ);
 -- all of them read and write through the module, so /fpp and every page agree.
@@ -116,6 +119,22 @@ function ns.RegisterSettings()
         end
     end
     Settings.RegisterAddOnCategory(category)
+    mainCategory = category
+end
+
+---Opens the Forever++ page in Settings (after combat, if the player is in combat).
+---@return boolean opened false when this client's Settings can't open to it
+function ns.OpenSettings()
+    if not (mainCategory and Settings.OpenToCategory and mainCategory.GetID) then
+        return false
+    end
+    if InCombatLockdown() then
+        ns.Print("Settings open after combat.")
+    end
+    ns.AfterCombat(function()
+        Settings.OpenToCategory(mainCategory:GetID())
+    end)
+    return true
 end
 
 ---Updates a module's checkboxes after it changed somewhere else (/fpp toggle).

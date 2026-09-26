@@ -1,0 +1,43 @@
+name: Check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lua:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lua 5.1
+        run: sudo apt-get update && sudo apt-get install -y lua5.1
+
+      - name: Syntax (Lua 5.1)
+        run: |
+          status=0
+          while IFS= read -r -d '' file; do
+            luac5.1 -p "$file" || status=1
+          done < <(find ForeverPlusPlus -name '*.lua' -print0)
+          exit $status
+
+      - name: ASCII only in .lua and .toc
+        run: |
+          if grep -rnP '[^\x00-\x7F]' --include='*.lua' --include='*.toc' ForeverPlusPlus; then
+            echo "Non-ASCII characters found (see above)."
+            exit 1
+          fi
+
+      - name: Every file in the TOC exists, and every .lua file is in the TOC
+        run: |
+          status=0
+          toc=ForeverPlusPlus/ForeverPlusPlus.toc
+          listed=$(grep -v '^#' "$toc" | tr -d '\r' | tr '\\\\' '/' | sed 's/ *\[.*$//' | grep -v '^$')
+          for file in $listed; do
+            [ -f "ForeverPlusPlus/$file" ] || { echo "In the TOC but missing: $file"; status=1; }
+          done
+          while IFS= read -r file; do
+            rel=${file#ForeverPlusPlus/}
+            echo "$listed" | grep -qxF "$rel" || { echo "Not in the TOC: $rel"; status=1; }
+          done < <(find ForeverPlusPlus -name '*.lua')
+          exit $status

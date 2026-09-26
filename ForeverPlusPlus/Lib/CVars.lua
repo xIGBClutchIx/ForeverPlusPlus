@@ -1,35 +1,13 @@
 -- Changing game settings (CVars) from a module, and putting the player's own values back.
 -- Each module keeps the originals in its own saved table (usually a field of module.db), so they
 -- survive a reload and two modules don't lose each other's. Many CVars (nameplates among them)
--- can't change in combat, so changes made then wait for it to end, in order.
+-- can't change in combat, so changes made then wait for it to end, in order (ns.AfterCombat).
 local _, ns = ...
 
-local type, pairs, InCombatLockdown, C_CVar = type, pairs, InCombatLockdown, C_CVar
+local type, pairs, C_CVar = type, pairs, C_CVar
 
 local CVars = {}
 ns.CVars = CVars
-
-local queue = {} -- functions waiting for combat to end
-
-local function flush()
-    ns.Off("PLAYER_REGEN_ENABLED", flush)
-    local waiting = queue
-    queue = {}
-    for i = 1, #waiting do
-        waiting[i]()
-    end
-end
-
-local function run(fn)
-    if InCombatLockdown() then
-        if #queue == 0 then
-            ns.On("PLAYER_REGEN_ENABLED", flush)
-        end
-        queue[#queue + 1] = fn
-    else
-        fn()
-    end
-end
 
 -- The first of `names` this client knows. CVars get renamed between patches, so callers can list
 -- the names a setting has had, newest first.
@@ -49,7 +27,7 @@ end
 ---@param names string|string[] the CVar, or its names newest first
 ---@param value string
 function CVars.Set(saved, names, value)
-    run(function()
+    ns.AfterCombat(function()
         local name = find(names)
         if not name then
             return
@@ -68,7 +46,7 @@ end
 ---@param saved table
 ---@param names string|string[]
 function CVars.Restore(saved, names)
-    run(function()
+    ns.AfterCombat(function()
         local name = find(names)
         if name and saved[name] ~= nil then
             C_CVar.SetCVar(name, saved[name])
@@ -80,7 +58,7 @@ end
 ---Puts back every CVar in `saved`.
 ---@param saved table
 function CVars.RestoreAll(saved)
-    run(function()
+    ns.AfterCombat(function()
         for name, value in pairs(saved) do
             C_CVar.SetCVar(name, value)
             saved[name] = nil

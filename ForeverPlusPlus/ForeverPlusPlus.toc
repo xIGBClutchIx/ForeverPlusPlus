@@ -10,6 +10,10 @@ Core.lua
 Lib\Secret.lua
 Lib\CVars.lua
 Lib\Nameplates.lua
-Modules\FriendlyPlates.lua
+Lib\Units.lua
+Modules\FriendlyPlates\Module.lua
+Modules\FriendlyPlates\Icons.lua
+Modules\FriendlyPlates\Label.lua
+Modules\FriendlyPlates\Plates.lua
 Settings.lua
 Init.lua
