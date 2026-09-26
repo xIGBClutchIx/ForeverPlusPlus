@@ -28,6 +28,7 @@ Names:
   - `Modules/*.lua`: one change each. `Example.lua` is the template.
   - `Init.lua`: loaded last; calls `ns.Start()` at `PLAYER_LOGIN`.
 - `README.md`: install and usage for people.
+- `docs/forever-api.md`: what we know about the Forever client API, with sources and how sure we are.
 - `.luarc.json`: LuaLS settings (Lua 5.1 and the known globals).
 
 There is no build step, packager, or library folder. Plain Lua, loaded straight from the TOC.
@@ -56,7 +57,7 @@ Forever is a Classic+ game (level 60 content) that runs the **modern Mainline (1
 - TOC suffixes are unreliable on this client (it loaded `_Mainline.toc` over `_Camelot.toc`). Ship one plain `ForeverPlusPlus.toc` only.
 - It is a beta. APIs appear, change, and break between patches. Probe (`if C_Foo and C_Foo.Bar then`) instead of assuming, and when something only works on Forever, say so in a comment. (On 2026-09-23 SavedVariables didn't persist across reloads; they did by 2026-09-24. Recheck if settings stop sticking.)
 
-When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or find an installed Forever addon that uses it. Don't guess from Classic Era or old Retail documentation. Record anything you confirm or rule out in this section.
+When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or find an installed Forever addon that uses it. Don't guess from Classic Era or old Retail documentation. [docs/forever-api.md](docs/forever-api.md) has the detail behind this section: removed globals and their replacements, TOC loading, realms and surnames, talents, secret values, and open questions, each with its source. Keep the rules here short and record the evidence there.
 
 ## Working rules
 
@@ -66,7 +67,7 @@ When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or f
 - When replacing behavior, delete the old path. No compatibility shims or migrations for unreleased settings.
 - Add a new file to the TOC, after `Core.lua` and before `Init.lua`.
 - Update `README.md` in the same change when commands, install steps, or the layout change.
-- Record things learned about the Forever client in "How Forever differs from Classic" above.
+- Record things learned about the Forever client in `docs/forever-api.md`, tagged with how you know. Promote a fact to "How Forever differs from Classic" above only when it changes how code must be written.
 
 ## Lua rules
 
