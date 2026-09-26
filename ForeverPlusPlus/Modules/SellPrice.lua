@@ -10,7 +10,7 @@ local L = ns.L
 local ItemTooltip = ns.ItemTooltip
 
 local module = ns.NewModule("SellPrice", L.SELLPRICE_DESC,
-    ItemTooltip.PriceDefaults({ enabled = true }))
+    ItemTooltip.PriceDefaults({ enabled = true }, "white"))
 module.title = L.SELLPRICE_TITLE
 module.options = ItemTooltip.PriceOptions({})
 

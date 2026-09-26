@@ -25,7 +25,7 @@ local module = ns.NewModule("AuctionPrices", L.AUCTIONPRICES_DESC, ItemTooltip.P
     -- Per auction house ("Realm-Faction"): { scannedAt = time(), prices = { [itemID] = copper } }.
     -- Data, not a setting: it isn't in module.options.
     houses = {},
-}))
+}, "gold"))
 module.title = L.AUCTIONPRICES_TITLE
 
 module.options = ItemTooltip.PriceOptions({

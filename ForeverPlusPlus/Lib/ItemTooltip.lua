@@ -145,9 +145,9 @@ local function money(amount)
 end
 
 -- Alignment ----------------------------------------------------------------------------------
--- "right": coins against the tooltip's right edge. "inline": coins right after the label, with
--- the names padded with a blank texture as wide as the gap, so every price line's quantity and
--- coins start in the same column. (Spaces only got within a space's width.)
+-- "right": coins against the tooltip's right edge. "inline": coins right after the label. Either
+-- way the names are padded with a blank texture as wide as the gap, so every price line's
+-- quantity starts in the same column (spaces only got within a space's width).
 
 -- Blizzard's transparent texture, drawn as a gap of any width inside text.
 local SPACER = "|TInterface\\Common\\spacer:1:%d|t"
@@ -155,7 +155,7 @@ local SPACER = "|TInterface\\Common\\spacer:1:%d|t"
 local names = {} -- every price line's name, to pad to the widest
 local measure -- our own hidden font string, for label widths
 
-local COLORS = { gray = GRAY_FONT_COLOR, white = HIGHLIGHT_FONT_COLOR, yellow = NORMAL_FONT_COLOR }
+local COLORS = { gray = GRAY_FONT_COLOR, white = HIGHLIGHT_FONT_COLOR, gold = NORMAL_FONT_COLOR }
 
 ---Registers a price line's name, so inline coins can line up with it.
 ---@param name string
@@ -182,8 +182,9 @@ local function padding(name)
     return gap > 0 and format(SPACER, gap) or ""
 end
 
----Adds a price line: the name and an "x20", then the coins. `db` is the module's settings from
----`PriceDefaults`: `align` places the coins and `color` colors the quantity.
+---Adds a price line: the name and an "x20", then the coins ("Sell Price x20: <coins>"). `db` is
+---the module's settings from `PriceDefaults`: `align` places the coins and `color` colors the
+---quantity.
 ---@param tooltip table
 ---@param name string such as "Sell Price"
 ---@param amount number copper, for all `count` items
@@ -192,11 +193,10 @@ end
 function ItemTooltip.AddPrice(tooltip, name, amount, count, db)
     local color = COLORS[db.color] or GRAY_FONT_COLOR
     local quantity = color:WrapTextInColorCode(format(L.PRICE_QUANTITY, count))
-    local label = format(L.PRICE_LINE, name, quantity)
+    -- The padding goes before the quantity, so the "x20"s line up.
+    local label = format(L.PRICE_LINE, name .. padding(name), quantity)
     local r, g, b = HIGHLIGHT_FONT_COLOR:GetRGB()
     if db.align == "inline" then
-        -- The padding goes before the quantity, so the "x20"s line up as well as the coins.
-        label = format(L.PRICE_LINE, name, padding(name) .. quantity)
         tooltip:AddLine(format(L.PRICE_INLINE, label, money(amount)), r, g, b)
     else
         tooltip:AddDoubleLine(label, money(amount), r, g, b, r, g, b)
@@ -207,11 +207,12 @@ end
 
 ---Adds a price line's settings, with their defaults, to a module's defaults.
 ---@param defaults table
+---@param color string the quantity's default color: "gray", "white", or "gold"
 ---@return table defaults
-function ItemTooltip.PriceDefaults(defaults)
+function ItemTooltip.PriceDefaults(defaults, color)
     defaults.mode = "stack" -- "stack" (Shift for one) or "one" (Shift for the stack)
     defaults.align = "right" -- "right" (coins at the tooltip's edge) or "inline" (after the label)
-    defaults.color = "gray" -- the quantity's color: "gray", "white", or "yellow"
+    defaults.color = color
     return defaults
 end
 
@@ -232,7 +233,7 @@ function ItemTooltip.PriceOptions(options)
         choices = {
             { "gray", L.PRICE_COLOR_GRAY },
             { "white", L.PRICE_COLOR_WHITE },
-            { "yellow", L.PRICE_COLOR_YELLOW },
+            { "gold", L.PRICE_COLOR_GOLD },
         },
     }
     return options

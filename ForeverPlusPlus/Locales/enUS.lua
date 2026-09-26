@@ -155,8 +155,8 @@ L.PRICE_COLOR = "Quantity Color"
 L.PRICE_COLOR_DESC = "The color of the x20 quantity on this line."
 L.PRICE_COLOR_GRAY = "Gray"
 L.PRICE_COLOR_WHITE = "White"
-L.PRICE_COLOR_YELLOW = "Yellow"
-L.PRICE_LINE = "%s: %s" -- line name, quantity
+L.PRICE_COLOR_GOLD = "Gold"
+L.PRICE_LINE = "%s %s:" -- line name, quantity
 L.PRICE_QUANTITY = "x%d" -- how many items the price is for
 L.PRICE_INLINE = "%s  %s" -- padded label, coins
 
