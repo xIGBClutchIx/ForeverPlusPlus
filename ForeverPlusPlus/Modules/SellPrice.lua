@@ -2,7 +2,7 @@
 -- (or the other way round). Forever's own line prices one item only.
 local _, ns = ...
 
-local format, select = string.format, select
+local select = select
 local C_Item = C_Item
 local SELL_PRICE = SELL_PRICE
 
@@ -43,9 +43,7 @@ local function drawSellPrice(tooltip, data, lineData)
         return false
     end
     local count = ItemTooltip.PriceCount(data, module.db.mode)
-    local label = count > 1 and format(L.PRICE_STACK_LABEL, SELL_PRICE, count)
-        or format(L.PRICE_LABEL, SELL_PRICE)
-    ItemTooltip.AddMoney(tooltip, label, price * count)
+    ItemTooltip.AddPrice(tooltip, SELL_PRICE, price * count, count)
     return true
 end
 

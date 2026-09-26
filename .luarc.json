@@ -65,7 +65,7 @@
     "GetRealmName",
     "UnitFactionGroup",
     "TooltipDataProcessor",
-    "SetTooltipMoney",
+    "GRAY_FONT_COLOR",
     "SELL_PRICE",
     "GetInventorySlotInfo",
     "GetInventoryItemDurability",

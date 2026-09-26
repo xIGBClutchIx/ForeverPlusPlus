@@ -142,8 +142,8 @@ L.SELLPRICE_MODE_DESC = "Whether the sell price counts the whole stack or one it
 -- Price lines in item tooltips (SellPrice and AuctionPrices)
 L.PRICE_MODE_STACK = "Whole Stack, Shift for One"
 L.PRICE_MODE_ONE = "One Item, Shift for Stack"
-L.PRICE_LABEL = "%s:" -- line name
-L.PRICE_STACK_LABEL = "%s (%d):" -- line name, stack size
+L.PRICE_LINE = "%s %s" -- line name, quantity (gray)
+L.PRICE_QUANTITY = "x%d" -- how many items the price is for
 
 -- DurabilityBars
 L.DURABILITYBARS_TITLE = "Durability Bars"

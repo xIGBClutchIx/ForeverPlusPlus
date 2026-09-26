@@ -4,10 +4,12 @@
 -- Nothing is hooked until a module first calls in.
 local _, ns = ...
 
-local ipairs, setmetatable = ipairs, setmetatable
+local ipairs, setmetatable, format = ipairs, setmetatable, string.format
 local TooltipDataProcessor, Enum, C_Item, GameTooltip = TooltipDataProcessor, Enum, C_Item, GameTooltip
-local IsShiftKeyDown, SetTooltipMoney, GetMoneyString = IsShiftKeyDown, SetTooltipMoney, GetMoneyString
-local HIGHLIGHT_FONT_COLOR = HIGHLIGHT_FONT_COLOR
+local IsShiftKeyDown, GetMoneyString, C_CurrencyInfo = IsShiftKeyDown, GetMoneyString, C_CurrencyInfo
+local HIGHLIGHT_FONT_COLOR, GRAY_FONT_COLOR = HIGHLIGHT_FONT_COLOR, GRAY_FONT_COLOR
+
+local L = ns.L
 
 local ItemTooltip = {}
 ns.ItemTooltip = ItemTooltip
@@ -132,16 +134,22 @@ function ItemTooltip.PriceCount(data, mode)
     return stack and ItemTooltip.StackCount(data) or 1
 end
 
----Adds a money line that looks like Blizzard's sell price.
----@param tooltip table
----@param label string with its colon, such as "Sell Price:"
----@param amount number copper
-function ItemTooltip.AddMoney(tooltip, label, amount)
-    -- Probe: SetTooltipMoney is Mainline FrameXML (the money frame Blizzard's line uses).
-    if SetTooltipMoney then
-        SetTooltipMoney(tooltip, amount, nil, label)
-        return
+local function money(amount)
+    -- Probe: GetMoneyString is Mainline FrameXML; the coin text is the fallback.
+    if GetMoneyString then
+        return GetMoneyString(amount, true)
     end
+    return C_CurrencyInfo.GetCoinTextureString(amount)
+end
+
+---Adds a price line: the name and a gray "x20" on the left, the coins on the right, so every
+---price line's coins line up.
+---@param tooltip table
+---@param name string such as "Sell Price"
+---@param amount number copper, for all `count` items
+---@param count number how many items the price is for
+function ItemTooltip.AddPrice(tooltip, name, amount, count)
+    local quantity = GRAY_FONT_COLOR:WrapTextInColorCode(format(L.PRICE_QUANTITY, count))
     local r, g, b = HIGHLIGHT_FONT_COLOR:GetRGB()
-    tooltip:AddDoubleLine(label, GetMoneyString(amount, true), r, g, b, r, g, b)
+    tooltip:AddDoubleLine(format(L.PRICE_LINE, name, quantity), money(amount), r, g, b, r, g, b)
 end

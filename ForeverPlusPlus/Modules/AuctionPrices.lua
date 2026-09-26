@@ -257,9 +257,7 @@ local function addAuctionPrice(tooltip, data)
         return
     end
     local count = ItemTooltip.PriceCount(data, module.db.mode)
-    local label = count > 1 and format(L.PRICE_STACK_LABEL, L.AUCTIONPRICES_LINE, count)
-        or format(L.PRICE_LABEL, L.AUCTIONPRICES_LINE)
-    ItemTooltip.AddMoney(tooltip, label, price * count)
+    ItemTooltip.AddPrice(tooltip, L.AUCTIONPRICES_LINE, price * count, count)
 end
 
 local hooked = false
