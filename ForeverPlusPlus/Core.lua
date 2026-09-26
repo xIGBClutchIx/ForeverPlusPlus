@@ -335,8 +335,9 @@ local function listOptions(module)
     end
 end
 
--- /fpp set <module> <option> [value]. Without a value it shows the current one.
-local function set(rest)
+-- /fpp set <module> <option> [value]. Without a value it shows the current one, or with `flip`
+-- (from /fpp toggle) turns an on/off option the other way.
+local function set(rest, flip)
     local moduleName, key, value = strsplit(" ", rest or "", 3)
     local module = moduleName and moduleName ~= "" and findModule(moduleName)
     if not module then
@@ -351,6 +352,9 @@ local function set(rest)
     value = value and strtrim(value):lower()
     if key:lower() == "enabled" then
         local on = booleans[value or ""]
+        if on == nil and flip and not value then
+            on = not module.db.enabled
+        end
         if on == nil then
             ns.Print(format("%s is %s (on, off).", module.name, module.db.enabled and "on" or "off"))
             return
@@ -375,6 +379,8 @@ local function set(rest)
         end
     elseif value then
         new = booleans[value]
+    elseif flip then
+        new = not module.db[option.key]
     end
     if new == nil then
         local current, allowed = describe(module, option)
@@ -393,6 +399,8 @@ SlashCmdList.FOREVERPLUSPLUS = function(message)
     command = (command or ""):lower()
     if commands[command] then
         commands[command].fn(rest or "")
+    elseif command == "toggle" and rest and rest:find(" ") then
+        set(rest, true) -- /fpp toggle <module> <option> [value]
     elseif command == "toggle" and rest then
         local module = findModule(rest)
         if not module then

@@ -18,6 +18,7 @@ mklink /J "D:\BattleNet\World of Warcraft\_classic_beta_\Interface\AddOns\Foreve
 - `/fpp toggle <name>` turns one on or off.
 - `/fpp options <name>` lists a module's options and their values.
 - `/fpp set <name> <option> <value>` changes one: `on`/`off` for a checkbox, a choice key for a dropdown (for example `/fpp set FriendlyPlates level after`). Leave out the value to see the current one and what it can be.
+- `/fpp toggle <name> <option> [value]` does the same, and without a value flips an on/off option.
 - `/fpp reset` puts every setting back to its default and reloads.
 - `/fpp cvar [search]` opens the Console Variables page: every CVar with its value and default. Type a new value and press Enter, or click Default. Changes made in combat wait until it ends.
 
