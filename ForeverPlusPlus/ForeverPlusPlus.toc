@@ -1,0 +1,11 @@
+## Interface: 16001
+## Title: Forever++
+## Notes: Small additions and changes to the default UI for WoW Forever.
+## Author: xIGBClutchIx
+## Version: 0.1.0
+## SavedVariables: ForeverPlusPlusDB
+## IconTexture: Interface\Icons\INV_Misc_Gear_01
+
+Core.lua
+Modules\Example.lua
+Init.lua
