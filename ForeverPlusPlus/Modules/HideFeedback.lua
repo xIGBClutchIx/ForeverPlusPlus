@@ -1,6 +1,6 @@
 -- Hide Beta Feedback: takes the beta's "Press F6 to submit an issue for this Item" line off
 -- tooltips and hides its floating bug report button. F6 still reports an issue; only the
--- reminder and the button go.
+-- reminder and the button go. Off by default, so players keep sending beta feedback.
 local _, ns = ...
 
 local _G, type, pairs, ipairs, setmetatable = _G, type, pairs, ipairs, setmetatable
@@ -9,7 +9,7 @@ local hooksecurefunc = hooksecurefunc
 
 local L = ns.L
 
-local module = ns.NewModule("HideFeedback", L.HIDEFEEDBACK_DESC, { enabled = true })
+local module = ns.NewModule("HideFeedback", L.HIDEFEEDBACK_DESC, { enabled = false })
 module.title = L.HIDEFEEDBACK_TITLE
 
 -- Forever beta only: Blizzard's PTR feedback code makes PTR_IssueReporter, the bug report button,
