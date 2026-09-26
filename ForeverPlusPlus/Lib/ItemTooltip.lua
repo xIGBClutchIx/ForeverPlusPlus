@@ -145,8 +145,8 @@ end
 
 -- Alignment ----------------------------------------------------------------------------------
 -- "right": coins against the tooltip's right edge. "inline": coins right after the label, with
--- the labels padded with spaces so every price line's coins start in the same column (to within
--- a space's width).
+-- the names padded with spaces so every price line's quantity and coins start in the same column
+-- (to within a space's width).
 
 local alignment = "right"
 local names = {} -- every price line's name, to pad to the widest
@@ -173,15 +173,14 @@ local function width(text)
     return measure:GetStringWidth()
 end
 
--- The label padded with spaces to the widest registered name with the same quantity.
-local function padded(name, quantity)
+-- Spaces that pad the name out to the widest registered name.
+local function padding(name)
     local widest = 0
     for _, other in ipairs(names) do
-        widest = max(widest, width(format(L.PRICE_LINE, other, quantity)))
+        widest = max(widest, width(other))
     end
     local space = width(" ")
-    local spaces = space > 0 and floor((widest - width(format(L.PRICE_LINE, name, quantity)))
-        / space + 0.5) or 0
+    local spaces = space > 0 and floor((widest - width(name)) / space + 0.5) or 0
     return rep(" ", max(spaces, 0))
 end
 
@@ -191,12 +190,13 @@ end
 ---@param amount number copper, for all `count` items
 ---@param count number how many items the price is for
 function ItemTooltip.AddPrice(tooltip, name, amount, count)
-    local quantity = format(L.PRICE_QUANTITY, count)
-    local label = format(L.PRICE_LINE, name, GRAY_FONT_COLOR:WrapTextInColorCode(quantity))
+    local quantity = GRAY_FONT_COLOR:WrapTextInColorCode(format(L.PRICE_QUANTITY, count))
+    local label = format(L.PRICE_LINE, name, quantity)
     local r, g, b = HIGHLIGHT_FONT_COLOR:GetRGB()
     if alignment == "inline" then
-        tooltip:AddLine(format(L.PRICE_INLINE, label .. padded(name, quantity), money(amount)),
-            r, g, b)
+        -- The padding goes before the quantity, so the "x20"s line up as well as the coins.
+        label = format(L.PRICE_LINE, name .. padding(name), quantity)
+        tooltip:AddLine(format(L.PRICE_INLINE, label, money(amount)), r, g, b)
     else
         tooltip:AddDoubleLine(label, money(amount), r, g, b, r, g, b)
     end
