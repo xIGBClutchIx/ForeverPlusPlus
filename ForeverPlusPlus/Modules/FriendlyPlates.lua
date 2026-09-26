@@ -1,5 +1,5 @@
--- Friendly player nameplates that always show the name (in class color, with the guild under
--- it), and show the health bar only while that player is hurt or in combat. Built on Blizzard's
+-- Friendly player nameplates that always show the name (in class color, with the guild and level
+-- beside it), and show the health bar only while that player is hurt or in combat. Built on Blizzard's
 -- own nameplates: the bar and name fade, and a label of ours shows while the bar is hidden.
 local _, ns = ...
 
@@ -12,22 +12,41 @@ local UnitAffectingCombat, UnitClass, GetGuildInfo = UnitAffectingCombat, UnitCl
 local UnitLevel = UnitLevel
 
 local module = ns.NewModule("FriendlyPlates",
-    "Friendly players always show their name and guild; the health bar shows only when hurt or in combat.",
+    "Always show friendly players' names. Their health bar appears only when they're hurt or in combat.",
     {
         enabled = false,
-        guild = true,
+        classColor = true,
+        barWhenHurt = true,
+        guildNames = "hidden", -- "hidden" (only without the bar), "always", or "off"
         level = "before", -- "before", "after", or "off"
         saved = {}, -- CVar -> the player's own value, put back when the module turns off
     })
+module.title = "Friendly Player Nameplates"
 
--- Extra checkboxes under this module's own in Settings (see Settings.lua).
+-- Extra settings under this module's checkbox in Settings (see Settings.lua).
 module.options = {
-    { key = "guild", name = "Guild names", description = "Show the guild under friendly player names." },
+    {
+        key = "barWhenHurt",
+        name = "Health Bar When Hurt",
+        description = "Show the health bar when a friendly player is missing health. "
+            .. "When off, it only shows in combat.",
+    },
+    {
+        key = "classColor",
+        name = "Class Colors",
+        description = "Color names by class while the health bar is hidden.",
+    },
+    {
+        key = "guildNames",
+        name = "Guild Names",
+        description = "Show the player's <Guild> under their name.",
+        choices = { { "hidden", "Without Health Bar" }, { "always", "Always" }, { "off", "Never" } },
+    },
     {
         key = "level",
         name = "Level",
-        description = "Where the level shows next to the name while the health bar is hidden.",
-        choices = { { "before", "Before the name" }, { "after", "After the name" }, { "off", "Hidden" } },
+        description = "Where the level shows while the health bar is hidden.",
+        choices = { { "before", "Before Name" }, { "after", "After Name" }, { "off", "Hidden" } },
     },
 }
 
@@ -256,7 +275,8 @@ local function layoutLabel(label, record, unit)
     local container = record.container
     matchFont(label, record.name)
     local _, class = UnitClass(unit)
-    local color = readable(class) and class and C_ClassColor and C_ClassColor.GetClassColor(class)
+    local color = module.db.classColor and readable(class) and class and C_ClassColor
+        and C_ClassColor.GetClassColor(class)
     if color then
         label.name:SetTextColor(color:GetRGB())
     else
@@ -295,7 +315,8 @@ local function layoutLabel(label, record, unit)
     else
         badge:Hide()
     end
-    local guild = module.db.guild and GetGuildInfo(unit)
+    local guildNames = module.db.guildNames
+    local guild = guildNames ~= "off" and GetGuildInfo(unit)
     label.name:ClearAllPoints()
     label.guild:ClearAllPoints()
     label.barGuild:ClearAllPoints()
@@ -306,7 +327,7 @@ local function layoutLabel(label, record, unit)
         label.guild:Show()
         label.barGuild:SetPoint("TOP", container, "BOTTOM", 0, -2)
         label.barGuild:SetFormattedText("<%s>", guild)
-        label.barGuild:Show()
+        label.barGuild:SetShown(guildNames == "always")
     else
         label.name:SetPoint("CENTER", container, "CENTER", shift, 0)
         label.guild:Hide()
@@ -357,29 +378,25 @@ local function update(unit)
     if not readable(inCombat) then
         inCombat = UnitAffectingCombat("player")
     end
-    local label = record.label
-    if inCombat or not curve then
-        record.container:SetAlpha(1)
-        if label then
-            fadeLevel(record, 1)
-        end
-        if label then
-            record.name:SetAlpha(1)
-            label:SetAlpha(0)
-            label.barGuildFrame:SetAlpha(1)
-        end
+    -- shown: the bar and everything that goes with it; hidden: our label, its opposite.
+    local shown, hidden
+    if inCombat then
+        shown, hidden = 1, 0
+    elseif not module.db.barWhenHurt then
+        shown, hidden = 0, 1
+    elseif not curve then
+        shown, hidden = 1, 0
     else
         -- The percent can be secret in combat, so the client maps it to an alpha, not Lua.
-        local shown = UnitHealthPercent(unit, true, curve)
-        record.container:SetAlpha(shown)
-        if label then
-            fadeLevel(record, shown)
-        end
-        if label then
-            record.name:SetAlpha(shown)
-            label.barGuildFrame:SetAlpha(shown)
-            label:SetAlpha(UnitHealthPercent(unit, true, inverse))
-        end
+        shown, hidden = UnitHealthPercent(unit, true, curve), UnitHealthPercent(unit, true, inverse)
+    end
+    record.container:SetAlpha(shown)
+    local label = record.label
+    if label then
+        fadeLevel(record, shown)
+        record.name:SetAlpha(shown)
+        label.barGuildFrame:SetAlpha(shown)
+        label:SetAlpha(hidden)
     end
 end
 
@@ -395,6 +412,7 @@ end
 function module:OnOptionChanged()
     for unit in pairs(plates) do
         refreshLabel(unit)
+        update(unit)
     end
 end
 

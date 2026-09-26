@@ -55,7 +55,7 @@ function ns.RegisterSettings()
         local module = ns.modules[name]
         -- A proxy setting reads and writes through the module, so /fpp and this page agree.
         local setting = Settings.RegisterProxySetting(category,
-            format("ForeverPlusPlus_%s", name), Settings.VarType.Boolean, name,
+            format("ForeverPlusPlus_%s", name), Settings.VarType.Boolean, module.title or name,
             module.defaults.enabled,
             function() return module.db.enabled end,
             function(value) ns.SetEnabled(name, value) end)

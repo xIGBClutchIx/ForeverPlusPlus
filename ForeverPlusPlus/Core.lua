@@ -87,7 +87,8 @@ end
 -- Modules -------------------------------------------------------------------------------------
 
 ---Creates a module: one change to the game's UI, switched on and off on its own. Give it
----`OnEnable` (and `OnDisable` if it can undo itself) and put its settings in `defaults`.
+---`OnEnable` (and `OnDisable` if it can undo itself) and put its settings in `defaults`. Set
+---`module.title` for a friendlier name in Settings (the name stays the /fpp key).
 ---@param name string shown in /fpp
 ---@param description string one line for /fpp
 ---@param defaults? table its settings; `enabled` defaults to true
