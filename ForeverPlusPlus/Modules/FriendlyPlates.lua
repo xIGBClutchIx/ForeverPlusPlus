@@ -11,6 +11,8 @@ local UnitIsPlayer, UnitIsFriend, UnitIsUnit = UnitIsPlayer, UnitIsFriend, UnitI
 local UnitAffectingCombat, UnitClass, GetGuildInfo = UnitAffectingCombat, UnitClass, GetGuildInfo
 local UnitLevel, UnitGUID, UnitInParty, UnitInRaid = UnitLevel, UnitGUID, UnitInParty, UnitInRaid
 local UnitIsInMyGuild, C_FriendList, C_BattleNet = UnitIsInMyGuild, C_FriendList, C_BattleNet
+local UnitGroupRolesAssigned, GetTexCoordsForRoleSmallCircle =
+    UnitGroupRolesAssigned, GetTexCoordsForRoleSmallCircle
 
 local module = ns.NewModule("FriendlyPlates",
     "Always show friendly players' names. Their health bar appears only when they're hurt or in combat.",
@@ -23,7 +25,7 @@ local module = ns.NewModule("FriendlyPlates",
         level = "before", -- "before", "after", or "off"
         guildHighlight = true,
         socialIcons = true,
-        iconStyle = "round", -- "round", "battlenet", or "markers"
+        groupIcon = "people", -- "people", "looking", or "role"
         testIcons = "off", -- debug: "off", "group", or "friend" on every friendly player
         saved = {}, -- CVar -> the player's own value, put back when the module turns off
     })
@@ -68,17 +70,17 @@ module.options = {
     {
         key = "socialIcons",
         name = "Group and Friend Icons",
-        description = "Show a small icon beside the names of your group members and friends "
-            .. "while the health bar is hidden.",
+        description = "Show an icon beside the names of your group members, and the Battle.net "
+            .. "logo beside your friends, while the health bar is hidden.",
     },
     {
-        key = "iconStyle",
-        name = "Icon Style",
-        description = "Which art the group and friend icons use.",
+        key = "groupIcon",
+        name = "Group Icon",
+        description = "Which icon group members get.",
         choices = {
-            { "round", "Round Icons" },
-            { "battlenet", "Battle.net Logo for Friends" },
-            { "markers", "Raid Markers" },
+            { "people", "Guild Crowd" },
+            { "looking", "Looking for Group" },
+            { "role", "Their Role (Tank, Healer, Damage)" },
         },
     },
     {
@@ -221,42 +223,56 @@ local LEVEL_GAP = 3 -- pixels between the name and the level
 local NPC_COLOR = { 0.1, 1, 0.1 } -- the green of friendly NPC names in the world
 local GUILDMATE_COLOR = { 0.25, 1, 0.25 } -- guild chat's green
 
--- Icons beside the name for group members and friends, one set per Icon Style. Each is a texture
--- file and whether to crop it round (spell-style icons, like a minimap button).
-local ICON_STYLES = {
-    round = {
-        group = { "Interface\\Icons\\INV_Misc_GroupNeedMore", true },
-        friend = { "Interface\\Icons\\Achievement_Reputation_01", true },
-    },
-    battlenet = {
-        group = { "Interface\\Icons\\INV_Misc_GroupNeedMore", true },
-        friend = { "Interface\\FriendsFrame\\Battlenet-Battleneticon", false },
-    },
-    markers = {
-        group = { "Interface\\TargetingFrame\\UI-RaidTargetingIcon_6", false }, -- blue square
-        friend = { "Interface\\TargetingFrame\\UI-RaidTargetingIcon_1", false }, -- yellow star
-    },
+-- Art for the icons beside the name. Friends get the Battle.net logo; group members get the
+-- Group Icon option's choice. `round` crops a spell-style icon round, like a minimap button;
+-- `role` picks that role from Blizzard's round role icons.
+local ICON_ART = {
+    battlenet = { file = "Interface\\FriendsFrame\\Battlenet-Battleneticon" },
+    people = { file = "Interface\\Icons\\Achievement_GuildPerk_EverybodysFriend", round = true },
+    looking = { file = "Interface\\Icons\\INV_Misc_GroupLooking", round = true },
+    TANK = { file = "Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES", role = "TANK" },
+    HEALER = { file = "Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES", role = "HEALER" },
+    DAMAGER = { file = "Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES", role = "DAMAGER" },
 }
 local ICON_ORDER = { "group", "friend" }
 local ICON_SCALE = 1.4 -- icon size against the name's font size
 local ROUND_MASK = "Interface\\CharacterFrame\\TempPortraitAlphaMask"
 
--- Sets an icon's art for the chosen style; only does the work when the style changed.
-local function styleIcon(icon, style)
-    local art = (ICON_STYLES[style] or ICON_STYLES.round)[icon.kind]
-    if icon.style == style then
+-- Which art an icon uses for this unit.
+local function iconArt(kind, unit)
+    if kind == "friend" then
+        return "battlenet"
+    end
+    local choice = module.db.groupIcon
+    if choice == "role" then
+        local role = UnitGroupRolesAssigned and UnitGroupRolesAssigned(unit)
+        -- No role (or not in a group, while testing) falls back to the people icon.
+        return readable(role) and ICON_ART[role] and role or "people"
+    end
+    return ICON_ART[choice] and choice or "people"
+end
+
+-- Sets an icon's art; only does the work when it changed.
+local function styleIcon(icon, key)
+    if icon.art == key then
         return
     end
-    icon.style = style
-    icon:SetTexture(art[1])
-    if art[2] then
+    icon.art = key
+    local art = ICON_ART[key]
+    icon:SetTexture(art.file)
+    if art.role and GetTexCoordsForRoleSmallCircle then
+        icon:SetTexCoord(GetTexCoordsForRoleSmallCircle(art.role))
+    elseif art.round then
         icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+    else
+        icon:SetTexCoord(0, 1, 0, 1)
+    end
+    if art.round then
         if not icon.masked then
             icon:AddMaskTexture(icon.mask)
             icon.masked = true
         end
     else
-        icon:SetTexCoord(0, 1, 0, 1)
         if icon.masked then
             icon:RemoveMaskTexture(icon.mask)
             icon.masked = false
@@ -453,7 +469,7 @@ local function layoutLabel(label, record, unit)
                     or kind == "group" and inGroup(unit) or kind == "friend" and isFriend(unit))
             icon:ClearAllPoints()
             if show then
-                styleIcon(icon, module.db.iconStyle)
+                styleIcon(icon, iconArt(kind, unit))
                 icon:SetSize(size, size)
                 if iconsLeft then
                     icon:SetPoint("RIGHT", previous, "LEFT", -LEVEL_GAP, 0)

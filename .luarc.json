@@ -32,6 +32,8 @@
     "UnitInRaid",
     "UnitIsInMyGuild",
     "C_FriendList",
-    "C_BattleNet"
+    "C_BattleNet",
+    "UnitGroupRolesAssigned",
+    "GetTexCoordsForRoleSmallCircle"
   ]
 }
