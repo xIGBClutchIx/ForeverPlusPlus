@@ -179,6 +179,12 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 
 - `GetSheathState()` (1 nothing drawn, 2 melee, 3 ranged) and `ToggleSheath()` are there, and `ToggleSheath()` works from a `C_Timer` callback with no key press. One toggle puts away everything drawn. `hooksecurefunc("ToggleSheath", fn)` sees the Sheath/Unsheath key. **[addon]** (AutoStow 1.2.2 `AutoStow.lua`, which stows out of combat on a timer) Not yet tested by us in the live client.
 
+## Gossip
+
+- `GOSSIP_SHOW` and `C_GossipInfo.GetActiveQuests` / `GetAvailableQuests` / `SelectActiveQuest` / `SelectAvailableQuest` are used on Forever. **[addon]** (BleakfibersQuestTracker `SocialModule.lua`) No installed addon reads `C_GossipInfo.GetOptions`.
+- The AutoGossip module assumes Retail's option table (`gossipOptionID`, `name`, `icon`, `status`, `rewards`, `spellID`, `flags`, `selectOptionWhenOnlyOption`), `C_GossipInfo.SelectOption(gossipOptionID)`, and the Classic gossip icon file IDs (banker 132050, innkeeper 132052, flight master 132057, trainer 132058, vendor 132060). All **Unverified** on Forever. Its Debug option prints every option's icon and status. Probe at an NPC: `/run for _,o in ipairs(C_GossipInfo.GetOptions())do print(o.gossipOptionID,o.icon,o.status,o.flags,o.spellID,o.selectOptionWhenOnlyOption,o.name)end`
+- Auctioneers and stable masters are told apart by the title under their name (line 2 of `C_TooltipInfo.GetUnit("npc")`), since Classic gives them no icon of their own. **Unverified** on Forever: `/run local d=C_TooltipInfo.GetUnit("npc")print(d and d.lines[2] and d.lines[2].leftText)`
+
 ## Fonts
 
 - Text measured before its font file has loaded reads as 0 tall on Forever, even after preloading. Measure with a floor of the font size. **[in-game]** (ClutchUI `Style.TextHeight`, `docs/fonts.md`)

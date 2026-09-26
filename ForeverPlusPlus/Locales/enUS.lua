@@ -199,6 +199,35 @@ L.AUTOSTOW_DELAY = "Delay"
 L.AUTOSTOW_DELAY_DESC = "How long after combat to wait before putting your weapons away."
 L.AUTOSTOW_SECONDS = "%d Seconds" -- number of seconds
 
+-- AutoGossip
+L.AUTOGOSSIP_TITLE = "Auto Gossip"
+L.AUTOGOSSIP_DESC = "When an NPC has only one thing to say and no quests, pick it for you, so "
+    .. "the bank, shop, or flight map opens straight away. Hold Shift to skip it."
+L.AUTOGOSSIP_BANKER = "Bankers"
+L.AUTOGOSSIP_BANKER_DESC = "Open the bank."
+L.AUTOGOSSIP_VENDOR = "Vendors and Repairs"
+L.AUTOGOSSIP_VENDOR_DESC = "Open the shop."
+L.AUTOGOSSIP_TRAINER = "Trainers"
+L.AUTOGOSSIP_TRAINER_DESC = "Open the trainer's list."
+L.AUTOGOSSIP_TAXI = "Flight Masters"
+L.AUTOGOSSIP_TAXI_DESC = "Open the flight map."
+L.AUTOGOSSIP_INNKEEPER = "Innkeepers"
+L.AUTOGOSSIP_INNKEEPER_DESC = "Pick the innkeeper's only option (setting your home asks first)."
+L.AUTOGOSSIP_AUCTION = "Auction House"
+L.AUTOGOSSIP_AUCTION_DESC = "Open the auction house."
+L.AUTOGOSSIP_STABLE = "Stable Masters"
+L.AUTOGOSSIP_STABLE_DESC = "Open the stable."
+L.AUTOGOSSIP_OTHER = "Other NPCs"
+L.AUTOGOSSIP_OTHER_DESC = "Pick the only option of any other NPC."
+L.AUTOGOSSIP_PRINT = "Print Gossip Options"
+L.AUTOGOSSIP_PRINT_DESC = "Print every gossip option in chat with its icon and status, to check "
+    .. "which kind of NPC it counts as."
+L.AUTOGOSSIP_PRINT_HEADER = "Gossip options (title: %s):" -- NPC's title under the name
+L.AUTOGOSSIP_PRINT_LINE = "  %s  icon=%s status=%s flags=%s  %s" -- id, icon, status, flags, name
+-- The title under an NPC's name, exactly as the game shows it, to tell these NPCs apart.
+L.AUTOGOSSIP_TITLE_AUCTIONEER = "Auctioneer"
+L.AUTOGOSSIP_TITLE_STABLE = "Stable Master"
+
 -- CVarBrowser
 L.CVARBROWSER_TITLE = "Console Variables"
 L.CVARBROWSER_DESC = "Browse the game's console variables (CVars) on a page in Settings, and "

@@ -27,5 +27,6 @@ Modules\DurabilityBars.lua
 Modules\HideFeedback.lua
 Modules\GatherTracking.lua
 Modules\AutoStow.lua
+Modules\AutoGossip.lua
 Settings.lua
 Init.lua
