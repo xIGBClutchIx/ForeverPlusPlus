@@ -12,6 +12,7 @@ mklink /J "D:\BattleNet\World of Warcraft\_classic_beta_\Interface\AddOns\Foreve
 
 ## Use
 
+- Game Menu > Options > AddOns > Forever++ has a checkbox for each module.
 - `/fpp` lists the modules and whether each is on.
 - `/fpp toggle <name>` turns one on or off.
 - `/fpp reset` puts every setting back to its default and reloads.
@@ -23,6 +24,7 @@ mklink /J "D:\BattleNet\World of Warcraft\_classic_beta_\Interface\AddOns\Foreve
 | `ForeverPlusPlus.toc` | Load order and metadata; `## Interface: 16001` (Forever) |
 | `Core.lua` | The shared namespace: events (`ns.On`, `ns.Off`), saved settings, modules (`ns.NewModule`), `/fpp`, `ns.Print` |
 | `Modules/*.lua` | One change each. `Example.lua` is a template |
+| `Settings.lua` | The Forever++ page in Settings > AddOns, one checkbox per module |
 | `Init.lua` | Loaded last; starts the modules at `PLAYER_LOGIN` |
 
 Settings are saved in `ForeverPlusPlusDB`, one table per module (`ForeverPlusPlusDB.modules.<Name>`), filled from the module's defaults.

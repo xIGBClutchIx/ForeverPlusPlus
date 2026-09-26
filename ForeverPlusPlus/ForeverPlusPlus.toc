@@ -8,4 +8,5 @@
 
 Core.lua
 Modules\Example.lua
+Settings.lua
 Init.lua

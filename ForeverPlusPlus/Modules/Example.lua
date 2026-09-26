@@ -3,7 +3,7 @@
 local _, ns = ...
 
 local module = ns.NewModule("Example", "Says hello when you log in.", {
-    enabled = false, -- off until you turn it on with /fpp toggle example
+    enabled = true,
     greeting = "Hello from Forever++!",
 })
 

@@ -3,4 +3,5 @@ local _, ns = ...
 
 ns.On("PLAYER_LOGIN", function()
     ns.Start()
+    ns.RegisterSettings()
 end)

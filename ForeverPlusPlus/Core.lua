@@ -194,6 +194,7 @@ SlashCmdList.FOREVERPLUSPLUS = function(message)
             return
         end
         ns.SetEnabled(module.name, not module.db.enabled)
+        ns.RefreshSetting(module.name)
         ns.Print(format("%s is %s.", module.name, module.db.enabled and "on" or "off"))
     elseif command == "reset" then
         ForeverPlusPlusDB = nil
