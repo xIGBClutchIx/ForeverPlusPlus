@@ -9,6 +9,7 @@ local _, ns = ...
 local ipairs, format = ipairs, string.format
 
 local InCombatLockdown = InCombatLockdown
+local L = ns.L
 
 local settings = {} -- module name -> its Blizzard setting objects, to refresh after /fpp toggle
 local mainCategory -- the Forever++ page, for /fpp
@@ -93,7 +94,7 @@ function ns.RegisterSettings()
     end
     local category, layout = Settings.RegisterVerticalLayoutCategory(ns.title)
     local subpages = Settings.RegisterVerticalLayoutSubcategory ~= nil
-    addHeader(layout, "Modules")
+    addHeader(layout, L.MODULES)
     for _, name in ipairs(ns.order) do
         local module = ns.modules[name]
         local parent = addToggle(category, module, "")
@@ -112,7 +113,7 @@ function ns.RegisterSettings()
         local module = ns.modules[name]
         if hasOptions(module, true) then
             if debugPage == category and subpages then
-                debugPage, debugLayout = Settings.RegisterVerticalLayoutSubcategory(category, "Debug")
+                debugPage, debugLayout = Settings.RegisterVerticalLayoutSubcategory(category, L.DEBUG)
             end
             addHeader(debugLayout, module.title or name)
             addOptions(debugPage, module, nil, true)
@@ -129,7 +130,7 @@ function ns.OpenSettings()
         return false
     end
     if InCombatLockdown() then
-        ns.Print("Settings open after combat.")
+        ns.Print(L.SETTINGS_AFTER_COMBAT)
     end
     ns.AfterCombat(function()
         Settings.OpenToCategory(mainCategory:GetID())

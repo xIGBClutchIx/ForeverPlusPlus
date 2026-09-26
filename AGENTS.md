@@ -24,7 +24,8 @@ Names:
 
 - `ForeverPlusPlus/`: the shipped addon folder, linked into the client's `Interface\AddOns`.
   - `ForeverPlusPlus.toc`: metadata and load order.
-  - `Core.lua`: the shared `ns`: events (`ns.On`, `ns.Off`), `ns.AfterCombat`, saved settings, modules (`ns.NewModule`, `ns.SetEnabled`), `/fpp`, `ns.Print`.
+  - `Core.lua`: the shared `ns`: events (`ns.On`, `ns.Off`), `ns.AfterCombat`, saved settings, modules (`ns.NewModule`, `ns.SetEnabled`), `/fpp`, `ns.Print`, and the locale table `ns.L`.
+  - `Locales/*.lua`: player-facing text. `enUS.lua` has every key and is the fallback; another language's file sets only the keys it translates.
   - `Lib/*.lua`: shared services any module can use, loaded before the modules. `Secret.lua` (`ns.IsReadable`, `ns.HealthStepCurve`), `CVars.lua` (`ns.CVars`: set CVars and put the player's values back, waiting out combat), `Nameplates.lua` (`ns.Nameplates`: plate added/removed/cast callbacks and Forever's plate parts), `Units.lua` (`ns.Units`: in my group, a friend, a guildmate). They cost nothing until a module uses them.
   - `Modules/`: one change each (see "Add a module" in `README.md`). A small module is one file; a bigger one gets a folder of files that share `module.internal`.
   - `Settings.lua`: the Settings pages (main, one per module with options, Debug).
@@ -69,7 +70,7 @@ When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or f
 - Plumbing that a second module could want (tracking nameplates, changing CVars, secret-value helpers) goes in `Lib/`, not inside a module. Modules never reach into each other; they share only `Lib/` and `Core.lua`.
 - Default to on only for changes nearly everyone wants; otherwise `enabled = false`.
 - When replacing behavior, delete the old path. No compatibility shims or migrations for unreleased settings.
-- Add a new file to the TOC, after `Core.lua` and before `Init.lua`: `Lib/` files before `Modules/`.
+- Add a new file to the TOC, after `Core.lua` and before `Init.lua`: `Locales/` first (`enUS.lua` before other languages), then `Lib/`, then `Modules/`.
 - Update `README.md` in the same change when commands, install steps, or the layout change.
 - Record things learned about the Forever client in `docs/forever-api.md`, tagged with how you know. Promote a fact to "How Forever differs from Classic" above only when it changes how code must be written.
 
@@ -84,6 +85,7 @@ When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or f
 - Read settings from `module.db`, filled from the defaults passed to `ns.NewModule`.
 - Annotate public functions with LuaLS `---@param` / `---@return`. Match the comment style of `Core.lua`: short, plain, and saying why.
 - Player-facing text goes through `ns.Print` and stays short.
+- Every player-facing string (chat, Settings names, descriptions, dropdown choices) is `ns.L.KEY`, with the English in `Locales/enUS.lua`. Prefix a module's keys with its name (`FRIENDLYPLATES_...`). Use `%s` placeholders instead of joining pieces, since word order differs between languages.
 
 ## Touching Blizzard's UI
 

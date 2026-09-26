@@ -3,7 +3,7 @@
 local addonName, ns = ...
 
 local pairs, type, print, format = pairs, type, print, string.format
-local InCombatLockdown = InCombatLockdown
+local InCombatLockdown, GetLocale = InCombatLockdown, GetLocale
 
 ns.name = addonName
 ns.title = "Forever++"
@@ -14,6 +14,30 @@ ns.order = {}
 ---@param message string
 function ns.Print(message)
     print(format("|cff33d0ffForever++|r %s", message))
+end
+
+-- Locale --------------------------------------------------------------------------------------
+-- ns.L.KEY is player-facing text in the client's language. Every key is in Locales/enUS.lua;
+-- another locale's file sets only what it translates, and the rest falls back to enUS.
+
+local enUS = {}
+local L = setmetatable({}, {
+    __index = function(_, key)
+        return enUS[key] or key -- a missing key shows as itself instead of erroring
+    end,
+})
+ns.L = L
+
+---Returns the table a locale file fills with its strings, or nil when the client uses another
+---language (the file then stops). enUS is always filled, since it's the fallback.
+---@param locale string a GetLocale() code, such as "enUS" or "deDE"
+---@return table|nil
+function ns.NewLocale(locale)
+    if locale == "enUS" then
+        return enUS
+    elseif locale == GetLocale() then
+        return L
+    end
 end
 
 -- Events --------------------------------------------------------------------------------------
@@ -181,7 +205,7 @@ local function disable(module)
         module:OnDisable()
         module.applied = false
     else
-        ns.Print(format("%s turns fully off after /reload.", module.name))
+        ns.Print(format(L.OFF_AFTER_RELOAD, module.name))
     end
 end
 
@@ -236,10 +260,11 @@ local function findModule(query)
 end
 
 local function list()
-    ns.Print("modules (/fpp toggle <name>, /fpp list):")
+    ns.Print(L.SLASH_MODULES)
     for _, name in pairs(ns.order) do
         local module = ns.modules[name]
-        local state = module.db.enabled and "|cff44dd44on|r" or "|cffdd4444off|r"
+        local state = module.db.enabled and format("|cff44dd44%s|r", L.ON)
+            or format("|cffdd4444%s|r", L.OFF)
         print(format("  %s  %s  |cff999999%s|r", state, name, module.description))
     end
 end
@@ -252,18 +277,18 @@ SlashCmdList.FOREVERPLUSPLUS = function(message)
     if command == "toggle" and rest then
         local module = findModule(rest)
         if not module then
-            ns.Print("no module called " .. rest)
+            ns.Print(format(L.NO_MODULE, rest))
             return
         end
         ns.SetEnabled(module.name, not module.db.enabled)
         ns.RefreshSetting(module.name)
-        ns.Print(format("%s is %s.", module.name, module.db.enabled and "on" or "off"))
+        ns.Print(format(L.MODULE_STATE, module.name, module.db.enabled and L.ON or L.OFF))
     elseif command == "reset" then
         ForeverPlusPlusDB = nil
         ReloadUI()
     elseif command == "list" or command == "help" or not ns.OpenSettings() then
         list()
-        print("  /fpp  |cff999999open the settings|r")
-        print("  /fpp reset  |cff999999all settings back to defaults (reloads)|r")
+        print(format("  /fpp  |cff999999%s|r", L.SLASH_OPEN))
+        print(format("  /fpp reset  |cff999999%s|r", L.SLASH_RESET))
     end
 end
