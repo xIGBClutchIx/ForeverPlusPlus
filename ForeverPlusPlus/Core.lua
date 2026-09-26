@@ -48,15 +48,19 @@ end
 ---@param event string
 ---@param fn function
 function ns.Off(event, fn)
-    local list = handlers[event]
-    if not list then
+    local old = handlers[event]
+    if not old then
         return
     end
-    for i = #list, 1, -1 do
-        if list[i] == fn then
-            table.remove(list, i)
+    -- Build a new list instead of removing in place: a handler may call this while OnEvent is
+    -- still looping over the old one, and shifting it would skip or call a missing entry.
+    local list = {}
+    for i = 1, #old do
+        if old[i] ~= fn then
+            list[#list + 1] = old[i]
         end
     end
+    handlers[event] = list
     if #list == 0 then
         handlers[event] = nil
         events:UnregisterEvent(event)
@@ -106,9 +110,11 @@ local function enable(module)
         return
     end
     module.enabled = true
-    if module.OnEnable then
+    -- A module without OnDisable stays applied after it turns off, so don't apply it twice.
+    if module.OnEnable and not module.applied then
         module:OnEnable()
     end
+    module.applied = true
 end
 
 local function disable(module)
@@ -118,6 +124,7 @@ local function disable(module)
     module.enabled = false
     if module.OnDisable then
         module:OnDisable()
+        module.applied = false
     else
         ns.Print(format("%s turns fully off after /reload.", module.name))
     end
