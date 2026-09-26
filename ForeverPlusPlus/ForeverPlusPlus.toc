@@ -20,5 +20,6 @@ Modules\CVarBrowser.lua
 Modules\FastLoot.lua
 Modules\AutoRepair.lua
 Modules\AuctionPrices.lua
+Modules\DurabilityBars.lua
 Settings.lua
 Init.lua

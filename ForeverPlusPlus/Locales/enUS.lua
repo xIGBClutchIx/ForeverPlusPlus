@@ -104,6 +104,11 @@ L.AUCTIONPRICES_SCANNED = "Auction prices updated for %d items." -- count
 L.AUCTIONPRICES_LINE = "Auction:"
 L.AUCTIONPRICES_STACK_LINE = "Auction (%d):" -- stack size
 
+-- DurabilityBars
+L.DURABILITYBARS_TITLE = "Durability Bars"
+L.DURABILITYBARS_DESC = "Show a small bar beside each item on the character window with how "
+    .. "worn it is, from green to red."
+
 -- CVarBrowser
 L.CVARBROWSER_TITLE = "Console Variables"
 L.CVARBROWSER_DESC = "Browse the game's console variables (CVars) on a page in Settings, and "

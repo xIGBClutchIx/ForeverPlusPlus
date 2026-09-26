@@ -64,6 +64,9 @@
     "C_Item",
     "GetRealmName",
     "UnitFactionGroup",
-    "TooltipDataProcessor"
+    "TooltipDataProcessor",
+    "GetInventorySlotInfo",
+    "GetInventoryItemDurability",
+    "PaperDollItemsFrame"
   ]
 }
