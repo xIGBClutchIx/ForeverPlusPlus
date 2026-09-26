@@ -80,6 +80,11 @@
     "C_AddOns",
     "GetAddOnMetadata",
     "PTR_IssueReporter",
-    "ItemRefTooltip"
+    "ItemRefTooltip",
+    "C_Minimap",
+    "UnitIsDeadOrGhost",
+    "UnitOnTaxi",
+    "UnitCastingInfo",
+    "UnitChannelInfo"
   ]
 }

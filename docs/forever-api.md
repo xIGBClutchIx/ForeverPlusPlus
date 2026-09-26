@@ -166,6 +166,15 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 - Fast looting works the Retail way: `LOOT_READY`, then `LootSlot(i)` from `GetNumLootItems()` down to 1, when `autoLootDefault` differs from `IsModifiedClick("AUTOLOOTTOGGLE")`. **[addon]** (Leatrix_Plus `Leatrix_Plus.lua`, BleakfibersQuestTracker `SocialModule.lua`)
 - `CanMerchantRepair`, `GetRepairAllCost`, `RepairAllItems(guildBank)`, `CanGuildBankRepair` and `IsInGuild` are there. **[addon]** (Leatrix_Plus `Leatrix_Plus.lua`, repairs at `MERCHANT_SHOW`) `GetGuildBankWithdrawMoney` returning -1 for no limit, and a failed guild bank repair raising `UI_ERROR_MESSAGE` (the AutoRepair module's fallback to the player's own money), are Retail behavior and **Unverified** on Forever.
 
+## Minimap tracking
+
+- `C_Minimap.GetNumTrackingTypes()` and `C_Minimap.GetTrackingInfo(i)` work, and the info is a table with `name`, `active`, `type`, and `spellID` (Find Herbs 2383, Find Minerals 2580). It has no secret values, in or out of combat. **[addon]** (GatherSkillTooltip `Warnings.lua`, `Data.lua`; AutoTrackers `AutoTrackers.lua`)
+- `C_Minimap.SetTracking(i, true)` turns a tracking spell on, called from a `C_Timer` callback with no keypress. **[addon]** (AutoTrackers restores the saved tracker from a 3 second ticker, out of combat and while alive; installed here with Find Minerals saved on three characters) **[in-game]** (2026-09-26, build 70009: `/run` turned Find Minerals off, and `SetTracking` from a 2 second `C_Timer.After` turned it back on, on foot) Whether it works mounted is **Unverified**.
+- The info's `type` is `"spell"` for tracking spells and `"other"` for the town and quest filters (Auctioneer, Flight Master, Track Quest POIs, ...), which have no `spellID`. **[in-game]** (2026-09-26, `/run` listing every entry)
+- Blizzard shows nothing on screen when tracking changes. A centered "Find Minerals is off" comes from GatherSkillTooltip's tracking warning, not the client. **[local]** (GatherSkillTooltip `Locales/enUS.lua` `SPELL_OFF`)
+- Only one tracking spell is on at a time, as in Classic: turning on Find Herbs turns off Find Minerals. **[addon]** (GatherSkillTooltip treats either one being on as enough when the player has both skills) **Unverified** in game.
+- Tracking is lost on death and needs turning back on after resurrection. **[addon]** (AutoTrackers restores on `PLAYER_ALIVE` / `PLAYER_UNGHOST`)
+
 ## Fonts
 
 - Text measured before its font file has loaded reads as 0 tall on Forever, even after preloading. Measure with a floor of the font size. **[in-game]** (ClutchUI `Style.TextHeight`, `docs/fonts.md`)
@@ -178,6 +187,7 @@ Check these in the live client and move them up with a tag and date:
 - [x] `[AllowLoadGameType camelot]` loads on Forever and `standard` doesn't. (2026-09-25)
 - [ ] Does `ConsoleGetAllCommands()` list every CVar on Forever, or only some?
 - [ ] Is `ReloadUI()` blocked when called from an addon's own button? (From `/run` it works.)
+- [ ] Does `C_Minimap.SetTracking` from a timer swap Find Minerals and Find Herbs, mounted and not, without an error or a dismount?
 - [x] Secure snippets run on 70009. (2026-09-25)
 - [x] `Settings.RegisterAddOnCategory`, `Menu.ModifyMenu`, and `TooltipDataProcessor.AddTooltipPostCall` are present. (2026-09-25)
 - [x] `C_SpecializationInfo.GetSpecializationInfo(1)` returns a class-level spec with 0 points. (2026-09-25, see Talents)

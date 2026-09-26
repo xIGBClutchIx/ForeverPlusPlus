@@ -168,6 +168,28 @@ L.HIDEFEEDBACK_TITLE = "Hide Beta Feedback"
 L.HIDEFEEDBACK_DESC = "Hide the beta's \"Press F6 to submit an issue\" line on tooltips and its "
     .. "bug report button. F6 still reports an issue."
 
+-- GatherTracking
+L.GATHERTRACKING_TITLE = "Gathering Tracking"
+L.GATHERTRACKING_DESC = "Keep Find Minerals or Find Herbs on: turn it back on after logging in, "
+    .. "zoning, or dying, and swap between the two if you like."
+L.GATHERTRACKING_TRACK = "Track"
+L.GATHERTRACKING_TRACK_DESC = "Which tracking to keep on. Only one tracks at a time, so with "
+    .. "both, swapping shows each in turn."
+L.GATHERTRACKING_TRACK_BOTH = "Minerals and Herbs"
+L.GATHERTRACKING_TRACK_MINERALS = "Minerals Only"
+L.GATHERTRACKING_TRACK_HERBS = "Herbs Only"
+L.GATHERTRACKING_REAPPLY = "Turn Back On"
+L.GATHERTRACKING_REAPPLY_DESC = "After logging in, zoning, or coming back to life, turn tracking "
+    .. "back on if nothing is being tracked. Turning it off yourself lasts until then."
+L.GATHERTRACKING_SWAP = "Swap"
+L.GATHERTRACKING_SWAP_DESC = "With both chosen, swap between Find Minerals and Find Herbs while "
+    .. "one of them is on. Waits during combat, casting, and flights."
+L.GATHERTRACKING_SWAP_OFF = "Never"
+L.GATHERTRACKING_SWAP_EVERY = "Every %d Seconds" -- seconds
+L.GATHERTRACKING_FAILED = "Gathering Tracking couldn't change tracking: %s" -- error
+L.GATHERTRACKING_BLOCKED = "The game blocked Gathering Tracking from changing tracking. It stops "
+    .. "until /reload."
+
 -- CVarBrowser
 L.CVARBROWSER_TITLE = "Console Variables"
 L.CVARBROWSER_DESC = "Browse the game's console variables (CVars) on a page in Settings, and "
