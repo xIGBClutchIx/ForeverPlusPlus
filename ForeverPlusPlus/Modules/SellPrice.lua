@@ -14,8 +14,6 @@ local module = ns.NewModule("SellPrice", L.SELLPRICE_DESC,
 module.title = L.SELLPRICE_TITLE
 module.options = ItemTooltip.PriceOptions({})
 
-ItemTooltip.AddName(SELL_PRICE)
-
 -- One item's vendor price. Item info has it per item; the line's own price is the fallback
 -- while item info isn't cached (Forever's line prices one item).
 local function unitPrice(data, lineData)

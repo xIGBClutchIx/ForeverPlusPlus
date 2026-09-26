@@ -15,7 +15,6 @@ local StaticPopupDialogs, StaticPopup_Show, YES, NO = StaticPopupDialogs, Static
 
 local L = ns.L
 local ItemTooltip = ns.ItemTooltip
-ItemTooltip.AddName(L.AUCTIONPRICES_LINE)
 
 local SCAN_INTERVAL = 15 * 60 -- seconds between automatic scans, as Auctionator waits
 

@@ -20,6 +20,7 @@ local providers = {} -- fn(tooltip, data), in the order added
 local replacer -- fn(tooltip, data, lineData) -> true when it drew the sell price line
 local done = setmetatable({}, { __mode = "k" }) -- tooltip -> price lines already added
 local current = setmetatable({}, { __mode = "k" }) -- tooltip -> item data being drawn
+local widest = setmetatable({}, { __mode = "k" }) -- tooltip -> widest price line name so far
 
 -- The item a line belongs to: from the item pre call, or else the tooltip's own data (probe:
 -- GetPrimaryTooltipData is Mainline's tooltip data mixin).
@@ -58,6 +59,7 @@ end
 local function onItemPre(tooltip, data)
     current[tooltip] = data
     done[tooltip] = nil
+    widest[tooltip] = nil
 end
 
 local function onItem(tooltip, data)
@@ -66,6 +68,7 @@ local function onItem(tooltip, data)
     end
     done[tooltip] = nil
     current[tooltip] = nil
+    widest[tooltip] = nil
 end
 
 -- Redraws the item tooltip when Shift goes up or down, so lines that depend on it change.
@@ -146,22 +149,17 @@ end
 
 -- Alignment ----------------------------------------------------------------------------------
 -- "right": coins against the tooltip's right edge. "inline": coins right after the label. Either
--- way the names are padded with a blank texture as wide as the gap, so every price line's
--- quantity starts in the same column (spaces only got within a space's width).
+-- way a name is padded with a blank texture out to the widest price line above it in the same
+-- tooltip, so the quantities line up (spaces only got within a space's width). A line with no
+-- price line above it, such as Auction on an item with no sell price, isn't padded. The sell
+-- price comes first and is the longest name, so the lines above are all it needs to look at.
 
 -- Blizzard's transparent texture, drawn as a gap of any width inside text.
 local SPACER = "|TInterface\\Common\\spacer:1:%d|t"
 
-local names = {} -- every price line's name, to pad to the widest
 local measure -- our own hidden font string, for label widths
 
 local COLORS = { gray = GRAY_FONT_COLOR, white = HIGHLIGHT_FONT_COLOR, gold = NORMAL_FONT_COLOR }
-
----Registers a price line's name, so inline coins can line up with it.
----@param name string
-function ItemTooltip.AddName(name)
-    names[#names + 1] = name
-end
 
 local function width(text)
     if not measure then
@@ -172,13 +170,11 @@ local function width(text)
     return measure:GetStringWidth()
 end
 
--- A gap that pads the name out to the widest registered name.
-local function padding(name)
-    local widest = 0
-    for _, other in ipairs(names) do
-        widest = max(widest, width(other))
-    end
-    local gap = floor(widest - width(name) + 0.5)
+-- A gap that pads the name out to the widest price line name above it in this tooltip.
+local function padding(tooltip, name)
+    local own = width(name)
+    local gap = floor((widest[tooltip] or own) - own + 0.5)
+    widest[tooltip] = max(widest[tooltip] or 0, own)
     return gap > 0 and format(SPACER, gap) or ""
 end
 
@@ -194,7 +190,7 @@ function ItemTooltip.AddPrice(tooltip, name, amount, count, db)
     local color = COLORS[db.color] or GRAY_FONT_COLOR
     local quantity = color:WrapTextInColorCode(format(L.PRICE_QUANTITY, count))
     -- The padding goes before the quantity, so the "x20"s line up.
-    local label = format(L.PRICE_LINE, name .. padding(name), quantity)
+    local label = format(L.PRICE_LINE, name .. padding(tooltip, name), quantity)
     local r, g, b = HIGHLIGHT_FONT_COLOR:GetRGB()
     if db.align == "inline" then
         tooltip:AddLine(format(L.PRICE_INLINE, label, money(amount)), r, g, b)
