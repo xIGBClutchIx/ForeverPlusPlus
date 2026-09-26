@@ -39,16 +39,16 @@ Use the interface number with both ends of a range: `local iface = select(4, Get
 ## TOC and loading
 
 - Ship one plain `ForeverPlusPlus.toc` with `## Interface: 16001`. That works. **[local]** (this addon loads and saves)
-- **TOC suffixes: sources disagree. Unverified.**
-  - warcraft.wiki.gg says the client picks expansion suffixes (`_Camelot`, `_Standard`, ...) over family suffixes (`_Mainline`, `_Classic`), over the plain name. **[web]**
-  - Cameron's test on 2026-09-23 (with `_Mainline` 120100, `_Camelot` 16001, and plain 16001 all present) loaded **`_Mainline`**. **[in-game]** (ClutchUI `docs/flavors.md`)
-  - Several installed addons ship a `_Camelot.toc` (AutoStow, AzerothCompendium, Chatify, Manners, MapUtils, TwitchEmotes, WhisperMessenger). **[local]** None of that proves which file loaded.
-  - Until retested, don't rely on suffixes. `AGENTS.md` already says to ship one plain TOC.
+- **TOC suffixes: `_Camelot` wins on build 70009.** A test addon with `FppTocProbe.toc`, `FppTocProbe_Camelot.toc`, and `FppTocProbe_Mainline.toc`, all at 16001, loaded **`_Camelot`**. **[in-game]** (2026-09-25)
+  - That matches warcraft.wiki.gg: expansion suffixes (`_Camelot`, `_Standard`, ...) beat family suffixes (`_Mainline`, `_Classic`), which beat the plain name. **[web]**
+  - An earlier test on 2026-09-23 (`_Mainline` at 120100, `_Camelot` and plain at 16001) loaded **`_Mainline`**. **[in-game]** (ClutchUI `docs/flavors.md`) Either the build changed or the setup differed. Recheck after patches.
+  - Installed addons that ship a `_Camelot.toc`: AutoStow, AzerothCompendium, Chatify, Manners, MapUtils, TwitchEmotes, WhisperMessenger. **[local]**
 - **Per-file load conditions** in the TOC file list: `file.lua [AllowLoadGameType camelot]` and `[ExcludeLoadGameType ...]`.
   - The wiki lists game type `camelot` = Forever, `standard` = Midnight only, `mainline` = Midnight **and** Forever (plus Plunderstorm and other modes), `classic` = the Classic expansions. **[web]**
   - BugSack (`forever.lua [ExcludeLoadGameType standard, classic][AllowLoadGameType camelot]`), Auctionator (`Source_Forever\Constants.lua`), and AlreadyKnown (`[AllowLoadGameType classic, camelot]`) rely on this. **[addon]**
   - Auctionator also loads `[AllowLoadGameType mainline]` files on Forever and branches on `IsForever` inside them, which fits `mainline` including Forever. **[addon]**
-  - So `camelot` looks like a real load-time way to split Forever-only files from Retail. ClutchUI's doc says `mainline` can't do this, which is true, but it didn't test `camelot`. **Unverified by us.**
+  - Tested on Forever: `[AllowLoadGameType camelot]` and `[AllowLoadGameType mainline]` load, `[AllowLoadGameType standard]` and `[AllowLoadGameType classic]` don't, and `[ExcludeLoadGameType standard]` loads. **[in-game]** (2026-09-25, FppTocProbe)
+  - So `camelot` (or excluding `standard`) splits Forever-only files from Retail at load time. `mainline` can't, since it matches both. That Retail skips `camelot` files comes from the wiki **[web]**; we didn't run the probe on Retail.
 - `## Category`, `## IconTexture`, localized `## Title-xxXX` / `## Notes-xxXX` fields are used by installed Forever addons. **[addon]**
 
 ## SavedVariables
@@ -111,6 +111,14 @@ From the dumps **[dump]**: `C_AddOns`, `C_Item`, `C_Spell`, `C_Container`, `C_Un
   - So the "spec" is the whole class: the name is the class name, the description is empty, and `pointsSpent` was 0 with 6 points spent in Arms. It doesn't count talent points, so it can't find a talent tree.
   - D4Lib picks the tree with the most `pointsSpent` as the player's "spec" **[addon]**. Given the result above, that finds nothing, and it passes a table where the dump documents positional arguments.
 - Spec IDs are new (Warrior 1491 **[in-game]**; Paladin 1486 **[web]**), so Retail spec-ID tables are wrong here.
+- Talent points live in `C_Traits`, in a config of a Forever-only type. **[in-game]** (2026-09-25, Warrior with 6 points in Arms)
+  - `Enum.TraitConfigType` has `Invalid 0, Combat 1, Profession 2, Generic 3, CamelotCombat 4`.
+  - `C_ClassTalents.GetActiveConfigID()` returned a `CamelotCombat` config named `"Warrior"` with a single tree, `treeIDs = { 1117 }`. There is no Retail-style `Combat` config.
+  - `C_Traits.GetTreeCurrencyInfo(configID, 1117, false)` returned one currency (3820) with `spent = 6, quantity = 0, maxQuantity = 6`. That's the total across all three talent tabs, not per tab.
+  - The tabs are trait **groups**. `C_Traits.GetGroupDisplayInfoByTreeID(1117)` returned three entries with `groupID`, `displayName`, `icon`, `orderIndex`, and `skillLineID`: Arms 11650, Fury 11657, Protection 11670.
+  - Purchased nodes (`C_Traits.GetNodeInfo(configID, nodeID)`) have `subTreeID = nil`, and `posX` / `posY` in tree coordinates. Two Arms nodes had `groupIDs[1] = 11650`; a third had `groupIDs[1] = 11649`, a group that isn't a tab.
+  - A node's tab is whichever of its `groupIDs` matches a display group, not the first one. That third node's `groupIDs` were `{ 11649, 12820, 12821, 12822, 12823, 12824, 11650 }`: the tab (11650) came last. What 11649 and 12820-12824 gate (tiers?) is unknown.
+  - **Points per tab:** `C_Traits.GetGroupCurrencyInfo(configID, { 11650, 11657, 11670 })` returned `{ traitNodeGroupID = 11650, currencyInfos = { { traitCurrencyID = 3820, spent = 6, quantity = 0, maxQuantity = 6 } } }`. Fury and Protection, with nothing spent, were left out of the result entirely, so treat a missing group as 0.
 
 ## Secret values and combat data
 
@@ -143,13 +151,16 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 
 Check these in the live client and move them up with a tag and date:
 
-- [ ] Which TOC loads when `_Camelot.toc` and a plain TOC are both present, now that we're on 70009?
-- [ ] Does `[AllowLoadGameType camelot]` load a file on Forever, and `[AllowLoadGameType standard]` skip it?
+- [x] `_Camelot.toc` beats `_Mainline.toc` and the plain TOC on 70009. (2026-09-25)
+- [x] `[AllowLoadGameType camelot]` loads on Forever and `standard` doesn't. (2026-09-25)
 - [ ] Is `ReloadUI()` blocked when called from an addon's own button? (From `/run` it works.)
 - [x] Secure snippets run on 70009. (2026-09-25)
 - [x] `Settings.RegisterAddOnCategory`, `Menu.ModifyMenu`, and `TooltipDataProcessor.AddTooltipPostCall` are present. (2026-09-25)
 - [x] `C_SpecializationInfo.GetSpecializationInfo(1)` returns a class-level spec with 0 points. (2026-09-25, see Talents)
-- [ ] Which API reports points spent per talent tree? Probably `C_Traits`; check before building on it.
+- [x] Talent points are in `C_Traits`, one `CamelotCombat` config with one tree per class. (2026-09-25, see Talents)
+- [x] The three talent tabs are trait groups from `C_Traits.GetGroupDisplayInfoByTreeID`. (2026-09-25)
+- [x] Nodes list their tab's group in `groupIDs` (not always first), and `C_Traits.GetGroupCurrencyInfo` gives points spent per tab. (2026-09-25)
+- [ ] Does `GetGroupCurrencyInfo` return an entry for a tab once it has points, with points in two tabs? (Only one tab had points when tested.)
 
 ## Sources
 

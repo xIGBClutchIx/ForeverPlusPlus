@@ -54,7 +54,7 @@ Forever is a Classic+ game (level 60 content) that runs the **modern Mainline (1
 - `COMBAT_LOG_EVENT_UNFILTERED` never fires for addons. There is `C_DamageMeter` instead.
 - `UnitName` returns a **surname**, not a realm, as its second value (`C_PlayerInfo.ShouldDisplaySurname`). Don't treat it as a realm.
 - Talents/specs go through `C_SpecializationInfo`.
-- TOC suffixes are unreliable on this client (it loaded `_Mainline.toc` over `_Camelot.toc`). Ship one plain `ForeverPlusPlus.toc` only.
+- Ship one plain `ForeverPlusPlus.toc`; this addon targets Forever only, so it needs no suffixes. On build 70009 the client picks `_Camelot.toc` over `_Mainline.toc` and the plain TOC, and per-file `[AllowLoadGameType camelot]` and `mainline` match Forever while `standard` and `classic` don't (an earlier build loaded `_Mainline` instead, so recheck after patches).
 - It is a beta. APIs appear, change, and break between patches. Probe (`if C_Foo and C_Foo.Bar then`) instead of assuming, and when something only works on Forever, say so in a comment. (On 2026-09-23 SavedVariables didn't persist across reloads; they did by 2026-09-24. Recheck if settings stop sticking.)
 
 When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or find an installed Forever addon that uses it. Don't guess from Classic Era or old Retail documentation. [docs/forever-api.md](docs/forever-api.md) has the detail behind this section: removed globals and their replacements, TOC loading, realms and surnames, talents, secret values, and open questions, each with its source. Keep the rules here short and record the evidence there.
