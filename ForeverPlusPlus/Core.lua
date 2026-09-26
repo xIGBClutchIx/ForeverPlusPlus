@@ -323,15 +323,15 @@ local function describe(module, option)
 end
 
 local function listOptions(module)
-    ns.Print(format("%s is %s. Options (/fpp set %s <option> <value>):", module.name,
-        module.db.enabled and "on" or "off", module.name))
+    ns.Print(format(L.OPTIONS_HEADER, module.name, module.db.enabled and L.ON or L.OFF,
+        module.name))
     if not module.options or #module.options == 0 then
-        print("  |cff999999none|r")
+        print(format("  |cff999999%s|r", L.OPTIONS_NONE))
     end
     for _, option in ipairs(module.options or {}) do
         local value, allowed = describe(module, option)
         print(format("  %s = |cffffd100%s|r  |cff999999%s (%s)%s|r", option.key, value, option.name,
-            allowed, option.debug and ", debug" or ""))
+            allowed, option.debug and L.OPTIONS_DEBUG or ""))
     end
 end
 
@@ -341,8 +341,8 @@ local function set(rest)
     local moduleName, key, value = strsplit(" ", rest or "", 3)
     local module = moduleName and moduleName ~= "" and findModule(moduleName)
     if not module then
-        ns.Print(moduleName and moduleName ~= "" and "no module called " .. moduleName
-            or "usage: /fpp set <module> <option> <value>")
+        ns.Print(moduleName and moduleName ~= "" and format(L.NO_MODULE, moduleName)
+            or L.SET_USAGE)
         return
     end
     if not key or key == "" then
@@ -353,18 +353,18 @@ local function set(rest)
     if key:lower() == "enabled" then
         local on = booleans[value or ""]
         if on == nil then
-            ns.Print(format("%s is %s (on, off).", module.name, module.db.enabled and "on" or "off"))
+            ns.Print(format(L.MODULE_STATE_ALLOWED, module.name,
+                module.db.enabled and L.ON or L.OFF))
             return
         end
         ns.SetEnabled(module.name, on)
         ns.RefreshSetting(module.name)
-        ns.Print(format("%s is %s.", module.name, on and "on" or "off"))
+        ns.Print(format(L.MODULE_STATE, module.name, on and L.ON or L.OFF))
         return
     end
     local option = findOption(module, key)
     if not option then
-        ns.Print(format("%s has no option %s. /fpp options %s lists them.", module.name, key,
-            module.name))
+        ns.Print(format(L.NO_OPTION, module.name, key, module.name))
         return
     end
     local new
@@ -379,7 +379,7 @@ local function set(rest)
     end
     if new == nil then
         local current, allowed = describe(module, option)
-        ns.Print(format("%s %s is |cffffd100%s|r (%s).", module.name, option.key, current, allowed))
+        ns.Print(format(L.OPTION_STATE_ALLOWED, module.name, option.key, current, allowed))
         if option.description then
             print(format("  |cff999999%s: %s|r", option.name, option.description))
         end
@@ -387,7 +387,7 @@ local function set(rest)
     end
     ns.SetOption(module.name, option.key, new)
     ns.RefreshSetting(module.name)
-    ns.Print(format("%s %s is %s.", module.name, option.key, (describe(module, option))))
+    ns.Print(format(L.OPTION_STATE, module.name, option.key, (describe(module, option))))
 end
 
 SLASH_FOREVERPLUSPLUS1 = "/fpp"
@@ -423,8 +423,8 @@ SlashCmdList.FOREVERPLUSPLUS = function(message)
     elseif command == "list" or command == "help" or not ns.OpenSettings() then
         list()
         print(format("  /fpp  |cff999999%s|r", L.SLASH_OPEN))
-        print("  /fpp options <module>  |cff999999list its options and their values|r")
-        print("  /fpp set <module> <option> <value>  |cff999999change one (on/off, or a choice)|r")
+        print(format("  /fpp options <module>  |cff999999%s|r", L.SLASH_OPTIONS))
+        print(format("  /fpp set <module> <option> <value>  |cff999999%s|r", L.SLASH_SET))
         print(format("  /fpp reset  |cff999999%s|r", L.SLASH_RESET))
         for _, name in pairs(commandOrder) do
             local info = commands[name]

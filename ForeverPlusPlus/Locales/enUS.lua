@@ -17,6 +17,18 @@ L.OFF_AFTER_RELOAD = "%s turns fully off after /reload."
 L.SLASH_MODULES = "modules (/fpp toggle <name>, /fpp list):"
 L.SLASH_OPEN = "open the settings"
 L.SLASH_RESET = "all settings back to defaults (reloads)"
+L.SLASH_OPTIONS = "list its options and their values"
+L.SLASH_SET = "change one (on/off, or a choice)"
+
+-- Core: /fpp options and /fpp set. The values typed (on, off, choice keys) stay as they are.
+L.OPTIONS_HEADER = "%s is %s. Options (/fpp set %s <option> <value>):" -- module, on/off, module
+L.OPTIONS_NONE = "none"
+L.OPTIONS_DEBUG = ", debug"
+L.SET_USAGE = "usage: /fpp set <module> <option> <value>"
+L.MODULE_STATE_ALLOWED = "%s is %s (on, off)." -- module name, on/off
+L.NO_OPTION = "%s has no option %s. /fpp options %s lists them." -- module, option, module
+L.OPTION_STATE = "%s %s is %s." -- module, option, value
+L.OPTION_STATE_ALLOWED = "%s %s is |cffffd100%s|r (%s)." -- module, option, value, allowed values
 
 -- Settings
 L.MODULES = "Modules"
