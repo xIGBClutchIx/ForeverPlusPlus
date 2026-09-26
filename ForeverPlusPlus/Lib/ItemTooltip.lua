@@ -4,7 +4,8 @@
 -- Nothing is hooked until a module first calls in.
 local _, ns = ...
 
-local ipairs, setmetatable, format = ipairs, setmetatable, string.format
+local ipairs, setmetatable, format, rep = ipairs, setmetatable, string.format, string.rep
+local floor, max, UIParent = math.floor, math.max, UIParent
 local TooltipDataProcessor, Enum, C_Item, GameTooltip = TooltipDataProcessor, Enum, C_Item, GameTooltip
 local IsShiftKeyDown, GetMoneyString, C_CurrencyInfo = IsShiftKeyDown, GetMoneyString, C_CurrencyInfo
 local HIGHLIGHT_FONT_COLOR, GRAY_FONT_COLOR = HIGHLIGHT_FONT_COLOR, GRAY_FONT_COLOR
@@ -142,14 +143,61 @@ local function money(amount)
     return C_CurrencyInfo.GetCoinTextureString(amount)
 end
 
----Adds a price line: the name and a gray "x20" on the left, the coins on the right, so every
----price line's coins line up.
+-- Alignment ----------------------------------------------------------------------------------
+-- "right": coins against the tooltip's right edge. "inline": coins right after the label, with
+-- the labels padded with spaces so every price line's coins start in the same column (to within
+-- a space's width).
+
+local alignment = "right"
+local names = {} -- every price line's name, to pad to the widest
+local measure -- our own hidden font string, for label widths
+
+---Sets how price lines place their coins: "right" or "inline".
+---@param mode string
+function ItemTooltip.SetAlignment(mode)
+    alignment = mode
+end
+
+---Registers a price line's name, so inline coins can line up with it.
+---@param name string
+function ItemTooltip.AddName(name)
+    names[#names + 1] = name
+end
+
+local function width(text)
+    if not measure then
+        measure = UIParent:CreateFontString(nil, "BACKGROUND", "GameTooltipText")
+        measure:Hide()
+    end
+    measure:SetText(text)
+    return measure:GetStringWidth()
+end
+
+-- The label padded with spaces to the widest registered name with the same quantity.
+local function padded(name, quantity)
+    local widest = 0
+    for _, other in ipairs(names) do
+        widest = max(widest, width(format(L.PRICE_LINE, other, quantity)))
+    end
+    local space = width(" ")
+    local spaces = space > 0 and floor((widest - width(format(L.PRICE_LINE, name, quantity)))
+        / space + 0.5) or 0
+    return rep(" ", max(spaces, 0))
+end
+
+---Adds a price line: the name and a gray "x20", then the coins, placed by the alignment.
 ---@param tooltip table
 ---@param name string such as "Sell Price"
 ---@param amount number copper, for all `count` items
 ---@param count number how many items the price is for
 function ItemTooltip.AddPrice(tooltip, name, amount, count)
-    local quantity = GRAY_FONT_COLOR:WrapTextInColorCode(format(L.PRICE_QUANTITY, count))
+    local quantity = format(L.PRICE_QUANTITY, count)
+    local label = format(L.PRICE_LINE, name, GRAY_FONT_COLOR:WrapTextInColorCode(quantity))
     local r, g, b = HIGHLIGHT_FONT_COLOR:GetRGB()
-    tooltip:AddDoubleLine(format(L.PRICE_LINE, name, quantity), money(amount), r, g, b, r, g, b)
+    if alignment == "inline" then
+        tooltip:AddLine(format(L.PRICE_INLINE, label .. padded(name, quantity), money(amount)),
+            r, g, b)
+    else
+        tooltip:AddDoubleLine(label, money(amount), r, g, b, r, g, b)
+    end
 end

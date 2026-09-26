@@ -1,8 +1,9 @@
 -- The "Forever++" pages in the game's Settings > AddOns list, built from Blizzard's own settings
 -- templates so they look like any other options page:
 --   Forever++        an on/off checkbox per module (the only place modules turn on and off)
---     <Module>       one page per module with options, holding just its options, or a page the
---                    module draws itself when it has `BuildPage`
+--     <Module>       one page per module with options, holding just its options (and buttons,
+--                    from `module.actions`), or a page the module draws itself when it has
+--                    `BuildPage`
 --     Debug          options marked `debug = true`, for testing
 -- Without subpages (an older Settings API), everything goes on the main page instead.
 local _, ns = ...
@@ -101,6 +102,18 @@ local function addOptions(category, module, parent, debug)
         if (option.debug or false) == debug then
             addOption(category, module, option, parent)
         end
+    end
+end
+
+-- A module's buttons (from `module.actions`: `{ name, button, description, fn }`), after its
+-- options.
+local function addActions(layout, module)
+    if not (layout and CreateSettingsButtonInitializer) then
+        return -- Probe: the button row is Mainline's Settings.
+    end
+    for _, action in ipairs(module.actions or {}) do
+        layout:AddInitializer(CreateSettingsButtonInitializer(action.name, action.button,
+            action.fn, action.description, true))
     end
 end
 
@@ -254,12 +267,15 @@ function ns.RegisterSettings()
             if subpages and Settings.RegisterCanvasLayoutSubcategory then
                 pages[name] = addCanvasPage(category, module)
             end
-        elseif hasOptions(module, false) then
+        elseif hasOptions(module, false) or module.actions then
             if subpages then
-                local page = Settings.RegisterVerticalLayoutSubcategory(category, module.title or name)
+                local page, pageLayout = Settings.RegisterVerticalLayoutSubcategory(category,
+                    module.title or name)
                 addOptions(page, module, nil, false)
+                addActions(pageLayout, module)
             else
                 addOptions(category, module, parent, false)
+                addActions(layout, module)
             end
         end
     end

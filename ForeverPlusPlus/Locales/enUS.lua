@@ -130,6 +130,13 @@ L.AUCTIONPRICES_COMMAND = "scan the open auction house now"
 L.AUCTIONPRICES_IS_OFF = "Auction Prices is off (/fpp toggle AuctionPrices)."
 L.AUCTIONPRICES_NOT_OPEN = "Open the auction house first."
 L.AUCTIONPRICES_LINE = "Auction"
+L.AUCTIONPRICES_RESET = "Saved Prices"
+L.AUCTIONPRICES_RESET_BUTTON = "Reset"
+L.AUCTIONPRICES_RESET_DESC = "Forget every auction price saved for this realm and faction. The "
+    .. "next visit to the auction house scans again."
+L.AUCTIONPRICES_RESET_CONFIRM = "Forget all saved auction prices for this realm and faction?"
+L.AUCTIONPRICES_RESET_DONE = "Auction prices reset."
+L.AUCTIONPRICES_RESET_COMMAND = "forget the saved auction prices"
 
 -- SellPrice
 L.SELLPRICE_TITLE = "Stack Sell Price"
@@ -138,12 +145,18 @@ L.SELLPRICE_DESC = "Show the vendor price of the whole stack in item tooltips. H
 L.SELLPRICE_MODE = "Sell Price For"
 L.SELLPRICE_MODE_DESC = "Whether the sell price counts the whole stack or one item, and what "
     .. "holding Shift shows."
+L.SELLPRICE_ALIGN = "Price Alignment"
+L.SELLPRICE_ALIGN_DESC = "Where the coins go on the sell price and auction lines. Either way, "
+    .. "they line up with each other."
+L.SELLPRICE_ALIGN_RIGHT = "Right Edge"
+L.SELLPRICE_ALIGN_INLINE = "After the Label"
 
 -- Price lines in item tooltips (SellPrice and AuctionPrices)
 L.PRICE_MODE_STACK = "Whole Stack, Shift for One"
 L.PRICE_MODE_ONE = "One Item, Shift for Stack"
 L.PRICE_LINE = "%s %s" -- line name, quantity (gray)
 L.PRICE_QUANTITY = "x%d" -- how many items the price is for
+L.PRICE_INLINE = "%s  %s" -- padded label, coins
 
 -- DurabilityBars
 L.DURABILITYBARS_TITLE = "Durability Bars"

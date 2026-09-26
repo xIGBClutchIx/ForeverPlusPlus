@@ -12,6 +12,7 @@ local ItemTooltip = ns.ItemTooltip
 local module = ns.NewModule("SellPrice", L.SELLPRICE_DESC, {
     enabled = true,
     mode = "stack", -- "stack" (Shift for one) or "one" (Shift for the stack)
+    align = "right", -- "right" (coins at the tooltip's edge) or "inline" (after the label)
 })
 module.title = L.SELLPRICE_TITLE
 
@@ -25,7 +26,18 @@ module.options = {
             { "one", L.PRICE_MODE_ONE },
         },
     },
+    {
+        key = "align",
+        name = L.SELLPRICE_ALIGN,
+        description = L.SELLPRICE_ALIGN_DESC,
+        choices = {
+            { "right", L.SELLPRICE_ALIGN_RIGHT },
+            { "inline", L.SELLPRICE_ALIGN_INLINE },
+        },
+    },
 }
+
+ItemTooltip.AddName(SELL_PRICE)
 
 -- One item's vendor price. Item info has it per item; the line's own price is the fallback
 -- while item info isn't cached (Forever's line prices one item).
@@ -56,7 +68,15 @@ function module:OnEnable()
         hooked = true
         ItemTooltip.ReplaceSellPrice(drawSellPrice)
     end
+    ItemTooltip.SetAlignment(self.db.align)
+end
+
+function module:OnOptionChanged(key)
+    if key == "align" and self.enabled then
+        ItemTooltip.SetAlignment(self.db.align)
+    end
 end
 
 function module:OnDisable()
+    ItemTooltip.SetAlignment("right")
 end
