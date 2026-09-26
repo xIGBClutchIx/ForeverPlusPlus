@@ -175,6 +175,10 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 - Only one tracking spell is on at a time, as in Classic: turning on Find Herbs turns off Find Minerals. **[addon]** (GatherSkillTooltip treats either one being on as enough when the player has both skills) **Unverified** in game.
 - Tracking is lost on death and needs turning back on after resurrection. **[addon]** (AutoTrackers restores on `PLAYER_ALIVE` / `PLAYER_UNGHOST`)
 
+## Weapon sheathing
+
+- `GetSheathState()` (1 nothing drawn, 2 melee, 3 ranged) and `ToggleSheath()` are there, and `ToggleSheath()` works from a `C_Timer` callback with no key press. One toggle puts away everything drawn. `hooksecurefunc("ToggleSheath", fn)` sees the Sheath/Unsheath key. **[addon]** (AutoStow 1.2.2 `AutoStow.lua`, which stows out of combat on a timer) Not yet tested by us in the live client.
+
 ## Fonts
 
 - Text measured before its font file has loaded reads as 0 tall on Forever, even after preloading. Measure with a floor of the font size. **[in-game]** (ClutchUI `Style.TextHeight`, `docs/fonts.md`)

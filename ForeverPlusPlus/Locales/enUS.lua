@@ -192,6 +192,14 @@ L.GATHERTRACKING_FAILED = "Gathering Tracking couldn't change tracking: %s" -- e
 L.GATHERTRACKING_BLOCKED = "The game blocked Gathering Tracking from changing tracking. It stops "
     .. "until /reload."
 
+-- AutoStow
+L.AUTOSTOW_TITLE = "Auto Stow"
+L.AUTOSTOW_DESC = "Put your weapons away a few seconds after combat ends, unless you draw or "
+    .. "stow them yourself first."
+L.AUTOSTOW_DELAY = "Delay"
+L.AUTOSTOW_DELAY_DESC = "How long after combat to wait before putting your weapons away."
+L.AUTOSTOW_SECONDS = "%d Seconds" -- number of seconds
+
 -- CVarBrowser
 L.CVARBROWSER_TITLE = "Console Variables"
 L.CVARBROWSER_DESC = "Browse the game's console variables (CVars) on a page in Settings, and "

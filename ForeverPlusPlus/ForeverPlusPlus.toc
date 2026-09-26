@@ -25,5 +25,6 @@ Modules\AuctionPrices.lua
 Modules\DurabilityBars.lua
 Modules\HideFeedback.lua
 Modules\GatherTracking.lua
+Modules\AutoStow.lua
 Settings.lua
 Init.lua
