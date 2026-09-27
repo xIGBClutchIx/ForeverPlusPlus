@@ -66,7 +66,7 @@ module.options = {
         section = L.TOOLTIPS_SECTION_LINES },
 }
 
-local GUILDMATE_COLOR = { 0.25, 1, 0.25 } -- guild chat's green, as on Friendly Nameplates
+local GUILDMATE_COLOR = { 0.25, 1, 0.25 } -- guild chat's green, as on Player Nameplates
 local GUILD_COLOR = { 0.65, 0.65, 0.65 }
 local YOU_COLOR = { 1, 0.25, 0.25 }
 

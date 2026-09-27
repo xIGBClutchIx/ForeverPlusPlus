@@ -1,0 +1,226 @@
+-- Friendly nameplates that always show the unit's name, and the health bar only while it's hurt or
+-- in combat. Built on Blizzard's own nameplates: the bar and Blizzard's name fade, and our label
+-- (ns.PlateLabel) shows instead. Player Nameplates and NPC Nameplates each run one of these for
+-- their own kind of unit:
+--
+--   local plates = ns.FriendlyPlates.New(module, {
+--       players = true,             -- friendly players, or false for friendly NPCs
+--       cvars = { { names = { "cvarName", "olderName" }, value = "1" }, ... },
+--       style = { NameColor = fn, Subtitle = fn, SubtitleColor = fn, icons = bool },
+--   })
+--   plates:Enable() / plates:Disable() / plates:Refresh()
+--
+-- The module's settings need barWhenHurt, level, centerLine, and `saved = {}` for the CVars.
+local _, ns = ...
+
+local pairs, ipairs, setmetatable, hooksecurefunc = pairs, ipairs, setmetatable, hooksecurefunc
+local UnitIsPlayer, UnitIsFriend, UnitIsUnit = UnitIsPlayer, UnitIsFriend, UnitIsUnit
+local UnitAffectingCombat, UnitHealthPercent = UnitAffectingCombat, UnitHealthPercent
+
+local readable = ns.IsReadable
+local Nameplates, PlateLabel = ns.Nameplates, ns.PlateLabel
+
+local FriendlyPlates = {}
+ns.FriendlyPlates = FriendlyPlates
+
+local Plates = {}
+Plates.__index = Plates
+
+local weak = { __mode = "k" }
+-- Blizzard name font string -> { plates, unit } while one of ours shows on its plate
+local mirrored = setmetatable({}, weak)
+local hookedNames = setmetatable({}, weak)
+local curve -- health fraction -> alpha: 1 below full health, 0 at full
+local inverse -- the opposite: 0 below full health, 1 at full
+
+local EVENTS = { "UNIT_HEALTH", "UNIT_MAXHEALTH", "UNIT_FLAGS", "UNIT_NAME_UPDATE", "UNIT_LEVEL" }
+local SOCIAL_EVENTS = { "GROUP_ROSTER_UPDATE", "FRIENDLIST_UPDATE" }
+
+-- Blizzard sets the name text (with surname) itself; our label copies it as it changes, and the
+-- icons beside Blizzard's name move to where the new text ends.
+local function onNameSet(fontString)
+    local entry = mirrored[fontString]
+    if entry then
+        entry[1]:Layout(entry[2])
+    end
+end
+
+local function hookName(name)
+    if not hookedNames[name] then
+        hookedNames[name] = true
+        hooksecurefunc(name, "SetText", onNameSet)
+    end
+end
+
+-- Blizzard's level at the bar's end. Which of the two frames draws the badge players see isn't
+-- known yet (LevelFrame alone left it showing), so both fade with the bar.
+local function fadeLevel(record, alpha)
+    if record.levelFrame then
+        record.levelFrame:SetAlpha(alpha)
+    end
+    if record.levelDiffFrame then
+        record.levelDiffFrame:SetAlpha(alpha)
+    end
+end
+
+---Friendly plates for one module (see the top of this file).
+---@param module table
+---@param spec table players, cvars, style
+---@return table plates
+function FriendlyPlates.New(module, spec)
+    local self = setmetatable({ module = module, spec = spec, style = spec.style, records = {} }, Plates)
+    self.onAdded = function(unit, frame) self:Add(unit, frame) end
+    self.onRemoved = function(unit) self:Remove(unit) end
+    self.onUnitEvent = function(event, unit)
+        if self.records[unit] then
+            if event == "UNIT_NAME_UPDATE" or event == "UNIT_LEVEL" then
+                self:Layout(unit)
+            end
+            self:Fade(unit)
+        end
+    end
+    self.onPlayerCombat = function()
+        for unit in pairs(self.records) do
+            self:Fade(unit)
+        end
+    end
+    -- Group or friends changed: the icons may need to come or go.
+    self.onSocialChange = function()
+        for unit in pairs(self.records) do
+            self:Layout(unit)
+        end
+    end
+    return self
+end
+
+-- Whether this is one of ours: a friendly player (or NPC) we can read. The personal resource
+-- display is a friendly player too, so leave out ourselves.
+function Plates:IsOurs(unit)
+    local isPlayer, isFriend, isSelf = UnitIsPlayer(unit), UnitIsFriend("player", unit),
+        UnitIsUnit(unit, "player")
+    if not (readable(isPlayer) and readable(isFriend) and readable(isSelf)) then
+        return false
+    end
+    return isFriend and not isSelf and (isPlayer and true or false) == self.spec.players
+end
+
+function Plates:Layout(unit)
+    local record = self.records[unit]
+    if record and record.label then
+        PlateLabel.Layout(record.label, record, unit, self.style)
+    end
+end
+
+-- Fades the bar (and Blizzard's name and level with it) in when the unit is hurt or in combat,
+-- and our label in when it isn't.
+function Plates:Fade(unit)
+    local record = self.records[unit]
+    if not record then
+        return
+    end
+    local inCombat = UnitAffectingCombat(unit)
+    if not readable(inCombat) then
+        inCombat = UnitAffectingCombat("player")
+    end
+    local shown, hidden
+    if inCombat then
+        shown, hidden = 1, 0
+    elseif not self.module.db.barWhenHurt then
+        shown, hidden = 0, 1
+    elseif not curve then
+        shown, hidden = 1, 0
+    else
+        -- The percent can be secret in combat, so the client maps it to an alpha, not Lua.
+        shown, hidden = UnitHealthPercent(unit, true, curve), UnitHealthPercent(unit, true, inverse)
+    end
+    record.container:SetAlpha(shown)
+    local label = record.label
+    if label then
+        fadeLevel(record, shown)
+        record.name:SetAlpha(shown)
+        label.barFrame:SetAlpha(shown)
+        label:SetAlpha(hidden)
+    end
+end
+
+function Plates:Add(unit, frame)
+    local parts = Nameplates.Parts(frame)
+    if not (parts.container and self:IsOurs(unit)) then
+        return
+    end
+    local record = { container = parts.container, plate = parts.plate }
+    local name = parts.name
+    if name and name.SetText then
+        record.name = name
+        record.levelFrame = parts.level
+        record.levelDiffFrame = parts.levelDiff
+        record.castBar = parts.castBar
+        record.label = PlateLabel.Show(frame)
+        hookName(name)
+        mirrored[name] = { self, unit }
+    end
+    self.records[unit] = record
+    self:Layout(unit)
+    self:Fade(unit)
+end
+
+-- Plates are pooled, so everything we changed goes back as the plate leaves.
+function Plates:Remove(unit)
+    local record = self.records[unit]
+    if not record then
+        return
+    end
+    self.records[unit] = nil
+    record.container:SetAlpha(1)
+    fadeLevel(record, 1)
+    if record.name then
+        record.name:SetAlpha(1)
+        mirrored[record.name] = nil
+    end
+    if record.label then
+        PlateLabel.Hide(record.label)
+    end
+end
+
+---Lays out and fades every plate again, after a setting changed.
+function Plates:Refresh()
+    for unit in pairs(self.records) do
+        self:Layout(unit)
+        self:Fade(unit)
+    end
+end
+
+---Sets the CVars, and starts handling plates and their events (through module:On, so they stop
+---when the module turns off).
+function Plates:Enable()
+    local module = self.module
+    if not curve then
+        curve, inverse = ns.HealthStepCurve(1, 0), ns.HealthStepCurve(0, 1)
+    end
+    self.style.db = module.db
+    for _, entry in ipairs(self.spec.cvars) do
+        ns.CVars.Set(module.db.saved, entry.names, entry.value)
+    end
+    for _, event in ipairs(EVENTS) do
+        module:On(event, self.onUnitEvent)
+    end
+    if self.style.icons then
+        for _, event in ipairs(SOCIAL_EVENTS) do
+            module:On(event, self.onSocialChange)
+        end
+    end
+    -- UNIT_FLAGS covers other units' combat; these cover the fallback to our own.
+    module:On("PLAYER_REGEN_DISABLED", self.onPlayerCombat)
+    module:On("PLAYER_REGEN_ENABLED", self.onPlayerCombat)
+    Nameplates.Register(self, {
+        OnAdded = self.onAdded,
+        OnRemoved = self.onRemoved,
+        OnCast = function(unit) self:Layout(unit) end,
+    })
+end
+
+---Gives every plate back to Blizzard and puts the player's CVars back.
+function Plates:Disable()
+    Nameplates.Unregister(self)
+    ns.CVars.RestoreAll(self.module.db.saved)
+end

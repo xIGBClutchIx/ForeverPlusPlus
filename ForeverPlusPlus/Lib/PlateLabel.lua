@@ -1,0 +1,402 @@
+-- The label friendly nameplate modules draw in place of Blizzard's name while the bar is hidden:
+-- the name centered on the plate at the bar's height, a "<Subtitle>" line under it (a guild or an
+-- NPC's title), the level beside it, and for players the group and friend icons. While the bar is
+-- up, Blizzard's name is back and the subtitle (and icons) sit with it instead.
+--
+-- A plate module decides what goes in the label through a `style` (see ns.FriendlyPlates):
+--   style.db               its settings: level ("before"/"after"/"off"), centerLine, and with
+--                          icons, socialIcons, groupIcon ("role"/"looking") and testIcons
+--   style.NameColor(unit)  r, g, b for the name
+--   style.Subtitle(unit)   the subtitle text (nil for none; may be secret) and when it shows:
+--                          "always", "hidden" (only without the bar), or "off"
+--   style.SubtitleColor(unit)  { r, g, b }
+--   style.icons            true to show the group and friend icons
+-- Labels are kept per Blizzard unit frame and shared by every module, since plates are pooled.
+local _, ns = ...
+
+local pairs, ipairs, setmetatable = pairs, ipairs, setmetatable
+local CreateFrame, UnitLevel = CreateFrame, UnitLevel
+local UnitGroupRolesAssigned, GetTexCoordsForRoleSmallCircle =
+    UnitGroupRolesAssigned, GetTexCoordsForRoleSmallCircle
+
+local readable = ns.IsReadable
+local Units, Nameplates = ns.Units, ns.Nameplates
+
+local L = ns.L
+
+local PlateLabel = {}
+ns.PlateLabel = PlateLabel
+
+-- Dropdown choices for the settings every plate module has.
+PlateLabel.LEVEL_CHOICES = {
+    { "before", L.PLATES_LEVEL_BEFORE },
+    { "after", L.PLATES_LEVEL_AFTER },
+    { "off", L.PLATES_LEVEL_OFF },
+}
+PlateLabel.SUBTITLE_CHOICES = {
+    { "always", L.PLATES_SUBTITLE_ALWAYS },
+    { "hidden", L.PLATES_SUBTITLE_HIDDEN },
+    { "off", L.PLATES_SUBTITLE_OFF },
+}
+
+local GAP = 3 -- pixels between the name, the level, and the icons
+local SUBTITLE_SCALE = 0.9 -- the subtitle is a touch smaller than the name
+
+-- Icons ---------------------------------------------------------------------------------------
+-- Friends get the Battle.net logo; group members get their role, or the Looking for Group icon.
+
+-- `round` crops a spell-style icon round, like a minimap button; `role` picks that role from
+-- Blizzard's round role icons.
+local ART = {
+    battlenet = { file = "Interface\\FriendsFrame\\Battlenet-Battleneticon" },
+    looking = { file = "Interface\\Icons\\INV_Misc_GroupLooking", round = true },
+    TANK = { file = "Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES", role = "TANK" },
+    HEALER = { file = "Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES", role = "HEALER" },
+    DAMAGER = { file = "Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES", role = "DAMAGER" },
+}
+local ORDER = { "group", "friend" }
+local ICON_SCALE = 1.4 -- icon size against the name's font size
+local ROUND_MASK = "Interface\\CharacterFrame\\TempPortraitAlphaMask"
+
+-- Which art an icon uses for this unit.
+local function artFor(kind, unit, db)
+    if kind == "friend" then
+        return "battlenet"
+    end
+    if db.groupIcon ~= "looking" then
+        local role = UnitGroupRolesAssigned and UnitGroupRolesAssigned(unit)
+        -- No role (or not in a group, while testing) falls back to the LFG icon.
+        return readable(role) and ART[role] and role or "looking"
+    end
+    return "looking"
+end
+
+-- Sets an icon's art; only does the work when it changed.
+local function setArt(icon, key)
+    if icon.art == key then
+        return
+    end
+    icon.art = key
+    local art = ART[key]
+    icon:SetTexture(art.file)
+    if art.role and GetTexCoordsForRoleSmallCircle then
+        icon:SetTexCoord(GetTexCoordsForRoleSmallCircle(art.role))
+    elseif art.round then
+        icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+    else
+        icon:SetTexCoord(0, 1, 0, 1)
+    end
+    if art.round and not icon.masked then
+        icon:AddMaskTexture(icon.mask)
+        icon.masked = true
+    elseif not art.round and icon.masked then
+        icon:RemoveMaskTexture(icon.mask)
+        icon.masked = false
+    end
+end
+
+local function shouldShow(kind, unit, style)
+    local db = style.db
+    if not (style.icons and db.socialIcons) then
+        return false
+    end
+    if db.testIcons == kind then
+        return true
+    end
+    if kind == "group" then
+        return Units.InGroup(unit)
+    end
+    return Units.IsFriend(unit)
+end
+
+-- One set of icons (hidden) on `parent`: kind -> texture.
+local function createIcons(parent)
+    local icons = {}
+    for _, kind in ipairs(ORDER) do
+        local icon = parent:CreateTexture(nil, "OVERLAY")
+        icon.mask = parent:CreateMaskTexture()
+        icon.mask:SetTexture(ROUND_MASK, "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+        icon.mask:SetAllPoints(icon)
+        icon:Hide()
+        icons[kind] = icon
+    end
+    return icons
+end
+
+-- Where icons after Blizzard's name should start. Its name string can be wider than its text
+-- (stretched across the bar), so its right edge isn't where the text ends; measure from the side
+-- it's justified to instead. Nil falls back to the right edge.
+local function barIconOffset(name)
+    local width, justify = name:GetStringWidth(), name:GetJustifyH()
+    if not (readable(width) and width and width > 0) then
+        return nil
+    end
+    if justify == "LEFT" then
+        return { "LEFT", width }
+    elseif justify == "CENTER" then
+        return { "CENTER", width / 2 }
+    end
+end
+
+-- Shows the icons this unit gets, in a row going away from `anchor` (leftward when `left`), and
+-- returns the width they take.
+local function placeIcons(icons, anchor, left, fontSize, unit, style, offset)
+    local size = fontSize * ICON_SCALE
+    local previous, width, first = anchor, 0, true
+    for _, kind in ipairs(ORDER) do
+        local icon = icons[kind]
+        local show = shouldShow(kind, unit, style)
+        icon:ClearAllPoints()
+        if show then
+            setArt(icon, artFor(kind, unit, style.db))
+            icon:SetSize(size, size)
+            if first and offset then
+                icon:SetPoint("LEFT", previous, offset[1], offset[2] + GAP, 0)
+            elseif left then
+                icon:SetPoint("RIGHT", previous, "LEFT", -GAP, 0)
+            else
+                icon:SetPoint("LEFT", previous, "RIGHT", GAP, 0)
+            end
+            previous, first = icon, false
+            width = width + size + GAP
+        end
+        icon:SetShown(show)
+    end
+    return width
+end
+
+-- Label ---------------------------------------------------------------------------------------
+
+local labels = setmetatable({}, { __mode = "k" }) -- Blizzard unit frame -> our label on it
+
+local function newText(parent)
+    local text = parent:CreateFontString(nil, "OVERLAY")
+    text:SetFontObject("SystemFont_NamePlate")
+    text:SetJustifyH("CENTER")
+    text:SetWordWrap(false)
+    return text
+end
+
+local function createLabel(frame)
+    local label = CreateFrame("Frame", nil, frame)
+    label:SetAllPoints(frame)
+    -- Empty frames to center on: the bar's row, and the cast bar's (see placeRow).
+    label.row = CreateFrame("Frame", nil, label)
+    label.castRow = CreateFrame("Frame", nil, label)
+    -- Debug (Show Plate Center): a thin line down the middle of the row, on a frame of its own so
+    -- it shows with or without the bar.
+    label.debugFrame = CreateFrame("Frame", nil, frame)
+    label.debugFrame:SetAllPoints(frame)
+    label.centerLine = label.debugFrame:CreateTexture(nil, "OVERLAY")
+    label.centerLine:SetColorTexture(1, 0.2, 0.2, 0.9)
+    label.centerLine:SetSize(1, 40)
+    label.centerLine:SetPoint("CENTER", label.row, "CENTER")
+    label.centerLine:Hide()
+    label.name = newText(label)
+    label.subtitle = newText(label)
+    -- A separate frame so it can fade in with the bar while the rest of the label fades out.
+    label.barFrame = CreateFrame("Frame", nil, frame)
+    label.barFrame:SetAllPoints(frame)
+    label.barSubtitle = newText(label.barFrame)
+    -- Our copy of the level badge, which sits beside the name instead of at the bar's end.
+    label.level = CreateFrame("Frame", nil, label)
+    label.level.text = label.level:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    label.level.text:SetPoint("CENTER")
+    -- One set of icons for each view: beside our name, and beside Blizzard's while the bar is up.
+    label.icons = createIcons(label)
+    label.barIcons = createIcons(label.barFrame)
+    return label
+end
+
+---Our label on a Blizzard unit frame, made the first time and shown. Plates are pooled, so it's
+---reused.
+---@param frame table plate.UnitFrame
+---@return table label
+function PlateLabel.Show(frame)
+    local label = labels[frame]
+    if not label then
+        label = createLabel(frame)
+        labels[frame] = label
+    end
+    label:Show()
+    label.barFrame:Show()
+    label.debugFrame:Show()
+    return label
+end
+
+---Hides a label as its plate goes back to the pool.
+---@param label table
+function PlateLabel.Hide(label)
+    label:Hide()
+    label.barFrame:Hide()
+    label.debugFrame:Hide()
+end
+
+-- Copies the look of Forever's level badge (UnitFrame.LevelFrame): its atlas art and its
+-- number's font. The art is copied once per label, since the badge is the same on every plate;
+-- the size is retried until Blizzard has laid its badge out.
+local function copyBadge(label, levelFrame)
+    local badge = label.level
+    local width, height = levelFrame:GetSize()
+    if readable(width) and readable(height) and width and width > 0 then
+        badge:SetSize(width, height)
+    elseif not badge.sized then
+        badge:SetSize(24, 14)
+    end
+    badge.sized = true
+    if badge.copied then
+        return
+    end
+    badge.copied = true
+    local sources = { levelFrame }
+    for _, child in pairs({ levelFrame:GetChildren() }) do
+        sources[#sources + 1] = child
+    end
+    for _, source in pairs(sources) do
+        for _, region in pairs({ source:GetRegions() }) do
+            local kind = region:GetObjectType()
+            if kind == "Texture" and region:GetAtlas() then
+                local texture = badge:CreateTexture(nil, region:GetDrawLayer())
+                texture:SetAtlas(region:GetAtlas())
+                texture:SetAllPoints(badge)
+                badge.hasArt = true
+            elseif kind == "FontString" then
+                local file, size, flags = region:GetFont()
+                if file and size then
+                    badge.text:SetFont(file, size, flags)
+                end
+            end
+        end
+    end
+end
+
+-- Use the font Blizzard's name is drawn with right now. Its font object can be a different size
+-- (nameplates set the size on the string), which made our copy come out small.
+-- Blizzard also shrinks the font of a long name to fit its plate, so copying each plate's size
+-- made long names tiny. Every label uses the largest size seen instead: the normal one.
+local fullSize = 0
+
+local function matchFont(label, name)
+    local file, size, flags = name:GetFont()
+    if not (file and size) then
+        return
+    end
+    if size > fullSize then
+        fullSize = size
+    end
+    size = fullSize
+    label.name:SetFont(file, size, flags)
+    label.nameSize = size
+    label.subtitle:SetFont(file, size * SUBTITLE_SCALE, flags)
+    label.barSubtitle:SetFont(file, size * SUBTITLE_SCALE, flags)
+end
+
+-- Puts the level beside the name; returns the width it takes.
+local function placeLevel(label, record, unit, where)
+    local badge = label.level
+    if not record.levelFrame or where == "off" then
+        badge:Hide()
+        return 0
+    end
+    copyBadge(label, record.levelFrame)
+    local level = UnitLevel(unit)
+    if readable(level) and level <= 0 then
+        badge.text:SetText("??")
+    else
+        badge.text:SetText(level)
+    end
+    -- Without copied art the badge is just the number, so it's as wide as the number.
+    local textWidth = badge.text:GetStringWidth()
+    if not badge.hasArt and readable(textWidth) and textWidth > 0 then
+        badge:SetWidth(textWidth)
+    end
+    local width = badge:GetWidth()
+    width = readable(width) and width + GAP or 0
+    badge:ClearAllPoints()
+    if where == "after" then
+        badge:SetPoint("LEFT", label.name, "RIGHT", GAP, 0)
+    else
+        badge:SetPoint("RIGHT", label.name, "LEFT", -GAP, 0)
+    end
+    badge:Show()
+    return width
+end
+
+-- The row our label is centered on: the bar's height, but the nameplate's own width, since the game
+-- centers the nameplate on the unit. Neither the bar (the level badge takes its right end) nor the
+-- UnitFrame inside the plate is sure to be centered on it.
+local function placeRow(label, record, style)
+    local row = label.row
+    row:ClearAllPoints()
+    row:SetPoint("TOP", record.container, "TOP")
+    row:SetPoint("BOTTOM", record.container, "BOTTOM")
+    row:SetPoint("LEFT", record.plate, "LEFT")
+    row:SetPoint("RIGHT", record.plate, "RIGHT")
+    -- Debug: a thin line through the plate's center, to check the centering in game.
+    label.centerLine:SetShown(style.db.centerLine)
+    return row
+end
+
+local function placeSubtitle(label, record, unit, style, shift)
+    local row = placeRow(label, record, style)
+    local text, mode = style.Subtitle(unit)
+    label.name:ClearAllPoints()
+    label.subtitle:ClearAllPoints()
+    label.barSubtitle:ClearAllPoints()
+    if mode == "off" or not (readable(text) and text and text ~= "") then
+        label.name:SetPoint("CENTER", row, "CENTER", shift, 0)
+        label.subtitle:Hide()
+        label.barSubtitle:Hide()
+        return
+    end
+    local color = style.SubtitleColor(unit)
+    label.subtitle:SetTextColor(color[1], color[2], color[3])
+    label.barSubtitle:SetTextColor(color[1], color[2], color[3])
+    label.name:SetPoint("BOTTOM", row, "CENTER", shift, 1)
+    -- While a cast bar is really showing (under the bar), the subtitle moves below it. Only then:
+    -- friendly plates can hide cast bars, and a stale cast left a gap under the name.
+    local castBar = record.castBar
+    if Nameplates.IsCasting(unit) and Nameplates.IsCastBarShown(castBar) then
+        -- Centered on the unit like the row, at the cast bar's height.
+        local castRow = label.castRow
+        castRow:ClearAllPoints()
+        castRow:SetPoint("TOP", castBar, "TOP")
+        castRow:SetPoint("BOTTOM", castBar, "BOTTOM")
+        castRow:SetPoint("LEFT", record.plate, "LEFT")
+        castRow:SetPoint("RIGHT", record.plate, "RIGHT")
+        label.subtitle:SetPoint("TOP", castRow, "BOTTOM", 0, -1)
+        label.barSubtitle:SetPoint("TOP", castRow, "BOTTOM", 0, -1)
+    else
+        label.subtitle:SetPoint("TOP", row, "CENTER", 0, 0)
+        label.barSubtitle:SetPoint("TOP", row, "BOTTOM", 0, -2)
+    end
+    label.subtitle:SetFormattedText("<%s>", text)
+    label.subtitle:Show()
+    label.barSubtitle:SetFormattedText("<%s>", text)
+    label.barSubtitle:SetShown(mode == "always")
+end
+
+---Lays the label out for this unit: name, color, level, icons, subtitle.
+---@param label table from PlateLabel.Show
+---@param record table the plate: plate, container, name (Blizzard's), levelFrame, castBar
+---@param unit string
+---@param style table see the top of this file
+function PlateLabel.Layout(label, record, unit, style)
+    label.name:SetText(record.name:GetText())
+    matchFont(label, record.name)
+    label.name:SetTextColor(style.NameColor(unit))
+    -- The level goes on one side of the name and the icons on the other. The name then shifts by
+    -- half the difference, so the whole row is centered over the bar. The subtitle stays centered.
+    local where = style.db.level
+    local levelWidth = placeLevel(label, record, unit, where)
+    local iconsLeft = where == "after"
+    local fontSize = label.nameSize or 12
+    local iconsWidth = placeIcons(label.icons, label.name, iconsLeft, fontSize, unit, style)
+    -- With the bar up, the icons follow Blizzard's own name.
+    placeIcons(label.barIcons, record.name, false, fontSize, unit, style, barIconOffset(record.name))
+    local leftWidth, rightWidth = levelWidth, iconsWidth
+    if iconsLeft then
+        leftWidth, rightWidth = iconsWidth, levelWidth
+    end
+    placeSubtitle(label, record, unit, style, (leftWidth - rightWidth) / 2)
+end

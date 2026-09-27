@@ -14,10 +14,10 @@ Lib\CVars.lua
 Lib\Nameplates.lua
 Lib\Units.lua
 Lib\ItemTooltip.lua
-Modules\FriendlyPlates\Module.lua
-Modules\FriendlyPlates\Icons.lua
-Modules\FriendlyPlates\Label.lua
-Modules\FriendlyPlates\Plates.lua
+Lib\PlateLabel.lua
+Lib\FriendlyPlates.lua
+Modules\PlayerPlates.lua
+Modules\NpcPlates.lua
 Modules\CVarBrowser.lua
 Modules\FastLoot.lua
 Modules\AutoRepair.lua
