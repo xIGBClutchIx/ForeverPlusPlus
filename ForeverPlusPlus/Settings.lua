@@ -5,8 +5,8 @@
 --     Modules        an on/off checkbox per module (the only place modules turn on and off),
 --                    grouped under headers by `module.category`. A module's options (and buttons,
 --                    from `module.actions`) sit indented under its checkbox, hidden until its gear
---                    is clicked, and greyed out while it's off. Options with a `section` get a
---                    white label above each group, indented like them. A module's `notice` (a warning) shows under its
+--                    is clicked, and greyed out while it's off. The indent groups them, so
+--                    their `section`s get no header here. A module's `notice` (a warning) shows under its
 --                    checkbox while it applies. `alwaysOn` modules (tools) have no checkbox
 --     <Tool>         a page a module draws itself (`BuildPage`)
 --     Debug          options marked `debug = true`, for testing
@@ -249,35 +249,17 @@ local function hasOptions(module, debug)
     return false
 end
 
--- A section's name among a module's options on the Modules page: a plain white row indented
--- under the module's checkbox, not a full section header, which would sit at the page's left
--- edge in the size of the category headers. Probe: Settings.CreateElementInitializer and the bare
--- row template are Mainline's; BugSack builds a row on SettingsListElementTemplate on Forever.
--- Without them the section just has no label.
-local function addSubheader(layout, text, module, parent, shown)
-    if not (layout and Settings.CreateElementInitializer) then
-        return
-    end
-    local initializer = Settings.CreateElementInitializer("SettingsListElementTemplate",
-        { name = format("|cffffffff%s|r", text) })
-    placeUnder(initializer, module, parent)
-    showWhen(initializer, shown)
-    layout:AddInitializer(initializer)
-end
-
--- A module's options, in the order it lists them. An option whose `section` differs from the one
--- before it starts a new section: a label under the module's checkbox (`parent`), or a section
--- header without one (the Debug page).
+-- A module's options, in the order it lists them. On the Debug page (no `parent`), an option whose
+-- `section` differs from the one before it starts a section header. Under a module's checkbox on
+-- the Modules page, sections get no header: a full one sits at the page's left edge in the size of
+-- the category headers, and a bare Blizzard row as a label (SettingsListElementTemplate through
+-- Settings.CreateElementInitializer) stopped the page drawing on Forever.
 local function addOptions(category, layout, module, parent, debug, shown)
     local section
     for _, option in ipairs(module.options or {}) do
         if (option.debug or false) == debug then
-            if option.section and option.section ~= section then
-                if parent then
-                    addSubheader(layout, option.section, module, parent, shown)
-                else
-                    addHeader(layout, option.section, shown)
-                end
+            if option.section and option.section ~= section and not parent then
+                addHeader(layout, option.section, shown)
             end
             section = option.section
             addOption(category, module, option, parent, shown)
