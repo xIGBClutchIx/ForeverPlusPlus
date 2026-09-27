@@ -12,9 +12,25 @@ local L = ns.L
 
 local module = ns.NewModule("DurabilityBars", L.DURABILITYBARS_DESC, {
     enabled = true,
+    show = "worn", -- a key of SHOW_BELOW
 })
 module.title = L.DURABILITYBARS_TITLE
 module.category = "items"
+
+-- Show a bar only below this much durability (a bar at exactly 1 is whole).
+local SHOW_BELOW = { always = 2, worn = 1, half = 0.5, quarter = 0.25 }
+
+module.options = {
+    {
+        key = "show", name = L.DURABILITYBARS_SHOW, description = L.DURABILITYBARS_SHOW_DESC,
+        choices = {
+            { "always", L.DURABILITYBARS_SHOW_ALWAYS },
+            { "worn", L.DURABILITYBARS_SHOW_WORN },
+            { "half", L.DURABILITYBARS_SHOW_HALF },
+            { "quarter", L.DURABILITYBARS_SHOW_QUARTER },
+        },
+    },
+}
 
 local THICKNESS = 3 -- bar width, in pixels
 local GAP = 2 -- space between the bar and the item button
@@ -71,10 +87,11 @@ local function build()
 end
 
 local function update()
+    local below = SHOW_BELOW[module.db.show] or SHOW_BELOW.always
     for slot, bar in pairs(bars) do
         local current, maximum = GetInventoryItemDurability(slot)
-        if current and maximum and maximum > 0 then
-            local fraction = current / maximum
+        local fraction = current and maximum and maximum > 0 and current / maximum
+        if fraction and fraction < below then
             bar:SetValue(fraction)
             -- Green at full, yellow at half, red at zero.
             if fraction > 0.5 then
@@ -119,5 +136,11 @@ end
 function module:OnDisable()
     if container then
         container:Hide()
+    end
+end
+
+function module:OnOptionChanged()
+    if self.enabled and container then
+        update()
     end
 end

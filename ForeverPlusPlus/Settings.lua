@@ -296,11 +296,14 @@ local function buildAbout(frame)
 end
 
 -- Module names in the order their titles sort in the player's language, so the toggles and pages
--- read alphabetically whatever order the TOC loads them in.
+-- read alphabetically whatever order the TOC loads them in. Modules this client doesn't get are
+-- left out.
 local function byTitle()
     local names = {}
-    for i, name in ipairs(ns.order) do
-        names[i] = name
+    for _, name in ipairs(ns.order) do
+        if not ns.modules[name].unavailable then
+            names[#names + 1] = name
+        end
     end
     local function key(name)
         return strlower(ns.modules[name].title or name)

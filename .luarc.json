@@ -73,6 +73,8 @@
     "YES",
     "NO",
     "CreateSettingsButtonInitializer",
+    "IsBetaBuild",
+    "IsPublicTestClient",
     "SELL_PRICE",
     "GetInventorySlotInfo",
     "GetInventoryItemDurability",

@@ -194,6 +194,12 @@ L.PRICE_INLINE = "%s  %s" -- padded label, coins
 L.DURABILITYBARS_TITLE = "Durability Bars"
 L.DURABILITYBARS_DESC = "Show a small bar beside each item on the character window with how "
     .. "worn it is, from green to red."
+L.DURABILITYBARS_SHOW = "Show Bars"
+L.DURABILITYBARS_SHOW_DESC = "Which items get a bar. Items without durability never do."
+L.DURABILITYBARS_SHOW_ALWAYS = "Always"
+L.DURABILITYBARS_SHOW_WORN = "Only When Worn"
+L.DURABILITYBARS_SHOW_HALF = "Below 50%"
+L.DURABILITYBARS_SHOW_QUARTER = "Below 25%"
 
 -- Tooltips
 L.TOOLTIPS_TITLE = "Tooltips"
@@ -235,6 +241,10 @@ L.TOOLTIPS_TARGET_YOU = "You"
 L.HIDEFEEDBACK_TITLE = "Hide Beta Feedback"
 L.HIDEFEEDBACK_DESC = "Hide the beta's \"Press F6 to submit an issue\" line on tooltips and its "
     .. "bug report button. F6 still reports an issue."
+L.HIDEFEEDBACK_TOOLTIP = "Tooltip Reminder"
+L.HIDEFEEDBACK_TOOLTIP_DESC = "Hide the \"Press F6 to submit an issue\" line on tooltips."
+L.HIDEFEEDBACK_BUTTON = "Bug Report Button"
+L.HIDEFEEDBACK_BUTTON_DESC = "Hide the floating bug report button."
 
 -- GatherTracking
 L.GATHERTRACKING_TITLE = "Gathering Tracking"

@@ -242,7 +242,9 @@ end
 ---added with `module:On` stop by themselves when it turns off. Set
 ---`module.title` for a friendlier name in Settings (the name stays the /fpp key), and
 ---`module.category` for its group on the main Settings page (see Settings.lua). A tool with
----nothing to turn off sets `module.alwaysOn`: it has no toggle and stays on.
+---nothing to turn off sets `module.alwaysOn`: it has no toggle and stays on. A module only for
+---some clients gives `module:IsAvailable()`; when it returns false at login, the module stays off
+---and out of Settings and /fpp list.
 ---@param name string shown in /fpp
 ---@param description string one line for /fpp
 ---@param defaults? table its settings; `enabled` defaults to true
@@ -310,7 +312,9 @@ function ns.Start()
         if module.alwaysOn then
             module.db.enabled = true
         end
-        if module.db.enabled then
+        -- A module only for some clients (IsAvailable false) stays off and out of sight.
+        module.unavailable = module.IsAvailable and not module:IsAvailable() or nil
+        if module.db.enabled and not module.unavailable then
             enable(module)
         end
     end
@@ -321,8 +325,8 @@ end
 ---@param on boolean
 function ns.SetEnabled(name, on)
     local module = ns.modules[name]
-    if module.alwaysOn then
-        return -- a tool that's always there, with no on/off
+    if module.alwaysOn or module.unavailable then
+        return -- a tool that's always there, or a module this client doesn't get
     end
     module.db.enabled = on
     if on then
@@ -361,7 +365,7 @@ end
 local function findModule(query)
     query = query:lower()
     for _, name in pairs(ns.order) do
-        if name:lower() == query then
+        if name:lower() == query and not ns.modules[name].unavailable then
             return ns.modules[name]
         end
     end
@@ -371,7 +375,7 @@ local function list()
     ns.Print(L.SLASH_MODULES)
     for _, name in pairs(ns.order) do
         local module = ns.modules[name]
-        if not module.alwaysOn then
+        if not (module.alwaysOn or module.unavailable) then
             print(format("  %s  %s  |cff999999%s|r", ns.StateText(module.db.enabled), name,
                 module.description))
         end
