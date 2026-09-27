@@ -22,6 +22,7 @@ local module = ns.NewModule("AuctionPrices", L.AUCTIONPRICES_DESC, ItemTooltip.P
     enabled = true,
     scanOnOpen = true,
     scanAge = "right", -- "right", "inline" (like the price line's alignment), or "off"
+    scanAgeColor = "age", -- "age" (green when fresh to red when old), "gray", "white", or "gold"
     chat = true,
     -- Per auction house ("Realm-Faction"): { scannedAt = time(), prices = { [itemID] = copper } }.
     -- Data, not a setting: it isn't in module.options.
@@ -41,6 +42,18 @@ module.options = ItemTooltip.PriceOptions({
             { "right", L.PRICE_ALIGN_RIGHT },
             { "inline", L.PRICE_ALIGN_INLINE },
             { "off", L.AUCTIONPRICES_SCAN_AGE_OFF },
+        },
+    },
+    {
+        key = "scanAgeColor",
+        name = L.AUCTIONPRICES_SCAN_AGE_COLOR,
+        description = L.AUCTIONPRICES_SCAN_AGE_COLOR_DESC,
+        section = L.AUCTIONPRICES_SECTION_TOOLTIP,
+        choices = {
+            { "age", L.AUCTIONPRICES_SCAN_AGE_COLOR_AGE },
+            { "gray", L.PRICE_COLOR_GRAY },
+            { "white", L.PRICE_COLOR_WHITE },
+            { "gold", L.PRICE_COLOR_GOLD },
         },
     },
     {
@@ -309,6 +322,18 @@ local function ago(seconds)
     return format(L.AUCTIONPRICES_AGO_DAYS, floor(seconds / 86400))
 end
 
+-- Scan Age Color "age": green up to an hour old, through yellow at a day, to red at two days.
+local FRESH, STALE = 3600, 2 * 86400
+
+local function ageColor(seconds)
+    local t = (seconds - FRESH) / (STALE - FRESH)
+    t = t < 0 and 0 or t > 1 and 1 or t
+    if t < 0.5 then
+        return { t * 2, 1, 0 }
+    end
+    return { 1, (1 - t) * 2, 0 }
+end
+
 local function addAuctionPrice(tooltip, data)
     local itemID = module.enabled and ItemTooltip.ItemID(data)
     local db = module.db
@@ -320,8 +345,9 @@ local function addAuctionPrice(tooltip, data)
     -- The last full scan; prices can also come from the player's own searches since then.
     local scannedAt = house().scannedAt
     if db.scanAge ~= "off" and scannedAt > 0 then
-        ItemTooltip.AddInfo(tooltip, L.AUCTIONPRICES_SCAN_AGE_LINE, ago(time() - scannedAt),
-            db.scanAge, db.color)
+        local age = time() - scannedAt
+        local color = db.scanAgeColor == "age" and ageColor(age) or db.scanAgeColor
+        ItemTooltip.AddInfo(tooltip, L.AUCTIONPRICES_SCAN_AGE_LINE, ago(age), db.scanAge, color)
     end
 end
 

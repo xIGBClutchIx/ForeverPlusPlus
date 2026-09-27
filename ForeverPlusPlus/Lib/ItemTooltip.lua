@@ -4,7 +4,7 @@
 -- Nothing is hooked until a module first calls in.
 local _, ns = ...
 
-local ipairs, setmetatable, format = ipairs, setmetatable, string.format
+local ipairs, setmetatable, format, type = ipairs, setmetatable, string.format, type
 local floor, max, UIParent = math.floor, math.max, UIParent
 local TooltipDataProcessor, Enum, C_Item, GameTooltip = TooltipDataProcessor, Enum, C_Item, GameTooltip
 local IsShiftKeyDown = IsShiftKeyDown
@@ -219,15 +219,22 @@ function ItemTooltip.AddPrice(tooltip, data, name, unitPrice, db)
 end
 
 ---Adds a line in the price lines' style with text instead of coins ("Scanned: 2h ago"). The
----text goes where `align` puts coins ("right" or "inline"), colored like a quantity (`color`).
+---text goes where `align` puts coins ("right" or "inline"), in `color`: a quantity color's name
+---or { r, g, b }.
 ---@param tooltip table
 ---@param name string
 ---@param text string
 ---@param align string
----@param color string "gray", "white", or "gold"
+---@param color string|table "gray", "white", "gold", or { r, g, b }
 function ItemTooltip.AddInfo(tooltip, name, text, align, color)
     local label = format(L.PRICE_INFO_LINE, name .. padding(tooltip, name))
-    local value = (COLORS[color] or GRAY_FONT_COLOR):WrapTextInColorCode(text)
+    local value
+    if type(color) == "table" then
+        value = format("|cff%02x%02x%02x%s|r", floor(color[1] * 255 + 0.5),
+            floor(color[2] * 255 + 0.5), floor(color[3] * 255 + 0.5), text)
+    else
+        value = (COLORS[color] or GRAY_FONT_COLOR):WrapTextInColorCode(text)
+    end
     local r, g, b = HIGHLIGHT_FONT_COLOR:GetRGB()
     if align == "inline" then
         tooltip:AddLine(format(L.PRICE_INLINE, label, value), r, g, b)
