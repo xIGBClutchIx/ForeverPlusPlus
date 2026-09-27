@@ -90,6 +90,15 @@
     "UnitCastingInfo",
     "UnitChannelInfo",
     "C_GossipInfo",
-    "C_TooltipInfo"
+    "C_TooltipInfo",
+    "UnitExists",
+    "UnitName",
+    "UnitPVPName",
+    "UnitReaction",
+    "UnitSelectionColor",
+    "GetCreatureDifficultyColor",
+    "GetQuestDifficultyColor",
+    "FACTION_BAR_COLORS",
+    "TOOLTIP_DEFAULT_COLOR"
   ]
 }
