@@ -169,7 +169,7 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 
 - `C_RecentAllies` exists: `IsSystemEnabled`, `IsSystemSupported`, `IsRecentAllyByGUID(guid)`, `IsRecentAllyByFullName(name)`, `GetRecentAllyByGUID`, `GetRecentAllies`, `IsRecentAllyDataReady`, `TryRequestRecentAlliesData`, plus notes and pins. Events: `RECENT_ALLIES_CACHE_UPDATE`, `RECENT_ALLIES_DATA_READY`, `RECENT_ALLY_DATA_UPDATED` (guid), `RECENT_ALLIES_SYSTEM_STATUS_UPDATED`. **[dump]** (both dumps)
 - Blizzard's Lua uses it for the Recent Allies tab in the Friends frame (Camelot `FriendsFrame.lua` shows the tab when `IsSystemEnabled()`), for the `friendslist-recentallies-yellow` icon after names in chat (`IsRecentAllyByGUID(senderGUID)`) and whisper tabs, and for the unit menu. The tab calls `TryRequestRecentAlliesData()` when shown and listens for `RECENT_ALLIES_CACHE_UPDATE`; chat asks `IsRecentAllyByGUID` without requesting first. **[web]** (Gethe/wow-ui-source `forever` branch, 1.60.1.70009)
-- The light blue is `RECENT_ALLY_FONT_COLOR`, (0.325, 0.788, 1) or `ff53c9ff`, a `GlobalColor` row that `C_UIColor.GetColors()` turns into a global at load. No Blizzard Lua reads it, not even the nameplates (`CompactUnitFrame_UpdateName` colors only by class or selection), so the client draws it itself (in-world names, presumably). **[web]** (wago.tools `GlobalColor` for 1.60.1.70009; the `forever` UI source) Where exactly the game shows it, and whether `IsRecentAllyByGUID` is right without a request first, is **Unverified**.
+- The light blue is `RECENT_ALLY_FONT_COLOR`, (0.325, 0.788, 1) or `ff53c9ff`, a `GlobalColor` row that `C_UIColor.GetColors()` turns into a global at load. No Blizzard Lua reads it, not even the nameplates (`CompactUnitFrame_UpdateName` colors only by class or selection), so the client draws it itself (in-world names, presumably). **[web]** (wago.tools `GlobalColor` for 1.60.1.70009; the `forever` UI source) The global exists with that value. **[in-game]** (2026-09-27, `/dump RECENT_ALLY_FONT_COLOR:GetRGB()`) Where exactly the game shows it, and whether `IsRecentAllyByGUID` is right without a request first, is **Unverified**.
 - Player Nameplates colors recent allies' names with `Units.IsRecentAlly`, falls back to the 70009 value if the global is missing, and requests the data once when it turns on.
 
 ## Looting and repairs
@@ -219,7 +219,8 @@ Check these in the live client and move them up with a tag and date:
 - [x] The three talent tabs are trait groups from `C_Traits.GetGroupDisplayInfoByTreeID`. (2026-09-25)
 - [x] Nodes list their tab's group in `groupIDs` (not always first), and `C_Traits.GetGroupCurrencyInfo` gives points spent per tab. (2026-09-25)
 - [ ] Does `GetGroupCurrencyInfo` return an entry for a tab once it has points, with points in two tabs? (Only one tab had points when tested.)
-- [ ] Does `C_RecentAllies.IsRecentAllyByGUID` answer right after login, before the Recent Allies tab is opened, and does `/dump RECENT_ALLY_FONT_COLOR:GetRGB()` give (0.325, 0.788, 1)?
+- [x] `RECENT_ALLY_FONT_COLOR:GetRGB()` gives (0.325, 0.788, 1). (2026-09-27)
+- [ ] Does `C_RecentAllies.IsRecentAllyByGUID` answer right after login, before the Recent Allies tab is opened?
 
 ## Sources
 
