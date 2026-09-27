@@ -12,6 +12,11 @@ local module = ns.NewModule("FastLoot", L.FASTLOOT_DESC, { enabled = true })
 module.title = L.FASTLOOT_TITLE
 module.category = "automation"
 
+-- With the game's auto loot off, only loot taken while holding its modifier is fast, which looks
+-- like the module doing nothing.
+module.notice = ns.CVars.OffNotice(module, "autoLootDefault", L.FASTLOOT_BLIZZARD_OFF,
+    L.FASTLOOT_BLIZZARD_OFF_DESC)
+
 -- LOOT_READY can fire more than once for the same corpse; loot it once.
 local DELAY = 0.3
 local last = 0

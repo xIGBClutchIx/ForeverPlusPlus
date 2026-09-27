@@ -106,6 +106,7 @@ The goal is to add to Blizzard frames without tainting or breaking them.
 - The main page is the only place modules turn on and off. Give every module a `module.category`: `automation`, `items`, `interface`, or `nameplates` (anything else lands under Other). It appears under that header, sorted by `module.title`.
 - A tool with nothing to turn off sets `module.alwaysOn = true` and gets no checkbox. A module that only makes sense on some clients gives `module:IsAvailable()`; when that's false at login it stays off and out of Settings and `/fpp`.
 - Options go in `module.options` (`{ key, name, description }`, default in `defaults`): a checkbox, or a dropdown with `choices`. `debug = true` moves one to the Debug page. Buttons go in `module.actions`. React to changes in `module:OnOptionChanged(key)`.
+- A module that silently depends on a Blizzard setting sets `module.notice`: a gray row atop its page (or under its checkbox, with no page) while that setting is off, with a button that turns it on. For a CVar, use `ns.CVars.OffNotice`.
 - On a page long enough to need them, give options a `section` (an `ns.L` string). Each change of section starts a Blizzard section header, so list options grouped in the order they should show, usually a general section first.
 
 ## Git

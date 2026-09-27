@@ -6,8 +6,9 @@
 --     <Module>       one page per module with options, holding just its options (and buttons,
 --                    from `module.actions`), in the main page's order, greyed out with a note at
 --                    the top while the module is off, and its `notice` (a warning) while that
---                    applies. Options with a `section`
---                    get a header above each group, for pages long enough to need them
+--                    applies (on the main page, under its checkbox, for a module with no page).
+--                    Options with a `section` get a header above each group, for pages long
+--                    enough to need them
 --     <Tool>         a page a module draws itself (`BuildPage`), after the option pages
 --     Debug          options marked `debug = true`, for testing
 --     About          the version, links, and /fpp commands
@@ -224,14 +225,19 @@ end
 
 -- A module's `notice` ({ text, description, button, fn, shown }): a gray row at the top of its
 -- page while `shown()` is true, such as a Blizzard setting the module needs being off, with a
--- button that fixes it. A normal settings row, so it's the size of the options below it.
-local function addNotice(layout, module)
+-- button that fixes it. A normal settings row, so it's the size of the options below it. A module
+-- without a page gets it on the main page instead, indented under its checkbox (`parent`).
+-- ns.CVars.OffNotice makes one for a CVar.
+local function addNotice(layout, module, parent)
     local notice = module.notice
     if not (notice and layout and CreateSettingsButtonInitializer) then
         return
     end
     local initializer = CreateSettingsButtonInitializer(format("|cff999999%s|r", notice.text),
         notice.button, notice.fn, notice.description, true)
+    if parent and initializer.SetParentInitializer then
+        initializer:SetParentInitializer(parent)
+    end
     if initializer.AddShownPredicate then
         initializer:AddShownPredicate(notice.shown)
         layout:AddInitializer(initializer)
@@ -412,6 +418,9 @@ function ns.RegisterSettings()
                 addHeader(layout, CATEGORY_NAMES[group])
             end
             local parent = addToggle(category, module, hasPage(module))
+            if not (subpages and hasPage(module) and not module.BuildPage) then
+                addNotice(layout, module, parent)
+            end
             if not subpages then
                 addOptions(category, module, parent, false)
                 addActions(layout, module)

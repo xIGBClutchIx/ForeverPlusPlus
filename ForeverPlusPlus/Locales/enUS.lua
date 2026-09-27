@@ -43,6 +43,7 @@ L.DEBUG = "Debug"
 L.SETTINGS_AFTER_COMBAT = "Settings open after combat."
 L.SETTINGS_MODULE_OFF = "Module is disabled: turn it on from the Forever++ page" -- atop its page
 L.SETTINGS_OPEN_PAGE = "%s Options" -- the gear beside a module's checkbox: module title
+L.SETTINGS_TURN_ON = "Turn On" -- the button on a "Blizzard's ... is off" row
 
 -- Settings: About page
 L.ABOUT = "About"
@@ -59,7 +60,6 @@ L.ABOUT_COMMANDS = "Commands"
 
 -- Friendly nameplates (Lib/PlateLabel.lua and both plate modules)
 L.PLATES_BLIZZARD_OFF = "Blizzard's nameplates are off" -- a gray row atop the page, with a button
-L.PLATES_TURN_ON = "Turn On"
 L.PLATES_BAR_WHEN_HURT = "Health Bar When Hurt"
 L.PLATES_NAME_COLOR = "Name Color"
 L.PLATES_LEVEL = "Level"
@@ -131,6 +131,9 @@ L.NPCPLATES_TITLE_COLOR_NAME = "Same as Name"
 L.FASTLOOT_TITLE = "Fast Loot"
 L.FASTLOOT_DESC = "With auto loot on, take everything at once instead of waiting for the loot "
     .. "window."
+L.FASTLOOT_BLIZZARD_OFF = "Blizzard's auto loot is off" -- a gray row under the checkbox, with a button
+L.FASTLOOT_BLIZZARD_OFF_DESC = "Blizzard's auto loot is off, so only loot you take while holding "
+    .. "the auto loot key (Shift) is fast. Turn it on here or in Blizzard's Controls options."
 
 -- AutoRepair
 L.AUTOREPAIR_TITLE = "Auto Repair"

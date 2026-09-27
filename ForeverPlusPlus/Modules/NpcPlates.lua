@@ -3,8 +3,6 @@
 -- The plates themselves are ns.FriendlyPlates; this module picks the colors and the title line.
 local _, ns = ...
 
-local ipairs = ipairs
-
 local L = ns.L
 local Units = ns.Units
 
@@ -78,19 +76,8 @@ end
 -- Blizzard's friendly NPC nameplates can be turned off after this module turns them on, and then
 -- there are no plates to draw on.
 local SHOW_NPCS = { "nameplateShowFriendlyNpcs", "nameplateShowFriendlyNPCs" }
-module.notice = {
-    text = L.PLATES_BLIZZARD_OFF,
-    description = L.NPCPLATES_BLIZZARD_OFF_DESC,
-    button = L.PLATES_TURN_ON,
-    fn = function()
-        for _, name in ipairs(SHOW_NPCS) do
-            ns.CVars.Apply(name, "1") -- the one this client lacks does nothing
-        end
-    end,
-    shown = function()
-        return module.db.enabled and not ns.CVars.IsOn(SHOW_NPCS)
-    end,
-}
+module.notice = ns.CVars.OffNotice(module, SHOW_NPCS, L.PLATES_BLIZZARD_OFF,
+    L.NPCPLATES_BLIZZARD_OFF_DESC)
 
 local plates = ns.FriendlyPlates.New(module, {
     players = false,

@@ -30,6 +30,30 @@ function CVars.IsOn(names)
     return name ~= nil and C_CVar.GetCVar(name) == "1"
 end
 
+---A module's settings `notice` for a Blizzard setting it needs: a gray row saying so while the
+---module is on and the CVar is off, with a button that turns the CVar on.
+---@param module table
+---@param names string|string[] the CVar, or its names newest first
+---@param text string the row's short gray label
+---@param description string its tooltip: what doesn't work and where else to turn it on
+---@return table notice for `module.notice`
+function CVars.OffNotice(module, names, text, description)
+    return {
+        text = text,
+        description = description,
+        button = ns.L.SETTINGS_TURN_ON,
+        fn = function()
+            local name = find(names)
+            if name then
+                CVars.Apply(name, "1")
+            end
+        end,
+        shown = function()
+            return module.db.enabled and not CVars.IsOn(names)
+        end,
+    }
+end
+
 ---Sets a CVar, remembering the player's value in `saved` the first time.
 ---@param saved table the owner's saved originals (CVar -> value)
 ---@param names string|string[] the CVar, or its names newest first
