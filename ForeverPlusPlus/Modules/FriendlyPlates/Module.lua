@@ -17,6 +17,8 @@ local module = ns.NewModule("FriendlyPlates", L.FRIENDLYPLATES_DESC, {
     barWhenHurt = true,
     nameColor = "class", -- players' names: "class" or "white"
     npcs = true,
+    npcBarWhenHurt = true,
+    npcLevel = "before", -- like level
     npcNameColor = "green", -- NPCs' names: "green" (as in the world) or "white"
     guildNames = "always", -- "always", "hidden" (only without the bar), or "off"
     guildColor = "gray", -- "gray" or "green"
@@ -32,9 +34,8 @@ local module = ns.NewModule("FriendlyPlates", L.FRIENDLYPLATES_DESC, {
 })
 module.title = L.FRIENDLYPLATES_TITLE
 
--- Extra settings on this module's page in Settings (see Settings.lua), in sections: both kinds
--- of plate, players, then NPCs.
-local GENERAL = L.FRIENDLYPLATES_SECTION_GENERAL
+-- Extra settings on this module's page in Settings (see Settings.lua), in two sections: players,
+-- then NPCs.
 local PLAYERS = L.FRIENDLYPLATES_SECTION_PLAYERS
 local NPCS = L.FRIENDLYPLATES_SECTION_NPCS
 
@@ -47,23 +48,21 @@ local function subtitleChoices()
     }
 end
 
+-- Where the level goes beside the name.
+local function levelChoices()
+    return {
+        { "before", L.FRIENDLYPLATES_LEVEL_BEFORE },
+        { "after", L.FRIENDLYPLATES_LEVEL_AFTER },
+        { "off", L.FRIENDLYPLATES_LEVEL_OFF },
+    }
+end
+
 module.options = {
     {
         key = "barWhenHurt",
         name = L.FRIENDLYPLATES_BAR_WHEN_HURT,
         description = L.FRIENDLYPLATES_BAR_WHEN_HURT_DESC,
-        section = GENERAL,
-    },
-    {
-        key = "level",
-        name = L.FRIENDLYPLATES_LEVEL,
-        description = L.FRIENDLYPLATES_LEVEL_DESC,
-        section = GENERAL,
-        choices = {
-            { "before", L.FRIENDLYPLATES_LEVEL_BEFORE },
-            { "after", L.FRIENDLYPLATES_LEVEL_AFTER },
-            { "off", L.FRIENDLYPLATES_LEVEL_OFF },
-        },
+        section = PLAYERS,
     },
     {
         key = "nameColor",
@@ -74,6 +73,13 @@ module.options = {
             { "class", L.FRIENDLYPLATES_NAME_COLOR_CLASS },
             { "white", L.FRIENDLYPLATES_COLOR_WHITE },
         },
+    },
+    {
+        key = "level",
+        name = L.FRIENDLYPLATES_LEVEL,
+        description = L.FRIENDLYPLATES_LEVEL_DESC,
+        section = PLAYERS,
+        choices = levelChoices(),
     },
     {
         key = "guildNames",
@@ -119,6 +125,19 @@ module.options = {
         name = L.FRIENDLYPLATES_NPCS,
         description = L.FRIENDLYPLATES_NPCS_DESC,
         section = NPCS,
+    },
+    {
+        key = "npcBarWhenHurt",
+        name = L.FRIENDLYPLATES_NPC_BAR_WHEN_HURT,
+        description = L.FRIENDLYPLATES_NPC_BAR_WHEN_HURT_DESC,
+        section = NPCS,
+    },
+    {
+        key = "npcLevel",
+        name = L.FRIENDLYPLATES_NPC_LEVEL,
+        description = L.FRIENDLYPLATES_NPC_LEVEL_DESC,
+        section = NPCS,
+        choices = levelChoices(),
     },
     {
         key = "npcNameColor",

@@ -165,7 +165,7 @@ end
 -- Puts the level beside the name; returns the width it takes.
 local function placeLevel(label, record, unit)
     local badge = label.level
-    local where = module.db.level
+    local where = record.isPlayer and module.db.level or module.db.npcLevel
     if not record.levelFrame or where == "off" then
         badge:Hide()
         return 0
@@ -279,7 +279,7 @@ function P.LayoutLabel(label, record, unit)
     -- The level goes on one side of the name and the icons on the other. The name then shifts by
     -- half the difference, so the whole row is centered over the bar. The guild stays centered.
     local levelWidth = placeLevel(label, record, unit)
-    local iconsLeft = module.db.level == "after"
+    local iconsLeft = (record.isPlayer and module.db.level or module.db.npcLevel) == "after"
     local fontSize = label.nameSize or 12
     local iconsWidth = P.PlaceIcons(label.icons, label.name, iconsLeft, fontSize, record, unit)
     -- With the bar up, the icons follow Blizzard's own name.

@@ -99,10 +99,12 @@ local function update(unit)
     if not readable(inCombat) then
         inCombat = UnitAffectingCombat("player")
     end
+    local db = module.db
+    local barWhenHurt = record.isPlayer and db.barWhenHurt or not record.isPlayer and db.npcBarWhenHurt
     local shown, hidden
     if inCombat then
         shown, hidden = 1, 0
-    elseif not module.db.barWhenHurt then
+    elseif not barWhenHurt then
         shown, hidden = 0, 1
     elseif not curve then
         shown, hidden = 1, 0
