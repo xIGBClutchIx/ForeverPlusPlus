@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/project-icon.png" alt="Forever++" width="128"></p>
+
 # Forever++
 
 A World of Warcraft addon for **WoW: Forever** that adds to and changes the default UI in small, separate modules. It doesn't replace the UI: every change is meant to look like Blizzard shipped it, needs no setup, and can be turned off on its own.

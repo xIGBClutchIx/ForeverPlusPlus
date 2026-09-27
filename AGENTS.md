@@ -30,6 +30,7 @@ Names:
   - `Modules/`: one change each (see "Add a module" in `README.md`). A small module is one file; a bigger one gets a folder of files that share `module.internal`. Today: Player Nameplates, NPC Nameplates, Console Variables (a tool, no toggle), Fast Loot, Auto Repair, Auction Prices, Sell Price, Hide Beta Feedback (beta/PTR only), Gathering Tracking, Auto Stow, Durability Bars, Auto Gossip, Tooltips.
   - `Settings.lua`: the Settings pages: the main page (a checkbox per module, grouped under a header per category), one page per module with options or its own `BuildPage`, Debug, and About.
   - `Init.lua`: loaded last; calls `ns.Start()` at `PLAYER_LOGIN`.
+  - `Media/Icon.tga`: the addon icon (64x64, 32-bit uncompressed TGA), used by the TOC's `IconTexture` and the About page as `ns.icon`. Made from `docs/project-icon.png`, which the README shows.
 - `.github/workflows/check.yml`: on every push, checks Lua 5.1 syntax, ASCII, and that the TOC and the files match, then uploads the addon folder as a zip artifact. Pushing a `v*` tag also makes a GitHub release with the zip; bump `## Version` in the TOC to match first.
 - `README.md`: for players and contributors: the module list, install, settings and commands, and "Add a module". Keep it short; rules and client detail belong here and in `docs/`.
 - `docs/forever-api.md`: what we know about the Forever client API, with sources and how sure we are.

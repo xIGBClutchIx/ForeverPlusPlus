@@ -311,6 +311,11 @@ end
 local function buildAbout(frame)
     ns.AddPageTitle(frame, ns.title)
 
+    local icon = frame:CreateTexture(nil, "ARTWORK")
+    icon:SetSize(64, 64)
+    icon:SetPoint("TOPRIGHT", -16, -64)
+    icon:SetTexture(ns.icon)
+
     local tagline = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     tagline:SetPoint("TOPLEFT", 16, -64)
     tagline:SetText(metadata("Notes") ~= "" and metadata("Notes") or L.ABOUT_TAGLINE)

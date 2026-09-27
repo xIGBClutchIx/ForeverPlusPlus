@@ -14,6 +14,7 @@ end
 
 ns.name = addonName
 ns.title = "Forever++"
+ns.icon = "Interface\\AddOns\\" .. addonName .. "\\Media\\Icon" -- also the TOC's IconTexture
 ns.modules = {} -- name -> module, in ns.order
 ns.order = {}
 

@@ -4,7 +4,7 @@
 ## Author: xIGBClutchIx
 ## Version: 0.1.0
 ## SavedVariables: ForeverPlusPlusDB
-## IconTexture: Interface\Icons\INV_Misc_Gear_01
+## IconTexture: Interface\AddOns\ForeverPlusPlus\Media\Icon
 
 Core.lua
 Locales\enUS.lua
