@@ -39,8 +39,9 @@ ns.changelog = {
                 { L.GATHERTOOLTIPS_TITLE, "The skill a herb, ore, or skinnable beast needs, in "
                     .. "its tooltip in the world or on the minimap, colored red, orange, yellow, "
                     .. "green, or gray against your skill like trainer recipes. Herb, ore, and "
-                    .. "stone items say the skill that gathers them. Includes a checkbox each for "
-                    .. "herbs, ore, creatures, and items." },
+                    .. "stone items say the skill that gathers them. Includes showing it only for "
+                    .. "professions you have or always, and a checkbox each for herbs, ore, "
+                    .. "creatures, and items." },
                 { L.SKIPCINEMATICS_TITLE, "Skips the game's cinematics and movies. Off by "
                     .. "default. Includes skipping only ones already seen on any character or "
                     .. "every one, holding Shift to watch, and a Forget button for the seen list." },

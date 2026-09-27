@@ -1,7 +1,8 @@
 -- Gathering Tooltips: the skill a herb, vein, or skinnable beast needs, in its tooltip, colored
 -- against the player's skill the way a trainer colors recipes: red can't yet, then orange,
 -- yellow, green, and gray as it gets easier. Herbs, ore, and stone items say the skill that
--- gathers them. Only for professions the player has. Ideas from GatherSkillTooltip; none of its
+-- gathers them. Only for professions the player has, or always (red without it). Ideas from
+-- GatherSkillTooltip; none of its
 -- code.
 --
 -- Fishing isn't here: in Classic what a pool or a fish needs depends on the zone, not on it.
@@ -23,6 +24,7 @@ local HERB, MINE, SKIN = Professions.HERBALISM, Professions.MINING, Professions.
 
 local module = ns.NewModule("GatherTooltips", L.GATHERTOOLTIPS_DESC, {
     enabled = true,
+    show = "known", -- "known" (only for professions you have) or "always"
     herbalism = true,
     mining = true,
     skinning = true,
@@ -32,6 +34,13 @@ module.title = L.GATHERTOOLTIPS_TITLE
 module.category = "items"
 
 module.options = {
+    {
+        key = "show", name = L.GATHERTOOLTIPS_SHOW, description = L.GATHERTOOLTIPS_SHOW_DESC,
+        choices = {
+            { "known", L.GATHERTOOLTIPS_SHOW_KNOWN },
+            { "always", L.GATHERTOOLTIPS_SHOW_ALWAYS },
+        },
+    },
     { key = "herbalism", name = L.GATHERTOOLTIPS_HERBALISM, description = L.GATHERTOOLTIPS_HERBALISM_DESC },
     { key = "mining", name = L.GATHERTOOLTIPS_MINING, description = L.GATHERTOOLTIPS_MINING_DESC },
     { key = "skinning", name = L.GATHERTOOLTIPS_SKINNING, description = L.GATHERTOOLTIPS_SKINNING_DESC },
@@ -183,16 +192,17 @@ local function difficulty(rank, need)
 end
 
 -- The line for a skill line and skill, colored, or nil when it's off or the player doesn't have
--- the profession. `text` is L.GATHERTOOLTIPS_REQUIRES or _GATHERED.
+-- the profession and `show` is "known". Without the profession it's red: you can't gather it.
+-- `text` is L.GATHERTOOLTIPS_REQUIRES or _GATHERED.
 local function skillLine(line, need, text)
     if not module.db[OPTION[line]] then
         return nil
     end
     local rank, name = Professions.Rank(line)
-    if not rank then
+    if not rank and module.db.show ~= "always" then
         return nil
     end
-    local color = difficulty(rank, need)
+    local color = rank and difficulty(rank, need) or RED
     return format(text, name or FALLBACK_NAME[line], need), color
 end
 
