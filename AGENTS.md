@@ -31,7 +31,7 @@ Names:
   - `Settings.lua`: the Settings pages: the main page (a checkbox per module, grouped under a header per category), one page per module with options or its own `BuildPage`, Debug, and About.
   - `Init.lua`: loaded last; calls `ns.Start()` at `PLAYER_LOGIN`.
 - `.github/workflows/check.yml`: on every push, checks Lua 5.1 syntax, ASCII, and that the TOC and the files match.
-- `README.md`: install and usage for people.
+- `README.md`: for players and contributors: the module list, install, settings and commands, and "Add a module". Keep it short; rules and client detail belong here and in `docs/`.
 - `docs/forever-api.md`: what we know about the Forever client API, with sources and how sure we are.
 - `.luarc.json`: LuaLS settings (Lua 5.1 and the known globals).
 
@@ -71,7 +71,7 @@ When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or f
 - Default to on only for changes nearly everyone wants; otherwise `enabled = false`.
 - When replacing behavior, delete the old path. No backwards compatibility for settings: no shims, migrations, or renamed-key fallbacks. Rename or drop a setting freely; the core clears settings for modules and options that no longer exist, and a dropdown whose saved value isn't a choice any more goes back to its default.
 - Add a new file to the TOC, after `Core.lua` and before `Init.lua`: `Locales/` first (`enUS.lua` before other languages), then `Lib/`, then `Modules/`.
-- Update `README.md` in the same change when commands, install steps, or the layout change.
+- Update `README.md` in the same change when a module is added, removed, or changes what it does or its default, or when commands or install steps change. Update the module list in "Project map" above too.
 - Record things learned about the Forever client in `docs/forever-api.md`, tagged with how you know. Promote a fact to "How Forever differs from Classic" above only when it changes how code must be written.
 
 ## Lua rules
