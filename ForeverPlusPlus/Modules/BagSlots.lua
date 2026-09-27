@@ -1,11 +1,12 @@
--- Bag Slot Counter: how many bag slots are free, as a number in the corner of the bag buttons
--- beside the micro menu, like an item's stack count. Either the total on the backpack or each
--- bag's own count on its button. Only normal bags count unless the player adds special ones
--- (quivers, ammo pouches, soul bags, herb bags, the reagent bag), whose slots only take some items.
+-- Bag Slot Counter: how many bag slots are free, as a number on the bag buttons beside the micro
+-- menu, like an item's stack count. Either the total on the backpack or each bag's own count on its
+-- button. Only normal bags count unless the player adds special ones (quivers, ammo pouches, soul
+-- bags, herb bags), whose slots only take some items. The reagent bag has its own setting: its own
+-- count, part of the total, or nothing. The text's size and corner are options.
 local _, ns = ...
 
-local _G, ipairs, tostring = _G, ipairs, tostring
-local CreateFrame, C_Container = CreateFrame, C_Container
+local _G, ipairs, pairs, tostring = _G, ipairs, pairs, tostring
+local CreateFrame, C_Container, Enum = CreateFrame, C_Container, Enum
 
 local L = ns.L
 
@@ -13,6 +14,9 @@ local module = ns.NewModule("BagSlots", L.BAGSLOTS_DESC, {
     enabled = true,
     show = "backpack", -- "backpack": the total on the backpack; "each": every bag its own
     special = false, -- count bags whose slots only take some items
+    reagent = "own", -- the reagent bag: "own" count on its button, in the "total", or "off"
+    size = "normal", -- a key of SIZES
+    position = "bottomright", -- a key of POSITIONS
 })
 module.title = L.BAGSLOTS_TITLE
 module.category = "items"
@@ -20,24 +24,81 @@ module.category = "items"
 module.options = {
     {
         key = "show", name = L.BAGSLOTS_SHOW, description = L.BAGSLOTS_SHOW_DESC,
+        section = L.BAGSLOTS_SECTION_COUNT,
         choices = {
             { "backpack", L.BAGSLOTS_SHOW_BACKPACK },
             { "each", L.BAGSLOTS_SHOW_EACH },
         },
     },
-    { key = "special", name = L.BAGSLOTS_SPECIAL, description = L.BAGSLOTS_SPECIAL_DESC },
+    {
+        key = "special", name = L.BAGSLOTS_SPECIAL, description = L.BAGSLOTS_SPECIAL_DESC,
+        section = L.BAGSLOTS_SECTION_COUNT,
+    },
+    {
+        key = "reagent", name = L.BAGSLOTS_REAGENT, description = L.BAGSLOTS_REAGENT_DESC,
+        section = L.BAGSLOTS_SECTION_COUNT,
+        choices = {
+            { "own", L.BAGSLOTS_REAGENT_OWN },
+            { "total", L.BAGSLOTS_REAGENT_TOTAL },
+            { "off", L.BAGSLOTS_REAGENT_OFF },
+        },
+    },
+    {
+        key = "size", name = L.BAGSLOTS_SIZE, description = L.BAGSLOTS_SIZE_DESC,
+        section = L.BAGSLOTS_SECTION_TEXT,
+        choices = {
+            { "small", L.BAGSLOTS_SIZE_SMALL },
+            { "normal", L.BAGSLOTS_SIZE_NORMAL },
+            { "large", L.BAGSLOTS_SIZE_LARGE },
+            { "huge", L.BAGSLOTS_SIZE_HUGE },
+        },
+    },
+    {
+        key = "position", name = L.BAGSLOTS_POSITION, description = L.BAGSLOTS_POSITION_DESC,
+        section = L.BAGSLOTS_SECTION_TEXT,
+        choices = {
+            { "bottomright", L.BAGSLOTS_POSITION_BOTTOMRIGHT },
+            { "bottomleft", L.BAGSLOTS_POSITION_BOTTOMLEFT },
+            { "topright", L.BAGSLOTS_POSITION_TOPRIGHT },
+            { "topleft", L.BAGSLOTS_POSITION_TOPLEFT },
+            { "bottom", L.BAGSLOTS_POSITION_BOTTOM },
+            { "top", L.BAGSLOTS_POSITION_TOP },
+            { "center", L.BAGSLOTS_POSITION_CENTER },
+        },
+    },
+}
+
+-- Blizzard's number fonts, the ones stack counts use, smallest to largest.
+local SIZES = {
+    small = "NumberFontNormalSmall",
+    normal = "NumberFontNormal",
+    large = "NumberFontNormalLarge",
+    huge = "NumberFontNormalHuge",
+}
+
+-- Anchor point, x and y offset from the button's edge, and justification.
+local INSET = 3
+local POSITIONS = {
+    bottomright = { "BOTTOMRIGHT", -INSET, INSET, "RIGHT" },
+    bottomleft = { "BOTTOMLEFT", INSET, INSET, "LEFT" },
+    topright = { "TOPRIGHT", -INSET, -INSET, "RIGHT" },
+    topleft = { "TOPLEFT", INSET, -INSET, "LEFT" },
+    bottom = { "BOTTOM", 0, INSET, "CENTER" },
+    top = { "TOP", 0, -INSET, "CENTER" },
+    center = { "CENTER", 0, 0, "CENTER" },
 }
 
 -- Bag ids (Enum.BagIndex) and their buttons on Mainline's bag bar. A button Forever doesn't have
--- is skipped. The reagent bag counts as special whatever its family says.
+-- is skipped.
 local BACKPACK = 0
+local REAGENT = Enum and Enum.BagIndex and Enum.BagIndex.ReagentBag or 5
 local BAGS = {
-    { id = 0, button = "MainMenuBarBackpackButton" },
+    { id = BACKPACK, button = "MainMenuBarBackpackButton" },
     { id = 1, button = "CharacterBag0Slot" },
     { id = 2, button = "CharacterBag1Slot" },
     { id = 3, button = "CharacterBag2Slot" },
     { id = 4, button = "CharacterBag3Slot" },
-    { id = 5, button = "CharacterReagentBag0Slot", special = true },
+    { id = REAGENT, button = "CharacterReagentBag0Slot" },
 }
 
 local RED_FONT_COLOR = RED_FONT_COLOR
@@ -55,6 +116,19 @@ local function blizzardCount()
     return _G.MainMenuBarBackpackButtonCount or (backpack and backpack.Count)
 end
 
+local function style()
+    local font = _G[SIZES[module.db.size] or SIZES.normal] or _G.NumberFontNormal
+    local position = POSITIONS[module.db.position] or POSITIONS.bottomright
+    for _, text in pairs(counts) do
+        if font then
+            text:SetFontObject(font)
+        end
+        text:ClearAllPoints()
+        text:SetPoint(position[1], position[2], position[3])
+        text:SetJustifyH(position[4])
+    end
+end
+
 local function build()
     built = true
     for _, bag in ipairs(BAGS) do
@@ -64,10 +138,7 @@ local function build()
             local frame = CreateFrame("Frame", nil, button)
             frame:SetAllPoints()
             frame:SetFrameLevel(button:GetFrameLevel() + 2)
-            local text = frame:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
-            text:SetPoint("BOTTOMRIGHT", -3, 3)
-            text:SetJustifyH("RIGHT")
-            counts[bag.id] = text
+            counts[bag.id] = frame:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
             frames[#frames + 1] = frame
         end
     end
@@ -79,8 +150,11 @@ local function freeSlots(bag)
         return nil
     end
     local free, family = C_Container.GetContainerNumFreeSlots(bag.id)
-    local special = bag.special or (family and family ~= 0)
-    if special and not module.db.special then
+    if bag.id == REAGENT then
+        if module.db.reagent == "off" then
+            return nil
+        end
+    elseif family and family ~= 0 and not module.db.special then
         return nil
     end
     return free or 0
@@ -102,16 +176,20 @@ end
 
 local function update()
     local each = module.db.show == "each"
+    local ownReagent = module.db.reagent == "own"
     local total, any = 0, false
     for _, bag in ipairs(BAGS) do
         local free = freeSlots(bag)
-        if free then
-            total, any = total + free, true
-        end
-        if each then
+        if each or (bag.id == REAGENT and ownReagent) then
+            -- Its own count on its own button.
             setCount(counts[bag.id], free)
-        elseif bag.id ~= BACKPACK then
-            setCount(counts[bag.id], nil)
+        else
+            if free then
+                total, any = total + free, true
+            end
+            if bag.id ~= BACKPACK then
+                setCount(counts[bag.id], nil)
+            end
         end
     end
     if not each then
@@ -133,6 +211,7 @@ function module:OnEnable()
     if not built then
         build()
     end
+    style() -- the size or position may have changed while it was off
     showAll(true)
     self:On("BAG_UPDATE_DELAYED", update)
     self:On("BAG_CONTAINER_UPDATE", update) -- a bag put on or taken off
@@ -144,8 +223,13 @@ function module:OnDisable()
     showAll(false)
 end
 
-function module:OnOptionChanged()
-    if self.enabled then
+function module:OnOptionChanged(key)
+    if not self.enabled then
+        return
+    end
+    if key == "size" or key == "position" then
+        style()
+    else
         update()
     end
 end

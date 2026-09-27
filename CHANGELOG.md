@@ -10,7 +10,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Auto Dismount**: gets you off your mount or stands you up when a spell, flight, loot, or attack fails because you're mounted or sitting. Includes separate Dismount and Stand Up options, and leaving shapeshift forms (off by default).
 - **Auto Release**: releases your spirit when you die in a battleground. Includes a delay, and staying put when a soulstone, reincarnation, or someone else can resurrect you. Off by default.
 - **Auto Screenshot**: takes a screenshot a moment after you level up, earn an achievement, or defeat a boss, so Blizzard's toast is in it. Includes checkboxes for loot of a chosen quality, reputation standings, PvP ranks, new titles, battleground ends, and deaths, hiding the interface for the shot, and a chat line saying why. Off by default.
-- **Bag Slot Counter**: how many bag slots are free, on the bag buttons. Includes the total on the backpack or each bag's own count, and counting special bags such as quivers and herb bags.
+- **Bag Slot Counter**: how many bag slots are free, on the bag buttons. Includes the total on the backpack or each bag's own count, the reagent bag on its own button, in the total, or hidden, counting special bags such as quivers and herb bags, and the text's size and position.
 - **Skip Cinematics**: skips the game's cinematics and movies. Off by default. Includes skipping only ones already seen on any character or every one, holding Shift to watch, and a Forget button for the seen list.
 
 ## 0.1.0 (2026-09-27)

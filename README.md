@@ -22,7 +22,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Skip Cinematics | Skips cinematics and movies you've already seen on any character, or every one. Hold Shift to watch. Off by default. |
 | **Items** | |
 | Auction Prices | Scans the auction house when you open it and shows the lowest buyout in item tooltips, under the sell price. |
-| Bag Slot Counter | Shows how many bag slots are free on the backpack button, or each bag's own count on its button. |
+| Bag Slot Counter | Shows how many bag slots are free on the backpack button, or each bag's own count on its button, with the reagent bag counted on its own. |
 | Durability Bars | Shows a small bar beside each item on the character window with how worn it is. |
 | Sell Price | Shows the vendor price of the whole stack in item tooltips. Hold Shift for one item. |
 | **Interface** | |
