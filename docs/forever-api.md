@@ -205,6 +205,12 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 - On Retail, `RepopMe()` isn't protected, and auto-release addons call it from a `C_Timer` after `PLAYER_DEAD`. **[web]** Whether Forever allows that from addon code is **Unverified**; Auto Release relies on it. Check: `/run C_Timer.After(1, RepopMe)` while dead should release with no "blocked" error.
 - `IsInInstance()` returning `"pvp"` in Forever's battlegrounds, and which battlegrounds exist, is **Unverified**. Check: `/dump IsInInstance()` in one.
 
+## Cinematics and movies
+
+- In-world cinematics go through `CINEMATIC_START(canBeCancelled, forcedAspectRatio)` and `CinematicFrame`, which Blizzard's `CinematicFrame_OnEvent` shows. `canBeCancelled` false means a vehicle ride or scene, which Blizzard's own cancel (`CinematicFrame_CancelCinematic`) ends with `CancelScene` or `VehicleExit`; true means a real cinematic, ended with `StopCinematic()`. **[web]** (Gethe/wow-ui-source `forever`, `Blizzard_FrameXML/Shared/CinematicFrame.lua`, checked 2026-09-27) Cinematics have no ID, so Skip Cinematics remembers them by map and subzone.
+- Movies go through `PLAY_MOVIE(movieID)` and `MovieFrame` (`MovieFrameMixin`, always loaded). `MovieFrame:PlayMovie` sets `MovieFrame.movieID` only when the movie really started, and the skip dialog's confirm button calls `MovieFrame:FinishMovie()`. **[web]** (same repo, `Blizzard_FrameXML/MovieFrame.lua`) `CinematicStarted` / `CinematicFinished` take secret arguments only when untainted, which doesn't matter for plain numbers.
+- Unverified: whether `StopCinematic()` from a `C_Timer.After(0)` after `CINEMATIC_START` ends the cinematic, and whether `FinishMovie()` from a `hooksecurefunc` on `MovieFrame.PlayMovie` works without a taint error. Skip Cinematics depends on both; its Debug option prints each key as it starts.
+
 ## Fonts
 
 - Text measured before its font file has loaded reads as 0 tall on Forever, even after preloading. Measure with a floor of the font size. **[in-game]** (2026-09-23)

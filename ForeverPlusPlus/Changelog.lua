@@ -21,6 +21,9 @@ ns.changelog = {
                 { L.BAGSLOTS_TITLE, "How many bag slots are free, on the bag buttons. Includes the "
                     .. "total on the backpack or each bag's own count, and counting special bags "
                     .. "such as quivers and herb bags." },
+                { L.SKIPCINEMATICS_TITLE, "Skips the game's cinematics and movies. Off by "
+                    .. "default. Includes skipping only ones already seen on any character or "
+                    .. "every one, holding Shift to watch, and a Forget button for the seen list." },
             } },
         },
     },

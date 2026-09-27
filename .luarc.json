@@ -121,6 +121,12 @@
     "C_GuildInfo",
     "BNGetNumFriends",
     "GetNumGuildMembers",
-    "GetGuildRosterInfo"
+    "GetGuildRosterInfo",
+    "MovieFrame",
+    "CinematicFrame",
+    "StopCinematic",
+    "C_Map",
+    "GetSubZoneText",
+    "GetInstanceInfo"
   ]
 }

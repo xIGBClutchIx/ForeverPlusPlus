@@ -18,6 +18,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Auto Stow | Puts your weapons away a few seconds after combat ends. |
 | Fast Loot | With auto loot on, takes everything at once instead of waiting for the loot window. |
 | Gathering Tracking | Keeps Find Minerals or Find Herbs on after logging in, zoning, or dying, and can swap between the two. |
+| Skip Cinematics | Skips cinematics and movies you've already seen on any character, or every one. Hold Shift to watch. Off by default. |
 | **Items** | |
 | Auction Prices | Scans the auction house when you open it and shows the lowest buyout in item tooltips, under the sell price. |
 | Bag Slot Counter | Shows how many bag slots are free on the backpack button, or each bag's own count on its button. |

@@ -33,6 +33,7 @@ Modules\AutoStow.lua
 Modules\AutoGossip.lua
 Modules\AutoDecline.lua
 Modules\AutoRelease.lua
+Modules\SkipCinematics.lua
 Changelog.lua
 Settings.lua
 Init.lua
