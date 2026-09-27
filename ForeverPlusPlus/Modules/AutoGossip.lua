@@ -5,7 +5,7 @@ local _, ns = ...
 
 local ipairs, format, tostring = ipairs, string.format, tostring
 local C_GossipInfo, C_TooltipInfo, Enum = C_GossipInfo, C_TooltipInfo, Enum
-local IsShiftKeyDown = IsShiftKeyDown
+local IsShiftKeyDown, GetTime = IsShiftKeyDown, GetTime
 
 local L = ns.L
 
@@ -80,7 +80,7 @@ local function isSafe(option)
     if option.status and option.status ~= AVAILABLE then
         return false
     end
-    if option.spellID or (option.rewards and #option.rewards > 0) then
+    if option.spellID or (option.rewards and #option.rewards > 0) or not option.gossipOptionID then
         return false
     end
     -- Blizzard picks these itself; picking again would select twice.
@@ -96,44 +96,54 @@ local function printOptions(options)
     end
 end
 
--- One pick per conversation, so a chain of one-option pages (story text) isn't skipped.
-local picked = false
+-- A page that shows right after a pick is the next page of the same conversation (story text),
+-- so leave it for the player to read. A time, not GOSSIP_CLOSED: that doesn't always fire when
+-- the pick opens another window (bank, flight map), which left later NPCs never picked.
+local REPICK_DELAY = 1
+local lastPick = 0
 
-local function onGossipShow()
-    local options = C_GossipInfo.GetOptions() or {}
-    if module.db.printOptions then
-        printOptions(options)
-    end
-    if picked or IsShiftKeyDown() or #options ~= 1 then
-        return
-    end
-    if C_GossipInfo.ForceGossip and C_GossipInfo.ForceGossip() then
-        return -- the NPC wants its text read
+-- Why the only option isn't picked, or nil to pick it.
+local function skipReason(options)
+    if GetTime() - lastPick < REPICK_DELAY then
+        return "just picked"
+    elseif IsShiftKeyDown() then
+        return "Shift"
+    elseif #options ~= 1 then
+        return "options"
+    elseif C_GossipInfo.ForceGossip and C_GossipInfo.ForceGossip() then
+        return "ForceGossip" -- the NPC wants its text read
     end
     local available = C_GossipInfo.GetAvailableQuests() or {}
     local active = C_GossipInfo.GetActiveQuests() or {}
     if #available > 0 or #active > 0 then
-        return
+        return "quests"
+    elseif not isSafe(options[1]) then
+        return "not safe"
     end
-    local option = options[1]
-    if not isSafe(option) or not module.db[kindOf(option)] then
-        return
+    local kind = kindOf(options[1])
+    if not module.db[kind] then
+        return kind .. " off"
     end
-    picked = true
-    C_GossipInfo.SelectOption(option.gossipOptionID)
 end
 
-local function onGossipClosed()
-    picked = false
+local function onGossipShow()
+    local options = C_GossipInfo.GetOptions() or {}
+    local reason = skipReason(options)
+    if module.db.printOptions then
+        printOptions(options)
+        ns.Print(format(L.AUTOGOSSIP_PRINT_RESULT, reason or kindOf(options[1])))
+    end
+    if reason then
+        return
+    end
+    lastPick = GetTime()
+    C_GossipInfo.SelectOption(options[1].gossipOptionID)
 end
 
 function module:OnEnable()
-    ns.On("GOSSIP_SHOW", onGossipShow)
-    ns.On("GOSSIP_CLOSED", onGossipClosed)
+    self:On("GOSSIP_SHOW", onGossipShow)
 end
 
 function module:OnDisable()
-    ns.Off("GOSSIP_SHOW", onGossipShow)
-    ns.Off("GOSSIP_CLOSED", onGossipClosed)
-    picked = false
+    lastPick = 0
 end
