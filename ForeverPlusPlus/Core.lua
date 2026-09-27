@@ -295,7 +295,7 @@ function ns.Start()
             ns.db.modules[name] = nil
         end
     end
-    for _, name in pairs(ns.order) do
+    for _, name in ipairs(ns.order) do
         local module = ns.modules[name]
         -- Every module turns on and off without a reload, so one that changes something must
         -- undo it.
@@ -365,7 +365,7 @@ end
 
 local function findModule(query)
     query = query:lower()
-    for _, name in pairs(ns.order) do
+    for _, name in ipairs(ns.order) do
         if name:lower() == query and not ns.modules[name].unavailable then
             return ns.modules[name]
         end
@@ -374,7 +374,7 @@ end
 
 local function list()
     ns.Print(L.SLASH_MODULES)
-    for _, name in pairs(ns.order) do
+    for _, name in ipairs(ns.order) do
         local module = ns.modules[name]
         if not (module.alwaysOn or module.unavailable) then
             print(format("  %s  %s  |cff999999%s|r", ns.StateText(module.db.enabled), name,
@@ -425,8 +425,8 @@ local function listOptions(module)
 end
 
 -- /fpp set <module> <option> [value]. Without a value it only shows the current one and what it
--- can be, and changes nothing.
-local function set(rest)
+-- can be, and changes nothing, unless `flip` (/fpp toggle) turns a checkbox the other way.
+local function set(rest, flip)
     local moduleName, key, value = strsplit(" ", rest or "", 3)
     local module = moduleName and moduleName ~= "" and findModule(moduleName)
     if not module then
@@ -465,6 +465,8 @@ local function set(rest)
         end
     elseif value then
         new = booleans[value]
+    elseif flip then
+        new = not module.db[option.key]
     end
     if new == nil then
         local current, allowed = describe(module, option)
@@ -487,7 +489,7 @@ SlashCmdList.FOREVERPLUSPLUS = function(message)
     if commands[command] then
         commands[command].fn(rest or "")
     elseif command == "toggle" and rest and rest:find(" ") then
-        set(rest) -- /fpp toggle <module> <option> [value]
+        set(rest, true) -- /fpp toggle <module> <option> [value]
     elseif command == "toggle" and rest then
         local module = findModule(rest)
         if not module then
