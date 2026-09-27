@@ -166,7 +166,7 @@ L.AUCTIONPRICES_RESET_DONE = "Auction prices reset."
 L.AUCTIONPRICES_RESET_COMMAND = "forget the saved auction prices"
 
 -- SellPrice
-L.SELLPRICE_TITLE = "Stack Sell Price"
+L.SELLPRICE_TITLE = "Sell Price"
 L.SELLPRICE_DESC = "Show the vendor price of the whole stack in item tooltips. Hold Shift to see "
     .. "one item."
 
@@ -271,7 +271,7 @@ L.AUTOSTOW_SECONDS = "%d Seconds" -- number of seconds
 -- AutoGossip
 L.AUTOGOSSIP_TITLE = "Auto Gossip"
 L.AUTOGOSSIP_DESC = "When an NPC has only one thing to say and no quests, pick it for you, so "
-    .. "the bank, shop, or flight map opens straight away. Hold Shift to skip it."
+    .. "the bank, shop, or flight map opens straight away."
 L.AUTOGOSSIP_BANKER = "Bankers"
 L.AUTOGOSSIP_BANKER_DESC = "Open the bank."
 L.AUTOGOSSIP_VENDOR = "Vendors and Repairs"
@@ -285,6 +285,9 @@ L.AUTOGOSSIP_STABLE_DESC = "Open the stable."
 L.AUTOGOSSIP_OTHER = "Other NPCs"
 L.AUTOGOSSIP_OTHER_DESC = "Pick the only option of any other NPC, unless the game asks you to "
     .. "read its text first."
+L.AUTOGOSSIP_SHIFT = "Hold Shift to Skip"
+L.AUTOGOSSIP_SHIFT_DESC = "Holding Shift while you talk to an NPC leaves its options for you to "
+    .. "pick."
 L.AUTOGOSSIP_PRINT = "Print Gossip Options"
 L.AUTOGOSSIP_PRINT_DESC = "Print every gossip option in chat with its icon and status, to check "
     .. "which kind of NPC it counts as."

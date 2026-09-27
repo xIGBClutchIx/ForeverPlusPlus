@@ -1,6 +1,6 @@
 -- Auto Gossip: when an NPC's gossip has exactly one option and no quests, pick it, so a banker,
 -- vendor, trainer, flight master and the rest open straight away. Each kind of NPC has its own
--- checkbox. Hold Shift while talking to the NPC to skip it.
+-- checkbox. Hold Shift while talking to the NPC to skip it (unless Shift Skips is off).
 local _, ns = ...
 
 local ipairs, format, tostring = ipairs, string.format, tostring
@@ -17,6 +17,7 @@ local module = ns.NewModule("AutoGossip", L.AUTOGOSSIP_DESC, {
     taxi = true,
     stable = true,
     other = true,
+    shiftSkips = true,
     printOptions = false,
 })
 module.title = L.AUTOGOSSIP_TITLE
@@ -30,6 +31,7 @@ module.options = {
     { key = "trainer", name = L.AUTOGOSSIP_TRAINER, description = L.AUTOGOSSIP_TRAINER_DESC },
     { key = "vendor", name = L.AUTOGOSSIP_VENDOR, description = L.AUTOGOSSIP_VENDOR_DESC },
     { key = "other", name = L.AUTOGOSSIP_OTHER, description = L.AUTOGOSSIP_OTHER_DESC },
+    { key = "shiftSkips", name = L.AUTOGOSSIP_SHIFT, description = L.AUTOGOSSIP_SHIFT_DESC },
     {
         key = "printOptions",
         name = L.AUTOGOSSIP_PRINT,
@@ -105,7 +107,7 @@ local lastPick = 0
 local function skipReason(options)
     if GetTime() - lastPick < REPICK_DELAY then
         return "just picked"
-    elseif IsShiftKeyDown() then
+    elseif module.db.shiftSkips and IsShiftKeyDown() then
         return "Shift"
     elseif #options ~= 1 then
         return "options"
