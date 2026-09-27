@@ -149,7 +149,7 @@ function Plates:Add(unit, frame)
     if not (parts.container and self:IsOurs(unit)) then
         return
     end
-    local record = { container = parts.container, plate = parts.plate }
+    local record = { container = parts.container }
     local name = parts.name
     if name and name.SetText then
         record.name = name

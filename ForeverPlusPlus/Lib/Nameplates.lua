@@ -171,14 +171,13 @@ function Nameplates.IsCastBarShown(castBar)
 end
 
 ---The parts of a nameplate's UnitFrame, under the names Forever uses (build 70009). Any may be
----nil on another build, so check before use.
+---nil on another build, so check before use. Anchor your frames to these or to the UnitFrame,
+---never to the nameplate base (plate) above it: that fails with "anchor family connection" on
+---12.x and breaks Blizzard's own anchors on the plate.
 ---@param frame table plate.UnitFrame
----@return table parts plate, name, container (the health bar's frame), healthBar, level, levelDiff, castBar
+---@return table parts name, container (the health bar's frame), healthBar, level, levelDiff, castBar
 function Nameplates.Parts(frame)
     return {
-        -- The nameplate itself, which the game centers on the unit. The UnitFrame inside it may
-        -- not be centered, so center anything meant to sit over the unit on this.
-        plate = frame:GetParent() or frame,
         name = frame.name or frame.Name,
         container = frame.HealthBarsContainer or frame.healthBar,
         healthBar = frame.healthBar,

@@ -311,16 +311,17 @@ local function placeLevel(label, record, unit, where)
     return width
 end
 
--- The row our label is centered on: the bar's height, but the nameplate's own width, since the game
--- centers the nameplate on the unit. Neither the bar (the level badge takes its right end) nor the
--- UnitFrame inside the plate is sure to be centered on it.
+-- The row our label is centered on: the bar's height, but the unit frame's width (the label covers
+-- it), since the bar sits left of center with the level badge on its right end. Never anchor to
+-- the nameplate base frame (NamePlateN) itself: on 12.x that fails with "anchor family
+-- connection" and also breaks Blizzard's own nameplate anchors.
 local function placeRow(label, record, style)
     local row = label.row
     row:ClearAllPoints()
     row:SetPoint("TOP", record.container, "TOP")
     row:SetPoint("BOTTOM", record.container, "BOTTOM")
-    row:SetPoint("LEFT", record.plate, "LEFT")
-    row:SetPoint("RIGHT", record.plate, "RIGHT")
+    row:SetPoint("LEFT", label, "LEFT")
+    row:SetPoint("RIGHT", label, "RIGHT")
     -- Debug: a thin line through the plate's center, to check the centering in game.
     label.centerLine:SetShown(style.db.centerLine)
     return row
@@ -351,8 +352,8 @@ local function placeSubtitle(label, record, unit, style, shift)
         castRow:ClearAllPoints()
         castRow:SetPoint("TOP", castBar, "TOP")
         castRow:SetPoint("BOTTOM", castBar, "BOTTOM")
-        castRow:SetPoint("LEFT", record.plate, "LEFT")
-        castRow:SetPoint("RIGHT", record.plate, "RIGHT")
+        castRow:SetPoint("LEFT", label, "LEFT")
+        castRow:SetPoint("RIGHT", label, "RIGHT")
         label.subtitle:SetPoint("TOP", castRow, "BOTTOM", 0, -1)
         label.barSubtitle:SetPoint("TOP", castRow, "BOTTOM", 0, -1)
     else
@@ -367,7 +368,7 @@ end
 
 ---Lays the label out for this unit: name, color, level, icons, subtitle.
 ---@param label table from PlateLabel.Show
----@param record table the plate: plate, container, name (Blizzard's), levelFrame, castBar
+---@param record table the plate: container, name (Blizzard's), levelFrame, castBar
 ---@param unit string
 ---@param style table see the top of this file
 function PlateLabel.Layout(label, record, unit, style)
@@ -390,8 +391,8 @@ function PlateLabel.Layout(label, record, unit, style)
     barRow:ClearAllPoints()
     barRow:SetPoint("TOP", record.container, "TOP")
     barRow:SetPoint("BOTTOM", record.container, "BOTTOM")
-    barRow:SetPoint("LEFT", record.plate, "LEFT")
-    barRow:SetPoint("RIGHT", record.plate, "RIGHT")
+    barRow:SetPoint("LEFT", label, "LEFT")
+    barRow:SetPoint("RIGHT", label, "RIGHT")
     label.barName:ClearAllPoints()
     label.barName:SetPoint("BOTTOM", barRow, "TOP", -barIconsWidth / 2, 2)
     local leftWidth, rightWidth = levelWidth, iconsWidth
