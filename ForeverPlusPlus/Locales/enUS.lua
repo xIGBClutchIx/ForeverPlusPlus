@@ -440,8 +440,8 @@ L.SKIPCINEMATICS_PRINT_LINE = "Cinematic %s: seen=%s skip=%s" -- key (movie ID o
 
 -- AutoScreenshot
 L.AUTOSCREENSHOT_TITLE = "Auto Screenshot"
-L.AUTOSCREENSHOT_DESC = "Take a screenshot when you level up, earn an achievement, and at other "
-    .. "moments worth keeping."
+L.AUTOSCREENSHOT_DESC = "Take a screenshot when you level up, earn an achievement, or defeat a "
+    .. "boss, and at other moments worth keeping."
 L.AUTOSCREENSHOT_SECTION_GENERAL = "General"
 L.AUTOSCREENSHOT_SECTION_EVENTS = "Take a Screenshot When"
 L.AUTOSCREENSHOT_HIDE_UI = "Hide Interface"

@@ -23,11 +23,11 @@ ns.changelog = {
                 { L.AUTORELEASE_TITLE, "Releases your spirit when you die in a battleground. "
                     .. "Includes a delay, and staying put when a soulstone, reincarnation, or "
                     .. "someone else can resurrect you. Off by default." },
-                { L.AUTOSCREENSHOT_TITLE, "Takes a screenshot a moment after you level up or earn "
-                    .. "an achievement, so Blizzard's toast is in it. Includes checkboxes for loot of "
-                    .. "a chosen quality, boss kills, reputation standings, PvP ranks, new titles, "
-                    .. "battleground ends, and deaths, hiding the interface for the shot, and a chat "
-                    .. "line saying why. Off by default." },
+                { L.AUTOSCREENSHOT_TITLE, "Takes a screenshot a moment after you level up, earn an "
+                    .. "achievement, or defeat a boss, so Blizzard's toast is in it. Includes "
+                    .. "checkboxes for loot of a chosen quality, reputation standings, PvP ranks, "
+                    .. "new titles, battleground ends, and deaths, hiding the interface for the "
+                    .. "shot, and a chat line saying why. Off by default." },
                 { L.BAGSLOTS_TITLE, "How many bag slots are free, on the bag buttons. Includes the "
                     .. "total on the backpack or each bag's own count, and counting special bags "
                     .. "such as quivers and herb bags." },
