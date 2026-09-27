@@ -12,7 +12,7 @@ local L = ns.L
 
 local module = ns.NewModule("DurabilityBars", L.DURABILITYBARS_DESC, {
     enabled = true,
-    show = "worn", -- a key of SHOW_BELOW
+    show = "always", -- a key of SHOW_BELOW
 })
 module.title = L.DURABILITYBARS_TITLE
 module.category = "items"

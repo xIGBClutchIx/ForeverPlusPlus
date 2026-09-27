@@ -3,7 +3,7 @@
 -- opening the merchant to skip it.
 local _, ns = ...
 
-local format = string.format
+local format, tonumber = string.format, tonumber
 local CanMerchantRepair, GetRepairAllCost, RepairAllItems = CanMerchantRepair, GetRepairAllCost, RepairAllItems
 local IsInGuild, CanGuildBankRepair, GetGuildBankWithdrawMoney = IsInGuild, CanGuildBankRepair, GetGuildBankWithdrawMoney
 local GetMoney, IsShiftKeyDown, C_Timer = GetMoney, IsShiftKeyDown, C_Timer
@@ -14,6 +14,7 @@ local money = ns.Money
 local module = ns.NewModule("AutoRepair", L.AUTOREPAIR_DESC, {
     enabled = true,
     funds = "guildFirst", -- "guildFirst", "guild", or "own"
+    minCost = "0", -- copper; repairs cheaper than this are left alone
     chat = true,
 })
 module.title = L.AUTOREPAIR_TITLE
@@ -28,6 +29,17 @@ module.options = {
             { "guildFirst", L.AUTOREPAIR_FUNDS_GUILD_FIRST },
             { "guild", L.AUTOREPAIR_FUNDS_GUILD },
             { "own", L.AUTOREPAIR_FUNDS_OWN },
+        },
+    },
+    {
+        key = "minCost",
+        name = L.AUTOREPAIR_MIN_COST,
+        description = L.AUTOREPAIR_MIN_COST_DESC,
+        choices = {
+            { "0", L.AUTOREPAIR_MIN_COST_ANY },
+            { "100", money(100) },
+            { "1000", money(1000) },
+            { "10000", money(10000) },
         },
     },
     ns.ChatOption(L.AUTOREPAIR_CHAT_DESC),
@@ -97,7 +109,7 @@ local function onMerchantShow()
         return
     end
     local cost, canRepair = GetRepairAllCost()
-    if not canRepair or cost <= 0 then
+    if not canRepair or cost <= 0 or cost < (tonumber(module.db.minCost) or 0) then
         return
     end
     local funds = module.db.funds

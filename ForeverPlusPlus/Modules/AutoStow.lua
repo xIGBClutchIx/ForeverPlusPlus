@@ -9,6 +9,7 @@ local ipairs, tonumber, format = ipairs, tonumber, string.format
 local GetSheathState, ToggleSheath, hooksecurefunc = GetSheathState, ToggleSheath, hooksecurefunc
 local UnitAffectingCombat, UnitIsDeadOrGhost = UnitAffectingCombat, UnitIsDeadOrGhost
 local UnitCastingInfo, UnitChannelInfo, C_Timer = UnitCastingInfo, UnitChannelInfo, C_Timer
+local IsInInstance = IsInInstance
 
 local L = ns.L
 
@@ -17,6 +18,7 @@ local DELAYS = { "3", "5", "10", "15", "30" } -- seconds
 local module = ns.NewModule("AutoStow", L.AUTOSTOW_DESC, {
     enabled = true,
     delay = "5",
+    outsideOnly = false, -- leave weapons out in dungeons and raids
 })
 module.title = L.AUTOSTOW_TITLE
 module.category = "automation"
@@ -32,6 +34,11 @@ module.options = {
         name = L.AUTOSTOW_DELAY,
         description = L.AUTOSTOW_DELAY_DESC,
         choices = choices,
+    },
+    {
+        key = "outsideOnly",
+        name = L.AUTOSTOW_OUTSIDE_ONLY,
+        description = L.AUTOSTOW_OUTSIDE_ONLY_DESC,
     },
 }
 
@@ -64,8 +71,17 @@ local function stow()
     ToggleSheath()
 end
 
+-- A dungeon, raid, battleground or arena.
+local function inInstance()
+    local inside, kind = IsInInstance()
+    return inside and kind ~= "none"
+end
+
 local function onCombatEnd()
     cancel()
+    if module.db.outsideOnly and inInstance() then
+        return
+    end
     timer = C_Timer.NewTimer(tonumber(module.db.delay) or 5, stow)
 end
 

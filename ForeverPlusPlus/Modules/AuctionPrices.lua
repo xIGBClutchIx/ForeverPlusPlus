@@ -21,6 +21,7 @@ local SCAN_INTERVAL = 15 * 60 -- seconds between automatic scans, as Auctionator
 local module = ns.NewModule("AuctionPrices", L.AUCTIONPRICES_DESC, ItemTooltip.PriceDefaults({
     enabled = true,
     scanOnOpen = true,
+    scanAge = "right", -- "right", "inline" (like the price line's alignment), or "off"
     chat = true,
     -- Per auction house ("Realm-Faction"): { scannedAt = time(), prices = { [itemID] = copper } }.
     -- Data, not a setting: it isn't in module.options.
@@ -31,6 +32,17 @@ module.category = "items"
 
 -- The price line first, then scanning, with the Reset button (module.actions) under it.
 module.options = ItemTooltip.PriceOptions({
+    {
+        key = "scanAge",
+        name = L.AUCTIONPRICES_SCAN_AGE,
+        description = L.AUCTIONPRICES_SCAN_AGE_DESC,
+        section = L.AUCTIONPRICES_SECTION_TOOLTIP,
+        choices = {
+            { "right", L.PRICE_ALIGN_RIGHT },
+            { "inline", L.PRICE_ALIGN_INLINE },
+            { "off", L.AUCTIONPRICES_SCAN_AGE_OFF },
+        },
+    },
     {
         key = "scanOnOpen",
         name = L.AUCTIONPRICES_SCAN_ON_OPEN,
@@ -285,11 +297,31 @@ end
 
 -- Tooltips -----------------------------------------------------------------------------------
 
+-- How long ago, as short as a price line: "just now", "12m ago", "3h ago", "2d ago".
+local function ago(seconds)
+    if seconds < 60 then
+        return L.AUCTIONPRICES_AGO_NOW
+    elseif seconds < 3600 then
+        return format(L.AUCTIONPRICES_AGO_MINUTES, floor(seconds / 60))
+    elseif seconds < 86400 then
+        return format(L.AUCTIONPRICES_AGO_HOURS, floor(seconds / 3600))
+    end
+    return format(L.AUCTIONPRICES_AGO_DAYS, floor(seconds / 86400))
+end
+
 local function addAuctionPrice(tooltip, data)
     local itemID = module.enabled and ItemTooltip.ItemID(data)
+    local db = module.db
     local price = itemID and house().prices[itemID]
-    if price then
-        ItemTooltip.AddPrice(tooltip, data, L.AUCTIONPRICES_LINE, price, module.db)
+    if not price then
+        return
+    end
+    ItemTooltip.AddPrice(tooltip, data, L.AUCTIONPRICES_LINE, price, db)
+    -- The last full scan; prices can also come from the player's own searches since then.
+    local scannedAt = house().scannedAt
+    if db.scanAge ~= "off" and scannedAt > 0 then
+        ItemTooltip.AddInfo(tooltip, L.AUCTIONPRICES_SCAN_AGE_LINE, ago(time() - scannedAt),
+            db.scanAge, db.color)
     end
 end
 

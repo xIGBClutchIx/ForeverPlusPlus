@@ -218,6 +218,24 @@ function ItemTooltip.AddPrice(tooltip, data, name, unitPrice, db)
     end
 end
 
+---Adds a line in the price lines' style with text instead of coins ("Scanned: 2h ago"). The
+---text goes where `align` puts coins ("right" or "inline"), colored like a quantity (`color`).
+---@param tooltip table
+---@param name string
+---@param text string
+---@param align string
+---@param color string "gray", "white", or "gold"
+function ItemTooltip.AddInfo(tooltip, name, text, align, color)
+    local label = format(L.PRICE_INFO_LINE, name .. padding(tooltip, name))
+    local value = (COLORS[color] or GRAY_FONT_COLOR):WrapTextInColorCode(text)
+    local r, g, b = HIGHLIGHT_FONT_COLOR:GetRGB()
+    if align == "inline" then
+        tooltip:AddLine(format(L.PRICE_INLINE, label, value), r, g, b)
+    else
+        tooltip:AddDoubleLine(label, value, r, g, b, r, g, b)
+    end
+end
+
 -- Settings every price line has: what it counts, where its coins go, and the quantity's color.
 
 ---Adds a price line's settings, with their defaults, to a module's defaults.

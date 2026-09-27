@@ -12,6 +12,8 @@
     "hooksecurefunc",
     "securecallfunction",
     "InCombatLockdown",
+    "IsInInstance",
+    "GameTooltip_SetDefaultAnchor",
     "GetLocale",
     "Settings",
     "CreateSettingsListSectionHeaderInitializer",

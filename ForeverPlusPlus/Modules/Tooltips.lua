@@ -16,6 +16,7 @@ local UnitPVPName, UnitIsUnit, UnitReaction, UnitSelectionColor = UnitPVPName, U
 local GetGuildInfo, GetCreatureDifficultyColor = GetGuildInfo, GetCreatureDifficultyColor
 local GetQuestDifficultyColor, FACTION_BAR_COLORS = GetQuestDifficultyColor, FACTION_BAR_COLORS
 local NORMAL_FONT_COLOR, TOOLTIP_DEFAULT_COLOR = NORMAL_FONT_COLOR, TOOLTIP_DEFAULT_COLOR
+local GameTooltip, InCombatLockdown, hooksecurefunc = GameTooltip, InCombatLockdown, hooksecurefunc
 
 local L = ns.L
 local readable = ns.IsReadable
@@ -31,6 +32,8 @@ local module = ns.NewModule("Tooltips", L.TOOLTIPS_DESC, {
     classColor = true,
     title = true,
     target = true,
+    hideInCombat = false, -- hide unit tooltips while in combat
+    anchorCursor = false, -- tooltips at the mouse instead of the bottom right
 })
 module.title = L.TOOLTIPS_TITLE
 module.category = "interface"
@@ -65,6 +68,10 @@ module.options = {
         section = L.TOOLTIPS_SECTION_LINES },
     { key = "target", name = L.TOOLTIPS_TARGET, description = L.TOOLTIPS_TARGET_DESC,
         section = L.TOOLTIPS_SECTION_LINES },
+    { key = "anchorCursor", name = L.TOOLTIPS_ANCHOR_CURSOR, description = L.TOOLTIPS_ANCHOR_CURSOR_DESC,
+        section = L.TOOLTIPS_SECTION_BEHAVIOR },
+    { key = "hideInCombat", name = L.TOOLTIPS_HIDE_IN_COMBAT, description = L.TOOLTIPS_HIDE_IN_COMBAT_DESC,
+        section = L.TOOLTIPS_SECTION_BEHAVIOR },
 }
 
 local GUILDMATE_COLOR = { 0.25, 1, 0.25 } -- guild chat's green, as on Player Nameplates
@@ -301,6 +308,11 @@ local function addTarget(tooltip, unit)
 end
 
 local function onUnit(tooltip, data)
+    -- Hide in Combat: the mouseover tooltip only; tooltips the player opens stay.
+    if module.enabled and module.db.hideInCombat and tooltip == GameTooltip and InCombatLockdown() then
+        tooltip:Hide()
+        return
+    end
     local unit = module.enabled and data and tooltipUnit(tooltip)
     if not unit then
         return
@@ -350,14 +362,26 @@ local function onItem(tooltip, data)
     end
 end
 
+-- Anchor to Cursor: after Blizzard places a tooltip at its default spot (bottom right), move it
+-- to the mouse instead.
+local function onDefaultAnchor(tooltip, parent)
+    if module.enabled and module.db.anchorCursor then
+        tooltip:SetOwner(parent, "ANCHOR_CURSOR")
+    end
+end
+
 local hooked = false
 
 function module:OnEnable()
-    -- Post calls can't be removed; onUnit and onItem check module.enabled.
+    -- Hooks can't be removed; each one checks module.enabled.
     if not hooked then
         hooked = true
         TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Unit, onUnit)
         TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, onItem)
+        -- Probe: GameTooltip_SetDefaultAnchor is Blizzard's for every default-placed tooltip.
+        if GameTooltip_SetDefaultAnchor then
+            hooksecurefunc("GameTooltip_SetDefaultAnchor", onDefaultAnchor)
+        end
     end
 end
 

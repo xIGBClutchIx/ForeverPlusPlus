@@ -133,6 +133,10 @@ L.AUTOREPAIR_FUNDS_DESC = "Whose money pays for repairs."
 L.AUTOREPAIR_FUNDS_GUILD_FIRST = "Guild Bank, Then Your Own"
 L.AUTOREPAIR_FUNDS_GUILD = "Guild Bank Only"
 L.AUTOREPAIR_FUNDS_OWN = "Your Own Money Only"
+L.AUTOREPAIR_MIN_COST = "Minimum Cost"
+L.AUTOREPAIR_MIN_COST_DESC = "Only repair when it costs at least this much, so a quick stop at a "
+    .. "merchant doesn't spend a few copper each time."
+L.AUTOREPAIR_MIN_COST_ANY = "Any Cost"
 L.AUTOREPAIR_CHAT_DESC = "Say in chat what repairs cost, or why they couldn't be paid for."
 L.AUTOREPAIR_REPAIRED = "Repaired for %s." -- cost
 L.AUTOREPAIR_REPAIRED_GUILD = "Repaired for %s from the guild bank." -- cost
@@ -148,6 +152,15 @@ L.AUCTIONPRICES_SCAN_ON_OPEN_DESC = "Scan the whole auction house when you open 
     .. "every 15 minutes. When off, prices still update from your own searches, and /fpp scan "
     .. "scans now."
 L.AUCTIONPRICES_SECTION_TOOLTIP = "Tooltip"
+L.AUCTIONPRICES_SCAN_AGE = "Scan Age"
+L.AUCTIONPRICES_SCAN_AGE_DESC = "Add a line under the auction price with how long ago the auction "
+    .. "house was last scanned, in the same style as the price."
+L.AUCTIONPRICES_SCAN_AGE_OFF = "Hidden"
+L.AUCTIONPRICES_SCAN_AGE_LINE = "Scanned"
+L.AUCTIONPRICES_AGO_NOW = "just now"
+L.AUCTIONPRICES_AGO_MINUTES = "%dm ago" -- minutes
+L.AUCTIONPRICES_AGO_HOURS = "%dh ago" -- hours
+L.AUCTIONPRICES_AGO_DAYS = "%dd ago" -- days
 L.AUCTIONPRICES_SECTION_SCANNING = "Scanning"
 L.AUCTIONPRICES_CHAT_DESC = "Say in chat when a scan finishes after the auction house closed."
 L.AUCTIONPRICES_SCANNING = "Scanning prices... %d items" -- count so far
@@ -189,6 +202,7 @@ L.PRICE_COLOR_GOLD = "Gold"
 L.PRICE_LINE = "%s %s:" -- line name, quantity
 L.PRICE_QUANTITY = "x%d" -- how many items the price is for
 L.PRICE_INLINE = "%s  %s" -- padded label, coins
+L.PRICE_INFO_LINE = "%s:" -- line name, on a price-style line with text instead of coins
 
 -- DurabilityBars
 L.DURABILITYBARS_TITLE = "Durability Bars"
@@ -236,6 +250,12 @@ L.TOOLTIPS_TARGET_DESC = "Add a line with who the unit is targeting, colored by 
     .. "reaction, or \"You\" in red when it's you."
 L.TOOLTIPS_TARGET_LINE = "Target:"
 L.TOOLTIPS_TARGET_YOU = "You"
+L.TOOLTIPS_SECTION_BEHAVIOR = "Behavior"
+L.TOOLTIPS_ANCHOR_CURSOR = "Anchor to Cursor"
+L.TOOLTIPS_ANCHOR_CURSOR_DESC = "Show tooltips at your mouse instead of the bottom right corner."
+L.TOOLTIPS_HIDE_IN_COMBAT = "Hide Unit Tooltips in Combat"
+L.TOOLTIPS_HIDE_IN_COMBAT_DESC = "Don't show player and NPC tooltips while you're in combat. Item "
+    .. "and spell tooltips still show."
 
 -- HideFeedback
 L.HIDEFEEDBACK_TITLE = "Hide Beta Feedback"
@@ -277,6 +297,9 @@ L.AUTOSTOW_DESC = "Put your weapons away a few seconds after combat ends, unless
 L.AUTOSTOW_DELAY = "Delay"
 L.AUTOSTOW_DELAY_DESC = "How long after combat to wait before putting your weapons away."
 L.AUTOSTOW_SECONDS = "%d Seconds" -- number of seconds
+L.AUTOSTOW_OUTSIDE_ONLY = "Only Out of Instances"
+L.AUTOSTOW_OUTSIDE_ONLY_DESC = "Leave your weapons out in dungeons, raids and battlegrounds, where "
+    .. "the next pull is never far off."
 
 -- AutoGossip
 L.AUTOGOSSIP_TITLE = "Auto Gossip"
