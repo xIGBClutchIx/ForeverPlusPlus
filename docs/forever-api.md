@@ -2,7 +2,7 @@
 
 What we know about the addon API on the WoW: Forever client, where each fact came from, and how sure we are. `AGENTS.md` has the short version; this file has the detail and the sources.
 
-Last reviewed 2026-09-25, against build **1.60.1.70009** (the build in `D:\BattleNet\World of Warcraft\.build.info`, product `wow_classic_beta`). Forever is a beta: recheck anything marked below before relying on it after a patch.
+Last reviewed 2026-09-25, against build **1.60.1.70009** (the build in the client's `.build.info`, product `wow_classic_beta`). Forever is a beta: recheck anything marked below before relying on it after a patch.
 
 ## How to read the tags
 
@@ -10,8 +10,8 @@ Every fact carries one tag saying how it was established:
 
 | Tag | Meaning |
 | --- | --- |
-| **[local]** | Read from this machine's client install or its saved files. |
-| **[in-game]** | Tested in the live client by Cameron (the `/cui` checks recorded in ClutchUI's `docs/flavors.md`). |
+| **[local]** | Read from a Forever client install: its files, installed addons, or saved files. |
+| **[in-game]** | Tested in the live client, with `/dump`, `/run`, or a test addon. |
 | **[dump]** | Present in a captured API dump of the Forever client (see [Sources](#sources)). Shows the API exists, not that it behaves like Retail. |
 | **[addon]** | Inferred from how an installed Forever addon uses it. The addon works for players, but we have not tested that exact call. |
 | **[web]** | Reported by someone else online. Not checked by us. |
@@ -23,8 +23,8 @@ When you confirm or rule out something here, change its tag, add the date, and s
 
 - Build 1.60.1.70009, interface **16001**, product `wow_classic_beta`, exe `WowB.exe`, folder `_classic_beta_`. **[local]** (`.build.info`, `WTF\Config.wtf` has `engineSurveyPatch "16001"`)
 - Internal codename is **Camelot**. It shows up in TOC suffixes, TOC game types, and addon code. **[local]** (installed addons) **[web]** (wiki)
-- `GetBuildInfo()` returns `"1.60.1", <build>, <date>, 16001`. **[in-game]** (`/cui` printed `interface=16001`) **[dump]** (`client.interface = 16001`)
-- `WOW_PROJECT_ID == WOW_PROJECT_MAINLINE` (1), same as Retail. It can't tell Forever from Retail. **[in-game]** (`/cui` printed `project=1`) **[dump]**
+- `GetBuildInfo()` returns `"1.60.1", <build>, <date>, 16001`. **[in-game]** (2026-09-23) **[dump]** (`client.interface = 16001`)
+- `WOW_PROJECT_ID == WOW_PROJECT_MAINLINE` (1), same as Retail. It can't tell Forever from Retail. **[in-game]** (2026-09-23) **[dump]**
 - Launch is set for 2026-11-04. **[web]**
 
 ### Detecting Forever at runtime
@@ -33,7 +33,7 @@ Use the interface number with both ends of a range: `local iface = select(4, Get
 
 - Never test "starts with 1" or "five digits": Classic Era is 11509 and would match. Manners' `Flavour.lua` explains this trap in detail. **[addon]**
 - Many Retail addons test `>= 100000` to mean "modern client". On Forever that fails, so ported Retail code takes Classic paths. **[web]** (forever-addon-kit)
-- Other addons use `[16000, 17000)` (ClutchUI, WhisperMessenger, Manners) or `[16000, 20000)` (Auctionator, D4Lib, ManiaTip, AceDB in UnifiedProfileManager). **[addon]**
+- Other addons use `[16000, 17000)` (WhisperMessenger, Manners) or `[16000, 20000)` (Auctionator, D4Lib, ManiaTip, AceDB in UnifiedProfileManager). **[addon]**
 - Prefer probing the API you need over any version check.
 
 ## TOC and loading
@@ -41,7 +41,7 @@ Use the interface number with both ends of a range: `local iface = select(4, Get
 - Ship one plain `ForeverPlusPlus.toc` with `## Interface: 16001`. That works. **[local]** (this addon loads and saves)
 - **TOC suffixes: `_Camelot` wins on build 70009.** A test addon with `FppTocProbe.toc`, `FppTocProbe_Camelot.toc`, and `FppTocProbe_Mainline.toc`, all at 16001, loaded **`_Camelot`**. **[in-game]** (2026-09-25)
   - That matches warcraft.wiki.gg: expansion suffixes (`_Camelot`, `_Standard`, ...) beat family suffixes (`_Mainline`, `_Classic`), which beat the plain name. **[web]**
-  - An earlier test on 2026-09-23 (`_Mainline` at 120100, `_Camelot` and plain at 16001) loaded **`_Mainline`**. **[in-game]** (ClutchUI `docs/flavors.md`) Either the build changed or the setup differed. Recheck after patches.
+  - An earlier test on 2026-09-23 (`_Mainline` at 120100, `_Camelot` and plain at 16001) loaded **`_Mainline`**. **[in-game]** Either the build changed or the setup differed. Recheck after patches.
   - Installed addons that ship a `_Camelot.toc`: AutoStow, AzerothCompendium, Chatify, Manners, MapUtils, TwitchEmotes, WhisperMessenger. **[local]**
 - **Per-file load conditions** in the TOC file list: `file.lua [AllowLoadGameType camelot]` and `[ExcludeLoadGameType ...]`.
   - The wiki lists game type `camelot` = Forever, `standard` = Midnight only, `mainline` = Midnight **and** Forever (plus Plunderstorm and other modes), `classic` = the Classic expansions. **[web]**
@@ -53,8 +53,8 @@ Use the interface number with both ends of a range: `local iface = select(4, Get
 
 ## SavedVariables
 
-- **They persist now.** ClutchUI's `loadCount` in `WTF\Account\70453270#1\SavedVariables\ClutchUI.lua` reached 7 (it only increments when the saved table is read back), and `ForeverPlusPlus.lua` holds this addon's module state. **[local]** (checked 2026-09-25)
-- History: on 2026-09-23 they were written but never read back, so every session started from defaults. **[in-game]** (ClutchUI `loads=` stayed at 1) **[web]** (forever-addon-kit, EU forum thread)
+- **They persist now.** A load counter that only goes up when the saved table is read back reached 7 across sessions, and `WTF\Account\<acct>\SavedVariables\ForeverPlusPlus.lua` holds this addon's module state. **[local]** (checked 2026-09-25)
+- History: on 2026-09-23 they were written but never read back, so every session started from defaults. **[in-game]** (the same counter stayed at 1) **[web]** (forever-addon-kit, EU forum thread)
 - The fix landed by 2026-09-24. If settings stop sticking after a patch, check this first.
 - Beta-era workarounds seen elsewhere, in case it regresses: `CreateMacro` survives a cold start; CVars registered with `C_CVar.RegisterCVar` survive `/reload` but not a restart. **[web]** (forever-addon-kit)
 
@@ -108,7 +108,7 @@ From the dumps **[dump]**: `C_AddOns`, `C_Item`, `C_Spell`, `C_Container`, `C_Un
 
 - Classic-style talent trees with points per tree, on Retail's trait system (`C_Traits`). A separate "Legacy" tree panel opens with `ToggleLegacySystemUI` and unlocks at level 25. **[web]** (forever-addon-kit)
 - `C_SpecializationInfo.GetSpecializationInfo(index, ...)` returns `specId, name, description, icon, role, primaryStat, pointsSpent, background, previewPointsSpent, isUnlocked`. **[dump]** (Atraeau api.json)
-  - On Cameron's Warrior, `GetSpecializationInfo(1)` returned `1491, "Warrior", "", 626008, "DAMAGER", 4, 0, nil, 0, true`, and `C_SpecializationInfo.GetSpecialization()` returned `1`. **[in-game]** (2026-09-25)
+  - On a Warrior, `GetSpecializationInfo(1)` returned `1491, "Warrior", "", 626008, "DAMAGER", 4, 0, nil, 0, true`, and `C_SpecializationInfo.GetSpecialization()` returned `1`. **[in-game]** (2026-09-25)
   - So the "spec" is the whole class: the name is the class name, the description is empty, and `pointsSpent` was 0 with 6 points spent in Arms. It doesn't count talent points, so it can't find a talent tree.
   - D4Lib picks the tree with the most `pointsSpent` as the player's "spec" **[addon]**. Given the result above, that finds nothing, and it passes a table where the dump documents positional arguments.
 - Spec IDs are new (Warrior 1491 **[in-game]**; Paladin 1486 **[web]**), so Retail spec-ID tables are wrong here.
@@ -125,7 +125,7 @@ From the dumps **[dump]**: `C_AddOns`, `C_Item`, `C_Spell`, `C_Container`, `C_Un
 
 Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for writing code; this is the evidence.
 
-- `issecretvalue`, `canaccessvalue`, `issecrettable`, `scrub`, `secretwrap` exist, as does `C_Secrets` with 27 predicates (`HasSecretRestrictions`, `ShouldAurasBeSecret`, `ShouldUnitHealthMaxBeSecret`, `GetSpellAuraSecrecy`, ...). **[in-game]** (`/cui` printed `secrets=true, curves=true`) **[dump]**
+- `issecretvalue`, `canaccessvalue`, `issecrettable`, `scrub`, `secretwrap` exist, as does `C_Secrets` with 27 predicates (`HasSecretRestrictions`, `ShouldAurasBeSecret`, `ShouldUnitHealthMaxBeSecret`, `GetSpellAuraSecrecy`, ...). **[in-game]** (2026-09-23) **[dump]**
 - In a solo open-world fight, `UnitHealth`, `UnitHealthPercent`, and `UnitHealthMissing` were secret for player and target, and the target's `UnitHealthMax` was secret. The player's `UnitHealthMax` and all `UNIT_COMBAT` amounts stayed readable. **[web]** (forever-addon-kit)
 - In combat, while `C_Secrets.ShouldAurasBeSecret()` is true, reading a secret aura throws, including your own buffs. Secrecy is per spell: `C_Secrets.GetSpellAuraSecrecy(id)`. **[web]**
 - `Cooldown:SetCooldown` rejects secret numbers from addon code. Get a duration object from `C_Spell.GetSpellCooldownDuration` and pass it to `Cooldown:SetCooldownFromDurationObject`. **[web]**
@@ -136,7 +136,7 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 
 ## Secure code and Blizzard systems
 
-- `/cui` confirmed `C_EditMode`, `C_CurveUtil`, and `C_EncodingUtil` exist. **[in-game]**
+- `C_EditMode`, `C_CurveUtil`, and `C_EncodingUtil` exist. **[in-game]** (2026-09-23)
 - Secure snippets (`WrapScript`, `_onstate-*`, `RunAttribute`) failed before build 70009 because `loadstring_untainted` was deleted too early. Build 70009 fixed the load order. **[web]** (forever-addon-kit, forever-bugs #74) Confirmed: a `SecureHandlerBaseTemplate` frame's `Execute(f, "return 42")` returned `true 42`. **[in-game]** (2026-09-25, build 70009)
   - Never probe `loadstring_untainted` to decide whether snippets work: it is nil after load on every client, Retail included.
 - Blizzard's Cooldown Manager is off by default and, from build 70009, has data for Druid, Mage, Priest, Warrior, and Warlock only. It doesn't support spell ranks. **[web]**
@@ -145,7 +145,7 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
   - A whole-house scan works as an empty browse search: `C_AuctionHouse.SendBrowseQuery({ searchString = "", sorts = {}, filters = {}, itemClassFilters = {} })`, then `RequestMoreBrowseResults()` on each `AUCTION_HOUSE_BROWSE_RESULTS_UPDATED` / `_ADDED` until `HasFullBrowseResults()`. Each result has `itemKey.itemID`, `minPrice` (taken as a unit price), and `totalQuantity`. **[addon]** (Auctionator `Source_ModernAH/IncrementalScan`, its default scan; `TimeOfLastBrowseScan` is set in the saved Auctionator.lua on this client)
   - `ReplicateItems`, `GetNumReplicateItems`, `GetReplicateItemInfo`, `GetReplicateItemLink`, and `REPLICATE_ITEM_LIST_UPDATE` are in the build 70009 exe, but no one has shown a replicate scan finishing on Forever (Auctionator's is off by default). **[exe]** Unverified in game.
 - The Professions window exists but has no crafting orders page. **[addon]** (Auctionator `Professions.lua`)
-- The beta runs Blizzard's PTR feedback code. `PTR_IssueReporter` is the floating bug report button, and it adds a `" "` line and then "Press F6 to submit an issue for this Item" at the end of tooltips. That line isn't in the tooltip's data lines, so it's added afterwards. Its format strings are `PTR_IssueReporter.BugTooltipString`, `BugTooltipPartialString`, and `MissingBindTooltipString`; it also has `HookIntoTooltip`, `AddTooltip`, `TooltipFrames`, and `Setup*Tooltips` (items, spells, units, quests, currencies, achievements, and more). **[in-game]** (2026-09-26, `/run` probes by Cameron)
+- The beta runs Blizzard's PTR feedback code. `PTR_IssueReporter` is the floating bug report button, and it adds a `" "` line and then "Press F6 to submit an issue for this Item" at the end of tooltips. That line isn't in the tooltip's data lines, so it's added afterwards. Its format strings are `PTR_IssueReporter.BugTooltipString`, `BugTooltipPartialString`, and `MissingBindTooltipString`; it also has `HookIntoTooltip`, `AddTooltip`, `TooltipFrames`, and `Setup*Tooltips` (items, spells, units, quests, currencies, achievements, and more). **[in-game]** (2026-09-26, `/run` probes)
 - Whether `IsBetaBuild()` or `IsPublicTestClient()` returns true on Forever's beta is **Unverified**. Two installed addons call `IsPublicTestClient` **[addon]**; Hide Beta Feedback shows only when either is true or `PTR_IssueReporter` already exists at login. Check with `/dump IsBetaBuild(), IsPublicTestClient()`.
 
 ## Console variables
@@ -161,7 +161,7 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 - A friendly player's `plate.UnitFrame` has these keys, among others: `name` (FontString), `healthBar` (StatusBar), `HealthBarsContainer`, `LevelFrame`, `PlayerLevelDiffFrame`, `ClassificationFrame`, `CastBarsContainer`, `AurasFrame`, `RaidTargetFrame`, `WidgetContainer`, `SoftTargetFrame`, `selectionHighlight`, and the aggro and heal-prediction textures. `LevelFrame` is the level badge at the bar's right end, which Retail doesn't have. **[in-game]** (2026-09-26, build 70009, `/run` listing the frame's widget fields)
 - Friendly player plates use CVar `nameplateShowFriendlyPlayers` (older name `nameplateShowFriends`), and Blizzard's names-only mode is `nameplateShowOnlyNameForFriendlyPlayerUnits` (older `nameplateShowOnlyNames`). ForeverNameplateFont tries the new name first and falls back. **[addon]** Which names this client has is **Unverified**; Player Nameplates probes with `C_CVar.GetCVar`.
 - Nameplate CVars can't be set in combat on Retail; Forever++ assumes the same and waits for `PLAYER_REGEN_ENABLED`. **Unverified** on Forever.
-- `C_CurveUtil.CreateCurve()` with `AddPoint` / `SetType(Enum.LuaCurveType.Step)`, evaluated by `UnitHealthPercent(unit, true, curve)`, turns a possibly secret health fraction into an alpha for `SetAlpha`. That's the Midnight pattern (ClutchUI uses `UnitHealthPercent` with `CurveConstants.ScaleTo100`) **[addon]**; the step curve and `SetAlpha` taking its result are **Unverified** on Forever.
+- `C_CurveUtil.CreateCurve()` with `AddPoint` / `SetType(Enum.LuaCurveType.Step)`, evaluated by `UnitHealthPercent(unit, true, curve)`, turns a possibly secret health fraction into an alpha for `SetAlpha`. That's the Midnight pattern, and a working Forever addon uses `UnitHealthPercent` with `CurveConstants.ScaleTo100` **[addon]**; the step curve and `SetAlpha` taking its result are **Unverified** on Forever.
 
 ## Looting and repairs
 
@@ -192,7 +192,7 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 
 ## Fonts
 
-- Text measured before its font file has loaded reads as 0 tall on Forever, even after preloading. Measure with a floor of the font size. **[in-game]** (ClutchUI `Style.TextHeight`, `docs/fonts.md`)
+- Text measured before its font file has loaded reads as 0 tall on Forever, even after preloading. Measure with a floor of the font size. **[in-game]** (2026-09-23)
 
 ## Open questions
 
@@ -214,9 +214,8 @@ Check these in the live client and move them up with a tag and date:
 ## Sources
 
 Local, read only:
-- `D:\BattleNet\World of Warcraft\.build.info`, `_classic_beta_\WTF\Config.wtf`, `_classic_beta_\WTF\Account\70453270#1\` (realm folders, `SavedVariables\ClutchUI.lua`, `SavedVariables\ForeverPlusPlus.lua`).
-- Installed addons in `_classic_beta_\Interface\AddOns`: Auctionator (v339), BugSack (v12.1.2), AlreadyKnown (1.103), Chatify (3.6, `Forever.lua`, `Config.lua`), Manners (1.0.0-beta.6, `Flavour.lua`, `Core.lua`), MapUtils / AzerothCompendium (D4Lib), ManiaTip (v15), UnifiedProfileManager (AceDB), ClutchUI.
-- ClutchUI repo, `docs/flavors.md`, `docs/midnight-secrets.md`, `docs/fonts.md`: Cameron's in-game checks from 2026-09-23.
+- The client's `.build.info`, `_classic_beta_\WTF\Config.wtf`, and `_classic_beta_\WTF\Account\<acct>\` (realm folders, `SavedVariables`).
+- Forever addons whose code shows an API working: Auctionator (v339), BugSack (v12.1.2), AlreadyKnown (1.103), Chatify (3.6, `Forever.lua`, `Config.lua`), Manners (1.0.0-beta.6, `Flavour.lua`, `Core.lua`), MapUtils / AzerothCompendium (D4Lib), ManiaTip (v15), UnifiedProfileManager (AceDB), Leatrix_Plus, AutoStow, GatherSkillTooltip.
 
 Web (checked 2026-09-25):
 - [TOC format, warcraft.wiki.gg](https://warcraft.wiki.gg/wiki/TOC_format): game types and suffix precedence.
