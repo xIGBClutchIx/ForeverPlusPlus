@@ -15,7 +15,7 @@ local L = ns.L
 
 local module = ns.NewModule("CVarBrowser", L.CVARBROWSER_DESC, { enabled = true })
 module.title = L.CVARBROWSER_TITLE
-module.category = "tools"
+module.alwaysOn = true -- a tool page, not a change to the game; it costs nothing until opened
 
 local ROW_HEIGHT = 26
 -- Columns, measured from the list's right edge so the name gets whatever width is left.
@@ -80,12 +80,6 @@ end
 -- Lists the CVars that match the search (and "Changed Only"), keeping the scroll position.
 local function refresh()
     if not ui then
-        return
-    end
-    local on = module.db.enabled
-    ui.list:SetShown(on)
-    ui.off:SetShown(not on)
-    if not on then
         return
     end
     local query = strlower(search)
@@ -254,7 +248,6 @@ end
 
 -- Follows changes made anywhere (the game's own settings, other addons) while the page is open.
 local function listen(on)
-    on = on and module.db.enabled or false
     if on == listening then
         return
     end
@@ -281,10 +274,6 @@ function module:BuildPage(frame)
     ui = {}
 
     ns.AddPageTitle(frame, module.title)
-
-    ui.off = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    ui.off:SetPoint("TOPLEFT", 12, -70)
-    ui.off:SetText(L.CVARBROWSER_PAGE_OFF)
 
     local list = CreateFrame("Frame", nil, frame)
     list:SetPoint("TOPLEFT", 0, -58)
@@ -355,21 +344,5 @@ local function openWith(text)
 end
 
 ns.AddCommand("cvar", "[search]", L.CVARBROWSER_COMMAND, function(rest)
-    if not module.db.enabled then
-        ns.Print(L.CVARBROWSER_IS_OFF)
-        return
-    end
     openWith(strtrim(rest))
 end)
-
-function module:OnEnable()
-    if ui then
-        listen(ui.list:GetParent():IsShown())
-        refresh()
-    end
-end
-
-function module:OnDisable()
-    listen(false)
-    refresh()
-end

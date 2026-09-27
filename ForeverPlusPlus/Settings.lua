@@ -1,7 +1,8 @@
 -- The "Forever++" pages in the game's Settings > AddOns list, built from Blizzard's own settings
 -- templates so they look like any other options page:
 --   Forever++        an on/off checkbox per module (the only place modules turn on and off),
---                    grouped under headers by `module.category`
+--                    grouped under headers by `module.category`. `alwaysOn` modules (tools)
+--                    have none
 --     <Module>       one page per module with options, holding just its options (and buttons,
 --                    from `module.actions`), sorted by title. Options with a `section` get a
 --                    header above each group, for pages long enough to need them
@@ -262,7 +263,6 @@ local CATEGORIES = {
     { "items", L.CATEGORY_ITEMS },
     { "interface", L.CATEGORY_INTERFACE },
     { "nameplates", L.CATEGORY_NAMEPLATES },
-    { "tools", L.CATEGORY_TOOLS },
     { "other", L.CATEGORY_OTHER },
 }
 local KNOWN = {}
@@ -289,7 +289,7 @@ function ns.RegisterSettings()
         local header = false
         for _, name in ipairs(order) do
             local module = ns.modules[name]
-            if categoryOf(module) == group[1] then
+            if not module.alwaysOn and categoryOf(module) == group[1] then
                 if not header then
                     header = true
                     addHeader(layout, group[2])

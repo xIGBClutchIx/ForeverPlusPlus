@@ -241,7 +241,8 @@ end
 ---`OnEnable` and an `OnDisable` that undoes it, and put its settings in `defaults`. Events
 ---added with `module:On` stop by themselves when it turns off. Set
 ---`module.title` for a friendlier name in Settings (the name stays the /fpp key), and
----`module.category` for its group on the main Settings page (see Settings.lua).
+---`module.category` for its group on the main Settings page (see Settings.lua). A tool with
+---nothing to turn off sets `module.alwaysOn`: it has no toggle and stays on.
 ---@param name string shown in /fpp
 ---@param description string one line for /fpp
 ---@param defaults? table its settings; `enabled` defaults to true
@@ -306,6 +307,9 @@ function ns.Start()
         if module.OnLoad then
             module:OnLoad()
         end
+        if module.alwaysOn then
+            module.db.enabled = true
+        end
         if module.db.enabled then
             enable(module)
         end
@@ -317,6 +321,9 @@ end
 ---@param on boolean
 function ns.SetEnabled(name, on)
     local module = ns.modules[name]
+    if module.alwaysOn then
+        return -- a tool that's always there, with no on/off
+    end
     module.db.enabled = on
     if on then
         enable(module)
@@ -364,8 +371,10 @@ local function list()
     ns.Print(L.SLASH_MODULES)
     for _, name in pairs(ns.order) do
         local module = ns.modules[name]
-        print(format("  %s  %s  |cff999999%s|r", ns.StateText(module.db.enabled), name,
-            module.description))
+        if not module.alwaysOn then
+            print(format("  %s  %s  |cff999999%s|r", ns.StateText(module.db.enabled), name,
+                module.description))
+        end
     end
 end
 
