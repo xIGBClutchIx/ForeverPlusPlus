@@ -120,11 +120,19 @@ end
 
 -- Use the font Blizzard's name is drawn with right now. Its font object can be a different size
 -- (nameplates set the size on the string), which made our copy come out small.
+-- Blizzard also shrinks the font of a long name to fit its plate, so copying each plate's size
+-- made long names tiny. Every label uses the largest size seen instead: the normal one.
+local fullSize = 0
+
 local function matchFont(label, name)
     local file, size, flags = name:GetFont()
     if not (file and size) then
         return
     end
+    if size > fullSize then
+        fullSize = size
+    end
+    size = fullSize
     label.name:SetFont(file, size, flags)
     label.nameSize = size
     label.guild:SetFont(file, size * GUILD_SCALE, flags)
