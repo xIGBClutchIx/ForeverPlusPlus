@@ -1,6 +1,6 @@
 -- Console Variables: a page under Forever++ in Settings that lists the game's console variables
--- (CVars) with a search, shows each one's value and default, and lets the player change one or
--- put it back to its default. Changes made in combat wait for it to end (ns.CVars.Apply).
+-- (CVars) the player can change with a search, shows each one's value and default, and lets the
+-- player change one or put it back to its default. Read-only CVars are left out. Changes made in combat wait for it to end (ns.CVars.Apply).
 -- Nothing is built until the page is first shown; `/fpp cvar <search>` opens it.
 local _, ns = ...
 
@@ -28,28 +28,6 @@ local search, changedOnly = "", false
 local listening = false
 local ui -- the page's parts, once built
 
--- Every CVar this client lists. Without the list, typing an exact name still finds a CVar.
-local function loadAll()
-    all = {}
-    if not getAllCommands then
-        return
-    end
-    local cvarType = Enum.ConsoleCommandType and Enum.ConsoleCommandType.Cvar or 0
-    for _, info in ipairs(getAllCommands() or {}) do
-        local name = info.command
-        if info.commandType == cvarType and type(name) == "string" and name ~= "" then
-            local key = strlower(name)
-            if not byKey[key] then
-                local help = info.help or ""
-                local entry = { name = name, key = key, help = help, text = key .. " " .. strlower(help) }
-                byKey[key] = entry
-                all[#all + 1] = entry
-            end
-        end
-    end
-    sort(all, function(a, b) return a.key < b.key end)
-end
-
 -- value, default, and flags ({ account, character, readOnly, secure }) for one CVar.
 local function read(name)
     if C_CVar.GetCVarInfo then
@@ -62,6 +40,35 @@ local function read(name)
         }
     end
     return C_CVar.GetCVar(name), C_CVar.GetCVarDefault and C_CVar.GetCVarDefault(name), {}
+end
+
+local function isReadOnly(name)
+    local _, _, flags = read(name)
+    return flags.readOnly
+end
+
+-- Every CVar this client lists that the player can change (read-only ones are left out). Without
+-- the list, typing an exact name still finds a CVar.
+local function loadAll()
+    all = {}
+    if not getAllCommands then
+        return
+    end
+    local cvarType = Enum.ConsoleCommandType and Enum.ConsoleCommandType.Cvar or 0
+    for _, info in ipairs(getAllCommands() or {}) do
+        local name = info.command
+        if info.commandType == cvarType and type(name) == "string" and name ~= ""
+            and not isReadOnly(name) then
+            local key = strlower(name)
+            if not byKey[key] then
+                local help = info.help or ""
+                local entry = { name = name, key = key, help = help, text = key .. " " .. strlower(help) }
+                byKey[key] = entry
+                all[#all + 1] = entry
+            end
+        end
+    end
+    sort(all, function(a, b) return a.key < b.key end)
 end
 
 local function isChanged(name)
@@ -87,8 +94,9 @@ local function refresh()
             rows[#rows + 1] = entry
         end
     end
-    -- An exact name the list doesn't have (a hidden CVar, or no command list) still shows, first.
-    if query ~= "" and not byKey[query] and C_CVar.GetCVar(search) ~= nil
+    -- An exact name the list doesn't have (a hidden CVar, or no command list) still shows, first,
+    -- unless it's read-only.
+    if query ~= "" and not byKey[query] and C_CVar.GetCVar(search) ~= nil and not isReadOnly(search)
         and not (changedOnly and not isChanged(search)) then
         tinsert(rows, 1, { name = search, key = query, help = "", text = query })
     end

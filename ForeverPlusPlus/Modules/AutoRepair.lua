@@ -14,6 +14,7 @@ local money = ns.Money
 local module = ns.NewModule("AutoRepair", L.AUTOREPAIR_DESC, {
     enabled = true,
     funds = "guildFirst", -- "guildFirst", "guild", or "own"
+    chat = true,
 })
 module.title = L.AUTOREPAIR_TITLE
 
@@ -28,6 +29,7 @@ module.options = {
             { "own", L.AUTOREPAIR_FUNDS_OWN },
         },
     },
+    ns.ChatOption(L.AUTOREPAIR_CHAT_DESC),
 }
 
 -- The server says whether a guild bank repair worked only afterwards: durability updates when it
@@ -43,15 +45,15 @@ end
 
 local function repairOwn(cost)
     if GetMoney() < cost then
-        ns.Print(format(L.AUTOREPAIR_NO_MONEY, money(cost)))
+        module:Print(format(L.AUTOREPAIR_NO_MONEY, money(cost)))
         return
     end
     RepairAllItems()
-    ns.Print(format(L.AUTOREPAIR_REPAIRED, money(cost)))
+    module:Print(format(L.AUTOREPAIR_REPAIRED, money(cost)))
 end
 
 function onDurability()
-    ns.Print(format(L.AUTOREPAIR_REPAIRED_GUILD, money(pending)))
+    module:Print(format(L.AUTOREPAIR_REPAIRED_GUILD, money(pending)))
     stopWaiting()
 end
 
@@ -61,7 +63,7 @@ function onError()
     if module.db.funds == "guildFirst" then
         repairOwn(cost)
     else
-        ns.Print(format(L.AUTOREPAIR_NO_GUILD_MONEY, money(cost)))
+        module:Print(format(L.AUTOREPAIR_NO_GUILD_MONEY, money(cost)))
     end
 end
 
@@ -101,7 +103,7 @@ local function onMerchantShow()
     if funds ~= "own" and guildCanPay(cost) then
         repairGuild(cost)
     elseif funds == "guild" then
-        ns.Print(format(L.AUTOREPAIR_NO_GUILD_MONEY, money(cost)))
+        module:Print(format(L.AUTOREPAIR_NO_GUILD_MONEY, money(cost)))
     else
         repairOwn(cost)
     end

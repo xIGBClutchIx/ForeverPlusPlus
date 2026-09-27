@@ -29,6 +29,7 @@ local module = ns.NewModule("GatherTracking", L.GATHERTRACKING_DESC, {
     track = "both", -- a key of SPELLS
     reapply = true,
     swap = "off", -- "off", or seconds between swaps
+    chat = true,
 })
 module.title = L.GATHERTRACKING_TITLE
 
@@ -60,6 +61,7 @@ module.options = {
             { "30", format(L.GATHERTRACKING_SWAP_EVERY, 30) },
         },
     },
+    ns.ChatOption(L.GATHERTRACKING_CHAT_DESC),
 }
 
 -- Reads the tracking list: the index of each of our spells the player knows, which of them is on,
@@ -103,7 +105,7 @@ local function track(i)
     local ok, err = pcall(C_Minimap.SetTracking, i, true)
     if not ok and not blocked then
         blocked = true
-        ns.Print(format(L.GATHERTRACKING_FAILED, tostring(err)))
+        module:Print(format(L.GATHERTRACKING_FAILED, tostring(err)))
     end
 end
 
@@ -197,7 +199,7 @@ local function onBlocked(_, addon, action)
         and not blocked then
         blocked = true
         stopSwapping()
-        ns.Print(L.GATHERTRACKING_BLOCKED)
+        module:Print(L.GATHERTRACKING_BLOCKED)
     end
 end
 

@@ -31,6 +31,7 @@ L.MODULE_STATE_ALLOWED = "%s is %s (on, off)." -- module name, on/off
 L.NO_OPTION = "%s has no option %s. /fpp options %s lists them." -- module, option, module
 L.OPTION_STATE = "%s %s is %s." -- module, option, value
 L.OPTION_STATE_ALLOWED = "%s %s is |cffffd100%s|r (%s)." -- module, option, value, allowed values
+L.CHAT_MESSAGES = "Chat Messages" -- a module's checkbox for what it says in chat by itself
 
 -- Settings
 L.MODULES = "Modules"
@@ -45,8 +46,9 @@ L.ABOUT_AUTHOR = "Author"
 L.ABOUT_GAME = "Game"
 L.ABOUT_GAME_BUILD = "%s (build %s, interface %s)" -- version, build, interface
 L.ABOUT_WEBSITE = "Website"
-L.ABOUT_ISSUES = "Report a Bug"
+L.ABOUT_ISSUES = "Feedback"
 L.ABOUT_COPY = "Select the link and press Ctrl+C to copy it."
+L.ABOUT_REQUESTS = "Want something changed or a new feature? Ask for it at the link above."
 L.ABOUT_COMMANDS = "Commands"
 
 -- FriendlyPlates
@@ -113,7 +115,8 @@ L.AUTOREPAIR_FUNDS_DESC = "Whose money pays for repairs."
 L.AUTOREPAIR_FUNDS_GUILD_FIRST = "Guild Bank, Then Your Own"
 L.AUTOREPAIR_FUNDS_GUILD = "Guild Bank Only"
 L.AUTOREPAIR_FUNDS_OWN = "Your Own Money Only"
-L.AUTOREPAIR_REPAIRED = "Repaired for %s." -- cost
+L.AUTOREPAIR_CHAT_DESC = "Say in chat what repairs cost, or why they couldn't be paid for."
+L.AUTOREPAIR_REPAIRED ="Repaired for %s." -- cost
 L.AUTOREPAIR_REPAIRED_GUILD = "Repaired for %s from the guild bank." -- cost
 L.AUTOREPAIR_NO_MONEY = "Not enough money to repair (%s)." -- cost
 L.AUTOREPAIR_NO_GUILD_MONEY = "The guild bank can't pay for repairs (%s)." -- cost
@@ -126,7 +129,8 @@ L.AUCTIONPRICES_SCAN_ON_OPEN = "Scan When Opened"
 L.AUCTIONPRICES_SCAN_ON_OPEN_DESC = "Scan the whole auction house when you open it, at most "
     .. "every 15 minutes. When off, prices still update from your own searches, and /fpp scan "
     .. "scans now."
-L.AUCTIONPRICES_SCANNING = "Scanning prices... %d items" -- count so far
+L.AUCTIONPRICES_CHAT_DESC = "Say in chat when a scan finishes after the auction house closed."
+L.AUCTIONPRICES_SCANNING ="Scanning prices... %d items" -- count so far
 L.AUCTIONPRICES_SCANNED = "Prices updated for %d items" -- count
 L.AUCTIONPRICES_AGE = "Prices scanned %d min ago" -- minutes
 L.AUCTIONPRICES_COMMAND = "scan the open auction house now"
@@ -194,7 +198,9 @@ L.GATHERTRACKING_SWAP_DESC = "With both chosen, swap between Find Minerals and F
     .. "one of them is on. Waits during combat, casting, and flights."
 L.GATHERTRACKING_SWAP_OFF = "Never"
 L.GATHERTRACKING_SWAP_EVERY = "Every %d Seconds" -- seconds
-L.GATHERTRACKING_FAILED = "Gathering Tracking couldn't change tracking: %s" -- error
+L.GATHERTRACKING_CHAT_DESC = "Say in chat when the game stops Gathering Tracking from changing "
+    .. "tracking."
+L.GATHERTRACKING_FAILED ="Gathering Tracking couldn't change tracking: %s" -- error
 L.GATHERTRACKING_BLOCKED = "The game blocked Gathering Tracking from changing tracking. It stops "
     .. "until /reload."
 

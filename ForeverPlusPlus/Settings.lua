@@ -2,15 +2,16 @@
 -- templates so they look like any other options page:
 --   Forever++        an on/off checkbox per module (the only place modules turn on and off)
 --     <Module>       one page per module with options, holding just its options (and buttons,
---                    from `module.actions`)
+--                    from `module.actions`), sorted by title
 --     <Tool>         a page a module draws itself (`BuildPage`), after the option pages
 --     Debug          options marked `debug = true`, for testing
+--     About          the version, links, and /fpp commands
 -- Without subpages (an older Settings API), everything goes on the main page instead.
 local _, ns = ...
 
 local ipairs, format = ipairs, string.format
 
-local pairs = pairs
+local pairs, sort, strlower = pairs, table.sort, string.lower
 local InCombatLockdown, CreateFrame, GetBuildInfo = InCombatLockdown, CreateFrame, GetBuildInfo
 local C_AddOns, GetAddOnMetadata, GameTooltip = C_AddOns, GetAddOnMetadata, GameTooltip
 local L = ns.L
@@ -212,8 +213,12 @@ local function buildAbout(frame)
     addLink(frame, y, L.ABOUT_WEBSITE, WEBSITE)
     y = y - 24
     addLink(frame, y, L.ABOUT_ISSUES, ISSUES)
+    y = y - 22
+    local requests = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    requests:SetPoint("TOPLEFT", 16, y)
+    requests:SetText(L.ABOUT_REQUESTS)
 
-    y = y - 36
+    y = y - 30
     addHeading(frame, y, L.ABOUT_COMMANDS)
     y = y - 24
     for _, line in ipairs(ns.Commands()) do
@@ -227,6 +232,20 @@ local function buildAbout(frame)
     end
 end
 
+-- Module names in the order their titles sort in the player's language, so the toggles and pages
+-- read alphabetically whatever order the TOC loads them in.
+local function byTitle()
+    local names = {}
+    for i, name in ipairs(ns.order) do
+        names[i] = name
+    end
+    local function key(name)
+        return strlower(ns.modules[name].title or name)
+    end
+    sort(names, function(a, b) return key(a) < key(b) end)
+    return names
+end
+
 ---Adds the Forever++ pages to Settings > AddOns (called once, after ns.Start).
 function ns.RegisterSettings()
     -- Probe: the Mainline Settings API is on Forever (build 70009), but it's a beta.
@@ -235,8 +254,9 @@ function ns.RegisterSettings()
     end
     local category, layout = Settings.RegisterVerticalLayoutCategory(ns.title)
     local subpages = Settings.RegisterVerticalLayoutSubcategory ~= nil
+    local order = byTitle()
     addHeader(layout, L.MODULES)
-    for _, name in ipairs(ns.order) do
+    for _, name in ipairs(order) do
         local module = ns.modules[name]
         local parent = addToggle(category, module)
         if not module.BuildPage and (hasOptions(module, false) or module.actions) then
@@ -253,7 +273,7 @@ function ns.RegisterSettings()
     end
     -- Pages modules draw themselves (tools such as Console Variables) go last, above Debug.
     if subpages and Settings.RegisterCanvasLayoutSubcategory then
-        for _, name in ipairs(ns.order) do
+        for _, name in ipairs(order) do
             local module = ns.modules[name]
             if module.BuildPage then
                 pages[name] = addCanvasPage(category, module.title or name, function(frame)
@@ -264,7 +284,7 @@ function ns.RegisterSettings()
     end
     -- Debug options, grouped by module.
     local debugPage, debugLayout = category, layout
-    for _, name in ipairs(ns.order) do
+    for _, name in ipairs(order) do
         local module = ns.modules[name]
         if hasOptions(module, true) then
             if debugPage == category and subpages then

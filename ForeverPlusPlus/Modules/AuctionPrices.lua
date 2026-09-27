@@ -21,6 +21,7 @@ local SCAN_INTERVAL = 15 * 60 -- seconds between automatic scans, as Auctionator
 local module = ns.NewModule("AuctionPrices", L.AUCTIONPRICES_DESC, ItemTooltip.PriceDefaults({
     enabled = false,
     scanOnOpen = true,
+    chat = true,
     -- Per auction house ("Realm-Faction"): { scannedAt = time(), prices = { [itemID] = copper } }.
     -- Data, not a setting: it isn't in module.options.
     houses = {},
@@ -33,6 +34,7 @@ module.options = ItemTooltip.PriceOptions({
         name = L.AUCTIONPRICES_SCAN_ON_OPEN,
         description = L.AUCTIONPRICES_SCAN_ON_OPEN_DESC,
     },
+    ns.ChatOption(L.AUCTIONPRICES_CHAT_DESC),
 })
 
 -- The auction house this character sees. Realms share one per faction.
@@ -80,7 +82,7 @@ local function showIndicator(text, busy)
     local frame = getIndicator()
     if not frame then
         if not busy then
-            ns.Print(text) -- no auction house window to show it on
+            module:Print(text) -- no auction house window to show it on
         end
         return
     end

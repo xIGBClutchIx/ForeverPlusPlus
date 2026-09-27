@@ -211,6 +211,23 @@ function Module:Off(event, fn)
     self.events = list
 end
 
+---Prints a line in chat that the module shows by itself (not in reply to a command), unless the
+---player turned its chat messages off. A module that prints these puts `chat = true` in its
+---defaults and `ns.ChatOption(...)` in its options.
+---@param message string
+function Module:Print(message)
+    if self.db.chat ~= false then
+        ns.Print(message)
+    end
+end
+
+---The "Chat Messages" checkbox for a module that uses `module:Print`.
+---@param description string what the module says in chat
+---@return table option for `module.options`
+function ns.ChatOption(description)
+    return { key = "chat", name = ns.L.CHAT_MESSAGES, description = description }
+end
+
 -- Stops every event the module added with `module:On`.
 local function offAll(module)
     for _, entry in ipairs(module.events or {}) do
