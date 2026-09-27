@@ -16,9 +16,7 @@
 -- Without subpages (an older Settings API), everything goes on the main page instead.
 local _, ns = ...
 
-local ipairs, format, type = ipairs, string.format, type
-
-local pairs, sort, strlower = pairs, table.sort, string.lower
+local ipairs, format, type, sort, strlower = ipairs, string.format, type, table.sort, string.lower
 local InCombatLockdown, CreateFrame, GetBuildInfo = InCombatLockdown, CreateFrame, GetBuildInfo
 local setmetatable, hooksecurefunc = setmetatable, hooksecurefunc
 local C_AddOns, GetAddOnMetadata, GameTooltip = C_AddOns, GetAddOnMetadata, GameTooltip
@@ -530,7 +528,7 @@ function ns.RegisterSettings()
             addOptions(debugPage, module, nil, true)
         end
     end
-    if subpages and Settings.RegisterCanvasLayoutSubcategory then
+    if canvas then
         addCanvasPage(category, L.CHANGELOG, buildChangelog)
         addCanvasPage(category, L.ABOUT, buildAbout)
     end

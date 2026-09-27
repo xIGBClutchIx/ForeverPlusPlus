@@ -1,6 +1,7 @@
 -- Console Variables: a page under Forever++ in Settings that lists the game's console variables
 -- (CVars) the player can change with a search, shows each one's value and default, and lets the
--- player change one or put it back to its default. Read-only CVars are left out. Changes made in combat wait for it to end (ns.CVars.Apply).
+-- player change one or put it back to its default. Read-only CVars are left out. Changes made in
+-- combat wait for it to end (ns.CVars.Apply).
 -- Nothing is built until the page is first shown; `/fpp cvar <search>` opens it.
 local _, ns = ...
 

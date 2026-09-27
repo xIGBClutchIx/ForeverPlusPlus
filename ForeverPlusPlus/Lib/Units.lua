@@ -1,6 +1,5 @@
 -- Who a unit is to the player: in their group, on their friends list, in their guild, and an NPC's
--- title. Identity can
--- be secret (mostly in instances), and a value we can't read counts as "no".
+-- title. Identity can be secret (mostly in instances), and a value we can't read counts as "no".
 local _, ns = ...
 
 local UnitInParty, UnitInRaid, UnitGUID, UnitIsInMyGuild = UnitInParty, UnitInRaid, UnitGUID, UnitIsInMyGuild
