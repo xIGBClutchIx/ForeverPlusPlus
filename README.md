@@ -43,7 +43,7 @@ Open Game Menu > Options > AddOns > Forever++. The main page has a checkbox for 
 |---|---|
 | `/fpp` | Opens the Forever++ settings (`/forever++` works too). |
 | `/fpp list` | Lists the modules and whether each is on. |
-| `/fpp toggle <module>` | Turns a module on or off. |
+| `/fpp toggle <module> [option]` | Turns a module on or off, or with an option, flips that checkbox. |
 | `/fpp options <module>` | Lists a module's options and their values. |
 | `/fpp set <module> <option> [value]` | Changes an option: `on`/`off`, or a choice such as `/fpp set PlayerPlates level after`. Leave out the value to see the choices. |
 | `/fpp reset` | Puts every setting back to its default and reloads. |

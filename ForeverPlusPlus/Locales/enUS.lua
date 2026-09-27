@@ -16,7 +16,7 @@ L.NO_MODULE = "no module called %s"
 L.SLASH_MODULES = "modules (/fpp toggle <name>, /fpp list):"
 L.SLASH_OPEN = "open the settings"
 L.SLASH_LIST = "list the modules and whether each is on"
-L.SLASH_TOGGLE = "turn a module on or off"
+L.SLASH_TOGGLE = "turn a module, or one of its checkboxes, on or off"
 L.SLASH_RESET = "all settings back to defaults (reloads)"
 L.SLASH_OPTIONS = "list its options and their values"
 L.SLASH_SET = "change one (on/off, or a choice)"
@@ -48,8 +48,9 @@ L.SETTINGS_TURN_ON = "Turn On" -- the button on a "Blizzard's ... is off" row
 -- Settings: Changelog page. The notes themselves are in Changelog.lua.
 L.CHANGELOG = "Changelog"
 L.CHANGELOG_RELEASE = "%s (%s)" -- version, date
-L.CHANGELOG_TOOLS = "Tools"
-L.CHANGELOG_SETTINGS = "Settings and Commands"
+L.CHANGELOG_ADDED = "Added"
+L.CHANGELOG_SETTINGS = "Settings"
+L.CHANGELOG_COMMANDS = "Commands"
 
 -- Settings: About page
 L.ABOUT = "About"

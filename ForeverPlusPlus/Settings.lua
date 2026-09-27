@@ -391,9 +391,6 @@ local function buildChangelog(frame)
     for i, release in ipairs(ns.changelog or {}) do
         add("GameFontHighlightLarge", format(L.CHANGELOG_RELEASE, release.version, release.date),
             0, i > 1 and 24 or 0)
-        if release.summary then
-            add("GameFontHighlight", release.summary, 0, 6)
-        end
         for _, section in ipairs(release.sections) do
             add("GameFontNormal", section[1], 0, 14)
             for _, entry in ipairs(section[2]) do

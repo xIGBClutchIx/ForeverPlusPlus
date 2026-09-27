@@ -523,11 +523,11 @@ end
 ---@return table lines { { "/fpp ...", description }, ... }
 function ns.Commands()
     local lines = {
-        { "/fpp", L.SLASH_OPEN },
+        { "/fpp, /forever++", L.SLASH_OPEN },
         { "/fpp list", L.SLASH_LIST },
-        { "/fpp toggle <module>", L.SLASH_TOGGLE },
+        { "/fpp toggle <module> [option]", L.SLASH_TOGGLE },
         { "/fpp options <module>", L.SLASH_OPTIONS },
-        { "/fpp set <module> <option> <value>", L.SLASH_SET },
+        { "/fpp set <module> <option> [value]", L.SLASH_SET },
         { "/fpp reset", L.SLASH_RESET },
     }
     for _, name in ipairs(commandOrder) do

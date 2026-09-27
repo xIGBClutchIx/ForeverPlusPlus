@@ -1,8 +1,8 @@
 -- The release notes the Changelog page in Settings shows, newest first. The game can't read
 -- CHANGELOG.md at the repo root, so this is the same notes as data: change both together.
 -- Headings and module names come from ns.L; the notes themselves are English, like CHANGELOG.md.
--- Each release: `version`, `date`, an optional `summary`, and `sections` of `{ heading, entries }`,
--- where an entry is a line of text or `{ name, text }` (a name shown in gold before its text).
+-- Each release: `version`, `date`, and `sections` of `{ heading, entries }`, where an entry is a
+-- line of text or `{ name, text }` (a name shown in gold before its text).
 local _, ns = ...
 
 local L = ns.L
@@ -11,60 +11,55 @@ ns.changelog = {
     {
         version = "0.1.0",
         date = "2026-09-27",
-        summary = "The first release.",
         sections = {
-            { L.CATEGORY_AUTOMATION, {
-                { L.AUTOGOSSIP_TITLE, "When an NPC has only one thing to say and no quests, picks it "
-                    .. "for you, so the bank, shop, trainer, flight map, or stable opens straight "
-                    .. "away. Each kind can be turned off, and holding Shift lets you choose yourself." },
-                { L.AUTOREPAIR_TITLE, "Repairs your gear at any merchant who repairs and says in chat "
-                    .. "what it cost. Choose whether the guild bank or your own money pays, and a "
-                    .. "minimum cost. Hold Shift to skip it." },
-                { L.AUTOSTOW_TITLE, "Puts your weapons away a few seconds after combat ends, with a "
-                    .. "choice of delay, and can leave them out in dungeons, raids, and battlegrounds." },
-                { L.FASTLOOT_TITLE, "With auto loot on, takes everything at once instead of waiting "
-                    .. "for the loot window. Warns in Settings when Blizzard's auto loot is off." },
-                { L.GATHERTRACKING_TITLE, "Keeps Find Minerals or Find Herbs on after logging in, "
-                    .. "zoning, or dying, and can swap between the two every few seconds." },
-            } },
-            { L.CATEGORY_ITEMS, {
+            { L.CHANGELOG_ADDED, {
                 { L.AUCTIONPRICES_TITLE, "Scans the auction house when you open it and shows the "
-                    .. "lowest buyout in item tooltips, with how old the scan is. /fpp scan scans now "
-                    .. "and /fpp resetprices forgets the saved prices." },
-                { L.DURABILITYBARS_TITLE, "A small bar beside each item on the character window with "
-                    .. "how worn it is." },
-                { L.SELLPRICE_TITLE, "The vendor price of the whole stack in item tooltips. Hold "
-                    .. "Shift for one item. Price lines from Sell Price and Auction Prices line up "
-                    .. "with each other." },
-            } },
-            { L.CATEGORY_INTERFACE, {
+                    .. "lowest buyout in item tooltips. Includes how long ago the item was scanned "
+                    .. "(colored by age), the same price options as Sell Price, /fpp scan, and a "
+                    .. "Reset button and /fpp resetprices to forget saved prices." },
+                { L.AUTOGOSSIP_TITLE, "Picks an NPC's only option when it has nothing else to say "
+                    .. "and no quests. Includes a choice for bankers, vendors, trainers, flight "
+                    .. "masters, stable masters, and other NPCs, and holding Shift to choose "
+                    .. "yourself." },
+                { L.AUTOREPAIR_TITLE, "Repairs your gear at merchants and says in chat what it "
+                    .. "cost. Includes paying from the guild bank first, the guild bank only, or "
+                    .. "your own money, a minimum cost, and holding Shift to skip it." },
+                { L.AUTOSTOW_TITLE, "Puts your weapons away after combat. Includes the delay and "
+                    .. "leaving them out in dungeons, raids, and battlegrounds." },
+                { L.CVARBROWSER_TITLE, "A Settings page to browse, search, and change the game's "
+                    .. "console variables (CVars). Includes a Changed Only filter and "
+                    .. "/fpp cvar [search]." },
+                { L.DURABILITYBARS_TITLE, "A bar beside each item on the character window with how "
+                    .. "worn it is. Includes showing bars always, only when worn, below 50%, or "
+                    .. "below 25%." },
+                { L.FASTLOOT_TITLE, "With auto loot on, takes everything at once. Includes a warning "
+                    .. "in Settings, with a Turn On button, when Blizzard's auto loot is off." },
+                { L.GATHERTRACKING_TITLE, "Keeps Find Minerals or Find Herbs on. Includes minerals, "
+                    .. "herbs, or both, turning tracking back on after logging in, zoning, or dying, "
+                    .. "and swapping between the two every few seconds." },
                 { L.HIDEFEEDBACK_TITLE, "Hides the beta's \"Press F6 to submit an issue\" tooltip "
-                    .. "line and the bug report button. Off by default, and only on beta and PTR "
-                    .. "clients." },
-                { L.TOOLTIPS_TITLE, "Colors unit and item tooltips by class, reaction, or quality, "
-                    .. "and adds player titles and who a unit is targeting. Can show tooltips at the "
-                    .. "mouse and hide unit tooltips in combat." },
-            } },
-            { L.CATEGORY_NAMEPLATES, {
-                { L.NPCPLATES_TITLE, "Always shows friendly NPCs' names with their title. The health "
-                    .. "bar appears only when they're hurt or in combat." },
-                { L.PLAYERPLATES_TITLE, "Always shows friendly players' names with their guild, and "
-                    .. "icons for group members and Battle.net friends. The health bar appears only "
-                    .. "when they're hurt or in combat." },
-                "Both warn in Settings when Blizzard's friendly nameplates are off, with a button to "
-                    .. "turn them on.",
-            } },
-            { L.CHANGELOG_TOOLS, {
-                { L.CVARBROWSER_TITLE, "A page in Settings to browse, search, and change the game's "
-                    .. "console variables (CVars). /fpp cvar opens it." },
-            } },
-            { L.CHANGELOG_SETTINGS, {
-                "Everything lives in Game Menu > Options > AddOns > Forever++: a checkbox per module "
-                    .. "grouped by category, a page per module with options, Debug, Changelog, and "
-                    .. "About.",
-                "/fpp (or /forever++) opens the settings; /fpp list, toggle, options, set, and reset "
-                    .. "do the same from chat.",
-                "Every module turns on and off without a reload.",
+                    .. "line and the bug report button, each on its own. Off by default, and only on "
+                    .. "beta and PTR clients." },
+                { L.NPCPLATES_TITLE, "Friendly NPCs' names with their title, and a health bar only "
+                    .. "when they're hurt or in combat. Includes name color, where the level goes, "
+                    .. "and when and in what color titles show." },
+                { L.PLAYERPLATES_TITLE, "Friendly players' names with their guild, and a health bar "
+                    .. "only when they're hurt or in combat. Includes class-colored names, where the "
+                    .. "level goes, guild line and color, highlighting guildmates, and role icons "
+                    .. "for group members and Battle.net icons for friends." },
+                { L.SELLPRICE_TITLE, "The vendor price in item tooltips. Includes the whole stack "
+                    .. "or one item (Shift shows the other), lining up with other price lines, and "
+                    .. "the quantity color." },
+                { L.TOOLTIPS_TITLE, "Colors unit and item tooltips. Includes borders by class, "
+                    .. "reaction, or item quality, name, guild, level, and class name colors, player "
+                    .. "titles, a Target line, anchoring to the cursor, and hiding unit tooltips in "
+                    .. "combat." },
+                { L.CHANGELOG_SETTINGS, "Forever++ in Game Menu > Options > AddOns. Includes a "
+                    .. "checkbox per module grouped by category, a page per module with options, "
+                    .. "Debug, Changelog, and About. Every module turns on and off without a "
+                    .. "reload." },
+                { L.CHANGELOG_COMMANDS, "/fpp or /forever++ opens the settings. Includes list, "
+                    .. "toggle, options, set, and reset." },
             } },
         },
     },
