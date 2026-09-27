@@ -43,7 +43,9 @@ function module:OnEnable()
         hooked = true
         ItemTooltip.ReplaceSellPrice(drawSellPrice)
     end
+    ItemTooltip.RedrawOnShift(self, true)
 end
 
 function module:OnDisable()
+    ItemTooltip.RedrawOnShift(self, false)
 end

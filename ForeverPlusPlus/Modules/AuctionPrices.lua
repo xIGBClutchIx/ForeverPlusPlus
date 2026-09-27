@@ -387,9 +387,11 @@ function module:OnEnable()
         hooked = true
         ItemTooltip.OnPrices(addAuctionPrice)
     end
+    ItemTooltip.RedrawOnShift(self, true)
 end
 
 function module:OnDisable()
+    ItemTooltip.RedrawOnShift(self, false)
     ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
     stopScan()
     hideIndicator()

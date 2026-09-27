@@ -4,7 +4,7 @@
 -- Nothing is hooked until a module first calls in.
 local _, ns = ...
 
-local ipairs, setmetatable, format, type = ipairs, setmetatable, string.format, type
+local ipairs, next, setmetatable, format, type = ipairs, next, setmetatable, string.format, type
 local floor, max, UIParent = math.floor, math.max, UIParent
 local TooltipDataProcessor, Enum, C_Item, GameTooltip = TooltipDataProcessor, Enum, C_Item, GameTooltip
 local IsShiftKeyDown = IsShiftKeyDown
@@ -115,7 +115,21 @@ local function hook()
         end
     end
     TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, onItem)
-    ns.On("MODIFIER_STATE_CHANGED", onModifier)
+end
+
+local shiftUsers = {} -- owner -> true while it has lines that change with Shift
+
+---Redraws item tooltips when Shift goes up or down while any owner wants it. A module turns this
+---on in OnEnable and off in OnDisable, so nothing listens while every price module is off.
+---@param owner any usually the module
+---@param on boolean
+function ItemTooltip.RedrawOnShift(owner, on)
+    shiftUsers[owner] = on or nil
+    if next(shiftUsers) then
+        ns.On("MODIFIER_STATE_CHANGED", onModifier)
+    else
+        ns.Off("MODIFIER_STATE_CHANGED", onModifier)
+    end
 end
 
 ---Calls `fn(tooltip, data)` on every item tooltip, where the price lines go. Hooks can't be
