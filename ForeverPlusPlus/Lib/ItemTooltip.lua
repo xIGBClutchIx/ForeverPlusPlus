@@ -230,8 +230,7 @@ function ItemTooltip.AddInfo(tooltip, name, text, align, color)
     local label = format(L.PRICE_INFO_LINE, name .. padding(tooltip, name))
     local value
     if type(color) == "table" then
-        value = format("|cff%02x%02x%02x%s|r", floor(color[1] * 255 + 0.5),
-            floor(color[2] * 255 + 0.5), floor(color[3] * 255 + 0.5), text)
+        value = ns.Colors.Code(color[1], color[2], color[3]) .. text .. "|r"
     else
         value = (COLORS[color] or GRAY_FONT_COLOR):WrapTextInColorCode(text)
     end

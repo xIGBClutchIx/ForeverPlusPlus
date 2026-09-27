@@ -46,8 +46,8 @@ local NAME_COLORS = {
     white = { 1, 1, 1 },
 }
 local TITLE_COLORS = { -- the same as Player Nameplates' guild colors
-    gray = { 0.65, 0.65, 0.65 },
-    green = { 0.25, 1, 0.25 },
+    gray = ns.Colors.GRAY,
+    green = ns.Colors.GUILD_GREEN,
 }
 
 local function nameColor()

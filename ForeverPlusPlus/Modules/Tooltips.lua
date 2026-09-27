@@ -8,8 +8,8 @@
 -- to read is left alone then, and colors that come back secret go straight to the setters.
 local _, ns = ...
 
-local _G, type, setmetatable, format = _G, type, setmetatable, string.format
-local find, sub, gsub, floor = string.find, string.sub, string.gsub, math.floor
+local _G, type, setmetatable = _G, type, setmetatable
+local find, sub, gsub = string.find, string.sub, string.gsub
 local TooltipDataProcessor, Enum, C_Item, C_ClassColor = TooltipDataProcessor, Enum, C_Item, C_ClassColor
 local UnitExists, UnitIsPlayer, UnitClass, UnitLevel, UnitName = UnitExists, UnitIsPlayer, UnitClass, UnitLevel, UnitName
 local UnitPVPName, UnitIsUnit, UnitReaction, UnitSelectionColor = UnitPVPName, UnitIsUnit, UnitReaction, UnitSelectionColor
@@ -21,6 +21,7 @@ local GameTooltip, InCombatLockdown, hooksecurefunc = GameTooltip, InCombatLockd
 local L = ns.L
 local readable = ns.IsReadable
 local Units = ns.Units
+local colorCode = ns.Colors.Code
 
 local module = ns.NewModule("Tooltips", L.TOOLTIPS_DESC, {
     enabled = true,
@@ -74,8 +75,8 @@ module.options = {
         section = L.TOOLTIPS_SECTION_BEHAVIOR },
 }
 
-local GUILDMATE_COLOR = { 0.25, 1, 0.25 } -- guild chat's green, as on Player Nameplates
-local GUILD_COLOR = { 0.65, 0.65, 0.65 }
+local GUILDMATE_COLOR = ns.Colors.GUILD_GREEN -- as on Player Nameplates
+local GUILD_COLOR = ns.Colors.GRAY
 local YOU_COLOR = { 1, 0.25, 0.25 }
 
 -- Text and colors -----------------------------------------------------------------------------
@@ -107,9 +108,7 @@ local function colorMatch(text, pattern, r, g, b)
     if not first then
         return text, false
     end
-    local code = format("|cff%02x%02x%02x", floor(r * 255 + 0.5), floor(g * 255 + 0.5),
-        floor(b * 255 + 0.5))
-    return sub(text, 1, first - 1) .. code .. sub(text, first, last) .. "|r" .. sub(text, last + 1), true
+    return sub(text, 1, first - 1) .. colorCode(r, g, b) .. sub(text, first, last) .. "|r" .. sub(text, last + 1), true
 end
 
 -- The unit's class color, or nil when it isn't a player or its class can't be read.

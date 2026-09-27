@@ -65,8 +65,8 @@ module.options = {
 -- Guild Name Color choices. Highlighted guildmates get guild chat's green, or white when every
 -- guild is already green, so they still stand out.
 local GUILD_COLORS = {
-    gray = { 0.65, 0.65, 0.65 },
-    green = { 0.25, 1, 0.25 }, -- guild chat's green
+    gray = ns.Colors.GRAY,
+    green = ns.Colors.GUILD_GREEN,
 }
 local GUILDMATE_COLORS = {
     gray = GUILD_COLORS.green,
