@@ -13,7 +13,6 @@ L.ON = "on"
 L.OFF = "off"
 L.MODULE_STATE = "%s is %s." -- module name, on/off
 L.NO_MODULE = "no module called %s"
-L.OFF_AFTER_RELOAD = "%s turns fully off after /reload."
 L.SLASH_MODULES = "modules (/fpp toggle <name>, /fpp list):"
 L.SLASH_OPEN = "open the settings"
 L.SLASH_LIST = "list the modules and whether each is on"

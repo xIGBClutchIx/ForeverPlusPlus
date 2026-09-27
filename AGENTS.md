@@ -81,7 +81,7 @@ When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or f
 - The only globals are `ForeverPlusPlusDB`, the `SLASH_FOREVERPLUSPLUS*` names, and `SlashCmdList.FOREVERPLUSPLUS`. Add any new client global you use to `.luarc.json`.
 - Cache hot globals as file-level locals: `local pairs, CreateFrame = pairs, CreateFrame`.
 - Use `ns.On` / `ns.Off` for events, not a new frame per module. For events a module listens to while it's on, use `self:On(event, fn)`; they stop by themselves when it turns off.
-- A module that is off costs nothing: no frames, hooks, events, or `OnUpdate` until `OnEnable`. Undo what you can in `OnDisable`; if a change (such as a hook) can only be undone by `/reload`, leave out `OnDisable` and the core says so.
+- A module that is off costs nothing: no frames, hooks, events, or `OnUpdate` until `OnEnable`. Every module turns on and off live, with no `/reload`: `OnDisable` undoes what `OnEnable` did, and the core errors on a module with `OnEnable` but no `OnDisable`. A hook can't be removed, so it checks `module.enabled` and does nothing while the module is off.
 - Read settings from `module.db`, filled from the defaults passed to `ns.NewModule`.
 - Annotate public functions with LuaLS `---@param` / `---@return`. Match the comment style of `Core.lua`: short, plain, and saying why.
 - Player-facing text goes through `ns.Print` and stays short.

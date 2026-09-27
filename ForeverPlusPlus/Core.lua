@@ -187,8 +187,8 @@ end
 local Module = {}
 Module.__index = Module
 
----Like ns.On, but the module remembers it and turns it off by itself when the module turns off
----(if it has OnDisable). Use it for events the module listens to while it's on.
+---Like ns.On, but the module remembers it and turns it off by itself when the module turns off.
+---Use it for events the module listens to while it's on.
 ---@param event string
 ---@param fn fun(event: string, ...)
 function Module:On(event, fn)
@@ -237,7 +237,7 @@ local function offAll(module)
 end
 
 ---Creates a module: one change to the game's UI, switched on and off on its own. Give it
----`OnEnable` (and `OnDisable` if it can undo itself) and put its settings in `defaults`. Events
+---`OnEnable` and an `OnDisable` that undoes it, and put its settings in `defaults`. Events
 ---added with `module:On` stop by themselves when it turns off. Set
 ---`module.title` for a friendlier name in Settings (the name stays the /fpp key).
 ---@param name string shown in /fpp
@@ -263,11 +263,9 @@ local function enable(module)
         return
     end
     module.enabled = true
-    -- A module without OnDisable stays applied after it turns off, so don't apply it twice.
-    if module.OnEnable and not module.applied then
+    if module.OnEnable then
         module:OnEnable()
     end
-    module.applied = true
 end
 
 local function disable(module)
@@ -277,11 +275,8 @@ local function disable(module)
     module.enabled = false
     if module.OnDisable then
         module:OnDisable()
-        offAll(module)
-        module.applied = false
-    else
-        ns.Print(format(L.OFF_AFTER_RELOAD, module.name))
     end
+    offAll(module)
 end
 
 ---Loads the saved settings and enables every module that is on (called once, at PLAYER_LOGIN).
@@ -296,6 +291,11 @@ function ns.Start()
     end
     for _, name in pairs(ns.order) do
         local module = ns.modules[name]
+        -- Every module turns on and off without a reload, so one that changes something must
+        -- undo it.
+        if module.OnEnable and not module.OnDisable then
+            error("Forever++: " .. name .. " has OnEnable but no OnDisable")
+        end
         ns.db.modules[name] = ns.db.modules[name] or {}
         prune(ns.db.modules[name], module.defaults)
         fill(ns.db.modules[name], module.defaults)
