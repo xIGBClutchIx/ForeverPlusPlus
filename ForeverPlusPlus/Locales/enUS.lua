@@ -45,6 +45,12 @@ L.SETTINGS_MODULE_OFF = "Module is disabled: turn it on from the Forever++ page"
 L.SETTINGS_OPEN_PAGE = "%s Options" -- the gear beside a module's checkbox: module title
 L.SETTINGS_TURN_ON = "Turn On" -- the button on a "Blizzard's ... is off" row
 
+-- Settings: Changelog page. The notes themselves are in Changelog.lua.
+L.CHANGELOG = "Changelog"
+L.CHANGELOG_RELEASE = "%s (%s)" -- version, date
+L.CHANGELOG_TOOLS = "Tools"
+L.CHANGELOG_SETTINGS = "Settings and Commands"
+
 -- Settings: About page
 L.ABOUT = "About"
 L.ABOUT_TAGLINE = "Small additions and changes to the default UI for WoW Forever."

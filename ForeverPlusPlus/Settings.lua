@@ -11,16 +11,18 @@
 --                    enough to need them
 --     <Tool>         a page a module draws itself (`BuildPage`), after the option pages
 --     Debug          options marked `debug = true`, for testing
+--     Changelog      the release notes from Changelog.lua
 --     About          the version, links, and /fpp commands
 -- Without subpages (an older Settings API), everything goes on the main page instead.
 local _, ns = ...
 
-local ipairs, format = ipairs, string.format
+local ipairs, format, type = ipairs, string.format, type
 
 local pairs, sort, strlower = pairs, table.sort, string.lower
 local InCombatLockdown, CreateFrame, GetBuildInfo = InCombatLockdown, CreateFrame, GetBuildInfo
 local setmetatable, hooksecurefunc = setmetatable, hooksecurefunc
 local C_AddOns, GetAddOnMetadata, GameTooltip = C_AddOns, GetAddOnMetadata, GameTooltip
+local C_XMLUtil = C_XMLUtil
 local L = ns.L
 
 local settings = {} -- module name -> its Blizzard setting objects, to refresh after /fpp changes
@@ -350,6 +352,64 @@ local function buildAbout(frame)
     end
 end
 
+-- Changelog page ------------------------------------------------------------------------------
+-- The release notes from Changelog.lua, newest first, in a scrolling list. Built the first time
+-- it's shown.
+
+local SCROLL_TEMPLATE = "ScrollFrameTemplate" -- Mainline's, with the thin scroll bar
+
+local function buildChangelog(frame)
+    ns.AddPageTitle(frame, L.CHANGELOG)
+
+    -- Probe: fall back to the older template if Mainline's isn't on this client.
+    local template = SCROLL_TEMPLATE
+    if not (C_XMLUtil and C_XMLUtil.GetTemplateInfo and C_XMLUtil.GetTemplateInfo(template)) then
+        template = "UIPanelScrollFrameTemplate"
+    end
+    local scroll = CreateFrame("ScrollFrame", nil, frame, template)
+    scroll:SetPoint("TOPLEFT", 16, -64)
+    scroll:SetPoint("BOTTOMRIGHT", -32, 8)
+
+    local width = scroll:GetWidth()
+    if width <= 0 then
+        width = 560 -- about the width of the Settings page, if its size isn't known yet
+    end
+    local content = CreateFrame("Frame", nil, scroll)
+    content:SetWidth(width)
+    scroll:SetScrollChild(content)
+
+    local y = 0
+    -- A line of text across the list, wrapping, below the one before it.
+    local function add(font, text, indent, gap)
+        y = y - (gap or 0)
+        local line = content:CreateFontString(nil, "OVERLAY", font)
+        line:SetPoint("TOPLEFT", indent or 0, y)
+        line:SetWidth(width - (indent or 0))
+        line:SetJustifyH("LEFT")
+        line:SetText(text)
+        y = y - line:GetStringHeight()
+    end
+
+    for i, release in ipairs(ns.changelog or {}) do
+        add("GameFontHighlightLarge", format(L.CHANGELOG_RELEASE, release.version, release.date),
+            0, i > 1 and 24 or 0)
+        if release.summary then
+            add("GameFontHighlight", release.summary, 0, 6)
+        end
+        for _, section in ipairs(release.sections) do
+            add("GameFontNormal", section[1], 0, 14)
+            for _, entry in ipairs(section[2]) do
+                local text = entry
+                if type(entry) == "table" then
+                    text = format("|cffffd100%s|r: %s", entry[1], entry[2]) -- gold, like GameFontNormal
+                end
+                add("GameFontHighlightSmall", format("- %s", text), 8, 6)
+            end
+        end
+    end
+    content:SetHeight(-y + 8)
+end
+
 -- Module names in the order their titles sort in the player's language, so the toggles and pages
 -- read alphabetically whatever order the TOC loads them in. Modules this client doesn't get are
 -- left out.
@@ -471,6 +531,7 @@ function ns.RegisterSettings()
         end
     end
     if subpages and Settings.RegisterCanvasLayoutSubcategory then
+        addCanvasPage(category, L.CHANGELOG, buildChangelog)
         addCanvasPage(category, L.ABOUT, buildAbout)
     end
     Settings.RegisterAddOnCategory(category)

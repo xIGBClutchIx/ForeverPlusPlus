@@ -37,7 +37,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 
 ## Use
 
-Open Game Menu > Options > AddOns > Forever++. The main page has a checkbox for each module, grouped by category; the gear beside a module opens its options. Debug has testing options, and About has the version and links.
+Open Game Menu > Options > AddOns > Forever++. The main page has a checkbox for each module, grouped by category; the gear beside a module opens its options. Debug has testing options, Changelog has what changed in each release (also in [CHANGELOG.md](CHANGELOG.md)), and About has the version and links.
 
 | Command | What it does |
 |---|---|

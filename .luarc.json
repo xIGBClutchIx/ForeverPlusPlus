@@ -18,6 +18,7 @@
     "Settings",
     "CreateSettingsListSectionHeaderInitializer",
     "C_CVar",
+    "C_XMLUtil",
     "C_NamePlate",
     "C_CurveUtil",
     "Enum",
