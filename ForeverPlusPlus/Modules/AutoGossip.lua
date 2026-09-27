@@ -110,8 +110,6 @@ local function skipReason(options)
         return "Shift"
     elseif #options ~= 1 then
         return "options"
-    elseif C_GossipInfo.ForceGossip and C_GossipInfo.ForceGossip() then
-        return "ForceGossip" -- the NPC wants its text read
     end
     local available = C_GossipInfo.GetAvailableQuests() or {}
     local active = C_GossipInfo.GetActiveQuests() or {}
@@ -123,6 +121,11 @@ local function skipReason(options)
     local kind = kindOf(options[1])
     if not module.db[kind] then
         return kind .. " off"
+    end
+    -- ForceGossip asks for the text to be read. Forever sets it on flight masters too, so it only
+    -- holds back NPCs that aren't a known service.
+    if kind == "other" and C_GossipInfo.ForceGossip and C_GossipInfo.ForceGossip() then
+        return "ForceGossip"
     end
 end
 

@@ -186,6 +186,7 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
   - The other icons AutoGossip uses (innkeeper 132052, trainer 132058, vendor 132060) and `C_GossipInfo.SelectOption(gossipOptionID)` are **Unverified**. Its Debug option prints every option's icon and status.
 - Line 2 of `C_TooltipInfo.GetUnit("npc")` is the NPC's title: `Banker`, `Wind Rider Master`. **[in-game]** (2026-09-27) AutoGossip tells stable masters apart by it (`Stable Master` is **Unverified**): `/run local d=C_TooltipInfo.GetUnit("npc")print(d and d.lines[2] and d.lines[2].leftText)`
 - Auctioneers open the auction house straight away, with no gossip. **[in-game]** (2026-09-27)
+- `C_GossipInfo.ForceGossip()` was true at a Wind Rider Master with one option (`95583`), so Forever sets it on plain service NPCs, not only on ones whose text matters. **[in-game]** (2026-09-27) AutoGossip ignores it for known service types.
 
 ## Fonts
 
