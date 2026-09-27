@@ -14,6 +14,7 @@ local module = ns.NewModule("DurabilityBars", L.DURABILITYBARS_DESC, {
     enabled = true,
 })
 module.title = L.DURABILITYBARS_TITLE
+module.category = "items"
 
 local THICKNESS = 3 -- bar width, in pixels
 local GAP = 2 -- space between the bar and the item button

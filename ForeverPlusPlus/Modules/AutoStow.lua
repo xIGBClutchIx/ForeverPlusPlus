@@ -19,6 +19,7 @@ local module = ns.NewModule("AutoStow", L.AUTOSTOW_DESC, {
     delay = "5",
 })
 module.title = L.AUTOSTOW_TITLE
+module.category = "automation"
 
 local choices = {}
 for i, seconds in ipairs(DELAYS) do

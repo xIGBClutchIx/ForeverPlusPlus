@@ -17,6 +17,7 @@ local module = ns.NewModule("AutoRepair", L.AUTOREPAIR_DESC, {
     chat = true,
 })
 module.title = L.AUTOREPAIR_TITLE
+module.category = "automation"
 
 module.options = {
     {

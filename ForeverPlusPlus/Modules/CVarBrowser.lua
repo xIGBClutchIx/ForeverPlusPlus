@@ -15,6 +15,7 @@ local L = ns.L
 
 local module = ns.NewModule("CVarBrowser", L.CVARBROWSER_DESC, { enabled = true })
 module.title = L.CVARBROWSER_TITLE
+module.category = "tools"
 
 local ROW_HEIGHT = 26
 -- Columns, measured from the list's right edge so the name gets whatever width is left.

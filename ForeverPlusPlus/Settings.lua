@@ -1,6 +1,7 @@
 -- The "Forever++" pages in the game's Settings > AddOns list, built from Blizzard's own settings
 -- templates so they look like any other options page:
---   Forever++        an on/off checkbox per module (the only place modules turn on and off)
+--   Forever++        an on/off checkbox per module (the only place modules turn on and off),
+--                    grouped under headers by `module.category`
 --     <Module>       one page per module with options, holding just its options (and buttons,
 --                    from `module.actions`), sorted by title. Options with a `section` get a
 --                    header above each group, for pages long enough to need them
@@ -254,6 +255,25 @@ local function byTitle()
     return names
 end
 
+-- The main page's groups, in order: a module's `category` and its header. A module without one
+-- goes under Other.
+local CATEGORIES = {
+    { "automation", L.CATEGORY_AUTOMATION },
+    { "items", L.CATEGORY_ITEMS },
+    { "interface", L.CATEGORY_INTERFACE },
+    { "nameplates", L.CATEGORY_NAMEPLATES },
+    { "tools", L.CATEGORY_TOOLS },
+    { "other", L.CATEGORY_OTHER },
+}
+local KNOWN = {}
+for _, group in ipairs(CATEGORIES) do
+    KNOWN[group[1]] = true
+end
+
+local function categoryOf(module)
+    return KNOWN[module.category] and module.category or "other"
+end
+
 ---Adds the Forever++ pages to Settings > AddOns (called once, after ns.Start).
 function ns.RegisterSettings()
     -- Probe: the Mainline Settings API is on Forever (build 70009), but it's a beta.
@@ -263,19 +283,34 @@ function ns.RegisterSettings()
     local category, layout = Settings.RegisterVerticalLayoutCategory(ns.title)
     local subpages = Settings.RegisterVerticalLayoutSubcategory ~= nil
     local order = byTitle()
-    addHeader(layout, L.MODULES)
-    for _, name in ipairs(order) do
-        local module = ns.modules[name]
-        local parent = addToggle(category, module)
-        if not module.BuildPage and (hasOptions(module, false) or module.actions) then
-            if subpages then
+    -- The main page: each category's modules under its header, alphabetically. Without subpages,
+    -- a module's options follow its checkbox.
+    for _, group in ipairs(CATEGORIES) do
+        local header = false
+        for _, name in ipairs(order) do
+            local module = ns.modules[name]
+            if categoryOf(module) == group[1] then
+                if not header then
+                    header = true
+                    addHeader(layout, group[2])
+                end
+                local parent = addToggle(category, module)
+                if not subpages then
+                    addOptions(category, module, parent, false)
+                    addActions(layout, module)
+                end
+            end
+        end
+    end
+    -- A page per module with options, alphabetically.
+    if subpages then
+        for _, name in ipairs(order) do
+            local module = ns.modules[name]
+            if not module.BuildPage and (hasOptions(module, false) or module.actions) then
                 local page, pageLayout = Settings.RegisterVerticalLayoutSubcategory(category,
                     module.title or name)
                 addOptions(page, module, nil, false, pageLayout)
                 addActions(pageLayout, module)
-            else
-                addOptions(category, module, parent, false)
-                addActions(layout, module)
             end
         end
     end

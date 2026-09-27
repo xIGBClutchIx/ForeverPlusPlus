@@ -32,6 +32,7 @@ local module = ns.NewModule("GatherTracking", L.GATHERTRACKING_DESC, {
     chat = true,
 })
 module.title = L.GATHERTRACKING_TITLE
+module.category = "automation"
 
 module.options = {
     {

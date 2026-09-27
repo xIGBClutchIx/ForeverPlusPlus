@@ -20,6 +20,7 @@ local module = ns.NewModule("AutoGossip", L.AUTOGOSSIP_DESC, {
     printOptions = false,
 })
 module.title = L.AUTOGOSSIP_TITLE
+module.category = "automation"
 
 module.options = {
     -- Alphabetical, with the catch-all last.

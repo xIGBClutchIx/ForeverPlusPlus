@@ -27,6 +27,7 @@ local module = ns.NewModule("AuctionPrices", L.AUCTIONPRICES_DESC, ItemTooltip.P
     houses = {},
 }, "gold"))
 module.title = L.AUCTIONPRICES_TITLE
+module.category = "items"
 
 -- The price line first, then scanning, with the Reset button (module.actions) under it.
 module.options = ItemTooltip.PriceOptions({

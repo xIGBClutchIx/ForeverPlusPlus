@@ -33,6 +33,7 @@ local module = ns.NewModule("Tooltips", L.TOOLTIPS_DESC, {
     target = true,
 })
 module.title = L.TOOLTIPS_TITLE
+module.category = "interface"
 
 local UNIT_COLORS = {
     { "class", L.TOOLTIPS_COLOR_CLASS },

@@ -33,7 +33,13 @@ L.OPTION_STATE_ALLOWED = "%s %s is |cffffd100%s|r (%s)." -- module, option, valu
 L.CHAT_MESSAGES = "Chat Messages" -- a module's checkbox for what it says in chat by itself
 
 -- Settings
-L.MODULES = "Modules"
+-- The main Settings page's groups of modules.
+L.CATEGORY_AUTOMATION = "Automation"
+L.CATEGORY_ITEMS = "Items"
+L.CATEGORY_INTERFACE = "Interface"
+L.CATEGORY_NAMEPLATES = "Nameplates"
+L.CATEGORY_TOOLS = "Tools"
+L.CATEGORY_OTHER = "Other"
 L.DEBUG = "Debug"
 L.SETTINGS_AFTER_COMBAT = "Settings open after combat."
 

@@ -10,6 +10,7 @@ local L = ns.L
 
 local module = ns.NewModule("FastLoot", L.FASTLOOT_DESC, { enabled = true })
 module.title = L.FASTLOOT_TITLE
+module.category = "automation"
 
 -- LOOT_READY can fire more than once for the same corpse; loot it once.
 local DELAY = 0.3

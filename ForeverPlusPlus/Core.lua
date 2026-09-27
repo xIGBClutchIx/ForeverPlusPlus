@@ -240,7 +240,8 @@ end
 ---Creates a module: one change to the game's UI, switched on and off on its own. Give it
 ---`OnEnable` and an `OnDisable` that undoes it, and put its settings in `defaults`. Events
 ---added with `module:On` stop by themselves when it turns off. Set
----`module.title` for a friendlier name in Settings (the name stays the /fpp key).
+---`module.title` for a friendlier name in Settings (the name stays the /fpp key), and
+---`module.category` for its group on the main Settings page (see Settings.lua).
 ---@param name string shown in /fpp
 ---@param description string one line for /fpp
 ---@param defaults? table its settings; `enabled` defaults to true

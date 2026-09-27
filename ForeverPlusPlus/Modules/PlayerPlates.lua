@@ -24,6 +24,7 @@ local module = ns.NewModule("PlayerPlates", L.PLAYERPLATES_DESC, {
     saved = {}, -- CVar -> the player's own value, put back when the module turns off
 })
 module.title = L.PLAYERPLATES_TITLE
+module.category = "nameplates"
 
 module.options = {
     { key = "barWhenHurt", name = L.PLATES_BAR_WHEN_HURT, description = L.PLAYERPLATES_BAR_WHEN_HURT_DESC },

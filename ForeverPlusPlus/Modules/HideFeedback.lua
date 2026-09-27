@@ -11,6 +11,7 @@ local L = ns.L
 
 local module = ns.NewModule("HideFeedback", L.HIDEFEEDBACK_DESC, { enabled = false })
 module.title = L.HIDEFEEDBACK_TITLE
+module.category = "interface"
 
 -- Forever beta only: Blizzard's PTR feedback code makes PTR_IssueReporter, the bug report button,
 -- and adds a " " line and then the reminder to tooltips after everything else (probed
