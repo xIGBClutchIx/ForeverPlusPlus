@@ -175,27 +175,21 @@ local function showButton()
     end
 end
 
--- The feedback code may load after Forever++; wait for it.
-local waiting = false
-
+-- The feedback code may load after Forever++; wait for it while the module is on.
 local function onLoad()
     if setupReporter() then
-        waiting = false
-        ns.Off("ADDON_LOADED", onLoad)
-        ns.Off("PLAYER_ENTERING_WORLD", onLoad)
-        if module.enabled then
-            hideButton()
-        end
+        module:Off("ADDON_LOADED", onLoad)
+        module:Off("PLAYER_ENTERING_WORLD", onLoad)
+        hideButton()
     end
 end
 
 function module:OnEnable()
     if reporter or setupReporter() then
         hideButton()
-    elseif not waiting then
-        waiting = true
-        ns.On("ADDON_LOADED", onLoad)
-        ns.On("PLAYER_ENTERING_WORLD", onLoad)
+    else
+        self:On("ADDON_LOADED", onLoad)
+        self:On("PLAYER_ENTERING_WORLD", onLoad)
     end
 end
 
