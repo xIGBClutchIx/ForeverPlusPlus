@@ -41,7 +41,7 @@ L.CATEGORY_NAMEPLATES = "Nameplates"
 L.CATEGORY_OTHER = "Other"
 L.DEBUG = "Debug"
 L.SETTINGS_AFTER_COMBAT = "Settings open after combat."
-L.SETTINGS_MODULE_OFF = "Off: turn it on from the Forever++ page" -- atop a disabled module's page
+L.SETTINGS_MODULE_OFF = "Module is disabled: turn it on from the Forever++ page" -- atop its page
 L.SETTINGS_OPEN_PAGE = "%s Options" -- the gear beside a module's checkbox: module title
 
 -- Settings: About page
@@ -154,8 +154,8 @@ L.AUCTIONPRICES_SCAN_ON_OPEN_DESC = "Scan the whole auction house when you open 
     .. "scans now."
 L.AUCTIONPRICES_SECTION_TOOLTIP = "Tooltip"
 L.AUCTIONPRICES_SCAN_AGE = "Scan Age"
-L.AUCTIONPRICES_SCAN_AGE_DESC = "Add a line under the auction price with how long ago the auction "
-    .. "house was last scanned, in the same style as the price."
+L.AUCTIONPRICES_SCAN_AGE_DESC = "A line under the auction price with how long ago the auction "
+    .. "house was last scanned, and where its text goes."
 L.AUCTIONPRICES_SCAN_AGE_OFF = "Hidden"
 L.AUCTIONPRICES_SCAN_AGE_COLOR = "Scan Age Color"
 L.AUCTIONPRICES_SCAN_AGE_COLOR_DESC = "The color of the scan age. By Age goes from green when "
@@ -262,7 +262,8 @@ L.TOOLTIPS_TARGET_LINE = "Target:"
 L.TOOLTIPS_TARGET_YOU = "You"
 L.TOOLTIPS_SECTION_BEHAVIOR = "Behavior"
 L.TOOLTIPS_ANCHOR_CURSOR = "Anchor to Cursor"
-L.TOOLTIPS_ANCHOR_CURSOR_DESC = "Show tooltips at your mouse instead of the bottom right corner."
+L.TOOLTIPS_ANCHOR_CURSOR_DESC = "Show tooltips at your mouse instead of their usual spot in the "
+    .. "corner."
 L.TOOLTIPS_HIDE_IN_COMBAT = "Hide Unit Tooltips in Combat"
 L.TOOLTIPS_HIDE_IN_COMBAT_DESC = "Don't show player and NPC tooltips while you're in combat. Item "
     .. "and spell tooltips still show."
@@ -271,9 +272,9 @@ L.TOOLTIPS_HIDE_IN_COMBAT_DESC = "Don't show player and NPC tooltips while you'r
 L.HIDEFEEDBACK_TITLE = "Hide Beta Feedback"
 L.HIDEFEEDBACK_DESC = "Hide the beta's \"Press F6 to submit an issue\" line on tooltips and its "
     .. "bug report button. F6 still reports an issue."
-L.HIDEFEEDBACK_TOOLTIP = "Tooltip Reminder"
+L.HIDEFEEDBACK_TOOLTIP = "Hide Tooltip Reminder"
 L.HIDEFEEDBACK_TOOLTIP_DESC = "Hide the \"Press F6 to submit an issue\" line on tooltips."
-L.HIDEFEEDBACK_BUTTON = "Bug Report Button"
+L.HIDEFEEDBACK_BUTTON = "Hide Bug Report Button"
 L.HIDEFEEDBACK_BUTTON_DESC = "Hide the floating bug report button."
 
 -- GatherTracking
