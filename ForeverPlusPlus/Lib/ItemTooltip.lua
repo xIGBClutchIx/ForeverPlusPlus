@@ -241,7 +241,9 @@ end
 ---@param align string
 ---@param color string|table "gray", "white", "gold", or { r, g, b }
 function ItemTooltip.AddInfo(tooltip, name, text, align, color)
-    local label = format(L.PRICE_INFO_LINE, name .. padding(tooltip, name))
+    -- The padding goes after the colon: there's no quantity for it to sit in front of, and
+    -- before the colon it read as "Scanned :".
+    local label = format(L.PRICE_INFO_LINE, name) .. padding(tooltip, name)
     local value
     if type(color) == "table" then
         value = ns.Colors.Code(color[1], color[2], color[3]) .. text .. "|r"
