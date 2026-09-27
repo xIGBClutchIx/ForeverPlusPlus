@@ -45,11 +45,6 @@ module.options = {
         },
     },
     {
-        key = "reapply",
-        name = L.GATHERTRACKING_REAPPLY,
-        description = L.GATHERTRACKING_REAPPLY_DESC,
-    },
-    {
         key = "swap",
         name = L.GATHERTRACKING_SWAP,
         description = L.GATHERTRACKING_SWAP_DESC,
@@ -60,6 +55,11 @@ module.options = {
             { "10", format(L.GATHERTRACKING_SWAP_EVERY, 10) },
             { "30", format(L.GATHERTRACKING_SWAP_EVERY, 30) },
         },
+    },
+    {
+        key = "reapply",
+        name = L.GATHERTRACKING_REAPPLY,
+        description = L.GATHERTRACKING_REAPPLY_DESC,
     },
     ns.ChatOption(L.GATHERTRACKING_CHAT_DESC),
 }

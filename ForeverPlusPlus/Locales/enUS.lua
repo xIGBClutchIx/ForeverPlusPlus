@@ -92,6 +92,10 @@ L.FRIENDLYPLATES_TEST_ICONS_DESC = "Show an icon on every friendly player, as if
 L.FRIENDLYPLATES_TEST_ICONS_OFF = "Off"
 L.FRIENDLYPLATES_TEST_ICONS_GROUP = "Everyone in Group"
 L.FRIENDLYPLATES_TEST_ICONS_FRIEND = "Everyone a Friend"
+L.FRIENDLYPLATES_SECTION_GENERAL = "General"
+L.FRIENDLYPLATES_SECTION_GUILD = "Guild"
+L.FRIENDLYPLATES_SECTION_ICONS = "Icons"
+L.FRIENDLYPLATES_SECTION_NPCS = "NPCs"
 L.FRIENDLYPLATES_NPC_TITLES = "NPC Titles"
 L.FRIENDLYPLATES_NPC_TITLES_DESC = "Show a friendly NPC's title, like <Innkeeper>, under its name "
     .. "where a player's guild goes. Needs Friendly NPCs, and follows Guild Names."
@@ -117,7 +121,7 @@ L.AUTOREPAIR_FUNDS_GUILD_FIRST = "Guild Bank, Then Your Own"
 L.AUTOREPAIR_FUNDS_GUILD = "Guild Bank Only"
 L.AUTOREPAIR_FUNDS_OWN = "Your Own Money Only"
 L.AUTOREPAIR_CHAT_DESC = "Say in chat what repairs cost, or why they couldn't be paid for."
-L.AUTOREPAIR_REPAIRED ="Repaired for %s." -- cost
+L.AUTOREPAIR_REPAIRED = "Repaired for %s." -- cost
 L.AUTOREPAIR_REPAIRED_GUILD = "Repaired for %s from the guild bank." -- cost
 L.AUTOREPAIR_NO_MONEY = "Not enough money to repair (%s)." -- cost
 L.AUTOREPAIR_NO_GUILD_MONEY = "The guild bank can't pay for repairs (%s)." -- cost
@@ -130,8 +134,10 @@ L.AUCTIONPRICES_SCAN_ON_OPEN = "Scan When Opened"
 L.AUCTIONPRICES_SCAN_ON_OPEN_DESC = "Scan the whole auction house when you open it, at most "
     .. "every 15 minutes. When off, prices still update from your own searches, and /fpp scan "
     .. "scans now."
+L.AUCTIONPRICES_SECTION_TOOLTIP = "Tooltip"
+L.AUCTIONPRICES_SECTION_SCANNING = "Scanning"
 L.AUCTIONPRICES_CHAT_DESC = "Say in chat when a scan finishes after the auction house closed."
-L.AUCTIONPRICES_SCANNING ="Scanning prices... %d items" -- count so far
+L.AUCTIONPRICES_SCANNING = "Scanning prices... %d items" -- count so far
 L.AUCTIONPRICES_SCANNED = "Prices updated for %d items" -- count
 L.AUCTIONPRICES_AGE = "Prices scanned %d min ago" -- minutes
 L.AUCTIONPRICES_COMMAND = "scan the open auction house now"
@@ -183,6 +189,9 @@ L.TOOLTIPS_DESC = "Color unit and item tooltips: borders and names by class, rea
 L.TOOLTIPS_COLOR_CLASS = "Class (Reaction for NPCs)"
 L.TOOLTIPS_COLOR_REACTION = "Reaction"
 L.TOOLTIPS_COLOR_OFF = "Blizzard's"
+L.TOOLTIPS_SECTION_BORDERS = "Borders"
+L.TOOLTIPS_SECTION_TEXT = "Text Colors"
+L.TOOLTIPS_SECTION_LINES = "Extra Lines"
 L.TOOLTIPS_BORDER = "Unit Border Color"
 L.TOOLTIPS_BORDER_DESC = "Color the border of player and NPC tooltips by class, or by whether "
     .. "they're hostile, neutral, or friendly."
@@ -234,7 +243,7 @@ L.GATHERTRACKING_SWAP_OFF = "Never"
 L.GATHERTRACKING_SWAP_EVERY = "Every %d Seconds" -- seconds
 L.GATHERTRACKING_CHAT_DESC = "Say in chat when the game stops Gathering Tracking from changing "
     .. "tracking."
-L.GATHERTRACKING_FAILED ="Gathering Tracking couldn't change tracking: %s" -- error
+L.GATHERTRACKING_FAILED = "Gathering Tracking couldn't change tracking: %s" -- error
 L.GATHERTRACKING_BLOCKED = "The game blocked Gathering Tracking from changing tracking. It stops "
     .. "until /reload."
 

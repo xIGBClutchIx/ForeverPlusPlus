@@ -28,14 +28,16 @@ local module = ns.NewModule("AuctionPrices", L.AUCTIONPRICES_DESC, ItemTooltip.P
 }, "gold"))
 module.title = L.AUCTIONPRICES_TITLE
 
+-- The price line first, then scanning, with the Reset button (module.actions) under it.
 module.options = ItemTooltip.PriceOptions({
     {
         key = "scanOnOpen",
         name = L.AUCTIONPRICES_SCAN_ON_OPEN,
         description = L.AUCTIONPRICES_SCAN_ON_OPEN_DESC,
+        section = L.AUCTIONPRICES_SECTION_SCANNING,
     },
-    ns.ChatOption(L.AUCTIONPRICES_CHAT_DESC),
-})
+    ns.ChatOption(L.AUCTIONPRICES_CHAT_DESC, L.AUCTIONPRICES_SECTION_SCANNING),
+}, L.AUCTIONPRICES_SECTION_TOOLTIP)
 
 -- The auction house this character sees. Realms share one per faction.
 local function house()

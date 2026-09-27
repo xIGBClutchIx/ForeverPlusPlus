@@ -2,7 +2,8 @@
 -- templates so they look like any other options page:
 --   Forever++        an on/off checkbox per module (the only place modules turn on and off)
 --     <Module>       one page per module with options, holding just its options (and buttons,
---                    from `module.actions`), sorted by title
+--                    from `module.actions`), sorted by title. Options with a `section` get a
+--                    header above each group, for pages long enough to need them
 --     <Tool>         a page a module draws itself (`BuildPage`), after the option pages
 --     Debug          options marked `debug = true`, for testing
 --     About          the version, links, and /fpp commands
@@ -111,9 +112,16 @@ local function hasOptions(module, debug)
     return false
 end
 
-local function addOptions(category, module, parent, debug)
+-- A module's options, in the order it lists them. With a layout (the module's own page), an
+-- option whose `section` differs from the one before it starts a new section header there.
+local function addOptions(category, module, parent, debug, layout)
+    local section
     for _, option in ipairs(module.options or {}) do
         if (option.debug or false) == debug then
+            if option.section and option.section ~= section then
+                addHeader(layout, option.section)
+            end
+            section = option.section
             addOption(category, module, option, parent)
         end
     end
@@ -263,7 +271,7 @@ function ns.RegisterSettings()
             if subpages then
                 local page, pageLayout = Settings.RegisterVerticalLayoutSubcategory(category,
                     module.title or name)
-                addOptions(page, module, nil, false)
+                addOptions(page, module, nil, false, pageLayout)
                 addActions(pageLayout, module)
             else
                 addOptions(category, module, parent, false)

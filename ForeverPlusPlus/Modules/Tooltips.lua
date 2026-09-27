@@ -42,22 +42,28 @@ local UNIT_COLORS = {
 
 module.options = {
     { key = "border", name = L.TOOLTIPS_BORDER, description = L.TOOLTIPS_BORDER_DESC,
-        choices = UNIT_COLORS },
-    { key = "itemBorder", name = L.TOOLTIPS_ITEM_BORDER, description = L.TOOLTIPS_ITEM_BORDER_DESC },
+        choices = UNIT_COLORS, section = L.TOOLTIPS_SECTION_BORDERS },
+    { key = "itemBorder", name = L.TOOLTIPS_ITEM_BORDER, description = L.TOOLTIPS_ITEM_BORDER_DESC,
+        section = L.TOOLTIPS_SECTION_BORDERS },
     { key = "nameColor", name = L.TOOLTIPS_NAME_COLOR, description = L.TOOLTIPS_NAME_COLOR_DESC,
-        choices = UNIT_COLORS },
+        choices = UNIT_COLORS, section = L.TOOLTIPS_SECTION_TEXT },
     {
         key = "guildColor", name = L.TOOLTIPS_GUILD_COLOR, description = L.TOOLTIPS_GUILD_COLOR_DESC,
+        section = L.TOOLTIPS_SECTION_TEXT,
         choices = {
             { "mine", L.TOOLTIPS_GUILD_COLOR_MINE },
             { "all", L.TOOLTIPS_GUILD_COLOR_ALL },
             { "off", L.TOOLTIPS_COLOR_OFF },
         },
     },
-    { key = "levelColor", name = L.TOOLTIPS_LEVEL_COLOR, description = L.TOOLTIPS_LEVEL_COLOR_DESC },
-    { key = "classColor", name = L.TOOLTIPS_CLASS_COLOR, description = L.TOOLTIPS_CLASS_COLOR_DESC },
-    { key = "title", name = L.TOOLTIPS_PLAYER_TITLE, description = L.TOOLTIPS_PLAYER_TITLE_DESC },
-    { key = "target", name = L.TOOLTIPS_TARGET, description = L.TOOLTIPS_TARGET_DESC },
+    { key = "levelColor", name = L.TOOLTIPS_LEVEL_COLOR, description = L.TOOLTIPS_LEVEL_COLOR_DESC,
+        section = L.TOOLTIPS_SECTION_TEXT },
+    { key = "classColor", name = L.TOOLTIPS_CLASS_COLOR, description = L.TOOLTIPS_CLASS_COLOR_DESC,
+        section = L.TOOLTIPS_SECTION_TEXT },
+    { key = "title", name = L.TOOLTIPS_PLAYER_TITLE, description = L.TOOLTIPS_PLAYER_TITLE_DESC,
+        section = L.TOOLTIPS_SECTION_LINES },
+    { key = "target", name = L.TOOLTIPS_TARGET, description = L.TOOLTIPS_TARGET_DESC,
+        section = L.TOOLTIPS_SECTION_LINES },
 }
 
 local GUILDMATE_COLOR = { 0.25, 1, 0.25 } -- guild chat's green, as on Friendly Nameplates

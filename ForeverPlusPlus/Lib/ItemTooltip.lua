@@ -231,25 +231,31 @@ function ItemTooltip.PriceDefaults(defaults, color)
     return defaults
 end
 
----Adds a price line's options to a module's options, for its Settings page and /fpp set.
----@param options table
+---A price line's options followed by the module's own, for its Settings page and /fpp set.
+---@param options table the module's own options
+---@param section? string a Settings header for the price options, when the page has others
 ---@return table options
-function ItemTooltip.PriceOptions(options)
-    options[#options + 1] = {
-        key = "mode", name = L.PRICE_MODE, description = L.PRICE_MODE_DESC,
-        choices = { { "stack", L.PRICE_MODE_STACK }, { "one", L.PRICE_MODE_ONE } },
-    }
-    options[#options + 1] = {
-        key = "align", name = L.PRICE_ALIGN, description = L.PRICE_ALIGN_DESC,
-        choices = { { "right", L.PRICE_ALIGN_RIGHT }, { "inline", L.PRICE_ALIGN_INLINE } },
-    }
-    options[#options + 1] = {
-        key = "color", name = L.PRICE_COLOR, description = L.PRICE_COLOR_DESC,
-        choices = {
-            { "gray", L.PRICE_COLOR_GRAY },
-            { "white", L.PRICE_COLOR_WHITE },
-            { "gold", L.PRICE_COLOR_GOLD },
+function ItemTooltip.PriceOptions(options, section)
+    local all = {
+        {
+            key = "mode", name = L.PRICE_MODE, description = L.PRICE_MODE_DESC, section = section,
+            choices = { { "stack", L.PRICE_MODE_STACK }, { "one", L.PRICE_MODE_ONE } },
+        },
+        {
+            key = "align", name = L.PRICE_ALIGN, description = L.PRICE_ALIGN_DESC, section = section,
+            choices = { { "right", L.PRICE_ALIGN_RIGHT }, { "inline", L.PRICE_ALIGN_INLINE } },
+        },
+        {
+            key = "color", name = L.PRICE_COLOR, description = L.PRICE_COLOR_DESC, section = section,
+            choices = {
+                { "gray", L.PRICE_COLOR_GRAY },
+                { "white", L.PRICE_COLOR_WHITE },
+                { "gold", L.PRICE_COLOR_GOLD },
+            },
         },
     }
-    return options
+    for _, option in ipairs(options) do
+        all[#all + 1] = option
+    end
+    return all
 end

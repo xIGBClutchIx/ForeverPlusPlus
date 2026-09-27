@@ -223,9 +223,10 @@ end
 
 ---The "Chat Messages" checkbox for a module that uses `module:Print`.
 ---@param description string what the module says in chat
+---@param section? string its Settings header, on a page with sections
 ---@return table option for `module.options`
-function ns.ChatOption(description)
-    return { key = "chat", name = ns.L.CHAT_MESSAGES, description = description }
+function ns.ChatOption(description, section)
+    return { key = "chat", name = ns.L.CHAT_MESSAGES, description = description, section = section }
 end
 
 -- Stops every event the module added with `module:On`.
