@@ -1,9 +1,11 @@
--- Who a unit is to the player: in their group, on their friends list, in their guild, and an NPC's
--- title. Identity can be secret (mostly in instances), and a value we can't read counts as "no".
+-- Who a unit is to the player: in their group, on their friends list, a recent ally, in their guild,
+-- and an NPC's title. Identity can be secret (mostly in instances), and a value we can't read counts
+-- as "no".
 local _, ns = ...
 
 local UnitInParty, UnitInRaid, UnitGUID, UnitIsInMyGuild = UnitInParty, UnitInRaid, UnitGUID, UnitIsInMyGuild
 local C_FriendList, C_BattleNet, C_TooltipInfo, type = C_FriendList, C_BattleNet, C_TooltipInfo, type
+local C_RecentAllies = C_RecentAllies
 
 local readable = ns.IsReadable
 
@@ -31,6 +33,40 @@ function Units.IsFriend(unit)
     end
     return C_BattleNet and C_BattleNet.GetAccountInfoByGUID
         and C_BattleNet.GetAccountInfoByGUID(guid) ~= nil or false
+end
+
+-- Fire when the recent allies list loads or changes.
+Units.RECENT_ALLY_EVENTS = { "RECENT_ALLIES_CACHE_UPDATE", "RECENT_ALLIES_DATA_READY" }
+
+---Whether the recent allies list is on this client. Call before listening to RECENT_ALLY_EVENTS.
+---@return boolean
+function Units.HasRecentAllies()
+    return C_RecentAllies and C_RecentAllies.IsRecentAllyByGUID and true or false
+end
+
+---Asks the server for the recent allies list if the client doesn't have it yet. Blizzard does this
+---when the Recent Allies tab opens; RECENT_ALLY_EVENTS fire when it arrives.
+function Units.RequestRecentAllies()
+    if C_RecentAllies and C_RecentAllies.IsRecentAllyDataReady and C_RecentAllies.TryRequestRecentAlliesData
+        and not C_RecentAllies.IsRecentAllyDataReady() then
+        C_RecentAllies.TryRequestRecentAlliesData()
+    end
+end
+
+---Whether the unit is on the player's Recent Allies list (players they've recently grouped or
+---played with), which the game shows in light blue (ns.Colors.RECENT_ALLY).
+---@param unit string
+---@return boolean
+function Units.IsRecentAlly(unit)
+    if not Units.HasRecentAllies() then
+        return false
+    end
+    local guid = UnitGUID(unit)
+    if not (readable(guid) and guid) then
+        return false
+    end
+    local ally = C_RecentAllies.IsRecentAllyByGUID(guid)
+    return readable(ally) and ally or false
 end
 
 ---Whether the unit is in the player's guild.

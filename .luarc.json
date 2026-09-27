@@ -38,6 +38,8 @@
     "UnitIsInMyGuild",
     "C_FriendList",
     "C_BattleNet",
+    "C_RecentAllies",
+    "RECENT_ALLY_FONT_COLOR",
     "UnitGroupRolesAssigned",
     "GetTexCoordsForRoleSmallCircle",
     "C_Console",

@@ -25,7 +25,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Tooltips | Colors unit and item tooltips by class, reaction, or quality, and adds player titles and who a unit is targeting. |
 | **Nameplates** | |
 | NPC Nameplates | Always shows friendly NPCs' names with their title. The health bar appears only when they're hurt or in combat. |
-| Player Nameplates | Always shows friendly players' names with their guild. The health bar appears only when they're hurt or in combat. |
+| Player Nameplates | Always shows friendly players' names with their guild, and recent allies' names in the game's light blue. The health bar appears only when they're hurt or in combat. |
 | **Tools** | |
 | Console Variables | A page in Settings to browse and change the game's console variables (CVars). |
 
