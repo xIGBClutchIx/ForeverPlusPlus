@@ -1,8 +1,8 @@
 -- Bag Slot Counter: how many bag slots are free, as a number on the bag buttons beside the micro
--- menu, like an item's stack count. Either the total on the backpack or each bag's own count on its
--- button. Only normal bags count unless the player adds special ones (quivers, ammo pouches, soul
--- bags, herb bags), whose slots only take some items. The reagent bag has its own setting: its own
--- count, part of the total, or nothing. The text's size and corner are options.
+-- menu, like an item's stack count. Either each bag's own count on its button or the total on the
+-- backpack. Special bags (quivers, ammo pouches, soul bags, herb bags), whose slots only take some
+-- items, can be left out. The reagent bag has its own setting: its own count, added to the
+-- backpack's count, or nothing. The text's size and corner are options.
 local _, ns = ...
 
 local _G, ipairs, pairs, tostring = _G, ipairs, pairs, tostring
@@ -12,10 +12,10 @@ local L = ns.L
 
 local module = ns.NewModule("BagSlots", L.BAGSLOTS_DESC, {
     enabled = true,
-    show = "backpack", -- "backpack": the total on the backpack; "each": every bag its own
-    special = false, -- count bags whose slots only take some items
-    reagent = "own", -- the reagent bag: "own" count on its button, in the "total", or "off"
-    size = "normal", -- a key of SIZES
+    show = "each", -- "each": every bag its own; "backpack": the total on the backpack
+    special = true, -- count bags whose slots only take some items
+    reagent = "own", -- the reagent bag: "own" count on its button, in the backpack's "total", or "off"
+    size = "large", -- a key of SIZES
     position = "bottomright", -- a key of POSITIONS
 })
 module.title = L.BAGSLOTS_TITLE
@@ -26,8 +26,8 @@ module.options = {
         key = "show", name = L.BAGSLOTS_SHOW, description = L.BAGSLOTS_SHOW_DESC,
         section = L.BAGSLOTS_SECTION_COUNT,
         choices = {
-            { "backpack", L.BAGSLOTS_SHOW_BACKPACK },
             { "each", L.BAGSLOTS_SHOW_EACH },
+            { "backpack", L.BAGSLOTS_SHOW_BACKPACK },
         },
     },
     {
@@ -176,24 +176,26 @@ end
 
 local function update()
     local each = module.db.show == "each"
-    local ownReagent = module.db.reagent == "own"
+    local shown = {} -- bag id -> the count on its button
     local total, any = 0, false
     for _, bag in ipairs(BAGS) do
         local free = freeSlots(bag)
-        if each or (bag.id == REAGENT and ownReagent) then
-            -- Its own count on its own button.
-            setCount(counts[bag.id], free)
-        else
-            if free then
-                total, any = total + free, true
-            end
-            if bag.id ~= BACKPACK then
-                setCount(counts[bag.id], nil)
-            end
+        local own = each
+        if bag.id == REAGENT then
+            own = module.db.reagent == "own"
+        end
+        if own then
+            shown[bag.id] = free
+        elseif free then
+            total, any = total + free, true
         end
     end
-    if not each then
-        setCount(counts[BACKPACK], any and total or nil)
+    -- Every bag without its own count adds up on the backpack, on top of the backpack's own.
+    if any then
+        shown[BACKPACK] = (shown[BACKPACK] or 0) + total
+    end
+    for _, bag in ipairs(BAGS) do
+        setCount(counts[bag.id], shown[bag.id])
     end
 end
 

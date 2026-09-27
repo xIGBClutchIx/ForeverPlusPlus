@@ -29,9 +29,9 @@ ns.changelog = {
                     .. "new titles, battleground ends, and deaths, hiding the interface for the "
                     .. "shot, and a chat line saying why. Off by default." },
                 { L.BAGSLOTS_TITLE, "How many bag slots are free, on the bag buttons. Includes the "
-                    .. "total on the backpack or each bag's own count, the reagent bag on its own "
-                    .. "button, in the total, or hidden, counting special bags such as quivers and "
-                    .. "herb bags, and the text's size and position." },
+                    .. "each bag's own count or the total on the backpack, the reagent bag on its "
+                    .. "own button, added to the backpack, or hidden, counting special bags such "
+                    .. "as quivers and herb bags, and the text's size and position." },
                 { L.CLASSCOLORS_TITLE, "Players' health bars and names in their class color on "
                     .. "the player, target, focus, party, and target-of-target frames. Includes "
                     .. "health bars and names (off by default) separately, and a checkbox for each "
