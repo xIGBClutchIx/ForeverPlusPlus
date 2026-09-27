@@ -394,12 +394,8 @@ L.AUTODECLINE_DESC = "Turn down duel requests as they arrive, so the popup never
 L.AUTODECLINE_ALLOW_FRIENDS = "Allow Friends and Guild"
 L.AUTODECLINE_ALLOW_FRIENDS_DESC = "Let duels from your friends, Battle.net friends, and guildmates "
     .. "through."
-L.AUTODECLINE_PET_DUELS = "Pet Battle Duels"
-L.AUTODECLINE_PET_DUELS_DESC = "Turn down pet battle duels too."
 L.AUTODECLINE_CHAT_DESC = "Say in chat whose duel was turned down."
-L.AUTODECLINE_DECLINED = "Declined a duel from %s." -- player name
-L.AUTODECLINE_DECLINED_PET = "Declined a pet battle duel from %s." -- player name
-L.AUTODECLINE_SOMEONE = "someone"
+L.AUTODECLINE_DECLINED = "Declined a duel from %s." -- player nameL.AUTODECLINE_SOMEONE = "someone"
 
 -- AutoRelease
 L.AUTORELEASE_TITLE = "Auto Release"

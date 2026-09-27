@@ -14,8 +14,8 @@ ns.changelog = {
         sections = {
             { L.CHANGELOG_ADDED, {
                 { L.AUTODECLINE_TITLE, "Turns down duel requests and closes the popup. Includes "
-                    .. "letting friends and guildmates through, pet battle duels where the game has "
-                    .. "them, and saying in chat who was declined. Off by default." },
+                    .. "letting friends and guildmates through, and saying in chat who was "
+                    .. "declined. Off by default." },
                 { L.AUTODISMOUNT_TITLE, "Gets you off your mount or stands you up when a spell, "
                     .. "flight, loot, or attack fails because you're mounted or sitting. Includes "
                     .. "separate Dismount and Stand Up options, and leaving shapeshift forms (off "

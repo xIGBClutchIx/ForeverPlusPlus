@@ -245,9 +245,7 @@ Check these in the live client and move them up with a tag and date:
 - [x] `RECENT_ALLY_FONT_COLOR:GetRGB()` gives (0.325, 0.788, 1). (2026-09-27)
 - [ ] Does `RepopMe()` work from an addon's timer after `PLAYER_DEAD`, and does `IsInInstance()` say `"pvp"` in battlegrounds?
 - [ ] Does `C_RecentAllies.IsRecentAllyByGUID` answer right after login, before the Recent Allies tab is opened?
-- [ ] Do `DUEL_REQUESTED`, `CancelDuel()`, and `StaticPopup_Hide("DUEL_REQUESTED")` work as on Retail? No installed addon uses them. **Unverified** (AutoDecline depends on them.)
-- [ ] Does Forever have `C_PetBattles.CancelPVPDuel` and `PET_BATTLE_PVP_DUEL_REQUESTED`? AutoDecline probes and shows its Pet Battle Duels option only if so.
-- [ ] Does `DUEL_REQUESTED` give the name with a surname or realm attached? AutoDecline compares names with anything after a `-` cut off.
+- [ ] Do `DUEL_REQUESTED`, `CancelDuel()`, and `StaticPopup_Hide("DUEL_REQUESTED")` work as on Retail? No installed addon uses them. **Unverified** (AutoDecline depends on them.)- [ ] Does `DUEL_REQUESTED` give the name with a surname or realm attached? AutoDecline compares names with anything after a `-` cut off.
 - [ ] What are the defaults of `autoDismount`, `autoStand` and `autoUnshift`, and do `Dismount()` and `C_ChatInfo.PerformEmote("STAND")` work from a `UI_ERROR_MESSAGE` handler out of combat?
 
 ## Sources
