@@ -80,13 +80,23 @@ module.options = ItemTooltip.PriceOptions({
     ns.ChatOption(L.AUCTIONPRICES_CHAT_DESC, L.AUCTIONPRICES_SECTION_SCANNING),
 }, L.AUCTIONPRICES_SECTION_TOOLTIP)
 
--- The auction house this character sees. Realms share one per faction.
+-- The auction house this character sees. Realms share one per faction. Kept once found, since
+-- every item tooltip asks and neither changes while logged in.
+local houseData
+
 local function house()
-    local key = format("%s-%s", GetRealmName(), UnitFactionGroup("player") or "")
+    if houseData then
+        return houseData
+    end
+    local faction = UnitFactionGroup("player")
+    local key = format("%s-%s", GetRealmName(), faction or "")
     local data = module.db.houses[key]
     if not data then
         data = { scannedAt = 0, prices = {} }
         module.db.houses[key] = data
+    end
+    if faction then
+        houseData = data -- without a faction yet (early in login), look again next time
     end
     return data
 end
@@ -349,14 +359,15 @@ end
 
 local function addAuctionPrice(tooltip, data)
     local itemID = module.enabled and ItemTooltip.ItemID(data)
-    local db = module.db
-    local price = itemID and house().prices[itemID]
+    local ah = itemID and house()
+    local price = ah and ah.prices[itemID]
     if not price then
         return
     end
+    local db = module.db
     ItemTooltip.AddPrice(tooltip, data, L.AUCTIONPRICES_LINE, price, db)
     -- The last full scan; prices can also come from the player's own searches since then.
-    local scannedAt = house().scannedAt
+    local scannedAt = ah.scannedAt
     if db.scanAge ~= "off" and scannedAt > 0 then
         local age = time() - scannedAt
         local color = db.scanAgeColor == "age" and ageColor(age) or db.scanAgeColor
