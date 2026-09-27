@@ -6,6 +6,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Added
 
+- **Auto Decline**: turns down duel requests and closes the popup. Includes letting friends and guildmates through, pet battle duels where the game has them, and saying in chat who was declined. Off by default.
 - **Bag Slot Counter**: how many bag slots are free, on the bag buttons. Includes the total on the backpack or each bag's own count, and counting special bags such as quivers and herb bags.
 
 ## 0.1.0 (2026-09-27)

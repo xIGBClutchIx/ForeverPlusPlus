@@ -375,6 +375,19 @@ L.AUTOGOSSIP_PRINT_RESULT = "  -> %s" -- the kind picked, or why not (debug code
 -- The title under a stable master's name, exactly as the game shows it.
 L.AUTOGOSSIP_TITLE_STABLE = "Stable Master"
 
+-- AutoDecline
+L.AUTODECLINE_TITLE = "Auto Decline"
+L.AUTODECLINE_DESC = "Turn down duel requests as they arrive, so the popup never gets in your way."
+L.AUTODECLINE_ALLOW_FRIENDS = "Allow Friends and Guild"
+L.AUTODECLINE_ALLOW_FRIENDS_DESC = "Let duels from your friends, Battle.net friends, and guildmates "
+    .. "through."
+L.AUTODECLINE_PET_DUELS = "Pet Battle Duels"
+L.AUTODECLINE_PET_DUELS_DESC = "Turn down pet battle duels too."
+L.AUTODECLINE_CHAT_DESC = "Say in chat whose duel was turned down."
+L.AUTODECLINE_DECLINED = "Declined a duel from %s." -- player name
+L.AUTODECLINE_DECLINED_PET = "Declined a pet battle duel from %s." -- player name
+L.AUTODECLINE_SOMEONE = "someone"
+
 -- CVarBrowser
 L.CVARBROWSER_TITLE = "Console Variables"
 L.CVARBROWSER_DESC = "Browse the game's console variables (CVars) on a page in Settings, and "

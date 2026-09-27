@@ -1,11 +1,12 @@
 -- Who a unit is to the player: in their group, on their friends list, a recent ally, in their guild,
--- and an NPC's title. Identity can be secret (mostly in instances), and a value we can't read counts
+-- and an NPC's title. Friends and guildmates can also be checked by name. Identity can be secret (mostly in instances), and a value we can't read counts
 -- as "no".
 local _, ns = ...
 
 local UnitInParty, UnitInRaid, UnitGUID, UnitIsInMyGuild = UnitInParty, UnitInRaid, UnitGUID, UnitIsInMyGuild
 local C_FriendList, C_BattleNet, C_TooltipInfo, type = C_FriendList, C_BattleNet, C_TooltipInfo, type
-local C_RecentAllies = C_RecentAllies
+local C_RecentAllies, C_GuildInfo, IsInGuild = C_RecentAllies, C_GuildInfo, IsInGuild
+local BNGetNumFriends, GetNumGuildMembers, GetGuildRosterInfo = BNGetNumFriends, GetNumGuildMembers, GetGuildRosterInfo
 
 local readable = ns.IsReadable
 
@@ -75,6 +76,66 @@ end
 function Units.IsGuildmate(unit)
     local mate = UnitIsInMyGuild and UnitIsInMyGuild(unit)
     return readable(mate) and mate or false
+end
+
+-- By name, for events that give a player's name but no unit (a duel or group invite). Names are
+-- compared without any "-Realm" part, and lowercased.
+local function bare(name)
+    if not (readable(name) and type(name) == "string") then
+        return nil
+    end
+    return (name:match("^([^%-]+)") or name):lower()
+end
+
+---Whether a player by this name is on the player's friends list or an online Battle.net friend.
+---@param name string
+---@return boolean
+function Units.IsFriendName(name)
+    local want = bare(name)
+    if not want then
+        return false
+    end
+    if C_FriendList and C_FriendList.GetNumFriends and C_FriendList.GetFriendInfoByIndex then
+        for i = 1, C_FriendList.GetNumFriends() do
+            local info = C_FriendList.GetFriendInfoByIndex(i)
+            if info and bare(info.name) == want then
+                return true
+            end
+        end
+    end
+    if BNGetNumFriends and C_BattleNet and C_BattleNet.GetFriendAccountInfo then
+        for i = 1, (BNGetNumFriends()) do
+            local info = C_BattleNet.GetFriendAccountInfo(i)
+            local game = info and info.gameAccountInfo
+            if game and bare(game.characterName) == want then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+---Asks the server for the guild roster, so IsGuildmateName has names to check.
+function Units.RequestGuildRoster()
+    if IsInGuild() and C_GuildInfo and C_GuildInfo.GuildRoster then
+        C_GuildInfo.GuildRoster()
+    end
+end
+
+---Whether a player by this name is in the player's guild, from the roster the client has.
+---@param name string
+---@return boolean
+function Units.IsGuildmateName(name)
+    local want = bare(name)
+    if not (want and IsInGuild() and GetNumGuildMembers and GetGuildRosterInfo) then
+        return false
+    end
+    for i = 1, (GetNumGuildMembers()) do
+        if bare((GetGuildRosterInfo(i))) == want then
+            return true
+        end
+    end
+    return false
 end
 
 ---An NPC's title ("Innkeeper", "Weapon Merchant"), without brackets, or nil. It's the tooltip's

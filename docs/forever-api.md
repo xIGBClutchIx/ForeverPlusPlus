@@ -221,6 +221,9 @@ Check these in the live client and move them up with a tag and date:
 - [ ] Does `GetGroupCurrencyInfo` return an entry for a tab once it has points, with points in two tabs? (Only one tab had points when tested.)
 - [x] `RECENT_ALLY_FONT_COLOR:GetRGB()` gives (0.325, 0.788, 1). (2026-09-27)
 - [ ] Does `C_RecentAllies.IsRecentAllyByGUID` answer right after login, before the Recent Allies tab is opened?
+- [ ] Do `DUEL_REQUESTED`, `CancelDuel()`, and `StaticPopup_Hide("DUEL_REQUESTED")` work as on Retail? No installed addon uses them. **Unverified** (AutoDecline depends on them.)
+- [ ] Does Forever have `C_PetBattles.CancelPVPDuel` and `PET_BATTLE_PVP_DUEL_REQUESTED`? AutoDecline probes and shows its Pet Battle Duels option only if so.
+- [ ] Does `DUEL_REQUESTED` give the name with a surname or realm attached? AutoDecline compares names with anything after a `-` cut off.
 
 ## Sources
 

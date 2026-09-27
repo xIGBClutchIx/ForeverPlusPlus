@@ -108,6 +108,13 @@
     "FACTION_BAR_COLORS",
     "TOOLTIP_DEFAULT_COLOR",
     "C_Container",
-    "RED_FONT_COLOR"
+    "RED_FONT_COLOR",
+    "CancelDuel",
+    "StaticPopup_Hide",
+    "C_PetBattles",
+    "C_GuildInfo",
+    "BNGetNumFriends",
+    "GetNumGuildMembers",
+    "GetGuildRosterInfo"
   ]
 }
