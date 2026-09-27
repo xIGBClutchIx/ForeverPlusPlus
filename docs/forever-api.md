@@ -182,8 +182,10 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 ## Gossip
 
 - `GOSSIP_SHOW` and `C_GossipInfo.GetActiveQuests` / `GetAvailableQuests` / `SelectActiveQuest` / `SelectAvailableQuest` are used on Forever. **[addon]** (BleakfibersQuestTracker `SocialModule.lua`) No installed addon reads `C_GossipInfo.GetOptions`.
-- The AutoGossip module assumes Retail's option table (`gossipOptionID`, `name`, `icon`, `status`, `rewards`, `spellID`, `flags`, `selectOptionWhenOnlyOption`), `C_GossipInfo.SelectOption(gossipOptionID)`, and the Classic gossip icon file IDs (banker 132050, innkeeper 132052, flight master 132057, trainer 132058, vendor 132060). All **Unverified** on Forever. Its Debug option prints every option's icon and status. Probe at an NPC: `/run for _,o in ipairs(C_GossipInfo.GetOptions())do print(o.gossipOptionID,o.icon,o.status,o.flags,o.spellID,o.selectOptionWhenOnlyOption,o.name)end`
-- Auctioneers and stable masters are told apart by the title under their name (line 2 of `C_TooltipInfo.GetUnit("npc")`), since Classic gives them no icon of their own. **Unverified** on Forever: `/run local d=C_TooltipInfo.GetUnit("npc")print(d and d.lines[2] and d.lines[2].leftText)`
+- `C_GossipInfo.GetOptions()` returns Retail's option table (`gossipOptionID`, `name`, `icon`, `status`, `flags`, `spellID`, `selectOptionWhenOnlyOption`) with the Classic gossip icon file IDs. **[in-game]** (2026-09-27, build 70009: a banker gave `96317 132050 0 0 nil false "I would like to check my deposit box."`, a Wind Rider Master `98541 132057 0 0 nil false "I need a ride."`) Probe: `/run for _,o in ipairs(C_GossipInfo.GetOptions())do print(o.gossipOptionID,o.icon,o.status,o.flags,o.spellID,o.selectOptionWhenOnlyOption,o.name)end`
+  - The other icons AutoGossip uses (innkeeper 132052, trainer 132058, vendor 132060) and `C_GossipInfo.SelectOption(gossipOptionID)` are **Unverified**. Its Debug option prints every option's icon and status.
+- Line 2 of `C_TooltipInfo.GetUnit("npc")` is the NPC's title: `Banker`, `Wind Rider Master`. **[in-game]** (2026-09-27) AutoGossip tells stable masters apart by it (`Stable Master` is **Unverified**): `/run local d=C_TooltipInfo.GetUnit("npc")print(d and d.lines[2] and d.lines[2].leftText)`
+- Auctioneers open the auction house straight away, with no gossip. **[in-game]** (2026-09-27)
 
 ## Fonts
 

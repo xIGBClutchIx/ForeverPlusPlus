@@ -213,8 +213,6 @@ L.AUTOGOSSIP_TAXI = "Flight Masters"
 L.AUTOGOSSIP_TAXI_DESC = "Open the flight map."
 L.AUTOGOSSIP_INNKEEPER = "Innkeepers"
 L.AUTOGOSSIP_INNKEEPER_DESC = "Pick the innkeeper's only option (setting your home asks first)."
-L.AUTOGOSSIP_AUCTION = "Auction House"
-L.AUTOGOSSIP_AUCTION_DESC = "Open the auction house."
 L.AUTOGOSSIP_STABLE = "Stable Masters"
 L.AUTOGOSSIP_STABLE_DESC = "Open the stable."
 L.AUTOGOSSIP_OTHER = "Other NPCs"
@@ -224,8 +222,7 @@ L.AUTOGOSSIP_PRINT_DESC = "Print every gossip option in chat with its icon and s
     .. "which kind of NPC it counts as."
 L.AUTOGOSSIP_PRINT_HEADER = "Gossip options (title: %s):" -- NPC's title under the name
 L.AUTOGOSSIP_PRINT_LINE = "  %s  icon=%s status=%s flags=%s  %s" -- id, icon, status, flags, name
--- The title under an NPC's name, exactly as the game shows it, to tell these NPCs apart.
-L.AUTOGOSSIP_TITLE_AUCTIONEER = "Auctioneer"
+-- The title under a stable master's name, exactly as the game shows it.
 L.AUTOGOSSIP_TITLE_STABLE = "Stable Master"
 
 -- CVarBrowser

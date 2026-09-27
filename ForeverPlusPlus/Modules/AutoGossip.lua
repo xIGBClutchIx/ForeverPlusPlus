@@ -16,7 +16,6 @@ local module = ns.NewModule("AutoGossip", L.AUTOGOSSIP_DESC, {
     trainer = true,
     taxi = true,
     innkeeper = true,
-    auction = true,
     stable = true,
     other = true,
     printOptions = false,
@@ -29,7 +28,6 @@ module.options = {
     { key = "trainer", name = L.AUTOGOSSIP_TRAINER, description = L.AUTOGOSSIP_TRAINER_DESC },
     { key = "taxi", name = L.AUTOGOSSIP_TAXI, description = L.AUTOGOSSIP_TAXI_DESC },
     { key = "innkeeper", name = L.AUTOGOSSIP_INNKEEPER, description = L.AUTOGOSSIP_INNKEEPER_DESC },
-    { key = "auction", name = L.AUTOGOSSIP_AUCTION, description = L.AUTOGOSSIP_AUCTION_DESC },
     { key = "stable", name = L.AUTOGOSSIP_STABLE, description = L.AUTOGOSSIP_STABLE_DESC },
     { key = "other", name = L.AUTOGOSSIP_OTHER, description = L.AUTOGOSSIP_OTHER_DESC },
     {
@@ -50,14 +48,13 @@ local ICONS = {
     [132052] = "innkeeper", -- BinderGossipIcon
 }
 
--- Auctioneers and stable masters have no icon of their own, so they go by the title under the
--- NPC's name.
+-- Stable masters have no icon of their own, so they go by the title under the NPC's name.
+-- (Auctioneers on Forever open the auction house without any gossip.)
 local TITLES = {
-    [L.AUTOGOSSIP_TITLE_AUCTIONEER] = "auction",
     [L.AUTOGOSSIP_TITLE_STABLE] = "stable",
 }
 
--- The line under the NPC's name ("Auctioneer"), or nil.
+-- The line under the NPC's name ("Banker"), or nil.
 local function npcTitle()
     if not (C_TooltipInfo and C_TooltipInfo.GetUnit) then
         return nil
