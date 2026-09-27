@@ -19,7 +19,7 @@ local ItemTooltip = ns.ItemTooltip
 local SCAN_INTERVAL = 15 * 60 -- seconds between automatic scans, as Auctionator waits
 
 local module = ns.NewModule("AuctionPrices", L.AUCTIONPRICES_DESC, ItemTooltip.PriceDefaults({
-    enabled = false,
+    enabled = true,
     scanOnOpen = true,
     chat = true,
     -- Per auction house ("Realm-Faction"): { scannedAt = time(), prices = { [itemID] = copper } }.

@@ -22,11 +22,11 @@ local readable = ns.IsReadable
 local Units = ns.Units
 
 local module = ns.NewModule("Tooltips", L.TOOLTIPS_DESC, {
-    enabled = false,
+    enabled = true,
     border = "class", -- unit borders: "class" (players by class, others by reaction), "reaction", "off"
     itemBorder = true,
     nameColor = "class", -- unit names, same choices as border
-    guildColor = "mine", -- "mine" (your guild green), "all" (yours green, others gray), "off"
+    guildColor = "all", -- "mine" (your guild green), "all" (yours green, others gray), "off"
     levelColor = true,
     classColor = true,
     title = true,

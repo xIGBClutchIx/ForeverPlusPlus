@@ -13,10 +13,10 @@ local _, ns = ...
 local L = ns.L
 
 local module = ns.NewModule("FriendlyPlates", L.FRIENDLYPLATES_DESC, {
-    enabled = false,
+    enabled = true,
     classColor = true,
     barWhenHurt = true,
-    npcs = false,
+    npcs = true,
     guildNames = "always", -- "always", "hidden" (only without the bar), or "off"
     guildColor = "gray", -- "gray" or "green"
     level = "before", -- "before", "after", or "off"

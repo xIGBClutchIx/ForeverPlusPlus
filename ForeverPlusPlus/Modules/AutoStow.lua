@@ -15,7 +15,7 @@ local L = ns.L
 local DELAYS = { "3", "5", "10", "15", "30" } -- seconds
 
 local module = ns.NewModule("AutoStow", L.AUTOSTOW_DESC, {
-    enabled = false,
+    enabled = true,
     delay = "5",
 })
 module.title = L.AUTOSTOW_TITLE
