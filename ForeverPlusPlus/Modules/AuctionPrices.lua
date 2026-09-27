@@ -23,7 +23,7 @@ local module = ns.NewModule("AuctionPrices", L.AUCTIONPRICES_DESC, ItemTooltip.P
     scanOnOpen = true,
     scanAge = "right", -- "right", "inline" (like the price line's alignment), or "off"
     scanAgeColor = "age", -- "age" (green when fresh to red when old), "gray", "white", or "gold"
-    scanAgeRed = "21600", -- seconds old at which "age" is fully red
+    scanAgeRed = "43200", -- seconds old at which "age" is fully red
     chat = true,
     -- Per auction house ("Realm-Faction"): { scannedAt = time(), prices = { [itemID] = copper } }.
     -- Data, not a setting: it isn't in module.options.
@@ -339,7 +339,7 @@ end
 
 -- Scan Age Color "age": green when just scanned, yellow halfway, red at Red After (seconds).
 local function ageColor(seconds)
-    local t = seconds / (tonumber(module.db.scanAgeRed) or 21600)
+    local t = seconds / (tonumber(module.db.scanAgeRed) or 43200)
     t = t > 1 and 1 or t
     if t < 0.5 then
         return { t * 2, 1, 0 }
