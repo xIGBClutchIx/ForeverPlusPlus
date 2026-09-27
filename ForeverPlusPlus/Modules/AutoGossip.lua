@@ -4,7 +4,7 @@
 local _, ns = ...
 
 local ipairs, format, tostring = ipairs, string.format, tostring
-local C_GossipInfo, C_TooltipInfo, Enum = C_GossipInfo, C_TooltipInfo, Enum
+local C_GossipInfo, Enum = C_GossipInfo, Enum
 local IsShiftKeyDown, GetTime = IsShiftKeyDown, GetTime
 
 local L = ns.L
@@ -57,17 +57,9 @@ local TITLES = {
     [L.AUTOGOSSIP_TITLE_STABLE] = "stable",
 }
 
--- The line under the NPC's name ("Banker"), or nil.
+-- The title under the NPC's name ("Stable Master"), or nil.
 local function npcTitle()
-    if not (C_TooltipInfo and C_TooltipInfo.GetUnit) then
-        return nil
-    end
-    local data = C_TooltipInfo.GetUnit("npc")
-    local line = data and data.lines and data.lines[2]
-    local text = line and line.leftText
-    if ns.IsReadable(text) and text then
-        return text
-    end
+    return ns.Units.Title("npc")
 end
 
 local function kindOf(option)
