@@ -29,8 +29,8 @@ Everything is on by default except where noted. Each module can be turned off, a
 
 ## Install
 
-1. Download this repository (Code > Download ZIP) and unzip it.
-2. Copy the inner `ForeverPlusPlus` folder (the one with `ForeverPlusPlus.toc`) into the Forever client's AddOns folder, for example `World of Warcraft\_classic_beta_\Interface\AddOns\`.
+1. Download the zip from the latest [release](https://github.com/xIGBClutchIx/ForeverPlusPlus/releases), or for the newest build, from the latest successful [Check run](https://github.com/xIGBClutchIx/ForeverPlusPlus/actions/workflows/check.yml) on `main` (under Artifacts; needs a GitHub login).
+2. Unzip it into the Forever client's AddOns folder, for example `World of Warcraft\_classic_beta_\Interface\AddOns\`, so you end up with `AddOns\ForeverPlusPlus\ForeverPlusPlus.toc`.
 3. Start the game, or `/reload` if it's already running.
 
 ## Use

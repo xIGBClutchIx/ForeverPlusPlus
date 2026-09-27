@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   lua:
     runs-on: ubuntu-latest
@@ -41,3 +44,43 @@ jobs:
             echo "$listed" | grep -qxF "$rel" || { echo "Not in the TOC: $rel"; status=1; }
           done < <(find ForeverPlusPlus -name '*.lua')
           exit $status
+
+  # The addon folder, ready to drop into Interface\AddOns. Every run uploads it as an artifact
+  # (the download is a zip holding ForeverPlusPlus/); a pushed v* tag also attaches the zip to a
+  # GitHub release.
+  package:
+    needs: lua
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Name the build
+        id: name
+        run: |
+          version=$(grep -m1 '^## Version:' ForeverPlusPlus/ForeverPlusPlus.toc | sed 's/^## Version: *//' | tr -d '\r')
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            name="ForeverPlusPlus-$GITHUB_REF_NAME"
+          else
+            name="ForeverPlusPlus-$version-${GITHUB_SHA::7}"
+          fi
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+
+      - name: Zip the addon folder
+        run: |
+          mkdir -p dist
+          zip -rq "dist/${{ steps.name.outputs.name }}.zip" ForeverPlusPlus
+          mkdir -p package
+          cp -r ForeverPlusPlus package/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.name.outputs.name }}
+          path: package/
+
+      - name: Release on a version tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" "dist/${{ steps.name.outputs.name }}.zip" --title "Forever++ $GITHUB_REF_NAME" --generate-notes
