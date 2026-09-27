@@ -389,8 +389,10 @@ local function buildChangelog(frame)
     end
 
     for i, release in ipairs(ns.changelog or {}) do
-        add("GameFontHighlightLarge", format(L.CHANGELOG_RELEASE, release.version, release.date),
-            0, i > 1 and 24 or 0)
+        -- Unreleased notes have no date.
+        local title = release.date and format(L.CHANGELOG_RELEASE, release.version, release.date)
+            or release.version
+        add("GameFontHighlightLarge", title, 0, i > 1 and 24 or 0)
         for _, section in ipairs(release.sections) do
             add("GameFontNormal", section[1], 0, 14)
             for _, entry in ipairs(section[2]) do

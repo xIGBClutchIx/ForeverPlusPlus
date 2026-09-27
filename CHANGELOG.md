@@ -2,6 +2,12 @@
 
 What changed in each release of Forever++. The same notes show in game under Settings > AddOns > Forever++ > Changelog, from [`ForeverPlusPlus/Changelog.lua`](ForeverPlusPlus/Changelog.lua); change both together.
 
+## Unreleased
+
+### Added
+
+- **Bag Slot Counter**: how many bag slots are free, on the bag buttons. Includes the total on the backpack or each bag's own count, and counting special bags such as quivers and herb bags.
+
 ## 0.1.0 (2026-09-27)
 
 ### Added

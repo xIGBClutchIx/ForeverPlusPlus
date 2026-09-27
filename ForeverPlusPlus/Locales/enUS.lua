@@ -48,6 +48,7 @@ L.SETTINGS_TURN_ON = "Turn On" -- the button on a "Blizzard's ... is off" row
 -- Settings: Changelog page. The notes themselves are in Changelog.lua.
 L.CHANGELOG = "Changelog"
 L.CHANGELOG_RELEASE = "%s (%s)" -- version, date
+L.CHANGELOG_UNRELEASED = "Unreleased"
 L.CHANGELOG_ADDED = "Added"
 L.CHANGELOG_SETTINGS = "Settings"
 L.CHANGELOG_COMMANDS = "Commands"
@@ -244,6 +245,17 @@ L.DURABILITYBARS_SHOW_ALWAYS = "Always"
 L.DURABILITYBARS_SHOW_WORN = "Only When Worn"
 L.DURABILITYBARS_SHOW_HALF = "Below 50%"
 L.DURABILITYBARS_SHOW_QUARTER = "Below 25%"
+
+-- BagSlots
+L.BAGSLOTS_TITLE = "Bag Slot Counter"
+L.BAGSLOTS_DESC = "Show how many bag slots are free on the bag buttons."
+L.BAGSLOTS_SHOW = "Show Free Slots"
+L.BAGSLOTS_SHOW_DESC = "The total on the backpack button, or each bag's own count on its button."
+L.BAGSLOTS_SHOW_BACKPACK = "All on Backpack"
+L.BAGSLOTS_SHOW_EACH = "Per Bag"
+L.BAGSLOTS_SPECIAL = "Count Special Bags"
+L.BAGSLOTS_SPECIAL_DESC = "Also count bags that only hold some items, such as quivers, ammo "
+    .. "pouches, soul bags, herb bags, and the reagent bag."
 
 -- Tooltips
 L.TOOLTIPS_TITLE = "Tooltips"

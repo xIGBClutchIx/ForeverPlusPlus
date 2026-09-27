@@ -25,6 +25,7 @@ Modules\AutoRepair.lua
 Modules\SellPrice.lua
 Modules\AuctionPrices.lua
 Modules\DurabilityBars.lua
+Modules\BagSlots.lua
 Modules\HideFeedback.lua
 Modules\Tooltips.lua
 Modules\GatherTracking.lua
