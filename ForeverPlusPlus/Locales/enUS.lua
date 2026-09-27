@@ -50,7 +50,7 @@ L.ABOUT_COPY = "Select the link and press Ctrl+C to copy it."
 L.ABOUT_COMMANDS = "Commands"
 
 -- FriendlyPlates
-L.FRIENDLYPLATES_TITLE = "Friendly Player Nameplates"
+L.FRIENDLYPLATES_TITLE = "Friendly Nameplates"
 L.FRIENDLYPLATES_DESC = "Always show friendly players' names. Their health bar appears only when "
     .. "they're hurt or in combat."
 L.FRIENDLYPLATES_BAR_WHEN_HURT = "Health Bar When Hurt"

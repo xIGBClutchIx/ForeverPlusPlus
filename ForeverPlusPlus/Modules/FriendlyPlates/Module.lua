@@ -1,4 +1,4 @@
--- Friendly Player Nameplates: friendly players (and optionally NPCs) always show their name, with
+-- Friendly Nameplates: friendly players (and optionally NPCs) always show their name, with
 -- the guild and level beside it, and the health bar only shows while they're hurt or in combat.
 -- Built on Blizzard's own nameplates: the bar and name fade, and a label of ours shows instead.
 --

@@ -1,4 +1,4 @@
--- Friendly Player Nameplates: our label. While the bar is hidden, Blizzard's name (which sits above
+-- Friendly Nameplates: our label. While the bar is hidden, Blizzard's name (which sits above
 -- the bar) fades out and our label takes its place, centered on the plate at the bar's height: the name in
 -- class color with "<Guild>" under it, or the name alone at the bar's middle when there's no
 -- guild, with the level and icons beside it. While the bar is up, Blizzard's name is back and the

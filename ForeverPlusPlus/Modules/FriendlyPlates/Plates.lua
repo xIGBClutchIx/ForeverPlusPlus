@@ -1,4 +1,4 @@
--- Friendly Player Nameplates: which plates we handle, fading the bar with health, the events, and
+-- Friendly Nameplates: which plates we handle, fading the bar with health, the events, and
 -- turning the module on and off.
 local _, ns = ...
 

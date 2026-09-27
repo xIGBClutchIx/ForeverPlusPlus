@@ -1,4 +1,4 @@
--- Friendly Player Nameplates: the group and friend icons beside the name. Friends get the
+-- Friendly Nameplates: the group and friend icons beside the name. Friends get the
 -- Battle.net logo; group members get their role, or the Looking for Group icon.
 local _, ns = ...
 
