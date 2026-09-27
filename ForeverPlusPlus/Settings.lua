@@ -4,7 +4,8 @@
 --                    grouped under headers by `module.category`, with a gear that opens its page
 --                    when it has one. `alwaysOn` modules (tools) have none
 --     <Module>       one page per module with options, holding just its options (and buttons,
---                    from `module.actions`), in the main page's order. Options with a `section`
+--                    from `module.actions`), in the main page's order, greyed out with a note at
+--                    the top while the module is off. Options with a `section`
 --                    get a header above each group, for pages long enough to need them
 --     <Tool>         a page a module draws itself (`BuildPage`), after the option pages
 --     Debug          options marked `debug = true`, for testing
@@ -121,8 +122,17 @@ local function addToggle(category, module, hasPage)
     return initializer
 end
 
+-- Greys a row out while the module is off, so its page shows nothing on it applies. Probe:
+-- AddModifyPredicate is Mainline's; ManiaTip uses it on Forever.
+local function greyWhenOff(initializer, module)
+    if initializer and initializer.AddModifyPredicate then
+        initializer:AddModifyPredicate(function() return module.db.enabled end)
+    end
+end
+
 -- A module's own option (from `module.options`): a checkbox, or a dropdown when it lists
--- `choices`. With a `parent`, it's indented under it and greyed out while the module is off.
+-- `choices`. With a `parent` (the main page, without subpages), it's indented under it; either
+-- way it's greyed out while the module is off.
 local function addOption(category, module, option, parent)
     local choices = option.choices
     if choices and not (Settings.CreateDropdown and Settings.CreateControlTextContainer) then
@@ -149,6 +159,8 @@ local function addOption(category, module, option, parent)
     end
     if parent and initializer and initializer.SetParentInitializer then
         initializer:SetParentInitializer(parent, function() return module.db.enabled end)
+    else
+        greyWhenOff(initializer, module)
     end
 end
 
@@ -189,8 +201,24 @@ local function addActions(layout, module)
         return -- Probe: the button row is Mainline's Settings.
     end
     for _, action in ipairs(module.actions or {}) do
-        layout:AddInitializer(CreateSettingsButtonInitializer(action.name, action.button,
-            action.fn, action.description, true))
+        local initializer = CreateSettingsButtonInitializer(action.name, action.button,
+            action.fn, action.description, true)
+        greyWhenOff(initializer, module)
+        layout:AddInitializer(initializer)
+    end
+end
+
+-- The top of a module's page, only while it's off: says the page's options don't apply, and
+-- where to turn it on. Probe: AddShownPredicate is Mainline's; ManiaTip uses it on Forever.
+local function addOffNotice(layout, module)
+    if not (layout and CreateSettingsListSectionHeaderInitializer) then
+        return
+    end
+    local initializer = CreateSettingsListSectionHeaderInitializer(
+        format(L.SETTINGS_MODULE_OFF, module.title or module.name))
+    if initializer.AddShownPredicate then
+        initializer:AddShownPredicate(function() return not module.db.enabled end)
+        layout:AddInitializer(initializer)
     end
 end
 
@@ -382,6 +410,7 @@ function ns.RegisterSettings()
                 local page, pageLayout = Settings.RegisterVerticalLayoutSubcategory(category,
                     module.title or name)
                 pages[name] = page
+                addOffNotice(pageLayout, module)
                 addOptions(page, module, nil, false, pageLayout)
                 addActions(pageLayout, module)
             end

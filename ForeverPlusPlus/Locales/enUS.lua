@@ -41,6 +41,7 @@ L.CATEGORY_NAMEPLATES = "Nameplates"
 L.CATEGORY_OTHER = "Other"
 L.DEBUG = "Debug"
 L.SETTINGS_AFTER_COMBAT = "Settings open after combat."
+L.SETTINGS_MODULE_OFF = "%s is off. Turn it on from the Forever++ page." -- module title
 L.SETTINGS_OPEN_PAGE = "%s Options" -- the gear beside a module's checkbox: module title
 
 -- Settings: About page
