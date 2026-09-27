@@ -91,6 +91,13 @@ L.FRIENDLYPLATES_TEST_ICONS_DESC = "Show an icon on every friendly player, as if
 L.FRIENDLYPLATES_TEST_ICONS_OFF = "Off"
 L.FRIENDLYPLATES_TEST_ICONS_GROUP = "Everyone in Group"
 L.FRIENDLYPLATES_TEST_ICONS_FRIEND = "Everyone a Friend"
+L.FRIENDLYPLATES_NPC_TITLES = "NPC Titles"
+L.FRIENDLYPLATES_NPC_TITLES_DESC = "Show a friendly NPC's title, like <Innkeeper>, under its name "
+    .. "where a player's guild goes. Needs Friendly NPCs, and follows Guild Names and Guild Name "
+    .. "Color."
+L.FRIENDLYPLATES_CENTER_LINE = "Show Plate Center"
+L.FRIENDLYPLATES_CENTER_LINE_DESC = "Draw a thin red line through the middle of each friendly "
+    .. "nameplate, to check the name sits centered over the unit."
 
 -- FastLoot
 L.FASTLOOT_TITLE = "Fast Loot"

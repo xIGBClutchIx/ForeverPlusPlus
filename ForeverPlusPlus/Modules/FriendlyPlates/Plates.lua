@@ -129,7 +129,7 @@ local function add(unit, frame)
     if not ours then
         return
     end
-    local record = { container = parts.container, isPlayer = isPlayer }
+    local record = { container = parts.container, plate = parts.plate, isPlayer = isPlayer }
     local name = parts.name
     if name and name.SetText then
         record.name = name
@@ -139,6 +139,7 @@ local function add(unit, frame)
         record.label = P.GetLabel(frame)
         record.label:Show()
         record.label.barFrame:Show()
+        record.label.debugFrame:Show()
         hookName(name)
         mirrored[name] = unit
     end
@@ -163,6 +164,7 @@ local function remove(unit)
     if record.label then
         record.label:Hide()
         record.label.barFrame:Hide()
+        record.label.debugFrame:Hide()
     end
 end
 

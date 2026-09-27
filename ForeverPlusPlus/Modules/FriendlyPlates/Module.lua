@@ -23,7 +23,9 @@ local module = ns.NewModule("FriendlyPlates", L.FRIENDLYPLATES_DESC, {
     guildHighlight = true,
     socialIcons = true,
     groupIcon = "role", -- "role" or "looking"
+    npcTitles = true,
     testIcons = "off", -- debug: "off", "group", or "friend" on every friendly player
+    centerLine = false, -- debug: a line through each plate's center
     saved = {}, -- CVar -> the player's own value, put back when the module turns off
 })
 module.title = L.FRIENDLYPLATES_TITLE
@@ -94,6 +96,11 @@ module.options = {
         },
     },
     {
+        key = "npcTitles",
+        name = L.FRIENDLYPLATES_NPC_TITLES,
+        description = L.FRIENDLYPLATES_NPC_TITLES_DESC,
+    },
+    {
         key = "testIcons",
         name = L.FRIENDLYPLATES_TEST_ICONS,
         description = L.FRIENDLYPLATES_TEST_ICONS_DESC,
@@ -102,6 +109,12 @@ module.options = {
             { "group", L.FRIENDLYPLATES_TEST_ICONS_GROUP },
             { "friend", L.FRIENDLYPLATES_TEST_ICONS_FRIEND },
         },
+        debug = true,
+    },
+    {
+        key = "centerLine",
+        name = L.FRIENDLYPLATES_CENTER_LINE,
+        description = L.FRIENDLYPLATES_CENTER_LINE_DESC,
         debug = true,
     },
 }

@@ -43,6 +43,15 @@ local function createLabel(frame)
     -- Empty frames to center on: the bar's row, and the cast bar's (see placeRow).
     label.row = CreateFrame("Frame", nil, label)
     label.castRow = CreateFrame("Frame", nil, label)
+    -- Debug (Show Plate Center): a thin line down the middle of the row, on a frame of its own so
+    -- it shows with or without the bar.
+    label.debugFrame = CreateFrame("Frame", nil, frame)
+    label.debugFrame:SetAllPoints(frame)
+    label.centerLine = label.debugFrame:CreateTexture(nil, "OVERLAY")
+    label.centerLine:SetColorTexture(1, 0.2, 0.2, 0.9)
+    label.centerLine:SetSize(1, 40)
+    label.centerLine:SetPoint("CENTER", label.row, "CENTER")
+    label.centerLine:Hide()
     label.name = newText(label)
     label.guild = newText(label)
     -- A separate frame so it can fade in with the bar while the rest of the label fades out.
@@ -167,23 +176,36 @@ local function placeLevel(label, record, unit)
     return width
 end
 
--- The row our label is centered on: the bar's height, but the whole plate's width. The bar sits
--- left of the plate's middle (the level badge takes its right end), so centering on the bar put
--- the name left of the player.
-local function placeRow(label, container)
+-- The row our label is centered on: the bar's height, but the nameplate's own width, since the game
+-- centers the nameplate on the unit. Neither the bar (the level badge takes its right end) nor the
+-- UnitFrame inside the plate is sure to be centered on it.
+local function placeRow(label, record)
     local row = label.row
     row:ClearAllPoints()
-    row:SetPoint("TOP", container, "TOP")
-    row:SetPoint("BOTTOM", container, "BOTTOM")
-    row:SetPoint("LEFT", label, "LEFT")
-    row:SetPoint("RIGHT", label, "RIGHT")
+    row:SetPoint("TOP", record.container, "TOP")
+    row:SetPoint("BOTTOM", record.container, "BOTTOM")
+    row:SetPoint("LEFT", record.plate, "LEFT")
+    row:SetPoint("RIGHT", record.plate, "RIGHT")
+    -- Debug: a thin line through the plate's center, to check the centering in game.
+    label.centerLine:SetShown(module.db.centerLine)
     return row
 end
 
+-- The line under the name: a player's <Guild>, or with NPC Titles on, an NPC's <Title>.
+local function subtitle(record, unit)
+    if module.db.guildNames == "off" then
+        return nil
+    end
+    if record.isPlayer then
+        return GetGuildInfo(unit)
+    end
+    return module.db.npcTitles and Units.Title(unit) or nil
+end
+
 local function placeGuild(label, record, unit, shift)
-    local row = placeRow(label, record.container)
+    local row = placeRow(label, record)
     local mode = module.db.guildNames
-    local guild = mode ~= "off" and GetGuildInfo(unit)
+    local guild = subtitle(record, unit)
     label.name:ClearAllPoints()
     label.guild:ClearAllPoints()
     label.barGuild:ClearAllPoints()
@@ -194,8 +216,8 @@ local function placeGuild(label, record, unit, shift)
         return
     end
     local scheme = GUILD_COLORS[module.db.guildColor] and module.db.guildColor or "gray"
-    local color = module.db.guildHighlight and Units.IsGuildmate(unit) and GUILDMATE_COLORS[scheme]
-        or GUILD_COLORS[scheme]
+    local color = record.isPlayer and module.db.guildHighlight and Units.IsGuildmate(unit)
+        and GUILDMATE_COLORS[scheme] or GUILD_COLORS[scheme]
     label.guild:SetTextColor(color[1], color[2], color[3])
     label.barGuild:SetTextColor(color[1], color[2], color[3])
     label.name:SetPoint("BOTTOM", row, "CENTER", shift, 1)
@@ -208,8 +230,8 @@ local function placeGuild(label, record, unit, shift)
         castRow:ClearAllPoints()
         castRow:SetPoint("TOP", castBar, "TOP")
         castRow:SetPoint("BOTTOM", castBar, "BOTTOM")
-        castRow:SetPoint("LEFT", label, "LEFT")
-        castRow:SetPoint("RIGHT", label, "RIGHT")
+        castRow:SetPoint("LEFT", record.plate, "LEFT")
+        castRow:SetPoint("RIGHT", record.plate, "RIGHT")
         label.guild:SetPoint("TOP", castRow, "BOTTOM", 0, -1)
         label.barGuild:SetPoint("TOP", castRow, "BOTTOM", 0, -1)
     else
