@@ -10,7 +10,8 @@ local L = ns.L
 
 ns.changelog = {
     {
-        version = L.CHANGELOG_UNRELEASED, -- no date until it ships
+        version = "0.2.0",
+        date = "2026-09-27",
         sections = {
             { L.CHANGELOG_ADDED, {
                 { L.AUTODECLINE_TITLE, "Turns down duel requests and closes the popup. Includes "
@@ -28,7 +29,7 @@ ns.changelog = {
                     .. "checkboxes for loot of a chosen quality, reputation standings, PvP ranks, "
                     .. "new titles, battleground ends, and deaths, hiding the interface for the "
                     .. "shot, and a chat line saying why. Off by default." },
-                { L.BAGSLOTS_TITLE, "How many bag slots are free, on the bag buttons. Includes the "
+                { L.BAGSLOTS_TITLE, "How many bag slots are free, on the bag buttons. Includes "
                     .. "each bag's own count or the total on the backpack, the reagent bag on its "
                     .. "own button, added to the backpack, or hidden, counting special bags such "
                     .. "as quivers and herb bags, and the text's size and position." },
@@ -47,6 +48,8 @@ ns.changelog = {
                     .. "every one, holding Shift to watch, and a Forget button for the seen list." },
             } },
             { L.CHANGELOG_CHANGED, {
+                { L.PLAYERPLATES_TITLE, "Recent allies' names in the game's light blue, instead "
+                    .. "of the Name Color. Includes a checkbox to turn it off." },
                 { L.CHANGELOG_SETTINGS, "Fewer entries in the sidebar. Forever++ opens on a "
                     .. "welcome page, and every module is on one Modules page, where the gear "
                     .. "beside a module shows its options under it. About is part of the welcome "

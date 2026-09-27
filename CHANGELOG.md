@@ -2,7 +2,7 @@
 
 What changed in each release of Forever++. The same notes show in game under Settings > AddOns > Forever++ > Changelog, from [`ForeverPlusPlus/Changelog.lua`](ForeverPlusPlus/Changelog.lua); change both together.
 
-## Unreleased
+## 0.2.0 (2026-09-27)
 
 ### Added
 
@@ -17,6 +17,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Changed
 
+- **Player Nameplates**: recent allies' names in the game's light blue, instead of the Name Color. Includes a checkbox to turn it off.
 - **Settings**: fewer entries in the sidebar. Forever++ opens on a welcome page, and every module is on one Modules page, where the gear beside a module shows its options under it. About is part of the welcome page.
 
 ## 0.1.0 (2026-09-27)
