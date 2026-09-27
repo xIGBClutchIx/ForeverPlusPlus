@@ -137,7 +137,8 @@ function Plates:Fade(unit)
     local label = record.label
     if label then
         fadeLevel(record, shown)
-        record.name:SetAlpha(shown)
+        -- Blizzard's name is always hidden: our label draws the name in both views.
+        record.name:SetAlpha(0)
         label.barFrame:SetAlpha(shown)
         label:SetAlpha(hidden)
     end

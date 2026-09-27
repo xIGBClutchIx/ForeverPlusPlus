@@ -86,6 +86,11 @@ function style.NameColor(unit)
     return 1, 1, 1
 end
 
+-- With the bar up, the name is plain white, as Blizzard draws it.
+function style.BarNameColor()
+    return 1, 1, 1
+end
+
 function style.Subtitle(unit)
     local mode = module.db.guildNames
     if mode == "off" then

@@ -1,12 +1,14 @@
 -- The label friendly nameplate modules draw in place of Blizzard's name while the bar is hidden:
 -- the name centered on the plate at the bar's height, a "<Subtitle>" line under it (a guild or an
 -- NPC's title), the level beside it, and for players the group and friend icons. While the bar is
--- up, Blizzard's name is back and the subtitle (and icons) sit with it instead.
+-- up, a second name of ours sits centered above the bar (Blizzard's stays hidden, since it sits at
+-- the bar's left), with the icons after it and the subtitle under the bar.
 --
 -- A plate module decides what goes in the label through a `style` (see ns.FriendlyPlates):
 --   style.db               its settings: level ("before"/"after"/"off"), centerLine, and with
 --                          icons, socialIcons, groupIcon ("role"/"looking") and testIcons
 --   style.NameColor(unit)  r, g, b for the name
+--   style.BarNameColor(unit)  r, g, b for the name while the bar is up (optional; NameColor)
 --   style.Subtitle(unit)   the subtitle text (nil for none; may be secret) and when it shows:
 --                          "always", "hidden" (only without the bar), or "off"
 --   style.SubtitleColor(unit)  { r, g, b }
@@ -123,26 +125,11 @@ local function createIcons(parent)
     return icons
 end
 
--- Where icons after Blizzard's name should start. Its name string can be wider than its text
--- (stretched across the bar), so its right edge isn't where the text ends; measure from the side
--- it's justified to instead. Nil falls back to the right edge.
-local function barIconOffset(name)
-    local width, justify = name:GetStringWidth(), name:GetJustifyH()
-    if not (readable(width) and width and width > 0) then
-        return nil
-    end
-    if justify == "LEFT" then
-        return { "LEFT", width }
-    elseif justify == "CENTER" then
-        return { "CENTER", width / 2 }
-    end
-end
-
 -- Shows the icons this unit gets, in a row going away from `anchor` (leftward when `left`), and
 -- returns the width they take.
-local function placeIcons(icons, anchor, left, fontSize, unit, style, offset)
+local function placeIcons(icons, anchor, left, fontSize, unit, style)
     local size = fontSize * ICON_SCALE
-    local previous, width, first = anchor, 0, true
+    local previous, width = anchor, 0
     for _, kind in ipairs(ORDER) do
         local icon = icons[kind]
         local show = shouldShow(kind, unit, style)
@@ -150,14 +137,12 @@ local function placeIcons(icons, anchor, left, fontSize, unit, style, offset)
         if show then
             setArt(icon, artFor(kind, unit, style.db))
             icon:SetSize(size, size)
-            if first and offset then
-                icon:SetPoint("LEFT", previous, offset[1], offset[2] + GAP, 0)
-            elseif left then
+            if left then
                 icon:SetPoint("RIGHT", previous, "LEFT", -GAP, 0)
             else
                 icon:SetPoint("LEFT", previous, "RIGHT", GAP, 0)
             end
-            previous, first = icon, false
+            previous = icon
             width = width + size + GAP
         end
         icon:SetShown(show)
@@ -198,6 +183,9 @@ local function createLabel(frame)
     label.barFrame = CreateFrame("Frame", nil, frame)
     label.barFrame:SetAllPoints(frame)
     label.barSubtitle = newText(label.barFrame)
+    -- Our own name for the bar view too: Blizzard's sits at the bar's left, off the unit's center.
+    label.barName = newText(label.barFrame)
+    label.barRow = CreateFrame("Frame", nil, label.barFrame)
     -- Our copy of the level badge, which sits beside the name instead of at the bar's end.
     label.level = CreateFrame("Frame", nil, label)
     label.level.text = label.level:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
@@ -289,6 +277,7 @@ local function matchFont(label, name)
     label.nameSize = size
     label.subtitle:SetFont(file, size * SUBTITLE_SCALE, flags)
     label.barSubtitle:SetFont(file, size * SUBTITLE_SCALE, flags)
+    label.barName:SetFont(file, size, flags)
 end
 
 -- Puts the level beside the name; returns the width it takes.
@@ -392,8 +381,19 @@ function PlateLabel.Layout(label, record, unit, style)
     local iconsLeft = where == "after"
     local fontSize = label.nameSize or 12
     local iconsWidth = placeIcons(label.icons, label.name, iconsLeft, fontSize, unit, style)
-    -- With the bar up, the icons follow Blizzard's own name.
-    placeIcons(label.barIcons, record.name, false, fontSize, unit, style, barIconOffset(record.name))
+    -- With the bar up: our bar-view name centered on the plate just above the bar, its icons after
+    -- it, and the pair shifted so they're centered together. Blizzard's level stays on the bar.
+    label.barName:SetText(record.name:GetText())
+    label.barName:SetTextColor((style.BarNameColor or style.NameColor)(unit))
+    local barIconsWidth = placeIcons(label.barIcons, label.barName, false, fontSize, unit, style)
+    local barRow = label.barRow
+    barRow:ClearAllPoints()
+    barRow:SetPoint("TOP", record.container, "TOP")
+    barRow:SetPoint("BOTTOM", record.container, "BOTTOM")
+    barRow:SetPoint("LEFT", record.plate, "LEFT")
+    barRow:SetPoint("RIGHT", record.plate, "RIGHT")
+    label.barName:ClearAllPoints()
+    label.barName:SetPoint("BOTTOM", barRow, "TOP", -barIconsWidth / 2, 2)
     local leftWidth, rightWidth = levelWidth, iconsWidth
     if iconsLeft then
         leftWidth, rightWidth = iconsWidth, levelWidth
