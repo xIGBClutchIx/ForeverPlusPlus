@@ -6,7 +6,7 @@
 --                    grouped under headers by `module.category`. A module's options (and buttons,
 --                    from `module.actions`) sit indented under its checkbox, hidden until its gear
 --                    is clicked, and greyed out while it's off. Options with a `section` get a
---                    header above each group. A module's `notice` (a warning) shows under its
+--                    white label above each group, indented like them. A module's `notice` (a warning) shows under its
 --                    checkbox while it applies. `alwaysOn` modules (tools) have no checkbox
 --     <Tool>         a page a module draws itself (`BuildPage`)
 --     Debug          options marked `debug = true`, for testing
@@ -249,21 +249,40 @@ local function hasOptions(module, debug)
     return false
 end
 
+-- A section's name among a module's options on the Modules page: a plain white row indented
+-- under the module's checkbox, not a full section header, which would sit at the page's left
+-- edge in the size of the category headers. Probe: Settings.CreateElementInitializer and the bare
+-- row template are Mainline's; BugSack builds a row on SettingsListElementTemplate on Forever.
+-- Without them the section just has no label.
+local function addSubheader(layout, text, module, parent, shown)
+    if not (layout and Settings.CreateElementInitializer) then
+        return
+    end
+    local initializer = Settings.CreateElementInitializer("SettingsListElementTemplate",
+        { name = format("|cffffffff%s|r", text) })
+    placeUnder(initializer, module, parent)
+    showWhen(initializer, shown)
+    layout:AddInitializer(initializer)
+end
+
 -- A module's options, in the order it lists them. An option whose `section` differs from the one
--- before it starts a new section header. Returns whether any section header was added.
+-- before it starts a new section: a label under the module's checkbox (`parent`), or a section
+-- header without one (the Debug page).
 local function addOptions(category, layout, module, parent, debug, shown)
-    local section, sectioned
+    local section
     for _, option in ipairs(module.options or {}) do
         if (option.debug or false) == debug then
             if option.section and option.section ~= section then
-                addHeader(layout, option.section, shown)
-                sectioned = true
+                if parent then
+                    addSubheader(layout, option.section, module, parent, shown)
+                else
+                    addHeader(layout, option.section, shown)
+                end
             end
             section = option.section
             addOption(category, module, option, parent, shown)
         end
     end
-    return sectioned
 end
 
 -- A module's buttons (from `module.actions`: `{ name, button, description, fn }`), after its
@@ -548,12 +567,10 @@ local function categoryOf(module)
 end
 
 -- The Modules page: each category's modules under its header, each module's options under its
--- checkbox. With `collapse`, those options show only while the module's gear has them open. A
--- module whose options have sections of their own gets its category's header again after them, so
--- the next module doesn't read as part of its last section.
+-- checkbox. With `collapse`, those options show only while the module's gear has them open.
 local function addModules(category, layout, grouped, collapse)
     local current
-    for i, name in ipairs(grouped) do
+    for _, name in ipairs(grouped) do
         local module = ns.modules[name]
         if not module.alwaysOn then
             local group = categoryOf(module)
@@ -568,12 +585,8 @@ local function addModules(category, layout, grouped, collapse)
             addNotice(layout, module, parent)
             if inline[name] then
                 local shown = collapse and function() return expanded[name] end or nil
-                local sectioned = addOptions(category, layout, module, parent, false, shown)
+                addOptions(category, layout, module, parent, false, shown)
                 addActions(layout, module, parent, shown)
-                local nextName = grouped[i + 1]
-                if sectioned and nextName and categoryOf(ns.modules[nextName]) == group then
-                    addHeader(layout, CATEGORY_NAMES[group], shown)
-                end
             end
         end
     end
