@@ -35,7 +35,7 @@ ns.changelog = {
                 { L.CLASSCOLORS_TITLE, "Players' health bars and names in their class color on "
                     .. "the player, target, focus, party, and target-of-target frames. Includes "
                     .. "health bars and names (off by default) separately, and a checkbox for each "
-                    .. "frame. Off by default." },
+                    .. "frame." },
                 { L.GATHERTOOLTIPS_TITLE, "The skill a herb, ore, or skinnable beast needs, in "
                     .. "its tooltip in the world or on the minimap, colored red, orange, yellow, "
                     .. "green, or gray against your skill like trainer recipes. Herb, ore, and "

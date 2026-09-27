@@ -17,7 +17,7 @@ local readable = ns.IsReadable
 local classColor = ns.Colors.Class
 
 local module = ns.NewModule("ClassColors", L.CLASSCOLORS_DESC, {
-    enabled = false,
+    enabled = true,
     healthBars = true,
     names = false,
     player = true,
