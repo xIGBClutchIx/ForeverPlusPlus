@@ -1,8 +1,8 @@
 -- The "Forever++" pages in the game's Settings > AddOns list, built from Blizzard's own settings
 -- templates so they look like any other options page:
 --   Forever++        an on/off checkbox per module (the only place modules turn on and off),
---                    grouped under headers by `module.category`, with an Options button when it
---                    has a page. `alwaysOn` modules (tools) have none
+--                    grouped under headers by `module.category`, with a gear that opens its page
+--                    when it has one. `alwaysOn` modules (tools) have none
 --     <Module>       one page per module with options, holding just its options (and buttons,
 --                    from `module.actions`), in the main page's order. Options with a `section`
 --                    get a header above each group, for pages long enough to need them
@@ -16,6 +16,7 @@ local ipairs, format = ipairs, string.format
 
 local pairs, sort, strlower = pairs, table.sort, string.lower
 local InCombatLockdown, CreateFrame, GetBuildInfo = InCombatLockdown, CreateFrame, GetBuildInfo
+local setmetatable, hooksecurefunc = setmetatable, hooksecurefunc
 local C_AddOns, GetAddOnMetadata, GameTooltip = C_AddOns, GetAddOnMetadata, GameTooltip
 local L = ns.L
 
@@ -56,24 +57,68 @@ local function track(module, setting)
     list[#list + 1] = setting
 end
 
+-- Gear icons beside the main page's checkboxes, for modules with a page. The list's row frames
+-- are Blizzard's and pooled across every Settings page, so the gear is our own child button kept
+-- in a weak table, shown only while one of our rows uses the frame.
+local gears = setmetatable({}, { __mode = "k" }) -- row frame -> our gear button
+local GEAR = "Interface\\WorldMap\\Gear_64" -- the cog Leatrix Maps uses for its option buttons
+
+local function gearFor(frame, anchor)
+    local gear = gears[frame]
+    if not gear then
+        gear = CreateFrame("Button", nil, frame)
+        gear:SetSize(18, 18)
+        gear:SetNormalTexture(GEAR)
+        gear:GetNormalTexture():SetTexCoord(0, 0.5, 0, 0.5)
+        gear:GetNormalTexture():SetVertexColor(1, 0.82, 0) -- gold, like the labels
+        gear:SetHighlightTexture(GEAR, "ADD")
+        gear:GetHighlightTexture():SetTexCoord(0, 0.5, 0, 0.5)
+        gear:SetScript("OnClick", function(self) ns.OpenSettings(self.module) end)
+        gear:SetScript("OnEnter", function(self)
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:SetText(format(L.SETTINGS_OPEN_PAGE, self.title), 1, 1, 1)
+            GameTooltip:Show()
+        end)
+        gear:SetScript("OnLeave", function() GameTooltip:Hide() end)
+        -- The frame goes back to the pool hidden; another page's row may get it next.
+        frame:HookScript("OnHide", function() gear:Hide() end)
+        gears[frame] = gear
+    end
+    gear:ClearAllPoints()
+    gear:SetPoint("LEFT", anchor, "RIGHT", 6, 0)
+    return gear
+end
+
+-- Puts a gear beside the checkbox each time Blizzard sets a row up for this initializer.
+local function addGear(initializer, module)
+    if not initializer.InitFrame then
+        return -- Probe: rows are set up through InitFrame on Mainline's Settings list.
+    end
+    hooksecurefunc(initializer, "InitFrame", function(_, frame)
+        local anchor = frame.Checkbox or frame.CheckBox
+        if not anchor then
+            return
+        end
+        local gear = gearFor(frame, anchor)
+        gear.module, gear.title = module.name, module.title or module.name
+        gear:Show()
+    end)
+end
+
 -- The module's on/off checkbox on the main page. It reads and writes through the module, so
--- /fpp and the page agree. With a page of its own, a button beside it opens that page.
-local function addToggle(category, layout, module, hasPage)
+-- /fpp and the page agree. With a page of its own, a gear beside it opens that page.
+local function addToggle(category, module, hasPage)
     local setting = Settings.RegisterProxySetting(category,
         format("ForeverPlusPlus_%s", module.name), Settings.VarType.Boolean,
         module.title or module.name, module.defaults.enabled,
         function() return module.db.enabled end,
         function(value) ns.SetEnabled(module.name, value) end)
     track(module, setting)
-    -- Probe: Mainline's checkbox-with-button row. ManiaTip calls it with these arguments on
-    -- Forever (setting, button text, click, button tooltip, click needs the box ticked, tooltip).
-    if hasPage and layout and CreateSettingsCheckboxWithButtonInitializer then
-        local initializer = CreateSettingsCheckboxWithButtonInitializer(setting, L.SETTINGS_OPEN_PAGE,
-            function() ns.OpenSettings(module.name) end, nil, false, module.description)
-        layout:AddInitializer(initializer)
-        return initializer
+    local initializer = Settings.CreateCheckbox(category, setting, module.description)
+    if hasPage and initializer then
+        addGear(initializer, module)
     end
-    return Settings.CreateCheckbox(category, setting, module.description)
+    return initializer
 end
 
 -- A module's own option (from `module.options`): a checkbox, or a dropdown when it lists
@@ -319,7 +364,7 @@ function ns.RegisterSettings()
                 current = group
                 addHeader(layout, CATEGORY_NAMES[group])
             end
-            local parent = addToggle(category, layout, module, hasPage(module))
+            local parent = addToggle(category, module, hasPage(module))
             if not subpages then
                 addOptions(category, module, parent, false)
                 addActions(layout, module)

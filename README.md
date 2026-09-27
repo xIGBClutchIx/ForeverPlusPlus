@@ -12,7 +12,7 @@ mklink /J "D:\BattleNet\World of Warcraft\_classic_beta_\Interface\AddOns\Foreve
 
 ## Use
 
-- Game Menu > Options > AddOns > Forever++ has a checkbox for each module, grouped by category, the one place to turn it on or off. Modules with options get their own page under it for those options, in the same order and opened by the Options button beside the checkbox, testing options are on the Debug page, and About shows the version, the game build, links (including where to ask for changes and features), and the commands. Modules that say things in chat by themselves have a Chat Messages checkbox to turn that off.
+- Game Menu > Options > AddOns > Forever++ has a checkbox for each module, grouped by category, the one place to turn it on or off. Modules with options get their own page under it for those options, in the same order and opened by the gear beside the checkbox, testing options are on the Debug page, and About shows the version, the game build, links (including where to ask for changes and features), and the commands. Modules that say things in chat by themselves have a Chat Messages checkbox to turn that off.
 - `/fpp` opens the Forever++ settings.
 - `/fpp list` lists the modules and whether each is on.
 - `/fpp toggle <name>` turns one on or off.
