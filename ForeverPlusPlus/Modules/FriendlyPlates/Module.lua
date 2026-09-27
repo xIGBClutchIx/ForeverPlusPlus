@@ -34,10 +34,10 @@ local module = ns.NewModule("FriendlyPlates", L.FRIENDLYPLATES_DESC, {
 })
 module.title = L.FRIENDLYPLATES_TITLE
 
--- Extra settings on this module's page in Settings (see Settings.lua), in two sections: players,
--- then NPCs.
-local PLAYERS = L.FRIENDLYPLATES_SECTION_PLAYERS
-local NPCS = L.FRIENDLYPLATES_SECTION_NPCS
+-- Extra settings in Settings (see Settings.lua), on two pages of their own: Player Nameplates and
+-- NPC Nameplates.
+local PLAYERS = L.FRIENDLYPLATES_PAGE_PLAYERS
+local NPCS = L.FRIENDLYPLATES_PAGE_NPCS
 
 -- When a <Guild> or <Title> line shows.
 local function subtitleChoices()
@@ -62,13 +62,13 @@ module.options = {
         key = "barWhenHurt",
         name = L.FRIENDLYPLATES_BAR_WHEN_HURT,
         description = L.FRIENDLYPLATES_BAR_WHEN_HURT_DESC,
-        section = PLAYERS,
+        page = PLAYERS,
     },
     {
         key = "nameColor",
         name = L.FRIENDLYPLATES_NAME_COLOR,
         description = L.FRIENDLYPLATES_NAME_COLOR_DESC,
-        section = PLAYERS,
+        page = PLAYERS,
         choices = {
             { "class", L.FRIENDLYPLATES_NAME_COLOR_CLASS },
             { "white", L.FRIENDLYPLATES_COLOR_WHITE },
@@ -78,21 +78,21 @@ module.options = {
         key = "level",
         name = L.FRIENDLYPLATES_LEVEL,
         description = L.FRIENDLYPLATES_LEVEL_DESC,
-        section = PLAYERS,
+        page = PLAYERS,
         choices = levelChoices(),
     },
     {
         key = "guildNames",
         name = L.FRIENDLYPLATES_GUILD_NAMES,
         description = L.FRIENDLYPLATES_GUILD_NAMES_DESC,
-        section = PLAYERS,
+        page = PLAYERS,
         choices = subtitleChoices(),
     },
     {
         key = "guildColor",
         name = L.FRIENDLYPLATES_GUILD_COLOR,
         description = L.FRIENDLYPLATES_GUILD_COLOR_DESC,
-        section = PLAYERS,
+        page = PLAYERS,
         choices = {
             { "gray", L.FRIENDLYPLATES_GUILD_COLOR_GRAY },
             { "green", L.FRIENDLYPLATES_GUILD_COLOR_GREEN },
@@ -102,19 +102,19 @@ module.options = {
         key = "guildHighlight",
         name = L.FRIENDLYPLATES_GUILD_HIGHLIGHT,
         description = L.FRIENDLYPLATES_GUILD_HIGHLIGHT_DESC,
-        section = PLAYERS,
+        page = PLAYERS,
     },
     {
         key = "socialIcons",
         name = L.FRIENDLYPLATES_SOCIAL_ICONS,
         description = L.FRIENDLYPLATES_SOCIAL_ICONS_DESC,
-        section = PLAYERS,
+        page = PLAYERS,
     },
     {
         key = "groupIcon",
         name = L.FRIENDLYPLATES_GROUP_ICON,
         description = L.FRIENDLYPLATES_GROUP_ICON_DESC,
-        section = PLAYERS,
+        page = PLAYERS,
         choices = {
             { "role", L.FRIENDLYPLATES_GROUP_ICON_ROLE },
             { "looking", L.FRIENDLYPLATES_GROUP_ICON_LOOKING },
@@ -124,26 +124,26 @@ module.options = {
         key = "npcs",
         name = L.FRIENDLYPLATES_NPCS,
         description = L.FRIENDLYPLATES_NPCS_DESC,
-        section = NPCS,
+        page = NPCS,
     },
     {
         key = "npcBarWhenHurt",
         name = L.FRIENDLYPLATES_NPC_BAR_WHEN_HURT,
         description = L.FRIENDLYPLATES_NPC_BAR_WHEN_HURT_DESC,
-        section = NPCS,
+        page = NPCS,
     },
     {
         key = "npcLevel",
         name = L.FRIENDLYPLATES_NPC_LEVEL,
         description = L.FRIENDLYPLATES_NPC_LEVEL_DESC,
-        section = NPCS,
+        page = NPCS,
         choices = levelChoices(),
     },
     {
         key = "npcNameColor",
         name = L.FRIENDLYPLATES_NPC_NAME_COLOR,
         description = L.FRIENDLYPLATES_NPC_NAME_COLOR_DESC,
-        section = NPCS,
+        page = NPCS,
         choices = {
             { "green", L.FRIENDLYPLATES_GUILD_COLOR_GREEN },
             { "white", L.FRIENDLYPLATES_COLOR_WHITE },
@@ -153,14 +153,14 @@ module.options = {
         key = "npcTitles",
         name = L.FRIENDLYPLATES_NPC_TITLES,
         description = L.FRIENDLYPLATES_NPC_TITLES_DESC,
-        section = NPCS,
+        page = NPCS,
         choices = subtitleChoices(),
     },
     {
         key = "npcTitleColor",
         name = L.FRIENDLYPLATES_NPC_TITLE_COLOR,
         description = L.FRIENDLYPLATES_NPC_TITLE_COLOR_DESC,
-        section = NPCS,
+        page = NPCS,
         choices = {
             { "name", L.FRIENDLYPLATES_NPC_TITLE_COLOR_NAME },
             { "gray", L.FRIENDLYPLATES_GUILD_COLOR_GRAY },

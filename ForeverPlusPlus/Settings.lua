@@ -2,8 +2,9 @@
 -- templates so they look like any other options page:
 --   Forever++        an on/off checkbox per module (the only place modules turn on and off)
 --     <Module>       one page per module with options, holding just its options (and buttons,
---                    from `module.actions`), sorted by title. Options with a `section` get a
---                    header above each group, for pages long enough to need them
+--                    from `module.actions`), sorted by title. Options with a `page` go on a page
+--                    of that name instead, so a module can have several. Options with a
+--                    `section` get a header above each group, for pages long enough to need them
 --     <Tool>         a page a module draws itself (`BuildPage`), after the option pages
 --     Debug          options marked `debug = true`, for testing
 --     About          the version, links, and /fpp commands
@@ -112,12 +113,18 @@ local function hasOptions(module, debug)
     return false
 end
 
--- A module's options, in the order it lists them. With a layout (the module's own page), an
--- option whose `section` differs from the one before it starts a new section header there.
-local function addOptions(category, module, parent, debug, layout)
+-- The Settings page an option goes on: its `page`, or the module's own.
+local function pageOf(module, option)
+    return option.page or module.title or module.name
+end
+
+-- A module's options, in the order it lists them (with `page`, only those on that page). With a
+-- layout (the option's own page), an option whose `section` differs from the one before it
+-- starts a new section header there.
+local function addOptions(category, module, parent, debug, layout, page)
     local section
     for _, option in ipairs(module.options or {}) do
-        if (option.debug or false) == debug then
+        if (option.debug or false) == debug and (not page or pageOf(module, option) == page) then
             if option.section and option.section ~= section then
                 addHeader(layout, option.section)
             end
@@ -263,20 +270,39 @@ function ns.RegisterSettings()
     local category, layout = Settings.RegisterVerticalLayoutCategory(ns.title)
     local subpages = Settings.RegisterVerticalLayoutSubcategory ~= nil
     local order = byTitle()
+    local optionPages = {} -- { title, module }: every option page, sorted by title below
     addHeader(layout, L.MODULES)
     for _, name in ipairs(order) do
         local module = ns.modules[name]
         local parent = addToggle(category, module)
         if not module.BuildPage and (hasOptions(module, false) or module.actions) then
             if subpages then
-                local page, pageLayout = Settings.RegisterVerticalLayoutSubcategory(category,
-                    module.title or name)
-                addOptions(page, module, nil, false, pageLayout)
-                addActions(pageLayout, module)
+                -- One page per `page` the module's options name, or one page for the module.
+                local seen, any = {}, false
+                for _, option in ipairs(module.options or {}) do
+                    local title = pageOf(module, option)
+                    if not option.debug and not seen[title] then
+                        seen[title], any = true, true
+                        optionPages[#optionPages + 1] = { title = title, module = module }
+                    end
+                end
+                if not any then -- only buttons
+                    optionPages[#optionPages + 1] = { title = module.title or name, module = module }
+                end
             else
                 addOptions(category, module, parent, false)
                 addActions(layout, module)
             end
+        end
+    end
+    sort(optionPages, function(a, b) return strlower(a.title) < strlower(b.title) end)
+    local withActions = {} -- module -> true once its buttons are on a page (its first)
+    for _, entry in ipairs(optionPages) do
+        local page, pageLayout = Settings.RegisterVerticalLayoutSubcategory(category, entry.title)
+        addOptions(page, entry.module, nil, false, pageLayout, entry.title)
+        if not withActions[entry.module] then
+            withActions[entry.module] = true
+            addActions(pageLayout, entry.module)
         end
     end
     -- Pages modules draw themselves (tools such as Console Variables) go last, above Debug.
