@@ -3,7 +3,7 @@
 -- The plates themselves are ns.FriendlyPlates; this module picks the colors and the guild line.
 local _, ns = ...
 
-local UnitClass, GetGuildInfo, C_ClassColor = UnitClass, GetGuildInfo, C_ClassColor
+local ipairs, UnitClass, GetGuildInfo, C_ClassColor = ipairs, UnitClass, GetGuildInfo, C_ClassColor
 
 local L = ns.L
 local readable = ns.IsReadable
@@ -112,7 +112,14 @@ end
 -- its options, or with its keybind), and then there are no plates to draw on.
 local SHOW_FRIENDLY = { "nameplateShowFriendlyPlayers", "nameplateShowFriends" }
 module.notice = {
-    text = L.PLAYERPLATES_BLIZZARD_OFF,
+    text = L.PLATES_BLIZZARD_OFF,
+    description = L.PLAYERPLATES_BLIZZARD_OFF_DESC,
+    button = L.PLATES_TURN_ON,
+    fn = function()
+        for _, name in ipairs(SHOW_FRIENDLY) do
+            ns.CVars.Apply(name, "1") -- the one this client lacks does nothing
+        end
+    end,
     shown = function()
         return module.db.enabled and not ns.CVars.IsOn(SHOW_FRIENDLY)
     end,

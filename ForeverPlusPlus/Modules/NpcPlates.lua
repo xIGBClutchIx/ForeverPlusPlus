@@ -3,6 +3,8 @@
 -- The plates themselves are ns.FriendlyPlates; this module picks the colors and the title line.
 local _, ns = ...
 
+local ipairs = ipairs
+
 local L = ns.L
 local Units = ns.Units
 
@@ -77,7 +79,14 @@ end
 -- there are no plates to draw on.
 local SHOW_NPCS = { "nameplateShowFriendlyNpcs", "nameplateShowFriendlyNPCs" }
 module.notice = {
-    text = L.NPCPLATES_BLIZZARD_OFF,
+    text = L.PLATES_BLIZZARD_OFF,
+    description = L.NPCPLATES_BLIZZARD_OFF_DESC,
+    button = L.PLATES_TURN_ON,
+    fn = function()
+        for _, name in ipairs(SHOW_NPCS) do
+            ns.CVars.Apply(name, "1") -- the one this client lacks does nothing
+        end
+    end,
     shown = function()
         return module.db.enabled and not ns.CVars.IsOn(SHOW_NPCS)
     end,

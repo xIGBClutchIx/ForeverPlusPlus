@@ -222,14 +222,16 @@ local function addOffNotice(layout, module)
     end
 end
 
--- A module's `notice` ({ text, shown = fn }): a line at the top of its page while `shown()` is
--- true, such as a Blizzard setting the module needs being off.
+-- A module's `notice` ({ text, description, button, fn, shown }): a gray row at the top of its
+-- page while `shown()` is true, such as a Blizzard setting the module needs being off, with a
+-- button that fixes it. A normal settings row, so it's the size of the options below it.
 local function addNotice(layout, module)
     local notice = module.notice
-    if not (notice and layout and CreateSettingsListSectionHeaderInitializer) then
+    if not (notice and layout and CreateSettingsButtonInitializer) then
         return
     end
-    local initializer = CreateSettingsListSectionHeaderInitializer(notice.text)
+    local initializer = CreateSettingsButtonInitializer(format("|cff999999%s|r", notice.text),
+        notice.button, notice.fn, notice.description, true)
     if initializer.AddShownPredicate then
         initializer:AddShownPredicate(notice.shown)
         layout:AddInitializer(initializer)

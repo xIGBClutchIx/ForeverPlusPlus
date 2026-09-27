@@ -58,6 +58,8 @@ L.ABOUT_REQUESTS = "Want something changed or a new feature? Ask for it at the l
 L.ABOUT_COMMANDS = "Commands"
 
 -- Friendly nameplates (Lib/PlateLabel.lua and both plate modules)
+L.PLATES_BLIZZARD_OFF = "Blizzard's nameplates are off" -- a gray row atop the page, with a button
+L.PLATES_TURN_ON = "Turn On"
 L.PLATES_BAR_WHEN_HURT = "Health Bar When Hurt"
 L.PLATES_NAME_COLOR = "Name Color"
 L.PLATES_LEVEL = "Level"
@@ -78,8 +80,9 @@ L.PLATES_CENTER_LINE_DESC = "Draw a thin red line through the middle of each nam
 
 -- PlayerPlates
 L.PLAYERPLATES_TITLE = "Player Nameplates"
-L.PLAYERPLATES_BLIZZARD_OFF = "Blizzard's friendly player nameplates are off: turn them on in its "
-    .. "Nameplates options or with their keybind (Shift-V)" -- atop the page
+L.PLAYERPLATES_BLIZZARD_OFF_DESC = "Blizzard's friendly player nameplates are off, so there's "
+    .. "nothing to show. Turn them on here, in Blizzard's Nameplates options, or with their keybind "
+    .. "(Shift-V)."
 L.PLAYERPLATES_DESC = "Always show friendly players' names, with their guild. Their health bar "
     .. "appears only when they're hurt or in combat."
 L.PLAYERPLATES_BAR_WHEN_HURT_DESC = "Show a player's health bar while they're missing health. "
@@ -110,8 +113,8 @@ L.PLAYERPLATES_TEST_ICONS_FRIEND = "Everyone a Friend"
 
 -- NpcPlates
 L.NPCPLATES_TITLE = "NPC Nameplates"
-L.NPCPLATES_BLIZZARD_OFF = "Blizzard's friendly NPC nameplates are off: turn them on in its "
-    .. "Nameplates options" -- atop the page
+L.NPCPLATES_BLIZZARD_OFF_DESC = "Blizzard's friendly NPC nameplates are off, so there's nothing "
+    .. "to show. Turn them on here or in Blizzard's Nameplates options."
 L.NPCPLATES_DESC = "Always show friendly NPCs' names, with their title. Their health bar appears "
     .. "only when they're hurt or in combat."
 L.NPCPLATES_BAR_WHEN_HURT_DESC = "Show an NPC's health bar while it's missing health. When off, "
