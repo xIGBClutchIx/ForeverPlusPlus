@@ -57,6 +57,16 @@ local function onSellPricePost(tooltip)
     end
 end
 
+-- An item with no sell price: the price lines go right after its last line of data, before
+-- anything added after the data (Forever's "Press F6" reminder is), instead of at the very end.
+local function onAnyLinePost(tooltip, lineData)
+    local data = not done[tooltip] and current[tooltip]
+    local lines = data and data.lines
+    if lines and lines[#lines] == lineData then
+        addPrices(tooltip, data)
+    end
+end
+
 local function onItemPre(tooltip, data)
     current[tooltip] = data
     done[tooltip] = nil
@@ -98,6 +108,11 @@ local function hook()
     end
     if TooltipDataProcessor.AddTooltipPreCall then
         TooltipDataProcessor.AddTooltipPreCall(Enum.TooltipDataType.Item, onItemPre)
+        -- Probe: AllTypes (every line type) is Mainline's; without it, no-sell-price items get
+        -- their price lines at the end, from onItem.
+        if TooltipDataProcessor.AllTypes and TooltipDataProcessor.AddLinePostCall then
+            TooltipDataProcessor.AddLinePostCall(TooltipDataProcessor.AllTypes, onAnyLinePost)
+        end
     end
     TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, onItem)
     ns.On("MODIFIER_STATE_CHANGED", onModifier)
