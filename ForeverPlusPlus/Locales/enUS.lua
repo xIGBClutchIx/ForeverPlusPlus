@@ -357,6 +357,31 @@ L.GATHERTRACKING_FAILED = "Gathering Tracking couldn't change tracking: %s" -- e
 L.GATHERTRACKING_BLOCKED = "The game blocked Gathering Tracking from changing tracking. It stops "
     .. "until /reload."
 
+-- GatherTooltips
+L.GATHERTOOLTIPS_TITLE = "Gathering Tooltips"
+L.GATHERTOOLTIPS_DESC = "Show the skill a herb, ore, or skinnable creature needs, colored by how "
+    .. "hard it is for you, like recipes at a trainer."
+L.GATHERTOOLTIPS_HERBALISM = "Herbs"
+L.GATHERTOOLTIPS_HERBALISM_DESC = "Show the Herbalism skill a herb needs when you point at it, in "
+    .. "the world or on the minimap."
+L.GATHERTOOLTIPS_MINING = "Ore"
+L.GATHERTOOLTIPS_MINING_DESC = "Show the Mining skill a vein or deposit needs when you point at "
+    .. "it, in the world or on the minimap."
+L.GATHERTOOLTIPS_SKINNING = "Creatures"
+L.GATHERTOOLTIPS_SKINNING_DESC = "Show the Skinning skill a beast needs, from its level."
+L.GATHERTOOLTIPS_ITEMS = "Items"
+L.GATHERTOOLTIPS_ITEMS_DESC = "Show in herb, ore, and stone tooltips the skill needed to gather "
+    .. "them."
+L.GATHERTOOLTIPS_REQUIRES = "Requires %s (%d)" -- profession, skill
+L.GATHERTOOLTIPS_GATHERED = "Gathered with %s (%d)" -- profession, skill
+L.GATHERTOOLTIPS_NAMED = "%s: %s" -- node name, "Requires Herbalism (70)"
+L.GATHERTOOLTIPS_HERBALISM_NAME = "Herbalism" -- until the client gives its own name
+L.GATHERTOOLTIPS_MINING_NAME = "Mining"
+L.GATHERTOOLTIPS_SKINNING_NAME = "Skinning"
+-- Creature types that can be skinned, exactly as the game names them.
+L.GATHERTOOLTIPS_BEAST = "Beast"
+L.GATHERTOOLTIPS_DRAGONKIN = "Dragonkin"
+
 -- AutoStow
 L.AUTOSTOW_TITLE = "Auto Stow"
 L.AUTOSTOW_DESC = "Put your weapons away a few seconds after combat ends, unless you draw or "

@@ -1,7 +1,8 @@
 -- Price lines in item tooltips, kept together where Blizzard puts the sell price. Modules add a
 -- line with `OnPrices`, and one module may redraw the sell price line itself with
 -- `ReplaceSellPrice`. Lines go right after the sell price, or at the end when the item has none.
--- Nothing is hooked until a module first calls in.
+-- Other lines about the item (`OnInfo`) go just above them. Nothing is hooked until a module
+-- first calls in.
 local _, ns = ...
 
 local ipairs, next, setmetatable, format, type = ipairs, next, setmetatable, string.format, type
@@ -18,8 +19,10 @@ local ItemTooltip = {}
 ns.ItemTooltip = ItemTooltip
 
 local providers = {} -- fn(tooltip, data), in the order added
+local infoProviders = {} -- fn(tooltip, data) for lines above the prices, in the order added
 local replacer -- fn(tooltip, data, lineData) -> true when it drew the sell price line
 local done = setmetatable({}, { __mode = "k" }) -- tooltip -> price lines already added
+local infoDone = setmetatable({}, { __mode = "k" }) -- tooltip -> lines above the prices added
 local current = setmetatable({}, { __mode = "k" }) -- tooltip -> item data being drawn
 local widest = setmetatable({}, { __mode = "k" }) -- tooltip -> widest price line name so far
 
@@ -42,9 +45,19 @@ local function addPrices(tooltip, data)
     end
 end
 
+local function addInfo(tooltip, data)
+    infoDone[tooltip] = true
+    for _, fn in ipairs(infoProviders) do
+        fn(tooltip, data)
+    end
+end
+
 local function onSellPricePre(tooltip, lineData)
-    local data = replacer and itemData(tooltip)
-    if data and replacer(tooltip, data, lineData) then
+    local data = itemData(tooltip)
+    if data and not infoDone[tooltip] then
+        addInfo(tooltip, data)
+    end
+    if data and replacer and replacer(tooltip, data, lineData) then
         addPrices(tooltip, data)
         return true -- Blizzard's line is skipped; ours is in its place
     end
@@ -63,6 +76,9 @@ local function onAnyLinePost(tooltip, lineData)
     local data = not done[tooltip] and current[tooltip]
     local lines = data and data.lines
     if lines and lines[#lines] == lineData then
+        if not infoDone[tooltip] then
+            addInfo(tooltip, data)
+        end
         addPrices(tooltip, data)
     end
 end
@@ -70,14 +86,19 @@ end
 local function onItemPre(tooltip, data)
     current[tooltip] = data
     done[tooltip] = nil
+    infoDone[tooltip] = nil
     widest[tooltip] = nil
 end
 
 local function onItem(tooltip, data)
+    if not infoDone[tooltip] and data then
+        addInfo(tooltip, data)
+    end
     if not done[tooltip] and data then
         addPrices(tooltip, data)
     end
     done[tooltip] = nil
+    infoDone[tooltip] = nil
     current[tooltip] = nil
     widest[tooltip] = nil
 end
@@ -138,6 +159,15 @@ end
 function ItemTooltip.OnPrices(fn)
     hook()
     providers[#providers + 1] = fn
+end
+
+---Calls `fn(tooltip, data)` on every item tooltip just above the price lines (or where they'd
+---go), for lines about the item that aren't prices. Hooks can't be removed, so `fn` checks
+---whether its module is on.
+---@param fn fun(tooltip: table, data: table)
+function ItemTooltip.OnInfo(fn)
+    hook()
+    infoProviders[#infoProviders + 1] = fn
 end
 
 ---Lets `fn(tooltip, data, lineData)` draw the sell price line instead of Blizzard. It returns

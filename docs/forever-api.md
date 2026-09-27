@@ -193,6 +193,13 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 - Only one tracking spell is on at a time, as in Classic: turning on Find Herbs turns off Find Minerals. **[addon]** (GatherSkillTooltip treats either one being on as enough when the player has both skills) **Unverified** in game.
 - Tracking is lost on death and needs turning back on after resurrection. **[addon]** (AutoTrackers restores on `PLAYER_ALIVE` / `PLAYER_UNGHOST`)
 
+## Professions and gathering tooltips
+
+- `GetProfessions()` and `GetProfessionInfo(index)` give the gathering skills, with the skill line as the seventh value (Herbalism 182, Mining 186, Skinning 393) and the gear bonus as the eighth. **[addon]** (GatherSkillTooltip `Skills.lua`, `Data.lua`)
+- Herbs and veins under the mouse come as `Enum.TooltipDataType.Object` tooltips and minimap pins as `MinimapMouseover`, with the object's name in `data.lines[1].leftText`. Overlapping pins put several names in that one line, separated by newlines. **[addon]** (GatherSkillTooltip `Events.lua`, `Tooltip.lua`)
+- `UnitCreatureType(unit)` may give the creature type's ID (Beast 1, Dragonkin 2) as a second value. GatherSkillTooltip checks it and falls back to the name, and so does Gathering Tooltips. **Unverified**
+- Skill needed for nodes, items, and skinning is taken from Classic (skinning: 1 up to level 10, then level x 10 - 100 to level 20, then level x 5). Forever may differ. **Unverified**
+
 ## Weapon sheathing
 
 - `GetSheathState()` (1 nothing drawn, 2 melee, 3 ranged) and `ToggleSheath()` are there, and `ToggleSheath()` works from a `C_Timer` callback with no key press. One toggle puts away everything drawn. `hooksecurefunc("ToggleSheath", fn)` sees the Sheath/Unsheath key. **[addon]** (AutoStow 1.2.2 `AutoStow.lua`, which stows out of combat on a timer) Not yet tested by us in the live client.
@@ -251,6 +258,7 @@ Check these in the live client and move them up with a tag and date:
 - [ ] Does `RepopMe()` work from an addon's timer after `PLAYER_DEAD`, and does `IsInInstance()` say `"pvp"` in battlegrounds?
 - [ ] Does `C_RecentAllies.IsRecentAllyByGUID` answer right after login, before the Recent Allies tab is opened?
 - [ ] Do `DUEL_REQUESTED`, `CancelDuel()`, and `StaticPopup_Hide("DUEL_REQUESTED")` work as on Retail? No installed addon uses them. **Unverified** (AutoDecline depends on them.)- [ ] Does `DUEL_REQUESTED` give the name with a surname or realm attached? AutoDecline compares names with anything after a `-` cut off.
+- [ ] Does `UnitCreatureType` return the creature type's ID as its second value, and does the client already show a skill line on herb and ore tooltips? (Gathering Tooltips.)
 - [ ] What are the defaults of `autoDismount`, `autoStand` and `autoUnshift`, and do `Dismount()` and `C_ChatInfo.PerformEmote("STAND")` work from a `UI_ERROR_MESSAGE` handler out of combat?
 
 ## Sources

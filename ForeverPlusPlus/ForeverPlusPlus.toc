@@ -15,6 +15,7 @@ Lib\CVars.lua
 Lib\Nameplates.lua
 Lib\Units.lua
 Lib\ItemTooltip.lua
+Lib\Professions.lua
 Lib\PlateLabel.lua
 Lib\FriendlyPlates.lua
 Modules\PlayerPlates.lua
@@ -29,6 +30,7 @@ Modules\BagSlots.lua
 Modules\HideFeedback.lua
 Modules\Tooltips.lua
 Modules\GatherTracking.lua
+Modules\GatherTooltips.lua
 Modules\AutoStow.lua
 Modules\AutoGossip.lua
 Modules\AutoDecline.lua

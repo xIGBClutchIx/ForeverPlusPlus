@@ -24,6 +24,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Auction Prices | Scans the auction house when you open it and shows the lowest buyout in item tooltips, under the sell price. |
 | Bag Slot Counter | Shows how many bag slots are free on the backpack button, or each bag's own count on its button, with the reagent bag counted on its own. |
 | Durability Bars | Shows a small bar beside each item on the character window with how worn it is. |
+| Gathering Tooltips | Shows the skill a herb, ore, or skinnable beast needs in its tooltip, colored like trainer recipes against your skill, and the skill that gathers herb, ore, and stone items. Only for professions you have. |
 | Sell Price | Shows the vendor price of the whole stack in item tooltips. Hold Shift for one item. |
 | **Interface** | |
 | Auto Screenshot | Takes a screenshot when you level up, earn an achievement, or defeat a boss, and can for good loot, reputation, PvP ranks, titles, battlegrounds, and deaths. Off by default. |
