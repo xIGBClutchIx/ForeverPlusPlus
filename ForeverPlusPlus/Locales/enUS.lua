@@ -158,9 +158,14 @@ L.AUCTIONPRICES_SCAN_AGE_DESC = "Add a line under the auction price with how lon
     .. "house was last scanned, in the same style as the price."
 L.AUCTIONPRICES_SCAN_AGE_OFF = "Hidden"
 L.AUCTIONPRICES_SCAN_AGE_COLOR = "Scan Age Color"
-L.AUCTIONPRICES_SCAN_AGE_COLOR_DESC = "The color of the scan age. By Age goes from green within "
-    .. "the hour, through yellow at a day old, to red at two days."
+L.AUCTIONPRICES_SCAN_AGE_COLOR_DESC = "The color of the scan age. By Age goes from green when "
+    .. "just scanned, through yellow, to red at the Red After age."
 L.AUCTIONPRICES_SCAN_AGE_COLOR_AGE = "By Age"
+L.AUCTIONPRICES_SCAN_AGE_RED = "Red After"
+L.AUCTIONPRICES_SCAN_AGE_RED_DESC = "With Scan Age Color on By Age, how old a scan is when its age "
+    .. "turns fully red. It's yellow at half that."
+L.AUCTIONPRICES_ONE_HOUR = "1 Hour"
+L.AUCTIONPRICES_HOURS = "%d Hours" -- hours, more than one
 L.AUCTIONPRICES_SCAN_AGE_LINE = "Scanned"
 L.AUCTIONPRICES_AGO_NOW = "just now"
 L.AUCTIONPRICES_AGO_MINUTES = "%dm ago" -- minutes

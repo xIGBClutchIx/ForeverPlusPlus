@@ -7,7 +7,7 @@
 -- and Auctionator leaves it off by default. Browse results give the lowest unit price per item.
 local _, ns = ...
 
-local ipairs, format, time, floor = ipairs, string.format, time, math.floor
+local ipairs, format, time, floor, tonumber = ipairs, string.format, time, math.floor, tonumber
 local C_AuctionHouse, C_Timer = C_AuctionHouse, C_Timer
 local GetRealmName, UnitFactionGroup = GetRealmName, UnitFactionGroup
 local CreateFrame, pcall = CreateFrame, pcall
@@ -23,6 +23,7 @@ local module = ns.NewModule("AuctionPrices", L.AUCTIONPRICES_DESC, ItemTooltip.P
     scanOnOpen = true,
     scanAge = "right", -- "right", "inline" (like the price line's alignment), or "off"
     scanAgeColor = "age", -- "age" (green when fresh to red when old), "gray", "white", or "gold"
+    scanAgeRed = "21600", -- seconds old at which "age" is fully red
     chat = true,
     -- Per auction house ("Realm-Faction"): { scannedAt = time(), prices = { [itemID] = copper } }.
     -- Data, not a setting: it isn't in module.options.
@@ -54,6 +55,20 @@ module.options = ItemTooltip.PriceOptions({
             { "gray", L.PRICE_COLOR_GRAY },
             { "white", L.PRICE_COLOR_WHITE },
             { "gold", L.PRICE_COLOR_GOLD },
+        },
+    },
+    {
+        key = "scanAgeRed",
+        name = L.AUCTIONPRICES_SCAN_AGE_RED,
+        description = L.AUCTIONPRICES_SCAN_AGE_RED_DESC,
+        section = L.AUCTIONPRICES_SECTION_TOOLTIP,
+        choices = {
+            { "3600", L.AUCTIONPRICES_ONE_HOUR },
+            { "10800", format(L.AUCTIONPRICES_HOURS, 3) },
+            { "21600", format(L.AUCTIONPRICES_HOURS, 6) },
+            { "43200", format(L.AUCTIONPRICES_HOURS, 12) },
+            { "86400", format(L.AUCTIONPRICES_HOURS, 24) },
+            { "172800", format(L.AUCTIONPRICES_HOURS, 48) },
         },
     },
     {
@@ -322,12 +337,10 @@ local function ago(seconds)
     return format(L.AUCTIONPRICES_AGO_DAYS, floor(seconds / 86400))
 end
 
--- Scan Age Color "age": green up to an hour old, through yellow at a day, to red at two days.
-local FRESH, STALE = 3600, 2 * 86400
-
+-- Scan Age Color "age": green when just scanned, yellow halfway, red at Red After (seconds).
 local function ageColor(seconds)
-    local t = (seconds - FRESH) / (STALE - FRESH)
-    t = t < 0 and 0 or t > 1 and 1 or t
+    local t = seconds / (tonumber(module.db.scanAgeRed) or 21600)
+    t = t > 1 and 1 or t
     if t < 0.5 then
         return { t * 2, 1, 0 }
     end
