@@ -25,7 +25,16 @@ local GUILDMATE_COLORS = {
     gray = GUILD_COLORS.green,
     green = { 0.9, 0.9, 0.9 },
 }
-local NPC_COLOR = { 0.1, 1, 0.1 } -- the green of friendly NPC names in the world
+-- NPC Name Color choices.
+local NPC_COLORS = {
+    green = { 0.1, 1, 0.1 }, -- the green of friendly NPC names in the world
+    white = { 1, 1, 1 },
+}
+
+-- The color an NPC's name takes.
+local function npcColor()
+    return NPC_COLORS[module.db.npcNameColor] or NPC_COLORS.green
+end
 
 local labels = setmetatable({}, { __mode = "k" }) -- Blizzard unit frame -> our label on it
 
@@ -141,14 +150,15 @@ end
 
 local function colorName(label, record, unit)
     local _, class = UnitClass(unit)
-    local color = record.isPlayer and module.db.classColor and readable(class) and class
+    local color = record.isPlayer and module.db.nameColor == "class" and readable(class) and class
         and C_ClassColor and C_ClassColor.GetClassColor(class)
     if color then
         label.name:SetTextColor(color:GetRGB())
     elseif record.isPlayer then
         label.name:SetTextColor(1, 1, 1)
     else
-        label.name:SetTextColor(NPC_COLOR[1], NPC_COLOR[2], NPC_COLOR[3])
+        local npc = npcColor()
+        label.name:SetTextColor(npc[1], npc[2], npc[3])
     end
 end
 
@@ -229,8 +239,8 @@ local function placeGuild(label, record, unit, shift)
         color = module.db.guildHighlight and Units.IsGuildmate(unit) and GUILDMATE_COLORS[scheme]
             or GUILD_COLORS[scheme]
     else
-        -- An NPC's title: NPC Title Color, where "name" matches the NPC's green name.
-        color = GUILD_COLORS[module.db.npcTitleColor] or NPC_COLOR
+        -- An NPC's title: NPC Title Color, where "name" matches the NPC's name.
+        color = GUILD_COLORS[module.db.npcTitleColor] or npcColor()
     end
     label.guild:SetTextColor(color[1], color[2], color[3])
     label.barGuild:SetTextColor(color[1], color[2], color[3])
