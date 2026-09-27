@@ -344,6 +344,19 @@ L.AUTOSTOW_OUTSIDE_ONLY = "Only Out of Instances"
 L.AUTOSTOW_OUTSIDE_ONLY_DESC = "Leave your weapons out in dungeons, raids and battlegrounds, where "
     .. "the next pull is never far off."
 
+-- AutoDismount
+L.AUTODISMOUNT_TITLE = "Auto Dismount"
+L.AUTODISMOUNT_DESC = "Get off your mount or stand up when something fails because you're "
+    .. "mounted or sitting, like casting a spell, taking a flight, or looting."
+L.AUTODISMOUNT_DISMOUNT = "Dismount"
+L.AUTODISMOUNT_DISMOUNT_DESC = "Get off your mount when you cast a spell, talk to a flight master, "
+    .. "or attack while mounted."
+L.AUTODISMOUNT_STAND = "Stand Up"
+L.AUTODISMOUNT_STAND_DESC = "Stand up when you cast a spell, loot, or attack while sitting."
+L.AUTODISMOUNT_UNSHIFT = "Leave Shapeshift Form"
+L.AUTODISMOUNT_UNSHIFT_DESC = "Leave a shapeshift form, like a druid's Bear or Cat Form, when you "
+    .. "cast a spell that can't be cast in it."
+
 -- AutoGossip
 L.AUTOGOSSIP_TITLE = "Auto Gossip"
 L.AUTOGOSSIP_DESC = "When an NPC has only one thing to say and no quests, pick it for you, so "

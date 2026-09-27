@@ -12,6 +12,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 |---|---|
 | **Automation** | |
 | Auto Decline | Turns down duel requests and closes the popup, and says in chat who asked. Can let friends and guildmates through. Off by default. |
+| Auto Dismount | Gets you off your mount or stands you up when a spell, flight, loot, or attack fails because you're mounted or sitting. Can also leave shapeshift forms (off by default). |
 | Auto Gossip | When an NPC has only one thing to say and no quests, picks it for you, so the bank, shop, or flight map opens straight away. Hold Shift to choose yourself. |
 | Auto Release | Releases your spirit when you die in a battleground, unless you can resurrect yourself or someone is resurrecting you. Off by default. |
 | Auto Repair | Repairs your gear at any merchant who repairs and says in chat what it cost. Hold Shift to skip it. |

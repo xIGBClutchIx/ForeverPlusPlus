@@ -152,6 +152,8 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 
 - The console's command list is the global `ConsoleGetAllCommands()` (entries with `command`, `help`, `commandType`, where `Enum.ConsoleCommandType.Cvar` marks a CVar), as on Retail. `C_Console` doesn't exist, so `C_Console.GetAllCommands` gave the CVar browser an empty list. **[local]** (2026-09-26, the `ConsoleGetAllCommands`, `ConsoleCommandType` and `Cvar` strings in `WowB.exe` 70009, next to `ConsoleExec`) **[in-game]** (the empty list)
 - `C_CVar.GetCVarInfo(name)` returns value, default, account, character, locked, secure, read only. **[local]** (its usage string in `WowB.exe`)
+- The client has `autoDismount` ("Automatically dismount when needed"), `autoDismountFlying`, `autoStand` ("Automatically stand when needed") and `autoUnshift` ("Automatically leave shapeshift form when needed"), as on Retail. **[local]** (2026-09-27, the names and help strings together in `WowB.exe` 70009) Their default values, and whether they cover more than casting (flight masters, looting), are **Unverified**.
+- `C_ChatInfo.PerformEmote` exists. **[addon]** (Leatrix_Maps hooks it with `hooksecurefunc`) Whether `PerformEmote("STAND")` from an event handler stands the player up is **Unverified**, as is whether `Dismount()` is callable from an addon.
 - `Settings.RegisterCanvasLayoutSubcategory` works on Forever. **[addon]** (Auctionator `PanelConfig.lua`, AceConfigDialog in several addons)
 - A checkbox with a button beside it: `CreateSettingsCheckboxWithButtonInitializer(setting, buttonText, onClick, nil, clickRequiresSet, tooltip)`, added with `layout:AddInitializer`. **[addon]** (ManiaTip `Libs/Huddle/Modules/Settings.lua`) What the fourth argument is (nil there) is **Unverified**; Forever++ probes for the function.
 
@@ -237,6 +239,7 @@ Check these in the live client and move them up with a tag and date:
 - [ ] Do `DUEL_REQUESTED`, `CancelDuel()`, and `StaticPopup_Hide("DUEL_REQUESTED")` work as on Retail? No installed addon uses them. **Unverified** (AutoDecline depends on them.)
 - [ ] Does Forever have `C_PetBattles.CancelPVPDuel` and `PET_BATTLE_PVP_DUEL_REQUESTED`? AutoDecline probes and shows its Pet Battle Duels option only if so.
 - [ ] Does `DUEL_REQUESTED` give the name with a surname or realm attached? AutoDecline compares names with anything after a `-` cut off.
+- [ ] What are the defaults of `autoDismount`, `autoStand` and `autoUnshift`, and do `Dismount()` and `C_ChatInfo.PerformEmote("STAND")` work from a `UI_ERROR_MESSAGE` handler out of combat?
 
 ## Sources
 

@@ -7,6 +7,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Added
 
 - **Auto Decline**: turns down duel requests and closes the popup. Includes letting friends and guildmates through, pet battle duels where the game has them, and saying in chat who was declined. Off by default.
+- **Auto Dismount**: gets you off your mount or stands you up when a spell, flight, loot, or attack fails because you're mounted or sitting. Includes separate Dismount and Stand Up options, and leaving shapeshift forms (off by default).
 - **Auto Release**: releases your spirit when you die in a battleground. Includes a delay, and staying put when a soulstone, reincarnation, or someone else can resurrect you. Off by default.
 - **Bag Slot Counter**: how many bag slots are free, on the bag buttons. Includes the total on the backpack or each bag's own count, and counting special bags such as quivers and herb bags.
 - **Skip Cinematics**: skips the game's cinematics and movies. Off by default. Includes skipping only ones already seen on any character or every one, holding Shift to watch, and a Forget button for the seen list.
