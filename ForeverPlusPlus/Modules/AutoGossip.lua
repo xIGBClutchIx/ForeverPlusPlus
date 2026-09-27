@@ -15,7 +15,6 @@ local module = ns.NewModule("AutoGossip", L.AUTOGOSSIP_DESC, {
     vendor = true,
     trainer = true,
     taxi = true,
-    innkeeper = true,
     stable = true,
     other = true,
     printOptions = false,
@@ -27,7 +26,6 @@ module.options = {
     { key = "vendor", name = L.AUTOGOSSIP_VENDOR, description = L.AUTOGOSSIP_VENDOR_DESC },
     { key = "trainer", name = L.AUTOGOSSIP_TRAINER, description = L.AUTOGOSSIP_TRAINER_DESC },
     { key = "taxi", name = L.AUTOGOSSIP_TAXI, description = L.AUTOGOSSIP_TAXI_DESC },
-    { key = "innkeeper", name = L.AUTOGOSSIP_INNKEEPER, description = L.AUTOGOSSIP_INNKEEPER_DESC },
     { key = "stable", name = L.AUTOGOSSIP_STABLE, description = L.AUTOGOSSIP_STABLE_DESC },
     { key = "other", name = L.AUTOGOSSIP_OTHER, description = L.AUTOGOSSIP_OTHER_DESC },
     {
@@ -45,7 +43,6 @@ local ICONS = {
     [132060] = "vendor", -- VendorGossipIcon, also repair vendors
     [132058] = "trainer", -- TrainerGossipIcon
     [132057] = "taxi", -- TaxiGossipIcon
-    [132052] = "innkeeper", -- BinderGossipIcon
 }
 
 -- Stable masters have no icon of their own, so they go by the title under the NPC's name.
