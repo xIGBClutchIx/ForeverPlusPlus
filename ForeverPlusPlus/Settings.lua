@@ -214,8 +214,7 @@ local function addOffNotice(layout, module)
     if not (layout and CreateSettingsListSectionHeaderInitializer) then
         return
     end
-    local initializer = CreateSettingsListSectionHeaderInitializer(
-        format(L.SETTINGS_MODULE_OFF, module.title or module.name))
+    local initializer = CreateSettingsListSectionHeaderInitializer(L.SETTINGS_MODULE_OFF)
     if initializer.AddShownPredicate then
         initializer:AddShownPredicate(function() return not module.db.enabled end)
         layout:AddInitializer(initializer)
