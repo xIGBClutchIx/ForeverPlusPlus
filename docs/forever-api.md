@@ -199,6 +199,12 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 - Auctioneers open the auction house straight away, with no gossip. **[in-game]** (2026-09-27)
 - `C_GossipInfo.ForceGossip()` was true at a Wind Rider Master with one option (`95583`), so Forever sets it on plain service NPCs, not only on ones whose text matters. **[in-game]** (2026-09-27) AutoGossip ignores it for known service types, and `C_GossipInfo.SelectOption(95583)` from `GOSSIP_SHOW` then opened the flight map. **[in-game]** (2026-09-27)
 
+## Death and releasing
+
+- `RepopMe`, `C_DeathInfo.GetSelfResurrectOptions`, `UseSelfResurrectOption`, `HasNoReleaseAura`, `UnitHasIncomingResurrection`, and `RESURRECT_REQUEST` are in the build 70009 exe. **[exe]** No installed addon calls them.
+- On Retail, `RepopMe()` isn't protected, and auto-release addons call it from a `C_Timer` after `PLAYER_DEAD`. **[web]** Whether Forever allows that from addon code is **Unverified**; Auto Release relies on it. Check: `/run C_Timer.After(1, RepopMe)` while dead should release with no "blocked" error.
+- `IsInInstance()` returning `"pvp"` in Forever's battlegrounds, and which battlegrounds exist, is **Unverified**. Check: `/dump IsInInstance()` in one.
+
 ## Fonts
 
 - Text measured before its font file has loaded reads as 0 tall on Forever, even after preloading. Measure with a floor of the font size. **[in-game]** (2026-09-23)
@@ -220,6 +226,7 @@ Check these in the live client and move them up with a tag and date:
 - [x] Nodes list their tab's group in `groupIDs` (not always first), and `C_Traits.GetGroupCurrencyInfo` gives points spent per tab. (2026-09-25)
 - [ ] Does `GetGroupCurrencyInfo` return an entry for a tab once it has points, with points in two tabs? (Only one tab had points when tested.)
 - [x] `RECENT_ALLY_FONT_COLOR:GetRGB()` gives (0.325, 0.788, 1). (2026-09-27)
+- [ ] Does `RepopMe()` work from an addon's timer after `PLAYER_DEAD`, and does `IsInInstance()` say `"pvp"` in battlegrounds?
 - [ ] Does `C_RecentAllies.IsRecentAllyByGUID` answer right after login, before the Recent Allies tab is opened?
 - [ ] Do `DUEL_REQUESTED`, `CancelDuel()`, and `StaticPopup_Hide("DUEL_REQUESTED")` work as on Retail? No installed addon uses them. **Unverified** (AutoDecline depends on them.)
 - [ ] Does Forever have `C_PetBattles.CancelPVPDuel` and `PET_BATTLE_PVP_DUEL_REQUESTED`? AutoDecline probes and shows its Pet Battle Duels option only if so.

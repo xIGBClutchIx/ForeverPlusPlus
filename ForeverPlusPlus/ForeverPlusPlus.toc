@@ -32,6 +32,7 @@ Modules\GatherTracking.lua
 Modules\AutoStow.lua
 Modules\AutoGossip.lua
 Modules\AutoDecline.lua
+Modules\AutoRelease.lua
 Changelog.lua
 Settings.lua
 Init.lua

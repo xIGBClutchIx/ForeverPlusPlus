@@ -15,6 +15,9 @@ ns.changelog = {
                 { L.AUTODECLINE_TITLE, "Turns down duel requests and closes the popup. Includes "
                     .. "letting friends and guildmates through, pet battle duels where the game has "
                     .. "them, and saying in chat who was declined. Off by default." },
+                { L.AUTORELEASE_TITLE, "Releases your spirit when you die in a battleground. "
+                    .. "Includes a delay, and staying put when a soulstone, reincarnation, or "
+                    .. "someone else can resurrect you. Off by default." },
                 { L.BAGSLOTS_TITLE, "How many bag slots are free, on the bag buttons. Includes the "
                     .. "total on the backpack or each bag's own count, and counting special bags "
                     .. "such as quivers and herb bags." },

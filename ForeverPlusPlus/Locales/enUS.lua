@@ -388,6 +388,19 @@ L.AUTODECLINE_DECLINED = "Declined a duel from %s." -- player name
 L.AUTODECLINE_DECLINED_PET = "Declined a pet battle duel from %s." -- player name
 L.AUTODECLINE_SOMEONE = "someone"
 
+-- AutoRelease
+L.AUTORELEASE_TITLE = "Auto Release"
+L.AUTORELEASE_DESC = "Release your spirit when you die in a battleground, unless you can "
+    .. "resurrect yourself or someone is resurrecting you."
+L.AUTORELEASE_DELAY = "Delay"
+L.AUTORELEASE_DELAY_DESC = "How long after dying to wait before releasing."
+L.AUTORELEASE_NOW = "Right Away"
+L.AUTORELEASE_SECONDS = "%d Seconds" -- number of seconds
+L.AUTORELEASE_CHAT_DESC = "Say in chat when your spirit was released, or why it wasn't."
+L.AUTORELEASE_RELEASED = "Released your spirit."
+L.AUTORELEASE_SELF_RES = "Didn't release: you can resurrect yourself."
+L.AUTORELEASE_RES_OFFER = "Didn't release: someone is resurrecting you."
+
 -- CVarBrowser
 L.CVARBROWSER_TITLE = "Console Variables"
 L.CVARBROWSER_DESC = "Browse the game's console variables (CVars) on a page in Settings, and "
