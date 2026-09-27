@@ -42,8 +42,11 @@ L.CATEGORY_NAMEPLATES = "Nameplates"
 L.CATEGORY_OTHER = "Other"
 L.DEBUG = "Debug"
 L.SETTINGS_AFTER_COMBAT = "Settings open after combat."
-L.SETTINGS_MODULE_OFF = "Module is disabled: turn it on from the Forever++ page" -- atop its page
-L.SETTINGS_OPEN_PAGE = "%s Options" -- the gear beside a module's checkbox: module title
+L.MODULES = "Modules" -- the page with every module's checkbox, and a button to it
+-- The gear beside a module's checkbox: module title
+L.SETTINGS_SHOW_OPTIONS = "Show %s Options"
+L.SETTINGS_HIDE_OPTIONS = "Hide %s Options"
+L.SETTINGS_OPEN_PAGE = "Open %s" -- for a module with a page of its own
 L.SETTINGS_TURN_ON = "Turn On" -- the button on a "Blizzard's ... is off" row
 
 -- Settings: Changelog page. The notes themselves are in Changelog.lua.
@@ -51,21 +54,25 @@ L.CHANGELOG = "Changelog"
 L.CHANGELOG_RELEASE = "%s (%s)" -- version, date
 L.CHANGELOG_UNRELEASED = "Unreleased"
 L.CHANGELOG_ADDED = "Added"
+L.CHANGELOG_CHANGED = "Changed"
 L.CHANGELOG_SETTINGS = "Settings"
 L.CHANGELOG_COMMANDS = "Commands"
 
--- Settings: About page
-L.ABOUT = "About"
-L.ABOUT_TAGLINE = "Small additions and changes to the default UI for WoW Forever."
-L.ABOUT_VERSION = "Version"
-L.ABOUT_AUTHOR = "Author"
-L.ABOUT_GAME = "Game"
-L.ABOUT_GAME_BUILD = "%s (build %s, interface %s)" -- version, build, interface
-L.ABOUT_WEBSITE = "Website"
-L.ABOUT_ISSUES = "Feedback"
-L.ABOUT_COPY = "Select the link and press Ctrl+C to copy it."
-L.ABOUT_REQUESTS = "Want something changed or a new feature? Ask for it at the link above."
-L.ABOUT_COMMANDS = "Commands"
+-- Settings: the welcome page (the top Forever++ page)
+L.HOME_WELCOME = "Welcome to %s" -- addon title
+L.HOME_TAGLINE = "Small additions and changes to the default UI for WoW Forever."
+L.HOME_VERSION = "Version %s by %s" -- version, author
+L.HOME_INTRO = "Each module is one small change to Blizzard's interface, made to look like it "
+    .. "shipped with the game. Turn them on and off on the Modules page; the gear beside a "
+    .. "module shows its options. Settings are saved for your whole account."
+L.HOME_MODULES_ON = "%d of %d modules on" -- on, total
+L.HOME_GAME_BUILD = "Game %s (build %s, interface %s)" -- version, build, interface
+L.HOME_LINKS = "Links"
+L.HOME_WEBSITE = "Website"
+L.HOME_ISSUES = "Feedback"
+L.HOME_COPY = "Select the link and press Ctrl+C to copy it."
+L.HOME_REQUESTS = "Want something changed or a new feature? Ask for it at the link above."
+L.HOME_COMMANDS = "Commands"
 
 -- Friendly nameplates (Lib/PlateLabel.lua and both plate modules)
 L.PLATES_BLIZZARD_OFF = "Blizzard's nameplates are off" -- a gray row atop the page, with a button

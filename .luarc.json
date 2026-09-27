@@ -16,6 +16,8 @@
     "GameTooltip_SetDefaultAnchor",
     "GetLocale",
     "Settings",
+    "SettingsInbound",
+    "SettingsPanel",
     "CreateSettingsListSectionHeaderInitializer",
     "C_CVar",
     "C_XMLUtil",

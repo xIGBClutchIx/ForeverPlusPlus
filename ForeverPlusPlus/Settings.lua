@@ -1,19 +1,17 @@
 -- The "Forever++" pages in the game's Settings > AddOns list, built from Blizzard's own settings
--- templates so they look like any other options page:
---   Forever++        an on/off checkbox per module (the only place modules turn on and off),
---                    grouped under headers by `module.category`, with a gear that opens its page
---                    when it has one. `alwaysOn` modules (tools) have none
---     <Module>       one page per module with options, holding just its options (and buttons,
---                    from `module.actions`), in the main page's order, greyed out with a note at
---                    the top while the module is off, and its `notice` (a warning) while that
---                    applies (on the main page, under its checkbox, for a module with no page).
---                    Options with a `section` get a header above each group, for pages long
---                    enough to need them
---     <Tool>         a page a module draws itself (`BuildPage`), after the option pages
+-- templates so they look like any other options page. Few entries, so the sidebar stays short:
+--   Forever++        a welcome page: what the addon is, how many modules are on, buttons to the
+--                    Modules and Changelog pages, the version, links, and the /fpp commands
+--     Modules        an on/off checkbox per module (the only place modules turn on and off),
+--                    grouped under headers by `module.category`. A module's options (and buttons,
+--                    from `module.actions`) sit indented under its checkbox, hidden until its gear
+--                    is clicked, and greyed out while it's off. Options with a `section` get a
+--                    header above each group. A module's `notice` (a warning) shows under its
+--                    checkbox while it applies. `alwaysOn` modules (tools) have no checkbox
+--     <Tool>         a page a module draws itself (`BuildPage`)
 --     Debug          options marked `debug = true`, for testing
 --     Changelog      the release notes from Changelog.lua
---     About          the version, links, and /fpp commands
--- Without subpages (an older Settings API), everything goes on the main page instead.
+-- Without subpages (an older Settings API), everything goes on one page with every option shown.
 local _, ns = ...
 
 local ipairs, format, type, sort, strlower = ipairs, string.format, type, table.sort, string.lower
@@ -25,11 +23,35 @@ local L = ns.L
 
 local settings = {} -- module name -> its Blizzard setting objects, to refresh after /fpp changes
 local mainCategory -- the Forever++ page, for /fpp
-local pages = {} -- module name -> its own page, for ns.OpenSettings(name)
+local modulesCategory -- the Modules page
+local changelogCategory -- the Changelog page, for the welcome page's button
+local pages = {} -- module name -> the page it draws itself, for ns.OpenSettings(name)
+local inline = {} -- module name -> true when its options sit under its checkbox on the Modules page
+local expanded = {} -- module name -> true while those options are shown (this session only)
 
--- A page drawn by `build(frame)` instead of from settings, such as a list. Settings needs the
--- frame now, so it starts empty and is filled the first time it's shown.
-local function addCanvasPage(category, name, build)
+-- Redraws the open Settings list, so rows shown or hidden by `expanded` appear or go. Probe:
+-- SettingsInbound.RepairDisplay is Mainline's; ArcaneWizardLibrary uses it on Forever.
+local function canRedraw()
+    return SettingsInbound and SettingsInbound.RepairDisplay and true or false
+end
+
+-- Opens a Forever++ page (after combat, if the player is in combat).
+local function open(category)
+    if not (category and Settings.OpenToCategory and category.GetID) then
+        return false
+    end
+    if InCombatLockdown() then
+        ns.Print(L.SETTINGS_AFTER_COMBAT)
+    end
+    ns.AfterCombat(function()
+        Settings.OpenToCategory(category:GetID())
+    end)
+    return true
+end
+
+-- A frame for a page drawn by `build(frame)` instead of from settings, such as a list. Settings
+-- needs the frame now, so it starts empty and is filled the first time it's shown.
+local function canvasFrame(build)
     local frame = CreateFrame("Frame")
     local built = false
     frame:SetScript("OnShow", function(self)
@@ -38,7 +60,11 @@ local function addCanvasPage(category, name, build)
             build(self)
         end
     end)
-    return Settings.RegisterCanvasLayoutSubcategory(category, frame, name)
+    return frame
+end
+
+local function addCanvasPage(category, name, build)
+    return Settings.RegisterCanvasLayoutSubcategory(category, canvasFrame(build), name)
 end
 
 ---Puts a page's title and the divider under it at the top of a drawn page, like Blizzard's own
@@ -60,11 +86,32 @@ local function track(module, setting)
     list[#list + 1] = setting
 end
 
--- Gear icons beside the main page's checkboxes, for modules with a page. The list's row frames
--- are Blizzard's and pooled across every Settings page, so the gear is our own child button kept
--- in a weak table, shown only while one of our rows uses the frame.
+-- Gear icons beside the Modules page's checkboxes, for modules with options: a click shows or
+-- hides them (or opens the module's own page, for one that draws it). The list's row frames are
+-- Blizzard's and pooled across every Settings page, so the gear is our own child button kept in a
+-- weak table, shown only while one of our rows uses the frame.
 local gears = setmetatable({}, { __mode = "k" }) -- row frame -> our gear button
 local GEAR = "Interface\\WorldMap\\Gear_64" -- the cog Leatrix Maps uses for its option buttons
+
+-- Gold while the options are hidden, white while they show, like a pressed button.
+local function tintGear(gear)
+    local texture = gear:GetNormalTexture()
+    if expanded[gear.module] then
+        texture:SetVertexColor(1, 1, 1)
+    else
+        texture:SetVertexColor(1, 0.82, 0) -- gold, like the labels
+    end
+end
+
+local function gearTooltip(gear)
+    local text = L.SETTINGS_OPEN_PAGE
+    if inline[gear.module] then
+        text = expanded[gear.module] and L.SETTINGS_HIDE_OPTIONS or L.SETTINGS_SHOW_OPTIONS
+    end
+    GameTooltip:SetOwner(gear, "ANCHOR_RIGHT")
+    GameTooltip:SetText(format(text, gear.title), 1, 1, 1)
+    GameTooltip:Show()
+end
 
 local function gearFor(frame, anchor)
     local gear = gears[frame]
@@ -73,15 +120,19 @@ local function gearFor(frame, anchor)
         gear:SetSize(18, 18)
         gear:SetNormalTexture(GEAR)
         gear:GetNormalTexture():SetTexCoord(0, 0.5, 0, 0.5)
-        gear:GetNormalTexture():SetVertexColor(1, 0.82, 0) -- gold, like the labels
         gear:SetHighlightTexture(GEAR, "ADD")
         gear:GetHighlightTexture():SetTexCoord(0, 0.5, 0, 0.5)
-        gear:SetScript("OnClick", function(self) ns.OpenSettings(self.module) end)
-        gear:SetScript("OnEnter", function(self)
-            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-            GameTooltip:SetText(format(L.SETTINGS_OPEN_PAGE, self.title), 1, 1, 1)
-            GameTooltip:Show()
+        gear:SetScript("OnClick", function(self)
+            if not inline[self.module] then
+                ns.OpenSettings(self.module)
+                return
+            end
+            expanded[self.module] = not expanded[self.module] or nil
+            tintGear(self)
+            gearTooltip(self)
+            SettingsInbound.RepairDisplay()
         end)
+        gear:SetScript("OnEnter", gearTooltip)
         gear:SetScript("OnLeave", function() GameTooltip:Hide() end)
         -- The frame goes back to the pool hidden; another page's row may get it next.
         frame:HookScript("OnHide", function() gear:Hide() end)
@@ -104,13 +155,14 @@ local function addGear(initializer, module)
         end
         local gear = gearFor(frame, anchor)
         gear.module, gear.title = module.name, module.title or module.name
+        tintGear(gear)
         gear:Show()
     end)
 end
 
--- The module's on/off checkbox on the main page. It reads and writes through the module, so
--- /fpp and the page agree. With a page of its own, a gear beside it opens that page.
-local function addToggle(category, module, hasPage)
+-- The module's on/off checkbox on the Modules page. It reads and writes through the module, so
+-- /fpp and the page agree. A gear beside it shows its options, or opens its own page.
+local function addToggle(category, module, hasGear)
     local setting = Settings.RegisterProxySetting(category,
         format("ForeverPlusPlus_%s", module.name), Settings.VarType.Boolean,
         module.title or module.name, module.defaults.enabled,
@@ -118,13 +170,13 @@ local function addToggle(category, module, hasPage)
         function(value) ns.SetEnabled(module.name, value) end)
     track(module, setting)
     local initializer = Settings.CreateCheckbox(category, setting, module.description)
-    if hasPage and initializer then
+    if hasGear and initializer then
         addGear(initializer, module)
     end
     return initializer
 end
 
--- Greys a row out while the module is off, so its page shows nothing on it applies. Probe:
+-- Greys a row out while the module is off, so it shows nothing on it applies. Probe:
 -- AddModifyPredicate is Mainline's; ManiaTip uses it on Forever.
 local function greyWhenOff(initializer, module)
     if initializer and initializer.AddModifyPredicate then
@@ -132,10 +184,27 @@ local function greyWhenOff(initializer, module)
     end
 end
 
+-- Hides a row unless `shown()` is true. Probe: AddShownPredicate is Mainline's; ManiaTip uses it
+-- on Forever.
+local function showWhen(initializer, shown)
+    if shown and initializer and initializer.AddShownPredicate then
+        initializer:AddShownPredicate(shown)
+    end
+end
+
+-- Indents a row under the module's checkbox (`parent`), greyed out while the module is off, or
+-- just greys it without one (the Debug page).
+local function placeUnder(initializer, module, parent)
+    if parent and initializer and initializer.SetParentInitializer then
+        initializer:SetParentInitializer(parent, function() return module.db.enabled end)
+    else
+        greyWhenOff(initializer, module)
+    end
+end
+
 -- A module's own option (from `module.options`): a checkbox, or a dropdown when it lists
--- `choices`. With a `parent` (the main page, without subpages), it's indented under it; either
--- way it's greyed out while the module is off.
-local function addOption(category, module, option, parent)
+-- `choices`, under its checkbox, and only while `shown()` is true.
+local function addOption(category, module, option, parent, shown)
     local choices = option.choices
     if choices and not (Settings.CreateDropdown and Settings.CreateControlTextContainer) then
         return -- Probe: dropdowns are Mainline's; leave the option at its default without one.
@@ -159,16 +228,15 @@ local function addOption(category, module, option, parent)
     else
         initializer = Settings.CreateCheckbox(category, setting, option.description)
     end
-    if parent and initializer and initializer.SetParentInitializer then
-        initializer:SetParentInitializer(parent, function() return module.db.enabled end)
-    else
-        greyWhenOff(initializer, module)
-    end
+    placeUnder(initializer, module, parent)
+    showWhen(initializer, shown)
 end
 
-local function addHeader(layout, text)
+local function addHeader(layout, text, shown)
     if layout and CreateSettingsListSectionHeaderInitializer then
-        layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(text))
+        local initializer = CreateSettingsListSectionHeaderInitializer(text)
+        showWhen(initializer, shown)
+        layout:AddInitializer(initializer)
     end
 end
 
@@ -181,53 +249,42 @@ local function hasOptions(module, debug)
     return false
 end
 
--- A module's options, in the order it lists them. With a layout (the module's own page), an
--- option whose `section` differs from the one before it starts a new section header there.
-local function addOptions(category, module, parent, debug, layout)
-    local section
+-- A module's options, in the order it lists them. An option whose `section` differs from the one
+-- before it starts a new section header. Returns whether any section header was added.
+local function addOptions(category, layout, module, parent, debug, shown)
+    local section, sectioned
     for _, option in ipairs(module.options or {}) do
         if (option.debug or false) == debug then
             if option.section and option.section ~= section then
-                addHeader(layout, option.section)
+                addHeader(layout, option.section, shown)
+                sectioned = true
             end
             section = option.section
-            addOption(category, module, option, parent)
+            addOption(category, module, option, parent, shown)
         end
     end
+    return sectioned
 end
 
 -- A module's buttons (from `module.actions`: `{ name, button, description, fn }`), after its
 -- options.
-local function addActions(layout, module)
+local function addActions(layout, module, parent, shown)
     if not (layout and CreateSettingsButtonInitializer) then
         return -- Probe: the button row is Mainline's Settings.
     end
     for _, action in ipairs(module.actions or {}) do
         local initializer = CreateSettingsButtonInitializer(action.name, action.button,
             action.fn, action.description, true)
-        greyWhenOff(initializer, module)
+        placeUnder(initializer, module, parent)
+        showWhen(initializer, shown)
         layout:AddInitializer(initializer)
     end
 end
 
--- The top of a module's page, only while it's off: says the page's options don't apply, and
--- where to turn it on. Probe: AddShownPredicate is Mainline's; ManiaTip uses it on Forever.
-local function addOffNotice(layout, module)
-    if not (layout and CreateSettingsListSectionHeaderInitializer) then
-        return
-    end
-    local initializer = CreateSettingsListSectionHeaderInitializer(L.SETTINGS_MODULE_OFF)
-    if initializer.AddShownPredicate then
-        initializer:AddShownPredicate(function() return not module.db.enabled end)
-        layout:AddInitializer(initializer)
-    end
-end
-
--- A module's `notice` ({ text, description, button, fn, shown }): a gray row at the top of its
--- page while `shown()` is true, such as a Blizzard setting the module needs being off, with a
--- button that fixes it. A normal settings row, so it's the size of the options below it. A module
--- without a page gets it on the main page instead, indented under its checkbox (`parent`).
--- ns.CVars.OffNotice makes one for a CVar.
+-- A module's `notice` ({ text, description, button, fn, shown }): a gray row under its checkbox
+-- while `shown()` is true, such as a Blizzard setting the module needs being off, with a button
+-- that fixes it. A normal settings row, so it's the size of the options around it. It shows
+-- whether or not the module's options do. ns.CVars.OffNotice makes one for a CVar.
 local function addNotice(layout, module, parent)
     local notice = module.notice
     if not (notice and layout and CreateSettingsButtonInitializer) then
@@ -244,9 +301,10 @@ local function addNotice(layout, module, parent)
     end
 end
 
--- About page ----------------------------------------------------------------------------------
--- The version and who made it, the game build, links, and the /fpp commands. Built the first time
--- it's shown.
+-- Welcome page --------------------------------------------------------------------------------
+-- The top Forever++ page: what the addon is, how many modules are on, the way to the Modules and
+-- Changelog pages, links, and the /fpp commands. Built the first time it's shown; the module count
+-- updates each time.
 
 local WEBSITE = "https://github.com/xIGBClutchIx/ForeverPlusPlus"
 local ISSUES = WEBSITE .. "/issues"
@@ -264,15 +322,6 @@ local function addLabel(frame, y, text)
     label:SetJustifyH("LEFT")
     label:SetText(text)
     return label
-end
-
--- A gold label with a value beside it, the way Blizzard's own info pages look.
-local function addRow(frame, y, label, value)
-    local left = addLabel(frame, y, label)
-    local right = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    right:SetPoint("LEFT", left, "RIGHT", 8, 0)
-    right:SetText(value)
-    return right
 end
 
 -- A link can't be clicked in the game, so it sits in a read-only box, selected on click, to copy.
@@ -296,7 +345,7 @@ local function addLink(frame, y, label, url)
     end)
     box:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-        GameTooltip:SetText(L.ABOUT_COPY, nil, nil, nil, nil, true)
+        GameTooltip:SetText(L.HOME_COPY, nil, nil, nil, nil, true)
         GameTooltip:Show()
     end)
     box:SetScript("OnLeave", function() GameTooltip:Hide() end)
@@ -308,36 +357,86 @@ local function addHeading(frame, y, text)
     heading:SetText(text)
 end
 
-local function buildAbout(frame)
+local function addButton(frame, text, category)
+    local button = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
+    button:SetSize(140, 24)
+    button:SetText(text)
+    button:SetScript("OnClick", function() open(category) end)
+    return button
+end
+
+-- How many modules the player can turn on, and how many are on.
+local function countModules()
+    local on, total = 0, 0
+    for _, name in ipairs(ns.order) do
+        local module = ns.modules[name]
+        if not (module.unavailable or module.alwaysOn) then
+            total = total + 1
+            if module.db.enabled then
+                on = on + 1
+            end
+        end
+    end
+    return on, total
+end
+
+local function buildWelcome(frame)
     ns.AddPageTitle(frame, ns.title)
 
     local icon = frame:CreateTexture(nil, "ARTWORK")
     icon:SetSize(64, 64)
-    icon:SetPoint("TOPRIGHT", -16, -64)
+    icon:SetPoint("TOPLEFT", 16, -64)
     icon:SetTexture(ns.icon)
 
-    local tagline = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    tagline:SetPoint("TOPLEFT", 16, -64)
-    tagline:SetText(metadata("Notes") ~= "" and metadata("Notes") or L.ABOUT_TAGLINE)
+    local welcome = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    welcome:SetPoint("TOPLEFT", icon, "TOPRIGHT", 12, -4)
+    welcome:SetText(format(L.HOME_WELCOME, ns.title))
 
-    local version, build, _, interface = GetBuildInfo()
-    local y = -92
-    addRow(frame, y, L.ABOUT_VERSION, metadata("Version"))
-    y = y - 20
-    addRow(frame, y, L.ABOUT_AUTHOR, metadata("Author"))
-    y = y - 20
-    addRow(frame, y, L.ABOUT_GAME, format(L.ABOUT_GAME_BUILD, version, build, interface))
+    local tagline = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    tagline:SetPoint("TOPLEFT", welcome, "BOTTOMLEFT", 0, -6)
+    tagline:SetText(metadata("Notes") ~= "" and metadata("Notes") or L.HOME_TAGLINE)
+
+    local version = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    version:SetPoint("TOPLEFT", tagline, "BOTTOMLEFT", 0, -6)
+    version:SetText(format(L.HOME_VERSION, metadata("Version"), metadata("Author")))
+
+    local y = -144
+    local intro = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    intro:SetPoint("TOPLEFT", 16, y)
+    intro:SetWidth(560)
+    intro:SetJustifyH("LEFT")
+    intro:SetText(L.HOME_INTRO)
+    y = y - intro:GetStringHeight() - 14
+
+    local status = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    status:SetPoint("TOPLEFT", 16, y)
+    local function update()
+        status:SetText(format(L.HOME_MODULES_ON, countModules()))
+    end
+    update()
+    frame:HookScript("OnShow", update) -- after /fpp or the Modules page changed some
+    y = y - 22
+
+    local modules = addButton(frame, L.MODULES, modulesCategory)
+    modules:SetPoint("TOPLEFT", 16, y)
+    if changelogCategory then
+        local changelog = addButton(frame, L.CHANGELOG, changelogCategory)
+        changelog:SetPoint("LEFT", modules, "RIGHT", 8, 0)
+    end
+
+    y = y - 44
+    addHeading(frame, y, L.HOME_LINKS)
     y = y - 26
-    addLink(frame, y, L.ABOUT_WEBSITE, WEBSITE)
+    addLink(frame, y, L.HOME_WEBSITE, WEBSITE)
     y = y - 24
-    addLink(frame, y, L.ABOUT_ISSUES, ISSUES)
+    addLink(frame, y, L.HOME_ISSUES, ISSUES)
     y = y - 22
     local requests = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     requests:SetPoint("TOPLEFT", 16, y)
-    requests:SetText(L.ABOUT_REQUESTS)
+    requests:SetText(L.HOME_REQUESTS)
 
     y = y - 30
-    addHeading(frame, y, L.ABOUT_COMMANDS)
+    addHeading(frame, y, L.HOME_COMMANDS)
     y = y - 24
     for _, line in ipairs(ns.Commands()) do
         local command = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
@@ -348,6 +447,11 @@ local function buildAbout(frame)
         description:SetText(line[2])
         y = y - 16
     end
+
+    local gameVersion, build, _, interface = GetBuildInfo()
+    local game = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    game:SetPoint("BOTTOMLEFT", 16, 12)
+    game:SetText(format(L.HOME_GAME_BUILD, gameVersion, build, interface))
 end
 
 -- Changelog page ------------------------------------------------------------------------------
@@ -424,7 +528,7 @@ local function byTitle()
     return names
 end
 
--- The main page's groups, in order: a module's `category` and its header. A module without one
+-- The Modules page's groups, in order: a module's `category` and its header. A module without one
 -- goes under Other.
 local CATEGORIES = {
     { "automation", L.CATEGORY_AUTOMATION },
@@ -443,17 +547,49 @@ local function categoryOf(module)
     return CATEGORY_NAMES[module.category] and module.category or "other"
 end
 
+-- The Modules page: each category's modules under its header, each module's options under its
+-- checkbox. With `collapse`, those options show only while the module's gear has them open. A
+-- module whose options have sections of their own gets its category's header again after them, so
+-- the next module doesn't read as part of its last section.
+local function addModules(category, layout, grouped, collapse)
+    local current
+    for i, name in ipairs(grouped) do
+        local module = ns.modules[name]
+        if not module.alwaysOn then
+            local group = categoryOf(module)
+            if group ~= current then
+                current = group
+                addHeader(layout, CATEGORY_NAMES[group])
+            end
+            inline[name] = not module.BuildPage
+                and (hasOptions(module, false) or module.actions) and true or nil
+            local hasGear = module.BuildPage and pages[name] or (collapse and inline[name])
+            local parent = addToggle(category, module, hasGear)
+            addNotice(layout, module, parent)
+            if inline[name] then
+                local shown = collapse and function() return expanded[name] end or nil
+                local sectioned = addOptions(category, layout, module, parent, false, shown)
+                addActions(layout, module, parent, shown)
+                local nextName = grouped[i + 1]
+                if sectioned and nextName and categoryOf(ns.modules[nextName]) == group then
+                    addHeader(layout, CATEGORY_NAMES[group], shown)
+                end
+            end
+        end
+    end
+end
+
 ---Adds the Forever++ pages to Settings > AddOns (called once, after ns.Start).
 function ns.RegisterSettings()
     -- Probe: the Mainline Settings API is on Forever (build 70009), but it's a beta.
     if not (Settings and Settings.RegisterVerticalLayoutCategory and Settings.RegisterAddOnCategory) then
         return
     end
-    local category, layout = Settings.RegisterVerticalLayoutCategory(ns.title)
     local subpages = Settings.RegisterVerticalLayoutSubcategory ~= nil
+        and Settings.RegisterCanvasLayoutSubcategory ~= nil
+        and Settings.RegisterCanvasLayoutCategory ~= nil
     local order = byTitle()
-    -- Modules by category, then title: the order of the main page and of the option pages, so
-    -- each page sits beside the others in its group.
+    -- Modules by category, then title: the order of the Modules page and of the tool pages.
     local grouped = {}
     for _, group in ipairs(CATEGORIES) do
         for _, name in ipairs(order) do
@@ -462,96 +598,66 @@ function ns.RegisterSettings()
             end
         end
     end
-    local canvas = subpages and Settings.RegisterCanvasLayoutSubcategory
-    local function hasPage(module)
-        if module.BuildPage then
-            return canvas and true or false
-        end
-        return subpages and (hasOptions(module, false) or module.actions) and true or false
+
+    -- Without subpages, one page holds every module with its options always shown.
+    if not subpages then
+        local category, layout = Settings.RegisterVerticalLayoutCategory(ns.title)
+        addModules(category, layout, grouped, false)
+        Settings.RegisterAddOnCategory(category)
+        mainCategory, modulesCategory = category, category
+        return
     end
-    -- The main page: each category's modules under its header. Without subpages, a module's
-    -- options follow its checkbox.
-    local current
+
+    local category = Settings.RegisterCanvasLayoutCategory(canvasFrame(buildWelcome), ns.title)
+    local modulesPage, modulesLayout = Settings.RegisterVerticalLayoutSubcategory(category, L.MODULES)
+    modulesCategory = modulesPage
+    -- Pages modules draw themselves (tools such as Console Variables), before the Modules page is
+    -- filled so their gears can open them.
     for _, name in ipairs(grouped) do
         local module = ns.modules[name]
-        if not module.alwaysOn then
-            local group = categoryOf(module)
-            if group ~= current then
-                current = group
-                addHeader(layout, CATEGORY_NAMES[group])
-            end
-            local parent = addToggle(category, module, hasPage(module))
-            if not (subpages and hasPage(module) and not module.BuildPage) then
-                addNotice(layout, module, parent)
-            end
-            if not subpages then
-                addOptions(category, module, parent, false)
-                addActions(layout, module)
-            end
+        if module.BuildPage then
+            pages[name] = addCanvasPage(category, module.title or name, function(frame)
+                module:BuildPage(frame)
+            end)
         end
     end
-    -- A page per module with options.
-    if subpages then
-        for _, name in ipairs(grouped) do
-            local module = ns.modules[name]
-            if not module.BuildPage and hasPage(module) then
-                local page, pageLayout = Settings.RegisterVerticalLayoutSubcategory(category,
-                    module.title or name)
-                pages[name] = page
-                addOffNotice(pageLayout, module)
-                addNotice(pageLayout, module)
-                addOptions(page, module, nil, false, pageLayout)
-                addActions(pageLayout, module)
-            end
-        end
-    end
-    -- Pages modules draw themselves (tools such as Console Variables) go last, above Debug.
-    if canvas then
-        for _, name in ipairs(grouped) do
-            local module = ns.modules[name]
-            if module.BuildPage then
-                pages[name] = addCanvasPage(category, module.title or name, function(frame)
-                    module:BuildPage(frame)
-                end)
-            end
-        end
-    end
+    addModules(modulesPage, modulesLayout, grouped, canRedraw())
     -- Debug options, grouped by module.
-    local debugPage, debugLayout = category, layout
+    local debugPage, debugLayout
     for _, name in ipairs(order) do
         local module = ns.modules[name]
         if hasOptions(module, true) then
-            if debugPage == category and subpages then
+            if not debugPage then
                 debugPage, debugLayout = Settings.RegisterVerticalLayoutSubcategory(category, L.DEBUG)
             end
             addHeader(debugLayout, module.title or name)
-            addOptions(debugPage, module, nil, true)
+            addOptions(debugPage, debugLayout, module, nil, true)
         end
     end
-    if canvas then
-        addCanvasPage(category, L.CHANGELOG, buildChangelog)
-        addCanvasPage(category, L.ABOUT, buildAbout)
-    end
+    changelogCategory = addCanvasPage(category, L.CHANGELOG, buildChangelog)
     Settings.RegisterAddOnCategory(category)
     mainCategory = category
 end
 
----Opens the Forever++ page in Settings, or a module's own page (after combat, if the player is in
----combat).
----@param name? string a module with its own page
+---Opens the Forever++ welcome page in Settings, or a module's options: its own page, or the
+---Modules page with its options shown (after combat, if the player is in combat).
+---@param name? string a module
 ---@return boolean opened false when this client's Settings can't open to it
 function ns.OpenSettings(name)
-    local category = name and pages[name] or mainCategory
-    if not (category and Settings.OpenToCategory and category.GetID) then
-        return false
+    if name and pages[name] then
+        return open(pages[name])
     end
-    if InCombatLockdown() then
-        ns.Print(L.SETTINGS_AFTER_COMBAT)
+    if name and ns.modules[name] then
+        if inline[name] and not expanded[name] then
+            expanded[name] = true
+            -- Already open on the Modules page: show them now.
+            if canRedraw() and SettingsPanel and SettingsPanel:IsShown() then
+                SettingsInbound.RepairDisplay()
+            end
+        end
+        return open(modulesCategory)
     end
-    ns.AfterCombat(function()
-        Settings.OpenToCategory(category:GetID())
-    end)
-    return true
+    return open(mainCategory)
 end
 
 ---Updates a module's checkboxes and dropdowns after it changed somewhere else (/fpp toggle, set).

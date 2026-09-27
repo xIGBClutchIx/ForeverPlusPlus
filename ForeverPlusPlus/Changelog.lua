@@ -46,6 +46,12 @@ ns.changelog = {
                     .. "default. Includes skipping only ones already seen on any character or "
                     .. "every one, holding Shift to watch, and a Forget button for the seen list." },
             } },
+            { L.CHANGELOG_CHANGED, {
+                { L.CHANGELOG_SETTINGS, "Fewer entries in the sidebar. Forever++ opens on a "
+                    .. "welcome page, and every module is on one Modules page, where the gear "
+                    .. "beside a module shows its options under it. About is part of the welcome "
+                    .. "page." },
+            } },
         },
     },
     {
