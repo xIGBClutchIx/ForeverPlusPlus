@@ -215,9 +215,15 @@ local function placeGuild(label, record, unit, shift)
         label.barGuild:Hide()
         return
     end
-    local scheme = GUILD_COLORS[module.db.guildColor] and module.db.guildColor or "gray"
-    local color = record.isPlayer and module.db.guildHighlight and Units.IsGuildmate(unit)
-        and GUILDMATE_COLORS[scheme] or GUILD_COLORS[scheme]
+    local color
+    if record.isPlayer then
+        local scheme = GUILD_COLORS[module.db.guildColor] and module.db.guildColor or "gray"
+        color = module.db.guildHighlight and Units.IsGuildmate(unit) and GUILDMATE_COLORS[scheme]
+            or GUILD_COLORS[scheme]
+    else
+        -- An NPC's title: NPC Title Color, where "name" matches the NPC's green name.
+        color = GUILD_COLORS[module.db.npcTitleColor] or NPC_COLOR
+    end
     label.guild:SetTextColor(color[1], color[2], color[3])
     label.barGuild:SetTextColor(color[1], color[2], color[3])
     label.name:SetPoint("BOTTOM", row, "CENTER", shift, 1)
