@@ -5,7 +5,8 @@
 --                    when it has one. `alwaysOn` modules (tools) have none
 --     <Module>       one page per module with options, holding just its options (and buttons,
 --                    from `module.actions`), in the main page's order, greyed out with a note at
---                    the top while the module is off. Options with a `section`
+--                    the top while the module is off, and its `notice` (a warning) while that
+--                    applies. Options with a `section`
 --                    get a header above each group, for pages long enough to need them
 --     <Tool>         a page a module draws itself (`BuildPage`), after the option pages
 --     Debug          options marked `debug = true`, for testing
@@ -221,6 +222,20 @@ local function addOffNotice(layout, module)
     end
 end
 
+-- A module's `notice` ({ text, shown = fn }): a line at the top of its page while `shown()` is
+-- true, such as a Blizzard setting the module needs being off.
+local function addNotice(layout, module)
+    local notice = module.notice
+    if not (notice and layout and CreateSettingsListSectionHeaderInitializer) then
+        return
+    end
+    local initializer = CreateSettingsListSectionHeaderInitializer(notice.text)
+    if initializer.AddShownPredicate then
+        initializer:AddShownPredicate(notice.shown)
+        layout:AddInitializer(initializer)
+    end
+end
+
 -- About page ----------------------------------------------------------------------------------
 -- The version and who made it, the game build, links, and the /fpp commands. Built the first time
 -- it's shown.
@@ -410,6 +425,7 @@ function ns.RegisterSettings()
                     module.title or name)
                 pages[name] = page
                 addOffNotice(pageLayout, module)
+                addNotice(pageLayout, module)
                 addOptions(page, module, nil, false, pageLayout)
                 addActions(pageLayout, module)
             end

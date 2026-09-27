@@ -73,10 +73,20 @@ function style.SubtitleColor()
     return TITLE_COLORS[module.db.titleColor] or nameColor()
 end
 
+-- Blizzard's friendly NPC nameplates can be turned off after this module turns them on, and then
+-- there are no plates to draw on.
+local SHOW_NPCS = { "nameplateShowFriendlyNpcs", "nameplateShowFriendlyNPCs" }
+module.notice = {
+    text = L.NPCPLATES_BLIZZARD_OFF,
+    shown = function()
+        return module.db.enabled and not ns.CVars.IsOn(SHOW_NPCS)
+    end,
+}
+
 local plates = ns.FriendlyPlates.New(module, {
     players = false,
     cvars = {
-        { names = { "nameplateShowFriendlyNpcs", "nameplateShowFriendlyNPCs" }, value = "1" },
+        { names = SHOW_NPCS, value = "1" },
     },
     style = style,
 })

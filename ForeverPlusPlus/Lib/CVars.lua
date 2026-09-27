@@ -22,6 +22,14 @@ local function find(names)
     end
 end
 
+---Whether a CVar is on ("1"), trying its names newest first. False when this client has none.
+---@param names string|string[]
+---@return boolean
+function CVars.IsOn(names)
+    local name = find(names)
+    return name ~= nil and C_CVar.GetCVar(name) == "1"
+end
+
 ---Sets a CVar, remembering the player's value in `saved` the first time.
 ---@param saved table the owner's saved originals (CVar -> value)
 ---@param names string|string[] the CVar, or its names newest first

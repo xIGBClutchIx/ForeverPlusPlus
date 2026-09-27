@@ -108,12 +108,22 @@ function style.SubtitleColor(unit)
     return GUILD_COLORS[scheme]
 end
 
+-- Blizzard's friendly player nameplates can be turned off after this module turns them on (in
+-- its options, or with its keybind), and then there are no plates to draw on.
+local SHOW_FRIENDLY = { "nameplateShowFriendlyPlayers", "nameplateShowFriends" }
+module.notice = {
+    text = L.PLAYERPLATES_BLIZZARD_OFF,
+    shown = function()
+        return module.db.enabled and not ns.CVars.IsOn(SHOW_FRIENDLY)
+    end,
+}
+
 local plates = ns.FriendlyPlates.New(module, {
     players = true,
     cvars = {
         -- Each entry lists the names the setting has had, newest first; the first one this client
         -- knows is used.
-        { names = { "nameplateShowFriendlyPlayers", "nameplateShowFriends" }, value = "1" },
+        { names = SHOW_FRIENDLY, value = "1" },
         -- Blizzard's names-only mode drops the bar entirely, so it could never come back when hurt.
         { names = { "nameplateShowOnlyNameForFriendlyPlayerUnits", "nameplateShowOnlyNames" }, value = "0" },
         -- Blizzard's own name, shown while the bar is up, stays plain white; class color is for ours.
