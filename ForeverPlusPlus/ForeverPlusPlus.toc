@@ -35,6 +35,7 @@ Modules\AutoDecline.lua
 Modules\AutoRelease.lua
 Modules\SkipCinematics.lua
 Modules\AutoDismount.lua
+Modules\AutoScreenshot.lua
 Changelog.lua
 Settings.lua
 Init.lua

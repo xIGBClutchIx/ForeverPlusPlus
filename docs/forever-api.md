@@ -213,6 +213,15 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 - Movies go through `PLAY_MOVIE(movieID)` and `MovieFrame` (`MovieFrameMixin`, always loaded). `MovieFrame:PlayMovie` sets `MovieFrame.movieID` only when the movie really started, and the skip dialog's confirm button calls `MovieFrame:FinishMovie()`. **[web]** (same repo, `Blizzard_FrameXML/MovieFrame.lua`) `CinematicStarted` / `CinematicFinished` take secret arguments only when untainted, which doesn't matter for plain numbers.
 - Unverified: whether `StopCinematic()` from a `C_Timer.After(0)` after `CINEMATIC_START` ends the cinematic, and whether `FinishMovie()` from a `hooksecurefunc` on `MovieFrame.PlayMovie` works without a taint error. Skip Cinematics depends on both; its Debug option prints each key as it starts.
 
+## Screenshots and milestone events
+
+- `Screenshot()` and the `SCREENSHOT_SUCCEEDED` / `SCREENSHOT_FAILED` events are there, and hiding `UIParent` out of combat for a shot works. **[addon]** (Memento v2.30 `core/Capture.lua`, which lists 16001 in its TOC)
+- Memento registers `PLAYER_LEVEL_UP`, `ACHIEVEMENT_EARNED`, `CRITERIA_EARNED`, `ENCOUNTER_END`, `PVP_MATCH_COMPLETE`, `PLAYER_DEAD`, `DUEL_FINISHED`, and `NEW_RECIPE_LEARNED` on Forever, but not `SHOW_LOOT_TOAST` or the pet, mount, and toy events. **[addon]** (Memento `Memento.lua`)
+- The PvP rank is the renown level of major faction 2800: Blizzard's Character frame reads it with `C_MajorFactions.GetMajorFactionProgressionInfo(2800).renownLevel`, and names it with `PVP_RANK_<n>_<0 Horde, 1 Alliance>`. So a rank up should be `MAJOR_FACTION_RENOWN_LEVEL_CHANGED(2800, new, old)`. **[web]** (the `forever` UI source, `Blizzard_UIPanels_Game/Camelot/PVPRankFrame.lua`) The event firing for it is **Unverified**.
+- `GetNumTitles` / `IsTitleKnown` are used by the Camelot Character frame, and `KNOWN_TITLES_UPDATE` is in the event docs. **[web]** (the `forever` UI source) Whether it fires when a title is earned, and whether the list arrives late at login, is **Unverified**.
+- Which chat event carries "You are now Friendly with ..." (`FACTION_STANDING_CHANGED`) isn't known: Auto Screenshot listens to `CHAT_MSG_SYSTEM` and `CHAT_MSG_COMBAT_FACTION_CHANGE`. **Unverified**.
+- Own loot lines (`LOOT_ITEM_SELF`, `LOOT_ITEM_PUSHED_SELF` and their `_MULTIPLE` forms) in `CHAT_MSG_LOOT` are Retail behavior; whether they can be secret in instances is **Unverified**.
+
 ## Fonts
 
 - Text measured before its font file has loaded reads as 0 tall on Forever, even after preloading. Measure with a floor of the font size. **[in-game]** (2026-09-23)
@@ -245,7 +254,7 @@ Check these in the live client and move them up with a tag and date:
 
 Local, read only:
 - The client's `.build.info`, `_classic_beta_\WTF\Config.wtf`, and `_classic_beta_\WTF\Account\<acct>\` (realm folders, `SavedVariables`).
-- Forever addons whose code shows an API working: Auctionator (v339), BugSack (v12.1.2), AlreadyKnown (1.103), Chatify (3.6, `Forever.lua`, `Config.lua`), Manners (1.0.0-beta.6, `Flavour.lua`, `Core.lua`), MapUtils / AzerothCompendium (D4Lib), ManiaTip (v15), UnifiedProfileManager (AceDB), Leatrix_Plus, AutoStow, GatherSkillTooltip.
+- Forever addons whose code shows an API working: Auctionator (v339), BugSack (v12.1.2), AlreadyKnown (1.103), Chatify (3.6, `Forever.lua`, `Config.lua`), Manners (1.0.0-beta.6, `Flavour.lua`, `Core.lua`), MapUtils / AzerothCompendium (D4Lib), ManiaTip (v15), UnifiedProfileManager (AceDB), Leatrix_Plus, AutoStow, GatherSkillTooltip, Memento (v2.30).
 
 Web (checked 2026-09-25):
 - [TOC format, warcraft.wiki.gg](https://warcraft.wiki.gg/wiki/TOC_format): game types and suffix precedence.

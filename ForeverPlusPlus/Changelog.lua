@@ -2,7 +2,8 @@
 -- CHANGELOG.md at the repo root, so this is the same notes as data: change both together.
 -- Headings and module names come from ns.L; the notes themselves are English, like CHANGELOG.md.
 -- Each release: `version`, `date`, and `sections` of `{ heading, entries }`, where an entry is a
--- line of text or `{ name, text }` (a name shown in gold before its text).
+-- line of text or `{ name, text }` (a name shown in gold before its text). Changes not released
+-- yet go first, with `version = L.CHANGELOG_UNRELEASED` and no date.
 local _, ns = ...
 
 local L = ns.L
@@ -22,6 +23,11 @@ ns.changelog = {
                 { L.AUTORELEASE_TITLE, "Releases your spirit when you die in a battleground. "
                     .. "Includes a delay, and staying put when a soulstone, reincarnation, or "
                     .. "someone else can resurrect you. Off by default." },
+                { L.AUTOSCREENSHOT_TITLE, "Takes a screenshot a moment after you level up or earn "
+                    .. "an achievement, so Blizzard's toast is in it. Includes checkboxes for loot of "
+                    .. "a chosen quality, boss kills, reputation standings, PvP ranks, new titles, "
+                    .. "battleground ends, and deaths, hiding the interface for the shot, and a chat "
+                    .. "line saying why. Off by default." },
                 { L.BAGSLOTS_TITLE, "How many bag slots are free, on the bag buttons. Includes the "
                     .. "total on the backpack or each bag's own count, and counting special bags "
                     .. "such as quivers and herb bags." },

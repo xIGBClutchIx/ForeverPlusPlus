@@ -132,6 +132,15 @@
     "StopCinematic",
     "C_Map",
     "GetSubZoneText",
-    "GetInstanceInfo"
+    "GetInstanceInfo",
+    "C_EventUtils",
+    "Screenshot",
+    "GetNumTitles",
+    "IsTitleKnown",
+    "LOOT_ITEM_SELF",
+    "LOOT_ITEM_SELF_MULTIPLE",
+    "LOOT_ITEM_PUSHED_SELF",
+    "LOOT_ITEM_PUSHED_SELF_MULTIPLE",
+    "FACTION_STANDING_CHANGED"
   ]
 }

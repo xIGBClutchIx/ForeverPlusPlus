@@ -26,6 +26,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Durability Bars | Shows a small bar beside each item on the character window with how worn it is. |
 | Sell Price | Shows the vendor price of the whole stack in item tooltips. Hold Shift for one item. |
 | **Interface** | |
+| Auto Screenshot | Takes a screenshot when you level up or earn an achievement, and can for good loot, boss kills, reputation, PvP ranks, titles, battlegrounds, and deaths. Off by default. |
 | Hide Beta Feedback | Hides the beta's "Press F6 to submit an issue" tooltip line and bug report button. Off by default, and only on beta and PTR clients. |
 | Tooltips | Colors unit and item tooltips by class, reaction, or quality, and adds player titles and who a unit is targeting. |
 | **Nameplates** | |
