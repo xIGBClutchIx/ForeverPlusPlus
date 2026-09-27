@@ -24,13 +24,13 @@ Names:
 
 - `ForeverPlusPlus/`: the shipped addon folder, linked into the client's `Interface\AddOns`.
   - `ForeverPlusPlus.toc`: metadata and load order.
-  - `Core.lua`: the shared `ns`: events (`ns.On`, `ns.Off`), `ns.AfterCombat`, saved settings, modules (`ns.NewModule`, `ns.SetEnabled`), `/fpp` (modules add subcommands with `ns.AddCommand`), `ns.Print`, and the locale table `ns.L`.
+  - `Core.lua`: the shared `ns`: events (`ns.On`, `ns.Off`), `ns.AfterCombat`, saved settings, modules (`ns.NewModule`, `ns.SetEnabled`), `/fpp` (modules add subcommands with `ns.AddCommand`), `ns.Print`, `module:Print` with `ns.ChatOption`, and the locale table `ns.L`.
   - `Locales/*.lua`: player-facing text. `enUS.lua` has every key and is the fallback; another language's file sets only the keys it translates.
   - `Lib/*.lua`: shared services any module can use, loaded before the modules. `Secret.lua` (`ns.IsReadable`, `ns.HealthStepCurve`), `Money.lua` (`ns.Money`: copper as coin text), `CVars.lua` (`ns.CVars`: set CVars and put the player's values back, waiting out combat), `Nameplates.lua` (`ns.Nameplates`: plate added/removed/cast callbacks and Forever's plate parts), `PlateLabel.lua` and `FriendlyPlates.lua` (`ns.PlateLabel`, `ns.FriendlyPlates`: the name-only friendly plates Player Nameplates and NPC Nameplates share), `Units.lua` (`ns.Units`: in my group, a friend, a guildmate), `ItemTooltip.lua` (`ns.ItemTooltip`: price lines together at the sell price, stack counts, Shift redraws). They cost nothing until a module uses them.
-  - `Modules/`: one change each (see "Add a module" in `README.md`). A small module is one file; a bigger one gets a folder of files that share `module.internal`.
-  - `Settings.lua`: the Settings pages (main, one per module with options or its own `BuildPage`, Debug).
-- `.github/workflows/check.yml`: on every push, checks Lua 5.1 syntax, ASCII, and that the TOC and the files match.
+  - `Modules/`: one change each (see "Add a module" in `README.md`). A small module is one file; a bigger one gets a folder of files that share `module.internal`. Today: Player Nameplates, NPC Nameplates, Console Variables (a tool, no toggle), Fast Loot, Auto Repair, Auction Prices, Sell Price, Hide Beta Feedback (beta/PTR only), Gathering Tracking, Auto Stow, Durability Bars, Auto Gossip, Tooltips.
+  - `Settings.lua`: the Settings pages: the main page (a checkbox per module, grouped under a header per category), one page per module with options or its own `BuildPage`, Debug, and About.
   - `Init.lua`: loaded last; calls `ns.Start()` at `PLAYER_LOGIN`.
+- `.github/workflows/check.yml`: on every push, checks Lua 5.1 syntax, ASCII, and that the TOC and the files match.
 - `README.md`: install and usage for people.
 - `docs/forever-api.md`: what we know about the Forever client API, with sources and how sure we are.
 - `.luarc.json`: LuaLS settings (Lua 5.1 and the known globals).
@@ -69,7 +69,7 @@ When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or f
 - One module per change the player can see. A module must work, and be removable, on its own.
 - Plumbing that a second module could want (tracking nameplates, changing CVars, secret-value helpers) goes in `Lib/`, not inside a module. Modules never reach into each other; they share only `Lib/` and `Core.lua`.
 - Default to on only for changes nearly everyone wants; otherwise `enabled = false`.
-- When replacing behavior, delete the old path. No compatibility shims or migrations for unreleased settings.
+- When replacing behavior, delete the old path. No backwards compatibility for settings: no shims, migrations, or renamed-key fallbacks. Rename or drop a setting freely; the core clears settings for modules and options that no longer exist, and a dropdown whose saved value isn't a choice any more goes back to its default.
 - Add a new file to the TOC, after `Core.lua` and before `Init.lua`: `Locales/` first (`enUS.lua` before other languages), then `Lib/`, then `Modules/`.
 - Update `README.md` in the same change when commands, install steps, or the layout change.
 - Record things learned about the Forever client in `docs/forever-api.md`, tagged with how you know. Promote a fact to "How Forever differs from Classic" above only when it changes how code must be written.
@@ -84,7 +84,7 @@ When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or f
 - A module that is off costs nothing: no frames, hooks, events, or `OnUpdate` until `OnEnable`. Every module turns on and off live, with no `/reload`: `OnDisable` undoes what `OnEnable` did, and the core errors on a module with `OnEnable` but no `OnDisable`. A hook can't be removed, so it checks `module.enabled` and does nothing while the module is off.
 - Read settings from `module.db`, filled from the defaults passed to `ns.NewModule`.
 - Annotate public functions with LuaLS `---@param` / `---@return`. Match the comment style of `Core.lua`: short, plain, and saying why.
-- Player-facing text goes through `ns.Print` and stays short.
+- Player-facing text goes through `ns.Print` and stays short. Anything a module says in chat by itself (not in reply to a command) goes through `module:Print` instead, with `chat = true` in its defaults and `ns.ChatOption(description)` in `module.options`, so the player gets a Chat Messages checkbox to silence it.
 - Every player-facing string (chat, Settings names, descriptions, dropdown choices) is `ns.L.KEY`, with the English in `Locales/enUS.lua`. Prefix a module's keys with its name (`FRIENDLYPLATES_...`). Use `%s` placeholders instead of joining pieces, since word order differs between languages.
 
 ## Touching Blizzard's UI
@@ -98,6 +98,15 @@ The goal is to add to Blizzard frames without tainting or breaking them.
 - Many Blizzard windows are load-on-demand (`Blizzard_*` addons). Hook them after they load: check `C_AddOns.IsAddOnLoaded` and otherwise wait for `ADDON_LOADED` with that name.
 - Look native: use `GameFontNormal` and related font objects, Blizzard atlases (`SetAtlas`), and Blizzard templates (`UIPanelButtonTemplate`, `UICheckButtonTemplate`, `BackdropTemplate` with Blizzard's own backdrop info) rather than custom art or fonts.
 - If a module ever needs options beyond `/fpp`, put them in Blizzard's Settings panel, not a custom window.
+
+## Settings
+
+`Settings.lua` builds every page from what modules declare; modules don't create Settings UI themselves (except a `BuildPage` tool page). Details are in "Add a module" in `README.md`.
+
+- The main page is the only place modules turn on and off. Give every module a `module.category`: `automation`, `items`, `interface`, or `nameplates` (anything else lands under Other). It appears under that header, sorted by `module.title`.
+- A tool with nothing to turn off sets `module.alwaysOn = true` and gets no checkbox. A module that only makes sense on some clients gives `module:IsAvailable()`; when that's false at login it stays off and out of Settings and `/fpp`.
+- Options go in `module.options` (`{ key, name, description }`, default in `defaults`): a checkbox, or a dropdown with `choices`. `debug = true` moves one to the Debug page. Buttons go in `module.actions`. React to changes in `module:OnOptionChanged(key)`.
+- On a page long enough to need them, give options a `section` (an `ns.L` string). Each change of section starts a Blizzard section header, so list options grouped in the order they should show, usually a general section first.
 
 ## Git
 
