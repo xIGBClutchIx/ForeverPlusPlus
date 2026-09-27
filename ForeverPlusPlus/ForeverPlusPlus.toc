@@ -8,8 +8,8 @@
 
 Core.lua
 Locales\enUS.lua
-Lib\Colors.lua
 Lib\Secret.lua
+Lib\Colors.lua
 Lib\Money.lua
 Lib\CVars.lua
 Lib\Nameplates.lua
@@ -36,6 +36,7 @@ Modules\AutoRelease.lua
 Modules\SkipCinematics.lua
 Modules\AutoDismount.lua
 Modules\AutoScreenshot.lua
+Modules\ClassColors.lua
 Changelog.lua
 Settings.lua
 Init.lua

@@ -3,10 +3,9 @@
 -- The plates themselves are ns.FriendlyPlates; this module picks the colors and the guild line.
 local _, ns = ...
 
-local ipairs, UnitClass, GetGuildInfo, C_ClassColor = ipairs, UnitClass, GetGuildInfo, C_ClassColor
+local ipairs, GetGuildInfo = ipairs, GetGuildInfo
 
 local L = ns.L
-local readable = ns.IsReadable
 local Units = ns.Units
 
 local module = ns.NewModule("PlayerPlates", L.PLAYERPLATES_DESC, {
@@ -88,8 +87,7 @@ function style.NameColor(unit)
         return RECENT_ALLY[1], RECENT_ALLY[2], RECENT_ALLY[3]
     end
     if module.db.nameColor == "class" then
-        local _, class = UnitClass(unit)
-        local color = readable(class) and class and C_ClassColor and C_ClassColor.GetClassColor(class)
+        local color = ns.Colors.Class(unit)
         if color then
             return color:GetRGB()
         end

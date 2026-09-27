@@ -29,6 +29,8 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Auto Screenshot | Takes a screenshot when you level up, earn an achievement, or defeat a boss, and can for good loot, reputation, PvP ranks, titles, battlegrounds, and deaths. Off by default. |
 | Hide Beta Feedback | Hides the beta's "Press F6 to submit an issue" tooltip line and bug report button. Off by default, and only on beta and PTR clients. |
 | Tooltips | Colors unit and item tooltips by class, reaction, or quality, and adds player titles and who a unit is targeting. |
+| **Unit Frames** | |
+| Class Colors | Shows players' health bars, and optionally names, in their class color on the player, target, focus, party, and target-of-target frames. Off by default. |
 | **Nameplates** | |
 | NPC Nameplates | Always shows friendly NPCs' names with their title. The health bar appears only when they're hurt or in combat. |
 | Player Nameplates | Always shows friendly players' names with their guild, and recent allies' names in the game's light blue. The health bar appears only when they're hurt or in combat. |
@@ -78,7 +80,7 @@ mklink /J "<WoW folder>\_classic_beta_\Interface\AddOns\ForeverPlusPlus" "<this 
 1. Create `Modules/YourThing.lua` starting with `local _, ns = ...`, and add it to the TOC before `Init.lua`.
 2. Call `ns.NewModule("YourThing", ns.L.YOURTHING_DESC, { enabled = true, ... })`. The description is its tooltip in Settings, and `module.title = ns.L.YOURTHING_TITLE` is the name shown there. Every string the player sees goes in `Locales/enUS.lua`, keyed with the module's name.
 3. Do the work in `OnEnable` and undo it in `OnDisable`: modules turn on and off without a reload. A hook can't be removed, so it checks `module.enabled`. Events added with `self:On(event, fn)` stop by themselves.
-4. Set `module.category` (`automation`, `items`, `interface`, or `nameplates`). A tool with nothing to turn off sets `module.alwaysOn = true` and gets no checkbox. A module only for some clients gives `module:IsAvailable()`.
+4. Set `module.category` (`automation`, `items`, `interface`, `unitframes`, or `nameplates`). A tool with nothing to turn off sets `module.alwaysOn = true` and gets no checkbox. A module only for some clients gives `module:IsAvailable()`.
 5. Read settings from `module.db`. List options in `module.options` (`{ key, name, description }`, default in `defaults`): a checkbox, or a dropdown with `choices = { { value, label }, ... }`. Add `debug = true` to put one on the Debug page, or a `section` (a locale string) to group a long page under headers. React in `module:OnOptionChanged(key)`. Buttons go in `module.actions` (`{ name, button, description, fn }`). If it needs a Blizzard setting (a CVar) on, `module.notice = ns.CVars.OffNotice(module, cvar, text, description)` warns in Settings while it's off.
 6. Anything the module says in chat by itself goes through `module:Print`, with `chat = true` in `defaults` and `ns.ChatOption(description)` in `module.options`, so the player can turn it off.
 7. For a page the module draws itself, give it `module:BuildPage(frame)`; `ns.OpenSettings(module.name)` opens it. `ns.AddCommand(name, usage, description, fn)` adds `/fpp <name>`.

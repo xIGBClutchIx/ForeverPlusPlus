@@ -167,6 +167,11 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 - Nameplate CVars can't be set in combat on Retail; Forever++ assumes the same and waits for `PLAYER_REGEN_ENABLED`. **Unverified** on Forever.
 - `C_CurveUtil.CreateCurve()` with `AddPoint` / `SetType(Enum.LuaCurveType.Step)`, evaluated by `UnitHealthPercent(unit, true, curve)`, turns a possibly secret health fraction into an alpha for `SetAlpha`. That's the Midnight pattern, and a working Forever addon uses `UnitHealthPercent` with `CurveConstants.ScaleTo100` **[addon]**; the step curve and `SetAlpha` taking its result are **Unverified** on Forever.
 
+## Unit frames
+
+- `Blizzard_UnitFrame` loads Mainline's player, target, focus, party, and target-of-target frames, with `Camelot/` overrides for the player and target frames' level and name placement. `UnitFrame_Initialize` sets `frame.name` (a FontString; `PlayerName` for the player), `frame.healthbar`, `healthbar.unit`, and `healthbar.unitFrame`; the target-of-target frames are `TargetFrame.totFrame` and `FocusFrame.totFrame`, and party members are `PartyFrame.MemberFrame1`-`4` from a frame pool. `UnitFrame_Update(frame)` runs whenever a frame's unit changes (new target, roster, target's target). **[web]** (the `forever` UI source, `Blizzard_UnitFrame`, checked 2026-09-27)
+- Those health bars set `lockColor`, so Blizzard never calls `SetStatusBarColor` on them: the green is the bar texture itself. Party frames call `SetStatusBarDesaturated(true/false)` on the bar in `UpdateOnlineStatus` for disconnected members. So tinting a bar needs `SetStatusBarDesaturated(true)` first, as MiniClassColors does. **[web]** (same source) Class Colors relies on this; how it looks on the Camelot art is **Unverified** in game.
+
 ## Recent allies
 
 - `C_RecentAllies` exists: `IsSystemEnabled`, `IsSystemSupported`, `IsRecentAllyByGUID(guid)`, `IsRecentAllyByFullName(name)`, `GetRecentAllyByGUID`, `GetRecentAllies`, `IsRecentAllyDataReady`, `TryRequestRecentAlliesData`, plus notes and pins. Events: `RECENT_ALLIES_CACHE_UPDATE`, `RECENT_ALLIES_DATA_READY`, `RECENT_ALLY_DATA_UPDATED` (guid), `RECENT_ALLIES_SYSTEM_STATUS_UPDATED`. **[dump]** (both dumps)

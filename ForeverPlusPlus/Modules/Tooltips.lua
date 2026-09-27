@@ -10,7 +10,7 @@ local _, ns = ...
 
 local _G, type, setmetatable = _G, type, setmetatable
 local find, sub, gsub = string.find, string.sub, string.gsub
-local TooltipDataProcessor, Enum, C_Item, C_ClassColor = TooltipDataProcessor, Enum, C_Item, C_ClassColor
+local TooltipDataProcessor, Enum, C_Item = TooltipDataProcessor, Enum, C_Item
 local UnitExists, UnitIsPlayer, UnitClass, UnitLevel, UnitName = UnitExists, UnitIsPlayer, UnitClass, UnitLevel, UnitName
 local UnitPVPName, UnitIsUnit, UnitReaction, UnitSelectionColor = UnitPVPName, UnitIsUnit, UnitReaction, UnitSelectionColor
 local GetGuildInfo, GetCreatureDifficultyColor = GetGuildInfo, GetCreatureDifficultyColor
@@ -114,12 +114,8 @@ end
 -- The unit's class color, or nil when it isn't a player or its class can't be read.
 local function classColor(unit)
     local player = UnitIsPlayer(unit)
-    if not (readable(player) and player and C_ClassColor) then
-        return nil
-    end
-    local _, class = UnitClass(unit)
-    if readable(class) and class then
-        return C_ClassColor.GetClassColor(class)
+    if readable(player) and player then
+        return ns.Colors.Class(unit)
     end
 end
 

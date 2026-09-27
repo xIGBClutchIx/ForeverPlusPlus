@@ -25,6 +25,7 @@
     "issecretvalue",
     "UnitHealthPercent",
     "UnitIsPlayer",
+    "UnitIsConnected",
     "UnitIsFriend",
     "UnitIsUnit",
     "UnitAffectingCombat",

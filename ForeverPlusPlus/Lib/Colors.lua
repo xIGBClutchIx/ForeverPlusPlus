@@ -3,7 +3,9 @@
 local _, ns = ...
 
 local format, floor = string.format, math.floor
-local RECENT_ALLY_FONT_COLOR = RECENT_ALLY_FONT_COLOR
+local RECENT_ALLY_FONT_COLOR, UnitClass, C_ClassColor = RECENT_ALLY_FONT_COLOR, UnitClass, C_ClassColor
+
+local readable = ns.IsReadable
 
 local Colors = {
     GRAY = { 0.65, 0.65, 0.65 }, -- a guild name or an NPC title that isn't highlighted
@@ -22,4 +24,15 @@ ns.Colors = Colors
 function Colors.Code(r, g, b)
     return format("|cff%02x%02x%02x", floor(r * 255 + 0.5), floor(g * 255 + 0.5),
         floor(b * 255 + 0.5))
+end
+
+---The unit's class color (a ColorMixin), or nil when its class can't be read (secret, mostly in
+---instances). NPCs have classes too, so check UnitIsPlayer first when only players should get one.
+---@param unit string
+---@return table?
+function Colors.Class(unit)
+    local _, class = UnitClass(unit)
+    if readable(class) and class and C_ClassColor then
+        return C_ClassColor.GetClassColor(class)
+    end
 end

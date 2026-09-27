@@ -430,6 +430,7 @@ local CATEGORIES = {
     { "automation", L.CATEGORY_AUTOMATION },
     { "items", L.CATEGORY_ITEMS },
     { "interface", L.CATEGORY_INTERFACE },
+    { "unitframes", L.CATEGORY_UNITFRAMES },
     { "nameplates", L.CATEGORY_NAMEPLATES },
     { "other", L.CATEGORY_OTHER },
 }
