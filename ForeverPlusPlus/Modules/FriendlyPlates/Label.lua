@@ -199,21 +199,21 @@ local function placeRow(label, record)
     return row
 end
 
--- The line under the name: a player's <Guild>, or with NPC Titles on, an NPC's <Title>.
+-- The line under the name, a player's <Guild> (Guild Names) or an NPC's <Title> (NPC Titles), and
+-- when it shows: "always", "hidden" (only without the bar), or "off".
 local function subtitle(record, unit)
-    if module.db.guildNames == "off" then
-        return nil
+    local mode = record.isPlayer and module.db.guildNames or module.db.npcTitles
+    if mode == "off" then
+        return nil, mode
+    elseif record.isPlayer then
+        return GetGuildInfo(unit), mode -- may be secret; placeGuild checks
     end
-    if record.isPlayer then
-        return GetGuildInfo(unit)
-    end
-    return module.db.npcTitles and Units.Title(unit) or nil
+    return Units.Title(unit), mode
 end
 
 local function placeGuild(label, record, unit, shift)
     local row = placeRow(label, record)
-    local mode = module.db.guildNames
-    local guild = subtitle(record, unit)
+    local guild, mode = subtitle(record, unit)
     label.name:ClearAllPoints()
     label.guild:ClearAllPoints()
     label.barGuild:ClearAllPoints()

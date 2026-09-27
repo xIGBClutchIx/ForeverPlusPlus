@@ -23,7 +23,7 @@ local module = ns.NewModule("FriendlyPlates", L.FRIENDLYPLATES_DESC, {
     guildHighlight = true,
     socialIcons = true,
     groupIcon = "role", -- "role" or "looking"
-    npcTitles = true,
+    npcTitles = "always", -- like guildNames, for an NPC's <Title>
     npcTitleColor = "name", -- "name" (the NPC's name color), "gray", or "green"
     testIcons = "off", -- debug: "off", "group", or "friend" on every friendly player
     centerLine = false, -- debug: a line through each plate's center
@@ -116,6 +116,11 @@ module.options = {
         name = L.FRIENDLYPLATES_NPC_TITLES,
         description = L.FRIENDLYPLATES_NPC_TITLES_DESC,
         section = NPCS,
+        choices = {
+            { "always", L.FRIENDLYPLATES_GUILD_NAMES_ALWAYS },
+            { "hidden", L.FRIENDLYPLATES_GUILD_NAMES_HIDDEN },
+            { "off", L.FRIENDLYPLATES_GUILD_NAMES_OFF },
+        },
     },
     {
         key = "npcTitleColor",
