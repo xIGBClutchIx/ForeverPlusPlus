@@ -1,11 +1,11 @@
 -- The "Forever++" pages in the game's Settings > AddOns list, built from Blizzard's own settings
 -- templates so they look like any other options page:
 --   Forever++        an on/off checkbox per module (the only place modules turn on and off),
---                    grouped under headers by `module.category`. `alwaysOn` modules (tools)
---                    have none
+--                    grouped under headers by `module.category`, with an Options button when it
+--                    has a page. `alwaysOn` modules (tools) have none
 --     <Module>       one page per module with options, holding just its options (and buttons,
---                    from `module.actions`), sorted by title. Options with a `section` get a
---                    header above each group, for pages long enough to need them
+--                    from `module.actions`), in the main page's order. Options with a `section`
+--                    get a header above each group, for pages long enough to need them
 --     <Tool>         a page a module draws itself (`BuildPage`), after the option pages
 --     Debug          options marked `debug = true`, for testing
 --     About          the version, links, and /fpp commands
@@ -57,14 +57,22 @@ local function track(module, setting)
 end
 
 -- The module's on/off checkbox on the main page. It reads and writes through the module, so
--- /fpp and the page agree.
-local function addToggle(category, module)
+-- /fpp and the page agree. With a page of its own, a button beside it opens that page.
+local function addToggle(category, layout, module, hasPage)
     local setting = Settings.RegisterProxySetting(category,
         format("ForeverPlusPlus_%s", module.name), Settings.VarType.Boolean,
         module.title or module.name, module.defaults.enabled,
         function() return module.db.enabled end,
         function(value) ns.SetEnabled(module.name, value) end)
     track(module, setting)
+    -- Probe: Mainline's checkbox-with-button row. ManiaTip calls it with these arguments on
+    -- Forever (setting, button text, click, button tooltip, click needs the box ticked, tooltip).
+    if hasPage and layout and CreateSettingsCheckboxWithButtonInitializer then
+        local initializer = CreateSettingsCheckboxWithButtonInitializer(setting, L.SETTINGS_OPEN_PAGE,
+            function() ns.OpenSettings(module.name) end, nil, false, module.description)
+        layout:AddInitializer(initializer)
+        return initializer
+    end
     return Settings.CreateCheckbox(category, setting, module.description)
 end
 
@@ -265,13 +273,13 @@ local CATEGORIES = {
     { "nameplates", L.CATEGORY_NAMEPLATES },
     { "other", L.CATEGORY_OTHER },
 }
-local KNOWN = {}
+local CATEGORY_NAMES = {}
 for _, group in ipairs(CATEGORIES) do
-    KNOWN[group[1]] = true
+    CATEGORY_NAMES[group[1]] = group[2]
 end
 
 local function categoryOf(module)
-    return KNOWN[module.category] and module.category or "other"
+    return CATEGORY_NAMES[module.category] and module.category or "other"
 end
 
 ---Adds the Forever++ pages to Settings > AddOns (called once, after ns.Start).
@@ -283,40 +291,57 @@ function ns.RegisterSettings()
     local category, layout = Settings.RegisterVerticalLayoutCategory(ns.title)
     local subpages = Settings.RegisterVerticalLayoutSubcategory ~= nil
     local order = byTitle()
-    -- The main page: each category's modules under its header, alphabetically. Without subpages,
-    -- a module's options follow its checkbox.
+    -- Modules by category, then title: the order of the main page and of the option pages, so
+    -- each page sits beside the others in its group.
+    local grouped = {}
     for _, group in ipairs(CATEGORIES) do
-        local header = false
         for _, name in ipairs(order) do
-            local module = ns.modules[name]
-            if not module.alwaysOn and categoryOf(module) == group[1] then
-                if not header then
-                    header = true
-                    addHeader(layout, group[2])
-                end
-                local parent = addToggle(category, module)
-                if not subpages then
-                    addOptions(category, module, parent, false)
-                    addActions(layout, module)
-                end
+            if categoryOf(ns.modules[name]) == group[1] then
+                grouped[#grouped + 1] = name
             end
         end
     end
-    -- A page per module with options, alphabetically.
+    local canvas = subpages and Settings.RegisterCanvasLayoutSubcategory
+    local function hasPage(module)
+        if module.BuildPage then
+            return canvas and true or false
+        end
+        return subpages and (hasOptions(module, false) or module.actions) and true or false
+    end
+    -- The main page: each category's modules under its header. Without subpages, a module's
+    -- options follow its checkbox.
+    local current
+    for _, name in ipairs(grouped) do
+        local module = ns.modules[name]
+        if not module.alwaysOn then
+            local group = categoryOf(module)
+            if group ~= current then
+                current = group
+                addHeader(layout, CATEGORY_NAMES[group])
+            end
+            local parent = addToggle(category, layout, module, hasPage(module))
+            if not subpages then
+                addOptions(category, module, parent, false)
+                addActions(layout, module)
+            end
+        end
+    end
+    -- A page per module with options.
     if subpages then
-        for _, name in ipairs(order) do
+        for _, name in ipairs(grouped) do
             local module = ns.modules[name]
-            if not module.BuildPage and (hasOptions(module, false) or module.actions) then
+            if not module.BuildPage and hasPage(module) then
                 local page, pageLayout = Settings.RegisterVerticalLayoutSubcategory(category,
                     module.title or name)
+                pages[name] = page
                 addOptions(page, module, nil, false, pageLayout)
                 addActions(pageLayout, module)
             end
         end
     end
     -- Pages modules draw themselves (tools such as Console Variables) go last, above Debug.
-    if subpages and Settings.RegisterCanvasLayoutSubcategory then
-        for _, name in ipairs(order) do
+    if canvas then
+        for _, name in ipairs(grouped) do
             local module = ns.modules[name]
             if module.BuildPage then
                 pages[name] = addCanvasPage(category, module.title or name, function(frame)

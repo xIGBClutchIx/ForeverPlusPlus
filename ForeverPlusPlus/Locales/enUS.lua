@@ -41,6 +41,7 @@ L.CATEGORY_NAMEPLATES = "Nameplates"
 L.CATEGORY_OTHER = "Other"
 L.DEBUG = "Debug"
 L.SETTINGS_AFTER_COMBAT = "Settings open after combat."
+L.SETTINGS_OPEN_PAGE = "Options" -- the button beside a module's checkbox that opens its page
 
 -- Settings: About page
 L.ABOUT = "About"

@@ -152,6 +152,7 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 - The console's command list is the global `ConsoleGetAllCommands()` (entries with `command`, `help`, `commandType`, where `Enum.ConsoleCommandType.Cvar` marks a CVar), as on Retail. `C_Console` doesn't exist, so `C_Console.GetAllCommands` gave the CVar browser an empty list. **[local]** (2026-09-26, the `ConsoleGetAllCommands`, `ConsoleCommandType` and `Cvar` strings in `WowB.exe` 70009, next to `ConsoleExec`) **[in-game]** (the empty list)
 - `C_CVar.GetCVarInfo(name)` returns value, default, account, character, locked, secure, read only. **[local]** (its usage string in `WowB.exe`)
 - `Settings.RegisterCanvasLayoutSubcategory` works on Forever. **[addon]** (Auctionator `PanelConfig.lua`, AceConfigDialog in several addons)
+- A checkbox with a button beside it: `CreateSettingsCheckboxWithButtonInitializer(setting, buttonText, onClick, nil, clickRequiresSet, tooltip)`, added with `layout:AddInitializer`. **[addon]** (ManiaTip `Libs/Huddle/Modules/Settings.lua`) What the fourth argument is (nil there) is **Unverified**; Forever++ probes for the function.
 
 ## Nameplates
 

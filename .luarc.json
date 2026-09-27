@@ -73,6 +73,7 @@
     "YES",
     "NO",
     "CreateSettingsButtonInitializer",
+    "CreateSettingsCheckboxWithButtonInitializer",
     "SELL_PRICE",
     "GetInventorySlotInfo",
     "GetInventoryItemDurability",
