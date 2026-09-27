@@ -46,14 +46,18 @@ module.options = {
 }
 
 -- The server says whether a guild bank repair worked only afterwards: durability updates when it
--- did, and an error shows when it didn't (not enough in the bank, or over the daily limit).
+-- did. When it didn't (not enough in the bank, or over the daily limit), the gear still needs
+-- repairing a moment later. That is checked instead of the error message, since any other error
+-- shown meanwhile ("Out of range") would look the same.
+local WAIT = 2 -- seconds to wait for the guild bank repair before calling it failed
 local pending -- the cost of the guild bank repair waiting for an answer
-local onDurability, onError
+local attempt = 0 -- counts repairs, so a timer knows whether it's still for the current one
+local onDurability
 
 local function stopWaiting()
     pending = nil
     ns.Off("UPDATE_INVENTORY_DURABILITY", onDurability)
-    ns.Off("UI_ERROR_MESSAGE", onError)
+    ns.Off("MERCHANT_CLOSED", stopWaiting)
 end
 
 local function repairOwn(cost)
@@ -70,13 +74,18 @@ function onDurability()
     stopWaiting()
 end
 
-function onError()
+-- No durability update came: repaired after all if nothing needs it now, otherwise the guild bank
+-- didn't pay. Only while the merchant is still open (closing it stops the wait).
+local function checkGuildRepair()
     local cost = pending
     stopWaiting()
-    if module.db.funds == "guildFirst" then
-        repairOwn(cost)
+    local left, canRepair = GetRepairAllCost()
+    if not canRepair or left <= 0 then
+        module:Print(format(L.AUTOREPAIR_REPAIRED_GUILD, money(cost)))
+    elseif module.db.funds == "guildFirst" then
+        repairOwn(left)
     else
-        module:Print(format(L.AUTOREPAIR_NO_GUILD_MONEY, money(cost)))
+        module:Print(format(L.AUTOREPAIR_NO_GUILD_MONEY, money(left)))
     end
 end
 
@@ -93,13 +102,14 @@ end
 local function repairGuild(cost)
     stopWaiting()
     pending = cost
+    attempt = attempt + 1
+    local this = attempt
     ns.On("UPDATE_INVENTORY_DURABILITY", onDurability)
-    ns.On("UI_ERROR_MESSAGE", onError)
+    ns.On("MERCHANT_CLOSED", stopWaiting)
     RepairAllItems(true)
-    -- No answer means nothing changed; stop listening so a later error isn't taken for this.
-    C_Timer.After(3, function()
-        if pending == cost then
-            stopWaiting()
+    C_Timer.After(WAIT, function()
+        if pending and attempt == this then
+            checkGuildRepair()
         end
     end)
 end
