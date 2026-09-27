@@ -23,15 +23,17 @@ local module = ns.NewModule("AutoGossip", L.AUTOGOSSIP_DESC, {
 module.title = L.AUTOGOSSIP_TITLE
 module.category = "automation"
 
+local GENERAL, NPCS = L.AUTOGOSSIP_SECTION_GENERAL, L.AUTOGOSSIP_SECTION_NPCS
+
 module.options = {
+    { key = "shiftSkips", name = L.AUTOGOSSIP_SHIFT, description = L.AUTOGOSSIP_SHIFT_DESC, section = GENERAL },
     -- Alphabetical, with the catch-all last.
-    { key = "banker", name = L.AUTOGOSSIP_BANKER, description = L.AUTOGOSSIP_BANKER_DESC },
-    { key = "taxi", name = L.AUTOGOSSIP_TAXI, description = L.AUTOGOSSIP_TAXI_DESC },
-    { key = "stable", name = L.AUTOGOSSIP_STABLE, description = L.AUTOGOSSIP_STABLE_DESC },
-    { key = "trainer", name = L.AUTOGOSSIP_TRAINER, description = L.AUTOGOSSIP_TRAINER_DESC },
-    { key = "vendor", name = L.AUTOGOSSIP_VENDOR, description = L.AUTOGOSSIP_VENDOR_DESC },
-    { key = "other", name = L.AUTOGOSSIP_OTHER, description = L.AUTOGOSSIP_OTHER_DESC },
-    { key = "shiftSkips", name = L.AUTOGOSSIP_SHIFT, description = L.AUTOGOSSIP_SHIFT_DESC },
+    { key = "banker", name = L.AUTOGOSSIP_BANKER, description = L.AUTOGOSSIP_BANKER_DESC, section = NPCS },
+    { key = "taxi", name = L.AUTOGOSSIP_TAXI, description = L.AUTOGOSSIP_TAXI_DESC, section = NPCS },
+    { key = "stable", name = L.AUTOGOSSIP_STABLE, description = L.AUTOGOSSIP_STABLE_DESC, section = NPCS },
+    { key = "trainer", name = L.AUTOGOSSIP_TRAINER, description = L.AUTOGOSSIP_TRAINER_DESC, section = NPCS },
+    { key = "vendor", name = L.AUTOGOSSIP_VENDOR, description = L.AUTOGOSSIP_VENDOR_DESC, section = NPCS },
+    { key = "other", name = L.AUTOGOSSIP_OTHER, description = L.AUTOGOSSIP_OTHER_DESC, section = NPCS },
     {
         key = "printOptions",
         name = L.AUTOGOSSIP_PRINT,

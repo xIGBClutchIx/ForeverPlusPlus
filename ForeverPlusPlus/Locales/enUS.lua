@@ -316,6 +316,8 @@ L.AUTOSTOW_OUTSIDE_ONLY_DESC = "Leave your weapons out in dungeons, raids and ba
 L.AUTOGOSSIP_TITLE = "Auto Gossip"
 L.AUTOGOSSIP_DESC = "When an NPC has only one thing to say and no quests, pick it for you, so "
     .. "the bank, shop, or flight map opens straight away."
+L.AUTOGOSSIP_SECTION_GENERAL = "General"
+L.AUTOGOSSIP_SECTION_NPCS = "Pick For"
 L.AUTOGOSSIP_BANKER = "Bankers"
 L.AUTOGOSSIP_BANKER_DESC = "Open the bank."
 L.AUTOGOSSIP_VENDOR = "Vendors and Repairs"
