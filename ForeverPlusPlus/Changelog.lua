@@ -10,45 +10,35 @@ local L = ns.L
 
 ns.changelog = {
     {
-        version = L.CHANGELOG_UNRELEASED,
+        version = "0.3.0",
+        date = "2026-09-28",
         sections = {
             { L.CHANGELOG_ADDED, {
                 { L.POI_TITLE, "Dungeons, raids, capitals, flight masters, boats, zeppelins, "
-                    .. "and spirit healers on the world map, in a new Map category. Includes an "
-                    .. "icon size and continent map toggle for each, capitals in place of "
-                    .. "Blizzard's city icons, and learned flight masters in the minimap's "
-                    .. "white." },
-                { L.ZONEINFO_TITLE, "A panel in a corner of the world map with the zone's level "
-                    .. "range, who holds it, its dungeons, fishing skill, and the herbs, ore, and "
-                    .. "skinning in it for your professions. Includes a size slider, and for herbs, ore, and skinning a "
-                    .. "choice of off, with the profession, or always. It sits above Blizzard's map "
-                    .. "coordinates when they're on." },
-                { L.UNEXPLORED_TITLE, "Shows the parts of zone maps you haven't explored yet. "
-                    .. "Includes the tint's color and strength, or no tint." },
+                    .. "and spirit healers on the world map, in a new Map category. Learned "
+                    .. "flight masters show in the minimap's white." },
+                { L.ZONEINFO_TITLE, "A panel on the world map with the zone's level range, who "
+                    .. "holds it, its dungeons, fishing skill, and its herbs, ore, and skinning." },
+                { L.UNEXPLORED_TITLE, "Shows the parts of zone maps you haven't explored yet, "
+                    .. "with a tint." },
                 { L.COORDS_TITLE, "Your coordinates and the cursor's in the world map's title "
-                    .. "bar, from the game's own coordinates, with a toggle each." },
+                    .. "bar." },
                 { L.HIDEFILTERRESET_TITLE, "Hides the reset button on the world map's filter "
                     .. "dropdown." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.CLASSCOLORS_TITLE, "Hostile NPCs' health bars are red, neutral ones yellow, "
-                    .. "and ones someone else tagged gray, on the same frames. Friendly NPCs stay "
-                    .. "green. Includes an NPC Health Bars checkbox to turn it off." },
-                { L.BAGSLOTS_TITLE, "Adds up every bag on the backpack button by default, with "
-                    .. "the reagent bag still on its own button. Per Bag is still a choice." },
-                { L.AUTOSTOW_TITLE, "The delay is a slider from 3 to 30 seconds." },
-                { L.AUTORELEASE_TITLE, "The delay is a slider from right away to 10 seconds." },
-                { L.GATHERTRACKING_TITLE, "Swap is a slider from never to every 30 seconds." },
-                { L.AUCTIONPRICES_TITLE, "Red After is a slider from 1 to 48 hours. It starts "
-                    .. "back at 12 hours." },
-                { L.PLAYERPLATES_TITLE, "A Name Size slider, from 50% to 200% of Blizzard's size. "
-                    .. "The guild line and icons grow with it." },
-                { L.NPCPLATES_TITLE, "A Name Size slider, from 50% to 200% of Blizzard's size. The "
-                    .. "title line grows with it." },
+                    .. "and tagged ones gray." },
+                { L.BAGSLOTS_TITLE, "Adds up every bag on the backpack button by default." },
+                { L.AUTOSTOW_TITLE, "The delay is a slider." },
+                { L.AUTORELEASE_TITLE, "The delay is a slider." },
+                { L.GATHERTRACKING_TITLE, "Swap is a slider." },
+                { L.AUCTIONPRICES_TITLE, "Red After is a slider." },
+                { L.PLAYERPLATES_TITLE, "A Name Size slider." },
+                { L.NPCPLATES_TITLE, "A Name Size slider." },
             } },
             { L.CHANGELOG_FIXED, {
-                { L.PLAYERPLATES_TITLE, "Chinese, Korean, and Cyrillic names show again, instead "
-                    .. "of coming out blank." },
+                { L.PLAYERPLATES_TITLE, "Chinese, Korean, and Cyrillic names show again." },
                 { L.NPCPLATES_TITLE, "Same fix for NPC names and titles." },
             } },
         },

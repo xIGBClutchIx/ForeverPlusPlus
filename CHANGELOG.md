@@ -2,30 +2,30 @@
 
 What changed in each release of Forever++. The same notes show in game under Settings > AddOns > Forever++ > Changelog, from [`ForeverPlusPlus/Changelog.lua`](ForeverPlusPlus/Changelog.lua); change both together.
 
-## Unreleased
+## 0.3.0 (2026-09-28)
 
 ### Added
 
-- **Points of Interest**: dungeons, raids, capitals, flight masters, boats, zeppelins, and spirit healers on the world map, in a new Map category. Includes an icon size and continent map toggle for each, capitals in place of Blizzard's city icons, and learned flight masters in the minimap's white.
-- **Zone Info**: a panel in a corner of the world map with the zone's level range, who holds it, its dungeons, fishing skill, and the herbs, ore, and skinning in it for your professions. Includes a size slider, and for herbs, ore, and skinning a choice of off, with the profession, or always. It sits above Blizzard's map coordinates when they're on.
-- **Unexplored Areas**: shows the parts of zone maps you haven't explored yet. Includes the tint's color and strength, or no tint.
-- **Coordinates**: your coordinates and the cursor's in the world map's title bar, from the game's own coordinates, with a toggle each.
+- **Points of Interest**: dungeons, raids, capitals, flight masters, boats, zeppelins, and spirit healers on the world map, in a new Map category. Learned flight masters show in the minimap's white.
+- **Zone Info**: a panel on the world map with the zone's level range, who holds it, its dungeons, fishing skill, and its herbs, ore, and skinning.
+- **Unexplored Areas**: shows the parts of zone maps you haven't explored yet, with a tint.
+- **Coordinates**: your coordinates and the cursor's in the world map's title bar.
 - **Hide Filter Reset**: hides the reset button on the world map's filter dropdown.
 
 ### Changed
 
-- **Class Colors**: hostile NPCs' health bars are red, neutral ones yellow, and ones someone else tagged gray, on the same frames. Friendly NPCs stay green. Includes an NPC Health Bars checkbox to turn it off.
-- **Bag Slot Counter**: adds up every bag on the backpack button by default, with the reagent bag still on its own button. Per Bag is still a choice.
-- **Auto Stow**: the delay is a slider from 3 to 30 seconds.
-- **Auto Release**: the delay is a slider from right away to 10 seconds.
-- **Gathering Tracking**: Swap is a slider from never to every 30 seconds.
-- **Auction Prices**: Red After is a slider from 1 to 48 hours. It starts back at 12 hours.
-- **Player Nameplates**: a Name Size slider, from 50% to 200% of Blizzard's size. The guild line and icons grow with it.
-- **NPC Nameplates**: a Name Size slider, from 50% to 200% of Blizzard's size. The title line grows with it.
+- **Class Colors**: hostile NPCs' health bars are red, neutral ones yellow, and tagged ones gray.
+- **Bag Slot Counter**: adds up every bag on the backpack button by default.
+- **Auto Stow**: the delay is a slider.
+- **Auto Release**: the delay is a slider.
+- **Gathering Tracking**: Swap is a slider.
+- **Auction Prices**: Red After is a slider.
+- **Player Nameplates**: a Name Size slider.
+- **NPC Nameplates**: a Name Size slider.
 
 ### Fixed
 
-- **Player Nameplates**: Chinese, Korean, and Cyrillic names show again, instead of coming out blank.
+- **Player Nameplates**: Chinese, Korean, and Cyrillic names show again.
 - **NPC Nameplates**: same fix for NPC names and titles.
 
 ## 0.2.0 (2026-09-27)
