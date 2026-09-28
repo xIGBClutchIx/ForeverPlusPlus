@@ -48,6 +48,7 @@ local MAX_WIDTH = 260 -- the widest the text gets; longer lines wrap
 local PADDING = 8
 local GAP = 3 -- between rows
 local ROWS = 3
+local ICON_SIZE = 18 -- pixels
 local THROTTLE = 0.1 -- seconds between looks at where the cursor is
 
 local function colored(color, text)
@@ -90,9 +91,9 @@ local function levelText(low, high)
     return color and colored(color, text) or text
 end
 
--- A profession's icon in text, the height of the line.
+-- A profession's icon in text, bigger than the small font so it reads at a glance.
 local function icon(line, own)
-    return format("|T%s:0|t ", own or ICONS[line])
+    return format("|T%s:%d:%d|t ", own or ICONS[line], ICON_SIZE, ICON_SIZE)
 end
 
 -- A skill the zone needs, colored by how hard it is at the player's rank. Fishing has no
