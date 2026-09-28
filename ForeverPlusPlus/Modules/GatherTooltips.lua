@@ -10,13 +10,15 @@
 local _, ns = ...
 
 local type, ipairs, setmetatable = type, ipairs, setmetatable
-local gsub, gmatch, match = string.gsub, string.gmatch, string.match
+local gsub, gmatch, match, find, concat = string.gsub, string.gmatch, string.match, string.find, table.concat
+local _G = _G
 local format = string.format
 local TooltipDataProcessor, Enum = TooltipDataProcessor, Enum
 local UnitIsPlayer, UnitPlayerControlled, UnitCreatureType = UnitIsPlayer, UnitPlayerControlled, UnitCreatureType
 local UnitLevel, UnitIsDead, UnitCanAttack = UnitLevel, UnitIsDead, UnitCanAttack
 
 local L = ns.L
+local colorCode = ns.Colors.Code
 local readable = ns.IsReadable
 local Professions = ns.Professions
 local ItemTooltip = ns.ItemTooltip
@@ -196,8 +198,24 @@ local function clean(text)
     return match(text, "^%s*(.-)%s*$")
 end
 
--- A herb or vein under the mouse, or a minimap pin: one name, or several on separate lines
--- when pins overlap. Each known one gets its line, with its name when there are several.
+-- The tooltip's left font string on line `i`, or nil for tooltips without named lines.
+local function leftLine(tooltip, i)
+    local name = tooltip.GetName and tooltip:GetName()
+    return type(name) == "string" and _G[name .. "TextLeft" .. i] or nil
+end
+
+-- The skill line and its color for the node named in `text`, or nil.
+local function nodeLine(text)
+    local node = NODES[clean(text)]
+    if node then
+        return skillLine(node[1], node[2], L.GATHERTOOLTIPS_REQUIRES)
+    end
+end
+
+-- A herb or vein under the mouse, or a minimap pin. A world object's tooltip has its name alone
+-- on the first line, and the skill line is added after it. A minimap pin's first line holds
+-- everything on separate lines, overlapping pins and their quest objectives too, so the skill
+-- line goes into that text under its node's name.
 local function addNodeLines(tooltip, data)
     if not (module.enabled and readable(data.lines) and type(data.lines) == "table") then
         return
@@ -207,23 +225,26 @@ local function addNodeLines(tooltip, data)
     if not (readable(text) and type(text) == "string") then
         return
     end
-    local found, count = {}, 0
+    text = gsub(text, "|n", "\n")
+    if not find(text, "\n", 1, true) then
+        local line, color = nodeLine(text)
+        if line then
+            addLine(tooltip, line, color)
+        end
+        return
+    end
+    local parts, changed = {}, false
     for part in gmatch(text .. "\n", "(.-)\n") do
-        local name = clean(part)
-        local node = NODES[name]
-        if node and not found[name] then
-            count = count + 1
-            found[count] = name
-            found[name] = true
+        parts[#parts + 1] = part
+        local line, color = nodeLine(part)
+        if line then
+            parts[#parts + 1] = colorCode(color.r, color.g, color.b) .. line .. "|r"
+            changed = true
         end
     end
-    for i = 1, count do
-        local name = found[i]
-        local node = NODES[name]
-        local line, color = skillLine(node[1], node[2], L.GATHERTOOLTIPS_REQUIRES)
-        if line then
-            addLine(tooltip, count > 1 and format(L.GATHERTOOLTIPS_NAMED, name, line) or line, color)
-        end
+    local fontString = changed and leftLine(tooltip, 1)
+    if fontString then
+        fontString:SetText(concat(parts, "\n"))
     end
 end
 

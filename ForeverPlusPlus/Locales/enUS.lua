@@ -391,7 +391,6 @@ L.GATHERTOOLTIPS_ITEMS_DESC = "Show in herb, ore, and stone tooltips the skill n
     .. "them."
 L.GATHERTOOLTIPS_REQUIRES = "Requires %s (%d)" -- profession, skill
 L.GATHERTOOLTIPS_GATHERED = "Gathered with %s (%d)" -- profession, skill
-L.GATHERTOOLTIPS_NAMED = "%s: %s" -- node name, "Requires Herbalism (70)"
 L.GATHERTOOLTIPS_HERBALISM_NAME = "Herbalism" -- until the client gives its own name
 L.GATHERTOOLTIPS_MINING_NAME = "Mining"
 L.GATHERTOOLTIPS_SKINNING_NAME = "Skinning"
