@@ -156,6 +156,7 @@
     "MinimalSliderWithSteppersMixin",
     "C_EncounterJournal",
     "C_TaxiMap",
+    "CreateSettingsCheckboxSliderInitializer",
     "CreateVector2D",
     "FACTION_ALLIANCE",
     "FACTION_HORDE",

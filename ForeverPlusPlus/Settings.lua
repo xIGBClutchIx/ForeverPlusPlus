@@ -222,22 +222,12 @@ local function sliderOptions(option)
     return options
 end
 
--- A module's own option (from `module.options`): a checkbox, a dropdown when it lists `choices`,
--- or a slider when it has `min` and `max`, under its checkbox (or under the checkbox option named
--- by `requires`, greyed out while that is off), and only while `shown()` is true. `added` maps
--- the module's option keys to their rows, for `requires`.
-local function addOption(category, module, option, parent, shown, added)
-    local choices, slider = option.choices, option.min
-    if choices and not (Settings.CreateDropdown and Settings.CreateControlTextContainer) then
-        return -- Probe: dropdowns are Mainline's; leave the option at its default without one.
-    end
-    if slider and not (Settings.CreateSlider and Settings.CreateSliderOptions) then
-        return -- Probe: sliders are Mainline's; ArcaneWizardLibrary uses them on Forever.
-    end
+-- The Blizzard setting behind one of a module's options, read and written through the module.
+local function optionSetting(category, module, option)
     local varType = Settings.VarType.Boolean
-    if choices then
+    if option.choices then
         varType = Settings.VarType.String
-    elseif slider then
+    elseif option.min then
         varType = Settings.VarType.Number
     end
     local setting = Settings.RegisterProxySetting(category,
@@ -245,17 +235,69 @@ local function addOption(category, module, option, parent, shown, added)
         option.name, module.defaults[option.key],
         function() return module.db[option.key] end,
         function(value)
-            if slider then
+            if option.min then
                 value = ns.SliderValue(option, value)
             end
             ns.SetOption(module.name, option.key, value)
         end)
     track(module, setting)
+    return setting
+end
+
+local function optionByKey(module, key)
+    for _, option in ipairs(module.options or {}) do
+        if option.key == key then
+            return option
+        end
+    end
+end
+
+-- Whether a checkbox and its slider (`option.slider`) can share a row, like Blizzard's own. Probe:
+-- the combined row is Mainline's; without it the slider gets a row of its own under the checkbox.
+local function canCombine()
+    return CreateSettingsCheckboxSliderInitializer ~= nil and Settings.CreateSliderOptions ~= nil
+end
+
+-- A checkbox option and its slider option in one row. Rows under the checkbox (`requires`) follow
+-- the checkbox.
+local function addCheckboxSlider(category, layout, module, option, slider)
+    local checkbox = optionSetting(category, module, option)
+    local initializer = CreateSettingsCheckboxSliderInitializer(checkbox, option.name,
+        option.description, optionSetting(category, module, slider), sliderOptions(slider),
+        slider.name, slider.description)
+    initializer.GetSetting = function() return checkbox end
+    layout:AddInitializer(initializer)
+    return initializer
+end
+
+-- A module's own option (from `module.options`): a checkbox, a dropdown when it lists `choices`,
+-- or a slider when it has `min` and `max` (in one row with the checkbox that names it as its
+-- `slider`, where it can), under the module's checkbox (or under the checkbox option named by
+-- `requires`, greyed out while that is off), and only while `shown()` is true. `added` maps the
+-- module's option keys to their rows, for `requires`.
+local function addOption(category, layout, module, option, parent, shown, added)
+    local choices, slider = option.choices, option.min
+    if added[option.key] then
+        return -- a slider already in its checkbox's row
+    end
+    if choices and not (Settings.CreateDropdown and Settings.CreateControlTextContainer) then
+        return -- Probe: dropdowns are Mainline's; leave the option at its default without one.
+    end
+    if slider and not (Settings.CreateSlider and Settings.CreateSliderOptions) then
+        return -- Probe: sliders are Mainline's; ArcaneWizardLibrary uses them on Forever.
+    end
     local initializer
-    if slider then
+    local rowSlider = option.slider and layout and canCombine()
+        and optionByKey(module, option.slider)
+    if rowSlider then
+        initializer = addCheckboxSlider(category, layout, module, option, rowSlider)
+        added[rowSlider.key] = initializer
+    elseif slider then
+        local setting = optionSetting(category, module, option)
         initializer = Settings.CreateSlider(category, setting, sliderOptions(option),
             option.description)
     elseif choices then
+        local setting = optionSetting(category, module, option)
         initializer = Settings.CreateDropdown(category, setting, function()
             local container = Settings.CreateControlTextContainer()
             for _, choice in ipairs(choices) do
@@ -264,9 +306,10 @@ local function addOption(category, module, option, parent, shown, added)
             return container:GetData()
         end, option.description)
     else
-        initializer = Settings.CreateCheckbox(category, setting, option.description)
+        initializer = Settings.CreateCheckbox(category, optionSetting(category, module, option),
+            option.description)
     end
-    local requires = option.requires and added and added[option.requires]
+    local requires = option.requires and added[option.requires]
     if requires and initializer and initializer.SetParentInitializer then
         initializer:SetParentInitializer(requires, function()
             return module.db.enabled and module.db[option.requires]
@@ -276,9 +319,7 @@ local function addOption(category, module, option, parent, shown, added)
         placeUnder(initializer, module, parent)
     end
     showWhen(initializer, shown)
-    if added then
-        added[option.key] = initializer
-    end
+    added[option.key] = initializer
 end
 
 local function addHeader(layout, text, shown)
@@ -312,7 +353,7 @@ local function addOptions(category, layout, module, parent, debug, shown)
                 addHeader(layout, option.section, shown)
             end
             section = option.section
-            addOption(category, module, option, parent, shown, added)
+            addOption(category, layout, module, option, parent, shown, added)
         end
     end
 end

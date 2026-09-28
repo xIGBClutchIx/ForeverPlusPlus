@@ -18,13 +18,13 @@ local module = ns.NewModule("PointsOfInterest", L.POI_DESC, {
     enabled = false,
     -- For each kind: shown, its size in percent of normal, and shown on continent maps too.
     dungeons = true,
-    dungeonSize = 80,
+    dungeonSize = 90,
     dungeonsWorld = true,
     raids = true,
     raidSize = 80,
     raidsWorld = true,
     capitals = true,
-    capitalSize = 80,
+    capitalSize = 50,
     capitalsWorld = true,
     flightMasters = true,
     flightSize = 80,
@@ -47,9 +47,10 @@ module.category = "map"
 module.internal = {}
 local internal = module.internal
 
--- A checkbox for a kind, and under it the slider for its size and whether it shows on continents.
+-- A checkbox for a kind with the slider for its size in the same row, and under it whether it
+-- shows on continents.
 local function kind(key, sizeKey, name, description)
-    return { key = key, name = name, description = description },
+    return { key = key, name = name, description = description, slider = sizeKey },
         {
             key = sizeKey, name = L.POI_SIZE, description = L.POI_SIZE_DESC, requires = key,
             min = 50, max = 200, step = 10, format = "%d%%",
@@ -65,14 +66,14 @@ for _, rows in ipairs({
     { kind("flightMasters", "flightSize", L.POI_FLIGHT, L.POI_FLIGHT_DESC) },
     { kind("ships", "shipSize", L.POI_SHIPS, L.POI_SHIPS_DESC) },
     { kind("zeppelins", "zeppelinSize", L.POI_ZEPPELINS, L.POI_ZEPPELINS_DESC) },
+    -- After the travel points it's about.
+    { { key = "otherFaction", name = L.POI_OTHER_FACTION, description = L.POI_OTHER_FACTION_DESC } },
     { kind("spiritHealers", "spiritSize", L.POI_SPIRIT, L.POI_SPIRIT_DESC) },
 }) do
     for _, option in ipairs(rows) do
         module.options[#module.options + 1] = option
     end
 end
-module.options[#module.options + 1] =
-    { key = "otherFaction", name = L.POI_OTHER_FACTION, description = L.POI_OTHER_FACTION_DESC }
 
 -- Each kind of point: the checkbox, size, and continent settings for it, its normal size in
 -- pixels, and its icon. The boat, zeppelin, graveyard, and town icons are in Retail's atlas list,
@@ -328,17 +329,52 @@ local function capitalPoint(cityMap)
 end
 
 -- A point listed for `fromMap`, drawn on `mapID`.
-local function addFrom(fromMap, mapID, point, world, add, listed)
+local function addFrom(fromMap, mapID, point, world, add)
     local info = pinFor(point, fromMap, world)
     if not info then
         return
     end
     local x, y = translate(fromMap, mapID, point[2] / 100, point[3] / 100)
     if x then
-        if listed and (point[1] == "dungeon" or point[1] == "raid") then
-            listed[#listed + 1] = { point[1], x * 100, y * 100 }
-        end
         add(x, y, info)
+    end
+end
+
+local function isInstance(point)
+    return point[1] == "dungeon" or point[1] == "raid"
+end
+
+-- How close (in percent of the map) a city's dungeon is to the city's own icon for the dungeon to
+-- go in the city's tooltip instead of on top of it (the Hall of Thanes under Ironforge).
+local MERGE = 2
+
+-- A capital's icon and its dungeons, on a map outside the city.
+local function addCity(cityMap, mapID, world, add, listed)
+    local capital = pinFor(capitalPoint(cityMap), cityMap, world)
+    local cx, cy
+    if capital then
+        cx, cy = translate(cityMap, mapID, 0.5, 0.5)
+    end
+    for _, point in ipairs(internal.points[cityMap] or {}) do
+        local info = isInstance(point) and pinFor(point, cityMap, world)
+        local x, y
+        if info then
+            x, y = translate(cityMap, mapID, point[2] / 100, point[3] / 100)
+        end
+        if x then
+            if listed then
+                listed[#listed + 1] = { point[1], x * 100, y * 100 }
+            end
+            if cx and abs(x - cx) * 100 < MERGE and abs(y - cy) * 100 < MERGE then
+                capital.lines[#capital.lines + 1] =
+                    format("%s  %s", info.title, info.lines[#info.lines])
+            else
+                add(x, y, info)
+            end
+        end
+    end
+    if cx then
+        add(cx, cy, capital)
     end
 end
 
@@ -357,12 +393,7 @@ local function fillZone(mapID, add)
     end
     for cityMap, city in pairs(internal.cities) do
         if city.zone == mapID then
-            addFrom(cityMap, mapID, capitalPoint(cityMap), false, add)
-            for _, point in ipairs(internal.points[cityMap] or {}) do
-                if point[1] == "dungeon" or point[1] == "raid" then
-                    addFrom(cityMap, mapID, point, false, add, listed)
-                end
-            end
+            addCity(cityMap, mapID, false, add, listed)
         end
     end
     gameEntrances(mapID, listed, add)
@@ -377,11 +408,14 @@ local function fillContinent(mapID, add)
             readTaxiNodes(fromMap)
         end
         for _, point in ipairs(points) do
-            addFrom(fromMap, mapID, point, true, add)
+            -- A city's dungeons come with the city, below.
+            if not (internal.cities[fromMap] and isInstance(point)) then
+                addFrom(fromMap, mapID, point, true, add)
+            end
         end
     end
     for cityMap in pairs(internal.cities) do
-        addFrom(cityMap, mapID, capitalPoint(cityMap), true, add)
+        addCity(cityMap, mapID, true, add)
     end
 end
 
