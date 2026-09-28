@@ -6,7 +6,8 @@
 --   { "ship" or "zeppelin", x, y, faction, destination place, destination map ID (or this map) }
 --   { "spirit", x, y }
 -- Factions are "A" (Alliance), "H" (Horde), and "N" (both). Places are English; a locale file can
--- translate one with L["Booty Bay"] = "...".
+-- translate one with L["Booty Bay"] = "...". Dungeons the game's own entrance list has and this
+-- list doesn't (Forever's new ones) are added from the game; see gameEntrances.
 local _, ns = ...
 
 local L = ns.L
@@ -30,6 +31,8 @@ internal.instances = {
     diremaulNorth = { 429, "Dire Maul", 56, 60, part = L.POI_NORTH },
     diremaulWest = { 429, "Dire Maul", 56, 60, part = L.POI_WEST },
     gnomeregan = { 90, "Gnomeregan", 29, 38 },
+    -- Forever's. Its instance ID isn't known yet, so the name is the English one.
+    hallOfThanes = { nil, "The Hall of Thanes", 13, 18 },
     maraudon = { 349, "Maraudon", 46, 55 },
     mc = { 409, "Molten Core", 60, 60 },
     naxxramas = { 533, "Naxxramas", 60, 60 },
@@ -188,6 +191,9 @@ internal.points = {
         { "flight", 70.9, 72.5, "A", "Trade District" },
     },
     [1455] = { -- Ironforge
+        -- The webbed stairs down, left of the High Seat. From Warcraft Tavern's and Wowhead
+        -- commenters' coordinates (43.5, 52.0 and 43, 51), not checked in game.
+        { "dungeon", 43.5, 52.0, "hallOfThanes" },
         { "flight", 55.5, 47.8, "A", "The Great Forge" },
     },
     [1458] = { -- Undercity

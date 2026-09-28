@@ -6,7 +6,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Added
 
-- **Points of Interest**: dungeons, raids, flight masters, boats, zeppelins, and spirit healers on the world map's zone maps, under a new Map category. Tooltips say what each is, dungeon level ranges colored against yours, and where boats and zeppelins go. Includes a checkbox and an icon size slider for each kind, and showing the other faction's travel points. Off by default.
+- **Points of Interest**: dungeons, raids, flight masters, boats, zeppelins, and spirit healers on the world map's zone maps, under a new Map category, including the Hall of Thanes and any of Forever's new dungeons the game's own entrance list has. Tooltips say what each is, dungeon level ranges colored against yours, and where boats and zeppelins go. Includes a checkbox and an icon size slider for each kind, and showing the other faction's travel points. Off by default.
 
 ### Changed
 

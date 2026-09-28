@@ -4,8 +4,9 @@
 -- asked for. Where the points are is in Data.lua.
 local _, ns = ...
 
-local ipairs, format, rawget, unpack = ipairs, string.format, rawget, unpack
-local C_Map, UnitFactionGroup, UnitLevel = C_Map, UnitFactionGroup, UnitLevel
+local ipairs, format, rawget, unpack, abs = ipairs, string.format, rawget, unpack, math.abs
+local C_Map, C_EncounterJournal, UnitFactionGroup, UnitLevel =
+    C_Map, C_EncounterJournal, UnitFactionGroup, UnitLevel
 local GetRealZoneText, GetQuestDifficultyColor = GetRealZoneText, GetQuestDifficultyColor
 local QuestDifficultyColors = QuestDifficultyColors
 
@@ -98,7 +99,7 @@ end
 
 -- An instance's name in the player's language from the game, or the English from Data.lua.
 local function instanceName(instance)
-    local name = GetRealZoneText and GetRealZoneText(instance[1])
+    local name = instance[1] and GetRealZoneText and GetRealZoneText(instance[1])
     if not name or name == "" then
         name = instance[2]
     end
@@ -190,13 +191,58 @@ local function pinFor(point, mapID)
     return info
 end
 
+-- How close (in percent of the map) an entrance the game knows is to one in Data.lua for the two
+-- to be the same.
+local NEAR = 3
+
+local function listedNear(listed, x, y)
+    for _, point in ipairs(listed) do
+        if abs(point[2] - x) < NEAR and abs(point[3] - y) < NEAR then
+            return true
+        end
+    end
+    return false
+end
+
+-- Dungeon and raid entrances the game itself has for the map (Blizzard's own entrance list, which
+-- its map hides behind a CVar), for ones Data.lua doesn't have, such as Forever's new dungeons.
+-- Probe: which entrances Forever lists there is Unverified.
+local function gameEntrances(mapID, listed, add)
+    if not (C_EncounterJournal and C_EncounterJournal.GetDungeonEntrancesForMap) then
+        return
+    end
+    local db = module.db
+    for _, entrance in ipairs(C_EncounterJournal.GetDungeonEntrancesForMap(mapID) or {}) do
+        local x, y = entrance.position:GetXY()
+        local raid = (entrance.atlasName or ""):lower():find("raid") ~= nil
+        local kindInfo = KINDS[raid and "raid" or "dungeon"]
+        if db[kindInfo.show] and not listedNear(listed, x * 100, y * 100) then
+            local lines = { raid and L.POI_RAID or L.POI_DUNGEON }
+            if entrance.description and entrance.description ~= "" then
+                lines[2] = entrance.description
+            end
+            add(x, y, {
+                atlas = entrance.atlasName ~= "" and entrance.atlasName or kindInfo.atlas,
+                size = kindInfo.pixels * db[kindInfo.size] / 100,
+                title = entrance.name,
+                lines = lines,
+            })
+        end
+    end
+end
+
 local function fill(mapID, add)
+    local listed = {} -- this map's dungeons and raids in Data.lua, shown or not
     for _, point in ipairs(internal.points[mapID] or {}) do
+        if point[1] == "dungeon" or point[1] == "raid" then
+            listed[#listed + 1] = point
+        end
         local info = pinFor(point, mapID)
         if info then
             add(point[2] / 100, point[3] / 100, info)
         end
     end
+    gameEntrances(mapID, listed, add)
 end
 
 local layer

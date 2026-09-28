@@ -154,6 +154,7 @@
     "UnitCanAttack",
     "QuestDifficultyColors",
     "MinimalSliderWithSteppersMixin",
+    "C_EncounterJournal",
     "WorldMapFrame",
     "MapCanvasDataProviderMixin",
     "CreateFromMixins",
