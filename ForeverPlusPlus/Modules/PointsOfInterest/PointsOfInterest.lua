@@ -10,7 +10,7 @@ local ipairs, pairs, format, rawget, unpack, abs = ipairs, pairs, string.format,
 local select, type = select, type
 local C_Map, C_EncounterJournal, C_TaxiMap, UnitFactionGroup, UnitLevel =
     C_Map, C_EncounterJournal, C_TaxiMap, UnitFactionGroup, UnitLevel
-local GetRealZoneText, GetQuestDifficultyColor = GetRealZoneText, GetQuestDifficultyColor
+local GetQuestDifficultyColor = GetQuestDifficultyColor
 local QuestDifficultyColors, Enum = QuestDifficultyColors, Enum
 
 local L = ns.L
@@ -140,12 +140,9 @@ local function zoneName(mapID)
     return info and info.name or ""
 end
 
--- An instance's name in the player's language from the game, or the English from Data.lua.
+-- An instance's name in the player's language, and which entrance it is.
 local function instanceName(instance)
-    local name = instance[1] and GetRealZoneText and GetRealZoneText(instance[1])
-    if not name or name == "" then
-        name = instance[2]
-    end
+    local name = ns.Instances.Name(instance)
     if instance.part then
         name = format(L.POI_PART, name, instance.part)
     end

@@ -204,43 +204,33 @@ for side, maps in pairs(SIDES) do
     end
 end
 
--- The dungeons and raids whose entrance is in each zone: { instance ID (the game names it in
--- the player's language), English name if it can't, lowest level, highest level }. Blackrock
+-- The dungeons and raids whose entrance is in each zone, from Lib/Instances.lua. Blackrock
 -- Mountain sits between Searing Gorge and Burning Steppes, so both list it.
-local BLACKROCK = {
-    { 230, "Blackrock Depths", 52, 60 },
-    { 229, "Blackrock Spire", 55, 60 },
-    { 409, "Molten Core", 60, 60 },
-    { 469, "Blackwing Lair", 60, 60 },
-}
+local I = ns.Instances.byKey
+local BLACKROCK = { I.brd, I.brs, I.mc, I.bwl }
 local DUNGEONS = {
-    [1436] = { { 36, "The Deadmines", 17, 26 } }, -- Westfall
-    [1453] = { { 34, "The Stockade", 22, 30 } }, -- Stormwind City
-    [1421] = { { 33, "Shadowfang Keep", 22, 30 } }, -- Silverpine Forest
-    [1426] = { { 90, "Gnomeregan", 29, 38 } }, -- Dun Morogh
-    -- Forever's; their instance IDs aren't known yet, so the names are the English ones.
-    [1455] = { { nil, "The Hall of Thanes", 13, 18 } }, -- Ironforge
-    [1458] = { { nil, "Ruins of Lordaeron", 15, 20 } }, -- Undercity
-    [1420] = { { 189, "Scarlet Monastery", 34, 45 } }, -- Tirisfal Glades
-    [1418] = { { 70, "Uldaman", 41, 51 } }, -- Badlands
-    [1435] = { { 109, "The Temple of Atal'Hakkar", 50, 60 } }, -- Swamp of Sorrows
+    [1436] = { I.deadmines }, -- Westfall
+    [1453] = { I.stockade }, -- Stormwind City
+    [1421] = { I.shadowfang }, -- Silverpine Forest
+    [1426] = { I.gnomeregan }, -- Dun Morogh
+    [1455] = { I.hallOfThanes }, -- Ironforge
+    [1458] = { I.ruinsOfLordaeron }, -- Undercity
+    [1420] = { I.scarlet }, -- Tirisfal Glades
+    [1418] = { I.uldaman }, -- Badlands
+    [1435] = { I.sunkenTemple }, -- Swamp of Sorrows
     [1427] = BLACKROCK, -- Searing Gorge
     [1428] = BLACKROCK, -- Burning Steppes
-    [1434] = { { 309, "Zul'Gurub", 60, 60 } }, -- Stranglethorn Vale
-    [1422] = { { 289, "Scholomance", 58, 60 } }, -- Western Plaguelands
-    [1423] = { { 329, "Stratholme", 58, 60 }, { 533, "Naxxramas", 60, 60 } }, -- Eastern Plaguelands
-    [1454] = { { 389, "Ragefire Chasm", 13, 18 } }, -- Orgrimmar
-    [1413] = { -- The Barrens
-        { 43, "Wailing Caverns", 17, 24 },
-        { 47, "Razorfen Kraul", 29, 38 },
-        { 129, "Razorfen Downs", 37, 46 },
-    },
-    [1440] = { { 48, "Blackfathom Deeps", 24, 32 } }, -- Ashenvale
-    [1443] = { { 349, "Maraudon", 46, 55 } }, -- Desolace
-    [1446] = { { 209, "Zul'Farrak", 44, 54 } }, -- Tanaris
-    [1444] = { { 429, "Dire Maul", 56, 60 } }, -- Feralas
-    [1445] = { { 249, "Onyxia's Lair", 60, 60 } }, -- Dustwallow Marsh
-    [1451] = { { 509, "Ruins of Ahn'Qiraj", 60, 60 }, { 531, "Temple of Ahn'Qiraj", 60, 60 } }, -- Silithus
+    [1434] = { I.zulgurub }, -- Stranglethorn Vale
+    [1422] = { I.scholomance }, -- Western Plaguelands
+    [1423] = { I.stratholme, I.naxxramas }, -- Eastern Plaguelands
+    [1454] = { I.ragefire }, -- Orgrimmar
+    [1413] = { I.wailing, I.razorfenKraul, I.razorfenDowns }, -- The Barrens
+    [1440] = { I.blackfathom }, -- Ashenvale
+    [1443] = { I.maraudon }, -- Desolace
+    [1446] = { I.zulfarrak }, -- Tanaris
+    [1444] = { I.diremaul }, -- Feralas
+    [1445] = { I.onyxia }, -- Dustwallow Marsh
+    [1451] = { I.aq20, I.aq40 }, -- Silithus
 }
 for mapID, dungeons in pairs(DUNGEONS) do
     internal.zones[mapID].dungeons = dungeons

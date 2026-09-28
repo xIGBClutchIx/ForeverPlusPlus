@@ -8,8 +8,7 @@ local ipairs, tostring, format, concat = ipairs, tostring, string.format, table.
 local min, max, GetLocale = math.min, math.max, GetLocale
 local CreateFrame, C_Map, C_Item, C_XMLUtil = CreateFrame, C_Map, C_Item, C_XMLUtil
 local Enum, UnitLevel, GetQuestDifficultyColor = Enum, UnitLevel, GetQuestDifficultyColor
-local QuestDifficultyColors, UnitFactionGroup, GetRealZoneText = QuestDifficultyColors, UnitFactionGroup,
-    GetRealZoneText
+local QuestDifficultyColors, UnitFactionGroup = QuestDifficultyColors, UnitFactionGroup
 local FACTION_ALLIANCE, FACTION_HORDE = FACTION_ALLIANCE, FACTION_HORDE
 
 local L = ns.L
@@ -233,15 +232,6 @@ local function territory(zone)
     return color, format(L.ZONEINFO_TERRITORY, FACTION_NAMES[side] or side)
 end
 
--- An instance's name in the player's language from the game, or the English from Data.lua.
-local function instanceName(instance)
-    local name = instance[1] and GetRealZoneText and GetRealZoneText(instance[1])
-    if not name or name == "" then
-        name = instance[2]
-    end
-    return name
-end
-
 -- The zone's dungeons and raids, each with its level range colored like quests.
 local function dungeonsRow(zone)
     if not (module.db.dungeons and zone.dungeons) then
@@ -249,7 +239,7 @@ local function dungeonsRow(zone)
     end
     local names = {}
     for i, instance in ipairs(zone.dungeons) do
-        names[i] = format(L.ZONEINFO_DUNGEON, instanceName(instance),
+        names[i] = format(L.ZONEINFO_DUNGEON, ns.Instances.Name(instance),
             levelText(instance[3], instance[4]))
     end
     return format("|A:%s:%d:%d|a ", DUNGEON_ATLAS, ICON_SIZE, ICON_SIZE)

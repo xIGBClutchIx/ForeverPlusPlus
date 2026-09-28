@@ -10,49 +10,31 @@
 -- list doesn't (Forever's new ones) are added from the game; see gameEntrances.
 local _, ns = ...
 
+local setmetatable = setmetatable
+
 local L = ns.L
 
 local internal = ns.modules.PointsOfInterest.internal
 
--- Dungeons and raids: instance ID (the game names it in the player's language), English name if
--- it can't, and level range. `part` tells apart entrances of one instance. A place with several
--- instances lists them in `parts`, and `raids` when some are raids.
-internal.instances = {
+local Instances = ns.Instances.byKey
+
+-- One entrance of an instance with several, told apart by `name`.
+local function part(instance, name)
+    return { instance[1], instance[2], instance[3], instance[4], part = name }
+end
+
+-- Dungeons and raids: the ones in Lib/Instances.lua, and the entrances and places only the map
+-- needs. `part` tells apart entrances of one instance. A place with several instances lists them
+-- in `parts`, and `raids` when some are raids.
+internal.instances = setmetatable({
     ahnqiraj = { name = "Ahn'Qiraj", parts = { "aq20", "aq40" } },
-    aq20 = { 509, "Ruins of Ahn'Qiraj", 60, 60 },
-    aq40 = { 531, "Temple of Ahn'Qiraj", 60, 60 },
-    blackfathom = { 48, "Blackfathom Deeps", 24, 32 },
     blackrock = { name = "Blackrock Mountain", parts = { "brd", "brs", "mc", "bwl" }, raids = true },
-    brd = { 230, "Blackrock Depths", 52, 60 },
-    brs = { 229, "Blackrock Spire", 55, 60 },
-    bwl = { 469, "Blackwing Lair", 60, 60 },
-    deadmines = { 36, "The Deadmines", 17, 26 },
-    diremaulEast = { 429, "Dire Maul", 56, 60, part = L.POI_EAST },
-    diremaulNorth = { 429, "Dire Maul", 56, 60, part = L.POI_NORTH },
-    diremaulWest = { 429, "Dire Maul", 56, 60, part = L.POI_WEST },
-    gnomeregan = { 90, "Gnomeregan", 29, 38 },
-    -- Forever's. Its instance ID isn't known yet, so the name is the English one.
-    hallOfThanes = { nil, "The Hall of Thanes", 13, 18 },
-    ruinsOfLordaeron = { nil, "Ruins of Lordaeron", 15, 20 },
-    maraudon = { 349, "Maraudon", 46, 55 },
-    mc = { 409, "Molten Core", 60, 60 },
-    naxxramas = { 533, "Naxxramas", 60, 60 },
-    onyxia = { 249, "Onyxia's Lair", 60, 60 },
-    ragefire = { 389, "Ragefire Chasm", 13, 18 },
-    razorfenDowns = { 129, "Razorfen Downs", 37, 46 },
-    razorfenKraul = { 47, "Razorfen Kraul", 29, 38 },
-    scarlet = { 189, "Scarlet Monastery", 34, 45 },
-    scholomance = { 289, "Scholomance", 58, 60 },
-    shadowfang = { 33, "Shadowfang Keep", 22, 30 },
-    stockade = { 34, "The Stockade", 22, 30 },
-    stratholmeMain = { 329, "Stratholme", 58, 60, part = L.POI_MAIN_GATE },
-    stratholmeService = { 329, "Stratholme", 58, 60, part = L.POI_SERVICE_GATE },
-    sunkenTemple = { 109, "The Temple of Atal'Hakkar", 50, 60 },
-    uldaman = { 70, "Uldaman", 41, 51 },
-    wailing = { 43, "Wailing Caverns", 17, 24 },
-    zulfarrak = { 209, "Zul'Farrak", 44, 54 },
-    zulgurub = { 309, "Zul'Gurub", 60, 60 },
-}
+    diremaulEast = part(Instances.diremaul, L.POI_EAST),
+    diremaulNorth = part(Instances.diremaul, L.POI_NORTH),
+    diremaulWest = part(Instances.diremaul, L.POI_WEST),
+    stratholmeMain = part(Instances.stratholme, L.POI_MAIN_GATE),
+    stratholmeService = part(Instances.stratholme, L.POI_SERVICE_GATE),
+}, { __index = Instances })
 
 -- The capital cities, by city map ID: the zone around each (where its icon and its dungeons also
 -- show, placed by where the game says the city sits on the zone's map) and its faction. A city
