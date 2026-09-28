@@ -8,7 +8,8 @@ local _, ns = ...
 
 local internal = ns.modules.ZoneInfo.internal
 
--- Herbs and ores: item ID -> { skill needed to gather, English name until the game gives its own }.
+-- Herbs and ores: item ID -> { skill needed to gather, short English name }. Other languages
+-- use the game's item name.
 -- The skills match Gathering Tooltips.
 internal.herbs = {
     [2447] = { 1, "Peacebloom" },
@@ -41,17 +42,17 @@ internal.herbs = {
 }
 
 internal.ores = {
-    [2770] = { 1, "Copper Ore" },
-    [2771] = { 65, "Tin Ore" },
-    [3340] = { 65, "Incendicite Ore" },
-    [2775] = { 75, "Silver Ore" },
-    [4278] = { 75, "Lesser Bloodstone Ore" },
-    [2772] = { 125, "Iron Ore" },
-    [2776] = { 155, "Gold Ore" },
-    [3858] = { 175, "Mithril Ore" },
-    [7911] = { 230, "Truesilver Ore" },
-    [11370] = { 230, "Dark Iron Ore" },
-    [10620] = { 245, "Thorium Ore" },
+    [2770] = { 1, "Copper" },
+    [2771] = { 65, "Tin" },
+    [3340] = { 65, "Incendicite" },
+    [2775] = { 75, "Silver" },
+    [4278] = { 75, "Lesser Bloodstone" },
+    [2772] = { 125, "Iron" },
+    [2776] = { 155, "Gold" },
+    [3858] = { 175, "Mithril" },
+    [7911] = { 230, "Truesilver" },
+    [11370] = { 230, "Dark Iron" },
+    [10620] = { 245, "Thorium" },
 }
 
 -- Herbs

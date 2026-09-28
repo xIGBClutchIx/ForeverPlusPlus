@@ -621,13 +621,9 @@ L.ZONEINFO_FISHING_DESC = "The Fishing skill the zone's waters need, in red whil
 L.ZONEINFO_GATHERING = "Gathering"
 L.ZONEINFO_GATHERING_DESC = "The herbs and ore in the zone and the Skinning its beasts need, for "
     .. "the professions you have, colored against your skill like Gathering Tooltips."
-L.ZONEINFO_TITLE_LEVELS = "%s  %s" -- zone, "Level 10-20"
-L.ZONEINFO_LEVEL = "Level %d"
-L.ZONEINFO_LEVEL_RANGE = "Level %d-%d" -- lowest, highest
-L.ZONEINFO_LINE = "%s: %s" -- profession, what it finds
-L.ZONEINFO_RANGE = "%s-%s" -- lowest skill, highest skill
+L.ZONEINFO_TITLE_LEVELS = "%s  %s" -- zone, its levels ("10-20")
+L.ZONEINFO_RANGE = "%s-%s" -- lowest, highest
 L.ZONEINFO_LIST_SEPARATOR = ", "
-L.ZONEINFO_FISHING_NAME = "Fishing" -- until the client gives its own name
 
 -- UnexploredAreas
 L.UNEXPLORED_TITLE = "Unexplored Areas"

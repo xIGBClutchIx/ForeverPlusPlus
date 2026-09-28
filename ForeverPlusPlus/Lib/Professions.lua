@@ -64,11 +64,12 @@ local function add(index)
     if not index then
         return
     end
-    local name, _, level, _, _, _, line, modifier = GetProfessionInfo(index)
+    local name, icon, level, _, _, _, line, modifier = GetProfessionInfo(index)
     if readable(line) and readable(level) and type(level) == "number" then
         -- The modifier (from gear or racials) counts toward what the player can gather.
         local rank = level + (readable(modifier) and type(modifier) == "number" and modifier or 0)
-        known[line] = { rank = rank, name = readable(name) and name or nil }
+        known[line] = { rank = rank, name = readable(name) and name or nil,
+            icon = readable(icon) and icon or nil }
     end
 end
 
@@ -87,12 +88,13 @@ local function forget()
     known = nil
 end
 
----The player's skill in a profession (with bonuses from gear) and its name in the client's
----language, or nil when the player doesn't have it. `line` is a skill line ID such as
+---The player's skill in a profession (with bonuses from gear), its name in the client's language,
+---and its icon, or nil when the player doesn't have it. `line` is a skill line ID such as
 ---`Professions.HERBALISM`.
 ---@param line number
 ---@return number? rank
 ---@return string? name
+---@return number|string|nil icon
 function Professions.Rank(line)
     if not (GetProfessions and GetProfessionInfo) then
         return nil
@@ -107,6 +109,6 @@ function Professions.Rank(line)
     end
     local info = known[line]
     if info then
-        return info.rank, info.name
+        return info.rank, info.name, info.icon
     end
 end

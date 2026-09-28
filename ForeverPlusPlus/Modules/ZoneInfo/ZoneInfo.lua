@@ -4,10 +4,11 @@
 -- you have. Ideas from Leatrix Maps' zone levels; none of its code. The zones are in Data.lua.
 local _, ns = ...
 
-local ipairs, tostring, format, concat, max = ipairs, tostring, string.format, table.concat, math.max
+local ipairs, tostring, format, concat = ipairs, tostring, string.format, table.concat
+local min, max, GetLocale = math.min, math.max, GetLocale
 local CreateFrame, C_AddOns, C_Map, C_Item, C_XMLUtil = CreateFrame, C_AddOns, C_Map, C_Item, C_XMLUtil
 local Enum, UnitLevel, GetQuestDifficultyColor = Enum, UnitLevel, GetQuestDifficultyColor
-local QuestDifficultyColors, NORMAL_FONT_COLOR = QuestDifficultyColors, NORMAL_FONT_COLOR
+local QuestDifficultyColors = QuestDifficultyColors
 
 local L = ns.L
 local Professions = ns.Professions
@@ -43,12 +44,11 @@ module.internal = {}
 local internal = module.internal
 
 local MAP_ADDON = "Blizzard_WorldMap"
-local WIDTH = 250 -- the panel's width; lines wrap inside it
-local PADDING = 10
+local MAX_WIDTH = 260 -- the widest the text gets; longer lines wrap
+local PADDING = 8
+local GAP = 3 -- between rows
+local ROWS = 3
 local THROTTLE = 0.1 -- seconds between looks at where the cursor is
-
-local NORMAL = NORMAL_FONT_COLOR and Code(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g,
-    NORMAL_FONT_COLOR.b) or "|cffffd100"
 
 local function colored(color, text)
     return Code(color.r, color.g, color.b) .. text .. "|r"
@@ -56,11 +56,25 @@ end
 
 -- Text ----------------------------------------------------------------------------------------
 
--- "Level 10-20", colored like a quest of that level: red or orange when it's above you, yellow
--- while you're in it, green or gray once you've outleveled it. Two below the top counts as
--- outleveled, so a zone you've finished isn't yellow.
+-- The panel is a title and up to three short rows, each led by its profession's icon:
+--   Silverpine Forest  10-20
+--   [fishing] 1    [skinning] 1-100
+--   [herbalism] Peacebloom, Silverleaf, Earthroot
+--   [mining] Copper, Tin, Silver
+
+-- Each profession's icon, for when the player doesn't have it (Fishing still shows then).
+local ICONS = {
+    [Professions.FISHING] = "Interface\\Icons\\Trade_Fishing",
+    [Professions.SKINNING] = "Interface\\Icons\\INV_Misc_Pelt_Wolf_01",
+    [Professions.HERBALISM] = "Interface\\Icons\\Spell_Nature_NatureTouchGrow",
+    [Professions.MINING] = "Interface\\Icons\\Trade_Mining",
+}
+
+-- "10-20", colored like a quest of that level: red or orange when it's above you, yellow while
+-- you're in it, green or gray once you've outleveled it. Two below the top counts as outleveled,
+-- so a zone you've finished isn't yellow.
 local function levelText(low, high)
-    local text = low == high and format(L.ZONEINFO_LEVEL, low) or format(L.ZONEINFO_LEVEL_RANGE, low, high)
+    local text = low == high and tostring(low) or format(L.ZONEINFO_RANGE, low, high)
     if not (GetQuestDifficultyColor and QuestDifficultyColors) then
         return text
     end
@@ -76,42 +90,65 @@ local function levelText(low, high)
     return color and colored(color, text) or text
 end
 
--- "Name: text", with the name in the game's gold.
-local function labeled(name, text)
-    return format(L.ZONEINFO_LINE, NORMAL .. name .. "|r", text)
+-- A profession's icon in text, the height of the line.
+local function icon(line, own)
+    return format("|T%s:0|t ", own or ICONS[line])
 end
 
--- A skill the player needs: red while below it, white once there.
-local function needText(rank, need)
-    if rank and rank < need then
-        return colored(Professions.Difficulty(rank, need), need)
+-- A skill the zone needs, colored by how hard it is at the player's rank. Fishing has no
+-- difficulty, only enough or not: red while below it, white once there.
+local function skill(rank, need, fishing)
+    if fishing and not (rank and rank < need) then
+        return tostring(need)
     end
-    return tostring(need)
+    return colored(Professions.Difficulty(rank, need), need)
 end
 
-local function fishingLine(zone)
-    local rank, name = Professions.Rank(Professions.FISHING)
-    local text = needText(rank, zone.fish)
-    if zone.fishHigh then
-        text = format(L.ZONEINFO_RANGE, text, needText(rank, zone.fishHigh))
+local function range(rank, low, high, fishing)
+    local text = skill(rank, low, fishing)
+    if high and high ~= low then
+        text = format(L.ZONEINFO_RANGE, text, skill(rank, high, fishing))
     end
-    return labeled(name or L.ZONEINFO_FISHING_NAME, text)
+    return text
 end
 
--- An item's name in the player's language, or the English from Data.lua until the game has it.
-local function itemName(id, english)
-    local name = C_Item and C_Item.GetItemNameByID and C_Item.GetItemNameByID(id)
-    if not name and C_Item and C_Item.RequestLoadItemDataByID then
+-- Fishing, whether or not the player has it, and Skinning, from the zone's level range, when the
+-- player has it; together in one row.
+local function skillsRow(zone)
+    local db, parts = module.db, {}
+    if db.fishing and zone.fish then
+        local rank, _, own = Professions.Rank(Professions.FISHING)
+        parts[#parts + 1] = icon(Professions.FISHING, own) .. range(rank, zone.fish, zone.fishHigh, true)
+    end
+    local rank, _, own = Professions.Rank(Professions.SKINNING)
+    if db.gathering and rank and zone[1] then
+        parts[#parts + 1] = icon(Professions.SKINNING, own) .. range(rank,
+            Professions.SkinningNeed(zone[1]), Professions.SkinningNeed(zone[2]))
+    end
+    if #parts > 0 then
+        return concat(parts, "    ")
+    end
+end
+
+-- An item's name: the short English one from Data.lua in English, else the game's own (which
+-- keeps "Ore"), or the English until the game has loaded it.
+local english = GetLocale() == "enUS"
+local function itemName(id, name)
+    if english or not (C_Item and C_Item.GetItemNameByID) then
+        return name
+    end
+    local own = C_Item.GetItemNameByID(id)
+    if not own and C_Item.RequestLoadItemDataByID then
         C_Item.RequestLoadItemDataByID(id)
     end
-    return name or english
+    return own or name
 end
 
--- The herbs or ores of a zone, each colored by how hard it is at the player's skill, or nil when
--- the player doesn't have the profession.
-local function gatherLine(line, ids, items)
-    local rank, name = Professions.Rank(line)
-    if not (rank and ids and #ids > 0) then
+-- The zone's herbs or ores, each colored by how hard it is at the player's skill, or nil when the
+-- player doesn't have the profession.
+local function gatherRow(line, ids, items)
+    local rank, _, own = Professions.Rank(line)
+    if not (module.db.gathering and rank and ids and #ids > 0) then
         return nil
     end
     local names = {}
@@ -119,34 +156,15 @@ local function gatherLine(line, ids, items)
         local item = items[id]
         names[i] = colored(Professions.Difficulty(rank, item[1]), itemName(id, item[2]))
     end
-    return labeled(name, concat(names, L.ZONEINFO_LIST_SEPARATOR))
+    return icon(line, own) .. concat(names, L.ZONEINFO_LIST_SEPARATOR)
 end
 
--- The Skinning skill the zone's beasts need, from its level range.
-local function skinningLine(zone)
-    local rank, name = Professions.Rank(Professions.SKINNING)
-    if not (rank and zone[1]) then
-        return nil
-    end
-    local low, high = Professions.SkinningNeed(zone[1]), Professions.SkinningNeed(zone[2])
-    local text = colored(Professions.Difficulty(rank, low), low)
-    if high ~= low then
-        text = format(L.ZONEINFO_RANGE, text, colored(Professions.Difficulty(rank, high), high))
-    end
-    return labeled(name, text)
-end
-
--- The lines under the zone's name, in order.
-local function lines(zone)
-    local db, list = module.db, {}
-    if db.fishing and zone.fish then
-        list[#list + 1] = fishingLine(zone)
-    end
-    if db.gathering then
-        list[#list + 1] = gatherLine(Professions.HERBALISM, zone.herbs, internal.herbs)
-        list[#list + 1] = gatherLine(Professions.MINING, zone.ores, internal.ores)
-        list[#list + 1] = skinningLine(zone)
-    end
+-- The rows under the zone's name, in order.
+local function rows(zone)
+    local list = {}
+    list[#list + 1] = skillsRow(zone)
+    list[#list + 1] = gatherRow(Professions.HERBALISM, zone.herbs, internal.herbs)
+    list[#list + 1] = gatherRow(Professions.MINING, zone.ores, internal.ores)
     return list
 end
 
@@ -208,20 +226,27 @@ local function newPanel(parent)
         frame:SetBackdrop(BACKDROP_TOOLTIP_16_16_5555)
         frame:SetBackdropColor(0, 0, 0, 0.8)
     end
-    frame:SetWidth(WIDTH)
     -- Over the map's pins, which sit on the canvas inside the same container.
     frame:SetFrameLevel(parent:GetFrameLevel() + 2000)
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     frame.title:SetPoint("TOPLEFT", PADDING, -PADDING)
-    frame.title:SetWidth(WIDTH - PADDING * 2)
     frame.title:SetJustifyH("LEFT")
-    frame.body = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    frame.body:SetPoint("TOPLEFT", frame.title, "BOTTOMLEFT", 0, -4)
-    frame.body:SetWidth(WIDTH - PADDING * 2)
-    frame.body:SetJustifyH("LEFT")
-    frame.body:SetSpacing(2)
+    frame.rows = {}
+    local above = frame.title
+    for i = 1, ROWS do
+        local row = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        row:SetPoint("TOPLEFT", above, "BOTTOMLEFT", 0, -GAP)
+        row:SetJustifyH("LEFT")
+        frame.rows[i] = row
+        above = row
+    end
     frame:Hide()
     return frame
+end
+
+-- How wide a line is unwrapped. Probe: GetUnboundedStringWidth is Mainline's.
+local function textWidth(text)
+    return text.GetUnboundedStringWidth and text:GetUnboundedStringWidth() or text:GetStringWidth()
 end
 
 local function anchor()
@@ -246,15 +271,29 @@ local function draw(mapID)
     if module.db.levels and zone[1] then
         title = format(L.ZONEINFO_TITLE_LEVELS, title, levelText(zone[1], zone[2]))
     end
-    local body = lines(zone)
+    local list = rows(zone)
+    -- As wide as the longest line, up to MAX_WIDTH; longer lines wrap.
+    panel.title:SetWidth(0)
     panel.title:SetText(title)
-    panel.body:SetText(concat(body, "\n"))
-    panel.body:SetShown(#body > 0)
-    local height = PADDING * 2 + panel.title:GetStringHeight()
-    if #body > 0 then
-        height = height + 4 + panel.body:GetStringHeight()
+    local width = textWidth(panel.title)
+    for i, row in ipairs(panel.rows) do
+        row:SetWidth(0)
+        row:SetText(list[i] or "")
+        row:SetShown(list[i] ~= nil)
+        if list[i] then
+            width = max(width, textWidth(row))
+        end
     end
-    panel:SetHeight(height)
+    width = min(width, MAX_WIDTH)
+    panel.title:SetWidth(width)
+    local height = PADDING * 2 + panel.title:GetStringHeight()
+    for i, row in ipairs(panel.rows) do
+        if list[i] then
+            row:SetWidth(width)
+            height = height + GAP + row:GetStringHeight()
+        end
+    end
+    panel:SetSize(width + PADDING * 2, height)
     panel:Show()
 end
 
