@@ -4,6 +4,10 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ## Unreleased
 
+### Added
+
+- **Points of Interest**: dungeons, raids, flight masters, boats, zeppelins, and spirit healers on the world map's zone maps, under a new Map category. Tooltips say what each is, dungeon level ranges colored against yours, and where boats and zeppelins go. Includes a checkbox and an icon size slider for each kind, and showing the other faction's travel points. Off by default.
+
 ### Changed
 
 - **Class Colors**: hostile NPCs' health bars are red, neutral ones yellow, and ones someone else tagged gray, on the same frames. Friendly NPCs stay green. Includes an NPC Health Bars checkbox to turn it off.

@@ -152,6 +152,12 @@
     "CreateColor",
     "UnitCreatureType",
     "UnitCanAttack",
-    "QuestDifficultyColors"
+    "QuestDifficultyColors",
+    "MinimalSliderWithSteppersMixin",
+    "WorldMapFrame",
+    "MapCanvasDataProviderMixin",
+    "CreateFromMixins",
+    "C_Texture",
+    "GetRealZoneText"
   ]
 }

@@ -237,6 +237,13 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 - Which chat event carries "You are now Friendly with ..." (`FACTION_STANDING_CHANGED`) isn't known: Auto Screenshot listens to `CHAT_MSG_SYSTEM` and `CHAT_MSG_COMBAT_FACTION_CHANGE`. **Unverified**.
 - Own loot lines (`LOOT_ITEM_SELF`, `LOOT_ITEM_PUSHED_SELF` and their `_MULTIPLE` forms) in `CHAT_MSG_LOOT` are Retail behavior; whether they can be secret in instances is **Unverified**.
 
+## World map
+
+- `WorldMapFrame` is Mainline's map canvas. Addons add icons with `WorldMapFrame:AddDataProvider(CreateFromMixins(MapCanvasDataProviderMixin))`; `AddDataProvider` doesn't draw, the map calls the provider's `RefreshAllData` when it shows or changes map, and `RemoveDataProvider` calls `RemoveAllData`. **[web]** (the `forever` UI source, `Blizzard_MapCanvas/Blizzard_MapCanvas.lua`, checked 2026-09-28) **[addon]** (Leatrix Maps 1.60.06 does this on Forever)
+- The map adds Blizzard's `FlightPointDataProvider` and `DungeonEntranceDataProvider`, but flight points only show on maps where `C_TaxiMap.ShouldMapShowTaxiNodes(mapID)` is true, and Forever's zone maps show neither, which is why Leatrix Maps and Points of Interest carry their own lists. **[web]** (same source, `Blizzard_WorldMap.lua`, `FlightPointDataProvider.lua`) Whether the zone maps really have no taxi or entrance data is **Unverified**.
+- `SetMouseClickEnabled`, `SetMouseMotionEnabled`, and `EnableMouse` are marked protected, but without `HasRestrictions`; `SetPassThroughButtons` has restrictions, and Leatrix Maps notes a blocked `SetPropagateMouseClicks`. `Lib/MapPins.lua` only uses the first two, on its own frames. **[web]** (`Blizzard_APIDocumentationGenerated/SimpleScriptRegionAPIDocumentation.lua`) Whether they work in combat on our frames is **Unverified**.
+- Atlases `Dungeon`, `Raid`, `TaxiNode_Alliance`, `TaxiNode_Horde`, `TaxiNode_Neutral`, `Vehicle-TempleofKotmogu-CyanBall`, and `...-GreenBall` work on Forever. **[addon]** (Leatrix Maps) `poi-graveyard-neutral` is in the `forever` UI source. **[web]** `FlightMasterFerry` and `Vehicle-Air-Horde` are in Retail's atlas list (wago.tools `UiTextureAtlasMember`), so Points of Interest probes them with `C_Texture.GetAtlasInfo` and falls back to the balls. **Unverified** on Forever.
+
 ## Fonts
 
 - Text measured before its font file has loaded reads as 0 tall on Forever, even after preloading. Measure with a floor of the font size. **[in-game]** (2026-09-23)

@@ -12,6 +12,13 @@ ns.changelog = {
     {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
+            { L.CHANGELOG_ADDED, {
+                { L.POI_TITLE, "Dungeons, raids, flight masters, boats, zeppelins, and spirit "
+                    .. "healers on the world map's zone maps, under a new Map category. Tooltips "
+                    .. "say what each is, dungeon level ranges colored against yours, and where "
+                    .. "boats and zeppelins go. Includes a checkbox and an icon size slider for "
+                    .. "each kind, and showing the other faction's travel points. Off by default." },
+            } },
             { L.CHANGELOG_CHANGED, {
                 { L.CLASSCOLORS_TITLE, "Hostile NPCs' health bars are red, neutral ones yellow, "
                     .. "and ones someone else tagged gray, on the same frames. Friendly NPCs stay "

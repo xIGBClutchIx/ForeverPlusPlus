@@ -3,9 +3,10 @@
 --   Forever++        a welcome page: what the addon is, how many modules are on, buttons to the
 --                    Modules and Changelog pages, the version, links, and the /fpp commands
 --     Modules        an on/off checkbox per module (the only place modules turn on and off),
---                    grouped under headers by `module.category`. A module's options (and buttons,
---                    from `module.actions`) sit indented under its checkbox, hidden until its gear
---                    is clicked, and greyed out while it's off. The indent groups them, so
+--                    grouped under headers by `module.category`. A module's options (checkboxes,
+--                    dropdowns and sliders) and buttons (from `module.actions`) sit indented under
+--                    its checkbox, hidden until its gear is clicked, and greyed out while it's
+--                    off. An option can sit under another (`requires`). The indent groups them, so
 --                    their `section`s get no header here. A module's `notice` (a warning) shows under its
 --                    checkbox while it applies. `alwaysOn` modules (tools) have no checkbox
 --     <Tool>         a page a module draws itself (`BuildPage`)
@@ -28,6 +29,7 @@ local changelogCategory -- the Changelog page, for the welcome page's button
 local pages = {} -- module name -> the page it draws itself, for ns.OpenSettings(name)
 local inline = {} -- module name -> true when its options sit under its checkbox on the Modules page
 local expanded = {} -- module name -> true while those options are shown (this session only)
+local nested = {} -- module name -> true when an option sits under another (`requires`)
 
 -- Redraws the open Settings list, so rows shown or hidden by `expanded` appear or go. Probe:
 -- SettingsInbound.RepairDisplay is Mainline's; ArcaneWizardLibrary uses it on Forever.
@@ -167,7 +169,13 @@ local function addToggle(category, module, hasGear)
         format("ForeverPlusPlus_%s", module.name), Settings.VarType.Boolean,
         module.title or module.name, module.defaults.enabled,
         function() return module.db.enabled end,
-        function(value) ns.SetEnabled(module.name, value) end)
+        function(value)
+            ns.SetEnabled(module.name, value)
+            -- A row under one of its options only rechecks that option, not the module: redraw.
+            if nested[module.name] and canRedraw() then
+                SettingsInbound.RepairDisplay()
+            end
+        end)
     track(module, setting)
     local initializer = Settings.CreateCheckbox(category, setting, module.description)
     if hasGear and initializer then
@@ -202,22 +210,52 @@ local function placeUnder(initializer, module, parent)
     end
 end
 
--- A module's own option (from `module.options`): a checkbox, or a dropdown when it lists
--- `choices`, under its checkbox, and only while `shown()` is true.
-local function addOption(category, module, option, parent, shown)
-    local choices = option.choices
+-- The slider's value as its label shows it: `option.format` (a format string, such as "%d%%"),
+-- or the number.
+local function sliderOptions(option)
+    local options = Settings.CreateSliderOptions(option.min, option.max, option.step or 1)
+    if MinimalSliderWithSteppersMixin and MinimalSliderWithSteppersMixin.Label then
+        options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, function(value)
+            return format(option.format or "%s", value)
+        end)
+    end
+    return options
+end
+
+-- A module's own option (from `module.options`): a checkbox, a dropdown when it lists `choices`,
+-- or a slider when it has `min` and `max`, under its checkbox (or under the checkbox option named
+-- by `requires`, greyed out while that is off), and only while `shown()` is true. `added` maps
+-- the module's option keys to their rows, for `requires`.
+local function addOption(category, module, option, parent, shown, added)
+    local choices, slider = option.choices, option.min
     if choices and not (Settings.CreateDropdown and Settings.CreateControlTextContainer) then
         return -- Probe: dropdowns are Mainline's; leave the option at its default without one.
     end
+    if slider and not (Settings.CreateSlider and Settings.CreateSliderOptions) then
+        return -- Probe: sliders are Mainline's; ArcaneWizardLibrary uses them on Forever.
+    end
+    local varType = Settings.VarType.Boolean
+    if choices then
+        varType = Settings.VarType.String
+    elseif slider then
+        varType = Settings.VarType.Number
+    end
     local setting = Settings.RegisterProxySetting(category,
-        format("ForeverPlusPlus_%s_%s", module.name, option.key),
-        choices and Settings.VarType.String or Settings.VarType.Boolean,
+        format("ForeverPlusPlus_%s_%s", module.name, option.key), varType,
         option.name, module.defaults[option.key],
         function() return module.db[option.key] end,
-        function(value) ns.SetOption(module.name, option.key, value) end)
+        function(value)
+            if slider then
+                value = ns.SliderValue(option, value)
+            end
+            ns.SetOption(module.name, option.key, value)
+        end)
     track(module, setting)
     local initializer
-    if choices then
+    if slider then
+        initializer = Settings.CreateSlider(category, setting, sliderOptions(option),
+            option.description)
+    elseif choices then
         initializer = Settings.CreateDropdown(category, setting, function()
             local container = Settings.CreateControlTextContainer()
             for _, choice in ipairs(choices) do
@@ -228,8 +266,19 @@ local function addOption(category, module, option, parent, shown)
     else
         initializer = Settings.CreateCheckbox(category, setting, option.description)
     end
-    placeUnder(initializer, module, parent)
+    local requires = option.requires and added and added[option.requires]
+    if requires and initializer and initializer.SetParentInitializer then
+        initializer:SetParentInitializer(requires, function()
+            return module.db.enabled and module.db[option.requires]
+        end)
+        nested[module.name] = true
+    else
+        placeUnder(initializer, module, parent)
+    end
     showWhen(initializer, shown)
+    if added then
+        added[option.key] = initializer
+    end
 end
 
 local function addHeader(layout, text, shown)
@@ -256,13 +305,14 @@ end
 -- Settings.CreateElementInitializer) stopped the page drawing on Forever.
 local function addOptions(category, layout, module, parent, debug, shown)
     local section
+    local added = {}
     for _, option in ipairs(module.options or {}) do
         if (option.debug or false) == debug then
             if option.section and option.section ~= section and not parent then
                 addHeader(layout, option.section, shown)
             end
             section = option.section
-            addOption(category, module, option, parent, shown)
+            addOption(category, module, option, parent, shown, added)
         end
     end
 end
@@ -535,6 +585,7 @@ local CATEGORIES = {
     { "automation", L.CATEGORY_AUTOMATION },
     { "items", L.CATEGORY_ITEMS },
     { "interface", L.CATEGORY_INTERFACE },
+    { "map", L.CATEGORY_MAP },
     { "unitframes", L.CATEGORY_UNITFRAMES },
     { "nameplates", L.CATEGORY_NAMEPLATES },
     { "other", L.CATEGORY_OTHER },

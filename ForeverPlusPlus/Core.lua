@@ -3,6 +3,7 @@
 local addonName, ns = ...
 
 local pairs, ipairs, type, print, format, tostring = pairs, ipairs, type, print, string.format, tostring
+local tonumber, floor, min, max = tonumber, math.floor, math.min, math.max
 local concat, strsplit, strtrim, setmetatable = table.concat, strsplit, strtrim, setmetatable
 local InCombatLockdown, GetLocale = InCombatLockdown, GetLocale
 
@@ -157,17 +158,36 @@ local function fill(target, defaults)
     end
 end
 
--- Resets dropdown settings whose saved value is no longer one of the choices.
-local function checkChoices(module)
+---A slider option's value brought into its range and onto its steps, or nil when it isn't a
+---number.
+---@param option table an option with `min`, `max` and `step`
+---@param value any
+---@return number?
+function ns.SliderValue(option, value)
+    value = tonumber(value)
+    if not value then
+        return nil
+    end
+    local step = option.step or 1
+    value = option.min + floor((value - option.min) / step + 0.5) * step
+    return max(option.min, min(option.max, value))
+end
+
+-- Resets dropdown settings whose saved value is no longer one of the choices, and brings slider
+-- settings back into their range.
+local function checkValues(module)
     for _, option in pairs(module.options or {}) do
+        local value = module.db[option.key]
         if option.choices then
             local valid = false
             for _, choice in pairs(option.choices) do
-                valid = valid or choice[1] == module.db[option.key]
+                valid = valid or choice[1] == value
             end
             if not valid then
                 module.db[option.key] = module.defaults[option.key]
             end
+        elseif option.min then
+            module.db[option.key] = ns.SliderValue(option, value) or module.defaults[option.key]
         end
     end
 end
@@ -306,7 +326,7 @@ function ns.Start()
         prune(ns.db.modules[name], module.defaults)
         fill(ns.db.modules[name], module.defaults)
         module.db = ns.db.modules[name]
-        checkChoices(module)
+        checkValues(module)
         if module.OnLoad then
             module:OnLoad()
         end
@@ -384,7 +404,7 @@ local function list()
 end
 
 -- /fpp options and /fpp set work on any module's `module.options`: a checkbox takes on/off, a
--- dropdown takes one of its choice keys. `enabled` is the module's own on/off.
+-- dropdown takes one of its choice keys, a slider a number. `enabled` is the module's own on/off.
 
 local booleans = { on = true, off = false, ["true"] = true, ["false"] = false, yes = true,
     no = false, ["1"] = true, ["0"] = false }
@@ -398,10 +418,12 @@ local function findOption(module, query)
     end
 end
 
--- "on", "off", or the choice key, and what it may be set to.
+-- "on", "off", the choice key, or the number, and what it may be set to.
 local function describe(module, option)
     local value = module.db[option.key]
-    if not option.choices then
+    if option.min then
+        return tostring(value), format("%s-%s", option.min, option.max)
+    elseif not option.choices then
         return value and "on" or "off", "on, off"
     end
     local keys = {}
@@ -457,7 +479,9 @@ local function set(rest, flip)
         return
     end
     local new
-    if option.choices then
+    if option.min then
+        new = ns.SliderValue(option, value)
+    elseif option.choices then
         for _, choice in ipairs(option.choices) do
             if choice[1]:lower() == value then
                 new = choice[1]

@@ -18,6 +18,7 @@ Lib\ItemTooltip.lua
 Lib\Professions.lua
 Lib\PlateLabel.lua
 Lib\FriendlyPlates.lua
+Lib\MapPins.lua
 Modules\PlayerPlates.lua
 Modules\NpcPlates.lua
 Modules\CVarBrowser.lua
@@ -39,6 +40,8 @@ Modules\SkipCinematics.lua
 Modules\AutoDismount.lua
 Modules\AutoScreenshot.lua
 Modules\ClassColors.lua
+Modules\PointsOfInterest\PointsOfInterest.lua
+Modules\PointsOfInterest\Data.lua
 Changelog.lua
 Settings.lua
 Init.lua

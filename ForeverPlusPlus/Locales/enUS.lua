@@ -19,7 +19,7 @@ L.SLASH_LIST = "list the modules and whether each is on"
 L.SLASH_TOGGLE = "turn a module, or one of its checkboxes, on or off"
 L.SLASH_RESET = "all settings back to defaults (reloads)"
 L.SLASH_OPTIONS = "list its options and their values"
-L.SLASH_SET = "change one (on/off, or a choice)"
+L.SLASH_SET = "change one (on/off, a choice, or a number)"
 
 -- Core: /fpp options and /fpp set. The values typed (on, off, choice keys) stay as they are.
 L.OPTIONS_HEADER = "%s is %s. Options (/fpp set %s <option> <value>):" -- module, on/off, module
@@ -37,6 +37,7 @@ L.CHAT_MESSAGES = "Chat Messages" -- a module's checkbox for what it says in cha
 L.CATEGORY_AUTOMATION = "Automation"
 L.CATEGORY_ITEMS = "Items"
 L.CATEGORY_INTERFACE = "Interface"
+L.CATEGORY_MAP = "Map"
 L.CATEGORY_UNITFRAMES = "Unit Frames"
 L.CATEGORY_NAMEPLATES = "Nameplates"
 L.CATEGORY_OTHER = "Other"
@@ -558,6 +559,42 @@ L.CLASSCOLORS_PARTY_DESC = "Your party members' frames. Raid-style party frames 
     .. "class color setting in Blizzard's options."
 L.CLASSCOLORS_TOT = "Target of Target"
 L.CLASSCOLORS_TOT_DESC = "The small frames for your target's target and your focus's target."
+
+-- PointsOfInterest. Place names on the map come from the game, or from Data.lua.
+L.POI_TITLE = "Points of Interest"
+L.POI_DESC = "Show dungeons, raids, flight masters, boats, zeppelins, and spirit healers on the "
+    .. "world map's zone maps."
+L.POI_DUNGEONS = "Dungeons"
+L.POI_DUNGEONS_DESC = "Dungeon entrances, with their level range colored against yours."
+L.POI_RAIDS = "Raids"
+L.POI_RAIDS_DESC = "Raid entrances."
+L.POI_FLIGHT = "Flight Masters"
+L.POI_FLIGHT_DESC = "Flight masters of your faction, and ones that fly for both."
+L.POI_SHIPS = "Boats"
+L.POI_SHIPS_DESC = "Boat docks, with where the boat goes."
+L.POI_ZEPPELINS = "Zeppelins"
+L.POI_ZEPPELINS_DESC = "Zeppelin towers, with where the zeppelin goes."
+L.POI_SPIRIT = "Spirit Healers"
+L.POI_SPIRIT_DESC = "Spirit healers, where you can come back to life after dying."
+L.POI_SIZE = "Icon Size"
+L.POI_SIZE_DESC = "How big the icons are, compared with their normal size."
+L.POI_OTHER_FACTION = "Other Faction"
+L.POI_OTHER_FACTION_DESC = "Also show the other faction's flight masters, boats, and zeppelins."
+-- Tooltips
+L.POI_DUNGEON = "Dungeon"
+L.POI_RAID = "Raid"
+L.POI_LEVEL = "Level %d"
+L.POI_LEVELS = "Level %d-%d" -- lowest, highest
+L.POI_PART = "%s (%s)" -- an instance, which entrance
+L.POI_MAIN_GATE = "Main Gate"
+L.POI_SERVICE_GATE = "Service Gate"
+L.POI_NORTH = "North"
+L.POI_EAST = "East"
+L.POI_WEST = "West"
+L.POI_FLIGHT_MASTER = "Flight Master"
+L.POI_SHIP_TO = "Boat to %s" -- a place
+L.POI_ZEPPELIN_TO = "Zeppelin to %s" -- a place
+L.POI_SPIRIT_HEALER = "Spirit Healer"
 
 -- CVarBrowser
 L.CVARBROWSER_TITLE = "Console Variables"
