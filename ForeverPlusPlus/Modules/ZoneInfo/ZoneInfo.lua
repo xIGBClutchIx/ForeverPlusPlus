@@ -96,11 +96,17 @@ local function icon(line, own)
     return format("|T%s:%d:%d|t ", own or ICONS[line], ICON_SIZE, ICON_SIZE)
 end
 
--- A skill the zone needs, colored by how hard it is at the player's rank. Fishing has no
--- difficulty, only enough or not: red while below it, white once there.
+-- Blizzard's green for a quest at your level. Probe: QuestDifficultyColors is FrameXML's.
+local GREEN = QuestDifficultyColors and QuestDifficultyColors.standard or { r = 0.25, g = 0.75, b = 0.25 }
+
+-- A skill the zone needs, colored by how hard it is at the player's rank. Fishing's skill-ups
+-- don't depend on the zone, so it's only enough or not: red while below it (fish get away),
+-- green once there, and white without Fishing.
 local function skill(rank, need, fishing)
-    if fishing and not (rank and rank < need) then
+    if fishing and not rank then
         return tostring(need)
+    elseif fishing and rank >= need then
+        return colored(GREEN, need)
     end
     return colored(Professions.Difficulty(rank, need), need)
 end
