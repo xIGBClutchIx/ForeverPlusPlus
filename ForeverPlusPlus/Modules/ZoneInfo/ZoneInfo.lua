@@ -266,7 +266,7 @@ local function bottomLeftOffset()
     if rows == 0 then
         return 8
     end
-    return COORDS_BOTTOM + rows * COORDS_ROW + 6
+    return COORDS_BOTTOM + rows * COORDS_ROW + 8 -- room for a background around them
 end
 
 local function anchor()

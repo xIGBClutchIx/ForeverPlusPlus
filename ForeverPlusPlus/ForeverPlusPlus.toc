@@ -46,6 +46,7 @@ Modules\ZoneInfo\ZoneInfo.lua
 Modules\ZoneInfo\Data.lua
 Modules\UnexploredAreas\UnexploredAreas.lua
 Modules\UnexploredAreas\Data.lua
+Modules\Coordinates.lua
 Changelog.lua
 Settings.lua
 Init.lua
