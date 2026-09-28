@@ -235,8 +235,16 @@ end
 -- Whether the character has learned the flight master at this point: true, false, or nil when
 -- neither the game's map list nor a flight master visit says.
 local function learned(point)
-    if seenLearned()[place(point[5])] then
+    local name = place(point[5])
+    if seenLearned()[name] then
         return true
+    end
+    -- By name first ("The Sepulcher, Silverpine Forest"), then by place: on Forever the list for
+    -- one zone holds the whole continent's flight points (36 for Silverpine).
+    for _, node in ipairs(taxiNodes) do
+        if node.name and shortName(node.name) == name then
+            return not node.isUndiscovered
+        end
     end
     for _, node in ipairs(taxiNodes) do
         local x, y = node.position:GetXY()
