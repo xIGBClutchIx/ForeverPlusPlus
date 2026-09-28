@@ -15,15 +15,15 @@ local module = ns.NewModule("UnexploredAreas", L.UNEXPLORED_DESC, {
     enabled = false,
     tint = true,
     tintStrength = 70, -- percent of the full color
-    tintColor = "blue",
+    tintColor = "gray",
 })
 module.title = L.UNEXPLORED_TITLE
 module.category = "map"
 
--- The tint colors at full strength. A cool blue by default, so they read as not yet visited.
+-- The tint colors at full strength. Gray by default: unexplored areas read as faded, not colored.
 local COLORS = {
-    blue = { 0.4, 0.55, 1 },
     gray = { 0.5, 0.5, 0.5 },
+    blue = { 0.4, 0.55, 1 },
     gold = { 1, 0.8, 0.35 },
     green = { 0.5, 1, 0.45 },
     red = { 1, 0.4, 0.35 },
@@ -41,8 +41,8 @@ module.options = {
         key = "tintColor", name = L.UNEXPLORED_COLOR, description = L.UNEXPLORED_COLOR_DESC,
         requires = "tint",
         choices = {
-            { "blue", L.UNEXPLORED_BLUE },
             { "gray", L.UNEXPLORED_GRAY },
+            { "blue", L.UNEXPLORED_BLUE },
             { "gold", L.UNEXPLORED_GOLD },
             { "green", L.UNEXPLORED_GREEN },
             { "red", L.UNEXPLORED_RED },
@@ -62,7 +62,7 @@ local function tintColor()
     if not db.tint then
         return 1, 1, 1
     end
-    local color = COLORS[db.tintColor] or COLORS.blue
+    local color = COLORS[db.tintColor] or COLORS.gray
     local strength = db.tintStrength / 100
     return 1 - (1 - color[1]) * strength, 1 - (1 - color[2]) * strength,
         1 - (1 - color[3]) * strength
