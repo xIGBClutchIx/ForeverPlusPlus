@@ -41,6 +41,10 @@ ns.changelog = {
                 { L.GATHERTRACKING_TITLE, "Swap is a slider from never to every 30 seconds." },
                 { L.AUCTIONPRICES_TITLE, "Red After is a slider from 1 to 48 hours. It starts "
                     .. "back at 12 hours." },
+                { L.PLAYERPLATES_TITLE, "A Name Size slider, 120% of Blizzard's size by default. "
+                    .. "The guild line and icons grow with it." },
+                { L.NPCPLATES_TITLE, "A Name Size slider, 120% of Blizzard's size by default. The "
+                    .. "title line grows with it." },
             } },
             { L.CHANGELOG_FIXED, {
                 { L.PLAYERPLATES_TITLE, "Chinese, Korean, and Cyrillic names show again, instead "

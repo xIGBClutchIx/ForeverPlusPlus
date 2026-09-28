@@ -10,6 +10,7 @@ local module = ns.NewModule("NpcPlates", L.NPCPLATES_DESC, {
     enabled = true,
     barWhenHurt = true,
     nameColor = "green", -- "green" (as in the world) or "white"
+    nameSize = 120, -- percent of Blizzard's name size
     level = "before", -- "before", "after", or "off"
     titles = "always", -- "always", "hidden" (only without the bar), or "off"
     titleColor = "name", -- "name" (the name's color), "gray", or "green"
@@ -25,6 +26,7 @@ module.options = {
         key = "nameColor", name = L.PLATES_NAME_COLOR, description = L.NPCPLATES_NAME_COLOR_DESC,
         choices = { { "green", L.PLATES_COLOR_GREEN }, { "white", L.PLATES_COLOR_WHITE } },
     },
+    ns.PlateLabel.NameSizeOption(),
     { key = "level", name = L.PLATES_LEVEL, description = L.PLATES_LEVEL_DESC, choices = ns.PlateLabel.LEVEL_CHOICES },
     {
         key = "titles", name = L.NPCPLATES_TITLES, description = L.NPCPLATES_TITLES_DESC,

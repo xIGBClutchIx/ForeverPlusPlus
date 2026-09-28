@@ -20,6 +20,8 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Auto Release**: the delay is a slider from right away to 10 seconds.
 - **Gathering Tracking**: Swap is a slider from never to every 30 seconds.
 - **Auction Prices**: Red After is a slider from 1 to 48 hours. It starts back at 12 hours.
+- **Player Nameplates**: a Name Size slider, 120% of Blizzard's size by default. The guild line and icons grow with it.
+- **NPC Nameplates**: a Name Size slider, 120% of Blizzard's size by default. The title line grows with it.
 
 ### Fixed
 

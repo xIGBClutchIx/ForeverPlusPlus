@@ -12,6 +12,7 @@ local module = ns.NewModule("PlayerPlates", L.PLAYERPLATES_DESC, {
     enabled = true,
     barWhenHurt = true,
     nameColor = "class", -- "class" or "white"
+    nameSize = 120, -- percent of Blizzard's name size
     recentAllies = true,
     level = "before", -- "before", "after", or "off"
     guildNames = "always", -- "always", "hidden" (only without the bar), or "off"
@@ -32,6 +33,7 @@ module.options = {
         key = "nameColor", name = L.PLATES_NAME_COLOR, description = L.PLAYERPLATES_NAME_COLOR_DESC,
         choices = { { "class", L.PLAYERPLATES_NAME_COLOR_CLASS }, { "white", L.PLATES_COLOR_WHITE } },
     },
+    ns.PlateLabel.NameSizeOption(),
     { key = "recentAllies", name = L.PLAYERPLATES_RECENT_ALLIES, description = L.PLAYERPLATES_RECENT_ALLIES_DESC },
     { key = "level", name = L.PLATES_LEVEL, description = L.PLATES_LEVEL_DESC, choices = ns.PlateLabel.LEVEL_CHOICES },
     {

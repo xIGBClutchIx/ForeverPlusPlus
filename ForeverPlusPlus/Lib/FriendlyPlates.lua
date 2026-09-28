@@ -10,7 +10,8 @@
 --   })
 --   plates:Enable() / plates:Disable() / plates:Refresh()
 --
--- The module's settings need barWhenHurt, level, centerLine, and `saved = {}` for the CVars.
+-- The module's settings need barWhenHurt, level, nameSize, centerLine, and `saved = {}` for the
+-- CVars.
 local _, ns = ...
 
 local pairs, ipairs, setmetatable, hooksecurefunc = pairs, ipairs, setmetatable, hooksecurefunc

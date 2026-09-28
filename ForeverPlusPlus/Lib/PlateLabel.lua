@@ -5,7 +5,8 @@
 -- the bar's left), with the icons after it and the subtitle under the bar.
 --
 -- A plate module decides what goes in the label through a `style` (see ns.FriendlyPlates):
---   style.db               its settings: level ("before"/"after"/"off"), centerLine, and with
+--   style.db               its settings: level ("before"/"after"/"off"), nameSize (a percent of
+--                          Blizzard's name size), centerLine, and with
 --                          icons, socialIcons, groupIcon ("role"/"looking") and testIcons
 --   style.NameColor(unit)  r, g, b for the name
 --   style.BarNameColor(unit)  r, g, b for the name while the bar is up (optional; NameColor)
@@ -17,7 +18,7 @@
 local _, ns = ...
 
 local pairs, ipairs, setmetatable, floor = pairs, ipairs, setmetatable, math.floor
-local CreateFrame, CreateFontFamily, UnitLevel = CreateFrame, CreateFontFamily, UnitLevel
+local CreateFrame, UnitLevel = CreateFrame, UnitLevel
 local UnitGroupRolesAssigned, GetTexCoordsForRoleSmallCircle =
     UnitGroupRolesAssigned, GetTexCoordsForRoleSmallCircle
 
@@ -40,6 +41,16 @@ PlateLabel.SUBTITLE_CHOICES = {
     { "hidden", L.PLATES_SUBTITLE_HIDDEN },
     { "off", L.PLATES_SUBTITLE_OFF },
 }
+
+---The Name Size slider every plate module has (setting `nameSize`, a percent). A new table each
+---call, so each module's list has its own.
+---@return table option
+function PlateLabel.NameSizeOption()
+    return {
+        key = "nameSize", name = L.PLATES_NAME_SIZE, description = L.PLATES_NAME_SIZE_DESC,
+        min = 50, max = 200, step = 10, format = "%d%%",
+    }
+end
 
 local GAP = 3 -- pixels between the name, the level, and the icons
 local SUBTITLE_SCALE = 0.9 -- the subtitle is a touch smaller than the name
@@ -266,77 +277,21 @@ local fullSize = 0
 
 -- Blizzard's nameplate font is a font family: a font per alphabet, so Chinese, Korean, and
 -- Cyrillic names draw with fonts that have those glyphs. SetFont with the one file GetFont
--- returns (the roman one) drops the rest, and those names came out blank. So at each size we
--- build our own family from Blizzard's members instead.
-local ALPHABETS = { "roman", "korean", "simplifiedchinese", "traditionalchinese", "russian" }
-local families = {} -- "size flags" -> our font family, or false if it couldn't be made
-local familyCount = 0
-
--- `base`'s font for one alphabet, or nil when it isn't a family (or the client can't say).
-local function member(base, alphabet)
-    local font = base.GetFontObjectForAlphabet and base:GetFontObjectForAlphabet(alphabet)
-    return font and font.GetFont and font or nil
+-- returns (the roman one) dropped the rest, and those names came out blank. So, like Blizzard's
+-- own plates, we take its font object and set only the height, which keeps the whole family.
+local function setFont(text, base, size)
+    text:SetFontObject(base)
+    if text.SetFontHeight then
+        text:SetFontHeight(size)
+    else
+        text:SetTextHeight(size) -- older clients: scales the text instead, a touch softer
+    end
 end
 
----A font family like `base` (Blizzard's name font) with its roman font at `size`; the other
----alphabets keep their sizes relative to it. Nil when the client has no font families.
----@param base table Font
----@param size number
----@param flags string|nil
----@return table|nil
-local function fontFamily(base, size, flags)
-    flags = flags or ""
-    size = floor(size * 10 + 0.5) / 10
-    local key = size .. " " .. flags
-    local family = families[key]
-    if family ~= nil then
-        return family or nil
-    end
-    local roman = CreateFontFamily and member(base, "roman")
-    local _, romanHeight = roman and roman:GetFont()
-    if not (romanHeight and romanHeight > 0) then
-        families[key] = false
-        return nil
-    end
-    local members = {}
-    for _, alphabet in ipairs(ALPHABETS) do
-        local font = member(base, alphabet)
-        local file, height = font and font:GetFont()
-        if file and height and height > 0 then
-            members[#members + 1] = {
-                alphabet = alphabet,
-                file = file,
-                height = size * height / romanHeight,
-                flags = flags,
-            }
-        end
-    end
-    -- Font objects need a unique global name; ours are prefixed with the addon's.
-    familyCount = familyCount + 1
-    family = CreateFontFamily("ForeverPlusPlusPlateFont" .. familyCount, members)
-    if family then
-        -- The members don't take a shadow, so copy Blizzard's onto each.
-        for _, alphabet in ipairs(ALPHABETS) do
-            local ours, theirs = member(family, alphabet), member(base, alphabet)
-            if ours and theirs then
-                ours:SetShadowOffset(theirs:GetShadowOffset())
-                ours:SetShadowColor(theirs:GetShadowColor())
-            end
-        end
-    end
-    families[key] = family or false
-    return family
-end
-
--- Sets a label's text to Blizzard's name font at `size`: our family when the client has them,
--- otherwise Blizzard's font object as it is (the right glyphs, if not always the right size).
-local function setFont(text, base, size, flags)
-    local family = fontFamily(base, size, flags)
-    text:SetFontObject(family or base)
-end
-
-local function matchFont(label, name)
-    local _, size, flags = name:GetFont()
+-- `scale` is the module's Name Size (1 = Blizzard's name size). Icons and the subtitle size from
+-- this too, and the layout measures the text, so they fit around whatever size it is.
+local function matchFont(label, name, scale)
+    local _, size = name:GetFont()
     local base = name:GetFontObject() or _G.SystemFont_NamePlate
     if not (size and base) then
         return
@@ -344,16 +299,15 @@ local function matchFont(label, name)
     if size > fullSize then
         fullSize = size
     end
-    size = fullSize
-    if label.fontSize == size and label.fontFlags == flags and label.fontBase == base then
+    size = floor(fullSize * scale * 10 + 0.5) / 10
+    if label.nameSize == size and label.fontBase == base then
         return
     end
-    label.fontSize, label.fontFlags, label.fontBase = size, flags, base
-    setFont(label.name, base, size, flags)
-    label.nameSize = size
-    setFont(label.subtitle, base, size * SUBTITLE_SCALE, flags)
-    setFont(label.barSubtitle, base, size * SUBTITLE_SCALE, flags)
-    setFont(label.barName, base, size, flags)
+    label.nameSize, label.fontBase = size, base
+    setFont(label.name, base, size)
+    setFont(label.subtitle, base, size * SUBTITLE_SCALE)
+    setFont(label.barSubtitle, base, size * SUBTITLE_SCALE)
+    setFont(label.barName, base, size)
 end
 
 -- Puts the level beside the name; returns the width it takes.
@@ -449,7 +403,7 @@ end
 ---@param style table see the top of this file
 function PlateLabel.Layout(label, record, unit, style)
     label.name:SetText(record.name:GetText())
-    matchFont(label, record.name)
+    matchFont(label, record.name, (style.db.nameSize or 100) / 100)
     label.name:SetTextColor(style.NameColor(unit))
     -- The level goes on one side of the name and the icons on the other. The name then shifts by
     -- half the difference, so the whole row is centered over the bar. The subtitle stays centered.
