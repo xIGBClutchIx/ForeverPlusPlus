@@ -39,8 +39,8 @@ Everything is on by default except where noted. Each module can be turned off, a
 | **Unit Frames** | |
 | Class Colors | Shows players' health bars, and optionally names, in their class color on the player, target, focus, party, and target-of-target frames, and hostile and neutral NPCs' health bars in red and yellow. |
 | **Nameplates** | |
-| NPC Nameplates | Always shows friendly NPCs' names with their title, a bit larger than Blizzard's (a slider). The health bar appears only when they're hurt or in combat. |
-| Player Nameplates | Always shows friendly players' names with their guild, a bit larger than Blizzard's (a slider), and recent allies' names in the game's light blue. The health bar appears only when they're hurt or in combat. |
+| NPC Nameplates | Always shows friendly NPCs' names with their title, with a name size slider. The health bar appears only when they're hurt or in combat. |
+| Player Nameplates | Always shows friendly players' names with their guild, with a name size slider, and recent allies' names in the game's light blue. The health bar appears only when they're hurt or in combat. |
 | **Tools** | |
 | Console Variables | A page in Settings to browse and change the game's console variables (CVars). |
 
