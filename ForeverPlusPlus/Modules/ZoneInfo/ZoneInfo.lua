@@ -257,9 +257,30 @@ end
 local COORDS_CVARS = { "worldMapShowCursorCoords", "worldMapShowPlayerCoords" }
 local COORDS_BOTTOM, COORDS_ROW = 2, 15
 
--- How far up the panel sits in the bottom left corner: over Blizzard's coordinates when they're
--- on. By the checkboxes, not the rows, so the panel doesn't jump as the cursor row comes and goes.
+-- Blizzard's coordinates panel: the map's overlay frame with a cursor row and a player row. It
+-- has no name, so it's found by its parts. False once looked for and not there.
+local coords
+local function coordsPanel()
+    if coords == nil then
+        coords = false
+        for _, frame in ipairs(WorldMapFrame.overlayFrames or {}) do
+            if frame.CursorCoords and frame.PlayerCoords then
+                coords = frame
+            end
+        end
+    end
+    return coords or nil
+end
+
+-- How far up the panel sits in the bottom left corner: over Blizzard's coordinates when they
+-- show. By the checkboxes, not the rows, so the panel doesn't jump as the cursor row comes and
+-- goes. Not when something has faded Blizzard's panel out to show the coordinates elsewhere
+-- (such as our Coordinates module in the title bar): only the panel's own state is read.
 local function bottomLeftOffset()
+    local blizzard = coordsPanel()
+    if blizzard and not (blizzard:IsShown() and blizzard:GetAlpha() > 0) then
+        return 8
+    end
     local rows = 0
     for _, name in ipairs(COORDS_CVARS) do
         if ns.CVars.IsOn(name) then
@@ -272,13 +293,21 @@ local function bottomLeftOffset()
     return COORDS_BOTTOM + rows * COORDS_ROW + 8
 end
 
+local anchored -- where the panel sits now: the corner and how far up, or nil to place it again
+
 local function anchor()
-    local parent = panel:GetParent()
+    local corner = module.db.corner
+    local offset = corner == "BOTTOMRIGHT" and 8 or bottomLeftOffset()
+    local key = corner .. offset
+    if key == anchored then
+        return
+    end
+    anchored = key
     panel:ClearAllPoints()
-    if module.db.corner == "BOTTOMRIGHT" then
-        panel:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -8, 8)
+    if corner == "BOTTOMRIGHT" then
+        panel:SetPoint("BOTTOMRIGHT", panel:GetParent(), "BOTTOMRIGHT", -8, offset)
     else
-        panel:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", 8, bottomLeftOffset())
+        panel:SetPoint("BOTTOMLEFT", panel:GetParent(), "BOTTOMLEFT", 8, offset)
     end
 end
 
@@ -327,6 +356,9 @@ local function onUpdate(_, delta)
         return
     end
     elapsed = 0
+    -- Blizzard's coordinates can be turned on, off, or faded out at any time, with no event for
+    -- the fading; this only moves the panel when that changed.
+    anchor()
     local mapID = target(WorldMapFrame) or false
     if mapID ~= shown then
         draw(mapID or nil)
@@ -377,12 +409,6 @@ function module:OnEnable()
     self:On("PLAYER_LEVEL_UP", redraw)
     self:On("SKILL_LINES_CHANGED", redraw)
     self:On("CHAT_MSG_SKILL", redraw)
-    -- Blizzard's coordinates turned on or off, which moves the panel.
-    self:On("CVAR_UPDATE", function(_, name)
-        if panel and (name == COORDS_CVARS[1] or name == COORDS_CVARS[2]) then
-            anchor()
-        end
-    end)
 end
 
 function module:OnDisable()
