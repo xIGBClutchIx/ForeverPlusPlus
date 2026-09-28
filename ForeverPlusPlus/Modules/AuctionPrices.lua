@@ -10,7 +10,7 @@ local _, ns = ...
 local ipairs, format, time, floor = ipairs, string.format, time, math.floor
 local C_AuctionHouse, C_Timer = C_AuctionHouse, C_Timer
 local GetRealmName, UnitFactionGroup = GetRealmName, UnitFactionGroup
-local CreateFrame, pcall = CreateFrame, pcall
+local CreateFrame, pcall, type, hooksecurefunc = CreateFrame, pcall, type, hooksecurefunc
 local StaticPopupDialogs, StaticPopup_Show, YES, NO = StaticPopupDialogs, StaticPopup_Show, YES, NO
 
 local L = ns.L
@@ -127,10 +127,11 @@ local function getIndicator()
     return indicator
 end
 
-local function showIndicator(text, busy)
+-- busy shows the spinner; stay keeps the text up instead of hiding it after a few seconds.
+local function showIndicator(text, busy, stay)
     local frame = getIndicator()
     if not frame then
-        if not busy then
+        if not busy and not stay then
             module:Print(text) -- no auction house window to show it on
         end
         return
@@ -144,7 +145,7 @@ local function showIndicator(text, busy)
         frame.spinner:SetShown(busy)
     end
     frame:Show()
-    if not busy then
+    if not busy and not stay then
         hideTimer = C_Timer.NewTimer(4, function()
             hideTimer = nil
             frame:Hide()
@@ -194,60 +195,138 @@ end
 
 local open = false -- the auction house is open
 
+-- The scan shares the server's query throttle with everything the player does in the auction
+-- house. Paging nonstop starved Blizzard's own queries, so the Sell tab's list never loaded and
+-- posts could fail. Now it sends one query at a time, only when the throttle is ready, and only
+-- on the Buy tab: anywhere else it pauses and carries on when the player comes back.
+local sent = false -- the scan's browse query has gone out
+local waiting -- what the next step waits on: "server", "throttle", or "tab"
+local ownQuery = false -- set while sending the scan's own browse query
+local onThrottleReady
+
 local function stopScan()
-    scanning = false
+    scanning, sent, waiting = false, false, nil
     seen, seenCount = nil, nil
+    ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
 end
 
--- Asks for the next page, or finishes once the server has sent everything.
-local function nextPage()
+-- The Buy tab's browse list is showing. Sell, Auctions, and an item's own listings all send
+-- queries of their own. When the window's mode can't be read, don't pause.
+local function onBuyTab()
+    local frame, modes = _G.AuctionHouseFrame, _G.AuctionHouseFrameDisplayMode
+    if not (frame and modes and modes.Buy) then
+        return true
+    end
+    local mode = frame.GetDisplayMode and frame:GetDisplayMode() or frame.displayMode
+    return mode == nil or mode == modes.Buy
+end
+
+-- Sends the scan's query, asks for the next page, or finishes once the server has sent
+-- everything. Runs once per answer, so there's never more than one request out.
+local function step()
     if not scanning then
         return
     end
-    if not C_AuctionHouse.HasFullBrowseResults() then
-        showIndicator(format(L.AUCTIONPRICES_SCANNING, seenCount), true)
-        C_AuctionHouse.RequestMoreBrowseResults()
+    if not onBuyTab() then
+        waiting = "tab"
+        showIndicator(format(L.AUCTIONPRICES_PAUSED, seenCount), false, true)
         return
     end
-    local count = seenCount
-    house().scannedAt = time()
-    stopScan()
-    showIndicator(format(L.AUCTIONPRICES_SCANNED, count), false)
+    showIndicator(format(L.AUCTIONPRICES_SCANNING, seenCount), true)
+    local ready = C_AuctionHouse.IsThrottledMessageSystemReady
+    if ready and not ready() then
+        if waiting ~= "throttle" then
+            waiting = "throttle"
+            ns.On("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
+        end
+        return
+    end
+    waiting = "server"
+    if not sent then
+        sent, ownQuery = true, true
+        C_AuctionHouse.SendBrowseQuery({
+            searchString = "", sorts = {}, filters = {}, itemClassFilters = {},
+        })
+        ownQuery = false
+    elseif not C_AuctionHouse.HasFullBrowseResults() then
+        C_AuctionHouse.RequestMoreBrowseResults()
+    else
+        local count = seenCount
+        house().scannedAt = time()
+        stopScan()
+        showIndicator(format(L.AUCTIONPRICES_SCANNED, count), false)
+    end
+end
+
+function onThrottleReady()
+    ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
+    if waiting == "throttle" then
+        step()
+    end
+end
+
+local function onResults()
+    if scanning and sent and waiting == "server" then
+        step()
+    end
 end
 
 local function onResultsUpdated()
     addResults(C_AuctionHouse.GetBrowseResults())
-    nextPage()
+    onResults()
 end
 
 local function onResultsAdded(_, added)
     addResults(added)
-    nextPage()
+    onResults()
 end
 
-local startScan
-
-local function onThrottleReady()
-    ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
-    startScan()
+-- Back on the Buy tab: carry on where the scan paused.
+local function onDisplayMode()
+    if module.enabled and scanning and waiting == "tab" then
+        step()
+    end
 end
 
-function startScan()
+-- Another search (the player's, favorites, another addon's) replaces the browse results the scan
+-- was paging through, so stop, keeping the prices seen so far. Also stops a scan still waiting
+-- to start, which would otherwise replace the player's results.
+local function onOtherSearch()
+    if module.enabled and scanning and not ownQuery then
+        local count = seenCount
+        stopScan()
+        showIndicator(format(L.AUCTIONPRICES_STOPPED, count), false)
+    end
+end
+
+-- Hooks can't be removed; the functions above check module.enabled. AuctionHouseFrame is
+-- load-on-demand, so this waits for a scan, when the window is open.
+local hookedFrame, hookedSearch = false, false
+
+local function hookAuctionHouse()
+    if not hookedSearch then
+        hookedSearch = true
+        for _, name in ipairs({ "SendBrowseQuery", "SearchForFavorites", "SearchForItemKeys" }) do
+            if type(C_AuctionHouse[name]) == "function" then
+                hooksecurefunc(C_AuctionHouse, name, onOtherSearch)
+            end
+        end
+    end
+    local frame = _G.AuctionHouseFrame
+    if not hookedFrame and frame and frame.SetDisplayMode then
+        hookedFrame = true
+        hooksecurefunc(frame, "SetDisplayMode", onDisplayMode)
+    end
+end
+
+local function startScan()
     if scanning or not open then
         return
     end
-    showIndicator(format(L.AUCTIONPRICES_SCANNING, 0), true)
-    -- The server drops queries sent too fast; wait until it's ready.
-    local ready = C_AuctionHouse.IsThrottledMessageSystemReady
-    if ready and not ready() then
-        ns.On("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
-        return
-    end
-    scanning = true
+    hookAuctionHouse()
+    scanning, sent, waiting = true, false, nil
     seen, seenCount = {}, 0
-    C_AuctionHouse.SendBrowseQuery({
-        searchString = "", sorts = {}, filters = {}, itemClassFilters = {},
-    })
+    step()
 end
 
 -- A moment after opening, so Blizzard's window has set itself up first: scan when it's due, or
@@ -324,7 +403,6 @@ module.actions = {
 
 local function onClosed()
     open = false
-    ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
     stopScan() -- prices seen so far are kept; the next visit scans again
     hideIndicator()
 end
@@ -388,7 +466,6 @@ end
 
 function module:OnDisable()
     ItemTooltip.RedrawOnShift(self, false)
-    ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
     stopScan()
     hideIndicator()
     open = false
