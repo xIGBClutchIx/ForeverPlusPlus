@@ -210,13 +210,17 @@ local function placeUnder(initializer, module, parent)
     end
 end
 
--- The slider's value as its label shows it: `option.format` (a format string, such as "%d%%"),
--- or the number.
+-- The slider's value as its label shows it: `option.format` (a format string, such as "%d%%", or
+-- a function of the value, for labels like "Never" at 0), or the number.
 local function sliderOptions(option)
     local options = Settings.CreateSliderOptions(option.min, option.max, option.step or 1)
     if MinimalSliderWithSteppersMixin and MinimalSliderWithSteppersMixin.Label then
+        local label = option.format
         options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, function(value)
-            return format(option.format or "%s", value)
+            if type(label) == "function" then
+                return label(value)
+            end
+            return format(label or "%s", value)
         end)
     end
     return options

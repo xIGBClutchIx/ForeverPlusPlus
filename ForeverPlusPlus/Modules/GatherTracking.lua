@@ -5,7 +5,7 @@
 -- tracking is a spell, and casting it would stop a cast or a channel such as mining or fishing.
 local _, ns = ...
 
-local ipairs, type, tonumber, tostring, pcall = ipairs, type, tonumber, tostring, pcall
+local ipairs, type, tostring, pcall = ipairs, type, tostring, pcall
 local format = string.format
 local C_Minimap, C_Timer = C_Minimap, C_Timer
 local InCombatLockdown, UnitIsDeadOrGhost, UnitOnTaxi = InCombatLockdown, UnitIsDeadOrGhost, UnitOnTaxi
@@ -24,11 +24,15 @@ local SPELLS = {
 
 local RETRY = 2 -- seconds between tries while the player can't cast it yet
 
+-- The Swap slider's first stop, which reads Never. Real swaps start a stop later, at 3 seconds,
+-- since each swap is a cast on the global cooldown and a faster one would keep taking it.
+local NEVER = 2
+
 local module = ns.NewModule("GatherTracking", L.GATHERTRACKING_DESC, {
     enabled = true,
     track = "both", -- a key of SPELLS
     reapply = true,
-    swap = "off", -- "off", or seconds between swaps
+    swap = NEVER, -- NEVER, or seconds between swaps
     chat = true,
 })
 module.title = L.GATHERTRACKING_TITLE
@@ -49,13 +53,11 @@ module.options = {
         key = "swap",
         name = L.GATHERTRACKING_SWAP,
         description = L.GATHERTRACKING_SWAP_DESC,
-        choices = {
-            { "off", L.GATHERTRACKING_SWAP_OFF },
-            { "3", format(L.GATHERTRACKING_SWAP_EVERY, 3) },
-            { "5", format(L.GATHERTRACKING_SWAP_EVERY, 5) },
-            { "10", format(L.GATHERTRACKING_SWAP_EVERY, 10) },
-            { "30", format(L.GATHERTRACKING_SWAP_EVERY, 30) },
-        },
+        min = NEVER, max = 30, step = 1,
+        format = function(seconds)
+            return seconds == NEVER and L.GATHERTRACKING_SWAP_OFF
+                or format(L.GATHERTRACKING_SWAP_EVERY, seconds)
+        end,
     },
     {
         key = "reapply",
@@ -181,8 +183,8 @@ end
 
 local function startSwapping()
     stopSwapping()
-    local seconds = tonumber(module.db.swap)
-    if seconds and not blocked then
+    local seconds = module.db.swap
+    if seconds > NEVER and not blocked then
         ticker = C_Timer.NewTicker(seconds, swap)
     end
 end

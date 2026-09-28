@@ -3,35 +3,33 @@
 -- or someone resurrecting you. Arenas are left alone, since the game doesn't release there.
 local _, ns = ...
 
-local ipairs, tonumber, format, select = ipairs, tonumber, string.format, select
+local format, select = string.format, select
 local IsInInstance, UnitIsDead, UnitIsGhost = IsInInstance, UnitIsDead, UnitIsGhost
 local UnitHasIncomingResurrection, HasNoReleaseAura = UnitHasIncomingResurrection, HasNoReleaseAura
 local RepopMe, C_DeathInfo, C_Timer = RepopMe, C_DeathInfo, C_Timer
 
 local L = ns.L
 
-local DELAYS = { "0", "1", "2", "5" } -- seconds
-
 local module = ns.NewModule("AutoRelease", L.AUTORELEASE_DESC, {
     enabled = false,
-    delay = "0",
+    delay = 0, -- seconds
     chat = true,
 })
 module.title = L.AUTORELEASE_TITLE
 module.category = "automation"
-
-local choices = {}
-for i, seconds in ipairs(DELAYS) do
-    local n = tonumber(seconds)
-    choices[i] = { seconds, n == 0 and L.AUTORELEASE_NOW or format(L.AUTORELEASE_SECONDS, n) }
-end
 
 module.options = {
     {
         key = "delay",
         name = L.AUTORELEASE_DELAY,
         description = L.AUTORELEASE_DELAY_DESC,
-        choices = choices,
+        min = 0, max = 10, step = 1,
+        format = function(seconds)
+            if seconds == 0 then
+                return L.AUTORELEASE_NOW
+            end
+            return seconds == 1 and L.AUTORELEASE_ONE_SECOND or format(L.AUTORELEASE_SECONDS, seconds)
+        end,
     },
     ns.ChatOption(L.AUTORELEASE_CHAT_DESC),
 }
@@ -102,7 +100,7 @@ local function onDead()
     if not inBattleground() then
         return
     end
-    local delay = tonumber(module.db.delay) or 0
+    local delay = module.db.delay
     timer = C_Timer.NewTimer(delay > MIN_WAIT and delay or MIN_WAIT, release)
 end
 

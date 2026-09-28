@@ -3,7 +3,6 @@
 -- already away, if combat starts again first, or if you draw or stow them yourself meanwhile.
 local _, ns = ...
 
-local ipairs, tonumber, format = ipairs, tonumber, string.format
 -- The original ToggleSheath, from before the hook below, so our own stow doesn't look like the
 -- player pressing the key.
 local GetSheathState, ToggleSheath, hooksecurefunc = GetSheathState, ToggleSheath, hooksecurefunc
@@ -13,27 +12,20 @@ local IsInInstance = IsInInstance
 
 local L = ns.L
 
-local DELAYS = { "3", "5", "10", "15", "30" } -- seconds
-
 local module = ns.NewModule("AutoStow", L.AUTOSTOW_DESC, {
     enabled = true,
-    delay = "5",
+    delay = 5, -- seconds
     outsideOnly = false, -- leave weapons out in dungeons and raids
 })
 module.title = L.AUTOSTOW_TITLE
 module.category = "automation"
-
-local choices = {}
-for i, seconds in ipairs(DELAYS) do
-    choices[i] = { seconds, format(L.AUTOSTOW_SECONDS, tonumber(seconds)) }
-end
 
 module.options = {
     {
         key = "delay",
         name = L.AUTOSTOW_DELAY,
         description = L.AUTOSTOW_DELAY_DESC,
-        choices = choices,
+        min = 3, max = 30, step = 1, format = L.AUTOSTOW_SECONDS,
     },
     {
         key = "outsideOnly",
@@ -82,7 +74,7 @@ local function onCombatEnd()
     if module.db.outsideOnly and inInstance() then
         return
     end
-    timer = C_Timer.NewTimer(tonumber(module.db.delay) or 5, stow)
+    timer = C_Timer.NewTimer(module.db.delay, stow)
 end
 
 function module:OnEnable()

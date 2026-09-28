@@ -24,6 +24,11 @@ ns.changelog = {
                     .. "green. Includes an NPC Health Bars checkbox to turn it off." },
                 { L.BAGSLOTS_TITLE, "Adds up every bag on the backpack button by default, with "
                     .. "the reagent bag still on its own button. Per Bag is still a choice." },
+                { L.AUTOSTOW_TITLE, "The delay is a slider from 3 to 30 seconds." },
+                { L.AUTORELEASE_TITLE, "The delay is a slider from right away to 10 seconds." },
+                { L.GATHERTRACKING_TITLE, "Swap is a slider from never to every 30 seconds." },
+                { L.AUCTIONPRICES_TITLE, "Red After is a slider from 1 to 48 hours. It starts "
+                    .. "back at 12 hours." },
             } },
             { L.CHANGELOG_FIXED, {
                 { L.PLAYERPLATES_TITLE, "Chinese, Korean, and Cyrillic names show again, instead "

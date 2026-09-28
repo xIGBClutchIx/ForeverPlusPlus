@@ -7,7 +7,7 @@
 -- and Auctionator leaves it off by default. Browse results give the lowest unit price per item.
 local _, ns = ...
 
-local ipairs, format, time, floor, tonumber = ipairs, string.format, time, math.floor, tonumber
+local ipairs, format, time, floor = ipairs, string.format, time, math.floor
 local C_AuctionHouse, C_Timer = C_AuctionHouse, C_Timer
 local GetRealmName, UnitFactionGroup = GetRealmName, UnitFactionGroup
 local CreateFrame, pcall = CreateFrame, pcall
@@ -23,7 +23,7 @@ local module = ns.NewModule("AuctionPrices", L.AUCTIONPRICES_DESC, ItemTooltip.P
     scanOnOpen = true,
     scanAge = "right", -- "right", "inline" (like the price line's alignment), or "off"
     scanAgeColor = "age", -- "age" (green when fresh to red when old), "gray", "white", or "gold"
-    scanAgeRed = "43200", -- seconds old at which "age" is fully red
+    scanAgeRedHours = 12, -- hours old at which "age" is fully red
     chat = true,
     -- Per auction house ("Realm-Faction"): { scannedAt = time(), prices = { [itemID] = copper } }.
     -- Data, not a setting: it isn't in module.options.
@@ -58,18 +58,14 @@ module.options = ItemTooltip.PriceOptions({
         },
     },
     {
-        key = "scanAgeRed",
+        key = "scanAgeRedHours",
         name = L.AUCTIONPRICES_SCAN_AGE_RED,
         description = L.AUCTIONPRICES_SCAN_AGE_RED_DESC,
         section = L.AUCTIONPRICES_SECTION_TOOLTIP,
-        choices = {
-            { "3600", L.AUCTIONPRICES_ONE_HOUR },
-            { "10800", format(L.AUCTIONPRICES_HOURS, 3) },
-            { "21600", format(L.AUCTIONPRICES_HOURS, 6) },
-            { "43200", format(L.AUCTIONPRICES_HOURS, 12) },
-            { "86400", format(L.AUCTIONPRICES_HOURS, 24) },
-            { "172800", format(L.AUCTIONPRICES_HOURS, 48) },
-        },
+        min = 1, max = 48, step = 1,
+        format = function(hours)
+            return hours == 1 and L.AUCTIONPRICES_ONE_HOUR or format(L.AUCTIONPRICES_HOURS, hours)
+        end,
     },
     {
         key = "scanOnOpen",
@@ -347,9 +343,9 @@ local function ago(seconds)
     return format(L.AUCTIONPRICES_AGO_DAYS, floor(seconds / 86400))
 end
 
--- Scan Age Color "age": green when just scanned, yellow halfway, red at Red After (seconds).
+-- Scan Age Color "age": green when just scanned, yellow halfway, red at Red After (hours).
 local function ageColor(seconds)
-    local t = seconds / (tonumber(module.db.scanAgeRed) or 43200)
+    local t = seconds / (module.db.scanAgeRedHours * 3600)
     t = t > 1 and 1 or t
     if t < 0.5 then
         return { t * 2, 1, 0 }
