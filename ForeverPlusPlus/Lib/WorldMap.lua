@@ -1,0 +1,88 @@
+-- The world map, which comes with a load-on-demand Blizzard addon: whether it has loaded, code to
+-- run once it has, and the parts of it more than one module finds. Nothing is listened to until a
+-- module waits for it.
+local _, ns = ...
+
+local ipairs, pairs, next = ipairs, pairs, next
+local C_AddOns = C_AddOns
+
+-- So one module's error doesn't stop the others waiting, as in Core.lua.
+local call = securecallfunction or function(fn, ...)
+    return fn(...)
+end
+
+local WorldMap = {}
+ns.WorldMap = WorldMap
+
+local ADDON = "Blizzard_WorldMap"
+
+---The world map, once its addon has loaded, or nil. Probe: it's loaded at login on Mainline, but
+---it's a load-on-demand Blizzard addon, so don't count on it.
+---@return table?
+function WorldMap.Get()
+    return (not C_AddOns or C_AddOns.IsAddOnLoaded(ADDON)) and WorldMapFrame or nil
+end
+
+local waiting = {} -- fn -> true, for the map to load
+
+local function onLoad(_, name)
+    if name ~= ADDON then
+        return
+    end
+    ns.Off("ADDON_LOADED", onLoad)
+    local fns = waiting
+    waiting = {}
+    for fn in pairs(fns) do
+        call(fn, WorldMapFrame)
+    end
+end
+
+---Calls `fn(map)` now if the world map has loaded, or else once it does. Waiting with the same
+---`fn` again doesn't call it twice; `WorldMap.Cancel(fn)` stops the wait, for a module turned off
+---before the map loaded.
+---@param fn fun(map: table)
+function WorldMap.WhenLoaded(fn)
+    local map = WorldMap.Get()
+    if map then
+        fn(map)
+        return
+    end
+    if not next(waiting) then
+        ns.On("ADDON_LOADED", onLoad)
+    end
+    waiting[fn] = true
+end
+
+---Stops waiting to call `fn` when the world map loads.
+---@param fn function
+function WorldMap.Cancel(fn)
+    if waiting[fn] then
+        waiting[fn] = nil
+        if not next(waiting) then
+            ns.Off("ADDON_LOADED", onLoad)
+        end
+    end
+end
+
+local coords -- false once looked for and not there
+
+---Blizzard's coordinates panel: the map's overlay frame with a CursorCoords row and a
+---PlayerCoords row, or nil before the map loads or on a client without it. It has no name, so
+---it's found by its parts.
+---@return table?
+function WorldMap.CoordsPanel()
+    if coords == nil then
+        local map = WorldMap.Get()
+        if not map then
+            return nil
+        end
+        coords = false
+        for _, frame in ipairs(map.overlayFrames or {}) do
+            if frame.CursorCoords and frame.PlayerCoords then
+                coords = frame
+                break
+            end
+        end
+    end
+    return coords or nil
+end

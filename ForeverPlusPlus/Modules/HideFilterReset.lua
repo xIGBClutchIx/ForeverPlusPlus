@@ -4,7 +4,6 @@
 local _, ns = ...
 
 local ipairs = ipairs
-local C_AddOns = C_AddOns
 
 local L = ns.L
 
@@ -14,8 +13,6 @@ local module = ns.NewModule("HideFilterReset", L.HIDEFILTERRESET_DESC, {
 module.title = L.HIDEFILTERRESET_TITLE
 module.category = "map"
 
-local MAP_ADDON = "Blizzard_WorldMap"
-
 -- The parts to hide: Mainline's filter dropdown has a ResetButton; older templates had a counter
 -- and its banner instead. Probe for each.
 local PARTS = { "ResetButton", "FilterCounter", "FilterCounterBanner" }
@@ -23,9 +20,9 @@ local PARTS = { "ResetButton", "FilterCounter", "FilterCounterBanner" }
 local parts -- the ones found, once the map has loaded
 
 -- The filter dropdown is one of the map's overlay frames, with no name, so it's found by its parts.
-local function findParts()
+local function findParts(map)
     local found = {}
-    for _, frame in ipairs(WorldMapFrame.overlayFrames or {}) do
+    for _, frame in ipairs(map.overlayFrames or {}) do
         for _, key in ipairs(PARTS) do
             if frame[key] then
                 found[#found + 1] = frame[key]
@@ -47,39 +44,17 @@ local function apply()
     end
 end
 
-local waiting
-
-local function attach()
-    if waiting then
-        ns.Off("ADDON_LOADED", waiting)
-        waiting = nil
-    end
-    parts = parts or findParts()
+local function attach(map)
+    parts = parts or findParts(map)
     apply()
 end
 
-local function mapLoaded()
-    return (not C_AddOns or C_AddOns.IsAddOnLoaded(MAP_ADDON)) and WorldMapFrame
-end
-
 function module:OnEnable()
-    if mapLoaded() then
-        attach()
-    else
-        waiting = function(_, name)
-            if name == MAP_ADDON then
-                attach()
-            end
-        end
-        ns.On("ADDON_LOADED", waiting)
-    end
+    ns.WorldMap.WhenLoaded(attach)
 end
 
 function module:OnDisable()
-    if waiting then
-        ns.Off("ADDON_LOADED", waiting)
-        waiting = nil
-    end
+    ns.WorldMap.Cancel(attach)
     if parts then
         apply()
     end

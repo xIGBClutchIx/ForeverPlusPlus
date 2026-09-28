@@ -6,7 +6,7 @@ local _, ns = ...
 
 local ipairs, tostring, format, concat = ipairs, tostring, string.format, table.concat
 local min, max, GetLocale = math.min, math.max, GetLocale
-local CreateFrame, C_AddOns, C_Map, C_Item, C_XMLUtil = CreateFrame, C_AddOns, C_Map, C_Item, C_XMLUtil
+local CreateFrame, C_Map, C_Item, C_XMLUtil = CreateFrame, C_Map, C_Item, C_XMLUtil
 local Enum, UnitLevel, GetQuestDifficultyColor = Enum, UnitLevel, GetQuestDifficultyColor
 local QuestDifficultyColors, UnitFactionGroup, GetRealZoneText = QuestDifficultyColors, UnitFactionGroup,
     GetRealZoneText
@@ -77,7 +77,6 @@ end
 module.internal = {}
 local internal = module.internal
 
-local MAP_ADDON = "Blizzard_WorldMap"
 local MAX_WIDTH = 300 -- the widest the text gets; longer lines wrap
 local PADDING = 8
 local GAP = 3 -- between rows
@@ -357,27 +356,12 @@ end
 local COORDS_CVARS = { "worldMapShowCursorCoords", "worldMapShowPlayerCoords" }
 local COORDS_BOTTOM, COORDS_ROW = 2, 15
 
--- Blizzard's coordinates panel: the map's overlay frame with a cursor row and a player row. It
--- has no name, so it's found by its parts. False once looked for and not there.
-local coords
-local function coordsPanel()
-    if coords == nil then
-        coords = false
-        for _, frame in ipairs(WorldMapFrame.overlayFrames or {}) do
-            if frame.CursorCoords and frame.PlayerCoords then
-                coords = frame
-            end
-        end
-    end
-    return coords or nil
-end
-
 -- How far up the panel sits in the bottom left corner: over Blizzard's coordinates when they
 -- show. By the checkboxes, not the rows, so the panel doesn't jump as the cursor row comes and
 -- goes. Not when something has faded Blizzard's panel out to show the coordinates elsewhere
 -- (such as our Coordinates module in the title bar): only the panel's own state is read.
 local function bottomLeftOffset()
-    local blizzard = coordsPanel()
+    local blizzard = ns.WorldMap.CoordsPanel()
     if blizzard and not (blizzard:IsShown() and blizzard:GetAlpha() > 0) then
         return 8
     end
@@ -478,17 +462,11 @@ local function redraw()
     shown = nil
 end
 
-local waiting
-
 -- Makes the panel on the world map, once the map has loaded. The driver looks at the map a few
 -- times a second while it's open; it's the map's child, so it stops while the map is closed.
-local function attach()
-    if waiting then
-        ns.Off("ADDON_LOADED", waiting)
-        waiting = nil
-    end
+local function attach(map)
     if not driver then
-        local parent = WorldMapFrame.ScrollContainer or WorldMapFrame
+        local parent = map.ScrollContainer or map
         panel = newPanel(parent)
         driver = CreateFrame("Frame", nil, parent)
         driver:SetScript("OnUpdate", onUpdate)
@@ -498,21 +476,8 @@ local function attach()
     driver:Show()
 end
 
-local function mapLoaded()
-    return (not C_AddOns or C_AddOns.IsAddOnLoaded(MAP_ADDON)) and WorldMapFrame
-end
-
 function module:OnEnable()
-    if mapLoaded() then
-        attach()
-    else
-        waiting = function(_, name)
-            if name == MAP_ADDON then
-                attach()
-            end
-        end
-        ns.On("ADDON_LOADED", waiting)
-    end
+    ns.WorldMap.WhenLoaded(attach)
     -- What the colors are measured against.
     self:On("PLAYER_LEVEL_UP", redraw)
     self:On("SKILL_LINES_CHANGED", redraw)
@@ -520,10 +485,7 @@ function module:OnEnable()
 end
 
 function module:OnDisable()
-    if waiting then
-        ns.Off("ADDON_LOADED", waiting)
-        waiting = nil
-    end
+    ns.WorldMap.Cancel(attach)
     if driver then
         driver:Hide()
         panel:Hide()

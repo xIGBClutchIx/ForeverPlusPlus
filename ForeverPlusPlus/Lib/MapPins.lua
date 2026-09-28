@@ -7,20 +7,15 @@ local _, ns = ...
 
 local ipairs, select, setmetatable, hooksecurefunc = ipairs, select, setmetatable, hooksecurefunc
 local CreateFrame, CreateFromMixins = CreateFrame, CreateFromMixins
-local C_AddOns, C_Texture, C_Map, GameTooltip = C_AddOns, C_Texture, C_Map, GameTooltip
+local C_Texture, C_Map, GameTooltip = C_Texture, C_Map, GameTooltip
 local CreateVector2D = CreateVector2D
 local NORMAL_FONT_COLOR, HIGHLIGHT_FONT_COLOR = NORMAL_FONT_COLOR, HIGHLIGHT_FONT_COLOR
 
 local MapPins = {}
 ns.MapPins = MapPins
 
-local MAP_ADDON = "Blizzard_WorldMap"
-
--- The world map, once its addon has loaded. Probe: it's loaded at login on Mainline, but it's a
--- load-on-demand Blizzard addon, so don't count on it.
-local function worldMap()
-    return (not C_AddOns or C_AddOns.IsAddOnLoaded(MAP_ADDON)) and WorldMapFrame or nil
-end
+local WorldMap = ns.WorldMap
+local worldMap = WorldMap.Get
 
 ---The first atlas in the list this client has, or the last one. For art that may not exist on
 ---every build.
@@ -134,9 +129,8 @@ end
 local acquireHooks = {} -- functions to call after the world map acquires one of its own pins
 local hooked = false
 
-local function hookAcquire()
-    local map = worldMap()
-    if hooked or not map then
+local function hookAcquire(map)
+    if hooked then
         return
     end
     hooked = true
@@ -153,17 +147,7 @@ end
 ---@param fn fun(map: table, template: string, ...)
 function MapPins.OnAcquire(fn)
     acquireHooks[#acquireHooks + 1] = fn
-    if worldMap() then
-        hookAcquire()
-    else
-        local function onLoad(_, name)
-            if name == MAP_ADDON then
-                ns.Off("ADDON_LOADED", onLoad)
-                hookAcquire()
-            end
-        end
-        ns.On("ADDON_LOADED", onLoad)
-    end
+    WorldMap.WhenLoaded(hookAcquire)
 end
 
 ---Has the world map redraw everything on it, Blizzard's pins too, if it's open.
@@ -255,15 +239,7 @@ local function newProvider(layer)
 end
 
 -- Adds the layer to the world map, once it has loaded.
-function Layer:Attach()
-    local map = worldMap()
-    if not map then
-        return
-    end
-    if self.waiting then
-        ns.Off("ADDON_LOADED", self.waiting)
-        self.waiting = nil
-    end
+function Layer:Attach(map)
     self.provider = self.provider or newProvider(self)
     if not self.attached then
         self.attached = true
@@ -278,24 +254,17 @@ end
 ---Shows the layer's pins on the world map.
 function Layer:Enable()
     self.enabled = true
-    if worldMap() then
-        self:Attach()
-    elseif not self.waiting then
-        self.waiting = function(_, name)
-            if name == MAP_ADDON and self.enabled then
-                self:Attach()
-            end
-        end
-        ns.On("ADDON_LOADED", self.waiting)
+    self.onLoad = self.onLoad or function(map)
+        self:Attach(map)
     end
+    WorldMap.WhenLoaded(self.onLoad)
 end
 
 ---Takes the layer's pins off the world map.
 function Layer:Disable()
     self.enabled = false
-    if self.waiting then
-        ns.Off("ADDON_LOADED", self.waiting)
-        self.waiting = nil
+    if self.onLoad then
+        WorldMap.Cancel(self.onLoad)
     end
     if self.attached then
         self.attached = false

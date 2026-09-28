@@ -5,8 +5,8 @@
 -- Leatrix Maps' coordinates; none of its code.
 local _, ns = ...
 
-local ipairs, pairs, max, min = ipairs, pairs, math.max, math.min
-local CreateFrame, C_AddOns = CreateFrame, C_AddOns
+local pairs, max, min = pairs, math.max, math.min
+local CreateFrame = CreateFrame
 
 local L = ns.L
 
@@ -39,7 +39,6 @@ local CVARS = {
     minimap = "minimapShowPlayerCoords",
 }
 
-local MAP_ADDON = "Blizzard_WorldMap"
 local INSET = 8 -- from the title bar's ends
 local GAP = 12 -- the least room kept either side of the title
 local THROTTLE = 0.05
@@ -53,16 +52,6 @@ end
 
 local coords -- Blizzard's panel, once found
 local bar -- ours: two lines over the title bar
-
--- Blizzard's coordinates panel: the map's overlay frame with a cursor row and a player row. It
--- has no name, so it's found by its parts.
-local function findCoords()
-    for _, frame in ipairs(WorldMapFrame.overlayFrames or {}) do
-        if frame.CursorCoords and frame.PlayerCoords then
-            return frame
-        end
-    end
-end
 
 -- A line at one end of the bar: `point` is its side, against `edge`'s other side.
 local function newLine(frame, point, edge, relativePoint, x)
@@ -140,16 +129,10 @@ local function restyle()
     end
 end
 
-local waiting
-
-local function attach()
-    if waiting then
-        ns.Off("ADDON_LOADED", waiting)
-        waiting = nil
-    end
+local function attach(map)
     if not bar then
-        local border = WorldMapFrame.BorderFrame
-        coords = findCoords()
+        local border = map.BorderFrame
+        coords = ns.WorldMap.CoordsPanel()
         if not (coords and border and border.TitleContainer) then
             return -- a client without Blizzard's panel; the settings still apply
         end
@@ -158,32 +141,16 @@ local function attach()
     restyle()
 end
 
-local function mapLoaded()
-    return (not C_AddOns or C_AddOns.IsAddOnLoaded(MAP_ADDON)) and WorldMapFrame
-end
-
 function module:OnEnable()
     for key in pairs(CVARS) do
         applyCVar(key)
     end
-    if mapLoaded() then
-        attach()
-    else
-        waiting = function(_, name)
-            if name == MAP_ADDON then
-                attach()
-            end
-        end
-        ns.On("ADDON_LOADED", waiting)
-    end
+    ns.WorldMap.WhenLoaded(attach)
 end
 
 function module:OnDisable()
     ns.CVars.RestoreAll(self.db.saved)
-    if waiting then
-        ns.Off("ADDON_LOADED", waiting)
-        waiting = nil
-    end
+    ns.WorldMap.Cancel(attach)
     if bar then
         restyle()
     end
