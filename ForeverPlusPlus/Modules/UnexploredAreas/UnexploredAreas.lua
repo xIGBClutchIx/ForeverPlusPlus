@@ -5,7 +5,7 @@
 -- under a data provider of our own, on each map's canvas.
 local _, ns = ...
 
-local ceil, ipairs, pairs, unpack, setmetatable = math.ceil, ipairs, pairs, unpack, setmetatable
+local ceil, ipairs, pairs, setmetatable = math.ceil, ipairs, pairs, setmetatable
 local CreateFrame, CreateFromMixins, C_AddOns, C_Map, C_MapExplorationInfo =
     CreateFrame, CreateFromMixins, C_AddOns, C_Map, C_MapExplorationInfo
 
@@ -14,19 +14,59 @@ local L = ns.L
 local module = ns.NewModule("UnexploredAreas", L.UNEXPLORED_DESC, {
     enabled = false,
     tint = true,
+    tintStrength = 70, -- percent of the full color
+    tintColor = "blue",
 })
 module.title = L.UNEXPLORED_TITLE
 module.category = "map"
+
+-- The tint colors at full strength. A cool blue by default, so they read as not yet visited.
+local COLORS = {
+    blue = { 0.4, 0.55, 1 },
+    gray = { 0.5, 0.5, 0.5 },
+    gold = { 1, 0.8, 0.35 },
+    green = { 0.5, 1, 0.45 },
+    red = { 1, 0.4, 0.35 },
+    purple = { 0.75, 0.45, 1 },
+}
+
 module.options = {
-    { key = "tint", name = L.UNEXPLORED_TINT, description = L.UNEXPLORED_TINT_DESC },
+    { key = "tint", name = L.UNEXPLORED_TINT, description = L.UNEXPLORED_TINT_DESC,
+        slider = "tintStrength" },
+    {
+        key = "tintStrength", name = L.UNEXPLORED_STRENGTH,
+        description = L.UNEXPLORED_STRENGTH_DESC, requires = "tint", min = 10, max = 100, step = 10, format = "%d%%",
+    },
+    {
+        key = "tintColor", name = L.UNEXPLORED_COLOR, description = L.UNEXPLORED_COLOR_DESC,
+        requires = "tint",
+        choices = {
+            { "blue", L.UNEXPLORED_BLUE },
+            { "gray", L.UNEXPLORED_GRAY },
+            { "gold", L.UNEXPLORED_GOLD },
+            { "green", L.UNEXPLORED_GREEN },
+            { "red", L.UNEXPLORED_RED },
+            { "purple", L.UNEXPLORED_PURPLE },
+        },
+    },
 }
 
 -- Shared with Data.lua: `overlays`, by map art ID.
 module.internal = {}
 local internal = module.internal
 
--- The tint on unexplored areas: a cool blue, so they read as not yet visited.
-local TINT = { 0.6, 0.7, 1 }
+-- The vertex color for unexplored areas: white untinted, or the tint color mixed with white by
+-- its strength.
+local function tintColor()
+    local db = module.db
+    if not db.tint then
+        return 1, 1, 1
+    end
+    local color = COLORS[db.tintColor] or COLORS.blue
+    local strength = db.tintStrength / 100
+    return 1 - (1 - color[1]) * strength, 1 - (1 - color[2]) * strength,
+        1 - (1 - color[3]) * strength
+end
 
 -- The maps it draws on, with the load-on-demand Blizzard addon each comes with.
 local MAPS = {
@@ -139,10 +179,7 @@ function Overlay:Draw()
     if manager then
         self.frame:SetFrameLevel(manager:GetValidFrameLevel("PIN_FRAME_LEVEL_MAP_EXPLORATION"))
     end
-    local r, g, b = 1, 1, 1
-    if module.db.tint then
-        r, g, b = unpack(TINT)
-    end
+    local r, g, b = tintColor()
     for _, area in ipairs(areas) do
         if not explored[areaKey(area[1], area[2], area[3], area[4])] then
             self:Add(area, layer.tileWidth, layer.tileHeight, r, g, b)
