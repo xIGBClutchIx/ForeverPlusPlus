@@ -8,9 +8,7 @@ local _, ns = ...
 local ipairs, pairs, format, rawget, unpack, abs = ipairs, pairs, string.format, rawget, unpack,
     math.abs
 local select, type = select, type
-local C_Map, C_EncounterJournal, C_TaxiMap, UnitLevel = C_Map, C_EncounterJournal, C_TaxiMap, UnitLevel
-local GetQuestDifficultyColor = GetQuestDifficultyColor
-local QuestDifficultyColors, Enum = QuestDifficultyColors, Enum
+local C_Map, C_EncounterJournal, C_TaxiMap, Enum = C_Map, C_EncounterJournal, C_TaxiMap, Enum
 
 local L = ns.L
 
@@ -148,23 +146,11 @@ local function instanceName(instance)
     return name
 end
 
--- "Level 41-51", colored against the player's level like quests: red or orange when too high,
--- yellow within it, green or gray below it.
+-- "Level 41-51", colored against the player's level like quests.
 local function levels(instance)
     local low, high = instance[3], instance[4]
     local text = low == high and format(L.POI_LEVEL, low) or format(L.POI_LEVELS, low, high)
-    if not (GetQuestDifficultyColor and QuestDifficultyColors) then
-        return text
-    end
-    local level = UnitLevel("player")
-    local color
-    if level < low then
-        color = GetQuestDifficultyColor(low)
-    elseif level > high then
-        color = GetQuestDifficultyColor(high)
-    else
-        color = QuestDifficultyColors.standard
-    end
+    local color = ns.Colors.LevelRange(low, high)
     if not color then
         return text
     end

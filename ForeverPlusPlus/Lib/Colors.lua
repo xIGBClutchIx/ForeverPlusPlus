@@ -2,7 +2,9 @@
 -- nameplate and in a tooltip), and color codes for text.
 local _, ns = ...
 
-local format, floor = string.format, math.floor
+local format, floor, max = string.format, math.floor, math.max
+local UnitLevel, GetQuestDifficultyColor, QuestDifficultyColors =
+    UnitLevel, GetQuestDifficultyColor, QuestDifficultyColors
 local RECENT_ALLY_FONT_COLOR, UnitClass, C_ClassColor = RECENT_ALLY_FONT_COLOR, UnitClass, C_ClassColor
 
 local readable = ns.IsReadable
@@ -24,6 +26,26 @@ ns.Colors = Colors
 function Colors.Code(r, g, b)
     return format("|cff%02x%02x%02x", floor(r * 255 + 0.5), floor(g * 255 + 0.5),
         floor(b * 255 + 0.5))
+end
+
+---The color of a level range (a zone's or a dungeon's) against the player's level, like a quest's:
+---red or orange while it's above you, yellow while you're in it, green or gray once you've
+---outleveled it. Two below the top counts as outleveled, so a range you've finished isn't yellow.
+---Nil without Blizzard's quest colors. Probe: they're FrameXML's.
+---@param low number
+---@param high number
+---@return table? color with r, g, b
+function Colors.LevelRange(low, high)
+    if not (GetQuestDifficultyColor and QuestDifficultyColors) then
+        return nil
+    end
+    local level = UnitLevel("player")
+    if level < low then
+        return GetQuestDifficultyColor(low)
+    elseif level > high then
+        return GetQuestDifficultyColor(max(low, high - 2))
+    end
+    return QuestDifficultyColors.difficult
 end
 
 ---The unit's class color (a ColorMixin), or nil when its class can't be read (secret, mostly in

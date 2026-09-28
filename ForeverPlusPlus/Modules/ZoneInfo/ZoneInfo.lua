@@ -7,8 +7,7 @@ local _, ns = ...
 local ipairs, tostring, format, concat = ipairs, tostring, string.format, table.concat
 local min, max, GetLocale = math.min, math.max, GetLocale
 local CreateFrame, C_Map, C_Item, C_XMLUtil = CreateFrame, C_Map, C_Item, C_XMLUtil
-local Enum, UnitLevel, GetQuestDifficultyColor = Enum, UnitLevel, GetQuestDifficultyColor
-local QuestDifficultyColors = QuestDifficultyColors
+local Enum, QuestDifficultyColors = Enum, QuestDifficultyColors
 
 local L = ns.L
 local Professions = ns.Professions
@@ -103,23 +102,10 @@ local ICONS = {
     [Professions.MINING] = "Interface\\Icons\\Trade_Mining",
 }
 
--- "10-20", colored like a quest of that level: red or orange when it's above you, yellow while
--- you're in it, green or gray once you've outleveled it. Two below the top counts as outleveled,
--- so a zone you've finished isn't yellow.
+-- "10-20", colored like a quest of that level.
 local function levelText(low, high)
     local text = low == high and tostring(low) or format(L.ZONEINFO_RANGE, low, high)
-    if not (GetQuestDifficultyColor and QuestDifficultyColors) then
-        return text
-    end
-    local level = UnitLevel("player")
-    local color
-    if level < low then
-        color = GetQuestDifficultyColor(low)
-    elseif level > high then
-        color = GetQuestDifficultyColor(max(low, high - 2))
-    else
-        color = QuestDifficultyColors.difficult
-    end
+    local color = ns.Colors.LevelRange(low, high)
     return color and colored(color, text) or text
 end
 
