@@ -15,7 +15,9 @@ ns.changelog = {
             { L.CHANGELOG_ADDED, {
                 { L.PROFTOOLTIPS_TITLE, "Was Gathering Tooltips. Also shows the Lockpicking "
                     .. "skill a lockbox or locked chest needs, colored against your skill, for "
-                    .. "characters who can pick locks. A Locks checkbox turns it off." },
+                    .. "characters who can pick locks. A Locks checkbox turns it off. A Skeleton Keys checkbox (on by default) "
+                    .. "shows it to blacksmiths too, against the best skeleton key they can "
+                    .. "make, and puts the skill each skeleton key opens in its tooltip." },
             } },
             { L.CHANGELOG_FIXED, {
                 { L.PLAYERPLATES_TITLE, "No more \"action blocked\" error at login. Recent "

@@ -392,6 +392,11 @@ L.PROFTOOLTIPS_SKINNING_DESC = "Show the Skinning skill a beast needs, from its 
 L.PROFTOOLTIPS_LOCKPICKING = "Locks"
 L.PROFTOOLTIPS_LOCKPICKING_DESC = "Show the Lockpicking skill a locked lockbox or chest needs, "
     .. "if you can pick locks."
+L.PROFTOOLTIPS_BLACKSMITHING = "Skeleton Keys"
+L.PROFTOOLTIPS_BLACKSMITHING_DESC = "Blacksmiths can open locks with the skeleton keys they make. "
+    .. "Show the lock skill to blacksmiths too, colored against their best key, and the skill "
+    .. "each skeleton key opens in its own tooltip."
+L.PROFTOOLTIPS_KEY = "Opens locks up to %s (%d)" -- profession, skill
 L.PROFTOOLTIPS_ITEMS = "Items"
 L.PROFTOOLTIPS_ITEMS_DESC = "Show in herb, ore, stone, and lockbox tooltips the skill needed to "
     .. "gather or open them."

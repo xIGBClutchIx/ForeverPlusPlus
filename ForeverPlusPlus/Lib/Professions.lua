@@ -11,6 +11,7 @@ local Professions = {
     SKINNING = 393,
     FISHING = 356,
     LOCKPICKING = 633,
+    BLACKSMITHING = 164,
 }
 ns.Professions = Professions
 

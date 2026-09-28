@@ -24,7 +24,9 @@ local Professions = ns.Professions
 local ItemTooltip = ns.ItemTooltip
 
 local HERB, MINE, SKIN = Professions.HERBALISM, Professions.MINING, Professions.SKINNING
-local LOCK = Professions.LOCKPICKING
+local LOCK, SMITH = Professions.LOCKPICKING, Professions.BLACKSMITHING
+local select = select
+local NORMAL_FONT_COLOR = NORMAL_FONT_COLOR
 
 local module = ns.NewModule("ProfessionTooltips", L.PROFTOOLTIPS_DESC, {
     enabled = true,
@@ -33,6 +35,7 @@ local module = ns.NewModule("ProfessionTooltips", L.PROFTOOLTIPS_DESC, {
     mining = true,
     skinning = true,
     lockpicking = true,
+    blacksmithing = true,
     items = true,
 })
 module.title = L.PROFTOOLTIPS_TITLE
@@ -50,6 +53,10 @@ module.options = {
     { key = "mining", name = L.PROFTOOLTIPS_MINING, description = L.PROFTOOLTIPS_MINING_DESC },
     { key = "skinning", name = L.PROFTOOLTIPS_SKINNING, description = L.PROFTOOLTIPS_SKINNING_DESC },
     { key = "lockpicking", name = L.PROFTOOLTIPS_LOCKPICKING, description = L.PROFTOOLTIPS_LOCKPICKING_DESC },
+    {
+        key = "blacksmithing", name = L.PROFTOOLTIPS_BLACKSMITHING,
+        description = L.PROFTOOLTIPS_BLACKSMITHING_DESC,
+    },
     { key = "items", name = L.PROFTOOLTIPS_ITEMS, description = L.PROFTOOLTIPS_ITEMS_DESC },
 }
 
@@ -180,6 +187,19 @@ local ITEMS = { -- item ID -> { skill line, skill }
     [5760] = { LOCK, 350 }, -- Eternium Lockbox
 }
 
+-- Blacksmiths make skeleton keys that open locks like Lockpicking: item ID, the skill it opens
+-- up to, and the Blacksmithing skill that makes it. From Classic; fix them here.
+local KEYS = {
+    { id = 15869, skill = 100, smith = 100 }, -- Silver Skeleton Key
+    { id = 15870, skill = 150, smith = 150 }, -- Golden Skeleton Key
+    { id = 15871, skill = 200, smith = 200 }, -- Truesilver Skeleton Key
+    { id = 15872, skill = 275, smith = 275 }, -- Arcanite Skeleton Key
+}
+local KEY_SKILL = {}
+for _, key in ipairs(KEYS) do
+    KEY_SKILL[key.id] = key.skill
+end
+
 local OPTION = { [HERB] = "herbalism", [MINE] = "mining", [SKIN] = "skinning", [LOCK] = "lockpicking" }
 local FALLBACK_NAME = {
     [HERB] = L.PROFTOOLTIPS_HERBALISM_NAME,
@@ -192,6 +212,26 @@ local FALLBACK_NAME = {
 local SKINNABLE_TYPES = { [1] = true, [2] = true }
 local SKINNABLE_NAMES = { [L.PROFTOOLTIPS_BEAST] = true, [L.PROFTOOLTIPS_DRAGONKIN] = true }
 
+-- The Lockpicking skill the player can open locks with: a rogue's own, or, with the Blacksmithing
+-- option, that of the best skeleton key their Blacksmithing lets them make (0 when none yet).
+-- Nil for anyone with neither.
+local function lockRank()
+    local rank, name = Professions.Rank(LOCK)
+    if module.db.blacksmithing then
+        local smith = Professions.Rank(SMITH)
+        if smith then
+            local best = 0
+            for _, key in ipairs(KEYS) do
+                if smith >= key.smith and key.skill > best then
+                    best = key.skill
+                end
+            end
+            rank = rank and rank > best and rank or best
+        end
+    end
+    return rank, name
+end
+
 -- The line for a skill line and skill, colored, or nil when it's off or the player doesn't have
 -- the profession and `show` is "known". Without the profession it's red: you can't gather it.
 -- Lockpicking is never shown to characters who can't pick locks, whatever `show` says.
@@ -200,9 +240,17 @@ local function skillLine(line, need, text)
     if not module.db[OPTION[line]] then
         return nil
     end
-    local rank, name = Professions.Rank(line)
-    if not rank and (module.db.show ~= "always" or line == LOCK) then
-        return nil
+    local rank, name
+    if line == LOCK then
+        rank, name = lockRank()
+        if not rank then
+            return nil
+        end
+    else
+        rank, name = Professions.Rank(line)
+        if not rank and module.db.show ~= "always" then
+            return nil
+        end
     end
     local color = Professions.Difficulty(rank, need)
     return format(text, name or FALLBACK_NAME[line], need), color
@@ -372,6 +420,12 @@ local function onItem(tooltip, data)
     end
     local id = ItemTooltip.ItemID(data)
     local item = id and ITEMS[id]
+    local keySkill = id and module.db.blacksmithing and KEY_SKILL[id]
+    if keySkill then
+        local name = select(2, lockRank())
+        addLine(tooltip, format(L.PROFTOOLTIPS_KEY, name or L.PROFTOOLTIPS_LOCKPICKING_NAME, keySkill),
+            NORMAL_FONT_COLOR or { r = 1, g = 0.82, b = 0 })
+    end
     if item then
         local text = item[1] == LOCK and L.PROFTOOLTIPS_REQUIRES or L.PROFTOOLTIPS_GATHERED
         local line, color = skillLine(item[1], item[2], text)

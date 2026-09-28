@@ -6,7 +6,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Added
 
-- **Profession Tooltips** (was Gathering Tooltips): also shows the Lockpicking skill a lockbox or locked chest needs, colored against your skill, for characters who can pick locks. A Locks checkbox turns it off.
+- **Profession Tooltips** (was Gathering Tooltips): also shows the Lockpicking skill a lockbox or locked chest needs, colored against your skill, for characters who can pick locks. A Locks checkbox turns it off. A Skeleton Keys checkbox (on by default) shows it to blacksmiths too, against the best skeleton key they can make, and puts the skill each skeleton key opens in its tooltip.
 
 ### Fixed
 
