@@ -269,7 +269,7 @@ local function bottomLeftOffset()
     if rows == 0 then
         return 8
     end
-    return COORDS_BOTTOM + rows * COORDS_ROW + 14 -- room for a panel around them
+    return COORDS_BOTTOM + rows * COORDS_ROW + 8
 end
 
 local function anchor()

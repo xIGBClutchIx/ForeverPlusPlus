@@ -652,8 +652,7 @@ L.UNEXPLORED_PURPLE = "Purple"
 
 -- Coordinates
 L.COORDS_TITLE = "Coordinates"
-L.COORDS_DESC = "Show your coordinates and the cursor's on the world map, in a panel like Zone "
-    .. "Info's."
+L.COORDS_DESC = "Show your coordinates and the cursor's in the world map's title bar."
 L.COORDS_PLAYER = "Player"
 L.COORDS_PLAYER_DESC = "Your coordinates, with your zone's name when the map shows another."
 L.COORDS_CURSOR = "Cursor"
@@ -662,9 +661,9 @@ L.COORDS_TENTHS = "Tenths"
 L.COORDS_TENTHS_DESC = "Coordinates to a tenth, like 45.2, instead of whole numbers."
 L.COORDS_MINIMAP = "On the Minimap"
 L.COORDS_MINIMAP_DESC = "Your coordinates on the minimap too."
-L.COORDS_PANEL = "Panel"
-L.COORDS_PANEL_DESC = "Show the coordinates in a dark panel, so they read over any map. Off "
-    .. "shows the game's plain text."
+L.COORDS_TITLEBAR = "In the Title Bar"
+L.COORDS_TITLEBAR_DESC = "Your coordinates on the left of the map's title bar and the cursor's "
+    .. "on the right. Off shows them in the map's bottom left corner, as the game does."
 
 -- CVarBrowser
 L.CVARBROWSER_TITLE = "Console Variables"

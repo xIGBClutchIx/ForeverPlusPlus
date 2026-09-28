@@ -9,7 +9,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Points of Interest**: dungeons, raids, capitals, flight masters, boats, zeppelins, and spirit healers on the world map, in a new Map category. Includes an icon size and continent map toggle for each, capitals in place of Blizzard's city icons, and graying out flight masters you haven't learned. Off by default.
 - **Zone Info**: a panel in a corner of the world map with the zone's level range, fishing skill, and the herbs, ore, and skinning in it for your professions. It sits above Blizzard's map coordinates when they're on. Off by default.
 - **Unexplored Areas**: shows the parts of zone maps you haven't explored yet. Includes the tint's color and strength, or no tint. Off by default.
-- **Coordinates**: your coordinates and the cursor's on the world map, from the game's own coordinates, with a toggle each, in a dark panel like Zone Info's. Off by default.
+- **Coordinates**: your coordinates and the cursor's in the world map's title bar, from the game's own coordinates, with a toggle each. Off by default.
 
 ### Changed
 

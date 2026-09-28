@@ -1,11 +1,12 @@
 -- Coordinates: the player's and the cursor's coordinates on the world map. Forever's map already
 -- has them (Blizzard's coordinates panel, off until its Settings checkboxes are on), so this turns
--- those settings on from here, one toggle each, and shows Blizzard's text in a panel like Zone
--- Info's, so it reads over any map art. Ideas from Leatrix Maps' coordinates; none of its code.
+-- those settings on from here, one toggle each, and moves Blizzard's text into the map's title
+-- bar: the player's on the left, the cursor's on the right, either side of the title. Ideas from
+-- Leatrix Maps' coordinates; none of its code.
 local _, ns = ...
 
-local ipairs, pairs, max = ipairs, pairs, math.max
-local CreateFrame, C_AddOns, C_XMLUtil = CreateFrame, C_AddOns, C_XMLUtil
+local ipairs, pairs, max, min = ipairs, pairs, math.max, math.min
+local CreateFrame, C_AddOns = CreateFrame, C_AddOns
 
 local L = ns.L
 
@@ -15,7 +16,7 @@ local module = ns.NewModule("Coordinates", L.COORDS_DESC, {
     cursor = true,
     tenths = true,
     minimap = false,
-    panel = true,
+    titleBar = true,
     saved = {}, -- CVar -> the player's own value, put back when the module turns off
 })
 module.title = L.COORDS_TITLE
@@ -26,7 +27,7 @@ module.options = {
     { key = "cursor", name = L.COORDS_CURSOR, description = L.COORDS_CURSOR_DESC },
     { key = "tenths", name = L.COORDS_TENTHS, description = L.COORDS_TENTHS_DESC },
     { key = "minimap", name = L.COORDS_MINIMAP, description = L.COORDS_MINIMAP_DESC },
-    { key = "panel", name = L.COORDS_PANEL, description = L.COORDS_PANEL_DESC },
+    { key = "titleBar", name = L.COORDS_TITLEBAR, description = L.COORDS_TITLEBAR_DESC },
 }
 
 -- The client's own setting behind each option: the checkboxes under Settings > Gameplay >
@@ -39,9 +40,8 @@ local CVARS = {
 }
 
 local MAP_ADDON = "Blizzard_WorldMap"
-local LEFT, BOTTOM = 60, 4 -- where Blizzard's panel is, a little inside the map's edge
-local PADDING = 6
-local GAP = 2 -- between rows
+local INSET = 8 -- from the title bar's ends
+local GAP = 12 -- the least room kept either side of the title
 local THROTTLE = 0.05
 
 -- Sets the client's setting to match an option, remembering the player's value the first time.
@@ -49,10 +49,10 @@ local function applyCVar(key)
     ns.CVars.Set(module.db.saved, CVARS[key], module.db[key] and "1" or "0")
 end
 
--- The panel ----------------------------------------------------------------------------------
+-- The title bar ------------------------------------------------------------------------------
 
 local coords -- Blizzard's panel, once found
-local panel, driver -- ours
+local bar -- ours: two lines over the title bar
 
 -- Blizzard's coordinates panel: the map's overlay frame with a cursor row and a player row. It
 -- has no name, so it's found by its parts.
@@ -64,64 +64,59 @@ local function findCoords()
     end
 end
 
--- A tooltip's look, like Zone Info's panel, on the map's scroll container over its pins.
--- Blizzard's own panel sits under the map art's level, so a background behind its text doesn't
--- show; this shows the same text on a frame of our own instead. Probe: the template is
--- Mainline's; without it, the plain backdrop template and its tooltip backdrop.
-local function newPanel(parent)
-    local hasTemplate = C_XMLUtil and C_XMLUtil.GetTemplateInfo
-        and C_XMLUtil.GetTemplateInfo("TooltipBackdropTemplate")
-    local frame = CreateFrame("Frame", nil, parent,
-        hasTemplate and "TooltipBackdropTemplate" or "BackdropTemplate")
-    if not hasTemplate and frame.SetBackdrop and BACKDROP_TOOLTIP_16_16_5555 then
-        frame:SetBackdrop(BACKDROP_TOOLTIP_16_16_5555)
-        frame:SetBackdropColor(0, 0, 0, 0.8)
+-- A line at one end of the bar: `point` is its side, against `edge`'s other side.
+local function newLine(frame, point, edge, relativePoint, x)
+    local line = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    line:SetPoint(point, edge, relativePoint, x, -1)
+    line:SetJustifyH(point)
+    line:SetWordWrap(false)
+    return line
+end
+
+-- Our frame covers the title bar, a level above it so the text draws over its art. The title bar
+-- is anchored to the map's frame, so it widens with the quest log and when the map is maximized,
+-- and our lines follow. The cursor's stops short of the maximize button.
+local function newBar(border)
+    local title = border.TitleContainer
+    local frame = CreateFrame("Frame", nil, border)
+    frame:SetFrameLevel(title:GetFrameLevel() + 1)
+    frame:SetAllPoints(title)
+    frame.player = newLine(frame, "LEFT", frame, "LEFT", INSET)
+    local button = border.MaximizeMinimizeFrame
+    if button then
+        frame.cursor = newLine(frame, "RIGHT", button, "LEFT", -INSET)
+    else
+        frame.cursor = newLine(frame, "RIGHT", frame, "RIGHT", -INSET)
     end
-    frame:SetFrameLevel(parent:GetFrameLevel() + 2000)
-    frame:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", LEFT, BOTTOM)
-    frame.lines = {}
-    for i = 1, 2 do
-        local line = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-        line:SetJustifyH("LEFT")
-        frame.lines[i] = line
-    end
-    frame:Hide()
     return frame
 end
 
--- How wide a line is. Probe: GetUnboundedStringWidth is Mainline's.
+-- How wide a line is unwrapped. Probe: GetUnboundedStringWidth is Mainline's.
 local function textWidth(text)
     return text.GetUnboundedStringWidth and text:GetUnboundedStringWidth() or text:GetStringWidth()
 end
 
--- Copies the rows Blizzard shows now (cursor, then player) into ours: its text already has the
--- tenths setting and, off the player's map, the player's zone.
-local function update()
-    local width, height, above = 0, PADDING * 2 - GAP, nil
-    for i, row in ipairs({ coords.CursorCoords, coords.PlayerCoords }) do
-        local line = panel.lines[i]
-        if row:IsShown() then
-            line:SetText(row.Label:GetText())
-            line:ClearAllPoints()
-            if above then
-                line:SetPoint("TOPLEFT", above, "BOTTOMLEFT", 0, -GAP)
-            else
-                line:SetPoint("TOPLEFT", PADDING, -PADDING)
-            end
-            line:Show()
-            width = max(width, textWidth(line))
-            height = height + GAP + line:GetStringHeight()
-            above = line
-        else
-            line:Hide()
-        end
-    end
-    if not above then
-        panel:Hide()
+-- One line from a row of Blizzard's: its text, which already has the tenths setting and, off the
+-- player's map, the player's zone, cut short with "..." before it reaches the title.
+local function copy(line, row, room)
+    if not row:IsShown() then
+        line:Hide()
         return
     end
-    panel:SetSize(width + PADDING * 2, height)
-    panel:Show()
+    line:SetWidth(0)
+    line:SetText(row.Label:GetText())
+    line:SetWidth(min(textWidth(line), max(room, 0)))
+    line:Show()
+end
+
+local function update()
+    local titleText = WorldMapFrame.BorderFrame.TitleContainer.TitleText
+    local titleWidth = titleText and textWidth(titleText) or 0
+    -- Half the bar beside the title, less the ends and the maximize button's width on the right.
+    local half = (bar:GetWidth() - titleWidth) / 2 - GAP - INSET
+    local button = WorldMapFrame.BorderFrame.MaximizeMinimizeFrame
+    copy(bar.player, coords.PlayerCoords, half)
+    copy(bar.cursor, coords.CursorCoords, half - (button and button:GetWidth() or 0))
 end
 
 local elapsed = 0
@@ -133,37 +128,32 @@ local function onUpdate(_, delta)
     end
 end
 
--- Our panel in place of Blizzard's, or Blizzard's as it comes. Its own text is only faded out, so
--- it keeps updating for ours to copy.
+-- Ours in the title bar, or Blizzard's panel as it comes. Blizzard's text is only faded out, so
+-- it keeps updating for ours to copy. Ours is the border frame's child, so it stops with the map.
 local function restyle()
-    local on = module.enabled and module.db.panel
+    local on = module.enabled and module.db.titleBar
     coords:SetAlpha(on and 0 or 1)
-    driver:SetShown(on)
+    bar:SetShown(on)
+    bar:SetScript("OnUpdate", on and onUpdate or nil)
     if on then
         update()
-    else
-        panel:Hide()
     end
 end
 
 local waiting
 
--- Makes our panel on the world map, once the map has loaded. The driver is the scroll
--- container's child, so it stops while the map is closed.
 local function attach()
     if waiting then
         ns.Off("ADDON_LOADED", waiting)
         waiting = nil
     end
-    if not panel then
+    if not bar then
+        local border = WorldMapFrame.BorderFrame
         coords = findCoords()
-        if not coords then
+        if not (coords and border and border.TitleContainer) then
             return -- a client without Blizzard's panel; the settings still apply
         end
-        local parent = WorldMapFrame.ScrollContainer or WorldMapFrame
-        panel = newPanel(parent)
-        driver = CreateFrame("Frame", nil, parent)
-        driver:SetScript("OnUpdate", onUpdate)
+        bar = newBar(border)
     end
     restyle()
 end
@@ -194,7 +184,7 @@ function module:OnDisable()
         ns.Off("ADDON_LOADED", waiting)
         waiting = nil
     end
-    if panel then
+    if bar then
         restyle()
     end
 end
@@ -204,7 +194,7 @@ function module:OnOptionChanged(key)
         return
     elseif CVARS[key] then
         applyCVar(key)
-    elseif panel then
+    elseif bar then
         restyle()
     end
 end
