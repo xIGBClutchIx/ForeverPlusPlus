@@ -16,6 +16,11 @@ ns.changelog = {
                 { L.BAGSLOTS_TITLE, "Adds up every bag on the backpack button by default, with "
                     .. "the reagent bag still on its own button. Per Bag is still a choice." },
             } },
+            { L.CHANGELOG_FIXED, {
+                { L.PLAYERPLATES_TITLE, "Chinese, Korean, and Cyrillic names show again, instead "
+                    .. "of coming out blank." },
+                { L.NPCPLATES_TITLE, "Same fix for NPC names and titles." },
+            } },
         },
     },
     {

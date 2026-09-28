@@ -16,8 +16,8 @@
 -- Labels are kept per Blizzard unit frame and shared by every module, since plates are pooled.
 local _, ns = ...
 
-local pairs, ipairs, setmetatable = pairs, ipairs, setmetatable
-local CreateFrame, UnitLevel = CreateFrame, UnitLevel
+local pairs, ipairs, setmetatable, floor = pairs, ipairs, setmetatable, math.floor
+local CreateFrame, CreateFontFamily, UnitLevel = CreateFrame, CreateFontFamily, UnitLevel
 local UnitGroupRolesAssigned, GetTexCoordsForRoleSmallCircle =
     UnitGroupRolesAssigned, GetTexCoordsForRoleSmallCircle
 
@@ -264,20 +264,96 @@ end
 -- made long names tiny. Every label uses the largest size seen instead: the normal one.
 local fullSize = 0
 
+-- Blizzard's nameplate font is a font family: a font per alphabet, so Chinese, Korean, and
+-- Cyrillic names draw with fonts that have those glyphs. SetFont with the one file GetFont
+-- returns (the roman one) drops the rest, and those names came out blank. So at each size we
+-- build our own family from Blizzard's members instead.
+local ALPHABETS = { "roman", "korean", "simplifiedchinese", "traditionalchinese", "russian" }
+local families = {} -- "size flags" -> our font family, or false if it couldn't be made
+local familyCount = 0
+
+-- `base`'s font for one alphabet, or nil when it isn't a family (or the client can't say).
+local function member(base, alphabet)
+    local font = base.GetFontObjectForAlphabet and base:GetFontObjectForAlphabet(alphabet)
+    return font and font.GetFont and font or nil
+end
+
+---A font family like `base` (Blizzard's name font) with its roman font at `size`; the other
+---alphabets keep their sizes relative to it. Nil when the client has no font families.
+---@param base table Font
+---@param size number
+---@param flags string|nil
+---@return table|nil
+local function fontFamily(base, size, flags)
+    flags = flags or ""
+    size = floor(size * 10 + 0.5) / 10
+    local key = size .. " " .. flags
+    local family = families[key]
+    if family ~= nil then
+        return family or nil
+    end
+    local roman = CreateFontFamily and member(base, "roman")
+    local _, romanHeight = roman and roman:GetFont()
+    if not (romanHeight and romanHeight > 0) then
+        families[key] = false
+        return nil
+    end
+    local members = {}
+    for _, alphabet in ipairs(ALPHABETS) do
+        local font = member(base, alphabet)
+        local file, height = font and font:GetFont()
+        if file and height and height > 0 then
+            members[#members + 1] = {
+                alphabet = alphabet,
+                file = file,
+                height = size * height / romanHeight,
+                flags = flags,
+            }
+        end
+    end
+    -- Font objects need a unique global name; ours are prefixed with the addon's.
+    familyCount = familyCount + 1
+    family = CreateFontFamily("ForeverPlusPlusPlateFont" .. familyCount, members)
+    if family then
+        -- The members don't take a shadow, so copy Blizzard's onto each.
+        for _, alphabet in ipairs(ALPHABETS) do
+            local ours, theirs = member(family, alphabet), member(base, alphabet)
+            if ours and theirs then
+                ours:SetShadowOffset(theirs:GetShadowOffset())
+                ours:SetShadowColor(theirs:GetShadowColor())
+            end
+        end
+    end
+    families[key] = family or false
+    return family
+end
+
+-- Sets a label's text to Blizzard's name font at `size`: our family when the client has them,
+-- otherwise Blizzard's font object as it is (the right glyphs, if not always the right size).
+local function setFont(text, base, size, flags)
+    local family = fontFamily(base, size, flags)
+    text:SetFontObject(family or base)
+end
+
 local function matchFont(label, name)
-    local file, size, flags = name:GetFont()
-    if not (file and size) then
+    local _, size, flags = name:GetFont()
+    local base = name:GetFontObject() or _G.SystemFont_NamePlate
+    if not (size and base) then
         return
     end
     if size > fullSize then
         fullSize = size
     end
     size = fullSize
-    label.name:SetFont(file, size, flags)
+    if label.fontSize == size and label.fontFlags == flags and label.fontBase == base then
+        return
+    end
+    label.fontSize, label.fontFlags, label.fontBase = size, flags, base
+    setFont(label.name, base, size, flags)
     label.nameSize = size
-    label.subtitle:SetFont(file, size * SUBTITLE_SCALE, flags)
-    label.barSubtitle:SetFont(file, size * SUBTITLE_SCALE, flags)
-    label.barName:SetFont(file, size, flags)
+    setFont(label.subtitle, base, size * SUBTITLE_SCALE, flags)
+    setFont(label.barSubtitle, base, size * SUBTITLE_SCALE, flags)
+    setFont(label.barName, base, size, flags)
 end
 
 -- Puts the level beside the name; returns the width it takes.

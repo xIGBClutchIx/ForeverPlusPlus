@@ -6,6 +6,7 @@
     "SLASH_FOREVERPLUSPLUS2",
     "SlashCmdList",
     "CreateFrame",
+    "CreateFontFamily",
     "ReloadUI",
     "strsplit",
     "strtrim",

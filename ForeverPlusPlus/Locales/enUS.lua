@@ -55,6 +55,7 @@ L.CHANGELOG_RELEASE = "%s (%s)" -- version, date
 L.CHANGELOG_UNRELEASED = "Unreleased"
 L.CHANGELOG_ADDED = "Added"
 L.CHANGELOG_CHANGED = "Changed"
+L.CHANGELOG_FIXED = "Fixed"
 L.CHANGELOG_SETTINGS = "Settings"
 L.CHANGELOG_COMMANDS = "Commands"
 

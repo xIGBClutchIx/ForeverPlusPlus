@@ -239,6 +239,7 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 ## Fonts
 
 - Text measured before its font file has loaded reads as 0 tall on Forever, even after preloading. Measure with a floor of the font size. **[in-game]** (2026-09-23)
+- `SystemFont_NamePlate` (and its `_Outlined` twin) is a `FontFamily`: FRIZQT for roman, and its own font for `korean`, `simplifiedchinese`, `traditionalchinese`, and `russian`. `FontString:GetFont()` returns only the roman file, so `SetFont` with it drops the other alphabets and CJK names draw blank. To change the size, build a family with `CreateFontFamily(name, members)` (members: `alphabet`, `file`, `height`, `flags`; `name` is required and becomes a global) from `Font:GetFontObjectForAlphabet(alphabet)`. **[web]** (Gethe `forever` branch, `GameFonts.xml` and `FontDocumentation.lua`, 2026-09-27)
 
 ## Open questions
 

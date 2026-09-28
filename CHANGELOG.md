@@ -8,6 +8,11 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 - **Bag Slot Counter**: adds up every bag on the backpack button by default, with the reagent bag still on its own button. Per Bag is still a choice.
 
+### Fixed
+
+- **Player Nameplates**: Chinese, Korean, and Cyrillic names show again, instead of coming out blank.
+- **NPC Nameplates**: same fix for NPC names and titles.
+
 ## 0.2.0 (2026-09-27)
 
 ### Added
