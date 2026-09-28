@@ -20,9 +20,10 @@ local module = ns.NewModule("ZoneInfo", L.ZONEINFO_DESC, {
     hover = true, -- on continent maps, the zone under the cursor
     levels = true,
     fishing = true,
-    herbs = true,
-    ore = true,
-    skinning = true,
+    -- Herbs, ore, and skinning: "off", "known" (only with the profession), or "always".
+    herbs = "known",
+    ore = "known",
+    skinning = "known",
     scale = 100, -- percent of the panel's normal size
 })
 module.title = L.ZONEINFO_TITLE
@@ -43,10 +44,21 @@ module.options = {
     { key = "hover", name = L.ZONEINFO_HOVER, description = L.ZONEINFO_HOVER_DESC },
     { key = "levels", name = L.ZONEINFO_LEVELS, description = L.ZONEINFO_LEVELS_DESC },
     { key = "fishing", name = L.ZONEINFO_FISHING, description = L.ZONEINFO_FISHING_DESC },
+}
+
+local SHOW = {
+    { "off", L.ZONEINFO_SHOW_OFF },
+    { "known", L.ZONEINFO_SHOW_KNOWN },
+    { "always", L.ZONEINFO_SHOW_ALWAYS },
+}
+for _, option in ipairs({
     { key = "herbs", name = L.ZONEINFO_HERBS, description = L.ZONEINFO_HERBS_DESC },
     { key = "ore", name = L.ZONEINFO_ORE, description = L.ZONEINFO_ORE_DESC },
     { key = "skinning", name = L.ZONEINFO_SKINNING, description = L.ZONEINFO_SKINNING_DESC },
-}
+}) do
+    option.choices = SHOW
+    module.options[#module.options + 1] = option
+end
 
 -- Shared with Data.lua: `zones` (by map ID), `herbs` and `ores` (by item ID).
 module.internal = {}
@@ -112,12 +124,19 @@ local GREEN = QuestDifficultyColors and QuestDifficultyColors.standard or { r = 
 -- don't depend on the zone, so it's only enough or not: red while below it (fish get away),
 -- green once there, and white without Fishing.
 local function skill(rank, need, fishing)
-    if fishing and not rank then
-        return tostring(need)
+    if not rank then
+        return tostring(need) -- white: the player doesn't have the profession
     elseif fishing and rank >= need then
         return colored(GREEN, need)
     end
     return colored(Professions.Difficulty(rank, need), need)
+end
+
+-- Whether a gathering row shows: its setting is "always", or "known" and the player has the
+-- profession (a rank).
+local function shows(key, rank)
+    local mode = module.db[key]
+    return mode == "always" or (mode == "known" and rank ~= nil)
 end
 
 local function range(rank, low, high, fishing)
@@ -138,7 +157,7 @@ local function skillsRow(zone)
             name or L.ZONEINFO_FISHING_NAME, range(rank, zone.fish, zone.fishHigh, true))
     end
     local rank, name, own = Professions.Rank(Professions.SKINNING)
-    if db.skinning and rank and zone[1] then
+    if shows("skinning", rank) and zone[1] then
         parts[#parts + 1] = icon(Professions.SKINNING, own) .. format(L.ZONEINFO_SKILL,
             name or L.ZONEINFO_SKINNING_NAME, range(rank, Professions.SkinningNeed(zone[1]),
                 Professions.SkinningNeed(zone[2])))
@@ -166,13 +185,14 @@ end
 -- player doesn't have the profession or `key`'s checkbox is off.
 local function gatherRow(key, line, ids, items)
     local rank, _, own = Professions.Rank(line)
-    if not (module.db[key] and rank and ids and #ids > 0) then
+    if not (shows(key, rank) and ids and #ids > 0) then
         return nil
     end
     local names = {}
     for i, id in ipairs(ids) do
         local item = items[id]
-        names[i] = colored(Professions.Difficulty(rank, item[1]), itemName(id, item[2]))
+        local name = itemName(id, item[2])
+        names[i] = rank and colored(Professions.Difficulty(rank, item[1]), name) or name
     end
     return icon(line, own) .. concat(names, L.ZONEINFO_LIST_SEPARATOR)
 end
