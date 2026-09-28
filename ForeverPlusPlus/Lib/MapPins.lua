@@ -7,7 +7,8 @@ local _, ns = ...
 
 local ipairs, select, setmetatable = ipairs, select, setmetatable
 local CreateFrame, CreateFromMixins = CreateFrame, CreateFromMixins
-local C_AddOns, C_Texture, GameTooltip = C_AddOns, C_Texture, GameTooltip
+local C_AddOns, C_Texture, C_Map, GameTooltip = C_AddOns, C_Texture, C_Map, GameTooltip
+local CreateVector2D = CreateVector2D
 local NORMAL_FONT_COLOR, HIGHLIGHT_FONT_COLOR = NORMAL_FONT_COLOR, HIGHLIGHT_FONT_COLOR
 
 local MapPins = {}
@@ -34,6 +35,48 @@ function MapPins.Atlas(...)
         end
     end
     return (select(count, ...))
+end
+
+-- Where one map sits on another, by map ID pair, once asked. The layout doesn't change.
+local rects = {}
+
+---A point on one map (x and y from 0 to 1) as a point on another that shows it, such as a zone
+---on its continent, or nil when the game can't place it there.
+---@param fromMap number
+---@param toMap number
+---@param x number
+---@param y number
+---@return number? x
+---@return number? y
+function MapPins.Translate(fromMap, toMap, x, y)
+    local key = fromMap * 100000 + toMap
+    local rect = rects[key]
+    if rect == nil then
+        rect = false
+        if C_Map and C_Map.GetMapRectOnMap then
+            local left, right, top, bottom = C_Map.GetMapRectOnMap(fromMap, toMap)
+            if left and right > left and bottom > top then
+                rect = { left, right, top, bottom }
+            end
+        end
+        rects[key] = rect
+    end
+    local tx, ty
+    if rect then
+        tx, ty = rect[1] + (rect[2] - rect[1]) * x, rect[3] + (rect[4] - rect[3]) * y
+    elseif C_Map and C_Map.GetWorldPosFromMapPos and CreateVector2D then
+        -- Probe: through world coordinates, when the game has no rectangle for the pair.
+        local continent, world = C_Map.GetWorldPosFromMapPos(fromMap, CreateVector2D(x, y))
+        if continent and world then
+            local _, position = C_Map.GetMapPosFromWorldPos(continent, world, toMap)
+            if position then
+                tx, ty = position:GetXY()
+            end
+        end
+    end
+    if tx and tx >= 0 and tx <= 1 and ty >= 0 and ty <= 1 then
+        return tx, ty
+    end
 end
 
 -- Pins ----------------------------------------------------------------------------------------

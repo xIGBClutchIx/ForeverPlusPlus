@@ -31,7 +31,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Hide Beta Feedback | Hides the beta's "Press F6 to submit an issue" tooltip line and bug report button. Off by default, and only on beta and PTR clients. |
 | Tooltips | Colors unit and item tooltips by class, reaction, or quality, and adds player titles and who a unit is targeting. |
 | **Map** | |
-| Points of Interest | Shows dungeons, raids, flight masters, boats, zeppelins, and spirit healers on the world map's zone maps, each with its own checkbox and icon size. Off by default. |
+| Points of Interest | Shows dungeons, raids, capital cities, flight masters, boats, zeppelins, and spirit healers on the world map, each with its own checkbox, icon size, and whether it also shows on continent maps. Off by default. |
 | **Unit Frames** | |
 | Class Colors | Shows players' health bars, and optionally names, in their class color on the player, target, focus, party, and target-of-target frames, and hostile and neutral NPCs' health bars in red and yellow. |
 | **Nameplates** | |

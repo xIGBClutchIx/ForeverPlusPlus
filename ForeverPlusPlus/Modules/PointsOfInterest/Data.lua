@@ -54,15 +54,18 @@ internal.instances = {
     zulgurub = { 309, "Zul'Gurub", 60, 60 },
 }
 
--- Cities whose dungeons also show on the zone around them, placed by where the game says the city
--- sits on the zone's map. A city can give that place (left, right, top, bottom, from 0 to 1) for
--- when the game doesn't: the Undercity's is worked out from the two maps' spirit healer and
--- their crossings to each other, which agree to 0.3%.
+-- The capital cities, by city map ID: the zone around each (where its icon and its dungeons also
+-- show, placed by where the game says the city sits on the zone's map) and its faction. A city
+-- can give that place (left, right, top, bottom, from 0 to 1) for when the game doesn't: the
+-- Undercity's is worked out from the two maps' spirit healer and their crossings to each other,
+-- which agree to 0.3%.
 internal.cities = {
-    [1411] = { { 1454 } }, -- Durotar: Orgrimmar
-    [1420] = { { 1458, 0.4789, 0.6912, 0.6402, 0.8527 } }, -- Tirisfal Glades: Undercity
-    [1426] = { { 1455 } }, -- Dun Morogh: Ironforge
-    [1429] = { { 1453 } }, -- Elwynn Forest: Stormwind City
+    [1453] = { zone = 1429, faction = "A" }, -- Stormwind City, in Elwynn Forest
+    [1455] = { zone = 1426, faction = "A" }, -- Ironforge, in Dun Morogh
+    [1457] = { zone = 1438, faction = "A" }, -- Darnassus, in Teldrassil
+    [1454] = { zone = 1411, faction = "H" }, -- Orgrimmar, in Durotar
+    [1456] = { zone = 1412, faction = "H" }, -- Thunder Bluff, in Mulgore
+    [1458] = { zone = 1420, faction = "H", rect = { 0.4789, 0.6912, 0.6402, 0.8527 } }, -- Undercity
 }
 
 internal.points = {

@@ -562,12 +562,15 @@ L.CLASSCOLORS_TOT_DESC = "The small frames for your target's target and your foc
 
 -- PointsOfInterest. Place names on the map come from the game, or from Data.lua.
 L.POI_TITLE = "Points of Interest"
-L.POI_DESC = "Show dungeons, raids, flight masters, boats, zeppelins, and spirit healers on the "
-    .. "world map's zone maps."
+L.POI_DESC = "Show dungeons, raids, capital cities, flight masters, boats, zeppelins, and spirit "
+    .. "healers on the world map."
 L.POI_DUNGEONS = "Dungeons"
 L.POI_DUNGEONS_DESC = "Dungeon entrances, with their level range colored against yours."
 L.POI_RAIDS = "Raids"
 L.POI_RAIDS_DESC = "Raid entrances."
+L.POI_CAPITALS = "Capital Cities"
+L.POI_CAPITALS_DESC = "Stormwind, Ironforge, Darnassus, Orgrimmar, Thunder Bluff, and the "
+    .. "Undercity, on the zone around each."
 L.POI_FLIGHT = "Flight Masters"
 L.POI_FLIGHT_DESC = "Flight masters of your faction, and ones that fly for both."
 L.POI_SHIPS = "Boats"
@@ -578,11 +581,14 @@ L.POI_SPIRIT = "Spirit Healers"
 L.POI_SPIRIT_DESC = "Spirit healers, where you can come back to life after dying."
 L.POI_SIZE = "Icon Size"
 L.POI_SIZE_DESC = "How big the icons are, compared with their normal size."
+L.POI_WORLD = "On Continent Maps"
+L.POI_WORLD_DESC = "Also show them on the continent and world maps, not just zone maps."
 L.POI_OTHER_FACTION = "Other Faction"
 L.POI_OTHER_FACTION_DESC = "Also show the other faction's flight masters, boats, and zeppelins."
 -- Tooltips
 L.POI_DUNGEON = "Dungeon"
 L.POI_RAID = "Raid"
+L.POI_CAPITAL = "Capital City"
 L.POI_LEVEL = "Level %d"
 L.POI_LEVELS = "Level %d-%d" -- lowest, highest
 L.POI_PART = "%s (%s)" -- an instance, which entrance

@@ -1,71 +1,88 @@
--- Points of Interest: icons on the world map's zone maps for dungeons, raids, flight masters,
--- boats, zeppelins, and spirit healers, each with a tooltip saying what and where it is. Every
--- kind has its own checkbox and icon size. Travel points of the other faction are off unless
--- asked for. Where the points are is in Data.lua.
+-- Points of Interest: icons on the world map for dungeons, raids, capital cities, flight
+-- masters, boats, zeppelins, and spirit healers, each with a tooltip saying what and where it is.
+-- Every kind has its own checkbox, icon size, and whether it also shows on the continent and
+-- world maps, not just zone maps. Travel points of the other faction are off unless asked for.
+-- Where the points are is in Data.lua.
 local _, ns = ...
 
-local ipairs, format, rawget, unpack, abs = ipairs, string.format, rawget, unpack, math.abs
+local ipairs, pairs, format, rawget, unpack, abs = ipairs, pairs, string.format, rawget, unpack,
+    math.abs
 local C_Map, C_EncounterJournal, C_TaxiMap, UnitFactionGroup, UnitLevel =
     C_Map, C_EncounterJournal, C_TaxiMap, UnitFactionGroup, UnitLevel
 local GetRealZoneText, GetQuestDifficultyColor = GetRealZoneText, GetQuestDifficultyColor
-local QuestDifficultyColors = QuestDifficultyColors
+local QuestDifficultyColors, Enum = QuestDifficultyColors, Enum
 
 local L = ns.L
 
 local module = ns.NewModule("PointsOfInterest", L.POI_DESC, {
     enabled = false,
+    -- For each kind: shown, its size in percent of normal, and shown on continent maps too.
     dungeons = true,
-    dungeonSize = 100, -- percent of the kind's normal size, here and below
+    dungeonSize = 80,
+    dungeonsWorld = true,
     raids = true,
-    raidSize = 100,
+    raidSize = 80,
+    raidsWorld = true,
+    capitals = true,
+    capitalSize = 80,
+    capitalsWorld = true,
     flightMasters = true,
-    flightSize = 100,
+    flightSize = 80,
+    flightMastersWorld = false,
     ships = true,
-    shipSize = 100,
+    shipSize = 80,
+    shipsWorld = false,
     zeppelins = true,
-    zeppelinSize = 100,
+    zeppelinSize = 80,
+    zeppelinsWorld = false,
     spiritHealers = true,
-    spiritSize = 100,
+    spiritSize = 70,
+    spiritHealersWorld = false,
     otherFaction = false, -- also the other faction's flight masters, boats, and zeppelins
 })
 module.title = L.POI_TITLE
 module.category = "map"
 
--- Shared with Data.lua: `points` (by map ID) and `instances` (by key).
+-- Shared with Data.lua: `points` (by map ID), `instances` (by key), and `cities` (by map ID).
 module.internal = {}
 local internal = module.internal
 
--- A checkbox for a kind, and the slider for its size under it.
+-- A checkbox for a kind, and under it the slider for its size and whether it shows on continents.
 local function kind(key, sizeKey, name, description)
     return { key = key, name = name, description = description },
         {
             key = sizeKey, name = L.POI_SIZE, description = L.POI_SIZE_DESC, requires = key,
             min = 50, max = 200, step = 10, format = "%d%%",
-        }
+        },
+        { key = key .. "World", name = L.POI_WORLD, description = L.POI_WORLD_DESC, requires = key }
 end
 
 module.options = {}
-for _, pair in ipairs({
+for _, rows in ipairs({
     { kind("dungeons", "dungeonSize", L.POI_DUNGEONS, L.POI_DUNGEONS_DESC) },
     { kind("raids", "raidSize", L.POI_RAIDS, L.POI_RAIDS_DESC) },
+    { kind("capitals", "capitalSize", L.POI_CAPITALS, L.POI_CAPITALS_DESC) },
     { kind("flightMasters", "flightSize", L.POI_FLIGHT, L.POI_FLIGHT_DESC) },
     { kind("ships", "shipSize", L.POI_SHIPS, L.POI_SHIPS_DESC) },
     { kind("zeppelins", "zeppelinSize", L.POI_ZEPPELINS, L.POI_ZEPPELINS_DESC) },
     { kind("spiritHealers", "spiritSize", L.POI_SPIRIT, L.POI_SPIRIT_DESC) },
 }) do
-    module.options[#module.options + 1] = pair[1]
-    module.options[#module.options + 1] = pair[2]
+    for _, option in ipairs(rows) do
+        module.options[#module.options + 1] = option
+    end
 end
 module.options[#module.options + 1] =
     { key = "otherFaction", name = L.POI_OTHER_FACTION, description = L.POI_OTHER_FACTION_DESC }
 
--- Each kind of point: the checkbox and size settings that show it, its normal size in pixels,
--- and its icon. The boat, zeppelin, and graveyard icons are in Retail's atlas list, but not
--- confirmed on Forever, so the first the client has is chosen the first time the map draws; the
--- plain colored balls after them are ones Leatrix Maps uses on Forever.
+-- Each kind of point: the checkbox, size, and continent settings for it, its normal size in
+-- pixels, and its icon. The boat, zeppelin, graveyard, and town icons are in Retail's atlas list,
+-- but not confirmed on Forever, so the first the client has is chosen the first time the map
+-- draws; the plain colored balls after them are ones Leatrix Maps uses on Forever.
 local KINDS = {
     dungeon = { show = "dungeons", size = "dungeonSize", pixels = 24, atlas = "Dungeon" },
     raid = { show = "raids", size = "raidSize", pixels = 24, atlas = "Raid" },
+    capital = { show = "capitals", size = "capitalSize", pixels = 28,
+        atlases = { "poi-town", "Vehicle-TempleofKotmogu-PurpleBall" } },
     flight = { show = "flightMasters", size = "flightSize", pixels = 18 },
     ship = { show = "ships", size = "shipSize", pixels = 22,
         atlases = { "FlightMasterFerry", "Vehicle-TempleofKotmogu-CyanBall" } },
@@ -74,6 +91,9 @@ local KINDS = {
     spirit = { show = "spiritHealers", size = "spiritSize", pixels = 20,
         atlases = { "poi-graveyard-neutral", "Vehicle-TempleofKotmogu-GreenBall" } },
 }
+for _, kindInfo in pairs(KINDS) do
+    kindInfo.world = kindInfo.show .. "World" -- the kind's On Continent Maps checkbox
+end
 
 -- The flight master icon in each faction's color.
 local TAXI = { A = "TaxiNode_Alliance", H = "TaxiNode_Horde", N = "TaxiNode_Neutral" }
@@ -191,18 +211,32 @@ local function learned(point)
     end
 end
 
--- The pin for one point of Data.lua, or nil when its settings hide it.
-local function pinFor(point, mapID)
+-- Whether a kind shows, on a continent map (`world`) or a zone map.
+local function shows(kindInfo, world)
+    local db = module.db
+    return db[kindInfo.show] and (not world or db[kindInfo.world])
+end
+
+local FACTION_NAMES = { A = FACTION_ALLIANCE, H = FACTION_HORDE }
+
+-- The pin for one point of Data.lua on the map `mapID` it's listed for, or nil when its settings
+-- hide it. `world` when it's being drawn on a continent map.
+local function pinFor(point, mapID, world)
     local kindName = point[1]
     local kindInfo = KINDS[kindName]
     local db = module.db
     -- A place with dungeons and raids (Blackrock Mountain) shows with either.
     local mixed = kindName == "dungeon" and internal.instances[point[4]].raids
-    if not (db[kindInfo.show] or (mixed and db.raids)) then
+    if not (shows(kindInfo, world) or (mixed and shows(KINDS.raid, world))) then
         return nil
     end
     local info = { size = kindInfo.pixels * db[kindInfo.size] / 100 }
-    if kindName == "dungeon" or kindName == "raid" then
+    if kindName == "capital" then
+        local city = internal.cities[point[4]]
+        info.atlas = atlasOf(kindInfo)
+        info.title = zoneName(point[4])
+        info.lines = { L.POI_CAPITAL, FACTION_NAMES[city.faction] }
+    elseif kindName == "dungeon" or kindName == "raid" then
         info.atlas = kindInfo.atlas
         info.title, info.lines = instanceTooltip(
             kindName == "raid" and L.POI_RAID or L.POI_DUNGEON, point[4])
@@ -271,7 +305,45 @@ local function gameEntrances(mapID, listed, add)
     end
 end
 
-local function fill(mapID, add)
+-- A point on one map (0 to 1) as a point on another that shows it: a city on its zone, or a zone
+-- or city on a continent. For a city the game can't place, the place Data.lua gives it on its
+-- zone.
+local function translate(fromMap, toMap, x, y)
+    local tx, ty = ns.MapPins.Translate(fromMap, toMap, x, y)
+    local city = internal.cities[fromMap]
+    if tx or not (city and city.rect) then
+        return tx, ty
+    end
+    local rect = city.rect
+    x, y = rect[1] + (rect[2] - rect[1]) * x, rect[3] + (rect[4] - rect[3]) * y
+    if city.zone == toMap then
+        return x, y
+    end
+    return ns.MapPins.Translate(city.zone, toMap, x, y)
+end
+
+-- A capital's icon, in the middle of its own map.
+local function capitalPoint(cityMap)
+    return { "capital", 50, 50, cityMap }
+end
+
+-- A point listed for `fromMap`, drawn on `mapID`.
+local function addFrom(fromMap, mapID, point, world, add, listed)
+    local info = pinFor(point, fromMap, world)
+    if not info then
+        return
+    end
+    local x, y = translate(fromMap, mapID, point[2] / 100, point[3] / 100)
+    if x then
+        if listed and (point[1] == "dungeon" or point[1] == "raid") then
+            listed[#listed + 1] = { point[1], x * 100, y * 100 }
+        end
+        add(x, y, info)
+    end
+end
+
+-- A zone map: its own points, and the capitals in it with their dungeons.
+local function fillZone(mapID, add)
     readTaxiNodes(mapID)
     local listed = {} -- this map's dungeons and raids in Data.lua, shown or not
     for _, point in ipairs(internal.points[mapID] or {}) do
@@ -283,30 +355,48 @@ local function fill(mapID, add)
             add(point[2] / 100, point[3] / 100, info)
         end
     end
-    -- A city's dungeons on the zone around it, where the city sits on that zone's map. Probe:
-    -- GetMapRectOnMap returns nothing when the city isn't on it; then the place in Data.lua.
-    for _, entry in ipairs(internal.cities[mapID] or {}) do
-        local city = entry[1]
-        local minX, maxX, minY, maxY
-        if C_Map and C_Map.GetMapRectOnMap then
-            minX, maxX, minY, maxY = C_Map.GetMapRectOnMap(city, mapID)
-        end
-        if not (minX and maxX > minX) then
-            minX, maxX, minY, maxY = entry[2], entry[3], entry[4], entry[5]
-        end
-        if minX then
-            for _, point in ipairs(internal.points[city] or {}) do
-                local info = (point[1] == "dungeon" or point[1] == "raid") and pinFor(point, city)
-                if info then
-                    local x = minX + (maxX - minX) * point[2] / 100
-                    local y = minY + (maxY - minY) * point[3] / 100
-                    listed[#listed + 1] = { point[1], x * 100, y * 100 }
-                    add(x, y, info)
+    for cityMap, city in pairs(internal.cities) do
+        if city.zone == mapID then
+            addFrom(cityMap, mapID, capitalPoint(cityMap), false, add)
+            for _, point in ipairs(internal.points[cityMap] or {}) do
+                if point[1] == "dungeon" or point[1] == "raid" then
+                    addFrom(cityMap, mapID, point, false, add, listed)
                 end
             end
         end
     end
     gameEntrances(mapID, listed, add)
+end
+
+-- A continent or world map: every kind whose On Continent Maps is on, from every zone and city
+-- the game can place on it.
+local function fillContinent(mapID, add)
+    local flights = shows(KINDS.flight, true)
+    for fromMap, points in pairs(internal.points) do
+        if flights then
+            readTaxiNodes(fromMap)
+        end
+        for _, point in ipairs(points) do
+            addFrom(fromMap, mapID, point, true, add)
+        end
+    end
+    for cityMap in pairs(internal.cities) do
+        addFrom(cityMap, mapID, capitalPoint(cityMap), true, add)
+    end
+end
+
+local function isContinent(mapID)
+    local info = C_Map and C_Map.GetMapInfo and C_Map.GetMapInfo(mapID)
+    local types = Enum and Enum.UIMapType
+    return info and types and (info.mapType == types.Continent or info.mapType == types.World)
+end
+
+local function fill(mapID, add)
+    if isContinent(mapID) then
+        fillContinent(mapID, add)
+    else
+        fillZone(mapID, add)
+    end
 end
 
 local layer

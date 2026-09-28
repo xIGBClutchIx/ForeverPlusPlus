@@ -13,14 +13,16 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_ADDED, {
-                { L.POI_TITLE, "Dungeons, raids, flight masters, boats, zeppelins, and spirit "
-                    .. "healers on the world map's zone maps, under a new Map category, including "
-                    .. "the Hall of Thanes, the Ruins of Lordaeron, and any of Forever's new "
-                    .. "dungeons the game's own entrance list has. City dungeons also show on the "
-                    .. "zone around the city, and flight masters you haven't learned are gray. "
-                    .. "Tooltips say what each is, dungeon level ranges colored against yours, and where "
-                    .. "boats and zeppelins go. Includes a checkbox and an icon size slider for "
-                    .. "each kind, and showing the other faction's travel points. Off by default." },
+                { L.POI_TITLE, "Dungeons, raids, capital cities, flight masters, boats, "
+                    .. "zeppelins, and spirit healers on the world map, under a new Map category, "
+                    .. "including the Hall of Thanes, the Ruins of Lordaeron, and any of Forever's "
+                    .. "new dungeons the game's own entrance list has. City dungeons also show on "
+                    .. "the zone around the city, and flight masters you haven't learned are gray. "
+                    .. "Tooltips say what each is, dungeon level ranges colored against yours, "
+                    .. "and where boats and zeppelins go. Includes a checkbox, an icon size "
+                    .. "slider, and showing on continent maps (dungeons, raids, and capitals by "
+                    .. "default) for each kind, and showing the other faction's travel points. "
+                    .. "Off by default." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.CLASSCOLORS_TITLE, "Hostile NPCs' health bars are red, neutral ones yellow, "
