@@ -1,10 +1,10 @@
 -- Coordinates: the player's and the cursor's coordinates on the world map. Forever's map already
 -- has them (Blizzard's coordinates panel, off until its Settings checkboxes are on), so this turns
--- those settings on from here, one toggle each, and puts a tooltip-style background behind the
--- panel so it reads over any map art. Ideas from Leatrix Maps' coordinates; none of its code.
+-- those settings on from here, one toggle each, and shows Blizzard's text in a panel like Zone
+-- Info's, so it reads over any map art. Ideas from Leatrix Maps' coordinates; none of its code.
 local _, ns = ...
 
-local ipairs, pairs, max, ceil = ipairs, pairs, math.max, math.ceil
+local ipairs, pairs, max = ipairs, pairs, math.max
 local CreateFrame, C_AddOns, C_XMLUtil = CreateFrame, C_AddOns, C_XMLUtil
 
 local L = ns.L
@@ -15,7 +15,7 @@ local module = ns.NewModule("Coordinates", L.COORDS_DESC, {
     cursor = true,
     tenths = true,
     minimap = false,
-    background = true,
+    panel = true,
     saved = {}, -- CVar -> the player's own value, put back when the module turns off
 })
 module.title = L.COORDS_TITLE
@@ -26,7 +26,7 @@ module.options = {
     { key = "cursor", name = L.COORDS_CURSOR, description = L.COORDS_CURSOR_DESC },
     { key = "tenths", name = L.COORDS_TENTHS, description = L.COORDS_TENTHS_DESC },
     { key = "minimap", name = L.COORDS_MINIMAP, description = L.COORDS_MINIMAP_DESC },
-    { key = "background", name = L.COORDS_BACKGROUND, description = L.COORDS_BACKGROUND_DESC },
+    { key = "panel", name = L.COORDS_PANEL, description = L.COORDS_PANEL_DESC },
 }
 
 -- The client's own setting behind each option: the checkboxes under Settings > Gameplay >
@@ -39,23 +39,24 @@ local CVARS = {
 }
 
 local MAP_ADDON = "Blizzard_WorldMap"
-local PAD_X, PAD_Y = 6, 2 -- around the text; the panel sits 2 pixels above the map's edge
-local STEP = 8 -- the background's width grows in steps, so it doesn't twitch as numbers change
-local THROTTLE = 0.1
+local LEFT, BOTTOM = 60, 4 -- where Blizzard's panel is, a little inside the map's edge
+local PADDING = 6
+local GAP = 2 -- between rows
+local THROTTLE = 0.05
 
 -- Sets the client's setting to match an option, remembering the player's value the first time.
 local function applyCVar(key)
     ns.CVars.Set(module.db.saved, CVARS[key], module.db[key] and "1" or "0")
 end
 
--- The background ---------------------------------------------------------------------------------
+-- The panel ----------------------------------------------------------------------------------
 
 local coords -- Blizzard's panel, once found
-local background -- ours, a child of it drawn under its rows
+local panel, driver -- ours
 
 -- Blizzard's coordinates panel: the map's overlay frame with a cursor row and a player row. It
 -- has no name, so it's found by its parts.
-local function findPanel()
+local function findCoords()
     for _, frame in ipairs(WorldMapFrame.overlayFrames or {}) do
         if frame.CursorCoords and frame.PlayerCoords then
             return frame
@@ -63,9 +64,11 @@ local function findPanel()
     end
 end
 
--- A tooltip's look, like Zone Info's panel. Probe: the template is Mainline's; without it, the
--- plain backdrop template and its tooltip backdrop.
-local function newBackground(parent)
+-- A tooltip's look, like Zone Info's panel, on the map's scroll container over its pins.
+-- Blizzard's own panel sits under the map art's level, so a background behind its text doesn't
+-- show; this shows the same text on a frame of our own instead. Probe: the template is
+-- Mainline's; without it, the plain backdrop template and its tooltip backdrop.
+local function newPanel(parent)
     local hasTemplate = C_XMLUtil and C_XMLUtil.GetTemplateInfo
         and C_XMLUtil.GetTemplateInfo("TooltipBackdropTemplate")
     local frame = CreateFrame("Frame", nil, parent,
@@ -74,31 +77,51 @@ local function newBackground(parent)
         frame:SetBackdrop(BACKDROP_TOOLTIP_16_16_5555)
         frame:SetBackdropColor(0, 0, 0, 0.8)
     end
-    -- On the panel's own level, so its rows (one level up) draw over it.
-    frame:SetFrameLevel(parent:GetFrameLevel())
+    frame:SetFrameLevel(parent:GetFrameLevel() + 2000)
+    frame:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", LEFT, BOTTOM)
+    frame.lines = {}
+    for i = 1, 2 do
+        local line = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        line:SetJustifyH("LEFT")
+        frame.lines[i] = line
+    end
     frame:Hide()
     return frame
 end
 
--- Fits the background around the rows Blizzard shows now, or hides it when there are none.
-local function fit()
-    local width, top, bottom = 0, nil, nil
-    for _, row in ipairs({ coords.CursorCoords, coords.PlayerCoords }) do
+-- How wide a line is. Probe: GetUnboundedStringWidth is Mainline's.
+local function textWidth(text)
+    return text.GetUnboundedStringWidth and text:GetUnboundedStringWidth() or text:GetStringWidth()
+end
+
+-- Copies the rows Blizzard shows now (cursor, then player) into ours: its text already has the
+-- tenths setting and, off the player's map, the player's zone.
+local function update()
+    local width, height, above = 0, PADDING * 2 - GAP, nil
+    for i, row in ipairs({ coords.CursorCoords, coords.PlayerCoords }) do
+        local line = panel.lines[i]
         if row:IsShown() then
-            width = max(width, row.Label:GetStringWidth())
-            top = top or row
-            bottom = row
+            line:SetText(row.Label:GetText())
+            line:ClearAllPoints()
+            if above then
+                line:SetPoint("TOPLEFT", above, "BOTTOMLEFT", 0, -GAP)
+            else
+                line:SetPoint("TOPLEFT", PADDING, -PADDING)
+            end
+            line:Show()
+            width = max(width, textWidth(line))
+            height = height + GAP + line:GetStringHeight()
+            above = line
+        else
+            line:Hide()
         end
     end
-    if not (module.db.background and top) then
-        background:Hide()
+    if not above then
+        panel:Hide()
         return
     end
-    background:ClearAllPoints()
-    background:SetPoint("TOPLEFT", top, "TOPLEFT", -PAD_X, PAD_Y)
-    background:SetPoint("BOTTOM", bottom, "BOTTOM", 0, -PAD_Y)
-    background:SetWidth(ceil(width / STEP) * STEP + PAD_X * 2)
-    background:Show()
+    panel:SetSize(width + PADDING * 2, height)
+    panel:Show()
 end
 
 local elapsed = 0
@@ -106,28 +129,43 @@ local function onUpdate(_, delta)
     elapsed = elapsed + delta
     if elapsed >= THROTTLE then
         elapsed = 0
-        fit()
+        update()
+    end
+end
+
+-- Our panel in place of Blizzard's, or Blizzard's as it comes. Its own text is only faded out, so
+-- it keeps updating for ours to copy.
+local function restyle()
+    local on = module.enabled and module.db.panel
+    coords:SetAlpha(on and 0 or 1)
+    driver:SetShown(on)
+    if on then
+        update()
+    else
+        panel:Hide()
     end
 end
 
 local waiting
 
--- Adds the background to Blizzard's panel, once the map has loaded. Its driver is the panel's
--- child, so it stops while the map is closed.
+-- Makes our panel on the world map, once the map has loaded. The driver is the scroll
+-- container's child, so it stops while the map is closed.
 local function attach()
     if waiting then
         ns.Off("ADDON_LOADED", waiting)
         waiting = nil
     end
-    if not background then
-        coords = findPanel()
+    if not panel then
+        coords = findCoords()
         if not coords then
             return -- a client without Blizzard's panel; the settings still apply
         end
-        background = newBackground(coords)
+        local parent = WorldMapFrame.ScrollContainer or WorldMapFrame
+        panel = newPanel(parent)
+        driver = CreateFrame("Frame", nil, parent)
+        driver:SetScript("OnUpdate", onUpdate)
     end
-    background:SetScript("OnUpdate", onUpdate)
-    fit()
+    restyle()
 end
 
 local function mapLoaded()
@@ -156,9 +194,8 @@ function module:OnDisable()
         ns.Off("ADDON_LOADED", waiting)
         waiting = nil
     end
-    if background then
-        background:SetScript("OnUpdate", nil)
-        background:Hide()
+    if panel then
+        restyle()
     end
 end
 
@@ -167,7 +204,7 @@ function module:OnOptionChanged(key)
         return
     elseif CVARS[key] then
         applyCVar(key)
-    elseif background then
-        fit()
+    elseif panel then
+        restyle()
     end
 end

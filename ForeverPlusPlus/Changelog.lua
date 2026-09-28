@@ -25,8 +25,8 @@ ns.changelog = {
                 { L.UNEXPLORED_TITLE, "Shows the parts of zone maps you haven't explored yet. "
                     .. "Includes the tint's color and strength, or no tint. Off by default." },
                 { L.COORDS_TITLE, "Your coordinates and the cursor's on the world map, from "
-                    .. "the game's own coordinates, with a toggle each and a background behind "
-                    .. "them. Off by default." },
+                    .. "the game's own coordinates, with a toggle each, in a dark panel like Zone "
+                    .. "Info's. Off by default." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.CLASSCOLORS_TITLE, "Hostile NPCs' health bars are red, neutral ones yellow, "
