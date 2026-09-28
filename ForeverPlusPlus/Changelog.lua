@@ -16,8 +16,8 @@ ns.changelog = {
                 { L.POI_TITLE, "Dungeons, raids, capitals, flight masters, boats, zeppelins, "
                     .. "and spirit healers on the world map, in a new Map category. Includes an "
                     .. "icon size and continent map toggle for each, capitals in place of "
-                    .. "Blizzard's city icons, and graying out flight masters you haven't "
-                    .. "learned." },
+                    .. "Blizzard's city icons, and learned flight masters in the minimap's "
+                    .. "white." },
                 { L.ZONEINFO_TITLE, "A panel in a corner of the world map with the zone's level "
                     .. "range, who holds it, its dungeons, fishing skill, and the herbs, ore, and "
                     .. "skinning in it for your professions. Includes a size slider, and for herbs, ore, and skinning a "

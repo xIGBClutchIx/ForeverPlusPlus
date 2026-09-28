@@ -9,6 +9,7 @@ local ipairs, pairs, format, rawget, unpack, abs = ipairs, pairs, string.format,
     math.abs
 local select, type = select, type
 local C_Map, C_EncounterJournal, C_TaxiMap, Enum = C_Map, C_EncounterJournal, C_TaxiMap, Enum
+local UnitName, GetRealmName = UnitName, GetRealmName
 
 local L = ns.L
 
@@ -37,6 +38,8 @@ local module = ns.NewModule("PointsOfInterest", L.POI_DESC, {
     spiritSize = 70,
     spiritHealersWorld = false,
     otherFaction = false, -- also the other faction's flight masters, boats, and zeppelins
+    -- Flight points seen learned at a flight master, by character. Data, not a setting.
+    known = {},
 })
 module.title = L.POI_TITLE
 module.category = "map"
@@ -102,20 +105,20 @@ for _, kindInfo in pairs(KINDS) do
     kindInfo.world = kindInfo.show .. "World" -- the kind's On Continent Maps checkbox
 end
 
--- The flight master icon in each faction's color.
+-- A flight master not learned yet (or not known to be): the flight point icon in its faction's
+-- color, which on Forever is bronze.
 local TAXI = { A = "TaxiNode_Alliance", H = "TaxiNode_Horde", N = "TaxiNode_Neutral" }
 
 local GRAY = ns.Colors.Code(unpack(ns.Colors.GRAY))
 
--- Blizzard's gray icon for a flight point not learned yet, or nil without it (the faction's icon
--- is then shown grayed out). In Retail's atlas list; Unverified on Forever.
-local unlearned
-local function unlearnedAtlas()
-    if unlearned == nil then
-        unlearned = ns.MapPins.Atlas("TaxiNode_Undiscovered", "") ~= "" and "TaxiNode_Undiscovered"
-            or false
+-- A learned one: the white flight master icon the minimap shows, or the faction's icon without
+-- it. In Retail's atlas list; Unverified on Forever.
+local learnedIcon
+local function learnedAtlas(faction)
+    if learnedIcon == nil then
+        learnedIcon = ns.MapPins.Atlas("FlightMaster", "") ~= "" and "FlightMaster" or false
     end
-    return unlearned or nil
+    return learnedIcon or TAXI[faction]
 end
 
 local function atlasOf(kindInfo)
@@ -189,9 +192,52 @@ local function readTaxiNodes(mapID)
         and C_TaxiMap.GetTaxiNodesForMap(mapID) or {}
 end
 
+-- The flight points this character has seen as learned at a flight master, by name ("The
+-- Sepulcher"), saved per character. The map list above may not have them on Forever, so this is
+-- the other way to know.
+local function characterKey()
+    return format("%s-%s", UnitName("player") or "", GetRealmName() or "")
+end
+
+local function seenLearned()
+    local known = module.db.known
+    local key = characterKey()
+    known[key] = known[key] or {}
+    return known[key]
+end
+
+-- The part of a flight point's name before the zone ("The Sepulcher, Silverpine Forest").
+local function shortName(name)
+    return (name:match("^([^,]+)") or name)
+end
+
+-- At a flight master, remembers which of the flight points it lists are learned. Probe: the
+-- classic TaxiNodeName / TaxiNodeGetType list, or Mainline's C_TaxiMap.GetAllTaxiNodes.
+local function rememberLearned()
+    local seen = seenLearned()
+    if NumTaxiNodes and TaxiNodeName and TaxiNodeGetType then
+        for i = 1, NumTaxiNodes() do
+            local kind, name = TaxiNodeGetType(i), TaxiNodeName(i)
+            if name and (kind == "CURRENT" or kind == "REACHABLE") then
+                seen[shortName(name)] = true
+            end
+        end
+    elseif C_TaxiMap and C_TaxiMap.GetAllTaxiNodes and GetTaxiMapID and Enum.FlightPathState then
+        local mapID = GetTaxiMapID()
+        for _, node in ipairs(mapID and C_TaxiMap.GetAllTaxiNodes(mapID) or {}) do
+            if node.state ~= Enum.FlightPathState.Unreachable then
+                seen[shortName(node.name)] = true
+            end
+        end
+    end
+end
+
 -- Whether the character has learned the flight master at this point: true, false, or nil when
--- the game doesn't say.
+-- neither the game's map list nor a flight master visit says.
 local function learned(point)
+    if seenLearned()[place(point[5])] then
+        return true
+    end
     for _, node in ipairs(taxiNodes) do
         local x, y = node.position:GetXY()
         if abs(x * 100 - point[2]) < NEAR and abs(y * 100 - point[3]) < NEAR then
@@ -232,15 +278,17 @@ local function pinFor(point, mapID, world)
         if not forPlayer(point[4]) then
             return nil
         end
-        info.atlas = TAXI[point[4]]
         info.title = place(point[5])
         info.lines = { L.POI_FLIGHT_MASTER, zoneName(mapID) }
-        -- One not learned yet is gray, like Blizzard's undiscovered flight points.
-        if learned(point) == false then
-            local gray = unlearnedAtlas()
-            info.atlas = gray or info.atlas
-            info.desaturated = not gray
-            info.lines[#info.lines + 1] = GRAY .. L.POI_FLIGHT_UNLEARNED .. "|r"
+        -- Learned ones look like the minimap's; the rest keep the bronze flight point icon.
+        local state = learned(point)
+        if state then
+            info.atlas = learnedAtlas(point[4])
+        else
+            info.atlas = TAXI[point[4]]
+            if state == false then
+                info.lines[#info.lines + 1] = GRAY .. L.POI_FLIGHT_UNLEARNED .. "|r"
+            end
         end
     elseif kindName == "ship" or kindName == "zeppelin" then
         if not forPlayer(point[4]) then
@@ -472,7 +520,8 @@ function module:OnEnable()
         ns.MapPins.OnAcquire(onAcquire)
     end
     ns.MapPins.RefreshMap() -- hide Blizzard's city icons already on it
-    -- A flight master's map, where a new flight point is learned.
+    -- A flight master's map: which flight points are learned, and new ones learned there.
+    self:On("TAXIMAP_OPENED", rememberLearned)
     self:On("TAXIMAP_CLOSED", function() layer:Refresh() end)
 end
 
