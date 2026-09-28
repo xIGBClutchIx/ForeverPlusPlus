@@ -2,6 +2,12 @@
 
 What changed in each release of Forever++. The same notes show in game under Settings > AddOns > Forever++ > Changelog, from [`ForeverPlusPlus/Changelog.lua`](ForeverPlusPlus/Changelog.lua); change both together.
 
+## Unreleased
+
+### Fixed
+
+- **Player Nameplates**: no more "action blocked" error at login. Recent allies turn light blue once the game has loaded the list, such as after you open the Recent Allies tab.
+
 ## 0.3.0 (2026-09-28)
 
 ### Added

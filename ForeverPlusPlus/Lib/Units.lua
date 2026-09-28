@@ -36,22 +36,15 @@ function Units.IsFriend(unit)
         and C_BattleNet.GetAccountInfoByGUID(guid) ~= nil or false
 end
 
--- Fire when the recent allies list loads or changes.
+-- Fire when the recent allies list loads or changes. We can't ask for the list ourselves:
+-- TryRequestRecentAlliesData is protected on Forever, so we use whatever the client has loaded
+-- (it loads when the Recent Allies tab opens) and recolor when these fire.
 Units.RECENT_ALLY_EVENTS = { "RECENT_ALLIES_CACHE_UPDATE", "RECENT_ALLIES_DATA_READY" }
 
 ---Whether the recent allies list is on this client. Call before listening to RECENT_ALLY_EVENTS.
 ---@return boolean
 function Units.HasRecentAllies()
     return C_RecentAllies and C_RecentAllies.IsRecentAllyByGUID and true or false
-end
-
----Asks the server for the recent allies list if the client doesn't have it yet. Blizzard does this
----when the Recent Allies tab opens; RECENT_ALLY_EVENTS fire when it arrives.
-function Units.RequestRecentAllies()
-    if C_RecentAllies and C_RecentAllies.IsRecentAllyDataReady and C_RecentAllies.TryRequestRecentAlliesData
-        and not C_RecentAllies.IsRecentAllyDataReady() then
-        C_RecentAllies.TryRequestRecentAlliesData()
-    end
 end
 
 ---Whether the unit is on the player's Recent Allies list (players they've recently grouped or

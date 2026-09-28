@@ -155,9 +155,6 @@ function module:OnEnable()
         for _, event in ipairs(Units.RECENT_ALLY_EVENTS) do
             self:On(event, onRecentAllies)
         end
-        if self.db.recentAllies then
-            Units.RequestRecentAllies()
-        end
     end
 end
 
@@ -167,9 +164,6 @@ end
 
 function module:OnOptionChanged(key)
     if self.enabled then
-        if key == "recentAllies" and self.db.recentAllies then
-            Units.RequestRecentAllies()
-        end
         plates:Refresh()
     end
 end

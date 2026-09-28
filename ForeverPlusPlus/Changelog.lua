@@ -10,6 +10,16 @@ local L = ns.L
 
 ns.changelog = {
     {
+        version = L.CHANGELOG_UNRELEASED,
+        sections = {
+            { L.CHANGELOG_FIXED, {
+                { L.PLAYERPLATES_TITLE, "No more \"action blocked\" error at login. Recent "
+                    .. "allies turn light blue once the game has loaded the list, such as after "
+                    .. "you open the Recent Allies tab." },
+            } },
+        },
+    },
+    {
         version = "0.3.0",
         date = "2026-09-28",
         sections = {
