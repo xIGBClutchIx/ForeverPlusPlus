@@ -33,6 +33,7 @@ internal.instances = {
     gnomeregan = { 90, "Gnomeregan", 29, 38 },
     -- Forever's. Its instance ID isn't known yet, so the name is the English one.
     hallOfThanes = { nil, "The Hall of Thanes", 13, 18 },
+    ruinsOfLordaeron = { nil, "Ruins of Lordaeron", 15, 20 },
     maraudon = { 349, "Maraudon", 46, 55 },
     mc = { 409, "Molten Core", 60, 60 },
     naxxramas = { 533, "Naxxramas", 60, 60 },
@@ -51,6 +52,14 @@ internal.instances = {
     wailing = { 43, "Wailing Caverns", 17, 24 },
     zulfarrak = { 209, "Zul'Farrak", 44, 54 },
     zulgurub = { 309, "Zul'Gurub", 60, 60 },
+}
+
+-- Cities whose dungeons also show on the zone around them, placed by the game's map layout.
+internal.cities = {
+    [1411] = { 1454 }, -- Durotar: Orgrimmar
+    [1420] = { 1458 }, -- Tirisfal Glades: Undercity
+    [1426] = { 1455 }, -- Dun Morogh: Ironforge
+    [1429] = { 1453 }, -- Elwynn Forest: Stormwind City
 }
 
 internal.points = {
@@ -197,6 +206,11 @@ internal.points = {
         { "flight", 55.5, 47.8, "A", "The Great Forge" },
     },
     [1458] = { -- Undercity
+        -- The Undercity map takes in the keep's courtyard above it (the blank top of the map).
+        -- The entrance is on the courtyard's east side; guides give /way 71.6 11.4, which is
+        -- this map, where the player stands there, though they call it Tirisfal. Not checked in
+        -- game.
+        { "dungeon", 71.6, 11.4, "ruinsOfLordaeron" },
         { "flight", 63.3, 48.5, "H", "Trade Quarter" },
         { "spirit", 67.9, 14.0 },
     },

@@ -242,6 +242,25 @@ local function fill(mapID, add)
             add(point[2] / 100, point[3] / 100, info)
         end
     end
+    -- A city's dungeons on the zone around it, where the city sits on that zone's map. Probe:
+    -- GetMapRectOnMap returns nothing when the city isn't on it.
+    for _, city in ipairs(internal.cities[mapID] or {}) do
+        local minX, maxX, minY, maxY
+        if C_Map and C_Map.GetMapRectOnMap then
+            minX, maxX, minY, maxY = C_Map.GetMapRectOnMap(city, mapID)
+        end
+        if minX then
+            for _, point in ipairs(internal.points[city] or {}) do
+                local info = (point[1] == "dungeon" or point[1] == "raid") and pinFor(point, city)
+                if info then
+                    local x = minX + (maxX - minX) * point[2] / 100
+                    local y = minY + (maxY - minY) * point[3] / 100
+                    listed[#listed + 1] = { point[1], x * 100, y * 100 }
+                    add(x, y, info)
+                end
+            end
+        end
+    end
     gameEntrances(mapID, listed, add)
 end
 
