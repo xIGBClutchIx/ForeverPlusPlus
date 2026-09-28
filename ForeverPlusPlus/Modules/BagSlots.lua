@@ -1,6 +1,6 @@
 -- Bag Slot Counter: how many bag slots are free, as a number on the bag buttons beside the micro
--- menu, like an item's stack count. Either each bag's own count on its button or the total on the
--- backpack. Special bags (quivers, ammo pouches, soul bags, herb bags), whose slots only take some
+-- menu, like an item's stack count. Either the total on the backpack or each bag's own count on its
+-- button. Special bags (quivers, ammo pouches, soul bags, herb bags), whose slots only take some
 -- items, can be left out. The reagent bag has its own setting: its own count, added to the
 -- backpack's count, or nothing. The text's size and corner are options.
 local _, ns = ...
@@ -12,7 +12,7 @@ local L = ns.L
 
 local module = ns.NewModule("BagSlots", L.BAGSLOTS_DESC, {
     enabled = true,
-    show = "each", -- "each": every bag its own; "backpack": the total on the backpack
+    show = "backpack", -- "backpack": the total on the backpack; "each": every bag its own
     special = true, -- count bags whose slots only take some items
     reagent = "own", -- the reagent bag: "own" count on its button, in the backpack's "total", or "off"
     size = "large", -- a key of SIZES
@@ -26,8 +26,8 @@ module.options = {
         key = "show", name = L.BAGSLOTS_SHOW, description = L.BAGSLOTS_SHOW_DESC,
         section = L.BAGSLOTS_SECTION_COUNT,
         choices = {
-            { "each", L.BAGSLOTS_SHOW_EACH },
             { "backpack", L.BAGSLOTS_SHOW_BACKPACK },
+            { "each", L.BAGSLOTS_SHOW_EACH },
         },
     },
     {

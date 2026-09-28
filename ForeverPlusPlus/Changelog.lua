@@ -10,6 +10,15 @@ local L = ns.L
 
 ns.changelog = {
     {
+        version = L.CHANGELOG_UNRELEASED,
+        sections = {
+            { L.CHANGELOG_CHANGED, {
+                { L.BAGSLOTS_TITLE, "Adds up every bag on the backpack button by default, with "
+                    .. "the reagent bag still on its own button. Per Bag is still a choice." },
+            } },
+        },
+    },
+    {
         version = "0.2.0",
         date = "2026-09-27",
         sections = {

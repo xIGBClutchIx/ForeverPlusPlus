@@ -2,6 +2,12 @@
 
 What changed in each release of Forever++. The same notes show in game under Settings > AddOns > Forever++ > Changelog, from [`ForeverPlusPlus/Changelog.lua`](ForeverPlusPlus/Changelog.lua); change both together.
 
+## Unreleased
+
+### Changed
+
+- **Bag Slot Counter**: adds up every bag on the backpack button by default, with the reagent bag still on its own button. Per Bag is still a choice.
+
 ## 0.2.0 (2026-09-27)
 
 ### Added
