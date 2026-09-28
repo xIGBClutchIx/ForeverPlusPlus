@@ -44,11 +44,11 @@ module.internal = {}
 local internal = module.internal
 
 local MAP_ADDON = "Blizzard_WorldMap"
-local MAX_WIDTH = 340 -- the widest the text gets; longer lines wrap
-local PADDING = 10
-local GAP = 4 -- between rows
+local MAX_WIDTH = 300 -- the widest the text gets; longer lines wrap
+local PADDING = 8
+local GAP = 3 -- between rows
 local ROWS = 3
-local ICON_SIZE = 22 -- pixels
+local ICON_SIZE = 16 -- pixels
 local THROTTLE = 0.1 -- seconds between looks at where the cursor is
 
 local function colored(color, text)
@@ -229,7 +229,7 @@ local function newPanel(parent)
     end
     -- Over the map's pins, which sit on the canvas inside the same container.
     frame:SetFrameLevel(parent:GetFrameLevel() + 2000)
-    frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     frame.title:SetPoint("TOPLEFT", PADDING, -PADDING)
     frame.title:SetJustifyH("LEFT")
     frame.rows = {}
