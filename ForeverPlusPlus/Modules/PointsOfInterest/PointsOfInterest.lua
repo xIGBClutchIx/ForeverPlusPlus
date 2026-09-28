@@ -239,17 +239,18 @@ local function learned(point)
     if seenLearned()[name] then
         return true
     end
-    -- By name first ("The Sepulcher, Silverpine Forest"), then by place: on Forever the list for
-    -- one zone holds the whole continent's flight points (36 for Silverpine).
+    -- The game's map list can only say one isn't learned: on Forever (2026-09-28) it lists the
+    -- whole continent for a zone (36 for Silverpine) and calls ones never visited discovered.
+    -- By name first ("The Sepulcher, Silverpine Forest"), then by place.
     for _, node in ipairs(taxiNodes) do
         if node.name and shortName(node.name) == name then
-            return not node.isUndiscovered
+            return node.isUndiscovered and false or nil
         end
     end
     for _, node in ipairs(taxiNodes) do
         local x, y = node.position:GetXY()
         if abs(x * 100 - point[2]) < NEAR and abs(y * 100 - point[3]) < NEAR then
-            return not node.isUndiscovered
+            return node.isUndiscovered and false or nil
         end
     end
 end
