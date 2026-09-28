@@ -277,8 +277,8 @@ local function canSkin(unit)
     return yes(UnitIsDead(unit)) or yes(UnitCanAttack("player", unit))
 end
 
-local function onUnit(tooltip, data)
-    if not (module.enabled and module.db.skinning and data and tooltip.GetUnit) then
+local function addSkinLine(tooltip)
+    if not (module.enabled and module.db.skinning and tooltip.GetUnit) then
         return
     end
     local _, unit = tooltip:GetUnit()
@@ -292,6 +292,29 @@ local function onUnit(tooltip, data)
     local line, color = skillLine(SKIN, Professions.SkinningNeed(level), L.GATHERTOOLTIPS_REQUIRES)
     if line then
         addLine(tooltip, line, color)
+    end
+end
+
+-- The line goes under the name and level, before the quest lines: it's added just before the
+-- first quest line is drawn, or at the end when there's none.
+local unitPending = setmetatable({}, { __mode = "k" }) -- tooltip -> true until the line is added
+
+local function onUnitPre(tooltip)
+    unitPending[tooltip] = true
+end
+
+local function onQuestLinePre(tooltip)
+    if unitPending[tooltip] then
+        unitPending[tooltip] = nil
+        addSkinLine(tooltip)
+    end
+end
+
+local function onUnit(tooltip, data)
+    local waiting = unitPending[tooltip]
+    unitPending[tooltip] = nil
+    if data and (waiting or not TooltipDataProcessor.AddTooltipPreCall) then
+        addSkinLine(tooltip)
     end
 end
 
@@ -334,7 +357,19 @@ function module:OnEnable()
     if TooltipDataProcessor.AllTypes and TooltipDataProcessor.AddLinePostCall then
         TooltipDataProcessor.AddLinePostCall(TooltipDataProcessor.AllTypes, onLinePost)
     end
+    if TooltipDataProcessor.AddTooltipPreCall then
+        TooltipDataProcessor.AddTooltipPreCall(types.Unit, onUnitPre)
+    end
     TooltipDataProcessor.AddTooltipPostCall(types.Unit, onUnit)
+    -- Probe: quest line types and line pre calls are Mainline's.
+    local lineTypes = Enum.TooltipDataLineType
+    if lineTypes and TooltipDataProcessor.AddLinePreCall then
+        for _, key in ipairs({ "QuestTitle", "QuestObjective", "QuestPlayer" }) do
+            if lineTypes[key] then
+                TooltipDataProcessor.AddLinePreCall(lineTypes[key], onQuestLinePre)
+            end
+        end
+    end
     ItemTooltip.OnInfo(onItem)
 end
 
