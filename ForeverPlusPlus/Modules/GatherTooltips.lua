@@ -9,7 +9,8 @@
 -- Node names are matched in English; another language needs its own names in NODES.
 local _, ns = ...
 
-local type, gsub, gmatch, match = type, string.gsub, string.gmatch, string.match
+local type, ipairs, setmetatable = type, ipairs, setmetatable
+local gsub, gmatch, match = string.gsub, string.gmatch, string.match
 local format = string.format
 local TooltipDataProcessor, Enum = TooltipDataProcessor, Enum
 local UnitIsPlayer, UnitPlayerControlled, UnitCreatureType = UnitIsPlayer, UnitPlayerControlled, UnitCreatureType
@@ -197,8 +198,8 @@ end
 
 -- A herb or vein under the mouse, or a minimap pin: one name, or several on separate lines
 -- when pins overlap. Each known one gets its line, with its name when there are several.
-local function onObject(tooltip, data)
-    if not (module.enabled and data and readable(data.lines) and type(data.lines) == "table") then
+local function addNodeLines(tooltip, data)
+    if not (module.enabled and readable(data.lines) and type(data.lines) == "table") then
         return
     end
     local first = data.lines[1]
@@ -223,6 +224,32 @@ local function onObject(tooltip, data)
         if line then
             addLine(tooltip, count > 1 and format(L.GATHERTOOLTIPS_NAMED, name, line) or line, color)
         end
+    end
+end
+
+-- The lines go right under the name, before quest objectives and anything else Blizzard adds:
+-- the tooltip's data is kept from its pre call, and they're added once its first line is drawn.
+-- Without line calls they go at the end, from the post call.
+local pending = setmetatable({}, { __mode = "k" }) -- tooltip -> object data not yet handled
+
+local function onObjectPre(tooltip, data)
+    pending[tooltip] = data
+end
+
+local function onLinePost(tooltip, lineData)
+    local data = pending[tooltip]
+    local lines = data and data.lines
+    if lines and readable(lines) and type(lines) == "table" and lines[1] == lineData then
+        pending[tooltip] = nil
+        addNodeLines(tooltip, data)
+    end
+end
+
+local function onObject(tooltip, data)
+    local waiting = pending[tooltip]
+    pending[tooltip] = nil
+    if data and (waiting or not TooltipDataProcessor.AddTooltipPreCall) then
+        addNodeLines(tooltip, data)
     end
 end
 
@@ -293,12 +320,19 @@ function module:OnEnable()
     end
     hooked = true
     local types = Enum.TooltipDataType
-    if types.Object then
-        TooltipDataProcessor.AddTooltipPostCall(types.Object, onObject)
-    end
     -- Probe: MinimapMouseover is Mainline's type for minimap pins.
-    if types.MinimapMouseover then
-        TooltipDataProcessor.AddTooltipPostCall(types.MinimapMouseover, onObject)
+    for _, key in ipairs({ "Object", "MinimapMouseover" }) do
+        local kind = types[key]
+        if kind and TooltipDataProcessor.AddTooltipPreCall then
+            TooltipDataProcessor.AddTooltipPreCall(kind, onObjectPre)
+        end
+        if kind then
+            TooltipDataProcessor.AddTooltipPostCall(kind, onObject)
+        end
+    end
+    -- Probe: AllTypes (every line type) and line calls are Mainline's.
+    if TooltipDataProcessor.AllTypes and TooltipDataProcessor.AddLinePostCall then
+        TooltipDataProcessor.AddLinePostCall(TooltipDataProcessor.AllTypes, onLinePost)
     end
     TooltipDataProcessor.AddTooltipPostCall(types.Unit, onUnit)
     ItemTooltip.OnInfo(onItem)
