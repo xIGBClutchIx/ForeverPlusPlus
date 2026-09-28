@@ -316,7 +316,8 @@ local function addOption(category, layout, module, option, parent, shown, added)
     local requires = option.requires and added[option.requires]
     if requires and initializer and initializer.SetParentInitializer then
         initializer:SetParentInitializer(requires, function()
-            return module.db.enabled and module.db[option.requires]
+            local value = module.db[option.requires]
+            return module.db.enabled and value and value ~= "off" -- a checkbox, or a dropdown
         end)
         nested[module.name] = true
     else

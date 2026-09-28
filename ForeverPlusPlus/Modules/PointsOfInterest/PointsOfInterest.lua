@@ -7,6 +7,7 @@ local _, ns = ...
 
 local ipairs, pairs, format, rawget, unpack, abs = ipairs, pairs, string.format, rawget, unpack,
     math.abs
+local select, type = select, type
 local C_Map, C_EncounterJournal, C_TaxiMap, UnitFactionGroup, UnitLevel =
     C_Map, C_EncounterJournal, C_TaxiMap, UnitFactionGroup, UnitLevel
 local GetRealZoneText, GetQuestDifficultyColor = GetRealZoneText, GetQuestDifficultyColor
@@ -23,7 +24,7 @@ local module = ns.NewModule("PointsOfInterest", L.POI_DESC, {
     raids = true,
     raidSize = 80,
     raidsWorld = true,
-    capitals = true,
+    capitals = "ours", -- "ours" (and Blizzard's city icons hidden), "blizzard", or "off"
     capitalSize = 50,
     capitalsWorld = true,
     flightMasters = true,
@@ -62,7 +63,15 @@ module.options = {}
 for _, rows in ipairs({
     { kind("dungeons", "dungeonSize", L.POI_DUNGEONS, L.POI_DUNGEONS_DESC) },
     { kind("raids", "raidSize", L.POI_RAIDS, L.POI_RAIDS_DESC) },
-    { kind("capitals", "capitalSize", L.POI_CAPITALS, L.POI_CAPITALS_DESC) },
+    -- Ours, Blizzard's, or none: ours hide Blizzard's city icons, so there's no checkbox.
+    { {
+        key = "capitals", name = L.POI_CAPITALS, description = L.POI_CAPITALS_DESC,
+        choices = {
+            { "ours", L.POI_CAPITALS_OURS },
+            { "blizzard", L.POI_CAPITALS_BLIZZARD },
+            { "off", L.POI_CAPITALS_OFF },
+        },
+    }, select(2, kind("capitals", "capitalSize")) },
     { kind("flightMasters", "flightSize", L.POI_FLIGHT, L.POI_FLIGHT_DESC) },
     { kind("ships", "shipSize", L.POI_SHIPS, L.POI_SHIPS_DESC) },
     { kind("zeppelins", "zeppelinSize", L.POI_ZEPPELINS, L.POI_ZEPPELINS_DESC) },
@@ -215,7 +224,8 @@ end
 -- Whether a kind shows, on a continent map (`world`) or a zone map.
 local function shows(kindInfo, world)
     local db = module.db
-    return db[kindInfo.show] and (not world or db[kindInfo.world])
+    local on = db[kindInfo.show]
+    return (on == true or on == "ours") and (not world or db[kindInfo.world])
 end
 
 local FACTION_NAMES = { A = FACTION_ALLIANCE, H = FACTION_HORDE }
@@ -433,21 +443,74 @@ local function fill(mapID, add)
     end
 end
 
+-- Blizzard's city icons -----------------------------------------------------------------------
+-- Blizzard marks the capitals on continent maps with area POIs. With Capital Cities set to Off,
+-- or to ours on continent maps, they're hidden, like Leatrix Maps' Hide Town and City Icons, but
+-- told apart by the city's name instead of the icon's place in its texture.
+
+local cityNames
+
+local function isCity(name)
+    if not cityNames then
+        cityNames = {}
+        for cityMap in pairs(internal.cities) do
+            local cityName = zoneName(cityMap)
+            if cityName ~= "" then
+                cityNames[cityName] = true
+                cityNames[(cityName:gsub(" City$", ""))] = true -- "Stormwind City" as "Stormwind"
+            end
+        end
+    end
+    return cityNames[name] == true
+end
+
+-- After the world map acquires a pin of its own. The pin is hidden, not faded, so its tooltip
+-- goes too; the map shows it again when it reuses the pin.
+local function hidesBlizzard()
+    local db = module.db
+    -- Ours replace them only where ours show: on continents, with On Continent Maps.
+    return module.enabled and (db.capitals == "off" or (db.capitals == "ours" and db.capitalsWorld))
+end
+
+local function onAcquire(map, template, poiInfo)
+    if not hidesBlizzard() or template ~= "AreaPOIPinTemplate" or type(poiInfo) ~= "table"
+        or not isCity(poiInfo.name) then
+        return
+    end
+    for pin in map:EnumeratePinsByTemplate(template) do
+        if pin.poiInfo == poiInfo then
+            pin:Hide()
+        end
+    end
+end
+
 local layer
+local hooked = false
 
 function module:OnEnable()
     layer = layer or ns.MapPins.New(fill)
     layer:Enable()
+    if not hooked then
+        hooked = true
+        ns.MapPins.OnAcquire(onAcquire)
+    end
+    ns.MapPins.RefreshMap() -- hide Blizzard's city icons already on it
     -- A flight master's map, where a new flight point is learned.
     self:On("TAXIMAP_CLOSED", function() layer:Refresh() end)
 end
 
 function module:OnDisable()
     layer:Disable()
+    ns.MapPins.RefreshMap() -- Blizzard's city icons back
 end
 
-function module:OnOptionChanged()
-    if self.enabled then
+function module:OnOptionChanged(key)
+    if not self.enabled then
+        return
+    end
+    if key == "capitals" or key == "capitalsWorld" then
+        ns.MapPins.RefreshMap() -- ours and Blizzard's, both redrawn
+    else
         layer:Refresh()
     end
 end

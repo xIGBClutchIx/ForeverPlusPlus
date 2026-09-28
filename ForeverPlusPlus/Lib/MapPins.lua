@@ -5,7 +5,7 @@
 -- Nothing is made until a layer is enabled.
 local _, ns = ...
 
-local ipairs, select, setmetatable = ipairs, select, setmetatable
+local ipairs, select, setmetatable, hooksecurefunc = ipairs, select, setmetatable, hooksecurefunc
 local CreateFrame, CreateFromMixins = CreateFrame, CreateFromMixins
 local C_AddOns, C_Texture, C_Map, GameTooltip = C_AddOns, C_Texture, C_Map, GameTooltip
 local CreateVector2D = CreateVector2D
@@ -127,6 +127,51 @@ local function place(pin, map)
     pin:ClearAllPoints()
     pin:SetPoint("CENTER", canvas, "TOPLEFT", canvas:GetWidth() * pin.x,
         -canvas:GetHeight() * pin.y)
+end
+
+-- Blizzard's pins ------------------------------------------------------------------------------
+
+local acquireHooks = {} -- functions to call after the world map acquires one of its own pins
+local hooked = false
+
+local function hookAcquire()
+    local map = worldMap()
+    if hooked or not map then
+        return
+    end
+    hooked = true
+    hooksecurefunc(map, "AcquirePin", function(self, template, ...)
+        for _, fn in ipairs(acquireHooks) do
+            fn(self, template, ...)
+        end
+    end)
+end
+
+---Calls `fn(map, template, ...)` after the world map acquires a pin of its own, with what the map
+---was given for it (for Blizzard's POI pins, the poiInfo), once the map has loaded. The hook
+---can't come off, so `fn` checks whether its module is on.
+---@param fn fun(map: table, template: string, ...)
+function MapPins.OnAcquire(fn)
+    acquireHooks[#acquireHooks + 1] = fn
+    if worldMap() then
+        hookAcquire()
+    else
+        local function onLoad(_, name)
+            if name == MAP_ADDON then
+                ns.Off("ADDON_LOADED", onLoad)
+                hookAcquire()
+            end
+        end
+        ns.On("ADDON_LOADED", onLoad)
+    end
+end
+
+---Has the world map redraw everything on it, Blizzard's pins too, if it's open.
+function MapPins.RefreshMap()
+    local map = worldMap()
+    if map and map:IsShown() and map.RefreshAllDataProviders then
+        map:RefreshAllDataProviders()
+    end
 end
 
 -- Layers --------------------------------------------------------------------------------------
