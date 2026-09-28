@@ -8,6 +8,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 - **Player Nameplates**: no more "action blocked" error at login. Recent allies turn light blue once the game has loaded the list, such as after you open the Recent Allies tab.
 - **Auction Prices**: posting works while a scan runs. The scan waits its turn with the server, gives way to the auction house's own searches, pauses while an item is in the sell box, and stops if you search.
+- **Player Nameplates** and **NPC Nameplates**: the guild or title moves under the cast bar the moment it appears, and back only once it has faded, instead of lagging or overlapping it.
 
 ## 0.3.0 (2026-09-28)
 

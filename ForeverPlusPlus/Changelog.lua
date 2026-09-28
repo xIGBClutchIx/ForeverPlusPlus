@@ -20,6 +20,12 @@ ns.changelog = {
                     .. "its turn with the server, gives way to the auction house's own "
                     .. "searches, pauses while an item is in the sell box, and stops if you "
                     .. "search." },
+                { L.PLAYERPLATES_TITLE, "The guild moves under the cast bar the moment it "
+                    .. "appears, and back only once it has faded, instead of lagging or "
+                    .. "overlapping it." },
+                { L.NPCPLATES_TITLE, "The title moves under the cast bar the moment it "
+                    .. "appears, and back only once it has faded, instead of lagging or "
+                    .. "overlapping it." },
             } },
         },
     },

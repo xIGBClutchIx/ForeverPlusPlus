@@ -373,10 +373,10 @@ local function placeSubtitle(label, record, unit, style, shift)
     label.subtitle:SetTextColor(color[1], color[2], color[3])
     label.barSubtitle:SetTextColor(color[1], color[2], color[3])
     label.name:SetPoint("BOTTOM", row, "CENTER", shift, 1)
-    -- While a cast bar is really showing (under the bar), the subtitle moves below it. Only then:
-    -- friendly plates can hide cast bars, and a stale cast left a gap under the name.
+    -- While a cast bar is showing (under the bar), the subtitle moves below it, and back once the
+    -- bar hides. Only then: friendly plates can hide cast bars, which left a gap under the name.
     local castBar = record.castBar
-    if Nameplates.IsCasting(unit) and Nameplates.IsCastBarShown(castBar) then
+    if Nameplates.IsCastBarShown(castBar) then
         -- Centered on the unit like the row, at the cast bar's height.
         local castRow = label.castRow
         castRow:ClearAllPoints()

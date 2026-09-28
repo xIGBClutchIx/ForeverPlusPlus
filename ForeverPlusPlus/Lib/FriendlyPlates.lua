@@ -217,7 +217,7 @@ function Plates:Enable()
     Nameplates.Register(self, {
         OnAdded = self.onAdded,
         OnRemoved = self.onRemoved,
-        OnCast = function(unit) self:Layout(unit) end,
+        OnCastBar = function(unit) self:Layout(unit) end,
     })
 end
 

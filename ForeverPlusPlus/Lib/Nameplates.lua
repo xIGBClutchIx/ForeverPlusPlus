@@ -1,34 +1,30 @@
 -- Shared nameplate plumbing for modules: which nameplates are on screen, the parts of a Forever
--- nameplate by name, and whether a unit is casting. It listens to events only while at least one
--- module has registered, so it costs nothing otherwise.
+-- nameplate by name, and when a plate's cast bar shows or hides. It listens to events only while
+-- at least one module has registered, so it costs nothing otherwise.
 --
 --   ns.Nameplates.Register(owner, {
 --       OnAdded = function(unit, frame) end,   -- a plate appeared (frame = plate.UnitFrame)
 --       OnRemoved = function(unit, frame) end, -- it went away; undo changes, plates are pooled
---       OnCast = function(unit, casting) end,  -- a cast or channel started or ended
+--       OnCastBar = function(unit) end,        -- its cast bar just showed or hid
 --   })
 --
 -- Friendly plates in instances are forbidden to addons and never show up here.
 local _, ns = ...
 
-local pairs, next, type, C_NamePlate = pairs, next, type, C_NamePlate
-local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
+local pairs, next, setmetatable, C_NamePlate = pairs, next, setmetatable, C_NamePlate
 
 local Nameplates = {}
 ns.Nameplates = Nameplates
 
 local users = {} -- owner -> handlers
 local frames = {} -- nameplate unit -> its UnitFrame, while on screen
-local casting = {} -- nameplate unit -> true while casting
 
--- Cast events -> whether the unit is casting afterwards. Only the event is trusted: the cast
--- itself can be secret.
-local CAST_EVENTS = {
-    UNIT_SPELLCAST_START = true,
-    UNIT_SPELLCAST_CHANNEL_START = true,
-    UNIT_SPELLCAST_STOP = false,
-    UNIT_SPELLCAST_CHANNEL_STOP = false,
-}
+-- Blizzard cast bar -> the unit whose plate it's on, while that plate is on screen. The bar's own
+-- OnShow and OnHide say when it's drawn, which cast events don't: our event handler could run
+-- before Blizzard's bar had shown, and a bar stays up after its stop event while it fades out
+-- (and for a moment after an interrupt).
+local barUnits = setmetatable({}, { __mode = "k" })
+local hookedBars = setmetatable({}, { __mode = "k" })
 
 local function dispatch(method, ...)
     for _, handlers in pairs(users) do
@@ -43,31 +39,74 @@ local function frameFor(unit)
     return plate and plate.UnitFrame
 end
 
+-- A cast bar showed or hid. Hooks can't be removed, so this does nothing unless the bar's plate
+-- is one we're tracking.
+local function onBarChanged(bar)
+    local unit = barUnits[bar]
+    if unit and frames[unit] then
+        dispatch("OnCastBar", unit)
+    end
+end
+
+-- The bars are the cast bar container's children (a cast bar and, on some builds, others such as
+-- an empowered one), or the container itself if it has none.
+local function castBarsOf(frame)
+    local container = frame.CastBarsContainer
+    if not container then
+        return nil
+    end
+    local bars = { container:GetChildren() }
+    if #bars == 0 then
+        bars[1] = container
+    end
+    return bars
+end
+
+local function watchCastBars(unit, frame)
+    local bars = castBarsOf(frame)
+    if not bars then
+        return
+    end
+    for i = 1, #bars do
+        local bar = bars[i]
+        barUnits[bar] = unit
+        if not hookedBars[bar] then
+            hookedBars[bar] = true
+            bar:HookScript("OnShow", onBarChanged)
+            bar:HookScript("OnHide", onBarChanged)
+        end
+    end
+end
+
+local function unwatchCastBars(frame)
+    local bars = castBarsOf(frame)
+    if bars then
+        for i = 1, #bars do
+            barUnits[bars[i]] = nil
+        end
+    end
+end
+
 local function onEvent(event, unit)
     if event == "NAME_PLATE_UNIT_ADDED" then
         local frame = frameFor(unit)
-        frames[unit], casting[unit] = frame, nil
+        frames[unit] = frame
         if frame then
+            watchCastBars(unit, frame)
             dispatch("OnAdded", unit, frame)
         end
     elseif event == "NAME_PLATE_UNIT_REMOVED" then
         -- Remembered from when it was added, since the plate may already be gone.
         local frame = frames[unit]
-        frames[unit], casting[unit] = nil, nil
+        frames[unit] = nil
         if frame then
+            unwatchCastBars(frame)
             dispatch("OnRemoved", unit, frame)
         end
-    elseif frames[unit] then
-        local now = CAST_EVENTS[event]
-        casting[unit] = now or nil
-        dispatch("OnCast", unit, now)
     end
 end
 
 local EVENTS = { "NAME_PLATE_UNIT_ADDED", "NAME_PLATE_UNIT_REMOVED" }
-for event in pairs(CAST_EVENTS) do
-    EVENTS[#EVENTS + 1] = event
-end
 
 -- Picks up the plates already on screen.
 local function scan()
@@ -75,13 +114,14 @@ local function scan()
         local unit = plate.namePlateUnitToken or (plate.UnitFrame and plate.UnitFrame.unit)
         if unit and plate.UnitFrame then
             frames[unit] = plate.UnitFrame
+            watchCastBars(unit, plate.UnitFrame)
         end
     end
 end
 
 ---Starts calling `handlers` for nameplate changes, first with OnAdded for every plate on screen.
 ---@param owner any a key for Unregister, usually the module
----@param handlers table OnAdded, OnRemoved, OnCast (all optional)
+---@param handlers table OnAdded, OnRemoved, OnCastBar (all optional)
 function Nameplates.Register(owner, handlers)
     if users[owner] then
         return
@@ -117,7 +157,10 @@ function Nameplates.Unregister(owner)
         for _, event in pairs(EVENTS) do
             ns.Off(event, onEvent)
         end
-        frames, casting = {}, {}
+        for _, frame in pairs(frames) do
+            unwatchCastBars(frame)
+        end
+        frames = {}
     end
 end
 
@@ -129,27 +172,10 @@ function Nameplates.ForEach(fn)
     end
 end
 
----Whether the unit is casting or channeling. A start event is needed, and the cast API has to
----agree, so a stop event that never came (an interrupt, a plate that went away) doesn't leave it
----stuck on. The API's result is only tested for nil, which is safe even when it's secret.
----@param unit string
----@return boolean
-function Nameplates.IsCasting(unit)
-    if not casting[unit] then
-        return false
-    end
-    local cast = UnitCastingInfo and UnitCastingInfo(unit)
-    local channel = UnitChannelInfo and UnitChannelInfo(unit)
-    if type(cast) == "nil" and type(channel) == "nil" then
-        casting[unit] = nil
-        return false
-    end
-    return true
-end
-
----Whether Blizzard is drawing a cast bar on this plate right now. Friendly plates can hide cast
----bars, so casting alone doesn't mean one is there. `castBar` is Parts(frame).castBar, a container
----whose children are the bars; a visibility we can't read counts as hidden.
+---Whether Blizzard is drawing a cast bar on this plate right now, fading out included. Friendly
+---plates can hide cast bars, so casting alone doesn't mean one is there. `castBar` is
+---Parts(frame).castBar, a container whose children are the bars; a visibility we can't read counts
+---as hidden. Right for OnCastBar: the bar that just hid already reads as hidden.
 ---@param castBar table?
 ---@return boolean
 function Nameplates.IsCastBarShown(castBar)
