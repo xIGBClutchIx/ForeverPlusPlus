@@ -8,8 +8,7 @@ local ipairs, tostring, format, concat = ipairs, tostring, string.format, table.
 local min, max, GetLocale = math.min, math.max, GetLocale
 local CreateFrame, C_Map, C_Item, C_XMLUtil = CreateFrame, C_Map, C_Item, C_XMLUtil
 local Enum, UnitLevel, GetQuestDifficultyColor = Enum, UnitLevel, GetQuestDifficultyColor
-local QuestDifficultyColors, UnitFactionGroup = QuestDifficultyColors, UnitFactionGroup
-local FACTION_ALLIANCE, FACTION_HORDE = FACTION_ALLIANCE, FACTION_HORDE
+local QuestDifficultyColors = QuestDifficultyColors
 
 local L = ns.L
 local Professions = ns.Professions
@@ -216,8 +215,6 @@ local TERRITORY = {
     hostile = { r = 1, g = 0.1, b = 0.1 },
     contested = { r = 1, g = 0.7, b = 0 },
 }
-local SIDES = { Alliance = "A", Horde = "H" }
-local FACTION_NAMES = { A = FACTION_ALLIANCE, H = FACTION_HORDE }
 
 -- The zone's territory color and its line ("Horde Territory"), or nil when it isn't known.
 local function territory(zone)
@@ -227,9 +224,8 @@ local function territory(zone)
     elseif side == "C" then
         return TERRITORY.contested, L.ZONEINFO_CONTESTED
     end
-    local mine = SIDES[UnitFactionGroup("player") or ""]
-    local color = side == mine and TERRITORY.friendly or TERRITORY.hostile
-    return color, format(L.ZONEINFO_TERRITORY, FACTION_NAMES[side] or side)
+    local color = side == ns.WorldMap.PlayerSide() and TERRITORY.friendly or TERRITORY.hostile
+    return color, format(L.ZONEINFO_TERRITORY, ns.WorldMap.SideName(side) or side)
 end
 
 -- The zone's dungeons and raids, each with its level range colored like quests.

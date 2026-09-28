@@ -4,7 +4,8 @@
 local _, ns = ...
 
 local ipairs, pairs, next = ipairs, pairs, next
-local C_AddOns = C_AddOns
+local C_AddOns, UnitFactionGroup = C_AddOns, UnitFactionGroup
+local FACTION_ALLIANCE, FACTION_HORDE = FACTION_ALLIANCE, FACTION_HORDE
 
 -- So one module's error doesn't stop the others waiting, as in Core.lua.
 local call = securecallfunction or function(fn, ...)
@@ -63,6 +64,27 @@ function WorldMap.Cancel(fn)
         end
     end
 end
+
+-- Sides -----------------------------------------------------------------------------------------
+-- Map data marks what belongs to a faction with "A" (Alliance) or "H" (Horde).
+
+local SIDES = { Alliance = "A", Horde = "H" }
+local SIDE_NAMES = { A = FACTION_ALLIANCE, H = FACTION_HORDE }
+
+---The player's side, "A" or "H", or nil when the game doesn't say.
+---@return string?
+function WorldMap.PlayerSide()
+    return SIDES[UnitFactionGroup("player") or ""]
+end
+
+---A side's faction name in the player's language ("Horde"), or nil for any other letter.
+---@param side string
+---@return string?
+function WorldMap.SideName(side)
+    return SIDE_NAMES[side]
+end
+
+-- Blizzard's panels ---------------------------------------------------------------------------
 
 local coords -- false once looked for and not there
 

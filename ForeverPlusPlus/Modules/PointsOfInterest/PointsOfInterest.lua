@@ -8,8 +8,7 @@ local _, ns = ...
 local ipairs, pairs, format, rawget, unpack, abs = ipairs, pairs, string.format, rawget, unpack,
     math.abs
 local select, type = select, type
-local C_Map, C_EncounterJournal, C_TaxiMap, UnitFactionGroup, UnitLevel =
-    C_Map, C_EncounterJournal, C_TaxiMap, UnitFactionGroup, UnitLevel
+local C_Map, C_EncounterJournal, C_TaxiMap, UnitLevel = C_Map, C_EncounterJournal, C_TaxiMap, UnitLevel
 local GetQuestDifficultyColor = GetQuestDifficultyColor
 local QuestDifficultyColors, Enum = QuestDifficultyColors, Enum
 
@@ -186,12 +185,9 @@ local function instanceTooltip(kindName, key)
     return place(instance.name), lines
 end
 
-local FACTIONS = { Alliance = "A", Horde = "H" }
-
 -- Whether a travel point of this faction shows for the player.
 local function forPlayer(faction)
-    local mine = FACTIONS[UnitFactionGroup("player") or ""]
-    return faction == "N" or faction == mine or module.db.otherFaction
+    return faction == "N" or faction == ns.WorldMap.PlayerSide() or module.db.otherFaction
 end
 
 -- How close (in percent of the map) a point the game knows is to one in Data.lua for the two to
@@ -225,8 +221,6 @@ local function shows(kindInfo, world)
     return (on == true or on == "ours") and (not world or db[kindInfo.world])
 end
 
-local FACTION_NAMES = { A = FACTION_ALLIANCE, H = FACTION_HORDE }
-
 -- The pin for one point of Data.lua on the map `mapID` it's listed for, or nil when its settings
 -- hide it. `world` when it's being drawn on a continent map.
 local function pinFor(point, mapID, world)
@@ -243,7 +237,7 @@ local function pinFor(point, mapID, world)
         local city = internal.cities[point[4]]
         info.atlas = atlasOf(kindInfo)
         info.title = zoneName(point[4])
-        info.lines = { L.POI_CAPITAL, FACTION_NAMES[city.faction] }
+        info.lines = { L.POI_CAPITAL, ns.WorldMap.SideName(city.faction) }
     elseif kindName == "dungeon" or kindName == "raid" then
         info.atlas = kindInfo.atlas
         info.title, info.lines = instanceTooltip(
