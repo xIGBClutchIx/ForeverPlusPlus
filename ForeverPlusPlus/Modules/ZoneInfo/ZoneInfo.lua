@@ -4,7 +4,8 @@
 -- you have. Ideas from Leatrix Maps' zone levels; none of its code. The zones are in Data.lua.
 local _, ns = ...
 
-local ipairs, tostring, format, concat = ipairs, tostring, string.format, table.concat
+local pairs, ipairs, tostring, format, concat = pairs, ipairs, tostring, string.format, table.concat
+local hooksecurefunc, MAP_AREA_LABEL_TYPE = hooksecurefunc, MAP_AREA_LABEL_TYPE
 local min, max, GetLocale = math.min, math.max, GetLocale
 local CreateFrame, C_Map, C_Item, C_XMLUtil = CreateFrame, C_Map, C_Item, C_XMLUtil
 local Enum, QuestDifficultyColors = Enum, QuestDifficultyColors
@@ -17,6 +18,7 @@ local module = ns.NewModule("ZoneInfo", L.ZONEINFO_DESC, {
     enabled = true,
     corner = "BOTTOMLEFT",
     hover = true, -- on continent maps, the zone under the cursor
+    hideLabel = true, -- and then the map's own zone name at the top, which says the same
     levels = true,
     faction = "name", -- who holds the zone: "off", "name" (the name's color), or "line"
     dungeons = true,
@@ -43,6 +45,10 @@ module.options = {
         min = 70, max = 150, step = 10, format = "%d%%",
     },
     { key = "hover", name = L.ZONEINFO_HOVER, description = L.ZONEINFO_HOVER_DESC },
+    {
+        key = "hideLabel", name = L.ZONEINFO_HIDE_LABEL, description = L.ZONEINFO_HIDE_LABEL_DESC,
+        requires = "hover",
+    },
     { key = "levels", name = L.ZONEINFO_LEVELS, description = L.ZONEINFO_LEVELS_DESC },
     {
         key = "faction", name = L.ZONEINFO_FACTION, description = L.ZONEINFO_FACTION_DESC,
@@ -280,7 +286,7 @@ local function target(map)
     local x, y = map:GetNormalizedCursorPosition()
     local under = x and C_Map.GetMapInfoAtPosition and C_Map.GetMapInfoAtPosition(mapID, x, y)
     if under and under.mapID ~= mapID then
-        return zoneOf(under.mapID)
+        return zoneOf(under.mapID), true
     end
 end
 
@@ -413,6 +419,62 @@ local function draw(mapID)
     panel:Show()
 end
 
+-- Blizzard's zone name ------------------------------------------------------------------------
+-- On a continent map the game names the zone under the cursor at the top of the map, which says
+-- what the panel's title does. While the panel shows that zone, it's faded out (never hidden or
+-- changed), and only while it names just the zone: a pin's name there (a dungeon, a flight
+-- point) stays.
+
+local label -- Blizzard's area label frame, once found
+local labelFaded = false
+local hovered = false -- the panel shows the zone under the cursor on a continent map
+
+-- Whether the label names anything besides the zone: its other label types with a name.
+local function labelHasOther(frame)
+    local byType = frame.labelInfoByType
+    local types = MAP_AREA_LABEL_TYPE
+    if not (byType and types) then
+        return true -- can't tell, so leave it be
+    end
+    for kind, info in pairs(byType) do
+        if kind ~= types.AREA_NAME and info.name then
+            return true
+        end
+    end
+    return false
+end
+
+-- After the label decides what to show, every frame while the map is open. A hook can't be
+-- removed, so it checks whether the module is on.
+local function onLabel(frame)
+    local fade = (module.enabled and module.db.hover and module.db.hideLabel and hovered
+        and not labelHasOther(frame)) and true or false
+    if fade ~= labelFaded then
+        labelFaded = fade
+        frame:SetAlpha(fade and 0 or 1)
+    end
+end
+
+-- The label comes from Blizzard's area label data provider. Probe: its `Label` frame and
+-- `EvaluateLabels` are Mainline's.
+local function hookLabel(map)
+    for provider in pairs(map.dataProviders or {}) do
+        local frame = provider.Label
+        if frame and frame.EvaluateLabels then
+            label = frame
+            hooksecurefunc(frame, "EvaluateLabels", onLabel)
+            return
+        end
+    end
+end
+
+local function unfadeLabel()
+    if label and labelFaded then
+        labelFaded = false
+        label:SetAlpha(1)
+    end
+end
+
 local elapsed = 0
 local function onUpdate(_, delta)
     elapsed = elapsed + delta
@@ -423,7 +485,9 @@ local function onUpdate(_, delta)
     -- Blizzard's coordinates can be turned on, off, or faded out at any time, with no event for
     -- the fading; this only moves the panel when that changed.
     anchor()
-    local mapID = target(WorldMapFrame) or false
+    local mapID, fromCursor = target(WorldMapFrame)
+    hovered = (fromCursor and mapID) and true or false
+    mapID = mapID or false
     if mapID ~= shown then
         draw(mapID or nil)
     end
@@ -442,6 +506,12 @@ local function attach(map)
         panel = newPanel(parent)
         driver = CreateFrame("Frame", nil, parent)
         driver:SetScript("OnUpdate", onUpdate)
+        -- The map closed: the next time it opens starts with its own zone name showing.
+        driver:SetScript("OnHide", function()
+            hovered = false
+            unfadeLabel()
+        end)
+        hookLabel(map)
     end
     anchor()
     redraw()
@@ -458,6 +528,8 @@ end
 
 function module:OnDisable()
     ns.WorldMap.Cancel(attach)
+    hovered = false
+    unfadeLabel()
     if driver then
         driver:Hide()
         panel:Hide()

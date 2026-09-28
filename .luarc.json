@@ -166,6 +166,7 @@
     "GetRealZoneText",
     "BACKDROP_TOOLTIP_16_16_5555",
     "C_MapExplorationInfo",
-    "BattlefieldMapFrame"
+    "BattlefieldMapFrame",
+    "MAP_AREA_LABEL_TYPE"
   ]
 }
