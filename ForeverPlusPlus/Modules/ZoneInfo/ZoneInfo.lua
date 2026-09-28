@@ -59,7 +59,7 @@ end
 
 -- The panel is a title and up to three short rows, each led by its profession's icon:
 --   Silverpine Forest  10-20
---   [fishing] 1    [skinning] 1-100
+--   [fishing] Fishing 1    [skinning] Skinning 1-100
 --   [herbalism] Peacebloom, Silverleaf, Earthroot
 --   [mining] Copper, Tin, Silver
 
@@ -118,13 +118,15 @@ end
 local function skillsRow(zone)
     local db, parts = module.db, {}
     if db.fishing and zone.fish then
-        local rank, _, own = Professions.Rank(Professions.FISHING)
-        parts[#parts + 1] = icon(Professions.FISHING, own) .. range(rank, zone.fish, zone.fishHigh, true)
+        local rank, name, own = Professions.Rank(Professions.FISHING)
+        parts[#parts + 1] = icon(Professions.FISHING, own) .. format(L.ZONEINFO_SKILL,
+            name or L.ZONEINFO_FISHING_NAME, range(rank, zone.fish, zone.fishHigh, true))
     end
-    local rank, _, own = Professions.Rank(Professions.SKINNING)
+    local rank, name, own = Professions.Rank(Professions.SKINNING)
     if db.gathering and rank and zone[1] then
-        parts[#parts + 1] = icon(Professions.SKINNING, own) .. range(rank,
-            Professions.SkinningNeed(zone[1]), Professions.SkinningNeed(zone[2]))
+        parts[#parts + 1] = icon(Professions.SKINNING, own) .. format(L.ZONEINFO_SKILL,
+            name or L.ZONEINFO_SKINNING_NAME, range(rank, Professions.SkinningNeed(zone[1]),
+                Professions.SkinningNeed(zone[2])))
     end
     if #parts > 0 then
         return concat(parts, "    ")

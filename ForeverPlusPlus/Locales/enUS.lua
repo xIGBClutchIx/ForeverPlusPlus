@@ -627,6 +627,9 @@ L.ZONEINFO_GATHERING_DESC = "The herbs and ore in the zone and the Skinning its 
     .. "the professions you have, colored against your skill like Gathering Tooltips."
 L.ZONEINFO_TITLE_LEVELS = "%s  %s" -- zone, its levels ("10-20")
 L.ZONEINFO_RANGE = "%s-%s" -- lowest, highest
+L.ZONEINFO_SKILL = "%s %s" -- profession, skill needed ("Fishing 55")
+L.ZONEINFO_FISHING_NAME = "Fishing" -- until the client gives its own name
+L.ZONEINFO_SKINNING_NAME = "Skinning"
 L.ZONEINFO_LIST_SEPARATOR = ", "
 
 -- UnexploredAreas
