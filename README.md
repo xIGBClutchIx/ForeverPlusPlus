@@ -32,7 +32,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Tooltips | Colors unit and item tooltips by class, reaction, or quality, and adds player titles and who a unit is targeting. |
 | **Map** | |
 | Points of Interest | Shows dungeons, raids, capital cities, flight masters, boats, zeppelins, and spirit healers on the world map, each with its own checkbox, icon size, and whether it also shows on continent maps. Off by default. |
-| Zone Info | Shows a panel in a bottom corner of the world map with the zone's level range colored against yours, the fishing skill it needs, and the herbs, ore, and skinning in it for the professions you have. On a continent map, it's the zone under the cursor. Off by default. |
+| Zone Info | Shows a panel in a bottom corner of the world map with the zone's level range colored against yours, the fishing skill it needs, and the herbs, ore, and skinning in it for the professions you have. On a continent map, it's the zone under the cursor. Each line has its own checkbox, and the panel a size slider. Off by default. |
 | Unexplored Areas | Shows the parts of zone maps you haven't explored yet on the world map and zone map, tinted in a color and strength you choose, or just like explored areas. Off by default. |
 | Coordinates | Shows your coordinates on the left of the world map's title bar and the cursor's on the right, each with its own checkbox, plus tenths and the minimap. It turns on the game's own coordinates, so it matches Settings > Gameplay > Interface. Off by default. |
 | **Unit Frames** | |

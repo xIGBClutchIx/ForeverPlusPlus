@@ -623,9 +623,16 @@ L.ZONEINFO_LEVELS_DESC = "The zone's level range, colored against your level lik
 L.ZONEINFO_FISHING = "Fishing"
 L.ZONEINFO_FISHING_DESC = "The Fishing skill the zone's waters need: red while yours is lower, green once "
     .. "it's enough."
-L.ZONEINFO_GATHERING = "Gathering"
-L.ZONEINFO_GATHERING_DESC = "The herbs and ore in the zone and the Skinning its beasts need, for "
-    .. "the professions you have, colored against your skill like Gathering Tooltips."
+L.ZONEINFO_HERBS = "Herbs"
+L.ZONEINFO_HERBS_DESC = "The herbs in the zone, if you have Herbalism, colored against your skill "
+    .. "like Gathering Tooltips."
+L.ZONEINFO_ORE = "Ore"
+L.ZONEINFO_ORE_DESC = "The ore in the zone, if you have Mining, colored against your skill."
+L.ZONEINFO_SKINNING = "Skinning"
+L.ZONEINFO_SKINNING_DESC = "The Skinning the zone's beasts need, from its level range, if you have "
+    .. "Skinning."
+L.ZONEINFO_SIZE = "Size"
+L.ZONEINFO_SIZE_DESC = "How big the panel is, compared with its normal size."
 L.ZONEINFO_TITLE_LEVELS = "%s  %s" -- zone, its levels ("10-20")
 L.ZONEINFO_RANGE = "%s-%s" -- lowest, highest
 L.ZONEINFO_SKILL = "%s %s" -- profession, skill needed ("Fishing 55")

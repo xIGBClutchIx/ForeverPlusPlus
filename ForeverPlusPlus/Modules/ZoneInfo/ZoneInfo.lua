@@ -20,7 +20,10 @@ local module = ns.NewModule("ZoneInfo", L.ZONEINFO_DESC, {
     hover = true, -- on continent maps, the zone under the cursor
     levels = true,
     fishing = true,
-    gathering = true,
+    herbs = true,
+    ore = true,
+    skinning = true,
+    scale = 100, -- percent of the panel's normal size
 })
 module.title = L.ZONEINFO_TITLE
 module.category = "map"
@@ -33,10 +36,16 @@ module.options = {
             { "BOTTOMRIGHT", L.ZONEINFO_BOTTOMRIGHT },
         },
     },
+    {
+        key = "scale", name = L.ZONEINFO_SIZE, description = L.ZONEINFO_SIZE_DESC,
+        min = 70, max = 150, step = 10, format = "%d%%",
+    },
     { key = "hover", name = L.ZONEINFO_HOVER, description = L.ZONEINFO_HOVER_DESC },
     { key = "levels", name = L.ZONEINFO_LEVELS, description = L.ZONEINFO_LEVELS_DESC },
     { key = "fishing", name = L.ZONEINFO_FISHING, description = L.ZONEINFO_FISHING_DESC },
-    { key = "gathering", name = L.ZONEINFO_GATHERING, description = L.ZONEINFO_GATHERING_DESC },
+    { key = "herbs", name = L.ZONEINFO_HERBS, description = L.ZONEINFO_HERBS_DESC },
+    { key = "ore", name = L.ZONEINFO_ORE, description = L.ZONEINFO_ORE_DESC },
+    { key = "skinning", name = L.ZONEINFO_SKINNING, description = L.ZONEINFO_SKINNING_DESC },
 }
 
 -- Shared with Data.lua: `zones` (by map ID), `herbs` and `ores` (by item ID).
@@ -129,7 +138,7 @@ local function skillsRow(zone)
             name or L.ZONEINFO_FISHING_NAME, range(rank, zone.fish, zone.fishHigh, true))
     end
     local rank, name, own = Professions.Rank(Professions.SKINNING)
-    if db.gathering and rank and zone[1] then
+    if db.skinning and rank and zone[1] then
         parts[#parts + 1] = icon(Professions.SKINNING, own) .. format(L.ZONEINFO_SKILL,
             name or L.ZONEINFO_SKINNING_NAME, range(rank, Professions.SkinningNeed(zone[1]),
                 Professions.SkinningNeed(zone[2])))
@@ -154,10 +163,10 @@ local function itemName(id, name)
 end
 
 -- The zone's herbs or ores, each colored by how hard it is at the player's skill, or nil when the
--- player doesn't have the profession.
-local function gatherRow(line, ids, items)
+-- player doesn't have the profession or `key`'s checkbox is off.
+local function gatherRow(key, line, ids, items)
     local rank, _, own = Professions.Rank(line)
-    if not (module.db.gathering and rank and ids and #ids > 0) then
+    if not (module.db[key] and rank and ids and #ids > 0) then
         return nil
     end
     local names = {}
@@ -172,8 +181,8 @@ end
 local function rows(zone)
     local list = {}
     list[#list + 1] = skillsRow(zone)
-    list[#list + 1] = gatherRow(Professions.HERBALISM, zone.herbs, internal.herbs)
-    list[#list + 1] = gatherRow(Professions.MINING, zone.ores, internal.ores)
+    list[#list + 1] = gatherRow("herbs", Professions.HERBALISM, zone.herbs, internal.herbs)
+    list[#list + 1] = gatherRow("ore", Professions.MINING, zone.ores, internal.ores)
     return list
 end
 
@@ -302,18 +311,20 @@ end
 local anchored -- where the panel sits now: the corner and how far up, or nil to place it again
 
 local function anchor()
-    local corner = module.db.corner
+    local corner, scale = module.db.corner, module.db.scale / 100
     local offset = corner == "BOTTOMRIGHT" and 8 or bottomLeftOffset()
-    local key = corner .. offset
+    local key = corner .. offset .. ":" .. scale
     if key == anchored then
         return
     end
     anchored = key
+    -- Offsets are in the panel's own scale, so divide to keep them the same on screen.
+    panel:SetScale(scale)
     panel:ClearAllPoints()
     if corner == "BOTTOMRIGHT" then
-        panel:SetPoint("BOTTOMRIGHT", panel:GetParent(), "BOTTOMRIGHT", -8, offset)
+        panel:SetPoint("BOTTOMRIGHT", panel:GetParent(), "BOTTOMRIGHT", -8 / scale, offset / scale)
     else
-        panel:SetPoint("BOTTOMLEFT", panel:GetParent(), "BOTTOMLEFT", 8, offset)
+        panel:SetPoint("BOTTOMLEFT", panel:GetParent(), "BOTTOMLEFT", 8 / scale, offset / scale)
     end
 end
 
