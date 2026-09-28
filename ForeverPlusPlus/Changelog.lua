@@ -13,6 +13,9 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_CHANGED, {
+                { L.CLASSCOLORS_TITLE, "Hostile NPCs' health bars are red, neutral ones yellow, "
+                    .. "and ones someone else tagged gray, on the same frames. Friendly NPCs stay "
+                    .. "green. Includes an NPC Health Bars checkbox to turn it off." },
                 { L.BAGSLOTS_TITLE, "Adds up every bag on the backpack button by default, with "
                     .. "the reagent bag still on its own button. Per Bag is still a choice." },
             } },

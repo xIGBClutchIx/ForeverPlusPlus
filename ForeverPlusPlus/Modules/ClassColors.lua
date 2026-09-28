@@ -1,6 +1,7 @@
 -- Class Colors: players' health bars and names in their class color on the player, target, focus,
--- party, and target-of-target frames. NPCs, and players whose class can't be read, keep
--- Blizzard's colors. Idea from MiniClassColors; none of its code.
+-- party, and target-of-target frames, and NPCs' health bars by reaction: red when hostile, yellow
+-- when neutral, gray when tapped by someone else. Friendly NPCs, and units whose class or
+-- reaction can't be read, keep Blizzard's green. Idea from MiniClassColors; none of its code.
 --
 -- Blizzard's health bars are a green texture with lockColor set, so Blizzard never colors them
 -- except party frames, which desaturate the bar for a disconnected member. The bar is
@@ -10,7 +11,8 @@
 local _, ns = ...
 
 local _G, setmetatable, hooksecurefunc = _G, setmetatable, hooksecurefunc
-local UnitIsPlayer, UnitIsConnected = UnitIsPlayer, UnitIsConnected
+local UnitIsPlayer, UnitIsConnected, UnitReaction = UnitIsPlayer, UnitIsConnected, UnitReaction
+local UnitIsTapDenied, UnitPlayerControlled, CreateColor = UnitIsTapDenied, UnitPlayerControlled, CreateColor
 
 local L = ns.L
 local readable = ns.IsReadable
@@ -19,6 +21,7 @@ local classColor = ns.Colors.Class
 local module = ns.NewModule("ClassColors", L.CLASSCOLORS_DESC, {
     enabled = true,
     healthBars = true,
+    npcBars = true,
     names = false,
     player = true,
     target = true,
@@ -33,6 +36,7 @@ local PARTS = L.CLASSCOLORS_SECTION_PARTS
 local FRAMES = L.CLASSCOLORS_SECTION_FRAMES
 module.options = {
     { key = "healthBars", name = L.CLASSCOLORS_BARS, description = L.CLASSCOLORS_BARS_DESC, section = PARTS },
+    { key = "npcBars", name = L.CLASSCOLORS_NPC_BARS, description = L.CLASSCOLORS_NPC_BARS_DESC, section = PARTS },
     { key = "names", name = L.CLASSCOLORS_NAMES, description = L.CLASSCOLORS_NAMES_DESC, section = PARTS },
     { key = "player", name = L.CLASSCOLORS_PLAYER, description = L.CLASSCOLORS_PLAYER_DESC, section = FRAMES },
     { key = "target", name = L.CLASSCOLORS_TARGET, description = L.CLASSCOLORS_TARGET_DESC, section = FRAMES },
@@ -42,10 +46,13 @@ module.options = {
 }
 
 local MAX_PARTY = 4
+-- Blizzard's own hostile, neutral, and tapped colors (UnitSelectionColor, Classic's tapped bar).
+local HOSTILE, NEUTRAL, TAPPED = CreateColor(1, 0, 0), CreateColor(1, 1, 0), CreateColor(0.5, 0.5, 0.5)
+local NEUTRAL_REACTION = 4 -- UnitReaction: 1-3 hostile, 4 neutral, 5-8 friendly
 local weak = { __mode = "k" }
 local barHooked = setmetatable({}, weak) -- StatusBar -> true once its setters are hooked
 local applying = setmetatable({}, weak) -- StatusBar -> true while we set its color ourselves
-local painted = setmetatable({}, weak) -- StatusBar or FontString -> true while in a class color
+local painted = setmetatable({}, weak) -- StatusBar or FontString -> true while in our color
 local blizzardColor = setmetatable({}, weak) -- StatusBar -> { r, g, b, a } Blizzard last set
 local blizzardDesaturated = setmetatable({}, weak) -- StatusBar -> what Blizzard last set
 local nameColor = setmetatable({}, weak) -- FontString -> { r, g, b, a } before we colored it
@@ -69,15 +76,42 @@ local function partOf(frame)
     end
 end
 
--- The class color for `unit` if `setting` (healthBars or names) is on for `frame`, else nil.
--- Disconnected players keep Blizzard's gray.
-local function wanted(frame, unit, setting)
+-- Whether the module colors this frame at all.
+local function frameOn(frame, unit)
     local part = partOf(frame)
-    if not (module.enabled and module.db[setting] and part and module.db[part] and unit) then
+    return module.enabled and part and module.db[part] and unit and true or false
+end
+
+-- The NPC's reaction color, or nil for friendly NPCs and ones we can't read.
+local function reactionColor(unit)
+    local controlled = UnitPlayerControlled(unit)
+    local tapped = UnitIsTapDenied(unit)
+    if readable(controlled) and not controlled and readable(tapped) and tapped then
+        return TAPPED
+    end
+    local reaction = UnitReaction("player", unit)
+    if not (readable(reaction) and reaction) then
+        return nil
+    elseif reaction < NEUTRAL_REACTION then
+        return HOSTILE
+    elseif reaction == NEUTRAL_REACTION then
+        return NEUTRAL
+    end
+end
+
+-- The color for `unit`'s health bar or name (`setting` healthBars or names) on `frame`, else
+-- nil for Blizzard's. Players get their class color; NPCs' bars get their reaction color with
+-- npcBars on. Disconnected players keep Blizzard's gray.
+local function wanted(frame, unit, setting)
+    if not frameOn(frame, unit) then
         return nil
     end
     local player = UnitIsPlayer(unit)
-    if not (readable(player) and player) then
+    if not readable(player) then
+        return nil
+    elseif not player then
+        return setting == "healthBars" and module.db.npcBars and reactionColor(unit) or nil
+    elseif not module.db[setting] then
         return nil
     end
     local connected = UnitIsConnected(unit)
@@ -200,6 +234,8 @@ function module:OnEnable()
         hooked = true
         hooksecurefunc("UnitFrame_Update", onUnitFrameUpdate)
     end
+    -- A reaction or tap can change without a new unit (a mob turns hostile, someone tags it).
+    self:On("UNIT_FACTION", updateAll)
     updateAll()
 end
 

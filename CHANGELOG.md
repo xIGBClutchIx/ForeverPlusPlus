@@ -6,6 +6,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Changed
 
+- **Class Colors**: hostile NPCs' health bars are red, neutral ones yellow, and ones someone else tagged gray, on the same frames. Friendly NPCs stay green. Includes an NPC Health Bars checkbox to turn it off.
 - **Bag Slot Counter**: adds up every bag on the backpack button by default, with the reagent bag still on its own button. Per Bag is still a choice.
 
 ### Fixed

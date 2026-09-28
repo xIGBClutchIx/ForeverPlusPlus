@@ -148,6 +148,8 @@
     "GetProfessions",
     "GetProfessionInfo",
     "UnitPlayerControlled",
+    "UnitIsTapDenied",
+    "CreateColor",
     "UnitCreatureType",
     "UnitCanAttack",
     "QuestDifficultyColors"
