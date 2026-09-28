@@ -371,34 +371,39 @@ L.GATHERTRACKING_FAILED = "Gathering Tracking couldn't change tracking: %s" -- e
 L.GATHERTRACKING_BLOCKED = "The game blocked Gathering Tracking from changing tracking. It stops "
     .. "until /reload."
 
--- GatherTooltips
-L.GATHERTOOLTIPS_TITLE = "Gathering Tooltips"
-L.GATHERTOOLTIPS_DESC = "Show the skill a herb, ore, or skinnable creature needs, colored by how "
-    .. "hard it is for you, like recipes at a trainer."
-L.GATHERTOOLTIPS_SHOW = "Show"
-L.GATHERTOOLTIPS_SHOW_DESC = "Show the skill only for professions you have, or always. Without "
-    .. "the profession it shows in red."
-L.GATHERTOOLTIPS_SHOW_KNOWN = "With the Profession"
-L.GATHERTOOLTIPS_SHOW_ALWAYS = "Always"
-L.GATHERTOOLTIPS_HERBALISM = "Herbs"
-L.GATHERTOOLTIPS_HERBALISM_DESC = "Show the Herbalism skill a herb needs when you point at it, in "
+-- ProfessionTooltips
+L.PROFTOOLTIPS_TITLE = "Profession Tooltips"
+L.PROFTOOLTIPS_DESC = "Show the skill a herb, ore, skinnable creature, or locked box or chest "
+    .. "needs, colored by how hard it is for you, like recipes at a trainer."
+L.PROFTOOLTIPS_SHOW = "Show Gathering"
+L.PROFTOOLTIPS_SHOW_DESC = "Show the gathering skills only for professions you have, or always. "
+    .. "Without the profession it shows in red. Lockpicking only shows for characters who can "
+    .. "pick locks."
+L.PROFTOOLTIPS_SHOW_KNOWN = "With the Profession"
+L.PROFTOOLTIPS_SHOW_ALWAYS = "Always"
+L.PROFTOOLTIPS_HERBALISM = "Herbs"
+L.PROFTOOLTIPS_HERBALISM_DESC = "Show the Herbalism skill a herb needs when you point at it, in "
     .. "the world or on the minimap."
-L.GATHERTOOLTIPS_MINING = "Ore"
-L.GATHERTOOLTIPS_MINING_DESC = "Show the Mining skill a vein or deposit needs when you point at "
+L.PROFTOOLTIPS_MINING = "Ore"
+L.PROFTOOLTIPS_MINING_DESC = "Show the Mining skill a vein or deposit needs when you point at "
     .. "it, in the world or on the minimap."
-L.GATHERTOOLTIPS_SKINNING = "Creatures"
-L.GATHERTOOLTIPS_SKINNING_DESC = "Show the Skinning skill a beast needs, from its level."
-L.GATHERTOOLTIPS_ITEMS = "Items"
-L.GATHERTOOLTIPS_ITEMS_DESC = "Show in herb, ore, and stone tooltips the skill needed to gather "
-    .. "them."
-L.GATHERTOOLTIPS_REQUIRES = "Requires %s (%d)" -- profession, skill
-L.GATHERTOOLTIPS_GATHERED = "Gathered with %s (%d)" -- profession, skill
-L.GATHERTOOLTIPS_HERBALISM_NAME = "Herbalism" -- until the client gives its own name
-L.GATHERTOOLTIPS_MINING_NAME = "Mining"
-L.GATHERTOOLTIPS_SKINNING_NAME = "Skinning"
+L.PROFTOOLTIPS_SKINNING = "Creatures"
+L.PROFTOOLTIPS_SKINNING_DESC = "Show the Skinning skill a beast needs, from its level."
+L.PROFTOOLTIPS_LOCKPICKING = "Locks"
+L.PROFTOOLTIPS_LOCKPICKING_DESC = "Show the Lockpicking skill a locked lockbox or chest needs, "
+    .. "if you can pick locks."
+L.PROFTOOLTIPS_ITEMS = "Items"
+L.PROFTOOLTIPS_ITEMS_DESC = "Show in herb, ore, stone, and lockbox tooltips the skill needed to "
+    .. "gather or open them."
+L.PROFTOOLTIPS_REQUIRES = "Requires %s (%d)" -- profession, skill
+L.PROFTOOLTIPS_GATHERED = "Gathered with %s (%d)" -- profession, skill
+L.PROFTOOLTIPS_HERBALISM_NAME = "Herbalism" -- until the client gives its own name
+L.PROFTOOLTIPS_MINING_NAME = "Mining"
+L.PROFTOOLTIPS_SKINNING_NAME = "Skinning"
+L.PROFTOOLTIPS_LOCKPICKING_NAME = "Lockpicking"
 -- Creature types that can be skinned, exactly as the game names them.
-L.GATHERTOOLTIPS_BEAST = "Beast"
-L.GATHERTOOLTIPS_DRAGONKIN = "Dragonkin"
+L.PROFTOOLTIPS_BEAST = "Beast"
+L.PROFTOOLTIPS_DRAGONKIN = "Dragonkin"
 
 -- AutoStow
 L.AUTOSTOW_TITLE = "Auto Stow"
@@ -632,7 +637,7 @@ L.ZONEINFO_FISHING_DESC = "The Fishing skill the zone's waters need: red while y
     .. "it's enough."
 L.ZONEINFO_HERBS = "Herbs"
 L.ZONEINFO_HERBS_DESC = "The herbs in the zone: off, only if you have Herbalism, or always. With "
-    .. "Herbalism they're colored against your skill like Gathering Tooltips."
+    .. "Herbalism they're colored against your skill like Profession Tooltips."
 L.ZONEINFO_ORE = "Ore"
 L.ZONEINFO_ORE_DESC = "The ore in the zone: off, only if you have Mining, or always. With Mining "
     .. "it's colored against your skill."

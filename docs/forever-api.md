@@ -202,8 +202,9 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 
 - `GetProfessions()` and `GetProfessionInfo(index)` give the gathering skills, with the skill line as the seventh value (Herbalism 182, Mining 186, Skinning 393) and the gear bonus as the eighth. **[addon]** (GatherSkillTooltip `Skills.lua`, `Data.lua`)
 - Herbs and veins under the mouse come as `Enum.TooltipDataType.Object` tooltips and minimap pins as `MinimapMouseover`, with the object's name in `data.lines[1].leftText`. Overlapping pins put several names in that one line, separated by newlines. **[addon]** (GatherSkillTooltip `Events.lua`, `Tooltip.lua`)
-- `UnitCreatureType(unit)` may give the creature type's ID (Beast 1, Dragonkin 2) as a second value. GatherSkillTooltip checks it and falls back to the name, and so does Gathering Tooltips. **Unverified**
+- `UnitCreatureType(unit)` may give the creature type's ID (Beast 1, Dragonkin 2) as a second value. GatherSkillTooltip checks it and falls back to the name, and so does Profession Tooltips. **Unverified**
 - Skill needed for nodes, items, and skinning is taken from Classic (skinning: 1 up to level 10, then level x 10 - 100 to level 20, then level x 5). Forever may differ. **Unverified**
+- Lockpicking isn't in `GetProfessions()`. Profession Tooltips treats a character as able to pick locks when Pick Lock (spell 1804) is known (`C_SpellBook.IsSpellKnown`, else `IsSpellKnown`) and takes their skill as level x 5, capped at 300, as in Classic. Lockbox item IDs and skills (junkboxes 1 to 175, Bronze 1 and 25, Iron 70, Strong Iron 125, Steel 175, Reinforced Steel 225, Mithril 225, Thorium 275, Eternium 350) and the chest names are written from memory of Classic. **Unverified**; check them against tooltips in game.
 
 ## Weapon sheathing
 

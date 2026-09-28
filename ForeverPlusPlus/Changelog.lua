@@ -12,6 +12,11 @@ ns.changelog = {
     {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
+            { L.CHANGELOG_ADDED, {
+                { L.PROFTOOLTIPS_TITLE, "Was Gathering Tooltips. Also shows the Lockpicking "
+                    .. "skill a lockbox or locked chest needs, colored against your skill, for "
+                    .. "characters who can pick locks. A Locks checkbox turns it off." },
+            } },
             { L.CHANGELOG_FIXED, {
                 { L.PLAYERPLATES_TITLE, "No more \"action blocked\" error at login. Recent "
                     .. "allies turn light blue once the game has loaded the list, such as after "
@@ -91,7 +96,7 @@ ns.changelog = {
                     .. "the player, target, focus, party, and target-of-target frames. Includes "
                     .. "health bars and names (off by default) separately, and a checkbox for each "
                     .. "frame." },
-                { L.GATHERTOOLTIPS_TITLE, "The skill a herb, ore, or skinnable beast needs, in "
+                { L.PROFTOOLTIPS_TITLE,"The skill a herb, ore, or skinnable beast needs, in "
                     .. "its tooltip in the world or on the minimap, colored red, orange, yellow, "
                     .. "green, or gray against your skill like trainer recipes. Herb, ore, and "
                     .. "stone items say the skill that gathers them. Includes showing it only for "

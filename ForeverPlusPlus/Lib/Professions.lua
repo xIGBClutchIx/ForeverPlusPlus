@@ -10,6 +10,7 @@ local Professions = {
     MINING = 186,
     SKINNING = 393,
     FISHING = 356,
+    LOCKPICKING = 633,
 }
 ns.Professions = Professions
 
@@ -88,14 +89,54 @@ local function forget()
     known = nil
 end
 
+-- Lockpicking isn't a profession in the list above: rogues have it as a skill they learn with
+-- Pick Lock, and, as in Classic, it's five times their level up to 300. Probe: the spell book
+-- call is Mainline's, the plain global is Classic's.
+local PICK_LOCK = 1804
+local LOCKPICKING_CAP = 300
+
+local function knowsPickLock()
+    if C_SpellBook and C_SpellBook.IsSpellKnown then
+        return C_SpellBook.IsSpellKnown(PICK_LOCK)
+    end
+    return IsSpellKnown and IsSpellKnown(PICK_LOCK)
+end
+
+local function lockpicking()
+    if not knowsPickLock() then
+        return nil
+    end
+    local level = UnitLevel("player")
+    if not (readable(level) and type(level) == "number") then
+        return nil
+    end
+    local rank = level * 5
+    if rank > LOCKPICKING_CAP then
+        rank = LOCKPICKING_CAP
+    end
+    local name, icon
+    if C_Spell and C_Spell.GetSpellTexture then
+        icon = C_Spell.GetSpellTexture(PICK_LOCK)
+    end
+    -- Probe: the skill line's own name, when the client has profession info for it.
+    if C_TradeSkillUI and C_TradeSkillUI.GetProfessionInfoBySkillLineID then
+        local info = C_TradeSkillUI.GetProfessionInfoBySkillLineID(Professions.LOCKPICKING)
+        name = info and readable(info.professionName) and info.professionName ~= "" and info.professionName or nil
+    end
+    return rank, name, readable(icon) and icon or nil
+end
+
 ---The player's skill in a profession (with bonuses from gear), its name in the client's language,
 ---and its icon, or nil when the player doesn't have it. `line` is a skill line ID such as
----`Professions.HERBALISM`.
+---`Professions.HERBALISM`. For `Professions.LOCKPICKING` it's the rogue's Lockpicking skill.
 ---@param line number
 ---@return number? rank
 ---@return string? name
 ---@return number|string|nil icon
 function Professions.Rank(line)
+    if line == Professions.LOCKPICKING then
+        return lockpicking()
+    end
     if not (GetProfessions and GetProfessionInfo) then
         return nil
     end

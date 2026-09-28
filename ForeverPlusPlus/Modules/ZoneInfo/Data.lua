@@ -13,7 +13,7 @@ local internal = ns.modules.ZoneInfo.internal
 
 -- Herbs and ores: item ID -> { skill needed to gather, short English name }. Other languages
 -- use the game's item name.
--- The skills match Gathering Tooltips.
+-- The skills match Profession Tooltips.
 internal.herbs = {
     [2447] = { 1, "Peacebloom" },
     [765] = { 1, "Silverleaf" },

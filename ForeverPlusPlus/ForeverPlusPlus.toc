@@ -33,7 +33,7 @@ Modules\BagSlots.lua
 Modules\HideFeedback.lua
 Modules\Tooltips.lua
 Modules\GatherTracking.lua
-Modules\GatherTooltips.lua
+Modules\ProfessionTooltips.lua
 Modules\AutoStow.lua
 Modules\AutoGossip.lua
 Modules\AutoDecline.lua

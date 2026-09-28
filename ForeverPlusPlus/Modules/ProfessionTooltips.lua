@@ -1,9 +1,9 @@
--- Gathering Tooltips: the skill a herb, vein, or skinnable beast needs, in its tooltip, colored
--- against the player's skill the way a trainer colors recipes: red can't yet, then orange,
--- yellow, green, and gray as it gets easier. Herbs, ore, and stone items say the skill that
--- gathers them. Only for professions the player has, or always (red without it). Ideas from
--- GatherSkillTooltip; none of its
--- code.
+-- Profession Tooltips: the skill a herb, vein, skinnable beast, or locked lockbox or chest needs,
+-- in its tooltip, colored against the player's skill the way a trainer colors recipes: red can't
+-- yet, then orange, yellow, green, and gray as it gets easier. Herbs, ore, and stone items say
+-- the skill that gathers them. Gathering is shown only for professions the player has, or always
+-- (red without it); Lockpicking only for characters who can pick locks. Ideas from
+-- GatherSkillTooltip; none of its code.
 --
 -- Fishing isn't here: in Classic what a pool or a fish needs depends on the zone, not on it.
 -- Node names are matched in English; another language needs its own names in NODES.
@@ -24,30 +24,33 @@ local Professions = ns.Professions
 local ItemTooltip = ns.ItemTooltip
 
 local HERB, MINE, SKIN = Professions.HERBALISM, Professions.MINING, Professions.SKINNING
+local LOCK = Professions.LOCKPICKING
 
-local module = ns.NewModule("GatherTooltips", L.GATHERTOOLTIPS_DESC, {
+local module = ns.NewModule("ProfessionTooltips", L.PROFTOOLTIPS_DESC, {
     enabled = true,
-    show = "known", -- "known" (only for professions you have) or "always"
+    show = "known", -- "known" (only for professions you have) or "always"; gathering only
     herbalism = true,
     mining = true,
     skinning = true,
+    lockpicking = true,
     items = true,
 })
-module.title = L.GATHERTOOLTIPS_TITLE
+module.title = L.PROFTOOLTIPS_TITLE
 module.category = "items"
 
 module.options = {
     {
-        key = "show", name = L.GATHERTOOLTIPS_SHOW, description = L.GATHERTOOLTIPS_SHOW_DESC,
+        key = "show", name = L.PROFTOOLTIPS_SHOW, description = L.PROFTOOLTIPS_SHOW_DESC,
         choices = {
-            { "known", L.GATHERTOOLTIPS_SHOW_KNOWN },
-            { "always", L.GATHERTOOLTIPS_SHOW_ALWAYS },
+            { "known", L.PROFTOOLTIPS_SHOW_KNOWN },
+            { "always", L.PROFTOOLTIPS_SHOW_ALWAYS },
         },
     },
-    { key = "herbalism", name = L.GATHERTOOLTIPS_HERBALISM, description = L.GATHERTOOLTIPS_HERBALISM_DESC },
-    { key = "mining", name = L.GATHERTOOLTIPS_MINING, description = L.GATHERTOOLTIPS_MINING_DESC },
-    { key = "skinning", name = L.GATHERTOOLTIPS_SKINNING, description = L.GATHERTOOLTIPS_SKINNING_DESC },
-    { key = "items", name = L.GATHERTOOLTIPS_ITEMS, description = L.GATHERTOOLTIPS_ITEMS_DESC },
+    { key = "herbalism", name = L.PROFTOOLTIPS_HERBALISM, description = L.PROFTOOLTIPS_HERBALISM_DESC },
+    { key = "mining", name = L.PROFTOOLTIPS_MINING, description = L.PROFTOOLTIPS_MINING_DESC },
+    { key = "skinning", name = L.PROFTOOLTIPS_SKINNING, description = L.PROFTOOLTIPS_SKINNING_DESC },
+    { key = "lockpicking", name = L.PROFTOOLTIPS_LOCKPICKING, description = L.PROFTOOLTIPS_LOCKPICKING_DESC },
+    { key = "items", name = L.PROFTOOLTIPS_ITEMS, description = L.PROFTOOLTIPS_ITEMS_DESC },
 }
 
 -- Data ---------------------------------------------------------------------------------------
@@ -106,6 +109,10 @@ local NODES = { -- object name -> { skill line, skill }
     ["Hakkari Thorium Vein"] = { MINE, 275 },
     ["Small Obsidian Chunk"] = { MINE, 305 },
     ["Large Obsidian Chunk"] = { MINE, 305 },
+
+    -- Locked chests in the world; add more (and doors) here as they're confirmed in game.
+    ["Solid Chest"] = { LOCK, 1 },
+    ["Large Solid Chest"] = { LOCK, 1 },
 }
 
 local ITEMS = { -- item ID -> { skill line, skill }
@@ -155,28 +162,46 @@ local ITEMS = { -- item ID -> { skill line, skill }
     [11370] = { MINE, 230 }, -- Dark Iron Ore
     [10620] = { MINE, 245 }, -- Thorium Ore
     [12365] = { MINE, 245 }, -- Dense Stone
+
+    -- Locked boxes: the Lockpicking skill to open them.
+    [16882] = { LOCK, 1 }, -- Battered Junkbox
+    [16883] = { LOCK, 25 }, -- Worn Junkbox
+    [16884] = { LOCK, 70 }, -- Sturdy Junkbox
+    [16885] = { LOCK, 175 }, -- Heavy Junkbox
+    [6712] = { LOCK, 1 }, -- Practice Lockbox
+    [4632] = { LOCK, 1 }, -- Ornate Bronze Lockbox
+    [4633] = { LOCK, 25 }, -- Heavy Bronze Lockbox
+    [4634] = { LOCK, 70 }, -- Iron Lockbox
+    [4636] = { LOCK, 125 }, -- Strong Iron Lockbox
+    [4637] = { LOCK, 175 }, -- Steel Lockbox
+    [4638] = { LOCK, 225 }, -- Reinforced Steel Lockbox
+    [5758] = { LOCK, 225 }, -- Mithril Lockbox
+    [5759] = { LOCK, 275 }, -- Thorium Lockbox
+    [5760] = { LOCK, 350 }, -- Eternium Lockbox
 }
 
-local OPTION = { [HERB] = "herbalism", [MINE] = "mining", [SKIN] = "skinning" }
+local OPTION = { [HERB] = "herbalism", [MINE] = "mining", [SKIN] = "skinning", [LOCK] = "lockpicking" }
 local FALLBACK_NAME = {
-    [HERB] = L.GATHERTOOLTIPS_HERBALISM_NAME,
-    [MINE] = L.GATHERTOOLTIPS_MINING_NAME,
-    [SKIN] = L.GATHERTOOLTIPS_SKINNING_NAME,
+    [HERB] = L.PROFTOOLTIPS_HERBALISM_NAME,
+    [MINE] = L.PROFTOOLTIPS_MINING_NAME,
+    [SKIN] = L.PROFTOOLTIPS_SKINNING_NAME,
+    [LOCK] = L.PROFTOOLTIPS_LOCKPICKING_NAME,
 }
 
 -- Beast and Dragonkin, the creature types that can be skinned (UnitCreatureType's second value).
 local SKINNABLE_TYPES = { [1] = true, [2] = true }
-local SKINNABLE_NAMES = { [L.GATHERTOOLTIPS_BEAST] = true, [L.GATHERTOOLTIPS_DRAGONKIN] = true }
+local SKINNABLE_NAMES = { [L.PROFTOOLTIPS_BEAST] = true, [L.PROFTOOLTIPS_DRAGONKIN] = true }
 
 -- The line for a skill line and skill, colored, or nil when it's off or the player doesn't have
 -- the profession and `show` is "known". Without the profession it's red: you can't gather it.
--- `text` is L.GATHERTOOLTIPS_REQUIRES or _GATHERED.
+-- Lockpicking is never shown to characters who can't pick locks, whatever `show` says.
+-- `text` is L.PROFTOOLTIPS_REQUIRES or _GATHERED.
 local function skillLine(line, need, text)
     if not module.db[OPTION[line]] then
         return nil
     end
     local rank, name = Professions.Rank(line)
-    if not rank and module.db.show ~= "always" then
+    if not rank and (module.db.show ~= "always" or line == LOCK) then
         return nil
     end
     local color = Professions.Difficulty(rank, need)
@@ -208,7 +233,7 @@ end
 local function nodeLine(text)
     local node = NODES[clean(text)]
     if node then
-        return skillLine(node[1], node[2], L.GATHERTOOLTIPS_REQUIRES)
+        return skillLine(node[1], node[2], L.PROFTOOLTIPS_REQUIRES)
     end
 end
 
@@ -310,7 +335,7 @@ local function addSkinLine(tooltip)
     if not (readable(level) and type(level) == "number" and level > 0) then
         return -- a "??" boss, or secret
     end
-    local line, color = skillLine(SKIN, Professions.SkinningNeed(level), L.GATHERTOOLTIPS_REQUIRES)
+    local line, color = skillLine(SKIN, Professions.SkinningNeed(level), L.PROFTOOLTIPS_REQUIRES)
     if line then
         addLine(tooltip, line, color)
     end
@@ -348,7 +373,8 @@ local function onItem(tooltip, data)
     local id = ItemTooltip.ItemID(data)
     local item = id and ITEMS[id]
     if item then
-        local line, color = skillLine(item[1], item[2], L.GATHERTOOLTIPS_GATHERED)
+        local text = item[1] == LOCK and L.PROFTOOLTIPS_REQUIRES or L.PROFTOOLTIPS_GATHERED
+        local line, color = skillLine(item[1], item[2], text)
         if line then
             addLine(tooltip, line, color)
         end
