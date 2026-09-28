@@ -15,7 +15,7 @@ local module = ns.NewModule("Coordinates", L.COORDS_DESC, {
     player = true,
     cursor = true,
     tenths = true,
-    minimap = false,
+    minimap = true,
     titleBar = true,
     saved = {}, -- CVar -> the player's own value, put back when the module turns off
 })
