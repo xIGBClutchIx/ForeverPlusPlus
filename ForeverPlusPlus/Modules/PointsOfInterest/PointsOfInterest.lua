@@ -5,8 +5,8 @@
 local _, ns = ...
 
 local ipairs, format, rawget, unpack, abs = ipairs, string.format, rawget, unpack, math.abs
-local C_Map, C_EncounterJournal, UnitFactionGroup, UnitLevel =
-    C_Map, C_EncounterJournal, UnitFactionGroup, UnitLevel
+local C_Map, C_EncounterJournal, C_TaxiMap, UnitFactionGroup, UnitLevel =
+    C_Map, C_EncounterJournal, C_TaxiMap, UnitFactionGroup, UnitLevel
 local GetRealZoneText, GetQuestDifficultyColor = GetRealZoneText, GetQuestDifficultyColor
 local QuestDifficultyColors = QuestDifficultyColors
 
@@ -77,6 +77,19 @@ local KINDS = {
 
 -- The flight master icon in each faction's color.
 local TAXI = { A = "TaxiNode_Alliance", H = "TaxiNode_Horde", N = "TaxiNode_Neutral" }
+
+local GRAY = ns.Colors.Code(unpack(ns.Colors.GRAY))
+
+-- Blizzard's gray icon for a flight point not learned yet, or nil without it (the faction's icon
+-- is then shown grayed out). In Retail's atlas list; Unverified on Forever.
+local unlearned
+local function unlearnedAtlas()
+    if unlearned == nil then
+        unlearned = ns.MapPins.Atlas("TaxiNode_Undiscovered", "") ~= "" and "TaxiNode_Undiscovered"
+            or false
+    end
+    return unlearned or nil
+end
 
 local function atlasOf(kindInfo)
     if not kindInfo.atlas then
@@ -154,6 +167,30 @@ local function forPlayer(faction)
     return faction == "N" or faction == mine or module.db.otherFaction
 end
 
+-- How close (in percent of the map) a point the game knows is to one in Data.lua for the two to
+-- be the same.
+local NEAR = 3
+
+-- The game's flight points on the map being drawn, with whether this character has learned each.
+-- Probe: Forever's world map doesn't show them, so whether it lists them is Unverified.
+local taxiNodes = {}
+
+local function readTaxiNodes(mapID)
+    taxiNodes = C_TaxiMap and C_TaxiMap.GetTaxiNodesForMap
+        and C_TaxiMap.GetTaxiNodesForMap(mapID) or {}
+end
+
+-- Whether the character has learned the flight master at this point: true, false, or nil when
+-- the game doesn't say.
+local function learned(point)
+    for _, node in ipairs(taxiNodes) do
+        local x, y = node.position:GetXY()
+        if abs(x * 100 - point[2]) < NEAR and abs(y * 100 - point[3]) < NEAR then
+            return not node.isUndiscovered
+        end
+    end
+end
+
 -- The pin for one point of Data.lua, or nil when its settings hide it.
 local function pinFor(point, mapID)
     local kindName = point[1]
@@ -176,6 +213,13 @@ local function pinFor(point, mapID)
         info.atlas = TAXI[point[4]]
         info.title = place(point[5])
         info.lines = { L.POI_FLIGHT_MASTER, zoneName(mapID) }
+        -- One not learned yet is gray, like Blizzard's undiscovered flight points.
+        if learned(point) == false then
+            local gray = unlearnedAtlas()
+            info.atlas = gray or info.atlas
+            info.desaturated = not gray
+            info.lines[#info.lines + 1] = GRAY .. L.POI_FLIGHT_UNLEARNED .. "|r"
+        end
     elseif kindName == "ship" or kindName == "zeppelin" then
         if not forPlayer(point[4]) then
             return nil
@@ -190,10 +234,6 @@ local function pinFor(point, mapID)
     end
     return info
 end
-
--- How close (in percent of the map) an entrance the game knows is to one in Data.lua for the two
--- to be the same.
-local NEAR = 3
 
 local function listedNear(listed, x, y)
     for _, point in ipairs(listed) do
@@ -232,6 +272,7 @@ local function gameEntrances(mapID, listed, add)
 end
 
 local function fill(mapID, add)
+    readTaxiNodes(mapID)
     local listed = {} -- this map's dungeons and raids in Data.lua, shown or not
     for _, point in ipairs(internal.points[mapID] or {}) do
         if point[1] == "dungeon" or point[1] == "raid" then
@@ -243,11 +284,15 @@ local function fill(mapID, add)
         end
     end
     -- A city's dungeons on the zone around it, where the city sits on that zone's map. Probe:
-    -- GetMapRectOnMap returns nothing when the city isn't on it.
-    for _, city in ipairs(internal.cities[mapID] or {}) do
+    -- GetMapRectOnMap returns nothing when the city isn't on it; then the place in Data.lua.
+    for _, entry in ipairs(internal.cities[mapID] or {}) do
+        local city = entry[1]
         local minX, maxX, minY, maxY
         if C_Map and C_Map.GetMapRectOnMap then
             minX, maxX, minY, maxY = C_Map.GetMapRectOnMap(city, mapID)
+        end
+        if not (minX and maxX > minX) then
+            minX, maxX, minY, maxY = entry[2], entry[3], entry[4], entry[5]
         end
         if minX then
             for _, point in ipairs(internal.points[city] or {}) do
@@ -269,6 +314,8 @@ local layer
 function module:OnEnable()
     layer = layer or ns.MapPins.New(fill)
     layer:Enable()
+    -- A flight master's map, where a new flight point is learned.
+    self:On("TAXIMAP_CLOSED", function() layer:Refresh() end)
 end
 
 function module:OnDisable()

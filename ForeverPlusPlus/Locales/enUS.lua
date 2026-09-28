@@ -592,6 +592,7 @@ L.POI_NORTH = "North"
 L.POI_EAST = "East"
 L.POI_WEST = "West"
 L.POI_FLIGHT_MASTER = "Flight Master"
+L.POI_FLIGHT_UNLEARNED = "Not learned yet"
 L.POI_SHIP_TO = "Boat to %s" -- a place
 L.POI_ZEPPELIN_TO = "Zeppelin to %s" -- a place
 L.POI_SPIRIT_HEALER = "Spirit Healer"

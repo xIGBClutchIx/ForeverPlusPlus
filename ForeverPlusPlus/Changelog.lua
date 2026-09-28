@@ -17,7 +17,8 @@ ns.changelog = {
                     .. "healers on the world map's zone maps, under a new Map category, including "
                     .. "the Hall of Thanes, the Ruins of Lordaeron, and any of Forever's new "
                     .. "dungeons the game's own entrance list has. City dungeons also show on the "
-                    .. "zone around the city. Tooltips say what each is, dungeon level ranges colored against yours, and where "
+                    .. "zone around the city, and flight masters you haven't learned are gray. "
+                    .. "Tooltips say what each is, dungeon level ranges colored against yours, and where "
                     .. "boats and zeppelins go. Includes a checkbox and an icon size slider for "
                     .. "each kind, and showing the other faction's travel points. Off by default." },
             } },

@@ -155,6 +155,7 @@
     "QuestDifficultyColors",
     "MinimalSliderWithSteppersMixin",
     "C_EncounterJournal",
+    "C_TaxiMap",
     "WorldMapFrame",
     "MapCanvasDataProviderMixin",
     "CreateFromMixins",

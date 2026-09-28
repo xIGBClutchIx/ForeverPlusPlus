@@ -54,12 +54,15 @@ internal.instances = {
     zulgurub = { 309, "Zul'Gurub", 60, 60 },
 }
 
--- Cities whose dungeons also show on the zone around them, placed by the game's map layout.
+-- Cities whose dungeons also show on the zone around them, placed by where the game says the city
+-- sits on the zone's map. A city can give that place (left, right, top, bottom, from 0 to 1) for
+-- when the game doesn't: the Undercity's is worked out from the two maps' spirit healer and
+-- their crossings to each other, which agree to 0.3%.
 internal.cities = {
-    [1411] = { 1454 }, -- Durotar: Orgrimmar
-    [1420] = { 1458 }, -- Tirisfal Glades: Undercity
-    [1426] = { 1455 }, -- Dun Morogh: Ironforge
-    [1429] = { 1453 }, -- Elwynn Forest: Stormwind City
+    [1411] = { { 1454 } }, -- Durotar: Orgrimmar
+    [1420] = { { 1458, 0.4789, 0.6912, 0.6402, 0.8527 } }, -- Tirisfal Glades: Undercity
+    [1426] = { { 1455 } }, -- Dun Morogh: Ironforge
+    [1429] = { { 1453 } }, -- Elwynn Forest: Stormwind City
 }
 
 internal.points = {

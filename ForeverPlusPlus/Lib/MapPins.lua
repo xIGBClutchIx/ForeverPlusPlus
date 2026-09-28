@@ -113,6 +113,7 @@ function Layer:Add(map, x, y, info)
     end
     pin.x, pin.y, pin.info = x, y, info
     pin.texture:SetAtlas(info.atlas)
+    pin.texture:SetDesaturated(info.desaturated or false)
     pin.highlight:SetAtlas(info.atlas)
     -- Where Blizzard's own dungeon entrance icons go: above the map art and areas, below quests.
     local manager = map.GetPinFrameLevelsManager and map:GetPinFrameLevelsManager()
@@ -224,8 +225,8 @@ end
 
 ---Makes a layer of map pins. `fill(mapID, add)` runs each time the map shows a map, and calls
 ---`add(x, y, info)` for each pin: x and y from 0 to 1 across the map, and info
----`{ atlas, size, title, lines }` (size in pixels on screen; lines of tooltip text under the
----title). Call `layer:Enable()` to show it and `layer:Disable()` to take it off.
+---`{ atlas, size, title, lines, desaturated }` (size in pixels on screen; lines of tooltip text
+---under the title; desaturated to gray the icon). Call `layer:Enable()` to show it and `layer:Disable()` to take it off.
 ---@param fill fun(mapID: number, add: fun(x: number, y: number, info: table))
 ---@return table layer
 function MapPins.New(fill)
