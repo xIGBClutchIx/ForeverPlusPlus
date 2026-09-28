@@ -249,13 +249,33 @@ local function textWidth(text)
     return text.GetUnboundedStringWidth and text:GetUnboundedStringWidth() or text:GetStringWidth()
 end
 
+-- Blizzard's own coordinates, a row each for the cursor and the player, sit in the bottom left
+-- corner from 2 pixels up, each row 15 tall, while their Settings checkboxes (these CVars) are on.
+local COORDS_CVARS = { "worldMapShowCursorCoords", "worldMapShowPlayerCoords" }
+local COORDS_BOTTOM, COORDS_ROW = 2, 15
+
+-- How far up the panel sits in the bottom left corner: over Blizzard's coordinates when they're
+-- on. By the checkboxes, not the rows, so the panel doesn't jump as the cursor row comes and goes.
+local function bottomLeftOffset()
+    local rows = 0
+    for _, name in ipairs(COORDS_CVARS) do
+        if ns.CVars.IsOn(name) then
+            rows = rows + 1
+        end
+    end
+    if rows == 0 then
+        return 8
+    end
+    return COORDS_BOTTOM + rows * COORDS_ROW + 6
+end
+
 local function anchor()
     local parent = panel:GetParent()
     panel:ClearAllPoints()
     if module.db.corner == "BOTTOMRIGHT" then
         panel:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -8, 8)
     else
-        panel:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", 8, 8)
+        panel:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", 8, bottomLeftOffset())
     end
 end
 
@@ -354,6 +374,12 @@ function module:OnEnable()
     self:On("PLAYER_LEVEL_UP", redraw)
     self:On("SKILL_LINES_CHANGED", redraw)
     self:On("CHAT_MSG_SKILL", redraw)
+    -- Blizzard's coordinates turned on or off, which moves the panel.
+    self:On("CVAR_UPDATE", function(_, name)
+        if panel and (name == COORDS_CVARS[1] or name == COORDS_CVARS[2]) then
+            anchor()
+        end
+    end)
 end
 
 function module:OnDisable()

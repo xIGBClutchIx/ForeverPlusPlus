@@ -19,7 +19,8 @@ ns.changelog = {
                     .. "masters you haven't learned. Off by default." },
                 { L.ZONEINFO_TITLE, "A panel in a corner of the world map with the zone's level "
                     .. "range, fishing skill, and the herbs, ore, and skinning in it for your "
-                    .. "professions. Off by default." },
+                    .. "professions. It sits above Blizzard's map coordinates when they're on. Off "
+                    .. "by default." },
                 { L.UNEXPLORED_TITLE, "Shows the parts of zone maps you haven't explored yet. "
                     .. "Includes the tint's color and strength, or no tint. Off by default." },
             } },
