@@ -29,7 +29,7 @@ ns.changelog = {
                     .. "bar, from the game's own coordinates, with a toggle each. Off by "
                     .. "default." },
                 { L.HIDEFILTERRESET_TITLE, "Hides the reset button on the world map's filter "
-                    .. "dropdown. Off by default." },
+                    .. "dropdown." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.CLASSCOLORS_TITLE, "Hostile NPCs' health bars are red, neutral ones yellow, "

@@ -9,7 +9,7 @@ local C_AddOns = C_AddOns
 local L = ns.L
 
 local module = ns.NewModule("HideFilterReset", L.HIDEFILTERRESET_DESC, {
-    enabled = false,
+    enabled = true,
 })
 module.title = L.HIDEFILTERRESET_TITLE
 module.category = "map"
