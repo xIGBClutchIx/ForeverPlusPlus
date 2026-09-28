@@ -165,6 +165,8 @@
     "CreateFromMixins",
     "C_Texture",
     "GetRealZoneText",
-    "BACKDROP_TOOLTIP_16_16_5555"
+    "BACKDROP_TOOLTIP_16_16_5555",
+    "C_MapExplorationInfo",
+    "BattlefieldMapFrame"
   ]
 }

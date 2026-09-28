@@ -629,6 +629,14 @@ L.ZONEINFO_RANGE = "%s-%s" -- lowest skill, highest skill
 L.ZONEINFO_LIST_SEPARATOR = ", "
 L.ZONEINFO_FISHING_NAME = "Fishing" -- until the client gives its own name
 
+-- UnexploredAreas
+L.UNEXPLORED_TITLE = "Unexplored Areas"
+L.UNEXPLORED_DESC = "Show the parts of zone maps you haven't explored yet, on the world map and "
+    .. "the zone map."
+L.UNEXPLORED_TINT = "Tint"
+L.UNEXPLORED_TINT_DESC = "Tint unexplored areas blue so they stand apart from the ones you've "
+    .. "explored. Off shows them just like explored areas."
+
 -- CVarBrowser
 L.CVARBROWSER_TITLE = "Console Variables"
 L.CVARBROWSER_DESC = "Browse the game's console variables (CVars) on a page in Settings, and "
