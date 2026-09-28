@@ -12,7 +12,7 @@ local CreateFrame, CreateFromMixins, C_AddOns, C_Map, C_MapExplorationInfo =
 local L = ns.L
 
 local module = ns.NewModule("UnexploredAreas", L.UNEXPLORED_DESC, {
-    enabled = false,
+    enabled = true,
     tint = true,
     tintStrength = 70, -- percent of the full color
     tintColor = "gray",

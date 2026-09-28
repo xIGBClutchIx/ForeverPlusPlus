@@ -17,7 +17,7 @@ local Professions = ns.Professions
 local Code = ns.Colors.Code
 
 local module = ns.NewModule("ZoneInfo", L.ZONEINFO_DESC, {
-    enabled = false,
+    enabled = true,
     corner = "BOTTOMLEFT",
     hover = true, -- on continent maps, the zone under the cursor
     levels = true,

@@ -16,7 +16,7 @@ local QuestDifficultyColors, Enum = QuestDifficultyColors, Enum
 local L = ns.L
 
 local module = ns.NewModule("PointsOfInterest", L.POI_DESC, {
-    enabled = false,
+    enabled = true,
     -- For each kind: shown, its size in percent of normal, and shown on continent maps too.
     dungeons = true,
     dungeonSize = 90,

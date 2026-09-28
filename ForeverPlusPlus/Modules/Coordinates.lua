@@ -11,7 +11,7 @@ local CreateFrame, C_AddOns = CreateFrame, C_AddOns
 local L = ns.L
 
 local module = ns.NewModule("Coordinates", L.COORDS_DESC, {
-    enabled = false,
+    enabled = true,
     player = true,
     cursor = true,
     tenths = true,

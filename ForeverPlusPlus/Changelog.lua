@@ -17,17 +17,16 @@ ns.changelog = {
                     .. "and spirit healers on the world map, in a new Map category. Includes an "
                     .. "icon size and continent map toggle for each, capitals in place of "
                     .. "Blizzard's city icons, and graying out flight masters you haven't "
-                    .. "learned. Off by default." },
+                    .. "learned." },
                 { L.ZONEINFO_TITLE, "A panel in a corner of the world map with the zone's level "
                     .. "range, who holds it, its dungeons, fishing skill, and the herbs, ore, and "
                     .. "skinning in it for your professions. Includes a size slider, and for herbs, ore, and skinning a "
                     .. "choice of off, with the profession, or always. It sits above Blizzard's map "
-                    .. "coordinates when they're on. Off by default." },
+                    .. "coordinates when they're on." },
                 { L.UNEXPLORED_TITLE, "Shows the parts of zone maps you haven't explored yet. "
-                    .. "Includes the tint's color and strength, or no tint. Off by default." },
+                    .. "Includes the tint's color and strength, or no tint." },
                 { L.COORDS_TITLE, "Your coordinates and the cursor's in the world map's title "
-                    .. "bar, from the game's own coordinates, with a toggle each. Off by "
-                    .. "default." },
+                    .. "bar, from the game's own coordinates, with a toggle each." },
                 { L.HIDEFILTERRESET_TITLE, "Hides the reset button on the world map's filter "
                     .. "dropdown." },
             } },
