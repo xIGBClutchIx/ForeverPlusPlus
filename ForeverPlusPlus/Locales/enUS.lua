@@ -635,6 +635,18 @@ L.ZONEINFO_SKINNING_DESC = "The Skinning the zone's beasts need, from its level 
 L.ZONEINFO_SHOW_OFF = "Off"
 L.ZONEINFO_SHOW_KNOWN = "With the Profession"
 L.ZONEINFO_SHOW_ALWAYS = "Always"
+L.ZONEINFO_FACTION = "Territory"
+L.ZONEINFO_FACTION_DESC = "Who holds the zone, in the colors the game uses when you enter it: green "
+    .. "for your faction, red for the other, orange for contested. On the zone's name, or on a "
+    .. "line of its own."
+L.ZONEINFO_FACTION_NAME = "Name Color"
+L.ZONEINFO_FACTION_LINE = "Own Line"
+L.ZONEINFO_TERRITORY = "%s Territory" -- a faction
+L.ZONEINFO_CONTESTED = "Contested Territory"
+L.ZONEINFO_DUNGEONS = "Dungeons"
+L.ZONEINFO_DUNGEONS_DESC = "The dungeons and raids whose entrance is in the zone, with their level "
+    .. "range colored against yours."
+L.ZONEINFO_DUNGEON = "%s %s" -- dungeon, its levels ("17-26")
 L.ZONEINFO_SIZE = "Size"
 L.ZONEINFO_SIZE_DESC = "How big the panel is, compared with its normal size."
 L.ZONEINFO_TITLE_LEVELS = "%s  %s" -- zone, its levels ("10-20")

@@ -8,7 +8,9 @@ local ipairs, tostring, format, concat = ipairs, tostring, string.format, table.
 local min, max, GetLocale = math.min, math.max, GetLocale
 local CreateFrame, C_AddOns, C_Map, C_Item, C_XMLUtil = CreateFrame, C_AddOns, C_Map, C_Item, C_XMLUtil
 local Enum, UnitLevel, GetQuestDifficultyColor = Enum, UnitLevel, GetQuestDifficultyColor
-local QuestDifficultyColors = QuestDifficultyColors
+local QuestDifficultyColors, UnitFactionGroup, GetRealZoneText = QuestDifficultyColors, UnitFactionGroup,
+    GetRealZoneText
+local FACTION_ALLIANCE, FACTION_HORDE = FACTION_ALLIANCE, FACTION_HORDE
 
 local L = ns.L
 local Professions = ns.Professions
@@ -19,6 +21,8 @@ local module = ns.NewModule("ZoneInfo", L.ZONEINFO_DESC, {
     corner = "BOTTOMLEFT",
     hover = true, -- on continent maps, the zone under the cursor
     levels = true,
+    faction = "name", -- who holds the zone: "off", "name" (the name's color), or "line"
+    dungeons = true,
     fishing = true,
     -- Herbs, ore, and skinning: "off", "known" (only with the profession), or "always".
     herbs = "known",
@@ -43,6 +47,15 @@ module.options = {
     },
     { key = "hover", name = L.ZONEINFO_HOVER, description = L.ZONEINFO_HOVER_DESC },
     { key = "levels", name = L.ZONEINFO_LEVELS, description = L.ZONEINFO_LEVELS_DESC },
+    {
+        key = "faction", name = L.ZONEINFO_FACTION, description = L.ZONEINFO_FACTION_DESC,
+        choices = {
+            { "off", L.ZONEINFO_SHOW_OFF },
+            { "name", L.ZONEINFO_FACTION_NAME },
+            { "line", L.ZONEINFO_FACTION_LINE },
+        },
+    },
+    { key = "dungeons", name = L.ZONEINFO_DUNGEONS, description = L.ZONEINFO_DUNGEONS_DESC },
     { key = "fishing", name = L.ZONEINFO_FISHING, description = L.ZONEINFO_FISHING_DESC },
 }
 
@@ -68,7 +81,8 @@ local MAP_ADDON = "Blizzard_WorldMap"
 local MAX_WIDTH = 300 -- the widest the text gets; longer lines wrap
 local PADDING = 8
 local GAP = 3 -- between rows
-local ROWS = 3
+local ROWS = 5
+local DUNGEON_ATLAS = "Dungeon" -- Blizzard's dungeon entrance icon
 local ICON_SIZE = 16 -- pixels
 local THROTTLE = 0.1 -- seconds between looks at where the cursor is
 
@@ -197,12 +211,63 @@ local function gatherRow(key, line, ids, items)
     return icon(line, own) .. concat(names, L.ZONEINFO_LIST_SEPARATOR)
 end
 
+-- Who holds the zone, from the player's side: the colors of Blizzard's zone text when you enter
+-- one. `zone.side` is "A" or "H" for a faction's own land, or "C" for contested.
+local TERRITORY = {
+    friendly = { r = 0.1, g = 1, b = 0.1 },
+    hostile = { r = 1, g = 0.1, b = 0.1 },
+    contested = { r = 1, g = 0.7, b = 0 },
+}
+local SIDES = { Alliance = "A", Horde = "H" }
+local FACTION_NAMES = { A = FACTION_ALLIANCE, H = FACTION_HORDE }
+
+-- The zone's territory color and its line ("Horde Territory"), or nil when it isn't known.
+local function territory(zone)
+    local side = zone.side
+    if not side then
+        return nil
+    elseif side == "C" then
+        return TERRITORY.contested, L.ZONEINFO_CONTESTED
+    end
+    local mine = SIDES[UnitFactionGroup("player") or ""]
+    local color = side == mine and TERRITORY.friendly or TERRITORY.hostile
+    return color, format(L.ZONEINFO_TERRITORY, FACTION_NAMES[side] or side)
+end
+
+-- An instance's name in the player's language from the game, or the English from Data.lua.
+local function instanceName(instance)
+    local name = instance[1] and GetRealZoneText and GetRealZoneText(instance[1])
+    if not name or name == "" then
+        name = instance[2]
+    end
+    return name
+end
+
+-- The zone's dungeons and raids, each with its level range colored like quests.
+local function dungeonsRow(zone)
+    if not (module.db.dungeons and zone.dungeons) then
+        return nil
+    end
+    local names = {}
+    for i, instance in ipairs(zone.dungeons) do
+        names[i] = format(L.ZONEINFO_DUNGEON, instanceName(instance),
+            levelText(instance[3], instance[4]))
+    end
+    return format("|A:%s:%d:%d|a ", DUNGEON_ATLAS, ICON_SIZE, ICON_SIZE)
+        .. concat(names, L.ZONEINFO_LIST_SEPARATOR)
+end
+
 -- The rows under the zone's name, in order.
 local function rows(zone)
     local list = {}
+    if module.db.faction == "line" then
+        local color, text = territory(zone)
+        list[#list + 1] = color and colored(color, text)
+    end
     list[#list + 1] = skillsRow(zone)
     list[#list + 1] = gatherRow("herbs", Professions.HERBALISM, zone.herbs, internal.herbs)
     list[#list + 1] = gatherRow("ore", Professions.MINING, zone.ores, internal.ores)
+    list[#list + 1] = dungeonsRow(zone)
     return list
 end
 
@@ -357,6 +422,12 @@ local function draw(mapID)
     end
     local info = C_Map.GetMapInfo(mapID)
     local title = info and info.name or ""
+    if module.db.faction == "name" then
+        local color = territory(zone)
+        if color then
+            title = colored(color, title)
+        end
+    end
     if module.db.levels and zone[1] then
         title = format(L.ZONEINFO_TITLE_LEVELS, title, levelText(zone[1], zone[2]))
     end

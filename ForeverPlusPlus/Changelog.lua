@@ -19,8 +19,8 @@ ns.changelog = {
                     .. "Blizzard's city icons, and graying out flight masters you haven't "
                     .. "learned. Off by default." },
                 { L.ZONEINFO_TITLE, "A panel in a corner of the world map with the zone's level "
-                    .. "range, fishing skill, and the herbs, ore, and skinning in it for your "
-                    .. "professions. Includes a size slider, and for herbs, ore, and skinning a "
+                    .. "range, who holds it, its dungeons, fishing skill, and the herbs, ore, and "
+                    .. "skinning in it for your professions. Includes a size slider, and for herbs, ore, and skinning a "
                     .. "choice of off, with the profession, or always. It sits above Blizzard's map "
                     .. "coordinates when they're on. Off by default." },
                 { L.UNEXPLORED_TITLE, "Shows the parts of zone maps you haven't explored yet. "

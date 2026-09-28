@@ -3,8 +3,11 @@
 -- (a few rare spawns left out). Forever may move things; fix them here. Each zone is:
 --   { lowest level, highest level, fish = skill, fishHigh = skill, herbs = { ... }, ores = { ... } }
 -- Cities have no levels. `fishHigh` is for zones whose coast needs more than their inland water.
--- Herbs and ores are item IDs, from the lists below.
+-- Herbs and ores are item IDs, from the lists below. Who holds each zone (`side`) and its
+-- dungeons (`dungeons`) are added at the end.
 local _, ns = ...
+
+local pairs, ipairs = pairs, ipairs
 
 local internal = ns.modules.ZoneInfo.internal
 
@@ -186,3 +189,59 @@ internal.zones = {
     [2548] = { 35, 45 }, -- Riverglades
     [2652] = { 35, 45 }, -- Shen'dralas
 }
+
+-- Who holds each zone, as Classic has it: "A" (Alliance), "H" (Horde), or "C" (contested).
+-- Forever's own zones aren't listed until we know.
+local SIDES = {
+    A = { 1429, 1426, 1432, 1436, 1433, 1431, 1437, 1453, 1455, 1438, 1439, 1457 },
+    H = { 1420, 1421, 1458, 1411, 1412, 1413, 1454, 1456 },
+    C = { 1424, 1416, 1417, 1434, 1418, 1435, 1425, 1427, 1419, 1428, 1422, 1423, 1430, 1442,
+        1440, 1441, 1443, 1445, 1444, 1446, 1447, 1448, 1449, 1451, 1452, 1450 },
+}
+for side, maps in pairs(SIDES) do
+    for _, mapID in ipairs(maps) do
+        internal.zones[mapID].side = side
+    end
+end
+
+-- The dungeons and raids whose entrance is in each zone: { instance ID (the game names it in
+-- the player's language), English name if it can't, lowest level, highest level }. Blackrock
+-- Mountain sits between Searing Gorge and Burning Steppes, so both list it.
+local BLACKROCK = {
+    { 230, "Blackrock Depths", 52, 60 },
+    { 229, "Blackrock Spire", 55, 60 },
+    { 409, "Molten Core", 60, 60 },
+    { 469, "Blackwing Lair", 60, 60 },
+}
+local DUNGEONS = {
+    [1436] = { { 36, "The Deadmines", 17, 26 } }, -- Westfall
+    [1453] = { { 34, "The Stockade", 22, 30 } }, -- Stormwind City
+    [1421] = { { 33, "Shadowfang Keep", 22, 30 } }, -- Silverpine Forest
+    [1426] = { { 90, "Gnomeregan", 29, 38 } }, -- Dun Morogh
+    -- Forever's; their instance IDs aren't known yet, so the names are the English ones.
+    [1455] = { { nil, "The Hall of Thanes", 13, 18 } }, -- Ironforge
+    [1458] = { { nil, "Ruins of Lordaeron", 15, 20 } }, -- Undercity
+    [1420] = { { 189, "Scarlet Monastery", 34, 45 } }, -- Tirisfal Glades
+    [1418] = { { 70, "Uldaman", 41, 51 } }, -- Badlands
+    [1435] = { { 109, "The Temple of Atal'Hakkar", 50, 60 } }, -- Swamp of Sorrows
+    [1427] = BLACKROCK, -- Searing Gorge
+    [1428] = BLACKROCK, -- Burning Steppes
+    [1434] = { { 309, "Zul'Gurub", 60, 60 } }, -- Stranglethorn Vale
+    [1422] = { { 289, "Scholomance", 58, 60 } }, -- Western Plaguelands
+    [1423] = { { 329, "Stratholme", 58, 60 }, { 533, "Naxxramas", 60, 60 } }, -- Eastern Plaguelands
+    [1454] = { { 389, "Ragefire Chasm", 13, 18 } }, -- Orgrimmar
+    [1413] = { -- The Barrens
+        { 43, "Wailing Caverns", 17, 24 },
+        { 47, "Razorfen Kraul", 29, 38 },
+        { 129, "Razorfen Downs", 37, 46 },
+    },
+    [1440] = { { 48, "Blackfathom Deeps", 24, 32 } }, -- Ashenvale
+    [1443] = { { 349, "Maraudon", 46, 55 } }, -- Desolace
+    [1446] = { { 209, "Zul'Farrak", 44, 54 } }, -- Tanaris
+    [1444] = { { 429, "Dire Maul", 56, 60 } }, -- Feralas
+    [1445] = { { 249, "Onyxia's Lair", 60, 60 } }, -- Dustwallow Marsh
+    [1451] = { { 509, "Ruins of Ahn'Qiraj", 60, 60 }, { 531, "Temple of Ahn'Qiraj", 60, 60 } }, -- Silithus
+}
+for mapID, dungeons in pairs(DUNGEONS) do
+    internal.zones[mapID].dungeons = dungeons
+end
