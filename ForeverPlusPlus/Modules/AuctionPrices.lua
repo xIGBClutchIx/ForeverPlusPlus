@@ -8,7 +8,7 @@
 local _, ns = ...
 
 local ipairs, format, time, floor = ipairs, string.format, time, math.floor
-local C_AuctionHouse, C_Timer = C_AuctionHouse, C_Timer
+local C_AuctionHouse, C_Timer, GetTime = C_AuctionHouse, C_Timer, GetTime
 local GetRealmName, UnitFactionGroup = GetRealmName, UnitFactionGroup
 local CreateFrame, pcall, type, hooksecurefunc = CreateFrame, pcall, type, hooksecurefunc
 local StaticPopupDialogs, StaticPopup_Show, YES, NO = StaticPopupDialogs, StaticPopup_Show, YES, NO
@@ -197,39 +197,69 @@ local open = false -- the auction house is open
 
 -- The scan shares the server's query throttle with everything the player does in the auction
 -- house. Paging nonstop starved Blizzard's own queries, so the Sell tab's list never loaded and
--- posts could fail. Now it sends one query at a time, only when the throttle is ready, and only
--- on the Buy tab: anywhere else it pauses and carries on when the player comes back.
+-- posts could fail. Now it keeps one request out at a time, sends only when the throttle is
+-- ready, gives way for a moment after each of Blizzard's own queries, and pauses while an item
+-- sits in the sell box, so the list and the post go through first. Browsing tabs with nothing
+-- to sell doesn't stop it.
+local YIELD = 2 -- seconds the scan waits after one of Blizzard's own queries
+
 local sent = false -- the scan's browse query has gone out
-local waiting -- what the next step waits on: "server", "throttle", or "tab"
+local waiting -- what the next step waits on: "server", "throttle", or "blocked"
 local ownQuery = false -- set while sending the scan's own browse query
+local lastQuery = 0 -- GetTime() of Blizzard's last query of its own
+local blockTimer
 local onThrottleReady
 
 local function stopScan()
     scanning, sent, waiting = false, false, nil
     seen, seenCount = nil, nil
     ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
+    if blockTimer then
+        blockTimer:Cancel()
+        blockTimer = nil
+    end
 end
 
--- The Buy tab's browse list is showing. Sell, Auctions, and an item's own listings all send
--- queries of their own. When the window's mode can't be read, don't pause.
-local function onBuyTab()
+-- An item is in the sell box on the Sell tab, so a post is coming. Probed: when the window's
+-- mode or the sell frame can't be read, don't pause.
+local function selling()
     local frame, modes = _G.AuctionHouseFrame, _G.AuctionHouseFrameDisplayMode
-    if not (frame and modes and modes.Buy) then
-        return true
+    if not (frame and modes and frame.GetDisplayMode) then
+        return false
     end
-    local mode = frame.GetDisplayMode and frame:GetDisplayMode() or frame.displayMode
-    return mode == nil or mode == modes.Buy
+    local mode = frame:GetDisplayMode()
+    local sellFrame = (mode == modes.ItemSell and frame.ItemSellFrame)
+        or (mode == modes.CommoditiesSell and frame.CommoditiesSellFrame)
+    return sellFrame and sellFrame.GetItem and sellFrame:GetItem() ~= nil or false
+end
+
+local step
+
+-- Paused for the sell box or giving way: look again shortly. The timer runs only while a scan
+-- is held back.
+local function onBlockTimer()
+    blockTimer = nil
+    if waiting == "blocked" then
+        step()
+    end
 end
 
 -- Sends the scan's query, asks for the next page, or finishes once the server has sent
 -- everything. Runs once per answer, so there's never more than one request out.
-local function step()
+function step()
     if not scanning then
         return
     end
-    if not onBuyTab() then
-        waiting = "tab"
-        showIndicator(format(L.AUCTIONPRICES_PAUSED, seenCount), false, true)
+    local sell = selling()
+    local wait = lastQuery + YIELD - GetTime()
+    if sell or wait > 0 then
+        waiting = "blocked"
+        if sell then
+            showIndicator(format(L.AUCTIONPRICES_PAUSED, seenCount), false, true)
+        end
+        if not blockTimer then
+            blockTimer = C_Timer.NewTimer(sell and 1 or wait, onBlockTimer)
+        end
         return
     end
     showIndicator(format(L.AUCTIONPRICES_SCANNING, seenCount), true)
@@ -281,10 +311,11 @@ local function onResultsAdded(_, added)
     onResults()
 end
 
--- Back on the Buy tab: carry on where the scan paused.
-local function onDisplayMode()
-    if module.enabled and scanning and waiting == "tab" then
-        step()
+-- Blizzard sent a query of its own (the sell list, an item's listings, your auctions, a post,
+-- a purchase): hold the next page back for a moment so those go first.
+local function onBlizzardQuery()
+    if module.enabled and scanning then
+        lastQuery = GetTime()
     end
 end
 
@@ -299,23 +330,33 @@ local function onOtherSearch()
     end
 end
 
--- Hooks can't be removed; the functions above check module.enabled. AuctionHouseFrame is
--- load-on-demand, so this waits for a scan, when the window is open.
-local hookedFrame, hookedSearch = false, false
+local SEARCHES = { "SendBrowseQuery", "SearchForFavorites", "SearchForItemKeys" }
+local QUERIES = {
+    "SendSearchQuery", "SendSellSearchQuery", "RequestMoreItemSearchResults",
+    "RequestMoreCommoditySearchResults", "RefreshItemSearchResults",
+    "RefreshCommoditySearchResults", "QueryOwnedAuctions", "QueryBids", "PostItem",
+    "PostCommodity", "PlaceBid", "CancelAuction", "StartCommoditiesPurchase",
+    "ConfirmCommoditiesPurchase",
+}
+
+-- Hooks can't be removed; the functions above check module.enabled. Probed per name, since the
+-- client may not have them all.
+local hookedQueries = false
 
 local function hookAuctionHouse()
-    if not hookedSearch then
-        hookedSearch = true
-        for _, name in ipairs({ "SendBrowseQuery", "SearchForFavorites", "SearchForItemKeys" }) do
-            if type(C_AuctionHouse[name]) == "function" then
-                hooksecurefunc(C_AuctionHouse, name, onOtherSearch)
-            end
+    if hookedQueries then
+        return
+    end
+    hookedQueries = true
+    for _, name in ipairs(SEARCHES) do
+        if type(C_AuctionHouse[name]) == "function" then
+            hooksecurefunc(C_AuctionHouse, name, onOtherSearch)
         end
     end
-    local frame = _G.AuctionHouseFrame
-    if not hookedFrame and frame and frame.SetDisplayMode then
-        hookedFrame = true
-        hooksecurefunc(frame, "SetDisplayMode", onDisplayMode)
+    for _, name in ipairs(QUERIES) do
+        if type(C_AuctionHouse[name]) == "function" then
+            hooksecurefunc(C_AuctionHouse, name, onBlizzardQuery)
+        end
     end
 end
 
