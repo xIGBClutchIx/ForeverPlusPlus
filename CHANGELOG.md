@@ -7,6 +7,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Added
 
 - **Points of Interest**: dungeons, raids, capitals, flight masters, boats, zeppelins, and spirit healers on the world map, in a new Map category. Includes an icon size and continent map toggle for each, and graying out flight masters you haven't learned. Off by default.
+- **Zone Info**: a panel in a corner of the world map with the zone's level range, fishing skill, and the herbs, ore, and skinning in it for your professions. Off by default.
 
 ### Changed
 

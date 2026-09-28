@@ -164,6 +164,7 @@
     "MapCanvasDataProviderMixin",
     "CreateFromMixins",
     "C_Texture",
-    "GetRealZoneText"
+    "GetRealZoneText",
+    "BACKDROP_TOOLTIP_16_16_5555"
   ]
 }

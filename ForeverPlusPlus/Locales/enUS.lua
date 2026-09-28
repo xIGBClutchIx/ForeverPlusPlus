@@ -604,6 +604,31 @@ L.POI_SHIP_TO = "Boat to %s" -- a place
 L.POI_ZEPPELIN_TO = "Zeppelin to %s" -- a place
 L.POI_SPIRIT_HEALER = "Spirit Healer"
 
+-- ZoneInfo
+L.ZONEINFO_TITLE = "Zone Info"
+L.ZONEINFO_DESC = "Show a zone's level range, fishing skill, and the herbs, ore, and skinning in "
+    .. "it for your professions, in a corner of the world map."
+L.ZONEINFO_CORNER = "Corner"
+L.ZONEINFO_CORNER_DESC = "Which corner of the world map the panel sits in."
+L.ZONEINFO_BOTTOMLEFT = "Bottom Left"
+L.ZONEINFO_BOTTOMRIGHT = "Bottom Right"
+L.ZONEINFO_HOVER = "On Continent Maps"
+L.ZONEINFO_HOVER_DESC = "On a continent map, show the zone under the cursor."
+L.ZONEINFO_LEVELS = "Level Range"
+L.ZONEINFO_LEVELS_DESC = "The zone's level range, colored against your level like quests."
+L.ZONEINFO_FISHING = "Fishing"
+L.ZONEINFO_FISHING_DESC = "The Fishing skill the zone's waters need, in red while yours is lower."
+L.ZONEINFO_GATHERING = "Gathering"
+L.ZONEINFO_GATHERING_DESC = "The herbs and ore in the zone and the Skinning its beasts need, for "
+    .. "the professions you have, colored against your skill like Gathering Tooltips."
+L.ZONEINFO_TITLE_LEVELS = "%s  %s" -- zone, "Level 10-20"
+L.ZONEINFO_LEVEL = "Level %d"
+L.ZONEINFO_LEVEL_RANGE = "Level %d-%d" -- lowest, highest
+L.ZONEINFO_LINE = "%s: %s" -- profession, what it finds
+L.ZONEINFO_RANGE = "%s-%s" -- lowest skill, highest skill
+L.ZONEINFO_LIST_SEPARATOR = ", "
+L.ZONEINFO_FISHING_NAME = "Fishing" -- until the client gives its own name
+
 -- CVarBrowser
 L.CVARBROWSER_TITLE = "Console Variables"
 L.CVARBROWSER_DESC = "Browse the game's console variables (CVars) on a page in Settings, and "

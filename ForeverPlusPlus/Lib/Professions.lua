@@ -9,8 +9,49 @@ local Professions = {
     HERBALISM = 182,
     MINING = 186,
     SKINNING = 393,
+    FISHING = 356,
 }
 ns.Professions = Professions
+
+-- Blizzard's difficulty colors, the same a trainer uses for recipes. Probe: QuestDifficultyColors
+-- is FrameXML's; the values after it are its own.
+local COLORS = QuestDifficultyColors or {}
+local RED = COLORS.impossible or { r = 1, g = 0.1, b = 0.1 }
+local ORANGE = COLORS.verydifficult or { r = 1, g = 0.5, b = 0.25 }
+local YELLOW = COLORS.difficult or { r = 1, g = 1, b = 0 }
+local GREEN = COLORS.standard or { r = 0.25, g = 0.75, b = 0.25 }
+local GRAY = COLORS.trivial or { r = 0.5, g = 0.5, b = 0.5 }
+
+---How hard gathering something that needs `need` is at skill `rank`, as a color (r, g, b): red
+---can't yet, then orange (a skill point every time), yellow (often), green (sometimes), and gray
+---(never). Without a rank (the player doesn't have the profession) it's red.
+---@param rank number?
+---@param need number
+---@return table color
+function Professions.Difficulty(rank, need)
+    if not rank or rank < need then
+        return RED
+    elseif rank < need + 25 then
+        return ORANGE
+    elseif rank < need + 50 then
+        return YELLOW
+    elseif rank < need + 100 then
+        return GREEN
+    end
+    return GRAY
+end
+
+---The Skinning skill a creature of `level` needs.
+---@param level number
+---@return number
+function Professions.SkinningNeed(level)
+    if level <= 10 then
+        return 1
+    elseif level <= 20 then
+        return level * 10 - 100
+    end
+    return level * 5
+end
 
 local known -- skill line -> { rank, name }, or nil until read
 local listening = false

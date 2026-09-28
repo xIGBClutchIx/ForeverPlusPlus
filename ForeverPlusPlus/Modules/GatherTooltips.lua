@@ -165,32 +165,6 @@ local FALLBACK_NAME = {
 local SKINNABLE_TYPES = { [1] = true, [2] = true }
 local SKINNABLE_NAMES = { [L.GATHERTOOLTIPS_BEAST] = true, [L.GATHERTOOLTIPS_DRAGONKIN] = true }
 
--- Colors -------------------------------------------------------------------------------------
--- Blizzard's difficulty colors, the same a trainer uses for recipes. Probe: QuestDifficultyColors
--- is FrameXML's; the values after it are its own.
-
-local COLORS = QuestDifficultyColors or {}
-local RED = COLORS.impossible or { r = 1, g = 0.1, b = 0.1 }
-local ORANGE = COLORS.verydifficult or { r = 1, g = 0.5, b = 0.25 }
-local YELLOW = COLORS.difficult or { r = 1, g = 1, b = 0 }
-local GREEN = COLORS.standard or { r = 0.25, g = 0.75, b = 0.25 }
-local GRAY = COLORS.trivial or { r = 0.5, g = 0.5, b = 0.5 }
-
--- How hard `need` is at `rank`: a gather gives a skill point every time while orange, often while
--- yellow, sometimes while green, and never once gray.
-local function difficulty(rank, need)
-    if rank < need then
-        return RED
-    elseif rank < need + 25 then
-        return ORANGE
-    elseif rank < need + 50 then
-        return YELLOW
-    elseif rank < need + 100 then
-        return GREEN
-    end
-    return GRAY
-end
-
 -- The line for a skill line and skill, colored, or nil when it's off or the player doesn't have
 -- the profession and `show` is "known". Without the profession it's red: you can't gather it.
 -- `text` is L.GATHERTOOLTIPS_REQUIRES or _GATHERED.
@@ -202,7 +176,7 @@ local function skillLine(line, need, text)
     if not rank and module.db.show ~= "always" then
         return nil
     end
-    local color = rank and difficulty(rank, need) or RED
+    local color = Professions.Difficulty(rank, need)
     return format(text, name or FALLBACK_NAME[line], need), color
 end
 
@@ -254,16 +228,6 @@ end
 
 -- Creatures ----------------------------------------------------------------------------------
 
--- The Skinning skill a creature of `level` needs.
-local function skinningNeed(level)
-    if level <= 10 then
-        return 1
-    elseif level <= 20 then
-        return level * 10 - 100
-    end
-    return level * 5
-end
-
 -- Whether a unit value is readable and true. Unit state can be secret; then it counts as no.
 local function yes(value)
     return readable(value) and not not value
@@ -298,7 +262,7 @@ local function onUnit(tooltip, data)
     if not (readable(level) and type(level) == "number" and level > 0) then
         return -- a "??" boss, or secret
     end
-    local line, color = skillLine(SKIN, skinningNeed(level), L.GATHERTOOLTIPS_REQUIRES)
+    local line, color = skillLine(SKIN, Professions.SkinningNeed(level), L.GATHERTOOLTIPS_REQUIRES)
     if line then
         addLine(tooltip, line, color)
     end

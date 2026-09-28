@@ -42,6 +42,8 @@ Modules\AutoScreenshot.lua
 Modules\ClassColors.lua
 Modules\PointsOfInterest\PointsOfInterest.lua
 Modules\PointsOfInterest\Data.lua
+Modules\ZoneInfo\ZoneInfo.lua
+Modules\ZoneInfo\Data.lua
 Changelog.lua
 Settings.lua
 Init.lua
