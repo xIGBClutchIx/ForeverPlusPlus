@@ -28,6 +28,8 @@ ns.changelog = {
                 { L.COORDS_TITLE, "Your coordinates and the cursor's in the world map's title "
                     .. "bar, from the game's own coordinates, with a toggle each. Off by "
                     .. "default." },
+                { L.HIDEFILTERRESET_TITLE, "Hides the reset button on the world map's filter "
+                    .. "dropdown. Off by default." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.CLASSCOLORS_TITLE, "Hostile NPCs' health bars are red, neutral ones yellow, "

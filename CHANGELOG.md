@@ -10,6 +10,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Zone Info**: a panel in a corner of the world map with the zone's level range, who holds it, its dungeons, fishing skill, and the herbs, ore, and skinning in it for your professions. Includes a size slider, and for herbs, ore, and skinning a choice of off, with the profession, or always. It sits above Blizzard's map coordinates when they're on. Off by default.
 - **Unexplored Areas**: shows the parts of zone maps you haven't explored yet. Includes the tint's color and strength, or no tint. Off by default.
 - **Coordinates**: your coordinates and the cursor's in the world map's title bar, from the game's own coordinates, with a toggle each. Off by default.
+- **Hide Filter Reset**: hides the reset button on the world map's filter dropdown. Off by default.
 
 ### Changed
 

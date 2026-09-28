@@ -689,6 +689,11 @@ L.COORDS_TITLEBAR = "In the Title Bar"
 L.COORDS_TITLEBAR_DESC = "Your coordinates on the left of the map's title bar and the cursor's "
     .. "on the right. Off shows them in the map's bottom left corner, as the game does."
 
+-- HideFilterReset
+L.HIDEFILTERRESET_TITLE = "Hide Filter Reset"
+L.HIDEFILTERRESET_DESC = "Hide the reset button on the world map's filter dropdown, which shows "
+    .. "whenever a filter is off."
+
 -- CVarBrowser
 L.CVARBROWSER_TITLE = "Console Variables"
 L.CVARBROWSER_DESC = "Browse the game's console variables (CVars) on a page in Settings, and "
