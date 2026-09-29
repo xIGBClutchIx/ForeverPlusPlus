@@ -13,6 +13,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Changed
 
 - **Zone Info** and **Points of Interest**: map tooltips now look the same. The title is white, then what kind of place it is in gold, then details in white, with the faction in Horde red or Alliance blue on cities, flight masters, boats, and zeppelins, and level ranges colored against yours. Each dungeon and raid is one row with Blizzard's icon, in the zone panel and in an entrance with several (such as Blackrock Mountain), so a long list no longer wraps through a name or a level range.
+- **Skip Cinematics**: Forget asks you to confirm first, like the Auction Prices reset.
 
 ### Fixed
 
@@ -20,6 +21,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Player Nameplates**: no more "action blocked" error at login. Recent allies turn light blue once the game has loaded the list, such as after you open the Recent Allies tab.
 - **Auction Prices**: posting works while a scan runs. The scan waits its turn with the server, gives way to the auction house's own searches, pauses while an item is in the sell box, and stops if you search.
 - **Player Nameplates** and **NPC Nameplates**: the guild or title moves under the cast bar the moment it appears, and back only once it has faded, instead of lagging or overlapping it.
+- **Points of Interest**: a flight point the game calls undiscovered now says it isn't learned yet.
 
 ## 0.3.0 (2026-09-28)
 

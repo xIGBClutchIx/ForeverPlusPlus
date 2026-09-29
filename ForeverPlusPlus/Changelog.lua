@@ -34,6 +34,8 @@ ns.changelog = {
                     .. "the zone panel and in an entrance with several (such as Blackrock "
                     .. "Mountain), so a long list no longer wraps through a name or a level "
                     .. "range." },
+                { L.SKIPCINEMATICS_TITLE, "Forget asks you to confirm first, like the Auction "
+                    .. "Prices reset." },
             } },
             { L.CHANGELOG_FIXED, {
                 { L.POI_TITLE, "No more second icon beside ours for Undercity, or for a "
@@ -51,6 +53,8 @@ ns.changelog = {
                 { L.NPCPLATES_TITLE, "The title moves under the cast bar the moment it "
                     .. "appears, and back only once it has faded, instead of lagging or "
                     .. "overlapping it." },
+                { L.POI_TITLE, "A flight point the game calls undiscovered now says it isn't "
+                    .. "learned yet." },
             } },
         },
     },
