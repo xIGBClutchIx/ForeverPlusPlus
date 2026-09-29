@@ -92,6 +92,44 @@ function CVars.Apply(name, value, done)
     end)
 end
 
+---Ties a module's checkbox options to the game settings behind them, keeping the player's own
+---values in `module.db.saved` (a `saved = {}` default). `map` is { option = cvar, ... } (each
+---cvar a name or a list of names, newest first). An option that's on sets its CVar to "1"; one
+---that's off sets it to "0", or with `restoreOff` puts the player's value back instead.
+---  local cvars = ns.CVars.Bind(module, { player = "worldMapShowPlayerCoords" })
+---  OnEnable: cvars.ApplyAll()   OnDisable: cvars.Restore()   OnOptionChanged: cvars.Apply(key)
+---@param module table
+---@param map table<string, string|string[]>
+---@param restoreOff? boolean
+---@return table bound Apply(key), ApplyAll(), Restore()
+function CVars.Bind(module, map, restoreOff)
+    local bound = {}
+    ---Applies one option, if it's one of the mapped ones.
+    function bound.Apply(key)
+        local names = map[key]
+        if not names then
+            return
+        end
+        if module.db[key] then
+            CVars.Set(module.db.saved, names, "1")
+        elseif restoreOff then
+            CVars.Restore(module.db.saved, names)
+        else
+            CVars.Set(module.db.saved, names, "0")
+        end
+    end
+    function bound.ApplyAll()
+        for key in pairs(map) do
+            bound.Apply(key)
+        end
+    end
+    ---Puts every CVar the module changed back to the player's value.
+    function bound.Restore()
+        CVars.RestoreAll(module.db.saved)
+    end
+    return bound
+end
+
 ---Puts one CVar back to the player's value, if `saved` changed it.
 ---@param saved table
 ---@param names string|string[]

@@ -5,7 +5,7 @@
 -- Leatrix Maps' coordinates; none of its code.
 local _, ns = ...
 
-local pairs, max, min = pairs, math.max, math.min
+local max, min = math.max, math.min
 local CreateFrame = CreateFrame
 
 local L = ns.L
@@ -32,21 +32,16 @@ module.options = {
 
 -- The client's own setting behind each option: the checkboxes under Settings > Gameplay >
 -- Interface > Coordinates. Forever only; see docs/forever-api.md.
-local CVARS = {
+local cvars = ns.CVars.Bind(module, {
     player = "worldMapShowPlayerCoords",
     cursor = "worldMapShowCursorCoords",
     tenths = "coordsByTenths",
     minimap = "minimapShowPlayerCoords",
-}
+})
 
 local INSET = 8 -- from the title bar's ends
 local GAP = 12 -- the least room kept either side of the title
 local THROTTLE = 0.05
-
--- Sets the client's setting to match an option, remembering the player's value the first time.
-local function applyCVar(key)
-    ns.CVars.Set(module.db.saved, CVARS[key], module.db[key] and "1" or "0")
-end
 
 -- The title bar ------------------------------------------------------------------------------
 
@@ -142,14 +137,12 @@ local function attach(map)
 end
 
 function module:OnEnable()
-    for key in pairs(CVARS) do
-        applyCVar(key)
-    end
+    cvars.ApplyAll()
     ns.WorldMap.WhenLoaded(attach)
 end
 
 function module:OnDisable()
-    ns.CVars.RestoreAll(self.db.saved)
+    cvars.Restore()
     ns.WorldMap.Cancel(attach)
     if bar then
         restyle()
@@ -159,9 +152,9 @@ end
 function module:OnOptionChanged(key)
     if not self.enabled then
         return
-    elseif CVARS[key] then
-        applyCVar(key)
-    elseif bar then
+    end
+    cvars.Apply(key)
+    if bar then
         restyle()
     end
 end

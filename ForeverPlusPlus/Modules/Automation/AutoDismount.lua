@@ -27,11 +27,12 @@ module.options = {
 }
 
 -- The client's own setting behind each option.
-local CVARS = {
+-- An option that's off puts the player's own value back.
+local cvars = ns.CVars.Bind(module, {
     dismount = "autoDismount",
     stand = "autoStand",
     unshift = "autoUnshift",
-}
+}, true)
 
 -- Errors the CVars don't answer, by the name of the game's string for them. Names this client
 -- doesn't have are skipped. Leaving a shapeshift form has none: CancelShapeshiftForm is protected,
@@ -92,33 +93,21 @@ local function onError(_, _, message)
     end
 end
 
--- Turns the client's setting on for an option that's on, and puts the player's value back for
--- one that's off.
-local function applyCVar(key)
-    if module.db[key] then
-        ns.CVars.Set(module.db.saved, CVARS[key], "1")
-    else
-        ns.CVars.Restore(module.db.saved, CVARS[key])
-    end
-end
-
 function module:OnEnable()
     if not actions then
         buildActions()
     end
-    for key in pairs(CVARS) do
-        applyCVar(key)
-    end
+    cvars.ApplyAll()
     self:On("UI_ERROR_MESSAGE", onError)
 end
 
 -- UI_ERROR_MESSAGE stops by itself (module:On).
 function module:OnDisable()
-    ns.CVars.RestoreAll(self.db.saved)
+    cvars.Restore()
 end
 
 function module:OnOptionChanged(key)
-    if self.enabled and CVARS[key] then
-        applyCVar(key)
+    if self.enabled then
+        cvars.Apply(key)
     end
 end
