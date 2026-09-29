@@ -13,6 +13,7 @@ local Enum, QuestDifficultyColors = Enum, QuestDifficultyColors
 local L = ns.L
 local Professions = ns.Professions
 local Code = ns.Colors.Code
+local NoBreak = ns.MapTooltip.NoBreak
 
 local module = ns.NewModule("ZoneInfo", L.ZONEINFO_DESC, {
     enabled = true,
@@ -83,7 +84,6 @@ local internal = module.internal
 local MAX_WIDTH = 300 -- the widest the text gets; longer lines wrap
 local PADDING = 8
 local GAP = 3 -- between rows
-local ROWS = 5
 local ICON_SIZE = 16 -- pixels
 local THROTTLE = 0.1 -- seconds between looks at where the cursor is
 
@@ -155,14 +155,14 @@ local function skillsRow(zone)
     local db, parts = module.db, {}
     if db.fishing and zone.fish then
         local rank, name, own = Professions.Rank(Professions.FISHING)
-        parts[#parts + 1] = icon(Professions.FISHING, own) .. format(L.ZONEINFO_SKILL,
-            name or L.ZONEINFO_FISHING_NAME, range(rank, zone.fish, zone.fishHigh, true))
+        parts[#parts + 1] = icon(Professions.FISHING, own) .. NoBreak(format(L.ZONEINFO_SKILL,
+            name or L.ZONEINFO_FISHING_NAME, range(rank, zone.fish, zone.fishHigh, true)))
     end
     local rank, name, own = Professions.Rank(Professions.SKINNING)
     if shows("skinning", rank) and zone[1] then
-        parts[#parts + 1] = icon(Professions.SKINNING, own) .. format(L.ZONEINFO_SKILL,
+        parts[#parts + 1] = icon(Professions.SKINNING, own) .. NoBreak(format(L.ZONEINFO_SKILL,
             name or L.ZONEINFO_SKINNING_NAME, range(rank, Professions.SkinningNeed(zone[1]),
-                Professions.SkinningNeed(zone[2])))
+                Professions.SkinningNeed(zone[2]))))
     end
     if #parts > 0 then
         return concat(parts, "    ")
@@ -194,7 +194,7 @@ local function gatherRow(key, line, ids, items)
     for i, id in ipairs(ids) do
         local item = items[id]
         local name = itemName(id, item[2])
-        names[i] = rank and colored(Professions.Difficulty(rank, item[1]), name) or name
+        names[i] = NoBreak(rank and colored(Professions.Difficulty(rank, item[1]), name) or name)
     end
     return icon(line, own) .. concat(names, L.ZONEINFO_LIST_SEPARATOR)
 end
@@ -219,20 +219,8 @@ local function territory(zone)
     return color, format(L.ZONEINFO_TERRITORY, ns.WorldMap.SideName(side) or side)
 end
 
--- The zone's dungeons and raids, each with its level range colored like quests.
-local function dungeonsRow(zone)
-    if not (module.db.dungeons and zone.dungeons) then
-        return nil
-    end
-    local names = {}
-    for i, instance in ipairs(zone.dungeons) do
-        names[i] = ns.Instances.Icon(instance, ICON_SIZE) .. " " .. format(L.ZONEINFO_DUNGEON,
-            ns.Instances.Name(instance), levelText(instance[3], instance[4]))
-    end
-    return concat(names, L.ZONEINFO_LIST_SEPARATOR)
-end
-
--- The rows under the zone's name, in order.
+-- The rows under the zone's name, in order. The zone's dungeons and raids are a row each, as
+-- Points of Interest lists them, so a row never wraps through a name or a level range.
 local function rows(zone)
     local list = {}
     if module.db.faction == "line" then
@@ -242,7 +230,11 @@ local function rows(zone)
     list[#list + 1] = skillsRow(zone)
     list[#list + 1] = gatherRow("herbs", Professions.HERBALISM, zone.herbs, internal.herbs)
     list[#list + 1] = gatherRow("ore", Professions.MINING, zone.ores, internal.ores)
-    list[#list + 1] = dungeonsRow(zone)
+    if module.db.dungeons then
+        for _, instance in ipairs(zone.dungeons or {}) do
+            list[#list + 1] = ns.Instances.Line(instance)
+        end
+    end
     return list
 end
 
@@ -306,20 +298,25 @@ local function newPanel(parent)
     end
     -- Over the map's pins, which sit on the canvas inside the same container.
     frame:SetFrameLevel(parent:GetFrameLevel() + 2000)
-    frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    -- The fonts of a GameTooltip: a white title, white rows.
+    frame.title = frame:CreateFontString(nil, "OVERLAY", "GameTooltipHeaderText")
     frame.title:SetPoint("TOPLEFT", PADDING, -PADDING)
     frame.title:SetJustifyH("LEFT")
     frame.rows = {}
-    local above = frame.title
-    for i = 1, ROWS do
-        local row = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-        row:SetPoint("TOPLEFT", above, "BOTTOMLEFT", 0, -GAP)
-        row:SetJustifyH("LEFT")
-        frame.rows[i] = row
-        above = row
-    end
     frame:Hide()
     return frame
+end
+
+-- The panel's row `i`, made when the zone first needs that many.
+local function rowAt(i)
+    local row = panel.rows[i]
+    if not row then
+        row = panel:CreateFontString(nil, "OVERLAY", "GameTooltipText")
+        row:SetPoint("TOPLEFT", panel.rows[i - 1] or panel.title, "BOTTOMLEFT", 0, -GAP)
+        row:SetJustifyH("LEFT")
+        panel.rows[i] = row
+    end
+    return row
 end
 
 -- How wide a line is unwrapped. Probe: GetUnboundedStringWidth is Mainline's.
@@ -396,6 +393,9 @@ local function draw(mapID)
     panel.title:SetWidth(0)
     panel.title:SetText(title)
     local width = textWidth(panel.title)
+    for i = #panel.rows + 1, #list do
+        rowAt(i)
+    end
     for i, row in ipairs(panel.rows) do
         row:SetWidth(0)
         row:SetText(list[i] or "")

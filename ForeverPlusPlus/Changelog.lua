@@ -20,11 +20,18 @@ ns.changelog = {
                     .. "make, and puts the skill each skeleton key opens in its tooltip." },
             } },
             { L.CHANGELOG_CHANGED, {
-                { L.ZONEINFO_TITLE, "Each dungeon and raid in the panel has Blizzard's "
-                    .. "dungeon or raid icon. Points of Interest does the same in the tooltip "
-                    .. "of an entrance with several instances, such as Blackrock Mountain." },
+                { L.ZONEINFO_TITLE .. " and " .. L.POI_TITLE, "Map tooltips now look the same. "
+                    .. "The title is white, then what kind of place it is in gold, then "
+                    .. "details in white, with the faction in Horde red or Alliance blue on "
+                    .. "cities, flight masters, boats, and zeppelins, and level ranges colored "
+                    .. "against yours. Each dungeon and raid is one row with Blizzard's icon, in "
+                    .. "the zone panel and in an entrance with several (such as Blackrock "
+                    .. "Mountain), so a long list no longer wraps through a name or a level "
+                    .. "range." },
             } },
             { L.CHANGELOG_FIXED, {
+                { L.POI_TITLE, "No more second icon beside ours for Undercity, or for a "
+                    .. "dungeon or raid entrance Blizzard also marks." },
                 { L.PLAYERPLATES_TITLE, "No more \"action blocked\" error at login. Recent "
                     .. "allies turn light blue once the game has loaded the list, such as after "
                     .. "you open the Recent Allies tab." },

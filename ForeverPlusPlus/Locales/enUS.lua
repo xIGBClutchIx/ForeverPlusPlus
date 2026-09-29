@@ -575,6 +575,11 @@ L.CLASSCOLORS_PARTY_DESC = "Your party members' frames. Raid-style party frames 
 L.CLASSCOLORS_TOT = "Target of Target"
 L.CLASSCOLORS_TOT_DESC = "The small frames for your target's target and your focus's target."
 
+-- Instances (Lib), shown in map tooltips and panels
+L.INSTANCES_LEVEL = "Level %d"
+L.INSTANCES_LEVELS = "Level %d-%d" -- lowest, highest
+L.INSTANCES_RANGE = "%d-%d" -- lowest, highest
+
 -- PointsOfInterest. Place names on the map come from the game, or from Data.lua.
 L.POI_TITLE = "Points of Interest"
 L.POI_DESC = "Show dungeons, raids, capital cities, flight masters, boats, zeppelins, and spirit "
@@ -608,8 +613,6 @@ L.POI_OTHER_FACTION_DESC = "Also show the other faction's flight masters, boats,
 L.POI_DUNGEON = "Dungeon"
 L.POI_RAID = "Raid"
 L.POI_CAPITAL = "Capital City"
-L.POI_LEVEL = "Level %d"
-L.POI_LEVELS = "Level %d-%d" -- lowest, highest
 L.POI_PART = "%s (%s)" -- an instance, which entrance
 L.POI_MAIN_GATE = "Main Gate"
 L.POI_SERVICE_GATE = "Service Gate"
@@ -663,7 +666,6 @@ L.ZONEINFO_CONTESTED = "Contested Territory"
 L.ZONEINFO_DUNGEONS = "Dungeons"
 L.ZONEINFO_DUNGEONS_DESC = "The dungeons and raids whose entrance is in the zone, with their level "
     .. "range colored against yours."
-L.ZONEINFO_DUNGEON = "%s %s" -- dungeon, its levels ("17-26")
 L.ZONEINFO_SIZE = "Size"
 L.ZONEINFO_SIZE_DESC = "How big the panel is, compared with its normal size."
 L.ZONEINFO_TITLE_LEVELS = "%s  %s" -- zone, its levels ("10-20")

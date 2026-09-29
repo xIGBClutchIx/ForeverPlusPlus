@@ -19,6 +19,7 @@ Lib\Professions.lua
 Lib\PlateLabel.lua
 Lib\FriendlyPlates.lua
 Lib\WorldMap.lua
+Lib\MapTooltip.lua
 Lib\Instances.lua
 Lib\MapPins.lua
 Modules\PlayerPlates.lua

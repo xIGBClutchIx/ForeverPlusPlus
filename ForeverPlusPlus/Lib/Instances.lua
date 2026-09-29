@@ -3,7 +3,10 @@
 -- level, true for a raid }, by a short key.
 local _, ns = ...
 
+local pairs, type, tostring = pairs, type, tostring
 local GetRealZoneText, format = GetRealZoneText, string.format
+
+local L = ns.L
 
 local Instances = {
     aq20 = { 509, "Ruins of Ahn'Qiraj", 60, 60, true },
@@ -58,4 +61,56 @@ function ns.Instances.Name(instance)
         name = instance[2]
     end
     return name
+end
+
+---An instance's level range as text, colored against the player's level like a quest's.
+---@param instance table an entry of `byKey`, or one shaped like it
+---@param compact boolean? "52-60" instead of "Level 52-60"
+---@return string
+function ns.Instances.Levels(instance, compact)
+    local low, high = instance[3], instance[4]
+    local text
+    if compact then
+        text = low == high and tostring(low) or format(L.INSTANCES_RANGE, low, high)
+    else
+        text = low == high and format(L.INSTANCES_LEVEL, low) or format(L.INSTANCES_LEVELS, low, high)
+    end
+    local color = ns.Colors.LevelRange(low, high)
+    if not color then
+        return text
+    end
+    return ns.Colors.Code(color.r, color.g, color.b) .. text .. "|r"
+end
+
+ns.Instances.ICON_SIZE = 14 -- pixels, the icon before an instance in a tooltip or panel
+
+---One instance as a row: its icon, its name, and its level range, the same in every tooltip and
+---panel that lists instances. The parts are held together with no-break spaces so a row that
+---wraps never splits the name or the levels.
+---@param instance table an entry of `byKey`, or one shaped like it
+---@param name string? shown instead of the instance's own name (for one of its entrances)
+---@return string
+function ns.Instances.Line(instance, name)
+    return format("%s %s  %s", ns.Instances.Icon(instance, ns.Instances.ICON_SIZE),
+        ns.MapTooltip.NoBreak(name or ns.Instances.Name(instance)), ns.Instances.Levels(instance, true))
+end
+
+local byName -- instances by lower-case name, once asked
+
+---The instance a name belongs to (in the player's language or English), for telling Blizzard's
+---own icon for it from ours.
+---@param name string?
+---@return table? instance an entry of `byKey`
+function ns.Instances.ByName(name)
+    if type(name) ~= "string" or name == "" then
+        return nil
+    end
+    if not byName then
+        byName = {}
+        for _, instance in pairs(Instances) do
+            byName[ns.Instances.Name(instance):lower()] = instance
+            byName[instance[2]:lower()] = instance
+        end
+    end
+    return byName[name:lower()]
 end

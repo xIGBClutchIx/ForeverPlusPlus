@@ -10,10 +10,11 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Changed
 
-- **Zone Info** and **Points of Interest**: each dungeon and raid in the zone panel and in a multi-instance entrance's tooltip (such as Blackrock Mountain) has Blizzard's dungeon or raid icon.
+- **Zone Info** and **Points of Interest**: map tooltips now look the same. The title is white, then what kind of place it is in gold, then details in white, with the faction in Horde red or Alliance blue on cities, flight masters, boats, and zeppelins, and level ranges colored against yours. Each dungeon and raid is one row with Blizzard's icon, in the zone panel and in an entrance with several (such as Blackrock Mountain), so a long list no longer wraps through a name or a level range.
 
 ### Fixed
 
+- **Points of Interest**: no more second icon beside ours for Undercity, or for a dungeon or raid entrance Blizzard also marks.
 - **Player Nameplates**: no more "action blocked" error at login. Recent allies turn light blue once the game has loaded the list, such as after you open the Recent Allies tab.
 - **Auction Prices**: posting works while a scan runs. The scan waits its turn with the server, gives way to the auction house's own searches, pauses while an item is in the sell box, and stops if you search.
 - **Player Nameplates** and **NPC Nameplates**: the guild or title moves under the cast bar the moment it appears, and back only once it has faded, instead of lagging or overlapping it.

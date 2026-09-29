@@ -120,6 +120,7 @@
     "GetCreatureDifficultyColor",
     "GetQuestDifficultyColor",
     "FACTION_BAR_COLORS",
+    "PLAYER_FACTION_COLORS",
     "TOOLTIP_DEFAULT_COLOR",
     "C_Container",
     "RED_FONT_COLOR",

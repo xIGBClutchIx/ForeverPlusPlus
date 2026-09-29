@@ -9,7 +9,6 @@ local ipairs, select, setmetatable, hooksecurefunc = ipairs, select, setmetatabl
 local CreateFrame, CreateFromMixins = CreateFrame, CreateFromMixins
 local C_Texture, C_Map, GameTooltip = C_Texture, C_Map, GameTooltip
 local CreateVector2D = CreateVector2D
-local NORMAL_FONT_COLOR, HIGHLIGHT_FONT_COLOR = NORMAL_FONT_COLOR, HIGHLIGHT_FONT_COLOR
 
 local MapPins = {}
 ns.MapPins = MapPins
@@ -77,12 +76,7 @@ end
 -- Pins ----------------------------------------------------------------------------------------
 
 local function onEnter(pin)
-    GameTooltip:SetOwner(pin, "ANCHOR_RIGHT")
-    GameTooltip:SetText(pin.info.title, HIGHLIGHT_FONT_COLOR:GetRGB())
-    for _, line in ipairs(pin.info.lines or {}) do
-        GameTooltip:AddLine(line, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
-    end
-    GameTooltip:Show()
+    ns.MapTooltip.Show(pin, pin.info.title, pin.info.lines)
     pin.highlight:Show()
 end
 
@@ -283,7 +277,7 @@ end
 ---Makes a layer of map pins. `fill(mapID, add)` runs each time the map shows a map, and calls
 ---`add(x, y, info)` for each pin: x and y from 0 to 1 across the map, and info
 ---`{ atlas, size, title, lines, desaturated }` (size in pixels on screen; lines of tooltip text
----under the title; desaturated to gray the icon). Call `layer:Enable()` to show it and `layer:Disable()` to take it off.
+---under the title, as `ns.MapTooltip.Show` takes them; desaturated to gray the icon). Call `layer:Enable()` to show it and `layer:Disable()` to take it off.
 ---@param fill fun(mapID: number, add: fun(x: number, y: number, info: table))
 ---@return table layer
 function MapPins.New(fill)

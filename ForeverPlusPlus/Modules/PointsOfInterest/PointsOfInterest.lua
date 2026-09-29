@@ -109,8 +109,6 @@ end
 -- color, which on Forever is bronze.
 local TAXI = { A = "TaxiNode_Alliance", H = "TaxiNode_Horde", N = "TaxiNode_Neutral" }
 
-local GRAY = ns.Colors.Code(unpack(ns.Colors.GRAY))
-
 -- A learned one: the white flight master icon the minimap shows, or the faction's icon without
 -- it. In Retail's atlas list; Unverified on Forever.
 local learnedIcon
@@ -149,32 +147,36 @@ local function instanceName(instance)
     return name
 end
 
--- "Level 41-51", colored against the player's level like quests.
-local function levels(instance)
-    local low, high = instance[3], instance[4]
-    local text = low == high and format(L.POI_LEVEL, low) or format(L.POI_LEVELS, low, high)
-    local color = ns.Colors.LevelRange(low, high)
-    if not color then
-        return text
+local MapTooltip = ns.MapTooltip
+
+-- The lines of a tooltip from the ones given, leaving out the nils.
+local function linesOf(...)
+    local lines = {}
+    for i = 1, select("#", ...) do
+        local line = select(i, ...)
+        if line then
+            lines[#lines + 1] = line
+        end
     end
-    return ns.Colors.Code(color.r, color.g, color.b) .. text .. "|r"
+    return lines
 end
 
-local TOOLTIP_ICON = 14 -- pixels, the dungeon or raid icon before each instance in a tooltip
-
--- The tooltip of a dungeon or raid: one instance, or a place with several (Blackrock Mountain).
+-- The tooltip of a dungeon or raid: one instance (its kind, then its level range colored against
+-- the player's), or a place with several (Blackrock Mountain), a row each. Also the rows alone,
+-- for a city's tooltip that takes them in.
 local function instanceTooltip(kindName, key)
     local instance = internal.instances[key]
     if not instance.parts then
-        return instanceName(instance), { kindName, levels(instance) }
+        local row = MapTooltip.Detail(ns.Instances.Line(instance, instanceName(instance)))
+        return instanceName(instance), { kindName, MapTooltip.Detail(ns.Instances.Levels(instance)) },
+            { row }
     end
-    local lines = {}
+    local rows = {}
     for _, partKey in ipairs(instance.parts) do
         local part = internal.instances[partKey]
-        lines[#lines + 1] = format("%s %s  %s", ns.Instances.Icon(part, TOOLTIP_ICON),
-            instanceName(part), levels(part))
+        rows[#rows + 1] = MapTooltip.Detail(ns.Instances.Line(part, instanceName(part)))
     end
-    return place(instance.name), lines
+    return place(instance.name), rows, rows
 end
 
 -- Whether a travel point of this faction shows for the player.
@@ -281,17 +283,18 @@ local function pinFor(point, mapID, world)
         local city = internal.cities[point[4]]
         info.atlas = atlasOf(kindInfo)
         info.title = zoneName(point[4])
-        info.lines = { L.POI_CAPITAL, ns.WorldMap.SideName(city.faction) }
+        info.lines = linesOf(L.POI_CAPITAL, MapTooltip.Side(city.faction))
     elseif kindName == "dungeon" or kindName == "raid" then
         info.atlas = kindInfo.atlas
-        info.title, info.lines = instanceTooltip(
+        info.title, info.lines, info.rows = instanceTooltip(
             kindName == "raid" and L.POI_RAID or L.POI_DUNGEON, point[4])
     elseif kindName == "flight" then
         if not forPlayer(point[4]) then
             return nil
         end
         info.title = place(point[5])
-        info.lines = { L.POI_FLIGHT_MASTER, zoneName(mapID) }
+        info.lines = linesOf(L.POI_FLIGHT_MASTER, MapTooltip.Side(point[4]),
+            MapTooltip.Detail(zoneName(mapID)))
         -- Learned ones look like the minimap's; the rest keep the bronze flight point icon.
         local state = learned(point)
         if state then
@@ -299,7 +302,7 @@ local function pinFor(point, mapID, world)
         else
             info.atlas = TAXI[point[4]]
             if state == false then
-                info.lines[#info.lines + 1] = GRAY .. L.POI_FLIGHT_UNLEARNED .. "|r"
+                info.lines[#info.lines + 1] = MapTooltip.Note(L.POI_FLIGHT_UNLEARNED)
             end
         end
     elseif kindName == "ship" or kindName == "zeppelin" then
@@ -309,7 +312,7 @@ local function pinFor(point, mapID, world)
         info.atlas = atlasOf(kindInfo)
         info.title = format(kindName == "ship" and L.POI_SHIP_TO or L.POI_ZEPPELIN_TO,
             place(point[5]))
-        info.lines = { zoneName(point[6] or mapID) }
+        info.lines = linesOf(MapTooltip.Side(point[4]), MapTooltip.Detail(zoneName(point[6] or mapID)))
     else
         info.atlas = atlasOf(kindInfo)
         info.title = L.POI_SPIRIT_HEALER
@@ -338,10 +341,13 @@ local function gameEntrances(mapID, listed, add)
         local x, y = entrance.position:GetXY()
         local raid = (entrance.atlasName or ""):lower():find("raid") ~= nil
         local kindInfo = KINDS[raid and "raid" or "dungeon"]
-        if db[kindInfo.show] and not listedNear(listed, x * 100, y * 100) then
+        -- Not one Data.lua has, by place or by name: the Ruins of Lordaeron's entrance is listed
+        -- on the Undercity's map, so the game's, on Tirisfal Glades, would be a second icon.
+        if db[kindInfo.show] and not listedNear(listed, x * 100, y * 100)
+            and not ns.Instances.ByName(entrance.name) then
             local lines = { raid and L.POI_RAID or L.POI_DUNGEON }
             if entrance.description and entrance.description ~= "" then
-                lines[2] = entrance.description
+                lines[2] = MapTooltip.Detail(entrance.description)
             end
             add(x, y, {
                 atlas = entrance.atlasName ~= "" and entrance.atlasName or kindInfo.atlas,
@@ -413,8 +419,9 @@ local function addCity(cityMap, mapID, world, add, listed)
                 listed[#listed + 1] = { point[1], x * 100, y * 100 }
             end
             if cx and abs(x - cx) * 100 < MERGE and abs(y - cy) * 100 < MERGE then
-                capital.lines[#capital.lines + 1] =
-                    format("%s  %s", info.title, info.lines[#info.lines])
+                for _, row in ipairs(info.rows) do
+                    capital.lines[#capital.lines + 1] = row
+                end
             else
                 add(x, y, info)
             end
@@ -480,10 +487,12 @@ local function fill(mapID, add)
     end
 end
 
--- Blizzard's city icons -----------------------------------------------------------------------
--- Blizzard marks the capitals on continent maps with area POIs. With Capital Cities set to Off,
--- or to ours on continent maps, they're hidden, like Leatrix Maps' Hide Town and City Icons, but
--- told apart by the city's name instead of the icon's place in its texture.
+-- Blizzard's own icons ------------------------------------------------------------------------
+-- Blizzard marks the capitals on continent maps, and may mark dungeon entrances anywhere, with
+-- pins of its own. Wherever ours show for the same place, theirs are hidden so there's one icon,
+-- not two (Undercity's, and the Ruins of Lordaeron's beside it). Capital Cities set to Off hides
+-- Blizzard's too, like Leatrix Maps' Hide Town and City Icons, but told apart by the name
+-- instead of the icon's place in its texture.
 
 local cityNames
 
@@ -498,24 +507,35 @@ local function isCity(name)
             end
         end
     end
-    return cityNames[name] == true
+    return cityNames[name] == true or cityNames[(name:gsub("^[Tt]he ", ""))] == true
+end
+
+-- Whether ours replace Blizzard's pin with this name on the map now: a city's (ours, or none at
+-- all), or a dungeon's or raid's, where its kind shows. Ours show on zone maps whenever their
+-- checkbox is on, and on continents with On Continent Maps.
+local function hidesBlizzard(mapID, name)
+    if not module.enabled then
+        return false
+    end
+    local db, world = module.db, isContinent(mapID)
+    if isCity(name) then
+        return db.capitals == "off" or (db.capitals == "ours" and (not world or db.capitalsWorld))
+    end
+    local instance = ns.Instances.ByName(name)
+    return instance ~= nil and shows(KINDS[instance[5] and "raid" or "dungeon"], world) or false
 end
 
 -- After the world map acquires a pin of its own. The pin is hidden, not faded, so its tooltip
 -- goes too; the map shows it again when it reuses the pin.
-local function hidesBlizzard()
-    local db = module.db
-    -- Ours replace them only where ours show: on continents, with On Continent Maps.
-    return module.enabled and (db.capitals == "off" or (db.capitals == "ours" and db.capitalsWorld))
-end
+local BLIZZARD_TEMPLATES = { AreaPOIPinTemplate = true, DungeonEntrancePinTemplate = true }
 
 local function onAcquire(map, template, poiInfo)
-    if not hidesBlizzard() or template ~= "AreaPOIPinTemplate" or type(poiInfo) ~= "table"
-        or not isCity(poiInfo.name) then
+    if not BLIZZARD_TEMPLATES[template] or type(poiInfo) ~= "table" or type(poiInfo.name) ~= "string"
+        or not hidesBlizzard(map:GetMapID(), poiInfo.name) then
         return
     end
     for pin in map:EnumeratePinsByTemplate(template) do
-        if pin.poiInfo == poiInfo then
+        if pin.poiInfo == poiInfo or pin.dungeonEntranceInfo == poiInfo or pin.name == poiInfo.name then
             pin:Hide()
         end
     end
@@ -546,7 +566,7 @@ function module:OnOptionChanged(key)
     if not self.enabled then
         return
     end
-    if key == "capitals" or key == "capitalsWorld" then
+    if key:find("^capital") or key:find("^dungeon") or key:find("^raid") then
         ns.MapPins.RefreshMap() -- ours and Blizzard's, both redrawn
     else
         layer:Refresh()

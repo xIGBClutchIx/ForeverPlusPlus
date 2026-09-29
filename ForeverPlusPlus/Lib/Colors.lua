@@ -6,6 +6,7 @@ local format, floor, max = string.format, math.floor, math.max
 local UnitLevel, GetQuestDifficultyColor, QuestDifficultyColors =
     UnitLevel, GetQuestDifficultyColor, QuestDifficultyColors
 local RECENT_ALLY_FONT_COLOR, UnitClass, C_ClassColor = RECENT_ALLY_FONT_COLOR, UnitClass, C_ClassColor
+local PLAYER_FACTION_COLORS = PLAYER_FACTION_COLORS
 
 local readable = ns.IsReadable
 
@@ -46,6 +47,22 @@ function Colors.LevelRange(low, high)
         return GetQuestDifficultyColor(max(low, high - 2))
     end
     return QuestDifficultyColors.difficult
+end
+
+-- Blizzard's faction colors (Horde red, Alliance blue, from its PLAYER_FACTION_COLORS), with
+-- these values kept for when the table isn't there. Anything neither side's is yellow, like a
+-- neutral reputation.
+local FACTION_COLORS = {
+    H = PLAYER_FACTION_COLORS and PLAYER_FACTION_COLORS[0] or { r = 0.9, g = 0.05, b = 0.07 },
+    A = PLAYER_FACTION_COLORS and PLAYER_FACTION_COLORS[1] or { r = 0.29, g = 0.33, b = 0.91 },
+    N = { r = 0.9, g = 0.7, b = 0 },
+}
+
+---The color of a side in map data: "H" (Horde), "A" (Alliance), or anything else for neutral.
+---@param side string?
+---@return table color with r, g, b
+function Colors.Faction(side)
+    return FACTION_COLORS[side or "N"] or FACTION_COLORS.N
 end
 
 ---The unit's class color (a ColorMixin), or nil when its class can't be read (secret, mostly in
