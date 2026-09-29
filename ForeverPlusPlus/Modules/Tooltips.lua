@@ -17,7 +17,7 @@ local GetGuildInfo, GetCreatureDifficultyColor = GetGuildInfo, GetCreatureDiffic
 local GetQuestDifficultyColor, FACTION_BAR_COLORS = GetQuestDifficultyColor, FACTION_BAR_COLORS
 local NORMAL_FONT_COLOR, TOOLTIP_DEFAULT_COLOR = NORMAL_FONT_COLOR, TOOLTIP_DEFAULT_COLOR
 local FACTION_HORDE, FACTION_ALLIANCE = FACTION_HORDE, FACTION_ALLIANCE
-local GameTooltip, InCombatLockdown, hooksecurefunc = GameTooltip, InCombatLockdown, hooksecurefunc
+local GameTooltip, InCombatLockdown = GameTooltip, InCombatLockdown
 
 local L = ns.L
 local readable = ns.IsReadable
@@ -381,7 +381,7 @@ end
 -- Anchor to Cursor: after Blizzard places a tooltip at its default spot (bottom right), move it
 -- to the mouse instead.
 local function onDefaultAnchor(tooltip, parent)
-    if module.enabled and module.db.anchorCursor then
+    if module.db.anchorCursor then
         tooltip:SetOwner(parent, "ANCHOR_CURSOR")
     end
 end
@@ -389,15 +389,15 @@ end
 local hooked = false
 
 function module:OnEnable()
-    -- Hooks can't be removed; each one checks module.enabled.
+    -- Tooltip data calls can't be removed; each one checks module.enabled.
     if not hooked then
         hooked = true
         TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Unit, onUnit)
         TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, onItem)
-        -- Probe: GameTooltip_SetDefaultAnchor is Blizzard's for every default-placed tooltip.
-        if GameTooltip_SetDefaultAnchor then
-            hooksecurefunc("GameTooltip_SetDefaultAnchor", onDefaultAnchor)
-        end
+    end
+    -- Probe: GameTooltip_SetDefaultAnchor is Blizzard's for every default-placed tooltip.
+    if GameTooltip_SetDefaultAnchor then
+        self:Hook("GameTooltip_SetDefaultAnchor", onDefaultAnchor)
     end
 end
 

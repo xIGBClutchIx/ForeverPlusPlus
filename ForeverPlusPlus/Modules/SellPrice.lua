@@ -34,15 +34,10 @@ local function drawSellPrice(tooltip, data, lineData)
     return true
 end
 
-local hooked = false
-
 function module:OnEnable()
     -- The hook can't be removed; drawSellPrice checks module.enabled and lets Blizzard's line
     -- show when off.
-    if not hooked then
-        hooked = true
-        ItemTooltip.ReplaceSellPrice(drawSellPrice)
-    end
+    ItemTooltip.ReplaceSellPrice(drawSellPrice)
     ItemTooltip.RedrawOnShift(self, true)
 end
 

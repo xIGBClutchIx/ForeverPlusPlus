@@ -5,7 +5,7 @@ local _, ns = ...
 
 -- The original ToggleSheath, from before the hook below, so our own stow doesn't look like the
 -- player pressing the key.
-local GetSheathState, ToggleSheath, hooksecurefunc = GetSheathState, ToggleSheath, hooksecurefunc
+local GetSheathState, ToggleSheath = GetSheathState, ToggleSheath
 local UnitAffectingCombat, UnitIsDeadOrGhost = UnitAffectingCombat, UnitIsDeadOrGhost
 local UnitCastingInfo, UnitChannelInfo, C_Timer = UnitCastingInfo, UnitChannelInfo, C_Timer
 local IsInInstance = IsInInstance
@@ -39,7 +39,6 @@ local SHEATHED = 1
 local RETRY = 1 -- seconds to wait while casting before trying again
 
 local timer -- the pending stow, or nil
-local hooked = false
 
 local function cancel()
     if timer then
@@ -81,12 +80,7 @@ function module:OnEnable()
     self:On("PLAYER_REGEN_ENABLED", onCombatEnd)
     self:On("PLAYER_REGEN_DISABLED", cancel)
     -- Drawing or stowing by hand (the Sheath/Unsheath key) is the player's choice; leave it.
-    -- Hooks can't be removed, but this one only cancels a pending stow, and while the module is
-    -- off there never is one.
-    if not hooked then
-        hooked = true
-        hooksecurefunc("ToggleSheath", cancel)
-    end
+    self:Hook("ToggleSheath", cancel)
 end
 
 function module:OnDisable()

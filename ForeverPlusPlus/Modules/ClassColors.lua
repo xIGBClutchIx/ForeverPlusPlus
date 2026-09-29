@@ -209,12 +209,6 @@ end
 
 -- Blizzard calls UnitFrame_Update whenever a frame's unit changes (a new target, the party
 -- roster, the target's target), so the colors follow it.
-local function onUnitFrameUpdate(frame)
-    if module.enabled then
-        update(frame)
-    end
-end
-
 local function updateAll()
     local target, focus, party = _G.TargetFrame, _G.FocusFrame, _G.PartyFrame
     update(_G.PlayerFrame)
@@ -227,12 +221,9 @@ local function updateAll()
     end
 end
 
-local hooked = false
-
 function module:OnEnable()
-    if not hooked and _G.UnitFrame_Update then
-        hooked = true
-        hooksecurefunc("UnitFrame_Update", onUnitFrameUpdate)
+    if _G.UnitFrame_Update then
+        self:Hook("UnitFrame_Update", update)
     end
     -- A reaction or tap can change without a new unit (a mob turns hostile, someone tags it).
     self:On("UNIT_FACTION", updateAll)

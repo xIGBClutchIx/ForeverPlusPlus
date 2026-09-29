@@ -137,9 +137,15 @@ end
 
 ---Calls `fn(map, template, ...)` after the world map acquires a pin of its own, with what the map
 ---was given for it (for Blizzard's POI pins, the poiInfo), once the map has loaded. The hook
----can't come off, so `fn` checks whether its module is on.
+---can't come off, so `fn` checks whether its module is on. Asking again with the same `fn`
+---changes nothing, so it can be called from `OnEnable`.
 ---@param fn fun(map: table, template: string, ...)
 function MapPins.OnAcquire(fn)
+    for _, known in ipairs(acquireHooks) do
+        if known == fn then
+            return
+        end
+    end
     acquireHooks[#acquireHooks + 1] = fn
     WorldMap.WhenLoaded(hookAcquire)
 end

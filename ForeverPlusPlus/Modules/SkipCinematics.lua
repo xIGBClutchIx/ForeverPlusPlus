@@ -4,7 +4,7 @@
 local _, ns = ...
 
 local format, tostring, select = string.format, tostring, select
-local hooksecurefunc, IsShiftKeyDown, StopCinematic = hooksecurefunc, IsShiftKeyDown, StopCinematic
+local IsShiftKeyDown, StopCinematic = IsShiftKeyDown, StopCinematic
 local C_Map, C_Timer, GetSubZoneText, GetInstanceInfo = C_Map, C_Timer, GetSubZoneText, GetInstanceInfo
 
 local L = ns.L
@@ -85,7 +85,7 @@ end
 
 -- After MovieFrame:PlayMovie. movieID is only set when the movie really started.
 local function onPlayMovie(frame, movieID)
-    if not module.enabled or not movieID or frame.movieID ~= movieID then
+    if not movieID or frame.movieID ~= movieID then
         return
     end
     if shouldSkip(module.db.seen.movies, movieID) then
@@ -98,7 +98,7 @@ end
 -- After CinematicFrame's own OnEvent has shown the frame. Only cinematics the game lets you
 -- cancel: the others are vehicle rides and scenes, where skipping would drop you off a vehicle.
 local function onCinematicEvent(_, event, canBeCancelled)
-    if not module.enabled or event ~= "CINEMATIC_START" or not canBeCancelled then
+    if event ~= "CINEMATIC_START" or not canBeCancelled then
         return
     end
     if shouldSkip(module.db.seen.cinematics, cinematicKey()) then
@@ -109,21 +109,15 @@ local function onCinematicEvent(_, event, canBeCancelled)
 end
 
 -- Both frames are part of the always-loaded FrameXML.
-local hooked = false
-
 function module:OnEnable()
-    if hooked then
-        return
-    end
-    hooked = true
     if MovieFrame and MovieFrame.PlayMovie then
-        hooksecurefunc(MovieFrame, "PlayMovie", onPlayMovie)
+        self:Hook(MovieFrame, "PlayMovie", onPlayMovie)
     end
     if CinematicFrame then
-        CinematicFrame:HookScript("OnEvent", onCinematicEvent)
+        self:HookScript(CinematicFrame, "OnEvent", onCinematicEvent)
     end
 end
 
--- The hooks can't come off; they check module.enabled and do nothing while it's off.
+-- The hooks do nothing while the module is off (module:Hook).
 function module:OnDisable()
 end

@@ -5,13 +5,14 @@ local addonName, ns = ...
 local pairs, ipairs, type, print, format, tostring = pairs, ipairs, type, print, string.format, tostring
 local tonumber, floor, min, max = tonumber, math.floor, math.min, math.max
 local concat, strsplit, strtrim, setmetatable = table.concat, strsplit, strtrim, setmetatable
-local InCombatLockdown, GetLocale = InCombatLockdown, GetLocale
+local InCombatLockdown, GetLocale, hooksecurefunc, _G = InCombatLockdown, GetLocale, hooksecurefunc, _G
 
 -- Calls a function so that an error in it is reported but doesn't stop the caller, so one broken
 -- handler can't stop the others. Probe: securecallfunction is Mainline's; without it, call plainly.
 local call = securecallfunction or function(fn, ...)
     return fn(...)
 end
+ns.Call = call -- for the Lib files that run other files' callbacks
 
 ns.name = addonName
 ns.title = "Forever++"
@@ -230,6 +231,61 @@ function Module:Off(event, fn)
         end
     end
     self.events = list
+end
+
+-- Hooks once per module, target, method and function, so `OnEnable` can ask for them every time
+-- it runs. The hook itself can't come off, so it does nothing while the module is off.
+local function hookOnce(module, target, method, fn, install)
+    local hooked = module.hooked
+    if not hooked then
+        hooked = {}
+        module.hooked = hooked
+    end
+    local byMethod = hooked[target]
+    if not byMethod then
+        byMethod = {}
+        hooked[target] = byMethod
+    end
+    local byFn = byMethod[method]
+    if not byFn then
+        byFn = {}
+        byMethod[method] = byFn
+    end
+    if not byFn[fn] then
+        byFn[fn] = true
+        install(function(...)
+            if module.enabled then
+                fn(...)
+            end
+        end)
+    end
+end
+
+---Calls `fn` after a function or method of a Blizzard object runs (`hooksecurefunc`), but only
+---while the module is on, and hooks it just once however often this is called. Use it in
+---`OnEnable` instead of a `hooked` flag: `module:Hook("ToggleSheath", fn)` for a global function,
+---or `module:Hook(object, "Method", fn)`. `fn` gets the same arguments the hooked function did.
+---@param target table|string an object, or the name of a global function
+---@param method string|function the method's name, or `fn` when `target` is a global's name
+---@param fn? function
+function Module:Hook(target, method, fn)
+    if type(target) == "string" then
+        target, method, fn = _G, target, method
+    end
+    hookOnce(self, target, method, fn, function(hook)
+        hooksecurefunc(target, method, hook)
+    end)
+end
+
+---Like `module:Hook`, for a frame's script: `frame:HookScript(script, fn)` that runs only while
+---the module is on, hooked once.
+---@param frame table
+---@param script string such as "OnEvent"
+---@param fn function
+function Module:HookScript(frame, script, fn)
+    hookOnce(self, frame, "script:" .. script, fn, function(hook)
+        frame:HookScript(script, hook)
+    end)
 end
 
 ---Prints a line in chat that the module shows by itself (not in reply to a command), unless the

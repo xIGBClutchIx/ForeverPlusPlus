@@ -490,18 +490,13 @@ local function addAuctionPrice(tooltip, data)
     end
 end
 
-local hooked = false
-
 function module:OnEnable()
     self:On("AUCTION_HOUSE_SHOW", onShow)
     self:On("AUCTION_HOUSE_CLOSED", onClosed)
     self:On("AUCTION_HOUSE_BROWSE_RESULTS_UPDATED", onResultsUpdated)
     self:On("AUCTION_HOUSE_BROWSE_RESULTS_ADDED", onResultsAdded)
     -- The hook can't be removed; addAuctionPrice checks module.enabled instead.
-    if not hooked then
-        hooked = true
-        ItemTooltip.OnPrices(addAuctionPrice)
-    end
+    ItemTooltip.OnPrices(addAuctionPrice)
     ItemTooltip.RedrawOnShift(self, true)
 end
 

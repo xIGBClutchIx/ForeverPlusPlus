@@ -7,10 +7,7 @@ local ipairs, pairs, next = ipairs, pairs, next
 local C_AddOns, UnitFactionGroup = C_AddOns, UnitFactionGroup
 local FACTION_ALLIANCE, FACTION_HORDE = FACTION_ALLIANCE, FACTION_HORDE
 
--- So one module's error doesn't stop the others waiting, as in Core.lua.
-local call = securecallfunction or function(fn, ...)
-    return fn(...)
-end
+local call = ns.Call -- so one module's error doesn't stop the others waiting
 
 local WorldMap = {}
 ns.WorldMap = WorldMap

@@ -153,21 +153,32 @@ function ItemTooltip.RedrawOnShift(owner, on)
     end
 end
 
+-- Adds `fn` to a provider list unless it's already there, so a module can ask on every enable.
+local function addProvider(list, fn)
+    for i = 1, #list do
+        if list[i] == fn then
+            return
+        end
+    end
+    list[#list + 1] = fn
+end
+
 ---Calls `fn(tooltip, data)` on every item tooltip, where the price lines go. Hooks can't be
----removed, so `fn` checks whether its module is on.
+---removed, so `fn` checks whether its module is on. Asking again with the same `fn` changes
+---nothing, so it can be called from `OnEnable`.
 ---@param fn fun(tooltip: table, data: table)
 function ItemTooltip.OnPrices(fn)
     hook()
-    providers[#providers + 1] = fn
+    addProvider(providers, fn)
 end
 
 ---Calls `fn(tooltip, data)` on every item tooltip just above the price lines (or where they'd
 ---go), for lines about the item that aren't prices. Hooks can't be removed, so `fn` checks
----whether its module is on.
+---whether its module is on; asking again with the same `fn` changes nothing.
 ---@param fn fun(tooltip: table, data: table)
 function ItemTooltip.OnInfo(fn)
     hook()
-    infoProviders[#infoProviders + 1] = fn
+    addProvider(infoProviders, fn)
 end
 
 ---Lets `fn(tooltip, data, lineData)` draw the sell price line instead of Blizzard. It returns
