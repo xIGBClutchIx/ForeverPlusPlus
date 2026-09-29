@@ -3,7 +3,7 @@
 -- or someone resurrecting you. Arenas are left alone, since the game doesn't release there.
 local _, ns = ...
 
-local format, select = string.format, select
+local select = select
 local IsInInstance, UnitIsDead, UnitIsGhost = IsInInstance, UnitIsDead, UnitIsGhost
 local UnitHasIncomingResurrection, HasNoReleaseAura = UnitHasIncomingResurrection, HasNoReleaseAura
 local RepopMe, C_DeathInfo, C_Timer = RepopMe, C_DeathInfo, C_Timer
@@ -28,7 +28,7 @@ module.options = {
             if seconds == 0 then
                 return L.AUTORELEASE_NOW
             end
-            return seconds == 1 and L.AUTORELEASE_ONE_SECOND or format(L.AUTORELEASE_SECONDS, seconds)
+            return ns.Text.Seconds(seconds)
         end,
     },
     ns.ChatOption(L.AUTORELEASE_CHAT_DESC),

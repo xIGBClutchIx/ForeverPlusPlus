@@ -25,7 +25,7 @@ module.options = {
         key = "delay",
         name = L.AUTOSTOW_DELAY,
         description = L.AUTOSTOW_DELAY_DESC,
-        min = 3, max = 30, step = 1, format = L.AUTOSTOW_SECONDS,
+        min = 3, max = 30, step = 1, format = ns.Text.Seconds,
     },
     {
         key = "outsideOnly",

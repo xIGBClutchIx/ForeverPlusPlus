@@ -75,10 +75,7 @@ local function newBar(border)
     return frame
 end
 
--- How wide a line is unwrapped. Probe: GetUnboundedStringWidth is Mainline's.
-local function textWidth(text)
-    return text.GetUnboundedStringWidth and text:GetUnboundedStringWidth() or text:GetStringWidth()
-end
+local textWidth = ns.Text.Width
 
 -- One line from a row of Blizzard's: its text, which already has the tenths setting and, off the
 -- player's map, the player's zone, cut short with "..." before it reaches the title.

@@ -387,10 +387,7 @@ local function rowAt(i)
     return row
 end
 
--- How wide a line is unwrapped. Probe: GetUnboundedStringWidth is Mainline's.
-local function textWidth(text)
-    return text.GetUnboundedStringWidth and text:GetUnboundedStringWidth() or text:GetStringWidth()
-end
+local textWidth = ns.Text.Width
 
 -- Blizzard's own coordinates, a row each for the cursor and the player, sit in the bottom left
 -- corner from 2 pixels up, each row 15 tall, while their Settings checkboxes (these CVars) are on.

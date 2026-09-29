@@ -8,7 +8,7 @@
 -- to read is left alone then, and colors that come back secret go straight to the setters.
 local _, ns = ...
 
-local _G, type, setmetatable = _G, type, setmetatable
+local type, setmetatable = type, setmetatable
 local find, sub, gsub = string.find, string.sub, string.gsub
 local TooltipDataProcessor, Enum, C_Item = TooltipDataProcessor, Enum, C_Item
 local UnitExists, UnitIsPlayer, UnitClass, UnitLevel, UnitName = UnitExists, UnitIsPlayer, UnitClass, UnitLevel, UnitName
@@ -85,11 +85,7 @@ local YOU_COLOR = ns.Colors.RED
 
 -- Text and colors -----------------------------------------------------------------------------
 
--- A tooltip's left font string on line `i`, or nil for tooltips without named lines.
-local function leftLine(tooltip, i)
-    local name = tooltip.GetName and tooltip:GetName()
-    return type(name) == "string" and _G[name .. "TextLeft" .. i] or nil
-end
+local leftLine = ns.Text.LeftLine
 
 -- The text Blizzard put on line `i`, from the tooltip's data rather than the font string, or
 -- nil when it's missing or secret.

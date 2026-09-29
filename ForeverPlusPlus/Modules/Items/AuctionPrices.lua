@@ -62,9 +62,7 @@ module.options = ItemTooltip.PriceOptions({
         description = L.AUCTIONPRICES_SCAN_AGE_RED_DESC,
         section = L.AUCTIONPRICES_SECTION_TOOLTIP,
         min = 1, max = 48, step = 1,
-        format = function(hours)
-            return hours == 1 and L.AUCTIONPRICES_ONE_HOUR or format(L.AUCTIONPRICES_HOURS, hours)
-        end,
+        format = ns.Text.Hours,
     },
     {
         key = "scanOnOpen",
@@ -430,18 +428,6 @@ end
 
 -- Tooltips -----------------------------------------------------------------------------------
 
--- How long ago, as short as a price line: "just now", "12m ago", "3h ago", "2d ago".
-local function ago(seconds)
-    if seconds < 60 then
-        return L.AUCTIONPRICES_AGO_NOW
-    elseif seconds < 3600 then
-        return format(L.AUCTIONPRICES_AGO_MINUTES, floor(seconds / 60))
-    elseif seconds < 86400 then
-        return format(L.AUCTIONPRICES_AGO_HOURS, floor(seconds / 3600))
-    end
-    return format(L.AUCTIONPRICES_AGO_DAYS, floor(seconds / 86400))
-end
-
 -- Scan Age Color "age": green when just scanned, yellow halfway, red at Red After (hours).
 local function ageColor(seconds)
     local t = seconds / (module.db.scanAgeRedHours * 3600)
@@ -466,7 +452,7 @@ local function addAuctionPrice(tooltip, data)
     if db.scanAge ~= "off" and scannedAt > 0 then
         local age = time() - scannedAt
         local color = db.scanAgeColor == "age" and ageColor(age) or db.scanAgeColor
-        ItemTooltip.AddInfo(tooltip, L.AUCTIONPRICES_SCAN_AGE_LINE, ago(age), db.scanAge, color)
+        ItemTooltip.AddInfo(tooltip, L.AUCTIONPRICES_SCAN_AGE_LINE, ns.Text.Ago(age), db.scanAge, color)
     end
 end
 

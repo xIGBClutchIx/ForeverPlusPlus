@@ -11,7 +11,6 @@ local _, ns = ...
 
 local type, ipairs, setmetatable = type, ipairs, setmetatable
 local gsub, gmatch, match, find, concat = string.gsub, string.gmatch, string.match, string.find, table.concat
-local _G = _G
 local format = string.format
 local TooltipDataProcessor, Enum = TooltipDataProcessor, Enum
 local UnitIsPlayer, UnitPlayerControlled, UnitCreatureType = UnitIsPlayer, UnitPlayerControlled, UnitCreatureType
@@ -271,11 +270,7 @@ local function clean(text)
     return match(text, "^%s*(.-)%s*$")
 end
 
--- The tooltip's left font string on line `i`, or nil for tooltips without named lines.
-local function leftLine(tooltip, i)
-    local name = tooltip.GetName and tooltip:GetName()
-    return type(name) == "string" and _G[name .. "TextLeft" .. i] or nil
-end
+local leftLine = ns.Text.LeftLine
 
 -- The skill line and its color for the node named in `text`, or nil.
 local function nodeLine(text)

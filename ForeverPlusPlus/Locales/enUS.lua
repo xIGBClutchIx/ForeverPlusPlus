@@ -8,6 +8,16 @@ if not L then
     return
 end
 
+-- Lib/Text.lua: lengths of time, for slider labels and price lines
+L.TEXT_ONE_SECOND = "1 Second"
+L.TEXT_SECONDS = "%d Seconds" -- number of seconds, more than one
+L.TEXT_ONE_HOUR = "1 Hour"
+L.TEXT_HOURS = "%d Hours" -- hours, more than one
+L.TEXT_AGO_NOW = "just now"
+L.TEXT_AGO_MINUTES = "%dm ago" -- minutes
+L.TEXT_AGO_HOURS = "%dh ago" -- hours
+L.TEXT_AGO_DAYS = "%dd ago" -- days
+
 -- Core: /fpp and chat
 L.ON = "on"
 L.OFF = "off"
@@ -198,13 +208,7 @@ L.AUCTIONPRICES_SCAN_AGE_COLOR_AGE = "By Age"
 L.AUCTIONPRICES_SCAN_AGE_RED = "Red After"
 L.AUCTIONPRICES_SCAN_AGE_RED_DESC = "With Scan Age Color on By Age, how old a scan is when its age "
     .. "turns fully red. It's yellow at half that."
-L.AUCTIONPRICES_ONE_HOUR = "1 Hour"
-L.AUCTIONPRICES_HOURS = "%d Hours" -- hours, more than one
 L.AUCTIONPRICES_SCAN_AGE_LINE = "Scanned"
-L.AUCTIONPRICES_AGO_NOW = "just now"
-L.AUCTIONPRICES_AGO_MINUTES = "%dm ago" -- minutes
-L.AUCTIONPRICES_AGO_HOURS = "%dh ago" -- hours
-L.AUCTIONPRICES_AGO_DAYS = "%dd ago" -- days
 L.AUCTIONPRICES_SECTION_SCANNING = "Scanning"
 L.AUCTIONPRICES_CHAT_DESC = "Say in chat when a scan finishes after the auction house closed."
 L.AUCTIONPRICES_SCANNING = "Scanning prices... %d items" -- count so far
@@ -418,7 +422,6 @@ L.AUTOSTOW_DESC = "Put your weapons away a few seconds after combat ends, unless
     .. "stow them yourself first."
 L.AUTOSTOW_DELAY = "Delay"
 L.AUTOSTOW_DELAY_DESC = "How long after combat to wait before putting your weapons away."
-L.AUTOSTOW_SECONDS = "%d Seconds" -- number of seconds
 L.AUTOSTOW_OUTSIDE_ONLY = "Only Out of Instances"
 L.AUTOSTOW_OUTSIDE_ONLY_DESC = "Leave your weapons out in dungeons, raids and battlegrounds, where "
     .. "the next pull is never far off."
@@ -483,8 +486,6 @@ L.AUTORELEASE_DESC = "Release your spirit when you die in a battleground, unless
 L.AUTORELEASE_DELAY = "Delay"
 L.AUTORELEASE_DELAY_DESC = "How long after dying to wait before releasing."
 L.AUTORELEASE_NOW = "Right Away"
-L.AUTORELEASE_ONE_SECOND = "1 Second"
-L.AUTORELEASE_SECONDS = "%d Seconds" -- number of seconds, more than one
 L.AUTORELEASE_CHAT_DESC = "Say in chat when your spirit was released, or why it wasn't."
 L.AUTORELEASE_RELEASED = "Released your spirit."
 L.AUTORELEASE_SELF_RES = "Didn't release: you can resurrect yourself."

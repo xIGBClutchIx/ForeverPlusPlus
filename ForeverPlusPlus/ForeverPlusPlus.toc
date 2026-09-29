@@ -10,6 +10,7 @@ Core.lua
 Locales\enUS.lua
 Lib\Secret.lua
 Lib\Colors.lua
+Lib\Text.lua
 Lib\Money.lua
 Lib\Confirm.lua
 Lib\CVars.lua
