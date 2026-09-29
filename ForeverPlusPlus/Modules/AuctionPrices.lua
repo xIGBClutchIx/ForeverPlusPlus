@@ -11,7 +11,6 @@ local ipairs, format, time, floor = ipairs, string.format, time, math.floor
 local C_AuctionHouse, C_Timer, GetTime = C_AuctionHouse, C_Timer, GetTime
 local GetRealmName, UnitFactionGroup = GetRealmName, UnitFactionGroup
 local CreateFrame, pcall, type, hooksecurefunc = CreateFrame, pcall, type, hooksecurefunc
-local StaticPopupDialogs, StaticPopup_Show, YES, NO = StaticPopupDialogs, StaticPopup_Show, YES, NO
 
 local L = ns.L
 local ItemTooltip = ns.ItemTooltip
@@ -402,8 +401,6 @@ end
 ns.AddCommand("scan", "", L.AUCTIONPRICES_COMMAND, scanCommand)
 
 -- Reset: forgets this auction house's prices, after the player confirms in a popup.
-local POPUP = "FOREVERPLUSPLUS_RESET_AUCTION_PRICES"
-
 local function resetPrices()
     local data = house()
     data.prices = {}
@@ -412,24 +409,7 @@ local function resetPrices()
 end
 
 local function confirmReset()
-    -- Probe: StaticPopup is Blizzard's confirmation dialog; without it, reset straight away.
-    if not (StaticPopupDialogs and StaticPopup_Show) then
-        resetPrices()
-        return
-    end
-    if not StaticPopupDialogs[POPUP] then
-        StaticPopupDialogs[POPUP] = {
-            text = L.AUCTIONPRICES_RESET_CONFIRM,
-            button1 = YES,
-            button2 = NO,
-            OnAccept = resetPrices,
-            timeout = 0,
-            whileDead = true,
-            hideOnEscape = true,
-            preferredIndex = 3,
-        }
-    end
-    StaticPopup_Show(POPUP)
+    ns.Confirm("AUCTIONPRICES_RESET", L.AUCTIONPRICES_RESET_CONFIRM, resetPrices)
 end
 ns.AddCommand("resetprices", "", L.AUCTIONPRICES_RESET_COMMAND, confirmReset)
 

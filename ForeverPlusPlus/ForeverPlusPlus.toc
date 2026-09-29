@@ -11,6 +11,7 @@ Locales\enUS.lua
 Lib\Secret.lua
 Lib\Colors.lua
 Lib\Money.lua
+Lib\Confirm.lua
 Lib\CVars.lua
 Lib\Nameplates.lua
 Lib\Units.lua

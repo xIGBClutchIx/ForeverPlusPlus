@@ -52,7 +52,9 @@ module.actions = {
         name = L.SKIPCINEMATICS_RESET,
         button = L.SKIPCINEMATICS_RESET_BUTTON,
         description = L.SKIPCINEMATICS_RESET_DESC,
-        fn = forgetSeen,
+        fn = function()
+            ns.Confirm("SKIPCINEMATICS_RESET", L.SKIPCINEMATICS_RESET_CONFIRM, forgetSeen)
+        end,
     },
 }
 
