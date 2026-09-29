@@ -162,7 +162,7 @@ function module:OnDisable()
     plates:Disable()
 end
 
-function module:OnOptionChanged(key)
+function module:OnOptionChanged()
     if self.enabled then
         plates:Refresh()
     end

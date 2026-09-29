@@ -6,7 +6,7 @@
 local _, ns = ...
 
 local ipairs, select, setmetatable, hooksecurefunc = ipairs, select, setmetatable, hooksecurefunc
-local CreateFrame, CreateFromMixins = CreateFrame, CreateFromMixins
+local CreateFrame = CreateFrame
 local C_Texture, C_Map, GameTooltip = C_Texture, C_Map, GameTooltip
 local CreateVector2D = CreateVector2D
 
@@ -222,20 +222,12 @@ end
 -- The layer's data provider: what the map calls as it changes maps and zooms. Made once the map
 -- has loaded, since the mixin comes with it.
 local function newProvider(layer)
-    local provider = CreateFromMixins(MapCanvasDataProviderMixin)
-    function provider:RemoveAllData()
-        layer:Release()
-    end
-    function provider:RefreshAllData()
-        layer:Draw()
-    end
-    function provider:OnCanvasScaleChanged()
-        layer:Place()
-    end
-    function provider:OnCanvasSizeChanged()
-        layer:Place()
-    end
-    return provider
+    return WorldMap.NewProvider({
+        RemoveAllData = function() layer:Release() end,
+        RefreshAllData = function() layer:Draw() end,
+        OnCanvasScaleChanged = function() layer:Place() end,
+        OnCanvasSizeChanged = function() layer:Place() end,
+    })
 end
 
 -- Adds the layer to the world map, once it has loaded.

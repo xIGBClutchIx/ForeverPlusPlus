@@ -6,8 +6,8 @@
 local _, ns = ...
 
 local ceil, ipairs, pairs, setmetatable = math.ceil, ipairs, pairs, setmetatable
-local CreateFrame, CreateFromMixins, C_AddOns, C_Map, C_MapExplorationInfo =
-    CreateFrame, CreateFromMixins, C_AddOns, C_Map, C_MapExplorationInfo
+local CreateFrame, C_AddOns, C_Map, C_MapExplorationInfo =
+    CreateFrame, C_AddOns, C_Map, C_MapExplorationInfo
 
 local L = ns.L
 
@@ -189,27 +189,23 @@ end
 
 -- The data provider the map calls as it changes maps and zooms.
 local function newProvider(overlay)
-    local provider = CreateFromMixins(MapCanvasDataProviderMixin)
-    function provider:RemoveAllData()
-        overlay:Release()
-    end
-    function provider:RefreshAllData()
-        overlay:Draw()
-    end
-    -- Zooming can switch to another layer of map art, with other tile sizes.
-    function provider:OnCanvasScaleChanged()
-        local container = overlay.map:GetCanvasContainer()
-        if overlay.layerIndex ~= container:GetCurrentLayerIndex() then
-            overlay:Draw()
-        end
-    end
-    -- The map fades while the player moves, if they chose that; fade with it.
-    function provider:OnGlobalAlphaChanged()
-        if overlay.map.GetGlobalAlpha then
-            overlay.frame:SetAlpha(overlay.map:GetGlobalAlpha())
-        end
-    end
-    return provider
+    return ns.WorldMap.NewProvider({
+        RemoveAllData = function() overlay:Release() end,
+        RefreshAllData = function() overlay:Draw() end,
+        -- Zooming can switch to another layer of map art, with other tile sizes.
+        OnCanvasScaleChanged = function()
+            local container = overlay.map:GetCanvasContainer()
+            if overlay.layerIndex ~= container:GetCurrentLayerIndex() then
+                overlay:Draw()
+            end
+        end,
+        -- The map fades while the player moves, if they chose that; fade with it.
+        OnGlobalAlphaChanged = function()
+            if overlay.map.GetGlobalAlpha then
+                overlay.frame:SetAlpha(overlay.map:GetGlobalAlpha())
+            end
+        end,
+    })
 end
 
 local function newOverlay(map)

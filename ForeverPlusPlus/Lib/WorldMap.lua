@@ -4,7 +4,7 @@
 local _, ns = ...
 
 local ipairs, pairs, next = ipairs, pairs, next
-local C_AddOns, UnitFactionGroup = C_AddOns, UnitFactionGroup
+local C_AddOns, UnitFactionGroup, CreateFromMixins = C_AddOns, UnitFactionGroup, CreateFromMixins
 local FACTION_ALLIANCE, FACTION_HORDE = FACTION_ALLIANCE, FACTION_HORDE
 
 local call = ns.Call -- so one module's error doesn't stop the others waiting
@@ -60,6 +60,20 @@ function WorldMap.Cancel(fn)
             ns.Off("ADDON_LOADED", onLoad)
         end
     end
+end
+
+---A data provider for a map to draw our own things on: what the map calls as it changes maps,
+---zooms or resizes. `handlers` may have RemoveAllData, RefreshAllData, OnCanvasScaleChanged,
+---OnCanvasSizeChanged and OnGlobalAlphaChanged, each called with the provider. Add it with
+---`map:AddDataProvider`. Only call this once the map has loaded, since the mixin comes with it.
+---@param handlers table<string, fun(provider: table)>
+---@return table provider
+function WorldMap.NewProvider(handlers)
+    local provider = CreateFromMixins(MapCanvasDataProviderMixin)
+    for name, fn in pairs(handlers) do
+        provider[name] = fn
+    end
+    return provider
 end
 
 -- Sides -----------------------------------------------------------------------------------------
