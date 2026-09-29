@@ -48,10 +48,6 @@ function module:OnEnable()
     end
 end
 
--- Its event stops by itself; there's nothing else to undo.
-function module:OnDisable()
-end
-
 function module:OnOptionChanged(key)
     if key == "allowFriends" and self.enabled and self.db.allowFriends then
         Units.RequestGuildRoster()

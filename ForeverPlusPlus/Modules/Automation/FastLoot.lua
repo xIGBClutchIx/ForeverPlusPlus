@@ -40,7 +40,3 @@ end
 function module:OnEnable()
     self:On("LOOT_READY", onLootReady)
 end
-
--- Turning off stops LOOT_READY by itself (module:On).
-function module:OnDisable()
-end

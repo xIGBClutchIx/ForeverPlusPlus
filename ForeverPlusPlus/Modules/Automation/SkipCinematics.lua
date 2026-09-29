@@ -119,7 +119,3 @@ function module:OnEnable()
         self:HookScript(CinematicFrame, "OnEvent", onCinematicEvent)
     end
 end
-
--- The hooks do nothing while the module is off (module:Hook).
-function module:OnDisable()
-end

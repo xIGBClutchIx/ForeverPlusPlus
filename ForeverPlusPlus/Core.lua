@@ -316,7 +316,9 @@ end
 
 ---Creates a module: one change to the game's UI, switched on and off on its own. Give it
 ---`OnEnable` and an `OnDisable` that undoes it, and put its settings in `defaults`. Events
----added with `module:On` stop by themselves when it turns off. Set
+---added with `module:On` and hooks added with `module:Hook` stop by themselves when it turns
+---off, so a module that only does those needs no `OnDisable`; anything else `OnEnable` changes
+---(a frame, a CVar, a timer) `OnDisable` must put back. Set
 ---`module.title` for a friendlier name in Settings (the name stays the /fpp key), and
 ---`module.category` for its group on the main Settings page (see Settings.lua). A tool with
 ---nothing to turn off sets `module.alwaysOn`: it has no toggle and stays on. A module only for
@@ -373,11 +375,6 @@ function ns.Start()
     end
     for _, name in ipairs(ns.order) do
         local module = ns.modules[name]
-        -- Every module turns on and off without a reload, so one that changes something must
-        -- undo it.
-        if module.OnEnable and not module.OnDisable then
-            error("Forever++: " .. name .. " has OnEnable but no OnDisable")
-        end
         ns.db.modules[name] = ns.db.modules[name] or {}
         prune(ns.db.modules[name], module.defaults)
         fill(ns.db.modules[name], module.defaults)

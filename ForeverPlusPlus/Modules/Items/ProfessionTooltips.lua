@@ -468,6 +468,3 @@ function module:OnEnable()
     end
     ItemTooltip.OnInfo(onItem)
 end
-
-function module:OnDisable()
-end

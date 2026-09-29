@@ -391,6 +391,3 @@ function module:OnEnable()
         self:Hook("GameTooltip_SetDefaultAnchor", onDefaultAnchor)
     end
 end
-
-function module:OnDisable()
-end
