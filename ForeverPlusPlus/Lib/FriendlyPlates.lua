@@ -7,11 +7,13 @@
 --       players = true,             -- friendly players, or false for friendly NPCs
 --       cvars = { { names = { "cvarName", "olderName" }, value = "1" }, ... },
 --       style = { NameColor = fn, Subtitle = fn, SubtitleColor = fn, icons = bool },
+--       OnEnable = fn(module), -- optional: more to do when the module turns on
 --   })
---   plates:Enable() / plates:Disable() / plates:Refresh()
+--   plates:Refresh() -- after a setting the plates draw from changed
 --
--- The module's settings need barWhenHurt, level, nameSize, centerLine, and `saved = {}` for the
--- CVars.
+-- New gives the module its OnEnable, OnDisable and OnOptionChanged (unless it has its own
+-- OnDisable or OnOptionChanged). The module's settings come from FriendlyPlates.Defaults: they
+-- need barWhenHurt, level, nameSize, centerLine, and `saved = {}` for the CVars.
 local _, ns = ...
 
 local pairs, ipairs, setmetatable, hooksecurefunc = pairs, ipairs, setmetatable, hooksecurefunc
@@ -91,7 +93,36 @@ function FriendlyPlates.New(module, spec)
             self:Layout(unit)
         end
     end
+    -- The module's turning on and off and option changes are the same for every plate module. It
+    -- keeps its own if it already has one, and `spec.OnEnable(module)` adds to turning on.
+    function module.OnEnable(mod)
+        self:Enable()
+        if spec.OnEnable then
+            spec.OnEnable(mod)
+        end
+    end
+    module.OnDisable = module.OnDisable or function()
+        self:Disable()
+    end
+    module.OnOptionChanged = module.OnOptionChanged or function(mod)
+        if mod.enabled then
+            self:Refresh()
+        end
+    end
     return self
+end
+
+---The settings every friendly plate module has, with `extra` (the module's own) added.
+---@param extra table
+---@return table defaults
+function FriendlyPlates.Defaults(extra)
+    extra.enabled = true
+    extra.barWhenHurt = true
+    extra.nameSize = 100 -- percent of Blizzard's name size
+    extra.level = "before" -- "before", "after", or "off"
+    extra.centerLine = false -- debug: a line through each plate's center
+    extra.saved = {} -- CVar -> the player's own value, put back when the module turns off
+    return extra
 end
 
 -- Whether this is one of ours: a friendly player (or NPC) we can read. The personal resource

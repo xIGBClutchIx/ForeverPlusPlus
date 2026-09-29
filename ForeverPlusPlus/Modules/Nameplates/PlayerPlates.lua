@@ -8,22 +8,16 @@ local ipairs, GetGuildInfo = ipairs, GetGuildInfo
 local L = ns.L
 local Units = ns.Units
 
-local module = ns.NewModule("PlayerPlates", L.PLAYERPLATES_DESC, {
-    enabled = true,
-    barWhenHurt = true,
+local module = ns.NewModule("PlayerPlates", L.PLAYERPLATES_DESC, ns.FriendlyPlates.Defaults({
     nameColor = "class", -- "class" or "white"
-    nameSize = 100, -- percent of Blizzard's name size
     recentAllies = true,
-    level = "before", -- "before", "after", or "off"
     guildNames = "always", -- "always", "hidden" (only without the bar), or "off"
     guildColor = "gray", -- "gray" or "green"
     guildHighlight = true,
     socialIcons = true,
     groupIcon = "role", -- "role" or "looking"
     testIcons = "off", -- debug: "off", "group", or "friend" on every friendly player
-    centerLine = false, -- debug: a line through each plate's center
-    saved = {}, -- CVar -> the player's own value, put back when the module turns off
-})
+}))
 module.title = L.PLAYERPLATES_TITLE
 module.category = "nameplates"
 
@@ -128,7 +122,15 @@ local SHOW_FRIENDLY = { "nameplateShowFriendlyPlayers", "nameplateShowFriends" }
 module.notice = ns.CVars.OffNotice(module, SHOW_FRIENDLY, L.PLATES_BLIZZARD_OFF,
     L.PLAYERPLATES_BLIZZARD_OFF_DESC)
 
-local plates = ns.FriendlyPlates.New(module, {
+local plates -- set below; the recent allies list may load after login (or change): recolor
+
+local function onRecentAllies()
+    if module.db.recentAllies then
+        plates:Refresh()
+    end
+end
+
+plates = ns.FriendlyPlates.New(module, {
     players = true,
     cvars = {
         -- Each entry lists the names the setting has had, newest first; the first one this client
@@ -140,30 +142,11 @@ local plates = ns.FriendlyPlates.New(module, {
         { names = { "nameplateUseClassColorForFriendlyPlayerUnitNames" }, value = "0" },
     },
     style = style,
-})
-
--- The recent allies list loads after login (or changed): recolor the names.
-local function onRecentAllies()
-    if module.db.recentAllies then
-        plates:Refresh()
-    end
-end
-
-function module:OnEnable()
-    plates:Enable()
-    if Units.HasRecentAllies() then
-        for _, event in ipairs(Units.RECENT_ALLY_EVENTS) do
-            self:On(event, onRecentAllies)
+    OnEnable = function(self)
+        if Units.HasRecentAllies() then
+            for _, event in ipairs(Units.RECENT_ALLY_EVENTS) do
+                self:On(event, onRecentAllies)
+            end
         end
-    end
-end
-
-function module:OnDisable()
-    plates:Disable()
-end
-
-function module:OnOptionChanged()
-    if self.enabled then
-        plates:Refresh()
-    end
-end
+    end,
+})

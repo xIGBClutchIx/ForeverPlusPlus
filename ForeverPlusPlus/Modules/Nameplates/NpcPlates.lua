@@ -6,17 +6,11 @@ local _, ns = ...
 local L = ns.L
 local Units = ns.Units
 
-local module = ns.NewModule("NpcPlates", L.NPCPLATES_DESC, {
-    enabled = true,
-    barWhenHurt = true,
+local module = ns.NewModule("NpcPlates", L.NPCPLATES_DESC, ns.FriendlyPlates.Defaults({
     nameColor = "green", -- "green" (as in the world) or "white"
-    nameSize = 100, -- percent of Blizzard's name size
-    level = "before", -- "before", "after", or "off"
     titles = "always", -- "always", "hidden" (only without the bar), or "off"
     titleColor = "name", -- "name" (the name's color), "gray", or "green"
-    centerLine = false, -- debug: a line through each plate's center
-    saved = {}, -- CVar -> the player's own value, put back when the module turns off
-})
+}))
 module.title = L.NPCPLATES_TITLE
 module.category = "nameplates"
 
@@ -81,24 +75,10 @@ local SHOW_NPCS = { "nameplateShowFriendlyNpcs", "nameplateShowFriendlyNPCs" }
 module.notice = ns.CVars.OffNotice(module, SHOW_NPCS, L.PLATES_BLIZZARD_OFF,
     L.NPCPLATES_BLIZZARD_OFF_DESC)
 
-local plates = ns.FriendlyPlates.New(module, {
+ns.FriendlyPlates.New(module, {
     players = false,
     cvars = {
         { names = SHOW_NPCS, value = "1" },
     },
     style = style,
 })
-
-function module:OnEnable()
-    plates:Enable()
-end
-
-function module:OnDisable()
-    plates:Disable()
-end
-
-function module:OnOptionChanged()
-    if self.enabled then
-        plates:Refresh()
-    end
-end
