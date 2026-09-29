@@ -20,7 +20,9 @@ ns.Professions = Professions
 local COLORS = QuestDifficultyColors or {}
 local RED = COLORS.impossible or { r = 1, g = 0.1, b = 0.1 }
 local ORANGE = COLORS.verydifficult or { r = 1, g = 0.5, b = 0.25 }
-local YELLOW = COLORS.difficult or { r = 1, g = 1, b = 0 }
+-- Yellow is fixed at the classic (1, 1, 0): this client's QuestDifficultyColors.difficult can be
+-- close to the gold of a tooltip title, so "often" wouldn't stand out from the name.
+local YELLOW = { r = 1, g = 1, b = 0 }
 local GREEN = COLORS.standard or { r = 0.25, g = 0.75, b = 0.25 }
 local GRAY = COLORS.trivial or { r = 0.5, g = 0.5, b = 0.5 }
 Professions.STANDARD = GREEN -- Blizzard's green for a quest at your level, for "enough"
