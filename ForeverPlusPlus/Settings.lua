@@ -363,15 +363,23 @@ local function addOptions(category, layout, module, parent, debug, shown)
     end
 end
 
--- A module's buttons (from `module.actions`: `{ name, button, description, fn }`), after its
--- options.
+-- A module's buttons (from `module.actions`: `{ name, button, description, fn }`, and `confirm`, a
+-- question to ask before `fn` runs, with `key` naming its popup), after its options.
 local function addActions(layout, module, parent, shown)
     if not (layout and CreateSettingsButtonInitializer) then
         return -- Probe: the button row is Mainline's Settings.
     end
-    for _, action in ipairs(module.actions or {}) do
+    for i, action in ipairs(module.actions or {}) do
+        local fn = action.fn
+        if action.confirm then
+            -- Asks first (ns.Confirm), in a popup named by `key`, so a command can ask the same one.
+            local key = action.key or format("%s_ACTION%d", module.name:upper(), i)
+            fn = function()
+                ns.Confirm(key, action.confirm, action.fn)
+            end
+        end
         local initializer = CreateSettingsButtonInitializer(action.name, action.button,
-            action.fn, action.description, true)
+            fn, action.description, true)
         placeUnder(initializer, module, parent)
         showWhen(initializer, shown)
         layout:AddInitializer(initializer)

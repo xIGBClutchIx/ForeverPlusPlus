@@ -406,8 +406,10 @@ local function resetPrices()
     ns.Print(L.AUCTIONPRICES_RESET_DONE)
 end
 
+local RESET_POPUP = "AUCTIONPRICES_RESET"
+
 local function confirmReset()
-    ns.Confirm("AUCTIONPRICES_RESET", L.AUCTIONPRICES_RESET_CONFIRM, resetPrices)
+    ns.Confirm(RESET_POPUP, L.AUCTIONPRICES_RESET_CONFIRM, resetPrices)
 end
 ns.AddCommand("resetprices", "", L.AUCTIONPRICES_RESET_COMMAND, confirmReset)
 
@@ -416,7 +418,9 @@ module.actions = {
         name = L.AUCTIONPRICES_RESET,
         button = L.AUCTIONPRICES_RESET_BUTTON,
         description = L.AUCTIONPRICES_RESET_DESC,
-        fn = confirmReset,
+        fn = resetPrices,
+        confirm = L.AUCTIONPRICES_RESET_CONFIRM,
+        key = RESET_POPUP, -- the same popup /fpp resetprices asks
     },
 }
 
