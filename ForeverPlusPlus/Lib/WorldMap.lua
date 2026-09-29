@@ -64,6 +64,19 @@ function WorldMap.NewProvider(handlers)
     return provider
 end
 
+---Whether a map (`C_Map.GetMapInfo` of it) is a continent or the world map, as against a zone.
+---@param info table?
+---@param cosmic? boolean count the cosmic map (Azeroth and beyond) too
+---@return boolean
+function WorldMap.IsContinent(info, cosmic)
+    local types = Enum and Enum.UIMapType
+    if not (info and types) then
+        return false
+    end
+    local kind = info.mapType
+    return kind == types.Continent or kind == types.World or (cosmic and kind == types.Cosmic) or false
+end
+
 -- Sides -----------------------------------------------------------------------------------------
 -- Map data marks what belongs to a faction with "A" (Alliance) or "H" (Horde).
 

@@ -79,7 +79,7 @@ function ns.Instances.Levels(instance, compact)
     if not color then
         return text
     end
-    return ns.Colors.Code(color.r, color.g, color.b) .. text .. "|r"
+    return ns.Colors.Text(color, text)
 end
 
 ns.Instances.ICON_SIZE = 14 -- pixels, the icon before an instance in a tooltip or panel

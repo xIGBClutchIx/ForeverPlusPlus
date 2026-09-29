@@ -17,7 +17,7 @@ local UnitIsPlayer, UnitPlayerControlled, UnitCreatureType = UnitIsPlayer, UnitP
 local UnitLevel, UnitIsDead, UnitCanAttack = UnitLevel, UnitIsDead, UnitCanAttack
 
 local L = ns.L
-local colorCode = ns.Colors.Code
+local Colors = ns.Colors
 local readable = ns.IsReadable
 local Professions = ns.Professions
 local ItemTooltip = ns.ItemTooltip
@@ -306,7 +306,7 @@ local function addNodeLines(tooltip, data)
         parts[#parts + 1] = part
         local line, color = nodeLine(part)
         if line then
-            parts[#parts + 1] = colorCode(color.r, color.g, color.b) .. line .. "|r"
+            parts[#parts + 1] = Colors.Text(color, line)
             changed = true
         end
     end

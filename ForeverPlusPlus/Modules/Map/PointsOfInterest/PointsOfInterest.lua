@@ -483,8 +483,7 @@ end
 
 local function isContinent(mapID)
     local info = C_Map and C_Map.GetMapInfo and C_Map.GetMapInfo(mapID)
-    local types = Enum and Enum.UIMapType
-    return info and types and (info.mapType == types.Continent or info.mapType == types.World)
+    return ns.WorldMap.IsContinent(info)
 end
 
 local function fill(mapID, add)

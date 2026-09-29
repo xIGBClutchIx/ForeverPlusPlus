@@ -23,6 +23,7 @@ local ORANGE = COLORS.verydifficult or { r = 1, g = 0.5, b = 0.25 }
 local YELLOW = COLORS.difficult or { r = 1, g = 1, b = 0 }
 local GREEN = COLORS.standard or { r = 0.25, g = 0.75, b = 0.25 }
 local GRAY = COLORS.trivial or { r = 0.5, g = 0.5, b = 0.5 }
+Professions.STANDARD = GREEN -- Blizzard's green for a quest at your level, for "enough"
 
 ---How hard gathering something that needs `need` is at skill `rank`, as a color (r, g, b): red
 ---can't yet, then orange (a skill point every time), yellow (often), green (sometimes), and gray

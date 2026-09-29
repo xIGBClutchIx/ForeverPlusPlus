@@ -6,6 +6,7 @@ local format, floor, max = string.format, math.floor, math.max
 local UnitLevel, GetQuestDifficultyColor, QuestDifficultyColors =
     UnitLevel, GetQuestDifficultyColor, QuestDifficultyColors
 local RECENT_ALLY_FONT_COLOR, UnitClass, C_ClassColor = RECENT_ALLY_FONT_COLOR, UnitClass, C_ClassColor
+local UnitIsPlayer = UnitIsPlayer
 local PLAYER_FACTION_COLORS = PLAYER_FACTION_COLORS
 
 local readable = ns.IsReadable
@@ -28,6 +29,14 @@ ns.Colors = Colors
 function Colors.Code(r, g, b)
     return format("|cff%02x%02x%02x", floor(r * 255 + 0.5), floor(g * 255 + 0.5),
         floor(b * 255 + 0.5))
+end
+
+---Text in a color, for a color table with `r`, `g` and `b` (Blizzard's, or one of ours).
+---@param color table
+---@param text string|number
+---@return string
+function Colors.Text(color, text)
+    return Colors.Code(color.r, color.g, color.b) .. text .. "|r"
 end
 
 ---The color of a level range (a zone's or a dungeon's) against the player's level, like a quest's:
@@ -74,5 +83,15 @@ function Colors.Class(unit)
     local _, class = UnitClass(unit)
     if readable(class) and class and C_ClassColor then
         return C_ClassColor.GetClassColor(class)
+    end
+end
+
+---Like `Colors.Class`, but nil for anything that isn't a player.
+---@param unit string
+---@return table?
+function Colors.PlayerClass(unit)
+    local player = UnitIsPlayer(unit)
+    if readable(player) and player then
+        return Colors.Class(unit)
     end
 end

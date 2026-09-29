@@ -9,11 +9,9 @@ local hooksecurefunc, MAP_AREA_LABEL_TYPE = hooksecurefunc, MAP_AREA_LABEL_TYPE
 local min, max, GetLocale = math.min, math.max, GetLocale
 local unpack, ceil = unpack, math.ceil
 local CreateFrame, C_Map, C_Item, C_XMLUtil = CreateFrame, C_Map, C_Item, C_XMLUtil
-local Enum, QuestDifficultyColors = Enum, QuestDifficultyColors
 
 local L = ns.L
 local Professions = ns.Professions
-local Code = ns.Colors.Code
 local NoBreak = ns.MapTooltip.NoBreak
 
 local module = ns.NewModule("ZoneInfo", L.ZONEINFO_DESC, {
@@ -115,9 +113,7 @@ local SECTION_GAP = 7 -- above the instances, to set them apart
 local PER_ROW = 4 -- the most herbs or ores on a row
 local THROTTLE = 0.1 -- seconds between looks at where the cursor is
 
-local function colored(color, text)
-    return Code(color.r, color.g, color.b) .. text .. "|r"
-end
+local colored = ns.Colors.Text
 
 -- Text ----------------------------------------------------------------------------------------
 
@@ -147,8 +143,8 @@ local function icon(line, own)
     return format("|T%s:%d:%d|t ", own or ICONS[line], ICON_SIZE, ICON_SIZE)
 end
 
--- Blizzard's green for a quest at your level. Probe: QuestDifficultyColors is FrameXML's.
-local GREEN = QuestDifficultyColors and QuestDifficultyColors.standard or { r = 0.25, g = 0.75, b = 0.25 }
+-- Blizzard's green for a quest at your level.
+local GREEN = Professions.STANDARD
 
 -- A skill the zone needs, colored by how hard it is at the player's rank. Fishing's skill-ups
 -- don't depend on the zone, so it's only enough or not: red while below it (fish get away),
@@ -308,9 +304,7 @@ end
 -- Which zone ----------------------------------------------------------------------------------
 
 local function isContinent(info)
-    local types = Enum and Enum.UIMapType
-    return types and (info.mapType == types.Continent or info.mapType == types.World
-        or info.mapType == types.Cosmic)
+    return ns.WorldMap.IsContinent(info, true)
 end
 
 -- The zone in Data.lua a map is, or is inside (a cave or a town's own map), or nil.
