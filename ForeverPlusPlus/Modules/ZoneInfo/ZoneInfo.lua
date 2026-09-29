@@ -7,6 +7,7 @@ local _, ns = ...
 local pairs, ipairs, tostring, format, concat = pairs, ipairs, tostring, string.format, table.concat
 local hooksecurefunc, MAP_AREA_LABEL_TYPE = hooksecurefunc, MAP_AREA_LABEL_TYPE
 local min, max, GetLocale = math.min, math.max, GetLocale
+local unpack, ceil = unpack, math.ceil
 local CreateFrame, C_Map, C_Item, C_XMLUtil = CreateFrame, C_Map, C_Item, C_XMLUtil
 local Enum, QuestDifficultyColors = Enum, QuestDifficultyColors
 
@@ -85,6 +86,7 @@ local MAX_WIDTH = 300 -- the widest the text gets; longer lines wrap
 local PADDING = 8
 local GAP = 3 -- between rows
 local ICON_SIZE = 16 -- pixels
+local PER_ROW = 4 -- the most herbs or ores on a row
 local THROTTLE = 0.1 -- seconds between looks at where the cursor is
 
 local function colored(color, text)
@@ -196,7 +198,17 @@ local function gatherRow(key, line, ids, items)
         local name = itemName(id, item[2])
         names[i] = NoBreak(rank and colored(Professions.Difficulty(rank, item[1]), name) or name)
     end
-    return icon(line, own) .. concat(names, L.ZONEINFO_LIST_SEPARATOR)
+    -- At most PER_ROW names to a row, split evenly (six are 3 and 3, not 4 and 2), so a long list
+    -- is a few short rows instead of one that wraps and leaves a name alone.
+    local count = ceil(#names / PER_ROW)
+    local size = ceil(#names / count)
+    local result = {}
+    for row = 1, count do
+        local text = concat(names, L.ZONEINFO_LIST_SEPARATOR, (row - 1) * size + 1,
+            min(row * size, #names))
+        result[row] = row == 1 and icon(line, own) .. text or text
+    end
+    return result
 end
 
 -- Who holds the zone, from the player's side: the colors of Blizzard's zone text when you enter
@@ -228,8 +240,14 @@ local function rows(zone)
         list[#list + 1] = color and colored(color, text)
     end
     list[#list + 1] = skillsRow(zone)
-    list[#list + 1] = gatherRow("herbs", Professions.HERBALISM, zone.herbs, internal.herbs)
-    list[#list + 1] = gatherRow("ore", Professions.MINING, zone.ores, internal.ores)
+    for _, gather in ipairs({
+        { "herbs", Professions.HERBALISM, zone.herbs, internal.herbs },
+        { "ore", Professions.MINING, zone.ores, internal.ores },
+    }) do
+        for _, row in ipairs(gatherRow(unpack(gather)) or {}) do
+            list[#list + 1] = row
+        end
+    end
     if module.db.dungeons then
         for _, instance in ipairs(zone.dungeons or {}) do
             list[#list + 1] = ns.Instances.Line(instance)
