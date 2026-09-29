@@ -1,0 +1,83 @@
+-- English text for friendly nameplates and the two plate modules. Locales/enUS/Core.lua says how locale files work.
+local _, ns = ...
+
+local L = ns.NewLocale("enUS")
+if not L then
+    return
+end
+
+-- Friendly nameplates (Lib/PlateLabel.lua and both plate modules)
+L.PLATES_BLIZZARD_OFF = "Blizzard's nameplates are off" -- a gray row atop the page, with a button
+L.PLATES_BAR_WHEN_HURT = "Health Bar When Hurt"
+L.PLATES_NAME_COLOR = "Name Color"
+L.PLATES_NAME_SIZE = "Name Size"
+L.PLATES_NAME_SIZE_DESC = "How big names are, against the size Blizzard draws them. The line under "
+    .. "the name and the icons beside it grow with it."
+L.PLATES_LEVEL = "Level"
+L.PLATES_LEVEL_DESC = "Where the level shows while the health bar is hidden."
+L.PLATES_LEVEL_BEFORE = "Before Name"
+L.PLATES_LEVEL_AFTER = "After Name"
+L.PLATES_LEVEL_OFF = "Hidden"
+-- When a <Guild> or <Title> line shows.
+L.PLATES_SUBTITLE_ALWAYS = "Always"
+L.PLATES_SUBTITLE_HIDDEN = "Without Health Bar"
+L.PLATES_SUBTITLE_OFF = "Never"
+L.PLATES_COLOR_WHITE = "White"
+L.PLATES_COLOR_GRAY = "Gray"
+L.PLATES_COLOR_GREEN = "Green"
+L.PLATES_CENTER_LINE = "Show Plate Center"
+L.PLATES_CENTER_LINE_DESC = "Draw a thin red line through the middle of each nameplate, to check "
+    .. "the name sits centered over the unit."
+
+-- PlayerPlates
+L.PLAYERPLATES_TITLE = "Player Nameplates"
+L.PLAYERPLATES_BLIZZARD_OFF_DESC = "Blizzard's friendly player nameplates are off, so there's "
+    .. "nothing to show. Turn them on here, in Blizzard's Nameplates options, or with their keybind "
+    .. "(Shift-V)."
+L.PLAYERPLATES_DESC = "Always show friendly players' names, with their guild. Their health bar "
+    .. "appears only when they're hurt or in combat."
+L.PLAYERPLATES_BAR_WHEN_HURT_DESC = "Show a player's health bar while they're missing health. "
+    .. "When off, it only shows in combat."
+L.PLAYERPLATES_NAME_COLOR_DESC = "The color of a player's name while the health bar is hidden."
+L.PLAYERPLATES_NAME_COLOR_CLASS = "Class"
+L.PLAYERPLATES_RECENT_ALLIES = "Color Recent Allies"
+L.PLAYERPLATES_RECENT_ALLIES_DESC = "Show the names of players on your Recent Allies list in "
+    .. "the game's light blue, instead of the Name Color."
+L.PLAYERPLATES_GUILD_NAMES = "Guild Names"
+L.PLAYERPLATES_GUILD_NAMES_DESC = "When to show a player's <Guild> under their name."
+L.PLAYERPLATES_GUILD_COLOR = "Guild Name Color"
+L.PLAYERPLATES_GUILD_COLOR_DESC = "The color of a player's <Guild> line."
+L.PLAYERPLATES_GUILD_HIGHLIGHT = "Highlight Guildmates"
+L.PLAYERPLATES_GUILD_HIGHLIGHT_DESC = "Show the <Guild> line of players in your own guild in "
+    .. "guild chat green. With Guild Name Color on Green, your guild shows in white instead."
+L.PLAYERPLATES_SOCIAL_ICONS = "Group and Friend Icons"
+L.PLAYERPLATES_SOCIAL_ICONS_DESC = "Show an icon beside the names of your group members, and "
+    .. "the Battle.net logo beside your friends, while the health bar is hidden."
+L.PLAYERPLATES_GROUP_ICON = "Group Icon"
+L.PLAYERPLATES_GROUP_ICON_DESC = "Which icon group members get. With roles, members who have "
+    .. "none get the Looking for Group icon."
+L.PLAYERPLATES_GROUP_ICON_ROLE = "Their Role (Tank, Healer, Damage)"
+L.PLAYERPLATES_GROUP_ICON_LOOKING = "Looking for Group"
+L.PLAYERPLATES_TEST_ICONS = "Test Group and Friend Icons"
+L.PLAYERPLATES_TEST_ICONS_DESC = "Show an icon on every friendly player, as if they were all "
+    .. "in your group or all your friends, to check how the icons look."
+L.PLAYERPLATES_TEST_ICONS_OFF = "Off"
+L.PLAYERPLATES_TEST_ICONS_GROUP = "Everyone in Group"
+L.PLAYERPLATES_TEST_ICONS_FRIEND = "Everyone a Friend"
+
+-- NpcPlates
+L.NPCPLATES_TITLE = "NPC Nameplates"
+L.NPCPLATES_BLIZZARD_OFF_DESC = "Blizzard's friendly NPC nameplates are off, so there's nothing "
+    .. "to show. Turn them on here or in Blizzard's Nameplates options."
+L.NPCPLATES_DESC = "Always show friendly NPCs' names, with their title. Their health bar appears "
+    .. "only when they're hurt or in combat."
+L.NPCPLATES_BAR_WHEN_HURT_DESC = "Show an NPC's health bar while it's missing health. When off, "
+    .. "it only shows in combat."
+L.NPCPLATES_NAME_COLOR_DESC = "The color of an NPC's name while the health bar is hidden. Green "
+    .. "matches friendly NPC names in the world."
+L.NPCPLATES_TITLES = "Titles"
+L.NPCPLATES_TITLES_DESC = "When to show an NPC's title, like <Innkeeper>, under its name."
+L.NPCPLATES_TITLE_COLOR = "Title Color"
+L.NPCPLATES_TITLE_COLOR_DESC = "The color of an NPC's <Title> line."
+L.NPCPLATES_TITLE_COLOR_NAME = "Same as Name"
+

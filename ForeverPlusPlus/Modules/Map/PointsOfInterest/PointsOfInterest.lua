@@ -127,7 +127,7 @@ local function atlasOf(kindInfo)
 end
 
 -- A place name from Data.lua, in the player's language when a locale file translates it
--- (L["Booty Bay"] = ...). Place names aren't in enUS.lua: the English is the name itself.
+-- (L["Booty Bay"] = ...). Place names aren't in Locales/enUS/: the English is the name itself.
 local function place(name)
     return rawget(L, name) or name
 end

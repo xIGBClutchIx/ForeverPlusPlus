@@ -34,7 +34,7 @@ function ns.StateText(on)
 end
 
 -- Locale --------------------------------------------------------------------------------------
--- ns.L.KEY is player-facing text in the client's language. Every key is in Locales/enUS.lua;
+-- ns.L.KEY is player-facing text in the client's language. Every key is in Locales/enUS/;
 -- another locale's file sets only what it translates, and the rest falls back to enUS.
 
 local enUS = {}
