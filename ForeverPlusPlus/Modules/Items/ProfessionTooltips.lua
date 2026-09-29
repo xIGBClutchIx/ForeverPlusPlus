@@ -290,7 +290,8 @@ end
 -- codes; nil when `text` isn't such a line, or the option is off or the profession not shown.
 local function requiresColor(text, line)
     local plain = clean(text)
-    local need = tonumber(select(2, match(plain, REQUIRES)))
+    local _, digits = match(plain, REQUIRES)
+    local need = tonumber(digits)
     if need then
         local _, color = skillLine(line, need, L.PROFTOOLTIPS_REQUIRES)
         return color, plain, true
