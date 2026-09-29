@@ -541,13 +541,7 @@ local function unfadeLabel()
     end
 end
 
-local elapsed = 0
-local function onUpdate(_, delta)
-    elapsed = elapsed + delta
-    if elapsed < THROTTLE then
-        return
-    end
-    elapsed = 0
+local function look()
     -- Blizzard's coordinates can be turned on, off, or faded out at any time, with no event for
     -- the fading; this only moves the panel when that changed.
     anchor()
@@ -559,6 +553,8 @@ local function onUpdate(_, delta)
         draw(mapID or nil)
     end
 end
+
+local onUpdate = ns.WorldMap.Throttled(THROTTLE, look)
 
 -- Draws the panel again on the next update, after something it shows changed.
 local function redraw()

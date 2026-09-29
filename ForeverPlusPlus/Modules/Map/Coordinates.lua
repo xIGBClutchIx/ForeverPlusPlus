@@ -100,14 +100,7 @@ local function update()
     copy(bar.cursor, coords.CursorCoords, half - (button and button:GetWidth() or 0))
 end
 
-local elapsed = 0
-local function onUpdate(_, delta)
-    elapsed = elapsed + delta
-    if elapsed >= THROTTLE then
-        elapsed = 0
-        update()
-    end
-end
+local onUpdate = ns.WorldMap.Throttled(THROTTLE, update)
 
 -- Ours in the title bar, or Blizzard's panel as it comes. Blizzard's text is only faded out, so
 -- it keeps updating for ours to copy. Ours is the border frame's child, so it stops with the map.

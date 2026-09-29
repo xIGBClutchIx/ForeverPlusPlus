@@ -64,6 +64,23 @@ function WorldMap.NewProvider(handlers)
     return provider
 end
 
+---An OnUpdate script that calls `fn(frame)` at most every `interval` seconds, for a frame on the
+---map (a child of it stops updating while the map is closed). Look at the map a few times a
+---second instead of every frame.
+---@param interval number seconds
+---@param fn fun(frame: table)
+---@return fun(frame: table, delta: number)
+function WorldMap.Throttled(interval, fn)
+    local elapsed = 0
+    return function(frame, delta)
+        elapsed = elapsed + delta
+        if elapsed >= interval then
+            elapsed = 0
+            fn(frame)
+        end
+    end
+end
+
 ---Whether a map (`C_Map.GetMapInfo` of it) is a continent or the world map, as against a zone.
 ---@param info table?
 ---@param cosmic? boolean count the cosmic map (Azeroth and beyond) too
