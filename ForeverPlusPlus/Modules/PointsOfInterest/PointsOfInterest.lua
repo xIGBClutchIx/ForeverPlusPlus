@@ -237,6 +237,14 @@ local function rememberLearned()
     end
 end
 
+-- What the game's list says about a flight point: false when it calls it undiscovered, else nil
+-- (its "discovered" can't be trusted, see `learned`).
+local function notLearned(node)
+    if node.isUndiscovered then
+        return false
+    end
+end
+
 -- Whether the character has learned the flight master at this point: true, false, or nil when
 -- neither the game's map list nor a flight master visit says.
 local function learned(point)
@@ -249,13 +257,13 @@ local function learned(point)
     -- By name first ("The Sepulcher, Silverpine Forest"), then by place.
     for _, node in ipairs(taxiNodes) do
         if node.name and shortName(node.name) == name then
-            return node.isUndiscovered and false or nil
+            return notLearned(node)
         end
     end
     for _, node in ipairs(taxiNodes) do
         local x, y = node.position:GetXY()
         if abs(x * 100 - point[2]) < NEAR and abs(y * 100 - point[3]) < NEAR then
-            return node.isUndiscovered and false or nil
+            return notLearned(node)
         end
     end
 end
@@ -542,15 +550,11 @@ local function onAcquire(map, template, poiInfo)
 end
 
 local layer
-local hooked = false
 
 function module:OnEnable()
     layer = layer or ns.MapPins.New(fill)
     layer:Enable()
-    if not hooked then
-        hooked = true
-        ns.MapPins.OnAcquire(onAcquire)
-    end
+    ns.MapPins.OnAcquire(onAcquire)
     ns.MapPins.RefreshMap() -- hide Blizzard's city icons already on it
     -- A flight master's map: which flight points are learned, and new ones learned there.
     self:On("TAXIMAP_OPENED", rememberLearned)
