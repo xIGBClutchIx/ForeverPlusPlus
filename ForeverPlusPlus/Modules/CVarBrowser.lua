@@ -122,19 +122,19 @@ local function showTooltip(row)
     if entry.help ~= "" then
         GameTooltip:AddLine(entry.help, nil, nil, nil, true)
     end
-    GameTooltip:AddLine(format(L.CVARBROWSER_VALUE_IS, tostring(value)), 0.8, 0.8, 0.8)
+    GameTooltip:AddLine(format(L.CVARBROWSER_VALUE_IS, tostring(value)), unpack(ns.Colors.GRAY))
     if default ~= nil then
-        GameTooltip:AddLine(format(L.CVARBROWSER_DEFAULT_IS, default), 0.8, 0.8, 0.8)
+        GameTooltip:AddLine(format(L.CVARBROWSER_DEFAULT_IS, default), unpack(ns.Colors.GRAY))
     end
     if flags.account then
-        GameTooltip:AddLine(L.CVARBROWSER_ACCOUNT, 0.6, 0.6, 0.6)
+        GameTooltip:AddLine(L.CVARBROWSER_ACCOUNT, unpack(ns.Colors.GRAY))
     elseif flags.character then
-        GameTooltip:AddLine(L.CVARBROWSER_CHARACTER, 0.6, 0.6, 0.6)
+        GameTooltip:AddLine(L.CVARBROWSER_CHARACTER, unpack(ns.Colors.GRAY))
     end
     if flags.readOnly then
-        GameTooltip:AddLine(L.CVARBROWSER_READ_ONLY, 1, 0.3, 0.3)
+        GameTooltip:AddLine(L.CVARBROWSER_READ_ONLY, unpack(ns.Colors.RED))
     elseif flags.secure then
-        GameTooltip:AddLine(L.CVARBROWSER_SECURE, 0.6, 0.6, 0.6)
+        GameTooltip:AddLine(L.CVARBROWSER_SECURE, unpack(ns.Colors.GRAY))
     end
     GameTooltip:Show()
 end

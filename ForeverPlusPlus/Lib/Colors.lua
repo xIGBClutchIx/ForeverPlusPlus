@@ -12,6 +12,7 @@ local readable = ns.IsReadable
 
 local Colors = {
     GRAY = { 0.65, 0.65, 0.65 }, -- a guild name or an NPC title that isn't highlighted
+    RED = { 1, 0.25, 0.25 }, -- "You" as a target, and what can't be changed
     GUILD_GREEN = { 0.25, 1, 0.25 }, -- guild chat's green, for the player's own guild
     -- The game's light blue for recent allies' names. It comes from the client's color table
     -- (no Blizzard Lua uses it), so keep its build 70009 value in case the name goes away.

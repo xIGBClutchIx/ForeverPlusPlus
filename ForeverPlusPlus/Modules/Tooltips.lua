@@ -16,6 +16,7 @@ local UnitPVPName, UnitIsUnit, UnitReaction, UnitSelectionColor = UnitPVPName, U
 local GetGuildInfo, GetCreatureDifficultyColor = GetGuildInfo, GetCreatureDifficultyColor
 local GetQuestDifficultyColor, FACTION_BAR_COLORS = GetQuestDifficultyColor, FACTION_BAR_COLORS
 local NORMAL_FONT_COLOR, TOOLTIP_DEFAULT_COLOR = NORMAL_FONT_COLOR, TOOLTIP_DEFAULT_COLOR
+local FACTION_HORDE, FACTION_ALLIANCE = FACTION_HORDE, FACTION_ALLIANCE
 local GameTooltip, InCombatLockdown, hooksecurefunc = GameTooltip, InCombatLockdown, hooksecurefunc
 
 local L = ns.L
@@ -31,6 +32,7 @@ local module = ns.NewModule("Tooltips", L.TOOLTIPS_DESC, {
     guildColor = "all", -- "mine" (your guild green), "all" (yours green, others gray), "off"
     levelColor = true,
     classColor = true,
+    factionColor = true,
     title = true,
     target = true,
     hideInCombat = false, -- hide unit tooltips while in combat
@@ -65,6 +67,8 @@ module.options = {
         section = L.TOOLTIPS_SECTION_TEXT },
     { key = "classColor", name = L.TOOLTIPS_CLASS_COLOR, description = L.TOOLTIPS_CLASS_COLOR_DESC,
         section = L.TOOLTIPS_SECTION_TEXT },
+    { key = "factionColor", name = L.TOOLTIPS_FACTION_COLOR,
+        description = L.TOOLTIPS_FACTION_COLOR_DESC, section = L.TOOLTIPS_SECTION_TEXT },
     { key = "title", name = L.TOOLTIPS_PLAYER_TITLE, description = L.TOOLTIPS_PLAYER_TITLE_DESC,
         section = L.TOOLTIPS_SECTION_LINES },
     { key = "target", name = L.TOOLTIPS_TARGET, description = L.TOOLTIPS_TARGET_DESC,
@@ -77,7 +81,7 @@ module.options = {
 
 local GUILDMATE_COLOR = ns.Colors.GUILD_GREEN -- as on Player Nameplates
 local GUILD_COLOR = ns.Colors.GRAY
-local YOU_COLOR = { 1, 0.25, 0.25 }
+local YOU_COLOR = ns.Colors.RED
 
 -- Text and colors -----------------------------------------------------------------------------
 
@@ -280,6 +284,20 @@ local function colorLevelLine(tooltip, data, unit, guildLine)
     end
 end
 
+-- Colors the "Horde" or "Alliance" line Blizzard adds to a unit, in the side's color, as on maps.
+local function colorFaction(tooltip, data)
+    for i = 2, #data.lines do
+        local text = lineText(data, i)
+        local side = text and (text == FACTION_HORDE and "H" or text == FACTION_ALLIANCE and "A")
+        local line = side and leftLine(tooltip, i)
+        if line then
+            local color = ns.Colors.Faction(side)
+            line:SetTextColor(color.r, color.g, color.b)
+            return
+        end
+    end
+end
+
 -- Adds "Target: <name>", or "Target: You", colored like names.
 local function addTarget(tooltip, unit)
     local target = unit .. "target"
@@ -332,6 +350,9 @@ local function onUnit(tooltip, data)
     end
     if lines then
         colorLevelLine(tooltip, data, unit, colorGuild(tooltip, data, unit))
+        if db.factionColor then
+            colorFaction(tooltip, data)
+        end
     end
     if db.target then
         addTarget(tooltip, unit)

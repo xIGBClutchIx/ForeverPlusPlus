@@ -72,6 +72,8 @@
     "GetMoney",
     "GetMoneyString",
     "IsShiftKeyDown",
+    "IsAltKeyDown",
+    "IsControlKeyDown",
     "C_Timer",
     "C_CurrencyInfo",
     "C_AuctionHouse",

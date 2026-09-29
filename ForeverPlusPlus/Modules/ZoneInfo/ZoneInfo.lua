@@ -23,8 +23,9 @@ local module = ns.NewModule("ZoneInfo", L.ZONEINFO_DESC, {
     hideLabel = true, -- and then the map's own zone name at the top, which says the same
     levels = true,
     faction = "name", -- who holds the zone: "off", "name" (the name's color), or "line"
-    dungeons = true,
-    fishing = true,
+    dungeons = "always", -- "off", "always", or "key" (while holding the detail key)
+    detailKey = "shift", -- "shift", "alt", or "ctrl"
+    fishing = "always",
     -- Herbs, ore, and skinning: "off", "known" (only with the profession), or "always".
     herbs = "known",
     ore = "known",
@@ -60,14 +61,37 @@ module.options = {
             { "line", L.ZONEINFO_FACTION_LINE },
         },
     },
-    { key = "dungeons", name = L.ZONEINFO_DUNGEONS, description = L.ZONEINFO_DUNGEONS_DESC },
-    { key = "fishing", name = L.ZONEINFO_FISHING, description = L.ZONEINFO_FISHING_DESC },
+    {
+        key = "dungeons", name = L.ZONEINFO_DUNGEONS, description = L.ZONEINFO_DUNGEONS_DESC,
+        choices = {
+            { "off", L.ZONEINFO_SHOW_OFF },
+            { "always", L.ZONEINFO_SHOW_ALWAYS },
+            { "key", L.ZONEINFO_SHOW_KEY },
+        },
+    },
+    {
+        key = "fishing", name = L.ZONEINFO_FISHING, description = L.ZONEINFO_FISHING_DESC,
+        choices = {
+            { "off", L.ZONEINFO_SHOW_OFF },
+            { "always", L.ZONEINFO_SHOW_ALWAYS },
+            { "key", L.ZONEINFO_SHOW_KEY },
+        },
+    },
+    {
+        key = "detailKey", name = L.ZONEINFO_DETAIL_KEY, description = L.ZONEINFO_DETAIL_KEY_DESC,
+        choices = {
+            { "shift", L.ZONEINFO_KEY_SHIFT },
+            { "alt", L.ZONEINFO_KEY_ALT },
+            { "ctrl", L.ZONEINFO_KEY_CTRL },
+        },
+    },
 }
 
 local SHOW = {
     { "off", L.ZONEINFO_SHOW_OFF },
     { "known", L.ZONEINFO_SHOW_KNOWN },
     { "always", L.ZONEINFO_SHOW_ALWAYS },
+    { "key", L.ZONEINFO_SHOW_KEY },
 }
 for _, option in ipairs({
     { key = "herbs", name = L.ZONEINFO_HERBS, description = L.ZONEINFO_HERBS_DESC },
@@ -86,6 +110,8 @@ local MAX_WIDTH = 300 -- the widest the text gets; longer lines wrap
 local PADDING = 8
 local GAP = 3 -- between rows
 local ICON_SIZE = 16 -- pixels
+local INDENT = ICON_SIZE + 4 -- a list's later rows start under its names, past the icon
+local SECTION_GAP = 7 -- above the instances, to set them apart
 local PER_ROW = 4 -- the most herbs or ores on a row
 local THROTTLE = 0.1 -- seconds between looks at where the cursor is
 
@@ -136,11 +162,28 @@ local function skill(rank, need, fishing)
     return colored(Professions.Difficulty(rank, need), need)
 end
 
--- Whether a gathering row shows: its setting is "always", or "known" and the player has the
--- profession (a rank).
+-- Whether the detail key is held.
+local function detailHeld()
+    local key = module.db.detailKey
+    if key == "alt" then
+        return IsAltKeyDown()
+    elseif key == "ctrl" then
+        return IsControlKeyDown()
+    end
+    return IsShiftKeyDown()
+end
+
+-- Whether a gathering row shows: its setting is "always", "known" and the player has the
+-- profession (a rank), or "key" with the profession while the detail key is held.
 local function shows(key, rank)
     local mode = module.db[key]
     return mode == "always" or (mode == "known" and rank ~= nil)
+        or (mode == "key" and rank ~= nil and detailHeld())
+end
+
+-- Whether a row that isn't about a profession shows: "always", or "key" while the key is held.
+local function visible(mode)
+    return mode == "always" or (mode == "key" and detailHeld())
 end
 
 local function range(rank, low, high, fishing)
@@ -155,7 +198,7 @@ end
 -- player has it; together in one row.
 local function skillsRow(zone)
     local db, parts = module.db, {}
-    if db.fishing and zone.fish then
+    if visible(db.fishing) and zone.fish then
         local rank, name, own = Professions.Rank(Professions.FISHING)
         parts[#parts + 1] = icon(Professions.FISHING, own) .. NoBreak(format(L.ZONEINFO_SKILL,
             name or L.ZONEINFO_FISHING_NAME, range(rank, zone.fish, zone.fishHigh, true)))
@@ -235,22 +278,28 @@ end
 -- Points of Interest lists them, so a row never wraps through a name or a level range.
 local function rows(zone)
     local list = {}
+    local function add(text, indent, gap)
+        if text then
+            list[#list + 1] = { text = text, indent = indent, gap = gap }
+        end
+    end
     if module.db.faction == "line" then
         local color, text = territory(zone)
-        list[#list + 1] = color and colored(color, text)
+        add(color and colored(color, text))
     end
-    list[#list + 1] = skillsRow(zone)
+    add(skillsRow(zone))
     for _, gather in ipairs({
         { "herbs", Professions.HERBALISM, zone.herbs, internal.herbs },
         { "ore", Professions.MINING, zone.ores, internal.ores },
     }) do
-        for _, row in ipairs(gatherRow(unpack(gather)) or {}) do
-            list[#list + 1] = row
+        -- A list that runs to a second row lines up under its names, not its icon.
+        for i, row in ipairs(gatherRow(unpack(gather)) or {}) do
+            add(row, i > 1)
         end
     end
-    if module.db.dungeons then
-        for _, instance in ipairs(zone.dungeons or {}) do
-            list[#list + 1] = ns.Instances.Line(instance)
+    if visible(module.db.dungeons) then
+        for i, instance in ipairs(zone.dungeons or {}) do
+            add(ns.Instances.Line(instance), false, i == 1 and #list > 0 and SECTION_GAP or nil)
         end
     end
     return list
@@ -301,6 +350,7 @@ end
 -- The panel -----------------------------------------------------------------------------------
 
 local panel, driver
+local shownHeld -- whether the detail key was held then
 local shown -- the zone the panel shows now, or false for none; nil to draw again
 
 -- A tooltip's look, which Blizzard uses for small boxes over the map. Probe: the template is
@@ -390,6 +440,7 @@ end
 
 local function draw(mapID)
     shown = mapID or false
+    shownHeld = detailHeld()
     local zone = mapID and internal.zones[mapID]
     if not zone then
         panel:Hide()
@@ -415,20 +466,28 @@ local function draw(mapID)
         rowAt(i)
     end
     for i, row in ipairs(panel.rows) do
+        local entry = list[i]
         row:SetWidth(0)
-        row:SetText(list[i] or "")
-        row:SetShown(list[i] ~= nil)
-        if list[i] then
-            width = max(width, textWidth(row))
+        row:SetText(entry and entry.text or "")
+        row:SetShown(entry ~= nil)
+        if entry then
+            width = max(width, textWidth(row) + (entry.indent and INDENT or 0))
         end
     end
     width = min(width, MAX_WIDTH)
     panel.title:SetWidth(width)
     local height = PADDING * 2 + panel.title:GetStringHeight()
+    local above, aboveIndent = panel.title, 0
     for i, row in ipairs(panel.rows) do
-        if list[i] then
-            row:SetWidth(width)
-            height = height + GAP + row:GetStringHeight()
+        local entry = list[i]
+        if entry then
+            local indent = entry.indent and INDENT or 0
+            local gap = entry.gap or GAP
+            row:ClearAllPoints()
+            row:SetPoint("TOPLEFT", above, "BOTTOMLEFT", indent - aboveIndent, -gap)
+            row:SetWidth(width - indent)
+            height = height + gap + row:GetStringHeight()
+            above, aboveIndent = row, indent
         end
     end
     panel:SetSize(width + PADDING * 2, height)
@@ -504,7 +563,8 @@ local function onUpdate(_, delta)
     local mapID, fromCursor = target(WorldMapFrame)
     hovered = (fromCursor and mapID) and true or false
     mapID = mapID or false
-    if mapID ~= shown then
+    local held = detailHeld()
+    if mapID ~= shown or held ~= shownHeld then
         draw(mapID or nil)
     end
 end

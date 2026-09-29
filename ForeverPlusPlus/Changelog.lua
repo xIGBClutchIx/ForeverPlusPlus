@@ -18,6 +18,12 @@ ns.changelog = {
                     .. "characters who can pick locks. A Locks checkbox turns it off. A Skeleton Keys checkbox (on by default) "
                     .. "shows it to blacksmiths too, against the best skeleton key they can "
                     .. "make, and puts the skill each skeleton key opens in its tooltip." },
+                { L.ZONEINFO_TITLE, "A Detail Key (Shift, Alt, or Ctrl), and fishing, "
+                    .. "dungeons, herbs, ore, and skinning can each show only while you hold "
+                    .. "it. Long herb and ore lists split into rows of at most four, and the "
+                    .. "instances sit apart under a little more space." },
+                { L.TOOLTIPS_TITLE, "A Faction Color option colors the Horde or Alliance line "
+                    .. "on a unit red or blue, as on the map." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.ZONEINFO_TITLE .. " and " .. L.POI_TITLE, "Map tooltips now look the same. "
