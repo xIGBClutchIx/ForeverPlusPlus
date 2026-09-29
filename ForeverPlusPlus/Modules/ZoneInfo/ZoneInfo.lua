@@ -84,7 +84,6 @@ local MAX_WIDTH = 300 -- the widest the text gets; longer lines wrap
 local PADDING = 8
 local GAP = 3 -- between rows
 local ROWS = 5
-local DUNGEON_ATLAS = "Dungeon" -- Blizzard's dungeon entrance icon
 local ICON_SIZE = 16 -- pixels
 local THROTTLE = 0.1 -- seconds between looks at where the cursor is
 
@@ -227,11 +226,10 @@ local function dungeonsRow(zone)
     end
     local names = {}
     for i, instance in ipairs(zone.dungeons) do
-        names[i] = format(L.ZONEINFO_DUNGEON, ns.Instances.Name(instance),
-            levelText(instance[3], instance[4]))
+        names[i] = ns.Instances.Icon(instance, ICON_SIZE) .. " " .. format(L.ZONEINFO_DUNGEON,
+            ns.Instances.Name(instance), levelText(instance[3], instance[4]))
     end
-    return format("|A:%s:%d:%d|a ", DUNGEON_ATLAS, ICON_SIZE, ICON_SIZE)
-        .. concat(names, L.ZONEINFO_LIST_SEPARATOR)
+    return concat(names, L.ZONEINFO_LIST_SEPARATOR)
 end
 
 -- The rows under the zone's name, in order.

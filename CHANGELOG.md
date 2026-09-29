@@ -8,6 +8,10 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 - **Profession Tooltips** (was Gathering Tooltips): also shows the Lockpicking skill a lockbox or locked chest needs, colored against your skill, for characters who can pick locks. A Locks checkbox turns it off. A Skeleton Keys checkbox (on by default) shows it to blacksmiths too, against the best skeleton key they can make, and puts the skill each skeleton key opens in its tooltip.
 
+### Changed
+
+- **Zone Info** and **Points of Interest**: each dungeon and raid in the zone panel and in a multi-instance entrance's tooltip (such as Blackrock Mountain) has Blizzard's dungeon or raid icon.
+
 ### Fixed
 
 - **Player Nameplates**: no more "action blocked" error at login. Recent allies turn light blue once the game has loaded the list, such as after you open the Recent Allies tab.

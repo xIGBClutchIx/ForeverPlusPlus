@@ -160,6 +160,8 @@ local function levels(instance)
     return ns.Colors.Code(color.r, color.g, color.b) .. text .. "|r"
 end
 
+local TOOLTIP_ICON = 14 -- pixels, the dungeon or raid icon before each instance in a tooltip
+
 -- The tooltip of a dungeon or raid: one instance, or a place with several (Blackrock Mountain).
 local function instanceTooltip(kindName, key)
     local instance = internal.instances[key]
@@ -169,7 +171,8 @@ local function instanceTooltip(kindName, key)
     local lines = {}
     for _, partKey in ipairs(instance.parts) do
         local part = internal.instances[partKey]
-        lines[#lines + 1] = format("%s  %s", instanceName(part), levels(part))
+        lines[#lines + 1] = format("%s %s  %s", ns.Instances.Icon(part, TOOLTIP_ICON),
+            instanceName(part), levels(part))
     end
     return place(instance.name), lines
 end

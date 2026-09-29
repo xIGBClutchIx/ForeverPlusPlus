@@ -1,17 +1,17 @@
 -- The dungeons and raids, for the modules that place or list them: each is { instance ID (the game
 -- names it in the player's language), English name for when it can't, lowest level, highest
--- level }, by a short key.
+-- level, true for a raid }, by a short key.
 local _, ns = ...
 
-local GetRealZoneText = GetRealZoneText
+local GetRealZoneText, format = GetRealZoneText, string.format
 
 local Instances = {
-    aq20 = { 509, "Ruins of Ahn'Qiraj", 60, 60 },
-    aq40 = { 531, "Temple of Ahn'Qiraj", 60, 60 },
+    aq20 = { 509, "Ruins of Ahn'Qiraj", 60, 60, true },
+    aq40 = { 531, "Temple of Ahn'Qiraj", 60, 60, true },
     blackfathom = { 48, "Blackfathom Deeps", 24, 32 },
     brd = { 230, "Blackrock Depths", 52, 60 },
     brs = { 229, "Blackrock Spire", 55, 60 },
-    bwl = { 469, "Blackwing Lair", 60, 60 },
+    bwl = { 469, "Blackwing Lair", 60, 60, true },
     deadmines = { 36, "The Deadmines", 17, 26 },
     diremaul = { 429, "Dire Maul", 56, 60 },
     gnomeregan = { 90, "Gnomeregan", 29, 38 },
@@ -19,9 +19,9 @@ local Instances = {
     hallOfThanes = { nil, "The Hall of Thanes", 13, 18 },
     ruinsOfLordaeron = { nil, "Ruins of Lordaeron", 15, 20 },
     maraudon = { 349, "Maraudon", 46, 55 },
-    mc = { 409, "Molten Core", 60, 60 },
-    naxxramas = { 533, "Naxxramas", 60, 60 },
-    onyxia = { 249, "Onyxia's Lair", 60, 60 },
+    mc = { 409, "Molten Core", 60, 60, true },
+    naxxramas = { 533, "Naxxramas", 60, 60, true },
+    onyxia = { 249, "Onyxia's Lair", 60, 60, true },
     ragefire = { 389, "Ragefire Chasm", 13, 18 },
     razorfenDowns = { 129, "Razorfen Downs", 37, 46 },
     razorfenKraul = { 47, "Razorfen Kraul", 29, 38 },
@@ -34,12 +34,20 @@ local Instances = {
     uldaman = { 70, "Uldaman", 41, 51 },
     wailing = { 43, "Wailing Caverns", 17, 24 },
     zulfarrak = { 209, "Zul'Farrak", 44, 54 },
-    zulgurub = { 309, "Zul'Gurub", 60, 60 },
+    zulgurub = { 309, "Zul'Gurub", 60, 60, true },
 }
 
 ns.Instances = {
     byKey = Instances,
 }
+
+---Blizzard's dungeon or raid entrance icon for an instance, as text to put before its name.
+---@param instance table an entry of `byKey`, or one shaped like it
+---@param size number pixels
+---@return string
+function ns.Instances.Icon(instance, size)
+    return format("|A:%s:%d:%d|a", instance[5] and "Raid" or "Dungeon", size, size)
+end
 
 ---An instance's name in the player's language from the game, or the English one.
 ---@param instance table an entry of `byKey`, or one shaped like it

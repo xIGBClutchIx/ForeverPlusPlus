@@ -20,7 +20,7 @@ local Instances = ns.Instances.byKey
 
 -- One entrance of an instance with several, told apart by `name`.
 local function part(instance, name)
-    return { instance[1], instance[2], instance[3], instance[4], part = name }
+    return { instance[1], instance[2], instance[3], instance[4], instance[5], part = name }
 end
 
 -- Dungeons and raids: the ones in Lib/Instances.lua, and the entrances and places only the map

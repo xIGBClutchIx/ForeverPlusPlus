@@ -19,6 +19,11 @@ ns.changelog = {
                     .. "shows it to blacksmiths too, against the best skeleton key they can "
                     .. "make, and puts the skill each skeleton key opens in its tooltip." },
             } },
+            { L.CHANGELOG_CHANGED, {
+                { L.ZONEINFO_TITLE, "Each dungeon and raid in the panel has Blizzard's "
+                    .. "dungeon or raid icon. Points of Interest does the same in the tooltip "
+                    .. "of an entrance with several instances, such as Blackrock Mountain." },
+            } },
             { L.CHANGELOG_FIXED, {
                 { L.PLAYERPLATES_TITLE, "No more \"action blocked\" error at login. Recent "
                     .. "allies turn light blue once the game has loaded the list, such as after "
