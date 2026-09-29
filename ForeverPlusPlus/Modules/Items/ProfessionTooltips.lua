@@ -259,6 +259,12 @@ local function addLine(tooltip, text, color)
     tooltip:AddLine(text, color.r, color.g, color.b)
 end
 
+-- Blizzard's own "Requires Mining (1)" line on a node or creature: it's recolored in place
+-- instead of adding ours. The pattern comes from its string, so it works in any language.
+local REQUIRES = gsub(ITEM_MIN_SKILL or L.PROFTOOLTIPS_REQUIRES, "([%(%)%.%-%+%[%]%*%?%^%$])", "%%%1")
+REQUIRES = gsub(REQUIRES, "%%s", "(.+)")
+REQUIRES = "^" .. gsub(REQUIRES, "%%d", "(%%d+)") .. "$"
+
 -- World objects and minimap pins -------------------------------------------------------------
 
 -- An object's name without the color codes, icons, and spaces a tooltip may wrap it in.
@@ -280,6 +286,43 @@ local function nodeLine(text)
     end
 end
 
+-- The color for Blizzard's requirement line `text` for skill line `line`, and its text without
+-- codes; nil when `text` isn't such a line, or the option is off or the profession not shown.
+local function requiresColor(text, line)
+    local plain = clean(text)
+    local need = tonumber(select(2, match(plain, REQUIRES)))
+    if need then
+        local _, color = skillLine(line, need, L.PROFTOOLTIPS_REQUIRES)
+        return color, plain, true
+    end
+end
+
+-- The first of data's lines after the first that is Blizzard's requirement line: its index, or nil.
+local function findRequires(data)
+    local lines = data.lines
+    if not (readable(lines) and type(lines) == "table") then
+        return nil
+    end
+    for i = 2, #lines do
+        local text = lines[i] and lines[i].leftText
+        if readable(text) and type(text) == "string" and match(clean(text), REQUIRES) then
+            return i
+        end
+    end
+end
+
+-- Recolors Blizzard's requirement line on `tooltip`, once it's drawn: `job` is { index, skill
+-- line, text }.
+local function restyle(tooltip, job)
+    local fontString = leftLine(tooltip, job[1])
+    local color = requiresColor(job[3], job[2])
+    if fontString and color then
+        fontString:SetText(Colors.Text(color, clean(job[3])))
+    end
+end
+
+local restyling = setmetatable({}, { __mode = "k" }) -- tooltip -> job for its post call
+
 -- A herb or vein under the mouse, or a minimap pin. A world object's tooltip has its name alone
 -- on the first line, and the skill line is added after it. A minimap pin's first line holds
 -- everything on separate lines, overlapping pins and their quest objectives too, so the skill
@@ -295,20 +338,53 @@ local function addNodeLines(tooltip, data)
     end
     text = gsub(text, "|n", "\n")
     if not find(text, "\n", 1, true) then
+        local node = NODES[clean(text)]
+        if not node then
+            return
+        end
+        -- Blizzard already says what it needs: recolor that once it's drawn, don't add another.
+        local index = findRequires(data)
+        if index then
+            restyling[tooltip] = { index, node[1], data.lines[index].leftText }
+            return
+        end
         local line, color = nodeLine(text)
         if line then
             addLine(tooltip, line, color)
         end
         return
     end
-    local parts, changed = {}, false
+    local raw, parts, changed = {}, {}, false
     for part in gmatch(text .. "\n", "(.-)\n") do
+        raw[#raw + 1] = part
+    end
+    local i = 1
+    while i <= #raw do
+        local part = raw[i]
         parts[#parts + 1] = part
-        local line, color = nodeLine(part)
-        if line then
-            parts[#parts + 1] = Colors.Text(color, line)
-            changed = true
+        local node = NODES[clean(part)]
+        local nextPart = raw[i + 1]
+        local color, plain = nil, nil
+        if node and nextPart then
+            color, plain = requiresColor(nextPart, node[1])
         end
+        if node and nextPart and match(clean(nextPart), REQUIRES) then
+            -- Blizzard's own line follows the name: color it.
+            if color then
+                parts[#parts + 1] = Colors.Text(color, plain)
+                changed = true
+            else
+                parts[#parts + 1] = nextPart
+            end
+            i = i + 1
+        else
+            local line, lineColor = nodeLine(part)
+            if line then
+                parts[#parts + 1] = Colors.Text(lineColor, line)
+                changed = true
+            end
+        end
+        i = i + 1
     end
     local fontString = changed and leftLine(tooltip, 1)
     if fontString then
@@ -323,6 +399,7 @@ local pending = setmetatable({}, { __mode = "k" }) -- tooltip -> object data not
 
 local function onObjectPre(tooltip, data)
     pending[tooltip] = data
+    restyling[tooltip] = nil
 end
 
 local function onLinePost(tooltip, lineData)
@@ -339,6 +416,11 @@ local function onObject(tooltip, data)
     pending[tooltip] = nil
     if data and (waiting or not TooltipDataProcessor.AddTooltipPreCall) then
         addNodeLines(tooltip, data)
+    end
+    local job = restyling[tooltip]
+    restyling[tooltip] = nil
+    if job and module.enabled then
+        restyle(tooltip, job)
     end
 end
 
@@ -366,12 +448,21 @@ local function canSkin(unit)
     return yes(UnitIsDead(unit)) or yes(UnitCanAttack("player", unit))
 end
 
+local unitData = setmetatable({}, { __mode = "k" }) -- tooltip -> the unit's tooltip data
+
 local function addSkinLine(tooltip)
     if not (module.enabled and module.db.skinning and tooltip.GetUnit) then
         return
     end
     local _, unit = tooltip:GetUnit()
     if not (readable(unit) and type(unit) == "string") or not canSkin(unit) then
+        return
+    end
+    -- Blizzard already says what it needs: recolor that once it's drawn, don't add another.
+    local data = unitData[tooltip]
+    local index = data and findRequires(data)
+    if index then
+        restyling[tooltip] = { index, SKIN, data.lines[index].leftText }
         return
     end
     local level = UnitLevel(unit)
@@ -388,8 +479,10 @@ end
 -- first quest line is drawn, or at the end when there's none.
 local unitPending = setmetatable({}, { __mode = "k" }) -- tooltip -> true until the line is added
 
-local function onUnitPre(tooltip)
+local function onUnitPre(tooltip, data)
     unitPending[tooltip] = true
+    unitData[tooltip] = data
+    restyling[tooltip] = nil
 end
 
 local function onQuestLinePre(tooltip)
@@ -404,6 +497,12 @@ local function onUnit(tooltip, data)
     unitPending[tooltip] = nil
     if data and (waiting or not TooltipDataProcessor.AddTooltipPreCall) then
         addSkinLine(tooltip)
+    end
+    local job = restyling[tooltip]
+    restyling[tooltip] = nil
+    unitData[tooltip] = nil
+    if job and module.enabled then
+        restyle(tooltip, job)
     end
 end
 

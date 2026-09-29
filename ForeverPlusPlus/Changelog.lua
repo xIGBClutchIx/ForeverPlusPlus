@@ -26,6 +26,10 @@ ns.changelog = {
                     .. "on a unit red or blue, as on the map." },
             } },
             { L.CHANGELOG_CHANGED, {
+                { L.PROFTOOLTIPS_TITLE, "When Blizzard already shows \"Requires Mining (1)\" on a "
+                    .. "vein, herb, or creature, that line is recolored against your skill instead "
+                    .. "of a second line being added. Ours is added only when Blizzard's is "
+                    .. "missing." },
                 { L.ZONEINFO_TITLE .. " and " .. L.POI_TITLE, "Map tooltips now look the same. "
                     .. "The title is white, then what kind of place it is in gold, then "
                     .. "details in white, with the faction in Horde red or Alliance blue on "

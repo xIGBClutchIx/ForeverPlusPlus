@@ -12,6 +12,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Changed
 
+- **Profession Tooltips**: when Blizzard already shows "Requires Mining (1)" on a vein, herb, or creature, that line is recolored against your skill instead of a second line being added. Ours is added only when Blizzard's is missing.
 - **Zone Info** and **Points of Interest**: map tooltips now look the same. The title is white, then what kind of place it is in gold, then details in white, with the faction in Horde red or Alliance blue on cities, flight masters, boats, and zeppelins, and level ranges colored against yours. Each dungeon and raid is one row with Blizzard's icon, in the zone panel and in an entrance with several (such as Blackrock Mountain), so a long list no longer wraps through a name or a level range.
 - **Skip Cinematics**: Forget asks you to confirm first, like the Auction Prices reset.
 
