@@ -223,7 +223,19 @@ local overlays = {}
 -- The overlays on their maps now.
 local attached = {}
 
-local function attach(entry)
+local attach
+
+-- One map's attach, kept so a wait for its addon can be cancelled.
+local attachers = {}
+
+local function attacher(entry)
+    attachers[entry] = attachers[entry] or function()
+        attach(entry)
+    end
+    return attachers[entry]
+end
+
+function attach(entry)
     local map = mapFrame(entry)
     if not map or attached[entry] then
         return
@@ -247,22 +259,18 @@ local function redraw()
 end
 
 function module:OnEnable()
-    for _, entry in ipairs(MAPS) do
-        attach(entry)
-    end
     -- The zone map loads when it's first opened.
-    self:On("ADDON_LOADED", function(_, name)
-        for _, entry in ipairs(MAPS) do
-            if entry.addon == name then
-                attach(entry)
-            end
-        end
-    end)
+    for _, entry in ipairs(MAPS) do
+        ns.AddOns.WhenLoaded(entry.addon, attacher(entry))
+    end
     -- A newly explored area now comes from Blizzard; stop drawing it.
     self:On("MAP_EXPLORATION_UPDATED", redraw)
 end
 
 function module:OnDisable()
+    for _, entry in ipairs(MAPS) do
+        ns.AddOns.Cancel(entry.addon, attacher(entry))
+    end
     for entry, overlay in pairs(attached) do
         overlay.map:RemoveDataProvider(overlay.provider)
         overlay:Release()

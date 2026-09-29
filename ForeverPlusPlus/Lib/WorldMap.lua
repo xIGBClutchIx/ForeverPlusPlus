@@ -3,11 +3,9 @@
 -- module waits for it.
 local _, ns = ...
 
-local ipairs, pairs, next = ipairs, pairs, next
-local C_AddOns, UnitFactionGroup, CreateFromMixins = C_AddOns, UnitFactionGroup, CreateFromMixins
+local ipairs, pairs = ipairs, pairs
+local UnitFactionGroup, CreateFromMixins = UnitFactionGroup, CreateFromMixins
 local FACTION_ALLIANCE, FACTION_HORDE = FACTION_ALLIANCE, FACTION_HORDE
-
-local call = ns.Call -- so one module's error doesn't stop the others waiting
 
 local WorldMap = {}
 ns.WorldMap = WorldMap
@@ -18,22 +16,10 @@ local ADDON = "Blizzard_WorldMap"
 ---it's a load-on-demand Blizzard addon, so don't count on it.
 ---@return table?
 function WorldMap.Get()
-    return (not C_AddOns or C_AddOns.IsAddOnLoaded(ADDON)) and WorldMapFrame or nil
+    return ns.AddOns.IsLoaded(ADDON) and WorldMapFrame or nil
 end
 
-local waiting = {} -- fn -> true, for the map to load
-
-local function onLoad(_, name)
-    if name ~= ADDON then
-        return
-    end
-    ns.Off("ADDON_LOADED", onLoad)
-    local fns = waiting
-    waiting = {}
-    for fn in pairs(fns) do
-        call(fn, WorldMapFrame)
-    end
-end
+local waiting = {} -- fn -> the function waiting on the addon for it
 
 ---Calls `fn(map)` now if the world map has loaded, or else once it does. Waiting with the same
 ---`fn` again doesn't call it twice; `WorldMap.Cancel(fn)` stops the wait, for a module turned off
@@ -45,22 +31,24 @@ function WorldMap.WhenLoaded(fn)
         fn(map)
         return
     end
-    if not next(waiting) then
-        ns.On("ADDON_LOADED", onLoad)
+    waiting[fn] = waiting[fn] or function()
+        waiting[fn] = nil
+        if WorldMapFrame then
+            fn(WorldMapFrame)
+        end
     end
-    waiting[fn] = true
+    ns.AddOns.WhenLoaded(ADDON, waiting[fn])
 end
 
 ---Stops waiting to call `fn` when the world map loads.
 ---@param fn function
 function WorldMap.Cancel(fn)
     if waiting[fn] then
+        ns.AddOns.Cancel(ADDON, waiting[fn])
         waiting[fn] = nil
-        if not next(waiting) then
-            ns.Off("ADDON_LOADED", onLoad)
-        end
     end
 end
+
 
 ---A data provider for a map to draw our own things on: what the map calls as it changes maps,
 ---zooms or resizes. `handlers` may have RemoveAllData, RefreshAllData, OnCanvasScaleChanged,

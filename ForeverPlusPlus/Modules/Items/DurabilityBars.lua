@@ -107,6 +107,9 @@ local function update()
 end
 
 local function start()
+    if not _G.PaperDollItemsFrame then
+        return
+    end
     if not container then
         build()
     end
@@ -116,12 +119,7 @@ end
 
 -- The character frame is in Blizzard_UIPanels_Game on Mainline, which loads before addons; wait
 -- for it anyway in case Forever makes it load on demand.
-local function onAddonLoaded(_, name)
-    if name == "Blizzard_UIPanels_Game" and _G.PaperDollItemsFrame then
-        module:Off("ADDON_LOADED", onAddonLoaded)
-        start()
-    end
-end
+local ADDON = "Blizzard_UIPanels_Game"
 
 function module:OnEnable()
     self:On("UPDATE_INVENTORY_DURABILITY", update)
@@ -129,11 +127,12 @@ function module:OnEnable()
     if _G.PaperDollItemsFrame then
         start()
     else
-        self:On("ADDON_LOADED", onAddonLoaded)
+        ns.AddOns.WhenLoaded(ADDON, start)
     end
 end
 
 function module:OnDisable()
+    ns.AddOns.Cancel(ADDON, start)
     if container then
         container:Hide()
     end
