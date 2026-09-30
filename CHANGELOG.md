@@ -5,6 +5,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ## Unreleased
 
 ### Added
+
 - **Chat** (new category, four modules, all off by default): **Chat Copy** adds a button beside the chat window that opens the chat as plain text, already selected, to copy with Ctrl+C, with a slider for how many lines. **Short Channel Names** shows channels as [1], [G], or [1. G] instead of [1. General]. **Chat History** keeps each chat window's latest lines when you log out or reload and shows them again at login, with a slider for how many. **Social Button** moves the social (Quick Join) button down beside the chat window's other buttons.
 - **Currency Bar** (new, off by default, in Interface): a small tooltip-styled box showing your gold and the currencies you tick Show on Backpack in the Currency tab. Gold always shows all three coins, even 0 gold. Checkboxes for the gold and the currencies, one to stack them in a column, and a size slider. Move it in Edit Mode.
 - **Auto Decline** (party invites): a new option, off by default, that also turns down party invites without the invite sound. Duels and party invites now each have their own checkbox, so you can decline only one. Friends and guildmates can still be let through, and chat says who was declined.
