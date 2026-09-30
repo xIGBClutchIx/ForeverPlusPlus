@@ -51,11 +51,13 @@ end
 
 ---Everything the list needs to know about one addon, read once per rebuild.
 local function readAddOn(index, character)
-    local name, title, notes = C_AddOns.GetAddOnInfo(index)
+    local name, title, notes, _, infoReason = C_AddOns.GetAddOnInfo(index)
     local group = C_AddOns.GetAddOnMetadata(index, "Group")
     local state = C_AddOns.GetAddOnEnableState(index, character)
     local _, reason = C_AddOns.IsAddOnLoadable(index, character)
     local none = Enum and Enum.AddOnEnableState and Enum.AddOnEnableState.None or 0
+    -- The enable state for the player's name came back "on" for addons the list shows as
+    -- Disabled (Forever, 2026-09-30), so the load reasons count too.
     return {
         index = index,
         name = name,
@@ -64,7 +66,8 @@ local function readAddOn(index, character)
         text = plain(title or name),
         notes = plain(notes),
         -- A dependency that's switched off counts as disabled, like its own checkbox would.
-        disabled = state <= none or reason == "DEP_DISABLED",
+        disabled = state <= none or reason == "DISABLED" or reason == "DEP_DISABLED"
+            or infoReason == "DISABLED" or infoReason == "DEP_DISABLED",
     }
 end
 
