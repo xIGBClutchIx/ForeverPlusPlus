@@ -13,6 +13,11 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_ADDED, {
+                { L.ALREADYKNOWN_TITLE, "New, off by default. Marks recipes, mounts, pets, toys, "
+                    .. "and other items you already know or have with Blizzard's green check on "
+                    .. "the icon, or a green tint. It shows on merchants, the auction house's "
+                    .. "browse list, bags, mail, and the loot window, each with its own "
+                    .. "checkbox." },
                 { L.AUTOSELLJUNK_TITLE, "New, off by default. Sells the gray items in your bags "
                     .. "when a merchant opens and says in chat what they sold for. Hold Shift to "
                     .. "skip it. A checkbox stops at 12 items per visit so everything can be "

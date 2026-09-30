@@ -22,6 +22,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Gathering Tracking | Keeps Find Minerals or Find Herbs on after logging in, zoning, or dying, and can swap between the two. |
 | Skip Cinematics | Skips cinematics and movies you've already seen on any character, or every one. Hold Shift to watch. Off by default. |
 | **Items** | |
+| Already Known | Marks recipes, mounts, pets, toys, and other items you already know or have with a green check (or tint) on their icon, on merchants, the auction house, bags, mail, and the loot window, each with its own checkbox. Off by default. |
 | Auction Prices | Scans the auction house when you open it and shows the lowest buyout in item tooltips, under the sell price. |
 | Bag Slot Counter | Shows how many bag slots are free on the backpack button, or each bag's own count on its button, with the reagent bag counted on its own. |
 | Durability Bars | Shows a small bar beside each item on the character window with how worn it is. |
