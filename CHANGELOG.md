@@ -6,7 +6,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Added
 
-- **AddOns List** (new, off by default, in Interface): the AddOns list without category headers, with enabled addons first and the disabled ones after, each in name order. Options to move disabled addons out of their group and to search addon notes. Turning it off gives Blizzard's list back at once.
+- **AddOns List** (new, in Interface): the AddOns list without category headers, with enabled addons first and the disabled ones after, each in name order. Options to move disabled addons out of their group and to search addon notes. Turning it off gives Blizzard's list back at once.
 - **Spell Ranks** (new, in Interface): marks the spells on your action bars that have a higher rank you already know, with a warning badge or a red tint over the button, and adds the best rank you know to the spell's tooltip. `/fpp ranks` lists them, and chat says how many there are after you level up or learn spells.
 - **Recipe Colors** (new): colors recipes in the professions window by your chance of a skill-up, orange, yellow, green, or gray, like the old trade skill window. Options tint the row highlights to match and gray out recipes you know that can't raise your skill any more.
 - **Quest Nameplates** (new): a quest icon and your progress (3/8, or how many are left) beside the health bar of creatures you need for a quest, from the objective lines of their tooltip. Options for the progress shown, which side of the bar, and size.

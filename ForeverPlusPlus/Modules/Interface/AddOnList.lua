@@ -14,7 +14,7 @@ local C_AddOns, UnitGUID, CreateTreeDataProvider, geterrorhandler =
 local L = ns.L
 
 local module = ns.NewModule("AddOnList", L.ADDONLIST_DESC, {
-    enabled = false,
+    enabled = true,
     enabledFirst = true, -- enabled addons above the disabled ones
     ungroup = false, -- disabled addons leave their group and sit with the other disabled ones
     notes = true, -- the search box also looks in an addon's notes
