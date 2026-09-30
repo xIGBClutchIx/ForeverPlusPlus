@@ -6,43 +6,40 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Added
 
-- **Settings**: Defaults and Clutch's Default buttons on the welcome page, each asking first. Defaults puts every module's settings back to how they start; Clutch's Default does that and also turns on Fishing Cast, Skip Cinematics, Auto Screenshot, Currency Bar, Hide Beta Feedback, and Short Channel Names. Saved data stays.
-- **Edit Mode** for Combat Alert, Currency Bar, and Flight Timer: they now look and work like Blizzard's own frames. The box turns gold when you click it and opens a small settings window with a Scale slider and Reset To Default Position. Right-click for the same options. Drag to move, with snapping to the middle and edges of the screen and to each other, or nudge a pixel at a time with the arrow keys. Flight Timer gets a Bar Size option too.
-- **Chat** (new category with four modules; Short Channel Names is off by default): **Chat Copy** adds a button beside the chat window that opens the chat as plain text, selected and ready to copy with Ctrl+C, with a slider for how many lines. **Short Channel Names** shows channels as [1], [G], or [1. G] instead of [1. General]. **Chat History** keeps each chat window's latest lines through a logout or reload and shows them again at login, with a slider for how many. **Social Button** moves the social (Quick Join) button down beside the chat window's other buttons.
-- **Chat Font** (new, in Chat): draws the chat windows in Friz Quadrata, Arial Narrow, Skurri, or Morpheus, keeping each window's size. Turning it off gives Blizzard's font back. It is unavailable on Korean, Chinese, and Russian clients.
-- **Currency Bar** (new, off by default, in Interface): a small box, styled like a tooltip, showing your gold and the currencies you tick Show on Backpack in the Currency tab. Only gold shows by default, always with all three coins; a checkbox adds the currencies. Hovering it lists your gold and currencies with what this session gained or spent, each with its own checkbox. Options also stack them in a column and set the size. Move it in Edit Mode.
-- **Auto Decline** (party invites, off by default): turned down without the invite sound. Friends and guildmates can still be let through, and chat says who was declined. Duels and party invites now each have their own checkbox, so you can decline only one.
-- **Fishing Cast** (new, off by default, in Automation): double right-click in the world with a fishing pole equipped to cast Fishing. Looting the bobber works as usual, and it never casts in combat. A slider sets how fast the second click must follow the first.
-- **AddOns List** (new, in Interface): the AddOns list without category headers, with enabled addons first and the disabled ones after, each in name order. Options to move disabled addons out of their group and to search addon notes. Turning it off gives Blizzard's list back at once.
-- **Spell Ranks** (new, in Interface): marks the spells on your action bars that have a higher rank you already know, with a warning badge or a red tint over the button, and adds the best rank you know to the spell's tooltip. `/fpp ranks` lists them, and chat says how many there are after you level up or learn spells.
-- **Recipe Colors** (new): colors recipes in the professions window by your chance of a skill-up, orange, yellow, green, or gray, like the old trade skill window. Options tint the row highlights to match and gray out recipes you know that can't raise your skill any more.
-- **Quest Nameplates** (new): a quest icon and your progress (3/8, or how many are left) beside the health bar of creatures you need for a quest, from the objective lines of their tooltip. Options for the progress shown, which side of the bar, and size.
-- **Already Known** (new): marks recipes, mounts, pets, toys, and other items you already know or have with Blizzard's green check on the icon, or a green tint. It shows on merchants, the auction house's browse list, bags, mail, and the loot window, each with its own checkbox.
-- **Combat Alert** (new, off by default, in Interface): floats a red "Entering Combat" or green "Leaving Combat" line up and away from the middle of the screen when combat starts or ends, in Blizzard's large title font. Each has a checkbox, with a size slider and a duration slider. Move it in Edit Mode.
-- **Auto Sell Junk** (new, off by default): sells the gray items in your bags when a merchant opens and says in chat what they sold for. Hold Shift to skip it. A checkbox stops at 12 items per visit so everything can be bought back.
-- **Flight Timer** (new): times every flight you take, then shows a bar counting the flight down, which you can move in Edit Mode, and the flight time on a flight point's tooltip on the flight map. Each route is timed on its own, since flights differ each way. A Reset button forgets the times.
-- **Profession Tooltips** (was Gathering Tooltips): also shows the Lockpicking skill a lockbox or locked chest needs, colored against your skill, for characters who can pick locks. A Locks checkbox turns it off. A Skeleton Keys checkbox (on by default) shows it to blacksmiths too, against the best skeleton key they can make, and puts the skill each skeleton key opens in its tooltip.
-- **Zone Info**: a Detail Key (Shift, Alt, or Ctrl), and fishing, dungeons, herbs, ore, and skinning can each show only while you hold it. Long herb and ore lists split into rows of at most four, and the instances sit apart under a little more space.
-- **Zone Info**: the panel can also sit in a top corner of the map. In a right corner it is mirrored: the icons go on the right and the text lines up on the right.
-- **Player Nameplates**: an Icon Position option puts the group role, friend, and recent ally icons before or after the name (after by default).
-- **Tooltips**: a Faction Color option colors the Horde or Alliance line on a unit red or blue, as on the map.
+- **Settings**: Defaults and Clutch's Default buttons on the welcome page, each asking first. Defaults resets every module's settings; Clutch's Default also turns on Fishing Cast, Skip Cinematics, Auto Screenshot, Currency Bar, Hide Beta Feedback, and Short Channel Names.
+- **Edit Mode**: Combat Alert, Currency Bar, and Flight Timer work like Blizzard's own frames: click one to select it, then drag it (it snaps to the screen and other frames), nudge it with the arrow keys, or use its Scale slider and Reset To Default Position, also on right-click.
+- **Chat** (new category): **Chat Copy** adds a button beside the chat window that opens the chat as plain text to copy. **Short Channel Names** shows [1] instead of [1. General] (off by default). **Chat History** shows each window's latest lines again after a logout or reload. **Social Button** moves the Quick Join button beside the chat's other buttons. **Chat Font** draws chat in Friz Quadrata or another Blizzard font (not on Korean, Chinese, or Russian clients).
+- **Currency Bar** (new, off by default, in Interface): a small box showing your gold and, if you choose, the currencies you show on your Backpack. Hover it for what this session gained or spent. Move it in Edit Mode.
+- **Auto Decline**: also turns down party invites, without the invite sound (off by default). Duels and party invites each have their own checkbox.
+- **Fishing Cast** (new, off by default, in Automation): double right-click with a fishing pole equipped to cast Fishing.
+- **AddOns List** (new, in Interface): the AddOns list without category headers, enabled addons first.
+- **Spell Ranks** (new, in Interface): marks action bar spells that have a higher rank you already know, and adds the best rank to the tooltip. `/fpp ranks` lists them.
+- **Recipe Colors** (new): colors recipes in the professions window by your chance of a skill-up, like the old trade skill window.
+- **Quest Nameplates** (new): a quest icon and your progress beside the health bar of creatures you need for a quest.
+- **Already Known** (new): a green check on recipes, mounts, pets, toys, and other items you already know, on merchants, the auction house, bags, mail, and loot.
+- **Combat Alert** (new, off by default, in Interface): floats "Entering Combat" or "Leaving Combat" up from the middle of the screen.
+- **Auto Sell Junk** (new, off by default): sells your gray items when a merchant opens. Hold Shift to skip it.
+- **Flight Timer** (new): times each flight you take, then counts the next one down in a bar and shows the flight time on the flight map.
+- **Profession Tooltips** (was Gathering Tooltips): also shows the Lockpicking skill a lockbox or locked chest needs, and lets blacksmiths see which skeleton key opens it.
+- **Zone Info**: a Detail Key shows fishing, dungeons, herbs, ore, and skinning only while you hold it, and the panel can sit in a top corner of the map.
+- **Player Nameplates**: an Icon Position option puts the role, friend, and recent ally icons before or after the name.
+- **Tooltips**: a Faction Color option colors the Horde or Alliance line on a unit red or blue.
 
 ### Changed
 
-- **Profession Tooltips**: when Blizzard already shows "Requires Mining (1)" on a vein, herb, or creature, that line is recolored against your skill instead of a second line being added. Ours is added only when Blizzard's is missing.
-- **Zone Info** and **Points of Interest**: map tooltips now look the same. The title is white, then what kind of place it is in gold, then details in white, with the faction in Horde red or Alliance blue on cities, flight masters, boats, and zeppelins, and level ranges colored against yours. Each dungeon and raid is one row with Blizzard's icon, in the zone panel and in an entrance with several (such as Blackrock Mountain), so a long list no longer wraps through a name or a level range.
-- **Player Nameplates**: recent allies get the Recent Allies icon beside their name by default, so their class color stays. Recent Allies is now a dropdown: Off, Colored Name (the old light blue name), or Icon.
+- **Profession Tooltips**: recolors Blizzard's "Requires Mining (1)" line against your skill instead of adding a second one.
+- **Zone Info** and **Points of Interest**: map tooltips look the same: white title, gold kind of place, Horde red and Alliance blue, and each dungeon or raid on one row with its icon.
+- **Player Nameplates**: recent allies get an icon instead of a light blue name. Recent Allies is a dropdown: Off, Colored Name, or Icon.
 - **Player Nameplates** and **NPC Nameplates**: Name Size is 80% by default.
-- **Skip Cinematics**: Forget asks you to confirm first, like the Auction Prices reset.
+- **Skip Cinematics**: Forget asks you to confirm first.
 
 ### Fixed
 
-- **Points of Interest**: no more second icon beside ours for Undercity, or for a dungeon or raid entrance Blizzard also marks.
-- **Player Nameplates**: no more "action blocked" error at login. Recent allies are marked once the game has loaded the list, such as after you open the Recent Allies tab.
-- **Auction Prices**: posting works while a scan runs. The scan waits its turn with the server, gives way to the auction house's own searches, pauses while an item is in the sell box, and stops if you search.
-- **Player Nameplates** and **NPC Nameplates**: the guild or title moves under the cast bar the moment it appears, and back only once it has faded, instead of lagging or overlapping it.
-- **Points of Interest**: flight points you have learned now show as learned, including with translated names and for the two Light's Hope Chapel points, and ones you haven't say so. Visit a flight master once to have yours picked up again.
-- **Profession Tooltips**: the skill line sits right under the name, above quest lines, including on minimap pins.
+- **Points of Interest**: no second icon beside ours for Undercity or for dungeon and raid entrances. Learned flight points show as learned again, including with translated names; visit a flight master once to pick yours up.
+- **Player Nameplates**: no more "action blocked" error at login.
+- **Auction Prices**: posting works while a scan runs.
+- **Player Nameplates** and **NPC Nameplates**: the guild or title no longer overlaps the cast bar.
+- **Profession Tooltips**: the skill line sits under the name, above quest lines, also on minimap pins.
 
 ## 0.3.0 (2026-09-28)
 
