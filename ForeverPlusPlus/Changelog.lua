@@ -15,8 +15,8 @@ ns.changelog = {
             { L.CHANGELOG_ADDED, {
                 { L.CURRENCYBAR_TITLE, "New, off by default, in Interface. A small "
                     .. "tooltip-styled box showing your gold and the currencies you tick Show "
-                    .. "on Backpack in the Currency tab. Checkboxes for the gold and the "
-                    .. "currencies, and one to stack them in a column. Move it in Edit Mode." },
+                    .. "on Backpack in the Currency tab. Gold always shows all three coins, even 0 gold. Checkboxes for the gold and the "
+                    .. "currencies, one to stack them in a column, and a size slider. Move it in Edit Mode." },
                 { L.CATEGORY_CHAT, "New category, four modules, all off by default. "
                     .. "Chat Copy adds a button beside the chat window that opens the chat as "
                     .. "plain text, already selected, to copy with Ctrl+C, with a slider for how "

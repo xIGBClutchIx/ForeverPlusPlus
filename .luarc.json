@@ -82,6 +82,7 @@
     "GetGuildBankWithdrawMoney",
     "GetMoney",
     "GetMoneyString",
+    "BreakUpLargeNumbers",
     "IsShiftKeyDown",
     "IsAltKeyDown",
     "IsControlKeyDown",

@@ -170,3 +170,5 @@ L.CURRENCYBAR_VERTICAL_DESC = "Stack the gold and currencies in a column instead
 L.CURRENCYBAR_RESET_POSITION = "Position"
 L.CURRENCYBAR_RESET_POSITION_BUTTON = "Reset"
 L.CURRENCYBAR_RESET_POSITION_DESC = "Puts the box back where it starts."
+L.CURRENCYBAR_SCALE = "Size"
+L.CURRENCYBAR_SCALE_DESC = "How big the box and its text are."

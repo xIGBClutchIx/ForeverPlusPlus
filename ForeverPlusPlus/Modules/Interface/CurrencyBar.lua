@@ -5,7 +5,8 @@ local _, ns = ...
 
 local GetMoney, C_CurrencyInfo, GameTooltip = GetMoney, C_CurrencyInfo, GameTooltip
 local CreateFrame, UIParent = CreateFrame, UIParent
-local format, max, tconcat = string.format, math.max, table.concat
+local format, max, floor, tconcat = string.format, math.max, math.floor, table.concat
+local BreakUpLargeNumbers = BreakUpLargeNumbers
 
 local L = ns.L
 
@@ -14,6 +15,7 @@ local module = ns.NewModule("CurrencyBar", L.CURRENCYBAR_DESC, {
     money = true,
     currencies = true,
     vertical = false,
+    scale = 100, -- percent
     x = 0, -- the box's offset from the center of the screen
     y = -300,
 })
@@ -24,6 +26,12 @@ module.options = {
     { key = "money", name = L.CURRENCYBAR_MONEY, description = L.CURRENCYBAR_MONEY_DESC },
     { key = "currencies", name = L.CURRENCYBAR_CURRENCIES, description = L.CURRENCYBAR_CURRENCIES_DESC },
     { key = "vertical", name = L.CURRENCYBAR_VERTICAL, description = L.CURRENCYBAR_VERTICAL_DESC },
+    {
+        key = "scale",
+        name = L.CURRENCYBAR_SCALE,
+        description = L.CURRENCYBAR_SCALE_DESC,
+        min = 50, max = 200, step = 10, format = "%d%%",
+    },
 }
 
 local DEFAULT_X, DEFAULT_Y = 0, -300
@@ -33,13 +41,23 @@ local MAX_CURRENCIES = 10 -- far more than the Backpack's three, in case Forever
 
 local frame
 
+-- Gold, silver, and copper as Blizzard draws them, but every coin always: 0 gold still shows.
+local function coins(amount)
+    local gold = floor(amount / 10000)
+    local silver = floor(amount / 100) % 100
+    local copper = amount % 100
+    local icon = "|TInterface/MoneyFrame/UI-%sIcon:" .. ICON .. ":" .. ICON .. ":2:0|t"
+    return (BreakUpLargeNumbers and BreakUpLargeNumbers(gold) or gold) .. format(icon, "Gold")
+        .. " " .. silver .. format(icon, "Silver") .. " " .. copper .. format(icon, "Copper")
+end
+
 -- The parts --------------------------------------------------------------------------------------
 
 -- What to show, in order: the gold, then each Backpack currency as its icon and amount.
 local function parts()
     local list = {}
     if module.db.money then
-        list[#list + 1] = ns.Money(GetMoney())
+        list[#list + 1] = coins(GetMoney())
     end
     -- Probe: the Backpack currency list is Mainline's.
     if module.db.currencies and C_CurrencyInfo and C_CurrencyInfo.GetBackpackCurrencyInfo then
@@ -82,7 +100,11 @@ local function newFrame()
         box:SetBackdrop(BACKDROP_TOOLTIP_16_16_5555)
         box:SetBackdropColor(0, 0, 0, 0.8)
     end
-    box.text = box:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    -- The text sits in a child that takes the scale, so the box's own position stays put in Edit Mode.
+    box.inner = CreateFrame("Frame", nil, box)
+    box.inner:SetSize(1, 1)
+    box.inner:SetPoint("CENTER")
+    box.text = box.inner:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     box.text:SetPoint("CENTER")
     box.text:SetJustifyH("CENTER")
     box:EnableMouse(true)
