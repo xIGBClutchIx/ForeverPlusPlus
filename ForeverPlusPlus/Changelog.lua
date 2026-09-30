@@ -13,6 +13,11 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_ADDED, {
+                { L.ADDONLIST_TITLE, "New, off by default, in Interface. The AddOns list "
+                    .. "without category headers, with enabled addons first and the disabled "
+                    .. "ones after, each in name order. Options to move disabled addons out of "
+                    .. "their group and to search addon notes. Turning it off gives Blizzard's "
+                    .. "list back at once." },
                 { L.SPELLRANKS_TITLE, "New, in Interface. Marks the spells on "
                     .. "your action bars that have a higher rank you already know, with a "
                     .. "warning badge or a red tint over the button, and adds the best rank you "

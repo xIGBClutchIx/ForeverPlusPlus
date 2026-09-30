@@ -143,3 +143,14 @@ L.COMBATALERT_DURATION_DESC = "How long the text stays up before it has faded aw
 L.COMBATALERT_RESET_POSITION = "Position"
 L.COMBATALERT_RESET_POSITION_BUTTON = "Reset"
 L.COMBATALERT_RESET_POSITION_DESC = "Puts the alert back where it starts."
+
+-- AddOnList
+L.ADDONLIST_TITLE = "AddOns List"
+L.ADDONLIST_DESC = "Show the AddOns list without category headers, with enabled addons first."
+L.ADDONLIST_ENABLEDFIRST = "Enabled First"
+L.ADDONLIST_ENABLEDFIRST_DESC = "List the addons you have enabled above the disabled ones."
+L.ADDONLIST_UNGROUP = "Ungroup Disabled"
+L.ADDONLIST_UNGROUP_DESC = "Move disabled addons out of their group to the disabled part of the "
+    .. "list, so a group only shows the addons that are on."
+L.ADDONLIST_NOTES = "Search Notes"
+L.ADDONLIST_NOTES_DESC = "Let the search box also find words in an addon's notes."
