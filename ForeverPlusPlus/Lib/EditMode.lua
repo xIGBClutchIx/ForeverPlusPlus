@@ -225,9 +225,13 @@ local function hasKit(kit)
     return true
 end
 
+-- Blizzard's boxes say "Click To Edit" while the mouse is over one that isn't picked.
+local function showHint(selection, isSelected)
+    selection.hint:SetShown(selection.hovered and not isSelected or false)
+end
+
 local function look(selection, isSelected)
-    -- Blizzard's boxes say "Click To Edit" until one is picked.
-    selection.hint:SetShown(not isSelected)
+    showHint(selection, isSelected)
     local kit = KITS[isSelected]
     if hasKit(kit) then
         NineSliceUtil.ApplyLayout(selection, LAYOUT, kit)
@@ -261,6 +265,14 @@ local function newSelection(frame, info)
     -- Blizzard's Edit Mode loads after us, so its art isn't there yet when a module turns on: draw
     -- the box again each time it shows.
     selection:SetScript("OnShow", function(self) look(self, selected == frame) end)
+    selection:SetScript("OnEnter", function(self)
+        self.hovered = true
+        showHint(self, selected == frame)
+    end)
+    selection:SetScript("OnLeave", function(self)
+        self.hovered = false
+        showHint(self, selected == frame)
+    end)
     selection:SetScript("OnMouseDown", function(_, button)
         if button == "LeftButton" then
             pick(frame)
