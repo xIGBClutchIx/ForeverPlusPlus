@@ -22,6 +22,10 @@ ns.changelog = {
                     .. "window by your chance of a skill-up, orange, yellow, green, or gray, like "
                     .. "the old trade skill window. Options tint the row highlights to match and "
                     .. "gray out recipes you know that can't raise your skill any more." },
+                { L.QUESTPLATES_TITLE, "New, off by default. A quest icon and your progress "
+                    .. "(3/8, or how many are left) beside the health bar of creatures you need "
+                    .. "for a quest, from the objective lines of their tooltip. Options for the "
+                    .. "progress shown, which side of the bar, and size." },
                 { L.AUTOSELLJUNK_TITLE, "New, off by default. Sells the gray items in your bags "
                     .. "when a merchant opens and says in chat what they sold for. Hold Shift to "
                     .. "skip it. A checkbox stops at 12 items per visit so everything can be "
