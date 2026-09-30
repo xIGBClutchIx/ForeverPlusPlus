@@ -35,8 +35,8 @@ Everything is on by default except where noted. Each module can be turned off, a
 | AddOns List | Shows the AddOns list without category headers, enabled addons first, each in name order. Options for ungrouping disabled addons and searching notes. On by default. |
 | Spell Ranks | Marks the spells on your action bars that have a higher rank you already know, with a warning badge or a red tint over the button, and says the best rank in the spell's tooltip. `/fpp ranks` lists them. |
 | Recipe Colors | Colors recipes in the professions window by your chance of a skill-up: orange, yellow, green, or gray, with the row's highlight to match. |
-| Combat Alert | Floats a red "Entering Combat" or green "Leaving Combat" line up and away from the middle of the screen, each with its own checkbox, plus a size slider and how long it stays (move it in Edit Mode). Off by default. |
-| Currency Bar | Shows your gold and the currencies you tick Show on Backpack in a small tooltip-styled box, each with its own checkbox, , a size slider, and can stack them in a column (move it in Edit Mode). Off by default. |
+| Combat Alert | Floats a red "Entering Combat" or green "Leaving Combat" line up and away from the middle of the screen, each with its own checkbox, plus a size slider and how long it stays (move and scale it in Edit Mode). Off by default. |
+| Currency Bar | Shows your gold and the currencies you tick Show on Backpack in a small tooltip-styled box, each with its own checkbox, , a size slider, and can stack them in a column (move and scale it in Edit Mode). Off by default. |
 | Tooltips | Colors unit and item tooltips by class, reaction, or quality, colors the Horde or Alliance line red or blue, and adds player titles and who a unit is targeting. |
 | **Chat** | |
 | Chat Copy | Adds a button beside the chat window that opens the chat as text, already selected, so you can copy it with Ctrl+C. A slider sets how many lines. |
@@ -48,7 +48,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Zone Info | Shows a panel in a corner of the world map (bottom left by default; in a right corner it is mirrored, icons on the right) with the zone's level range colored against yours, who holds it, its dungeons, the fishing skill it needs, and the herbs, ore, and skinning in it for the professions you have. On a continent map, it's the zone under the cursor. Herbs, ore, and skinning can each be off, shown with the profession, always, or only while you hold the detail key (Shift, Alt, or Ctrl), and so can fishing and dungeons; the panel has a size slider. |
 | Unexplored Areas | Shows the parts of zone maps you haven't explored yet on the world map and zone map, tinted in a color and strength you choose, or just like explored areas. |
 | Coordinates | Shows your coordinates on the left of the world map's title bar and the cursor's on the right, each with its own checkbox, plus tenths and the minimap. It turns on the game's own coordinates, so it matches Settings > Gameplay > Interface. |
-| Flight Timer | Times every flight you take, remembered by the game's flight point IDs, then shows a bar counting the flight down (move it in Edit Mode) and the time on the flight map's tooltip. |
+| Flight Timer | Times every flight you take, remembered by the game's flight point IDs, then shows a bar counting the flight down (move and scale it in Edit Mode) and the time on the flight map's tooltip. |
 | Hide Filter Reset | Hides the reset button on the world map's filter dropdown, which otherwise shows whenever a filter is off. |
 | **Unit Frames** | |
 | Class Colors | Shows players' health bars, and optionally names, in their class color on the player, target, focus, party, and target-of-target frames, and hostile and neutral NPCs' health bars in red and yellow. |

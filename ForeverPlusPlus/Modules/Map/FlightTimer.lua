@@ -16,6 +16,7 @@ local module = ns.NewModule("FlightTimer", L.FLIGHTTIMER_DESC, {
     enabled = true,
     bar = true,
     tooltip = true,
+    scale = 100, -- percent
     x = 0, -- the bar's offset from the center of the screen
     y = 250,
     -- Seconds by "fromNodeID>toNodeID". Data, not a setting.
@@ -27,6 +28,12 @@ module.category = "map"
 module.options = {
     { key = "bar", name = L.FLIGHTTIMER_BAR, description = L.FLIGHTTIMER_BAR_DESC },
     { key = "tooltip", name = L.FLIGHTTIMER_TOOLTIP, description = L.FLIGHTTIMER_TOOLTIP_DESC },
+    {
+        key = "scale",
+        name = L.FLIGHTTIMER_SCALE,
+        description = L.FLIGHTTIMER_SCALE_DESC,
+        min = 50, max = 200, step = 10, format = "%d%%",
+    },
 }
 
 local DEFAULT_X, DEFAULT_Y = 0, 250
@@ -112,8 +119,8 @@ local function newBar()
 end
 
 local function place()
-    bar:ClearAllPoints()
-    bar:SetPoint("CENTER", UIParent, "CENTER", module.db.x, module.db.y)
+    bar:SetScale(module.db.scale / 100)
+    ns.EditMode.Place(bar, module.db.x, module.db.y)
 end
 
 local function fillTo(fraction)
@@ -263,17 +270,33 @@ local function moved(x, y)
     module.db.x, module.db.y = x, y
 end
 
+local function resetPosition()
+    module.db.x, module.db.y = DEFAULT_X, DEFAULT_Y
+    if bar then
+        place()
+    end
+end
+
+-- What Edit Mode's dialog for the bar offers.
+local editModeOptions = {
+    onChange = sample,
+    reset = resetPosition,
+    scale = {
+        min = 50, max = 200, step = 10, format = "%d%%",
+        get = function() return module.db.scale end,
+        set = function(value)
+            module.db.scale = value
+            place()
+        end,
+    },
+}
+
 module.actions = {
     {
         name = L.FLIGHTTIMER_RESET_POSITION,
         button = L.FLIGHTTIMER_RESET_POSITION_BUTTON,
         description = L.FLIGHTTIMER_RESET_POSITION_DESC,
-        fn = function()
-            module.db.x, module.db.y = DEFAULT_X, DEFAULT_Y
-            if bar then
-                place()
-            end
-        end,
+        fn = resetPosition,
     },
     {
         name = L.FLIGHTTIMER_RESET_TIMES,
@@ -311,7 +334,7 @@ function module:OnEnable()
     end
     self:Hook(GameTooltip, "Show", onTooltipShow)
     self:On("PLAYER_ENTERING_WORLD", cancel) -- a loading screen ends any timing
-    ns.EditMode.Register(bar, L.FLIGHTTIMER_TITLE, moved, sample)
+    ns.EditMode.Register(bar, L.FLIGHTTIMER_TITLE, moved, editModeOptions)
 end
 
 function module:OnDisable()
@@ -323,6 +346,9 @@ function module:OnDisable()
 end
 
 function module:OnOptionChanged(option)
+    if option == "scale" and bar then
+        place()
+    end
     if option == "bar" and bar and not self.db.bar and not ns.EditMode.IsActive() then
         bar:Hide()
     end

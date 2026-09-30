@@ -126,17 +126,33 @@ local function moved(x, y)
     module.db.x, module.db.y = x, y
 end
 
+local function resetPosition()
+    module.db.x, module.db.y = DEFAULT_X, DEFAULT_Y
+    if frame then
+        place()
+    end
+end
+
+-- What Edit Mode's dialog for the alert offers.
+local editModeOptions = {
+    onChange = sample,
+    reset = resetPosition,
+    scale = {
+        min = 50, max = 200, step = 10, format = "%d%%",
+        get = function() return module.db.scale end,
+        set = function(value)
+            module.db.scale = value
+            place()
+        end,
+    },
+}
+
 module.actions = {
     {
         name = L.COMBATALERT_RESET_POSITION,
         button = L.COMBATALERT_RESET_POSITION_BUTTON,
         description = L.COMBATALERT_RESET_POSITION_DESC,
-        fn = function()
-            module.db.x, module.db.y = DEFAULT_X, DEFAULT_Y
-            if frame then
-                place()
-            end
-        end,
+        fn = resetPosition,
     },
 }
 
@@ -145,7 +161,7 @@ function module:OnEnable()
     place()
     self:On("PLAYER_REGEN_DISABLED", entering)
     self:On("PLAYER_REGEN_ENABLED", leaving)
-    ns.EditMode.Register(frame, L.COMBATALERT_TITLE, moved, sample)
+    ns.EditMode.Register(frame, L.COMBATALERT_TITLE, moved, editModeOptions)
 end
 
 function module:OnDisable()

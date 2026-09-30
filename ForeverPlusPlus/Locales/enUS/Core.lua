@@ -89,3 +89,6 @@ L.HOME_COPY = "Select the link and press Ctrl+C to copy it."
 L.HOME_REQUESTS = "Want something changed or a new feature? Ask for it at the link above."
 L.HOME_COMMANDS = "Commands"
 
+-- Edit Mode dialog for our own frames (Lib/EditMode.lua)
+L.EDITMODE_SCALE = "Scale"
+L.EDITMODE_RESET_POSITION = "Reset To Default Position"

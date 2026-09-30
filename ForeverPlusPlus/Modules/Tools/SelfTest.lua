@@ -465,7 +465,8 @@ local function checkUI()
     section("interface")
     present("ui.editmode", { "EditModeManagerFrame", "EditModeSystemSelectionLayout",
         "NineSliceUtil.ApplyLayout", "EditModeManagerFrame.EnterEditMode",
-        "EditModeManagerFrame.ExitEditMode" })
+        "EditModeManagerFrame.ExitEditMode", "EditModeManagerFrame.ClearSelectedSystem",
+        "MinimalSliderWithSteppersMixin", "CreateMinimalSliderFormatter" })
     present("ui.fonts", { "SystemFont_NamePlate", "CreateFontFamily", "TooltipDataProcessor.AddTooltipPostCall",
         "Menu.ModifyMenu" })
     local label = scratch:CreateFontString(nil, "OVERLAY", "GameFontNormal")

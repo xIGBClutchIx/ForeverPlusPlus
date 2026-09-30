@@ -127,17 +127,32 @@ local function moved(x, y)
     module.db.x, module.db.y = x, y
 end
 
+local function resetPosition()
+    module.db.x, module.db.y = DEFAULT_X, DEFAULT_Y
+    if frame then
+        place()
+    end
+end
+
+-- What Edit Mode's dialog for the box offers.
+local editModeOptions = {
+    reset = resetPosition,
+    scale = {
+        min = 50, max = 200, step = 10, format = "%d%%",
+        get = function() return module.db.scale end,
+        set = function(value)
+            module.db.scale = value
+            update()
+        end,
+    },
+}
+
 module.actions = {
     {
         name = L.CURRENCYBAR_RESET_POSITION,
         button = L.CURRENCYBAR_RESET_POSITION_BUTTON,
         description = L.CURRENCYBAR_RESET_POSITION_DESC,
-        fn = function()
-            module.db.x, module.db.y = DEFAULT_X, DEFAULT_Y
-            if frame then
-                place()
-            end
-        end,
+        fn = resetPosition,
     },
 }
 
@@ -151,7 +166,7 @@ function module:OnEnable()
     self:On("PLAYER_MONEY", update)
     self:On("CURRENCY_DISPLAY_UPDATE", update)
     self:On("PLAYER_ENTERING_WORLD", update)
-    ns.EditMode.Register(frame, L.CURRENCYBAR_TITLE, moved)
+    ns.EditMode.Register(frame, L.CURRENCYBAR_TITLE, moved, editModeOptions)
 end
 
 function module:OnDisable()
