@@ -62,6 +62,10 @@ ns.changelog = {
                     .. "overlapping it." },
                 { L.POI_TITLE, "A flight point the game calls undiscovered now says it isn't "
                     .. "learned yet." },
+                { L.POI_TITLE, "Flight points you have learned now show as learned. They are "
+                    .. "remembered by the game's own flight point ID instead of by name, so "
+                    .. "translated names and the two Light's Hope Chapel points no longer get "
+                    .. "missed. Visit a flight master once to have yours picked up again." },
             } },
         },
     },

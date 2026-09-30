@@ -24,6 +24,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Auction Prices**: posting works while a scan runs. The scan waits its turn with the server, gives way to the auction house's own searches, pauses while an item is in the sell box, and stops if you search.
 - **Player Nameplates** and **NPC Nameplates**: the guild or title moves under the cast bar the moment it appears, and back only once it has faded, instead of lagging or overlapping it.
 - **Points of Interest**: a flight point the game calls undiscovered now says it isn't learned yet.
+- **Points of Interest**: flight points you have learned now show as learned. They are remembered by the game's own flight point ID instead of by name, so translated names and the two Light's Hope Chapel points no longer get missed. Visit a flight master once to have yours picked up again.
 
 ## 0.3.0 (2026-09-28)
 

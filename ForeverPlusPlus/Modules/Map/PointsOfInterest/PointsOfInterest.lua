@@ -38,8 +38,9 @@ local module = ns.NewModule("PointsOfInterest", L.POI_DESC, {
     spiritSize = 70,
     spiritHealersWorld = false,
     otherFaction = false, -- also the other faction's flight masters, boats, and zeppelins
-    -- Flight points seen learned at a flight master, by character. Data, not a setting.
-    known = {},
+    -- Flight points seen learned at a flight master, by character then node ID. Data, not a
+    -- setting.
+    learnedNodes = {},
 })
 module.title = L.POI_TITLE
 module.category = "map"
@@ -197,74 +198,64 @@ local function readTaxiNodes(mapID)
         and C_TaxiMap.GetTaxiNodesForMap(mapID) or {}
 end
 
--- The flight points this character has seen as learned at a flight master, by name ("The
--- Sepulcher"), saved per character. The map list above may not have them on Forever, so this is
--- the other way to know.
+-- The flight points this character has seen as learned at a flight master, by the game's node ID
+-- (names repeat: Light's Hope Chapel has one per faction, and the game's names are in the
+-- player's language), saved per character. The map list above may not have them on Forever, so
+-- this is the other way to know.
 local function characterKey()
     return format("%s-%s", UnitName("player") or "", GetRealmName() or "")
 end
 
 local function seenLearned()
-    local known = module.db.known
+    local known = module.db.learnedNodes
     local key = characterKey()
     known[key] = known[key] or {}
     return known[key]
 end
 
--- The part of a flight point's name before the zone ("The Sepulcher, Silverpine Forest").
-local function shortName(name)
-    return (name:match("^([^,]+)") or name)
-end
-
--- At a flight master, remembers which of the flight points it lists are learned. Probe: the
--- classic TaxiNodeName / TaxiNodeGetType list, or Mainline's C_TaxiMap.GetAllTaxiNodes.
+-- At a flight master, remembers which of the flight points it lists are learned, by node ID.
+-- Mainline's C_TaxiMap.GetAllTaxiNodes: ones the master can't fly to are Unreachable.
 local function rememberLearned()
+    if not (C_TaxiMap and C_TaxiMap.GetAllTaxiNodes and GetTaxiMapID and Enum.FlightPathState) then
+        return
+    end
     local seen = seenLearned()
-    if NumTaxiNodes and TaxiNodeName and TaxiNodeGetType then
-        for i = 1, NumTaxiNodes() do
-            local kind, name = TaxiNodeGetType(i), TaxiNodeName(i)
-            if name and (kind == "CURRENT" or kind == "REACHABLE") then
-                seen[shortName(name)] = true
-            end
-        end
-    elseif C_TaxiMap and C_TaxiMap.GetAllTaxiNodes and GetTaxiMapID and Enum.FlightPathState then
-        local mapID = GetTaxiMapID()
-        for _, node in ipairs(mapID and C_TaxiMap.GetAllTaxiNodes(mapID) or {}) do
-            if node.state ~= Enum.FlightPathState.Unreachable then
-                seen[shortName(node.name)] = true
-            end
+    local mapID = GetTaxiMapID()
+    for _, node in ipairs(mapID and C_TaxiMap.GetAllTaxiNodes(mapID) or {}) do
+        if node.nodeID and node.state ~= Enum.FlightPathState.Unreachable then
+            seen[node.nodeID] = true
         end
     end
 end
 
--- What the game's list says about a flight point: false when it calls it undiscovered, else nil
--- (its "discovered" can't be trusted, see `learned`).
-local function notLearned(node)
-    if node.isUndiscovered then
-        return false
-    end
-end
-
--- Whether the character has learned the flight master at this point: true, false, or nil when
--- neither the game's map list nor a flight master visit says.
-local function learned(point)
-    local name = place(point[5])
-    if seenLearned()[name] then
-        return true
-    end
-    -- The game's map list can only say one isn't learned: on Forever (2026-09-28) it lists the
-    -- whole continent for a zone (36 for Silverpine) and calls ones never visited discovered.
-    -- By name first ("The Sepulcher, Silverpine Forest"), then by place.
-    for _, node in ipairs(taxiNodes) do
-        if node.name and shortName(node.name) == name then
-            return notLearned(node)
-        end
-    end
+-- The game's flight point for one of Data.lua's, by place: the closest on the map. The node
+-- carries the ID.
+local function nodeOf(point)
+    local best, bestDistance
     for _, node in ipairs(taxiNodes) do
         local x, y = node.position:GetXY()
-        if abs(x * 100 - point[2]) < NEAR and abs(y * 100 - point[3]) < NEAR then
-            return notLearned(node)
+        local dx, dy = abs(x * 100 - point[2]), abs(y * 100 - point[3])
+        if dx < NEAR and dy < NEAR and (not bestDistance or dx + dy < bestDistance) then
+            best, bestDistance = node, dx + dy
         end
+    end
+    return best
+end
+
+-- Whether the character has learned the flight master at this point: true when a flight master
+-- visit saw its node learned, false when the game's map list calls it undiscovered, else nil.
+-- The map list can't say one is learned: on Forever (2026-09-28) it lists the whole continent
+-- for a zone (36 for Silverpine) and calls ones never visited discovered.
+local function learned(point)
+    local node = nodeOf(point)
+    if not (node and node.nodeID) then
+        return nil
+    end
+    if seenLearned()[node.nodeID] then
+        return true
+    end
+    if node.isUndiscovered then
+        return false
     end
 end
 
