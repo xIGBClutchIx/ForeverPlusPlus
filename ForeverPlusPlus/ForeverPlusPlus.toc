@@ -56,6 +56,7 @@ Modules\Automation\AutoDecline.lua
 Modules\Automation\AutoRelease.lua
 Modules\Automation\SkipCinematics.lua
 Modules\Automation\AutoDismount.lua
+Modules\Automation\FishingCast.lua
 Modules\Interface\AutoScreenshot.lua
 Modules\Interface\SpellRanks.lua
 Modules\Interface\RecipeColors.lua

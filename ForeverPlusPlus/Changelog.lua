@@ -16,6 +16,11 @@ ns.changelog = {
                 { L.AUTODECLINE_TITLE, "New option, off by default, for party invites. "
                     .. "Turns them down without the invite sound. Friends and guildmates can "
                     .. "still be let through, and chat says who was declined." },
+                { L.FISHINGCAST_TITLE, "New, off by default, in Automation. "
+                    .. "Double right-click in the world with a fishing pole equipped to cast "
+                    .. "Fishing. It uses a temporary right-click binding that comes off on the "
+                    .. "next click, so looting the bobber works as usual, and it never arms in "
+                    .. "combat. A slider sets how fast the second click must follow the first." },
                 { L.ADDONLIST_TITLE, "New, in Interface. The AddOns list "
                     .. "without category headers, with enabled addons first and the disabled "
                     .. "ones after, each in name order. Options to move disabled addons out of "

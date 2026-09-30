@@ -7,6 +7,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Added
 
 - **Auto Decline** (party invites): a new option, off by default, that also turns down party invites without the invite sound. Friends and guildmates can still be let through, and chat says who was declined.
+- **Fishing Cast** (new, off by default, in Automation): double right-click in the world with a fishing pole equipped to cast Fishing. It uses a temporary right-click binding that comes off on the next click, so looting the bobber works as usual, and it never arms in combat. A slider sets how fast the second click must follow the first.
 - **AddOns List** (new, in Interface): the AddOns list without category headers, with enabled addons first and the disabled ones after, each in name order. Options to move disabled addons out of their group and to search addon notes. Turning it off gives Blizzard's list back at once.
 - **Spell Ranks** (new, in Interface): marks the spells on your action bars that have a higher rank you already know, with a warning badge or a red tint over the button, and adds the best rank you know to the spell's tooltip. `/fpp ranks` lists them, and chat says how many there are after you level up or learn spells.
 - **Recipe Colors** (new): colors recipes in the professions window by your chance of a skill-up, orange, yellow, green, or gray, like the old trade skill window. Options tint the row highlights to match and gray out recipes you know that can't raise your skill any more.

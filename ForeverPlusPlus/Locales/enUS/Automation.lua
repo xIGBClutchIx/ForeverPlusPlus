@@ -172,3 +172,10 @@ L.SKIPCINEMATICS_PRINT_DESC = "Print each cinematic's or movie's key in chat as 
     .. "whether it was seen and skipped."
 L.SKIPCINEMATICS_PRINT_LINE = "Cinematic %s: seen=%s skip=%s" -- key (movie ID or map:subzone), seen, skip
 
+
+-- FishingCast
+L.FISHINGCAST_TITLE = "Fishing Cast"
+L.FISHINGCAST_DESC = "Double right-click in the world with a fishing pole equipped to cast Fishing."
+L.FISHINGCAST_SPEED = "Double-Click Speed"
+L.FISHINGCAST_SPEED_DESC = "How quickly the second right-click must follow the first."
+L.FISHINGCAST_MS = "%d ms" -- milliseconds
