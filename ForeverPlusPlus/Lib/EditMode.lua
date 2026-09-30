@@ -1,6 +1,6 @@
 -- Edit Mode for our own frames, made to look and work like Blizzard's own system frames: while
--- the player is in Blizzard's Edit Mode, a frame registered here gets the same blue selection box
--- with its name, turns gold when clicked, can be dragged with snapping to the screen's middle and
+-- the player is in Blizzard's Edit Mode, a frame registered here gets the same blue selection box,
+-- which turns gold when clicked, and can be dragged with snapping to the screen's middle and
 -- edges and to the other frames, nudged a pixel at a time with the arrow keys, and opens a small
 -- settings dialog (scale and reset position) like the one Blizzard's frames open. Blizzard's Edit
 -- Mode has no way for an addon to add a frame to its layouts (that needs its protected system
@@ -228,9 +228,6 @@ local function newSelection(frame, info)
     selection.tint:SetAllPoints()
     selection.tint:SetColorTexture(GOLD[1], GOLD[2], GOLD[3], 0.2)
     selection.tint:Hide()
-    local text = selection:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    text:SetPoint("CENTER")
-    text:SetText(info.label)
     look(selection, false)
     selection:SetScript("OnMouseDown", function(_, button)
         if button == "LeftButton" then
@@ -495,7 +492,7 @@ end
 ---from an offset from the center of the screen (`EditMode.Place`), and `onMove` gets the new offset
 ---when it moves.
 ---@param frame table
----@param label string what the selection box and dialog say
+---@param label string the dialog's title and the right-click menu's
 ---@param onMove fun(x: number, y: number)
 ---@param options? { onChange: fun(active: boolean)?, scale: { min: number, max: number, step: number, format: string?, get: fun(): number, set: fun(value: number) }?, reset: fun()? }
 --- onChange is called when Edit Mode opens or closes, and now if it's open. scale gives the
