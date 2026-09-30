@@ -6,6 +6,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Added
 
+- **Spell Ranks** (new, off by default, in Interface): marks the spells on your action bars that have a higher rank you already know, with a warning badge or a red tint over the button, and adds the best rank you know to the spell's tooltip. `/fpp ranks` lists them, and chat says how many there are after you level up or learn spells.
 - **Auto Sell Junk** (new, off by default): sells the gray items in your bags when a merchant opens and says in chat what they sold for. Hold Shift to skip it. A checkbox stops at 12 items per visit so everything can be bought back.
 - **Flight Timer** (new, off by default): times every flight you take, remembered by the game's flight point IDs, then shows a bar counting the flight down that you can move in Edit Mode, and the flight time on a flight point's tooltip on the flight map. A Reset button forgets the times.
 - **Profession Tooltips** (was Gathering Tooltips): also shows the Lockpicking skill a lockbox or locked chest needs, colored against your skill, for characters who can pick locks. A Locks checkbox turns it off. A Skeleton Keys checkbox (on by default) shows it to blacksmiths too, against the best skeleton key they can make, and puts the skill each skeleton key opens in its tooltip.

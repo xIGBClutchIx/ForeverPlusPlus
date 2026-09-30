@@ -55,6 +55,7 @@ Modules\Automation\AutoRelease.lua
 Modules\Automation\SkipCinematics.lua
 Modules\Automation\AutoDismount.lua
 Modules\Interface\AutoScreenshot.lua
+Modules\Interface\SpellRanks.lua
 Modules\UnitFrames\ClassColors.lua
 Modules\Map\PointsOfInterest\PointsOfInterest.lua
 Modules\Map\PointsOfInterest\Data.lua

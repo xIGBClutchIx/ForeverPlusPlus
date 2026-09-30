@@ -13,6 +13,11 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_ADDED, {
+                { L.SPELLRANKS_TITLE, "New, off by default, in Interface. Marks the spells on "
+                    .. "your action bars that have a higher rank you already know, with a "
+                    .. "warning badge or a red tint over the button, and adds the best rank you "
+                    .. "know to the spell's tooltip. /fpp ranks lists them, and chat says how "
+                    .. "many there are after you level up or learn spells." },
                 { L.AUTOSELLJUNK_TITLE, "New, off by default. Sells the gray items in your bags "
                     .. "when a merchant opens and says in chat what they sold for. Hold Shift to "
                     .. "skip it. A checkbox stops at 12 items per visit so everything can be "

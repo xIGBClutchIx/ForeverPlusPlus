@@ -97,3 +97,23 @@ L.AUTOSCREENSHOT_BATTLEGROUND_DESC = "When a battleground ends, with the scorebo
 L.AUTOSCREENSHOT_DEATH = "Death"
 L.AUTOSCREENSHOT_DEATH_DESC = "When you die."
 
+
+-- SpellRanks
+L.SPELLRANKS_TITLE = "Spell Ranks"
+L.SPELLRANKS_DESC = "Mark the spells on your action bars that have a higher rank you already "
+    .. "know, and say the best rank in their tooltips. /fpp ranks lists them."
+L.SPELLRANKS_STYLE = "Mark Style"
+L.SPELLRANKS_STYLE_DESC = "How an action button with an outdated spell rank is marked."
+L.SPELLRANKS_STYLE_BADGE = "Warning Badge"
+L.SPELLRANKS_STYLE_TINT = "Red Tint"
+L.SPELLRANKS_TOOLTIP = "Tooltip Line"
+L.SPELLRANKS_TOOLTIP_DESC = "Add the best rank you know to the tooltip of a spell that has a "
+    .. "higher rank."
+L.SPELLRANKS_CHAT_DESC = "Say in chat how many action bar spells have a higher rank after you "
+    .. "learn new spells or level up."
+L.SPELLRANKS_BEST = "Higher rank known: Rank %d"
+L.SPELLRANKS_FOUND = "%d action bar spells have a higher rank. /fpp ranks lists them."
+L.SPELLRANKS_COMMAND = "List the action bar spells that have a higher rank"
+L.SPELLRANKS_OFF = "Spell Ranks is off."
+L.SPELLRANKS_NONE = "Every spell on your action bars is its highest rank."
+L.SPELLRANKS_LINE = "Bar %d, slot %d: %s is Rank %d, and Rank %d is known." -- bar, slot, spell link, ranks
