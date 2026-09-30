@@ -225,13 +225,13 @@ local function hasKit(kit)
     return true
 end
 
--- Blizzard's boxes say "Click To Edit" while the mouse is over one that isn't picked.
-local function showHint(selection, isSelected)
-    selection.hint:SetShown(selection.hovered and not isSelected or false)
+-- Blizzard's boxes say "Click To Edit" while the mouse is over them, picked or not.
+local function showHint(selection)
+    selection.hint:SetShown(selection.hovered or false)
 end
 
 local function look(selection, isSelected)
-    showHint(selection, isSelected)
+    showHint(selection)
     local kit = KITS[isSelected]
     if hasKit(kit) then
         NineSliceUtil.ApplyLayout(selection, LAYOUT, kit)
@@ -270,11 +270,11 @@ local function newSelection(frame, info)
     end)
     selection:SetScript("OnEnter", function(self)
         self.hovered = true
-        showHint(self, selected == frame)
+        showHint(self)
     end)
     selection:SetScript("OnLeave", function(self)
         self.hovered = false
-        showHint(self, selected == frame)
+        showHint(self)
     end)
     selection:SetScript("OnMouseDown", function(_, button)
         if button == "LeftButton" then
