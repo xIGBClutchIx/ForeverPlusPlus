@@ -263,7 +263,9 @@ ns.AddCommand("addons", "[name]", L.ADDONLIST_COMMAND, function(rest)
         if type(_G.AddonList_Update) == "function" then
             _G.AddonList_Update()
         end
-        ns.Print(format("%d calls, first: %s", count, table.concat(seen, " | ")))
+        C_Timer.After(1, function()
+            ns.Print(format("%d calls, first: %s", count, table.concat(seen, " | ")))
+        end)
         return
     end
     if rest and rest ~= "" then
