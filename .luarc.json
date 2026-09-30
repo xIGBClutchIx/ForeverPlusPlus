@@ -211,7 +211,6 @@
     "BattlefieldMapFrame",
     "MAP_AREA_LABEL_TYPE",
     "NineSliceUtil",
-    "BagsBar",
     "MenuUtil",
     "GetCursorPosition",
     "MinimalSliderWithSteppersMixin",

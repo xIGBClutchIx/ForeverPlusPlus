@@ -12,7 +12,6 @@ local pairs, type, pcall, abs, min, max = pairs, type, pcall, math.abs, math.min
 local format = string.format
 local CreateFrame, UIParent, hooksecurefunc = CreateFrame, UIParent, hooksecurefunc
 local GetCursorPosition = GetCursorPosition
-local NineSliceUtil, EditModeSystemSelectionLayout = NineSliceUtil, EditModeSystemSelectionLayout
 
 local L = ns.L
 local call = ns.Call
@@ -224,16 +223,14 @@ local function newSelection(frame, info)
     selection:SetFrameLevel(frame:GetFrameLevel() + 10)
     selection:EnableMouse(true)
     selection:RegisterForDrag("LeftButton")
-    -- Blizzard's frames have their own buttons and art under the blue, which lightens it; ours
-    -- have a dark box or nothing, so a pale wash goes under it.
-    local under = selection:CreateTexture(nil, "BACKGROUND", nil, -8)
-    under:SetAllPoints()
-    under:SetColorTexture(0.55, 0.75, 0.85, 0.3)
     selection.tint = selection:CreateTexture(nil, "BACKGROUND")
     selection.tint:SetAllPoints()
     selection.tint:SetColorTexture(GOLD[1], GOLD[2], GOLD[3], 0.2)
     selection.tint:Hide()
     look(selection, false)
+    -- Blizzard's Edit Mode loads after us, so its art isn't there yet when a module turns on: draw
+    -- the box again each time it shows.
+    selection:SetScript("OnShow", function(self) look(self, selected == frame) end)
     selection:SetScript("OnMouseDown", function(_, button)
         if button == "LeftButton" then
             pick(frame)
@@ -490,38 +487,6 @@ local function install()
         end
     end
 end
-
--- Temporary: prints how a selection box's centre is drawn, ours and Blizzard's bag bar, to compare.
-local function describe(name, box)
-    local center = box and box.Center
-    if box and not center then
-        for index = 1, select("#", box:GetRegions()) do
-            local region = select(index, box:GetRegions())
-            if region.GetAtlas then
-                local r, g, b, a = region:GetVertexColor()
-                ns.Print(format("%s region %d: atlas=%s alpha=%.2f rgba=%.2f,%.2f,%.2f,%.2f layer=%s shown=%s",
-                    name, index, tostring(region:GetAtlas()), region:GetAlpha(), r, g, b, a,
-                    tostring(region:GetDrawLayer()), tostring(region:IsShown())))
-            end
-        end
-        return
-    end
-    if not center then
-        ns.Print(name .. ": no box")
-        return
-    end
-    local r, g, b, a = center:GetVertexColor()
-    ns.Print(format("%s: atlas=%s tex=%s alpha=%.2f rgba=%.2f,%.2f,%.2f,%.2f layer=%s level=%d strata=%s",
-        name, tostring(center:GetAtlas()), tostring(center:GetTexture()), center:GetAlpha(), r, g, b, a,
-        tostring(center:GetDrawLayer()), box:GetFrameLevel(), box:GetFrameStrata()))
-end
-
-ns.AddCommand("editmodedebug", "", "Edit Mode selection box details (temporary)", function()
-    describe("Blizzard", BagsBar and BagsBar.Selection)
-    for _, info in pairs(registered) do
-        describe(info.label, info.selection)
-    end
-end)
 
 -- Registering -------------------------------------------------------------------------------------
 
