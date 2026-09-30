@@ -11,7 +11,6 @@ local L = ns.L
 local Chat = ns.Chat
 
 local module = ns.NewModule("ChatCopy", L.CHATCOPY_DESC, {
-    enabled = false,
     lines = 250,
 })
 module.title = L.CHATCOPY_TITLE

@@ -11,7 +11,6 @@ local L = ns.L
 local Chat = ns.Chat
 
 local module = ns.NewModule("ChatHistory", L.CHATHISTORY_DESC, {
-    enabled = false,
     lines = 100,
     saved = {}, -- chat window number -> { { text, r, g, b }, ... }
 })

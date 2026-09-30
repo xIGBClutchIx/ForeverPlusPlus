@@ -17,7 +17,7 @@ ns.changelog = {
                     .. "tooltip-styled box showing your gold and the currencies you tick Show "
                     .. "on Backpack in the Currency tab. Gold always shows all three coins, even 0 gold. Checkboxes for the gold and the "
                     .. "currencies, one to stack them in a column, and a size slider. Move it in Edit Mode." },
-                { L.CATEGORY_CHAT, "New category, four modules, all off by default. "
+                { L.CATEGORY_CHAT, "New category, four modules, only Short Channel Names off by default. "
                     .. "Chat Copy adds a button beside the chat window that opens the chat as "
                     .. "plain text, already selected, to copy with Ctrl+C, with a slider for how "
                     .. "many lines. Short Channel Names shows channels as [1], [G], or [1. G] instead of "

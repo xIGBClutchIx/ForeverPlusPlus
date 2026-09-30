@@ -8,7 +8,6 @@ local L = ns.L
 local Chat = ns.Chat
 
 local module = ns.NewModule("SocialButton", L.SOCIALBUTTON_DESC, {
-    enabled = false,
 })
 module.title = L.SOCIALBUTTON_TITLE
 module.category = "chat"

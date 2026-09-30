@@ -39,10 +39,10 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Currency Bar | Shows your gold and the currencies you tick Show on Backpack in a small tooltip-styled box, each with its own checkbox, , a size slider, and can stack them in a column (move it in Edit Mode). Off by default. |
 | Tooltips | Colors unit and item tooltips by class, reaction, or quality, colors the Horde or Alliance line red or blue, and adds player titles and who a unit is targeting. |
 | **Chat** | |
-| Chat Copy | Adds a button beside the chat window that opens the chat as text, already selected, so you can copy it with Ctrl+C. A slider sets how many lines. Off by default. |
-| Short Channel Names | Shows chat channels as [1], [G], or [1. G] instead of [1. General]. Off by default. |
-| Chat History | Keeps each chat window's latest lines when you log out or reload and shows them again at login. A slider sets how many lines. Off by default. |
-| Social Button | Moves the social (Quick Join) button down beside the chat window's other buttons. Off by default. |
+| Chat Copy | Adds a button beside the chat window that opens the chat as text, already selected, so you can copy it with Ctrl+C. A slider sets how many lines. |
+| Short Channel Names | Shows chat channels as [1], [G], or [1. G] instead of [1. General], as number and letter ([3. T]) by default. Off by default. |
+| Chat History | Keeps each chat window's latest lines when you log out or reload and shows them again at login. A slider sets how many lines. |
+| Social Button | Moves the social (Quick Join) button down beside the chat window's other buttons. |
 | **Map** | |
 | Points of Interest | Shows dungeons, raids, capital cities, flight masters, boats, zeppelins, and spirit healers on the world map, each with its own checkbox, icon size, and whether it also shows on continent maps. |
 | Zone Info | Shows a panel in a corner of the world map (bottom left by default; in a right corner it is mirrored, icons on the right) with the zone's level range colored against yours, who holds it, its dungeons, the fishing skill it needs, and the herbs, ore, and skinning in it for the professions you have. On a continent map, it's the zone under the cursor. Herbs, ore, and skinning can each be off, shown with the profession, always, or only while you hold the detail key (Shift, Alt, or Ctrl), and so can fishing and dungeons; the panel has a size slider. |

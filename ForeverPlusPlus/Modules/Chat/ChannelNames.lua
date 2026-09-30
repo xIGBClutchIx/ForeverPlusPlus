@@ -11,7 +11,7 @@ local Chat = ns.Chat
 
 local module = ns.NewModule("ChannelNames", L.CHANNELNAMES_DESC, {
     enabled = false,
-    style = "number",
+    style = "both",
 })
 module.title = L.CHANNELNAMES_TITLE
 module.category = "chat"
