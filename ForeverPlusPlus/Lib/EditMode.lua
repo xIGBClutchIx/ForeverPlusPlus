@@ -491,6 +491,26 @@ local function install()
     end
 end
 
+-- Temporary: prints how a selection box's centre is drawn, ours and Blizzard's bag bar, to compare.
+local function describe(name, box)
+    local center = box and box.Center
+    if not center then
+        ns.Print(name .. ": no Center")
+        return
+    end
+    local r, g, b, a = center:GetVertexColor()
+    ns.Print(format("%s: atlas=%s tex=%s alpha=%.2f rgba=%.2f,%.2f,%.2f,%.2f layer=%s level=%d strata=%s",
+        name, tostring(center:GetAtlas()), tostring(center:GetTexture()), center:GetAlpha(), r, g, b, a,
+        tostring(center:GetDrawLayer()), box:GetFrameLevel(), box:GetFrameStrata()))
+end
+
+ns.AddCommand("editmodedebug", "", "Edit Mode selection box details (temporary)", function()
+    describe("Blizzard", BagsBar and BagsBar.Selection)
+    for _, info in pairs(registered) do
+        describe(info.label, info.selection)
+    end
+end)
+
 -- Registering -------------------------------------------------------------------------------------
 
 ---Makes `frame` selectable and draggable in Edit Mode, like Blizzard's own frames. It is placed
