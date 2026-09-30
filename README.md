@@ -40,7 +40,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Tooltips | Colors unit and item tooltips by class, reaction, or quality, colors the Horde or Alliance line red or blue, and adds player titles and who a unit is targeting. |
 | **Chat** | |
 | Chat Copy | Adds a button beside the chat window that opens the chat as text, already selected, so you can copy it with Ctrl+C. A slider sets how many lines. Off by default. |
-| Short Channel Names | Shows chat channels as [1] or [G] instead of [1. General]. Off by default. |
+| Short Channel Names | Shows chat channels as [1], [G], or [1. G] instead of [1. General]. Off by default. |
 | Chat History | Keeps each chat window's latest lines when you log out or reload and shows them again at login. A slider sets how many lines. Off by default. |
 | Social Button | Moves the social (Quick Join) button down beside the chat window's other buttons. Off by default. |
 | **Map** | |

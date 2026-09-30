@@ -72,13 +72,15 @@ local function newWindow()
     end
 
     local scroll = CreateFrame("ScrollFrame", nil, f, "UIPanelScrollFrameTemplate")
-    scroll:SetPoint("TOPLEFT", f.Inset or f, "TOPLEFT", 8, -8)
-    scroll:SetPoint("BOTTOMRIGHT", f.Inset or f, "BOTTOMRIGHT", -28, 8)
+    -- Below the title bar, which is about 24 pixels tall.
+    scroll:SetPoint("TOPLEFT", f, "TOPLEFT", 12, -36)
+    scroll:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -30, 12)
 
     local edit = CreateFrame("EditBox", nil, scroll)
     edit:SetMultiLine(true)
     edit:SetAutoFocus(false)
     edit:SetFontObject("ChatFontNormal")
+    edit:SetTextInsets(4, 4, 4, 4)
     edit:SetMaxLetters(MAX_LETTERS)
     edit:SetWidth(480)
     edit:SetScript("OnEscapePressed", function()

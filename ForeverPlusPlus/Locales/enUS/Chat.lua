@@ -19,11 +19,12 @@ L.CHATCOPY_EMPTY = "(no chat yet)"
 
 -- ChannelNames
 L.CHANNELNAMES_TITLE = "Short Channel Names"
-L.CHANNELNAMES_DESC = "Show chat channels as [1] or [G] instead of [1. General]."
+L.CHANNELNAMES_DESC = "Show chat channels as [1], [G], or [1. G] instead of [1. General]."
 L.CHANNELNAMES_STYLE = "Style"
-L.CHANNELNAMES_STYLE_DESC = "Whether a channel shows as its number or as its first letter."
+L.CHANNELNAMES_STYLE_DESC = "Whether a channel shows as its number, its first letter, or both."
 L.CHANNELNAMES_NUMBER = "Number"
 L.CHANNELNAMES_LETTER = "Letter"
+L.CHANNELNAMES_BOTH = "Number and Letter"
 
 -- ChatHistory
 L.CHATHISTORY_TITLE = "Chat History"

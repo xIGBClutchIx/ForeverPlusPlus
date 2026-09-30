@@ -1,4 +1,4 @@
--- Short Channel Names: [1. General] becomes [1] or [G] in chat. Blizzard builds the channel link
+-- Short Channel Names: [1. General] becomes [1], [G], or [1. G] in chat. Blizzard builds the channel link
 -- from the channel's full name, so this rewrites the finished line after it is added to the
 -- window, through the chat frame's own TransformMessages (the line stays a working link). Lines
 -- the game marks secret can't be read and are left alone.
@@ -21,7 +21,11 @@ module.options = {
         key = "style",
         name = L.CHANNELNAMES_STYLE,
         description = L.CHANNELNAMES_STYLE_DESC,
-        choices = { { "number", L.CHANNELNAMES_NUMBER }, { "letter", L.CHANNELNAMES_LETTER } },
+        choices = {
+            { "number", L.CHANNELNAMES_NUMBER },
+            { "letter", L.CHANNELNAMES_LETTER },
+            { "both", L.CHANNELNAMES_BOTH },
+        },
     },
 }
 
@@ -36,9 +40,12 @@ local LINK = "(|Hchannel:channel:%d+|h%[)(%d+)%. ([^%]]-)(%]|h)"
 ---@return string
 local function rewrite(text)
     return (gsub(text, LINK, function(open, number, name, close)
+        local letter = name:match(FIRST_CHARACTER)
         local short = number
         if module.db.style == "letter" then
-            short = name:match(FIRST_CHARACTER) or number
+            short = letter or number
+        elseif module.db.style == "both" and letter then
+            short = number .. ". " .. letter
         end
         return open .. short .. close
     end))

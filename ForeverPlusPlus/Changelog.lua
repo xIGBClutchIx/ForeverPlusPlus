@@ -20,7 +20,7 @@ ns.changelog = {
                 { L.CATEGORY_CHAT, "New category, four modules, all off by default. "
                     .. "Chat Copy adds a button beside the chat window that opens the chat as "
                     .. "plain text, already selected, to copy with Ctrl+C, with a slider for how "
-                    .. "many lines. Short Channel Names shows channels as [1] or [G] instead of "
+                    .. "many lines. Short Channel Names shows channels as [1], [G], or [1. G] instead of "
                     .. "[1. General]. Chat History keeps each chat window's latest lines when "
                     .. "you log out or reload and shows them again at login, with a slider for "
                     .. "how many. Social Button moves the social (Quick Join) button down "
