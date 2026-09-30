@@ -18,6 +18,10 @@ ns.changelog = {
                     .. "warning badge or a red tint over the button, and adds the best rank you "
                     .. "know to the spell's tooltip. /fpp ranks lists them, and chat says how "
                     .. "many there are after you level up or learn spells." },
+                { L.RECIPECOLORS_TITLE, "New, off by default. Colors recipes in the professions "
+                    .. "window by your chance of a skill-up, orange, yellow, green, or gray, like "
+                    .. "the old trade skill window. Options tint the row highlights to match and "
+                    .. "gray out recipes you know that can't raise your skill any more." },
                 { L.AUTOSELLJUNK_TITLE, "New, off by default. Sells the gray items in your bags "
                     .. "when a merchant opens and says in chat what they sold for. Hold Shift to "
                     .. "skip it. A checkbox stops at 12 items per visit so everything can be "

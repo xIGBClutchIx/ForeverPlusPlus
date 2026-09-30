@@ -51,6 +51,15 @@ L.TOOLTIPS_HIDE_IN_COMBAT = "Hide Unit Tooltips in Combat"
 L.TOOLTIPS_HIDE_IN_COMBAT_DESC = "Don't show player and NPC tooltips while you're in combat. Item "
     .. "and spell tooltips still show."
 
+-- RecipeColors
+L.RECIPECOLORS_TITLE = "Recipe Colors"
+L.RECIPECOLORS_DESC = "Color recipes in the professions window by your chance of a skill-up: "
+    .. "orange always, yellow usually, green sometimes, gray never."
+L.RECIPECOLORS_HIGHLIGHT = "Tint Row Highlights"
+L.RECIPECOLORS_HIGHLIGHT_DESC = "Color the selected and mouse-over highlight of a recipe to match its name."
+L.RECIPECOLORS_GRAY = "Gray Out Finished Recipes"
+L.RECIPECOLORS_GRAY_DESC = "Show recipes you know that can't raise your skill any more in gray."
+
 -- HideFeedback
 L.HIDEFEEDBACK_TITLE = "Hide Beta Feedback"
 L.HIDEFEEDBACK_DESC = "Hide the beta's \"Press F6 to submit an issue\" line on tooltips and its "
