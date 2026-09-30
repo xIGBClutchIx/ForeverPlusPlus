@@ -639,6 +639,7 @@ local CATEGORIES = {
     { "automation", L.CATEGORY_AUTOMATION },
     { "items", L.CATEGORY_ITEMS },
     { "interface", L.CATEGORY_INTERFACE },
+    { "chat", L.CATEGORY_CHAT },
     { "map", L.CATEGORY_MAP },
     { "unitframes", L.CATEGORY_UNITFRAMES },
     { "nameplates", L.CATEGORY_NAMEPLATES },

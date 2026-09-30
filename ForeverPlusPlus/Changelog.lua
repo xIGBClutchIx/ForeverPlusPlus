@@ -17,6 +17,14 @@ ns.changelog = {
                     .. "tooltip-styled box showing your gold and the currencies you tick Show "
                     .. "on Backpack in the Currency tab. Checkboxes for the gold and the "
                     .. "currencies, and one to stack them in a column. Move it in Edit Mode." },
+                { L.CATEGORY_CHAT, "New category, four modules, all off by default. "
+                    .. "Chat Copy adds a button beside the chat window that opens the chat as "
+                    .. "plain text, already selected, to copy with Ctrl+C, with a slider for how "
+                    .. "many lines. Short Channel Names shows channels as [1] or [G] instead of "
+                    .. "[1. General]. Chat History keeps each chat window's latest lines when "
+                    .. "you log out or reload and shows them again at login, with a slider for "
+                    .. "how many. Social Button moves the social (Quick Join) button down "
+                    .. "beside the chat window's other buttons." },
                 { L.AUTODECLINE_TITLE, "New option, off by default, for party invites. "
                     .. "Turns them down without the invite sound. Friends and guildmates can "
                     .. "still be let through, and chat says who was declined. Duels and party "

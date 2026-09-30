@@ -44,7 +44,7 @@ end
 for _, file in ipairs({ "Core", "Map" }) do
     load("ForeverPlusPlus/Locales/enUS/" .. file .. ".lua")
 end
-for _, file in ipairs({ "Secret", "Colors", "Text", "WorldMap", "Instances" }) do
+for _, file in ipairs({ "Secret", "Colors", "Text", "WorldMap", "Instances", "Chat" }) do
     load("ForeverPlusPlus/Lib/" .. file .. ".lua")
 end
 
@@ -151,6 +151,13 @@ eq(Instances.Levels(Instances.byKey.brd, true), "52-60", "compact range")
 eq(Instances.Levels(Instances.byKey.mc, true), "60", "compact single")
 eq(Instances.Icon(Instances.byKey.mc, 14), "|A:Raid:14:14|a", "raid icon")
 eq(Instances.Icon(Instances.byKey.brd, 14), "|A:Dungeon:14:14|a", "dungeon icon")
+
+-- Chat.Plain
+eq(ns.Chat.Plain("|cffff0000red|r text"), "red text", "plain color")
+eq(ns.Chat.Plain("|cnCOLOR:named|r"), "named", "plain named color")
+eq(ns.Chat.Plain("|Hplayer:Bob:1|h[Bob]|h: hi"), "[Bob]: hi", "plain link keeps its text")
+eq(ns.Chat.Plain("a |TInterface\\Icon:0|t b |A:Raid:14:14|a c"), "a  b  c", "plain textures")
+eq(ns.Chat.Plain("100||"), "100|", "plain escaped pipe")
 
 -- Done ------------------------------------------------------------------------------------------
 

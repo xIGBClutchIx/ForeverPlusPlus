@@ -13,6 +13,7 @@ Locales\enUS\Automation.lua
 Locales\enUS\Items.lua
 Locales\enUS\Interface.lua
 Locales\enUS\UnitFrames.lua
+Locales\enUS\Chat.lua
 Locales\enUS\Map.lua
 Locales\enUS\Tools.lua
 Lib\Secret.lua
@@ -33,6 +34,7 @@ Lib\MapTooltip.lua
 Lib\Instances.lua
 Lib\MapPins.lua
 Lib\EditMode.lua
+Lib\Chat.lua
 Modules\Nameplates\PlayerPlates.lua
 Modules\Nameplates\NpcPlates.lua
 Modules\Nameplates\QuestPlates.lua
@@ -63,6 +65,10 @@ Modules\Interface\RecipeColors.lua
 Modules\Interface\CombatAlert.lua
 Modules\Interface\AddOnList.lua
 Modules\Interface\CurrencyBar.lua
+Modules\Chat\ChatCopy.lua
+Modules\Chat\ChannelNames.lua
+Modules\Chat\ChatHistory.lua
+Modules\Chat\SocialButton.lua
 Modules\UnitFrames\ClassColors.lua
 Modules\Map\PointsOfInterest\PointsOfInterest.lua
 Modules\Map\PointsOfInterest\Data.lua
