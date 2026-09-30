@@ -171,15 +171,34 @@ local function rebuild()
     busy = false
 end
 
+local pending = false
+
+local function later()
+    pending = false
+    if module.enabled then
+        rebuild()
+    end
+end
+
+-- Rebuilds now, and once more next frame in case Blizzard fills the list again after its own
+-- hooks ran (it does when the window opens), which would put its order back.
+local function refresh()
+    rebuild()
+    if not pending and C_Timer then
+        pending = true
+        C_Timer.After(0, later)
+    end
+end
+
 local function start()
     local list = addList()
     if not list then
         return
     end
-    module:Hook("AddonList_Update", rebuild)
-    module:HookScript(list.SearchBox, "OnTextChanged", rebuild)
-    module:HookScript(list, "OnShow", rebuild)
-    rebuild()
+    module:Hook("AddonList_Update", refresh)
+    module:HookScript(list.SearchBox, "OnTextChanged", refresh)
+    module:HookScript(list, "OnShow", refresh)
+    refresh()
 end
 
 function module:OnEnable()
