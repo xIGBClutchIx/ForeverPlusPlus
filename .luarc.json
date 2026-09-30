@@ -215,7 +215,6 @@
     "GetCursorPosition",
     "MinimalSliderWithSteppersMixin",
     "CreateMinimalSliderFormatter",
-    "EditModeSystemSelectionLayout",
     "EditModeManagerFrame",
     "TaxiFrame",
     "FlightMapFrame",

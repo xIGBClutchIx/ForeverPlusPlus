@@ -195,22 +195,47 @@ end
 
 -- The selection box --------------------------------------------------------------------------------
 
--- Blizzard's two looks for a frame in Edit Mode: blue while it can be picked, gold once picked. The
--- art comes from its atlas names; without them the layout's own look is used with a tint.
+-- Blizzard's two looks for a frame in Edit Mode: blue while it can be picked, gold once picked.
+-- Its layout is a local in its own file, so the same pieces are laid out here, from its atlases
+-- (named for the look). Without those atlases a plain tint stands in.
 local KITS = { [false] = "editmode-actionbar-highlight", [true] = "editmode-actionbar-selected" }
+local LAYOUT = {
+    TopRightCorner = { atlas = "%s-NineSlice-Corner", mirrorLayout = true, x = 8, y = 8 },
+    TopLeftCorner = { atlas = "%s-NineSlice-Corner", mirrorLayout = true, x = -8, y = 8 },
+    BottomLeftCorner = { atlas = "%s-NineSlice-Corner", mirrorLayout = true, x = -8, y = -8 },
+    BottomRightCorner = { atlas = "%s-NineSlice-Corner", mirrorLayout = true, x = 8, y = -8 },
+    TopEdge = { atlas = "_%s-NineSlice-EdgeTop" },
+    BottomEdge = { atlas = "_%s-NineSlice-EdgeBottom" },
+    LeftEdge = { atlas = "!%s-NineSlice-EdgeLeft" },
+    RightEdge = { atlas = "!%s-NineSlice-EdgeRight" },
+    Center = { layer = "BORDER", atlas = "%s-NineSlice-Center", x = -8, y = 8, x1 = 8, y1 = -8 },
+}
+local KIT_PARTS = { "Corner", "Center" }
+
+-- Whether a look's atlases are there (the corners and the fill; the edges follow them).
+local function hasKit(kit)
+    if not (NineSliceUtil and NineSliceUtil.ApplyLayout and C_Texture and C_Texture.GetAtlasInfo) then
+        return false
+    end
+    for _, part in pairs(KIT_PARTS) do
+        if not C_Texture.GetAtlasInfo(kit .. "-NineSlice-" .. part) then
+            return false
+        end
+    end
+    return true
+end
 
 local function look(selection, isSelected)
-    if NineSliceUtil and EditModeSystemSelectionLayout then
-        local kit = KITS[isSelected]
-        local hasKit = C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(kit .. "-NineSlice-Corner")
-        if hasKit then
-            NineSliceUtil.ApplyLayout(selection, EditModeSystemSelectionLayout, kit)
-        else
-            NineSliceUtil.ApplyLayout(selection, EditModeSystemSelectionLayout)
-        end
-        selection.tint:SetShown(isSelected and not hasKit)
+    local kit = KITS[isSelected]
+    if hasKit(kit) then
+        NineSliceUtil.ApplyLayout(selection, LAYOUT, kit)
+        selection.tint:Hide()
     else
-        selection.tint:SetColorTexture(0.2, 0.5, 1, 0.3)
+        if isSelected then
+            selection.tint:SetColorTexture(GOLD[1], GOLD[2], GOLD[3], 0.3)
+        else
+            selection.tint:SetColorTexture(0.2, 0.5, 1, 0.3)
+        end
         selection.tint:Show()
     end
 end

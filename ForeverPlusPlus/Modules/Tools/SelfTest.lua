@@ -463,7 +463,7 @@ end
 
 local function checkUI()
     section("interface")
-    present("ui.editmode", { "EditModeManagerFrame", "EditModeSystemSelectionLayout",
+    present("ui.editmode", { "EditModeManagerFrame",
         "NineSliceUtil.ApplyLayout", "EditModeManagerFrame.EnterEditMode",
         "EditModeManagerFrame.ExitEditMode", "EditModeManagerFrame.ClearSelectedSystem",
         "MinimalSliderWithSteppersMixin", "CreateMinimalSliderFormatter" })
