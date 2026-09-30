@@ -1,4 +1,4 @@
--- Zone Info: a small panel in a bottom corner of the world map about the zone it shows, or on a
+-- Zone Info: a small panel in a corner of the world map about the zone it shows, or on a
 -- continent map the zone under the cursor: its level range colored against yours, the Fishing
 -- skill its waters need, and the herbs, ore, and skinning it has for the gathering professions
 -- you have. Ideas from Leatrix Maps' zone levels; none of its code. The zones are in Data.lua.
@@ -39,6 +39,8 @@ module.options = {
         choices = {
             { "BOTTOMLEFT", L.ZONEINFO_BOTTOMLEFT },
             { "BOTTOMRIGHT", L.ZONEINFO_BOTTOMRIGHT },
+            { "TOPLEFT", L.ZONEINFO_TOPLEFT },
+            { "TOPRIGHT", L.ZONEINFO_TOPRIGHT },
         },
     },
     {
@@ -138,9 +140,17 @@ local function levelText(low, high)
     return color and colored(color, text) or text
 end
 
--- A profession's icon in text, bigger than the small font so it reads at a glance.
-local function icon(line, own)
-    return format("|T%s:%d:%d|t ", own or ICONS[line], ICON_SIZE, ICON_SIZE)
+-- Whether the panel is in a right corner, where everything is mirrored: the icons come after
+-- their text and the text lines up on the right.
+local function onRight()
+    return module.db.corner == "TOPRIGHT" or module.db.corner == "BOTTOMRIGHT"
+end
+
+-- A profession's icon in text, bigger than the small font so it reads at a glance, on the side of
+-- `text` the corner calls for.
+local function icon(line, own, text)
+    local texture = format("|T%s:%d:%d|t", own or ICONS[line], ICON_SIZE, ICON_SIZE)
+    return onRight() and text .. " " .. texture or texture .. " " .. text
 end
 
 -- Blizzard's green for a quest at your level.
@@ -196,14 +206,14 @@ local function skillsRow(zone)
     local db, parts = module.db, {}
     if visible(db.fishing) and zone.fish then
         local rank, name, own = Professions.Rank(Professions.FISHING)
-        parts[#parts + 1] = icon(Professions.FISHING, own) .. NoBreak(format(L.ZONEINFO_SKILL,
-            name or L.ZONEINFO_FISHING_NAME, range(rank, zone.fish, zone.fishHigh, true)))
+        parts[#parts + 1] = icon(Professions.FISHING, own, NoBreak(format(L.ZONEINFO_SKILL,
+            name or L.ZONEINFO_FISHING_NAME, range(rank, zone.fish, zone.fishHigh, true))))
     end
     local rank, name, own = Professions.Rank(Professions.SKINNING)
     if shows("skinning", rank) and zone[1] then
-        parts[#parts + 1] = icon(Professions.SKINNING, own) .. NoBreak(format(L.ZONEINFO_SKILL,
+        parts[#parts + 1] = icon(Professions.SKINNING, own, NoBreak(format(L.ZONEINFO_SKILL,
             name or L.ZONEINFO_SKINNING_NAME, range(rank, Professions.SkinningNeed(zone[1]),
-                Professions.SkinningNeed(zone[2]))))
+                Professions.SkinningNeed(zone[2])))))
     end
     if #parts > 0 then
         return concat(parts, "    ")
@@ -245,7 +255,7 @@ local function gatherRow(key, line, ids, items)
     for row = 1, count do
         local text = concat(names, L.ZONEINFO_LIST_SEPARATOR, (row - 1) * size + 1,
             min(row * size, #names))
-        result[row] = row == 1 and icon(line, own) .. text or text
+        result[row] = row == 1 and icon(line, own, text) or text
     end
     return result
 end
@@ -268,6 +278,16 @@ local function territory(zone)
     end
     local color = side == ns.WorldMap.PlayerSide() and TERRITORY.friendly or TERRITORY.hostile
     return color, format(L.ZONEINFO_TERRITORY, ns.WorldMap.SideName(side) or side)
+end
+
+-- A dungeon or raid as one row: Points of Interest's, or in a right corner the same mirrored
+-- (levels, name, then the icon).
+local function instanceLine(instance)
+    if not onRight() then
+        return ns.Instances.Line(instance)
+    end
+    return format("%s  %s %s", ns.Instances.Levels(instance, true),
+        NoBreak(ns.Instances.Name(instance)), ns.Instances.Icon(instance, ns.Instances.ICON_SIZE))
 end
 
 -- The rows under the zone's name, in order. The zone's dungeons and raids are a row each, as
@@ -295,7 +315,7 @@ local function rows(zone)
     end
     if visible(module.db.dungeons) then
         for i, instance in ipairs(zone.dungeons or {}) do
-            add(ns.Instances.Line(instance), false, i == 1 and #list > 0 and SECTION_GAP or nil)
+            add(instanceLine(instance), false, i == 1 and #list > 0 and SECTION_GAP or nil)
         end
     end
     return list
@@ -362,8 +382,6 @@ local function newPanel(parent)
     frame:SetFrameLevel(parent:GetFrameLevel() + 2000)
     -- The fonts of a GameTooltip: a white title, white rows.
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameTooltipHeaderText")
-    frame.title:SetPoint("TOPLEFT", PADDING, -PADDING)
-    frame.title:SetJustifyH("LEFT")
     frame.rows = {}
     frame:Hide()
     return frame
@@ -374,8 +392,6 @@ local function rowAt(i)
     local row = panel.rows[i]
     if not row then
         row = panel:CreateFontString(nil, "OVERLAY", "GameTooltipText")
-        row:SetPoint("TOPLEFT", panel.rows[i - 1] or panel.title, "BOTTOMLEFT", 0, -GAP)
-        row:SetJustifyH("LEFT")
         panel.rows[i] = row
     end
     return row
@@ -413,7 +429,8 @@ local anchored -- where the panel sits now: the corner and how far up, or nil to
 
 local function anchor()
     local corner, scale = module.db.corner, module.db.scale / 100
-    local offset = corner == "BOTTOMRIGHT" and 8 or bottomLeftOffset()
+    -- Only the bottom left has Blizzard's coordinates to clear.
+    local offset = corner == "BOTTOMLEFT" and bottomLeftOffset() or 8
     local key = corner .. offset .. ":" .. scale
     if key == anchored then
         return
@@ -422,11 +439,9 @@ local function anchor()
     -- Offsets are in the panel's own scale, so divide to keep them the same on screen.
     panel:SetScale(scale)
     panel:ClearAllPoints()
-    if corner == "BOTTOMRIGHT" then
-        panel:SetPoint("BOTTOMRIGHT", panel:GetParent(), "BOTTOMRIGHT", -8 / scale, offset / scale)
-    else
-        panel:SetPoint("BOTTOMLEFT", panel:GetParent(), "BOTTOMLEFT", 8 / scale, offset / scale)
-    end
+    local x = onRight() and -8 or 8
+    local y = corner:find("TOP") and -offset or offset
+    panel:SetPoint(corner, panel:GetParent(), corner, x / scale, y / scale)
 end
 
 local function draw(mapID)
@@ -467,6 +482,12 @@ local function draw(mapID)
     end
     width = min(width, MAX_WIDTH)
     panel.title:SetWidth(width)
+    -- In a right corner the text lines up on the right, and a later row of a list is set in from
+    -- there, past where the icon is.
+    local side = onRight() and "RIGHT" or "LEFT"
+    panel.title:ClearAllPoints()
+    panel.title:SetPoint("TOP" .. side, side == "RIGHT" and -PADDING or PADDING, -PADDING)
+    panel.title:SetJustifyH(side)
     local height = PADDING * 2 + panel.title:GetStringHeight()
     local above, aboveIndent = panel.title, 0
     for i, row in ipairs(panel.rows) do
@@ -475,7 +496,10 @@ local function draw(mapID)
             local indent = entry.indent and INDENT or 0
             local gap = entry.gap or GAP
             row:ClearAllPoints()
-            row:SetPoint("TOPLEFT", above, "BOTTOMLEFT", indent - aboveIndent, -gap)
+            local inset = indent - aboveIndent
+            row:SetPoint("TOP" .. side, above, "BOTTOM" .. side, side == "RIGHT" and -inset or inset,
+                -gap)
+            row:SetJustifyH(side)
             row:SetWidth(width - indent)
             height = height + gap + row:GetStringHeight()
             above, aboveIndent = row, indent

@@ -22,6 +22,9 @@ ns.changelog = {
                     .. "dungeons, herbs, ore, and skinning can each show only while you hold "
                     .. "it. Long herb and ore lists split into rows of at most four, and the "
                     .. "instances sit apart under a little more space." },
+                { L.ZONEINFO_TITLE, "The panel can also sit in a top corner of the map. In a "
+                    .. "right corner it is mirrored: the icons go on the right and the text "
+                    .. "lines up on the right." },
                 { L.TOOLTIPS_TITLE, "A Faction Color option colors the Horde or Alliance line "
                     .. "on a unit red or blue, as on the map." },
             } },
