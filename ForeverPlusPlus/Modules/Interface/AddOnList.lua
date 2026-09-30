@@ -8,8 +8,8 @@ local _, ns = ...
 
 local _G, ipairs, type, pcall, sort, lower, gsub, find, format, tostring =
     _G, ipairs, type, pcall, table.sort, string.lower, string.gsub, string.find, string.format, tostring
-local C_AddOns, UnitName, CreateTreeDataProvider, geterrorhandler =
-    C_AddOns, UnitName, CreateTreeDataProvider, geterrorhandler
+local C_AddOns, UnitName, CreateTreeDataProvider, geterrorhandler, hooksecurefunc =
+    C_AddOns, UnitName, CreateTreeDataProvider, geterrorhandler, hooksecurefunc
 
 local L = ns.L
 
@@ -249,6 +249,23 @@ end
 -- Reports what the module sees, to check it against what the list shows.
 ns.AddCommand("addons", "[name]", L.ADDONLIST_COMMAND, function(rest)
     local character = selectedCharacter(addList())
+    if rest == "spy" then
+        -- What Blizzard's own list asks the game: the arguments of its enable state calls.
+        local seen, count = {}, 0
+        hooksecurefunc(C_AddOns, "GetAddOnEnableState", function(a, b)
+            if not busy then
+                count = count + 1
+                if #seen < 4 then
+                    seen[#seen + 1] = tostring(a) .. "," .. tostring(b)
+                end
+            end
+        end)
+        if type(_G.AddonList_Update) == "function" then
+            _G.AddonList_Update()
+        end
+        ns.Print(format("%d calls, first: %s", count, table.concat(seen, " | ")))
+        return
+    end
     if rest and rest ~= "" then
         -- The raw answers the game gives for one addon.
         local _, _, _, _, infoReason = C_AddOns.GetAddOnInfo(rest)
