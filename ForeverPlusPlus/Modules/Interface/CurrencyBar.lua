@@ -15,7 +15,7 @@ local module = ns.NewModule("CurrencyBar", L.CURRENCYBAR_DESC, {
     money = true,
     currencies = true,
     vertical = false,
-    scale = 100, -- percent
+    scale = 120, -- percent
     x = 0, -- the box's offset from the center of the screen
     y = -300,
 })
