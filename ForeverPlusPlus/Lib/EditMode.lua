@@ -226,6 +226,8 @@ local function hasKit(kit)
 end
 
 local function look(selection, isSelected)
+    -- Blizzard's boxes say "Click To Edit" until one is picked.
+    selection.hint:SetShown(not isSelected)
     local kit = KITS[isSelected]
     if hasKit(kit) then
         NineSliceUtil.ApplyLayout(selection, LAYOUT, kit)
@@ -248,6 +250,9 @@ local function newSelection(frame, info)
     selection:SetFrameLevel(frame:GetFrameLevel() + 10)
     selection:EnableMouse(true)
     selection:RegisterForDrag("LeftButton")
+    selection.hint = selection:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
+    selection.hint:SetPoint("CENTER")
+    selection.hint:SetText(L.EDITMODE_CLICK_TO_EDIT)
     selection.tint = selection:CreateTexture(nil, "BACKGROUND")
     selection.tint:SetAllPoints()
     selection.tint:SetColorTexture(GOLD[1], GOLD[2], GOLD[3], 0.2)

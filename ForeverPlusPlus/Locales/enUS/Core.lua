@@ -91,4 +91,5 @@ L.HOME_COMMANDS = "Commands"
 
 -- Edit Mode dialog for our own frames (Lib/EditMode.lua)
 L.EDITMODE_SCALE = "Scale"
+L.EDITMODE_CLICK_TO_EDIT = "Click To Edit"
 L.EDITMODE_RESET_POSITION = "Reset To Default Position"
