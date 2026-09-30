@@ -35,6 +35,7 @@ Lib\MapPins.lua
 Lib\EditMode.lua
 Modules\Nameplates\PlayerPlates.lua
 Modules\Nameplates\NpcPlates.lua
+Modules\Nameplates\QuestPlates.lua
 Modules\Tools\CVarBrowser.lua
 Modules\Tools\SelfTest.lua
 Modules\Automation\FastLoot.lua

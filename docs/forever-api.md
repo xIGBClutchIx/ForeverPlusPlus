@@ -312,3 +312,8 @@ Web (checked 2026-09-25):
 - [Forever addons: the modern API and beta compatibility (classicwowforever.com)](https://classicwowforever.com/guides/wow-forever-addons-api-compatibility/): launch date, Blizzard's 2026-09-17 Q&A confirming the modern API.
 
 Both API dumps predate build 70009. To refresh, regenerate one in game (Atraeau's `WowApiExport` or forever-addon-kit's `ForeverBeacon`) rather than trusting these copies.
+
+## Quest Nameplates (unverified)
+
+- Quest Nameplates reads `C_TooltipInfo.GetUnit(unit).lines`: lines of type `Enum.TooltipDataLineType.QuestTitle` start a quest and `QuestObjective` lines hold its progress (`3/8`, or `45%`); `QuestPlayer` lines (group members' progress) are skipped. **Unverified**: check in game with `/run for _,l in ipairs(C_TooltipInfo.GetUnit("target").lines) do print(l.type,l.leftText) end` on a quest creature. `C_QuestLog.UnitIsRelatedToActiveQuest` is used as a pre-filter when it exists (MyQuestPlates relies on it, so it is probably there).
+- The icon is the first of the atlases `QuestObjective`, `QuestNormal`, `quest-icon-exclamation` the client has. **Unverified**: only `QuestNormal` was seen, in another addon's code.

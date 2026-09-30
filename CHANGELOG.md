@@ -6,6 +6,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Added
 
+- **Quest Nameplates** (new, off by default): a quest icon and your progress (3/8, or how many are left) beside the health bar of creatures you need for a quest, from the objective lines of their tooltip. Options for the progress shown, which side of the bar, and size.
 - **Auto Sell Junk** (new, off by default): sells the gray items in your bags when a merchant opens and says in chat what they sold for. Hold Shift to skip it. A checkbox stops at 12 items per visit so everything can be bought back.
 - **Flight Timer** (new, off by default): times every flight you take, remembered by the game's flight point IDs, then shows a bar counting the flight down that you can move in Edit Mode, and the flight time on a flight point's tooltip on the flight map. A Reset button forgets the times.
 - **Profession Tooltips** (was Gathering Tooltips): also shows the Lockpicking skill a lockbox or locked chest needs, colored against your skill, for characters who can pick locks. A Locks checkbox turns it off. A Skeleton Keys checkbox (on by default) shows it to blacksmiths too, against the best skeleton key they can make, and puts the skill each skeleton key opens in its tooltip.
