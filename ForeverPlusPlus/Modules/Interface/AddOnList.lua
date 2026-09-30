@@ -8,8 +8,8 @@ local _, ns = ...
 
 local _G, ipairs, type, pcall, sort, lower, gsub, find, format, tostring =
     _G, ipairs, type, pcall, table.sort, string.lower, string.gsub, string.find, string.format, tostring
-local C_AddOns, UnitName, CreateTreeDataProvider, geterrorhandler, hooksecurefunc =
-    C_AddOns, UnitName, CreateTreeDataProvider, geterrorhandler, hooksecurefunc
+local C_AddOns, UnitGUID, CreateTreeDataProvider, geterrorhandler, hooksecurefunc =
+    C_AddOns, UnitGUID, CreateTreeDataProvider, geterrorhandler, hooksecurefunc
 
 local L = ns.L
 
@@ -49,22 +49,23 @@ local function addList()
     end
 end
 
----The character the list's dropdown has picked: its enabled boxes are that character's, which is
----not always the one playing (Forever, 2026-09-30). Its text is the name; with nothing readable,
----the player.
+---The character the list asks about. On Forever the list passes a character's GUID to
+---GetAddOnEnableState, not its name: a name gets "enabled" for every addon (probed 2026-09-30,
+---with `/fpp addons spy`). It is the dropdown's pick when that can be read, else the player.
 ---@param list table|nil
 ---@return string
 local function selectedCharacter(list)
     local dropdown = list and list.Dropdown
-    local text = dropdown and dropdown.Text and dropdown.Text.GetText and dropdown.Text:GetText()
-    if type(text) == "string" and text ~= "" then
-        text = gsub(text, "|c%x%x%x%x%x%x%x%x", "")
-        text = gsub(text, "|r", "")
-        if text ~= "" then
-            return text
+    if dropdown and dropdown.GetSelectionData then
+        local ok, data = pcall(dropdown.GetSelectionData, dropdown)
+        if ok and type(data) == "table" then
+            data = data.data or data.value or data.character
+        end
+        if ok and type(data) == "string" and find(data, "^Player%-") then
+            return data
         end
     end
-    return (UnitName("player"))
+    return UnitGUID("player")
 end
 
 ---Everything the list needs to know about one addon, read once per rebuild.
