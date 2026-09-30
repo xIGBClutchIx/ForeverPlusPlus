@@ -12,7 +12,7 @@ local Nameplates = ns.Nameplates
 local readable = ns.IsReadable
 
 local module = ns.NewModule("QuestPlates", L.QUESTPLATES_DESC, {
-    enabled = false,
+    enabled = true,
     progress = "count", -- "count" (3/8), "remaining" (5), or "off" (just the icon)
     side = "left", -- which side of the bar: "left" or "right"
     size = 100, -- a percent

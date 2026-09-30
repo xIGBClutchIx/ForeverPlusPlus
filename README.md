@@ -22,7 +22,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Gathering Tracking | Keeps Find Minerals or Find Herbs on after logging in, zoning, or dying, and can swap between the two. |
 | Skip Cinematics | Skips cinematics and movies you've already seen on any character, or every one. Hold Shift to watch. Off by default. |
 | **Items** | |
-| Already Known | Marks recipes, mounts, pets, toys, and other items you already know or have with a green check (or tint) on their icon, on merchants, the auction house, bags, mail, and the loot window, each with its own checkbox. Off by default. |
+| Already Known | Marks recipes, mounts, pets, toys, and other items you already know or have with a green check (or tint) on their icon, on merchants, the auction house, bags, mail, and the loot window, each with its own checkbox. |
 | Auction Prices | Scans the auction house when you open it and shows the lowest buyout in item tooltips, under the sell price. |
 | Bag Slot Counter | Shows how many bag slots are free on the backpack button, or each bag's own count on its button, with the reagent bag counted on its own. |
 | Durability Bars | Shows a small bar beside each item on the character window with how worn it is. |
@@ -31,8 +31,8 @@ Everything is on by default except where noted. Each module can be turned off, a
 | **Interface** | |
 | Auto Screenshot | Takes a screenshot when you level up, earn an achievement, or defeat a boss, and can for good loot, reputation, PvP ranks, titles, battlegrounds, and deaths. Off by default. |
 | Hide Beta Feedback | Hides the beta's "Press F6 to submit an issue" tooltip line and bug report button. Off by default, and only on beta and PTR clients. |
-| Spell Ranks | Marks the spells on your action bars that have a higher rank you already know, with a warning badge or a red tint over the button, and says the best rank in the spell's tooltip. `/fpp ranks` lists them. Off by default. |
-| Recipe Colors | Colors recipes in the professions window by your chance of a skill-up: orange, yellow, green, or gray, with the row's highlight to match. Off by default. |
+| Spell Ranks | Marks the spells on your action bars that have a higher rank you already know, with a warning badge or a red tint over the button, and says the best rank in the spell's tooltip. `/fpp ranks` lists them. |
+| Recipe Colors | Colors recipes in the professions window by your chance of a skill-up: orange, yellow, green, or gray, with the row's highlight to match. |
 | Combat Alert | Floats a red "Entering Combat" or green "Leaving Combat" line up and away from the middle of the screen, each with its own checkbox, plus a size slider and how long it stays (move it in Edit Mode). Off by default. |
 | Tooltips | Colors unit and item tooltips by class, reaction, or quality, colors the Horde or Alliance line red or blue, and adds player titles and who a unit is targeting. |
 | **Map** | |
@@ -40,14 +40,14 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Zone Info | Shows a panel in a corner of the world map (bottom left by default; in a right corner it is mirrored, icons on the right) with the zone's level range colored against yours, who holds it, its dungeons, the fishing skill it needs, and the herbs, ore, and skinning in it for the professions you have. On a continent map, it's the zone under the cursor. Herbs, ore, and skinning can each be off, shown with the profession, always, or only while you hold the detail key (Shift, Alt, or Ctrl), and so can fishing and dungeons; the panel has a size slider. |
 | Unexplored Areas | Shows the parts of zone maps you haven't explored yet on the world map and zone map, tinted in a color and strength you choose, or just like explored areas. |
 | Coordinates | Shows your coordinates on the left of the world map's title bar and the cursor's on the right, each with its own checkbox, plus tenths and the minimap. It turns on the game's own coordinates, so it matches Settings > Gameplay > Interface. |
-| Flight Timer | Times every flight you take, remembered by the game's flight point IDs, then shows a bar counting the flight down (move it in Edit Mode) and the time on the flight map's tooltip. Off by default. |
+| Flight Timer | Times every flight you take, remembered by the game's flight point IDs, then shows a bar counting the flight down (move it in Edit Mode) and the time on the flight map's tooltip. |
 | Hide Filter Reset | Hides the reset button on the world map's filter dropdown, which otherwise shows whenever a filter is off. |
 | **Unit Frames** | |
 | Class Colors | Shows players' health bars, and optionally names, in their class color on the player, target, focus, party, and target-of-target frames, and hostile and neutral NPCs' health bars in red and yellow. |
 | **Nameplates** | |
 | NPC Nameplates | Always shows friendly NPCs' names with their title, with a name size slider. The health bar appears only when they're hurt or in combat. |
 | Player Nameplates | Always shows friendly players' names with their guild, with a name size slider, and an icon (or light blue name) for recent allies. The health bar appears only when they're hurt or in combat. |
-| Quest Nameplates | Off by default. Shows a quest icon and your progress (3/8, or how many are left) beside the health bar of creatures you need for a quest. |
+| Quest Nameplates | Shows a quest icon and your progress (3/8, or how many are left) beside the health bar of creatures you need for a quest. |
 | **Tools** | |
 | Console Variables | A page in Settings to browse and change the game's console variables (CVars). |
 

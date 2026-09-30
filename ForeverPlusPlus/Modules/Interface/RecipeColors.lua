@@ -13,7 +13,7 @@ local C_TradeSkillUI = C_TradeSkillUI
 local L = ns.L
 
 local module = ns.NewModule("RecipeColors", L.RECIPECOLORS_DESC, {
-    enabled = false,
+    enabled = true,
     highlight = true, -- tint the row's selected and mouse-over highlights too
     gray = true, -- learned recipes that can't raise the skill any more are gray
 })

@@ -18,7 +18,7 @@ local L = ns.L
 local readable = ns.IsReadable
 
 local module = ns.NewModule("SpellRanks", L.SPELLRANKS_DESC, {
-    enabled = false,
+    enabled = true,
     style = "badge", -- "badge" or "tint"
     tooltip = true, -- say the best known rank in spell tooltips
     chat = true,

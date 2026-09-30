@@ -17,7 +17,7 @@ local C_Timer, GetTime = C_Timer, GetTime
 local L = ns.L
 
 local module = ns.NewModule("AlreadyKnown", L.ALREADYKNOWN_DESC, {
-    enabled = false,
+    enabled = true,
     style = "check", -- "check" mark, "tint" the icon green, or "both"
     merchant = true,
     auction = true,

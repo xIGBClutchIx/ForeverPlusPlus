@@ -13,20 +13,20 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_ADDED, {
-                { L.SPELLRANKS_TITLE, "New, off by default, in Interface. Marks the spells on "
+                { L.SPELLRANKS_TITLE, "New, in Interface. Marks the spells on "
                     .. "your action bars that have a higher rank you already know, with a "
                     .. "warning badge or a red tint over the button, and adds the best rank you "
                     .. "know to the spell's tooltip. /fpp ranks lists them, and chat says how "
                     .. "many there are after you level up or learn spells." },
-                { L.RECIPECOLORS_TITLE, "New, off by default. Colors recipes in the professions "
+                { L.RECIPECOLORS_TITLE, "New. Colors recipes in the professions "
                     .. "window by your chance of a skill-up, orange, yellow, green, or gray, like "
                     .. "the old trade skill window. Options tint the row highlights to match and "
                     .. "gray out recipes you know that can't raise your skill any more." },
-                { L.QUESTPLATES_TITLE, "New, off by default. A quest icon and your progress "
+                { L.QUESTPLATES_TITLE, "New. A quest icon and your progress "
                     .. "(3/8, or how many are left) beside the health bar of creatures you need "
                     .. "for a quest, from the objective lines of their tooltip. Options for the "
                     .. "progress shown, which side of the bar, and size." },
-                { L.ALREADYKNOWN_TITLE, "New, off by default. Marks recipes, mounts, pets, toys, "
+                { L.ALREADYKNOWN_TITLE, "New. Marks recipes, mounts, pets, toys, "
                     .. "and other items you already know or have with Blizzard's green check on "
                     .. "the icon, or a green tint. It shows on merchants, the auction house's "
                     .. "browse list, bags, mail, and the loot window, each with its own "
@@ -40,7 +40,7 @@ ns.changelog = {
                     .. "when a merchant opens and says in chat what they sold for. Hold Shift to "
                     .. "skip it. A checkbox stops at 12 items per visit so everything can be "
                     .. "bought back." },
-                { L.FLIGHTTIMER_TITLE, "New, off by default. Times every flight you take, "
+                { L.FLIGHTTIMER_TITLE, "New. Times every flight you take, "
                     .. "remembered by the game's flight point IDs, then shows a bar counting "
                     .. "the flight down that you can move in Edit Mode, and the flight time on "
                     .. "a flight point's tooltip on the flight map. Each route is timed on its own, "

@@ -13,7 +13,7 @@ local CreateFrame, UIParent, GameTooltip = CreateFrame, UIParent, GameTooltip
 local L = ns.L
 
 local module = ns.NewModule("FlightTimer", L.FLIGHTTIMER_DESC, {
-    enabled = false,
+    enabled = true,
     bar = true,
     tooltip = true,
     x = 0, -- the bar's offset from the center of the screen
