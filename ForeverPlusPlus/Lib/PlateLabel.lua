@@ -7,7 +7,8 @@
 -- A plate module decides what goes in the label through a `style` (see ns.FriendlyPlates):
 --   style.db               its settings: level ("before"/"after"/"off"), nameSize (a percent of
 --                          Blizzard's name size), centerLine, and with
---                          icons, socialIcons, groupIcon ("role"/"looking") and testIcons
+--                          icons, socialIcons, groupIcon ("role"/"looking"), iconSide
+--                          ("after"/"before" the name) and testIcons
 --   style.NameColor(unit)  r, g, b for the name
 --   style.BarNameColor(unit)  r, g, b for the name while the bar is up (optional; NameColor)
 --   style.Subtitle(unit)   the subtitle text (nil for none; may be secret) and when it shows:
@@ -442,14 +443,17 @@ function PlateLabel.Layout(label, record, unit, style)
     -- half the difference, so the whole row is centered over the bar. The subtitle stays centered.
     local where = style.db.level
     local levelWidth = placeLevel(label, record, unit, where)
-    local iconsLeft = where == "after"
+    local levelLeft = where ~= "after"
+    local iconsLeft = style.db.iconSide == "before"
     local fontSize = label.nameSize or 12
-    local iconsWidth = placeIcons(label.icons, label.name, iconsLeft, fontSize, unit, style)
+    -- Icons on the level's side sit past its badge.
+    local anchor = levelWidth > 0 and levelLeft == iconsLeft and label.level or label.name
+    local iconsWidth = placeIcons(label.icons, anchor, iconsLeft, fontSize, unit, style)
     -- With the bar up: our bar-view name centered on the plate just above the bar, its icons after
     -- it, and the pair shifted so they're centered together. Blizzard's level stays on the bar.
     label.barName:SetText(record.name:GetText())
     label.barName:SetTextColor((style.BarNameColor or style.NameColor)(unit))
-    local barIconsWidth = placeIcons(label.barIcons, label.barName, false, fontSize, unit, style)
+    local barIconsWidth = placeIcons(label.barIcons, label.barName, iconsLeft, fontSize, unit, style)
     local barRow = label.barRow
     barRow:ClearAllPoints()
     barRow:SetPoint("TOP", record.container, "TOP")
@@ -457,10 +461,17 @@ function PlateLabel.Layout(label, record, unit, style)
     barRow:SetPoint("LEFT", label, "LEFT")
     barRow:SetPoint("RIGHT", label, "RIGHT")
     label.barName:ClearAllPoints()
-    label.barName:SetPoint("BOTTOM", barRow, "TOP", -barIconsWidth / 2, 2)
-    local leftWidth, rightWidth = levelWidth, iconsWidth
+    label.barName:SetPoint("BOTTOM", barRow, "TOP", (iconsLeft and 1 or -1) * barIconsWidth / 2, 2)
+    local leftWidth, rightWidth = 0, 0
+    if levelLeft then
+        leftWidth = levelWidth
+    else
+        rightWidth = levelWidth
+    end
     if iconsLeft then
-        leftWidth, rightWidth = iconsWidth, levelWidth
+        leftWidth = leftWidth + iconsWidth
+    else
+        rightWidth = rightWidth + iconsWidth
     end
     placeSubtitle(label, record, unit, style, (leftWidth - rightWidth) / 2)
 end

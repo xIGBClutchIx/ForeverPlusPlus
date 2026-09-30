@@ -16,6 +16,7 @@ local module = ns.NewModule("PlayerPlates", L.PLAYERPLATES_DESC, ns.FriendlyPlat
     guildHighlight = true,
     socialIcons = true,
     groupIcon = "role", -- "role" or "looking"
+    iconSide = "after", -- "after" or "before" the name
     testIcons = "off", -- debug: "off", "group", or "friend" on every friendly player
 }))
 module.title = L.PLAYERPLATES_TITLE
@@ -52,6 +53,13 @@ module.options = {
         choices = {
             { "role", L.PLAYERPLATES_GROUP_ICON_ROLE },
             { "looking", L.PLAYERPLATES_GROUP_ICON_LOOKING },
+        },
+    },
+    {
+        key = "iconSide", name = L.PLAYERPLATES_ICON_SIDE, description = L.PLAYERPLATES_ICON_SIDE_DESC,
+        choices = {
+            { "after", L.PLAYERPLATES_ICON_SIDE_AFTER },
+            { "before", L.PLAYERPLATES_ICON_SIDE_BEFORE },
         },
     },
     {

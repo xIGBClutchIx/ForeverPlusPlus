@@ -11,6 +11,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Profession Tooltips** (was Gathering Tooltips): also shows the Lockpicking skill a lockbox or locked chest needs, colored against your skill, for characters who can pick locks. A Locks checkbox turns it off. A Skeleton Keys checkbox (on by default) shows it to blacksmiths too, against the best skeleton key they can make, and puts the skill each skeleton key opens in its tooltip.
 - **Zone Info**: a Detail Key (Shift, Alt, or Ctrl), and fishing, dungeons, herbs, ore, and skinning can each show only while you hold it. Long herb and ore lists split into rows of at most four, and the instances sit apart under a little more space.
 - **Zone Info**: the panel can also sit in a top corner of the map. In a right corner it is mirrored: the icons go on the right and the text lines up on the right.
+- **Player Nameplates**: an Icon Position option puts the group role, friend, and recent ally icons before or after the name (after by default).
 - **Tooltips**: a Faction Color option colors the Horde or Alliance line on a unit red or blue, as on the map.
 
 ### Changed
