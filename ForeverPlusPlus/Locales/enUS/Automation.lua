@@ -123,12 +123,17 @@ L.AUTOGOSSIP_TITLE_STABLE = "Stable Master"
 
 -- AutoDecline
 L.AUTODECLINE_TITLE = "Auto Decline"
-L.AUTODECLINE_DESC = "Turn down duel requests as they arrive, so the popup never gets in your way."
+L.AUTODECLINE_DESC = "Turn down duel requests, and optionally party invites, as they arrive, so "
+    .. "the popup never gets in your way."
+L.AUTODECLINE_PARTY_INVITES = "Party Invites"
+L.AUTODECLINE_PARTY_INVITES_DESC = "Also turn down party invites, without the invite sound."
 L.AUTODECLINE_ALLOW_FRIENDS = "Allow Friends and Guild"
-L.AUTODECLINE_ALLOW_FRIENDS_DESC = "Let duels from your friends, Battle.net friends, and guildmates "
-    .. "through."
-L.AUTODECLINE_CHAT_DESC = "Say in chat whose duel was turned down."
-L.AUTODECLINE_DECLINED = "Declined a duel from %s." -- player nameL.AUTODECLINE_SOMEONE = "someone"
+L.AUTODECLINE_ALLOW_FRIENDS_DESC = "Let duels and party invites from your friends, Battle.net "
+    .. "friends, and guildmates through."
+L.AUTODECLINE_CHAT_DESC = "Say in chat whose duel or party invite was turned down."
+L.AUTODECLINE_DECLINED = "Declined a duel from %s." -- player name
+L.AUTODECLINE_DECLINED_INVITE = "Declined a party invite from %s." -- player name
+L.AUTODECLINE_SOMEONE = "someone"
 
 -- AutoRelease
 L.AUTORELEASE_TITLE = "Auto Release"

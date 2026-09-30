@@ -13,6 +13,9 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_ADDED, {
+                { L.AUTODECLINE_TITLE, "New option, off by default, for party invites. "
+                    .. "Turns them down without the invite sound. Friends and guildmates can "
+                    .. "still be let through, and chat says who was declined." },
                 { L.ADDONLIST_TITLE, "New, in Interface. The AddOns list "
                     .. "without category headers, with enabled addons first and the disabled "
                     .. "ones after, each in name order. Options to move disabled addons out of "
