@@ -494,8 +494,20 @@ end
 -- Temporary: prints how a selection box's centre is drawn, ours and Blizzard's bag bar, to compare.
 local function describe(name, box)
     local center = box and box.Center
+    if box and not center then
+        for index = 1, select("#", box:GetRegions()) do
+            local region = select(index, box:GetRegions())
+            if region.GetAtlas then
+                local r, g, b, a = region:GetVertexColor()
+                ns.Print(format("%s region %d: atlas=%s alpha=%.2f rgba=%.2f,%.2f,%.2f,%.2f layer=%s shown=%s",
+                    name, index, tostring(region:GetAtlas()), region:GetAlpha(), r, g, b, a,
+                    tostring(region:GetDrawLayer()), tostring(region:IsShown())))
+            end
+        end
+        return
+    end
     if not center then
-        ns.Print(name .. ": no Center")
+        ns.Print(name .. ": no box")
         return
     end
     local r, g, b, a = center:GetVertexColor()
