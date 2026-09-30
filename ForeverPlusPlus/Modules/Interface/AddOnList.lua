@@ -6,8 +6,8 @@
 -- back at once.
 local _, ns = ...
 
-local _G, ipairs, type, pcall, sort, lower, gsub, find =
-    _G, ipairs, type, pcall, table.sort, string.lower, string.gsub, string.find
+local _G, ipairs, type, pcall, sort, lower, gsub, find, format, tostring =
+    _G, ipairs, type, pcall, table.sort, string.lower, string.gsub, string.find, string.format, tostring
 local C_AddOns, UnitName, CreateTreeDataProvider, geterrorhandler =
     C_AddOns, UnitName, CreateTreeDataProvider, geterrorhandler
 
@@ -34,6 +34,7 @@ module.options = {
 local ADDON = "Blizzard_AddOnList"
 
 local busy = false
+local rebuilds = 0 -- for /fpp addons
 
 local function plain(text)
     local stripped = gsub(text or "", "|c%x%x%x%x%x%x%x%x", "")
@@ -162,6 +163,7 @@ local function rebuild()
     end
     busy = true
     local ok, provider = pcall(build, list)
+    rebuilds = rebuilds + 1
     if ok then
         list.ScrollBox:SetDataProvider(provider, ScrollBoxConstants and ScrollBoxConstants.RetainScrollPosition)
     else
@@ -222,3 +224,20 @@ function module:OnOptionChanged()
         rebuild()
     end
 end
+
+-- Reports what the module sees, to check it against what the list shows.
+ns.AddCommand("addons", "", L.ADDONLIST_COMMAND, function()
+    local character = (UnitName("player"))
+    local total, off, first = 0, 0, "-"
+    for index = 1, C_AddOns.GetNumAddOns() do
+        local info = readAddOn(index, character)
+        total = total + 1
+        if info.disabled then
+            off = off + 1
+            if first == "-" then
+                first = info.name
+            end
+        end
+    end
+    ns.Print(format(L.ADDONLIST_REPORT, tostring(addList() ~= nil), rebuilds, off, total, first))
+end)

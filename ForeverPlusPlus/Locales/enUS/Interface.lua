@@ -154,3 +154,5 @@ L.ADDONLIST_UNGROUP_DESC = "Move disabled addons out of their group to the disab
     .. "list, so a group only shows the addons that are on."
 L.ADDONLIST_NOTES = "Search Notes"
 L.ADDONLIST_NOTES_DESC = "Let the search box also find words in an addon's notes."
+L.ADDONLIST_COMMAND = "Show what the AddOns List module sees, for checking it"
+L.ADDONLIST_REPORT = "AddOns List: list found %s, rebuilt %d times, %d of %d addons disabled, first disabled: %s"
