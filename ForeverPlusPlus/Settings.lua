@@ -505,6 +505,12 @@ local function buildWelcome(frame)
     version:SetPoint("TOPLEFT", tagline, "BOTTOMLEFT", 0, -6)
     version:SetText(format(L.HOME_VERSION, metadata("Version"), metadata("Author")))
 
+    -- Under the version, since the command list below grows with every module.
+    local gameVersion, build, _, interface = GetBuildInfo()
+    local game = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    game:SetPoint("TOPLEFT", version, "BOTTOMLEFT", 0, -2)
+    game:SetText(format(L.HOME_GAME_BUILD, gameVersion, build, interface))
+
     local y = -144
     local intro = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     intro:SetPoint("TOPLEFT", 16, y)
@@ -524,13 +530,13 @@ local function buildWelcome(frame)
 
     local modules = addButton(frame, L.MODULES, modulesCategory)
     modules:SetPoint("TOPLEFT", 16, y)
+    local last = modules
     if changelogCategory then
-        local changelog = addButton(frame, L.CHANGELOG, changelogCategory)
-        changelog:SetPoint("LEFT", modules, "RIGHT", 8, 0)
+        last = addButton(frame, L.CHANGELOG, changelogCategory)
+        last:SetPoint("LEFT", modules, "RIGHT", 8, 0)
     end
 
-    -- Two presets, each asking first since they overwrite the player's settings.
-    y = y - 32
+    -- Two presets on the same row, each asking first since they overwrite the player's settings.
     local function addPreset(text, tooltip, key, question, fn, anchor)
         local button = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
         button:SetSize(140, 24)
@@ -543,15 +549,11 @@ local function buildWelcome(frame)
             GameTooltip:Show()
         end)
         button:SetScript("OnLeave", function() GameTooltip:Hide() end)
-        if anchor then
-            button:SetPoint("LEFT", anchor, "RIGHT", 8, 0)
-        else
-            button:SetPoint("TOPLEFT", 16, y)
-        end
+        button:SetPoint("LEFT", anchor, "RIGHT", 8, 0)
         return button
     end
     local defaults = addPreset(L.HOME_DEFAULTS, L.HOME_DEFAULTS_TIP, "DEFAULTS",
-        L.HOME_DEFAULTS_ASK, ns.ApplyDefaults)
+        L.HOME_DEFAULTS_ASK, ns.ApplyDefaults, last)
     addPreset(L.HOME_CLUTCH, L.HOME_CLUTCH_TIP, "CLUTCH", L.HOME_CLUTCH_ASK,
         ns.ApplyClutchDefault, defaults)
 
@@ -578,11 +580,6 @@ local function buildWelcome(frame)
         description:SetText(line[2])
         y = y - 16
     end
-
-    local gameVersion, build, _, interface = GetBuildInfo()
-    local game = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-    game:SetPoint("TOPLEFT", 16, y - 10) -- below the command list, which grows with modules
-    game:SetText(format(L.HOME_GAME_BUILD, gameVersion, build, interface))
 end
 
 -- Changelog page ------------------------------------------------------------------------------
