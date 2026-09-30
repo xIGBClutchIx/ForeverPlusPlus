@@ -253,8 +253,12 @@ ns.AddCommand("addons", "[name]", L.ADDONLIST_COMMAND, function(rest)
         -- The raw answers the game gives for one addon.
         local _, _, _, _, infoReason = C_AddOns.GetAddOnInfo(rest)
         local _, reason = C_AddOns.IsAddOnLoadable(rest, character)
-        ns.Print(format(L.ADDONLIST_PROBE, rest, tostring(C_AddOns.GetAddOnEnableState(rest, character)),
-            tostring(C_AddOns.GetAddOnEnableState(rest)), tostring(reason), tostring(infoReason)))
+        local dropdown = addList() and addList().Dropdown
+        local shown = dropdown and dropdown.Text and dropdown.Text.GetText and dropdown.Text:GetText()
+        ns.Print(format(L.ADDONLIST_PROBE, rest, tostring(character),
+            tostring(C_AddOns.GetAddOnEnableState(rest, character)),
+            tostring(C_AddOns.GetAddOnEnableState(rest)), tostring(reason), tostring(infoReason),
+            tostring(shown)))
         return
     end
     local total, off, first = 0, 0, "-"
