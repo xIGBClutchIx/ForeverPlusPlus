@@ -422,6 +422,58 @@ function ns.SetOption(name, key, value)
     end
 end
 
+-- Presets -------------------------------------------------------------------------------------
+
+-- Modules the Clutch's Default preset turns on, on top of every module's default settings.
+local clutchEnables = { "FishingCast", "SkipCinematics", "AutoScreenshot", "CurrencyBar",
+    "HideFeedback", "ChannelNames" }
+
+---Puts every module's settings back to their defaults, then turns on the modules in `enable`.
+---Saved data (prices, seen cinematics, chat history, positions) stays: only plain settings reset.
+---Modules that are always on have nothing to reset. Applies live, like the checkboxes do.
+---@param enable? string[] module names to turn on whatever their default is
+function ns.ApplyPreset(enable)
+    local wanted = {}
+    for _, name in ipairs(enable or {}) do
+        wanted[name] = true
+    end
+    local changed = {}
+    for _, name in ipairs(ns.order) do
+        local module = ns.modules[name]
+        if not (module.alwaysOn or module.unavailable) then
+            for key, value in pairs(module.defaults) do
+                if key ~= "enabled" and type(value) ~= "table" and module.db[key] ~= value then
+                    module.db[key] = value
+                    changed[#changed + 1] = { module, key }
+                end
+            end
+        end
+    end
+    for _, name in ipairs(ns.order) do
+        local module = ns.modules[name]
+        ns.SetEnabled(name, wanted[name] or module.defaults.enabled)
+    end
+    for _, entry in ipairs(changed) do
+        local module, key = entry[1], entry[2]
+        if module.enabled and module.OnOptionChanged then
+            module:OnOptionChanged(key)
+        end
+    end
+    for _, name in ipairs(ns.order) do
+        ns.RefreshSetting(name)
+    end
+end
+
+---Puts every module back to its defaults (the Defaults button on the welcome page).
+function ns.ApplyDefaults()
+    ns.ApplyPreset()
+end
+
+---Defaults plus the modules the author recommends (the Clutch's Default button).
+function ns.ApplyClutchDefault()
+    ns.ApplyPreset(clutchEnables)
+end
+
 -- /fpp ----------------------------------------------------------------------------------------
 
 local commands, commandOrder = {}, {} -- name -> { usage, description, fn }, and their order

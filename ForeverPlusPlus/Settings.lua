@@ -529,6 +529,32 @@ local function buildWelcome(frame)
         changelog:SetPoint("LEFT", modules, "RIGHT", 8, 0)
     end
 
+    -- Two presets, each asking first since they overwrite the player's settings.
+    y = y - 32
+    local function addPreset(text, tooltip, key, question, fn, anchor)
+        local button = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
+        button:SetSize(140, 24)
+        button:SetText(text)
+        button:SetScript("OnClick", function() ns.Confirm(key, question, fn) end)
+        button:SetScript("OnEnter", function(self)
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:SetText(text)
+            GameTooltip:AddLine(tooltip, 1, 1, 1, true)
+            GameTooltip:Show()
+        end)
+        button:SetScript("OnLeave", function() GameTooltip:Hide() end)
+        if anchor then
+            button:SetPoint("LEFT", anchor, "RIGHT", 8, 0)
+        else
+            button:SetPoint("TOPLEFT", 16, y)
+        end
+        return button
+    end
+    local defaults = addPreset(L.HOME_DEFAULTS, L.HOME_DEFAULTS_TIP, "DEFAULTS",
+        L.HOME_DEFAULTS_ASK, ns.ApplyDefaults)
+    addPreset(L.HOME_CLUTCH, L.HOME_CLUTCH_TIP, "CLUTCH", L.HOME_CLUTCH_ASK,
+        ns.ApplyClutchDefault, defaults)
+
     y = y - 44
     addHeading(frame, y, L.HOME_LINKS)
     y = y - 26

@@ -13,6 +13,11 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_ADDED, {
+                { L.CHANGELOG_SETTINGS, "Defaults and Clutch's Default buttons on the welcome "
+                    .. "page, each asking first. Defaults puts every module's settings back to "
+                    .. "how they start; Clutch's Default does that and also turns on Fishing "
+                    .. "Cast, Skip Cinematics, Auto Screenshot, Currency Bar, Hide Beta "
+                    .. "Feedback, and Short Channel Names. Saved data stays." },
                 { "Edit Mode", "Combat Alert, Currency Bar, and Flight Timer now look and work "
                     .. "like Blizzard's own frames. The box turns gold when you click it and opens "
                     .. "a small settings window with a Scale slider and Reset To Default Position. "

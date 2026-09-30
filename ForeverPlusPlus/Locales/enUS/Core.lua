@@ -81,6 +81,13 @@ L.HOME_INTRO = "Each module is one small change to Blizzard's interface, made to
     .. "shipped with the game. Turn them on and off on the Modules page; the gear beside a "
     .. "module shows its options. Settings are saved for your whole account."
 L.HOME_MODULES_ON = "%d of %d modules on" -- on, total
+L.HOME_DEFAULTS = "Defaults"
+L.HOME_DEFAULTS_TIP = "Puts every module's settings back to how they start for a new player."
+L.HOME_DEFAULTS_ASK = "Put all Forever++ settings back to their defaults?"
+L.HOME_CLUTCH = "Clutch's Default"
+L.HOME_CLUTCH_TIP = "The defaults, plus the extra modules the author turns on: Fishing Cast, "
+    .. "Skip Cinematics, Auto Screenshot, Currency Bar, Hide Beta Feedback, and Short Channel Names."
+L.HOME_CLUTCH_ASK = "Use Clutch's recommended settings? This replaces your current Forever++ settings."
 L.HOME_GAME_BUILD = "Game %s (build %s, interface %s)" -- version, build, interface
 L.HOME_LINKS = "Links"
 L.HOME_WEBSITE = "Website"
