@@ -264,7 +264,10 @@ local function newSelection(frame, info)
     look(selection, false)
     -- Blizzard's Edit Mode loads after us, so its art isn't there yet when a module turns on: draw
     -- the box again each time it shows.
-    selection:SetScript("OnShow", function(self) look(self, selected == frame) end)
+    selection:SetScript("OnShow", function(self)
+        self.hovered = false
+        look(self, selected == frame)
+    end)
     selection:SetScript("OnEnter", function(self)
         self.hovered = true
         showHint(self, selected == frame)
