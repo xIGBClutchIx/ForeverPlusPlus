@@ -39,6 +39,7 @@ Modules\Tools\CVarBrowser.lua
 Modules\Tools\SelfTest.lua
 Modules\Automation\FastLoot.lua
 Modules\Automation\AutoRepair.lua
+Modules\Automation\AutoSellJunk.lua
 Modules\Items\SellPrice.lua
 Modules\Items\AuctionPrices.lua
 Modules\Items\DurabilityBars.lua

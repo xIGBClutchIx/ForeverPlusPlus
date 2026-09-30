@@ -13,6 +13,10 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_ADDED, {
+                { L.AUTOSELLJUNK_TITLE, "New, off by default. Sells the gray items in your bags "
+                    .. "when a merchant opens and says in chat what they sold for. Hold Shift to "
+                    .. "skip it. A checkbox stops at 12 items per visit so everything can be "
+                    .. "bought back." },
                 { L.FLIGHTTIMER_TITLE, "New, off by default. Times every flight you take, "
                     .. "remembered by the game's flight point IDs, then shows a bar counting "
                     .. "the flight down that you can move in Edit Mode, and the flight time on "

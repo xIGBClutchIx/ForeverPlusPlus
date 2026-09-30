@@ -33,6 +33,16 @@ L.AUTOREPAIR_REPAIRED_GUILD = "Repaired for %s from the guild bank." -- cost
 L.AUTOREPAIR_NO_MONEY = "Not enough money to repair (%s)." -- cost
 L.AUTOREPAIR_NO_GUILD_MONEY = "The guild bank can't pay for repairs (%s)." -- cost
 
+-- AutoSellJunk
+L.AUTOSELLJUNK_TITLE = "Auto Sell Junk"
+L.AUTOSELLJUNK_DESC = "Sell the gray items in your bags when you talk to a merchant, and say in "
+    .. "chat what they sold for. Hold Shift to skip it."
+L.AUTOSELLJUNK_BUYBACK = "Keep Everything Buyable Back"
+L.AUTOSELLJUNK_BUYBACK_DESC = "Sell at most 12 items per visit, the number the merchant's buyback "
+    .. "list holds, so you can still buy back anything sold by mistake."
+L.AUTOSELLJUNK_CHAT_DESC = "Say in chat how many items were sold and what they sold for."
+L.AUTOSELLJUNK_SOLD = "Sold %d junk items for %s." -- count, money
+
 -- GatherTracking
 L.GATHERTRACKING_TITLE = "Gathering Tracking"
 L.GATHERTRACKING_DESC = "Keep Find Minerals or Find Herbs on: turn it back on after logging in, "
