@@ -152,3 +152,24 @@ L.HIDEFILTERRESET_TITLE = "Hide Filter Reset"
 L.HIDEFILTERRESET_DESC = "Hide the reset button on the world map's filter dropdown, which shows "
     .. "whenever a filter is off."
 
+
+-- FlightTimer
+L.FLIGHTTIMER_TITLE = "Flight Timer"
+L.FLIGHTTIMER_DESC = "Time every flight you take, then show how long a flight takes: a bar that "
+    .. "counts it down as you fly, and the time on the flight map's tooltip."
+L.FLIGHTTIMER_BAR = "Timer Bar"
+L.FLIGHTTIMER_BAR_DESC = "A bar with the time left while you fly. Move it in Edit Mode. A flight "
+    .. "you haven't taken before counts up instead, and is timed for next time."
+L.FLIGHTTIMER_TOOLTIP = "Flight Map Tooltip"
+L.FLIGHTTIMER_TOOLTIP_DESC = "How long the flight takes, on a flight point's tooltip on the flight "
+    .. "map, once you have flown it. A route with stops adds up the stops you know."
+L.FLIGHTTIMER_TIME = "Flight time: %s" -- a time like 2:05
+L.FLIGHTTIMER_TIME_ABOUT = "Flight time: about %s" -- a time like 2:05, added up from other flights
+L.FLIGHTTIMER_RESET_POSITION = "Bar Position"
+L.FLIGHTTIMER_RESET_POSITION_BUTTON = "Reset"
+L.FLIGHTTIMER_RESET_POSITION_DESC = "Puts the timer bar back where it starts."
+L.FLIGHTTIMER_RESET_TIMES = "Flight Times"
+L.FLIGHTTIMER_RESET_TIMES_BUTTON = "Reset"
+L.FLIGHTTIMER_RESET_TIMES_DESC = "Forgets every flight time. They are timed again as you fly."
+L.FLIGHTTIMER_RESET_TIMES_CONFIRM = "Forget every flight time Flight Timer has recorded?"
+L.FLIGHTTIMER_RESET_TIMES_DONE = "Flight times forgotten."

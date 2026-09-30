@@ -256,6 +256,13 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 - `SetMouseClickEnabled`, `SetMouseMotionEnabled`, and `EnableMouse` are marked protected, but without `HasRestrictions`; `SetPassThroughButtons` has restrictions, and Leatrix Maps notes a blocked `SetPropagateMouseClicks`. `Lib/MapPins.lua` only uses the first two, on its own frames. **[web]** (`Blizzard_APIDocumentationGenerated/SimpleScriptRegionAPIDocumentation.lua`) Whether they work in combat on our frames is **Unverified**.
 - Atlases `Dungeon`, `Raid`, `TaxiNode_Alliance`, `TaxiNode_Horde`, `TaxiNode_Neutral`, `Vehicle-TempleofKotmogu-CyanBall`, and `...-GreenBall` work on Forever. **[addon]** (Leatrix Maps) `poi-graveyard-neutral` is in the `forever` UI source. **[web]** `FlightMasterFerry` and `Vehicle-Air-Horde` are in Retail's atlas list (wago.tools `UiTextureAtlasMember`), so Points of Interest probes them with `C_Texture.GetAtlasInfo` and falls back to the balls. **Unverified** on Forever.
 
+## Flight times
+
+- No API for how long a flight takes was found: nothing in `C_TaxiMap`'s documented functions (`GetAllTaxiNodes`, `GetTaxiNodesForMap`, `GetDestinationMap`, `ShouldMapShowTaxiNodes`), and the taxi node info has `nodeID`, `name`, `slotIndex`, `position`, `state`, `cost`, and no duration. **[web]** (Retail `TaxiMapDocumentation.lua`) Whether Forever adds one is **Unverified**; Flight Timer times flights itself and saves seconds by `fromNodeID>toNodeID`.
+- Flight Timer relies on Retail's flight master API on Forever, all **Unverified** on the live client until tried: `TakeTaxiNode(slot)`, `GetNumRoutes(slot)`, `TaxiGetNodeSlot(slot, i, fromSource)`, `TaxiRequestEarlyLanding()`, `UnitOnTaxi("player")` turning true when the flight starts, `Enum.FlightPathState.Current` on `C_TaxiMap.GetAllTaxiNodes` for where the flight master is, and the flight map pins carrying `taxiNodeData` (with `nodeID`) as the owner of `GameTooltip`. **[web]** (Retail `Blizzard_FlightMap`, from memory of the source)
+- A flight path is assumed to take as long both ways. **Unverified**
+- Edit Mode: `EditModeManagerFrame:EnterEditMode()` and `ExitEditMode()` are hooked, and `EditModeSystemSelectionLayout` with `NineSliceUtil.ApplyLayout` draws the selection box, as libraries like LibEditMode do. Addon frames can't join Edit Mode's saved layouts, so Flight Timer saves its own position. **[web]** **Unverified** on Forever.
+
 ## Fonts
 
 - Text measured before its font file has loaded reads as 0 tall on Forever, even after preloading. Measure with a floor of the font size. **[in-game]** (2026-09-23)

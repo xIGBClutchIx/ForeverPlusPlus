@@ -13,6 +13,11 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_ADDED, {
+                { L.FLIGHTTIMER_TITLE, "New, off by default. Times every flight you take, "
+                    .. "remembered by the game's flight point IDs, then shows a bar counting "
+                    .. "the flight down that you can move in Edit Mode, and the flight time on "
+                    .. "a flight point's tooltip on the flight map. A route with stops adds up "
+                    .. "the ones you know. A Reset button forgets the times." },
                 { L.PROFTOOLTIPS_TITLE, "Was Gathering Tooltips. Also shows the Lockpicking "
                     .. "skill a lockbox or locked chest needs, colored against your skill, for "
                     .. "characters who can pick locks. A Locks checkbox turns it off. A Skeleton Keys checkbox (on by default) "

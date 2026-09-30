@@ -39,6 +39,14 @@ function Text.Hours(hours)
     return hours == 1 and L.TEXT_ONE_HOUR or format(L.TEXT_HOURS, hours)
 end
 
+---A length of time as a clock: "0:42", "12:05".
+---@param seconds number
+---@return string
+function Text.Clock(seconds)
+    seconds = floor(seconds + 0.5)
+    return format("%d:%02d", floor(seconds / 60), seconds % 60)
+end
+
 ---How long ago something was, as short as a price line: "just now", "12m ago", "3h ago", "2d ago".
 ---@param seconds number
 ---@return string

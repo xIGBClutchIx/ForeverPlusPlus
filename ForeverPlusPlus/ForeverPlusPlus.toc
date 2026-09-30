@@ -32,6 +32,7 @@ Lib\WorldMap.lua
 Lib\MapTooltip.lua
 Lib\Instances.lua
 Lib\MapPins.lua
+Lib\EditMode.lua
 Modules\Nameplates\PlayerPlates.lua
 Modules\Nameplates\NpcPlates.lua
 Modules\Tools\CVarBrowser.lua
@@ -60,6 +61,7 @@ Modules\Map\ZoneInfo\Data.lua
 Modules\Map\UnexploredAreas\UnexploredAreas.lua
 Modules\Map\UnexploredAreas\Data.lua
 Modules\Map\Coordinates.lua
+Modules\Map\FlightTimer.lua
 Modules\Map\HideFilterReset.lua
 Changelog.lua
 Settings.lua

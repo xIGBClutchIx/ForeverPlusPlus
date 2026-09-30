@@ -178,6 +178,15 @@
     "BACKDROP_TOOLTIP_16_16_5555",
     "C_MapExplorationInfo",
     "BattlefieldMapFrame",
-    "MAP_AREA_LABEL_TYPE"
+    "MAP_AREA_LABEL_TYPE",
+    "NineSliceUtil",
+    "EditModeSystemSelectionLayout",
+    "EditModeManagerFrame",
+    "TaxiFrame",
+    "FlightMapFrame",
+    "TakeTaxiNode",
+    "TaxiRequestEarlyLanding",
+    "GetNumRoutes",
+    "TaxiGetNodeSlot"
   ]
 }
