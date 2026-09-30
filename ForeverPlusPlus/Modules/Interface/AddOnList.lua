@@ -49,6 +49,24 @@ local function addList()
     end
 end
 
+---The character the list's dropdown has picked: its enabled boxes are that character's, which is
+---not always the one playing (Forever, 2026-09-30). Its text is the name; with nothing readable,
+---the player.
+---@param list table|nil
+---@return string
+local function selectedCharacter(list)
+    local dropdown = list and list.Dropdown
+    local text = dropdown and dropdown.Text and dropdown.Text.GetText and dropdown.Text:GetText()
+    if type(text) == "string" and text ~= "" then
+        text = gsub(text, "|c%x%x%x%x%x%x%x%x", "")
+        text = gsub(text, "|r", "")
+        if text ~= "" then
+            return text
+        end
+    end
+    return (UnitName("player"))
+end
+
 ---Everything the list needs to know about one addon, read once per rebuild.
 local function readAddOn(index, character)
     local name, title, notes, _, infoReason = C_AddOns.GetAddOnInfo(index)
@@ -95,7 +113,7 @@ end
 -- when asked, no category rows.
 local function build(list)
     local db = module.db
-    local character = (UnitName("player"))
+    local character = selectedCharacter(list)
     local filter = plain(list.SearchBox:GetText())
 
     local infos, byName = {}, {}
@@ -230,7 +248,7 @@ end
 
 -- Reports what the module sees, to check it against what the list shows.
 ns.AddCommand("addons", "[name]", L.ADDONLIST_COMMAND, function(rest)
-    local character = (UnitName("player"))
+    local character = selectedCharacter(addList())
     if rest and rest ~= "" then
         -- The raw answers the game gives for one addon.
         local _, _, _, _, infoReason = C_AddOns.GetAddOnInfo(rest)
