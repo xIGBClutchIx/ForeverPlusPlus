@@ -21,6 +21,10 @@ ns.changelog = {
                     .. "latest lines through a logout or reload and shows them again at login, "
                     .. "with a slider for how many. Social Button moves the social (Quick Join) "
                     .. "button down beside the chat window's other buttons." },
+                { L.CHATFONT_TITLE, "New, off by default, in Chat. Draws the chat windows in "
+                    .. "Friz Quadrata, Arial Narrow, Skurri, or Morpheus, keeping each window's "
+                    .. "size. Turning it off gives Blizzard's font back. It is unavailable on "
+                    .. "Korean, Chinese, and Russian clients." },
                 { L.CURRENCYBAR_TITLE, "New, off by default, in Interface. A small box, styled "
                     .. "like a tooltip, showing your gold and the currencies you tick Show on "
                     .. "Backpack in the Currency tab. Gold always shows all three coins. Options "
