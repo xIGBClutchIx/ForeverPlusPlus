@@ -187,6 +187,12 @@
     "TakeTaxiNode",
     "TaxiRequestEarlyLanding",
     "GetNumRoutes",
-    "TaxiGetNodeSlot"
+    "TaxiGetNodeSlot",
+    "TaxiNodeCost",
+    "C_Secrets",
+    "GetNumGroupMembers",
+    "IsInRaid",
+    "WOW_PROJECT_ID",
+    "date"
   ]
 }

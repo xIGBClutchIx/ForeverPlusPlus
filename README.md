@@ -53,7 +53,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 
 ## Use
 
-Open Game Menu > Options > AddOns > Forever++. It opens on a welcome page with the version, links, and commands. Modules has a checkbox for each module, grouped by category; the gear beside a module shows its options under it. Console Variables is its own page, Debug has testing options, and Changelog has what changed in each release (also in [CHANGELOG.md](CHANGELOG.md)).
+Open Game Menu > Options > AddOns > Forever++. It opens on a welcome page with the version, links, and commands. Modules has a checkbox for each module, grouped by category; the gear beside a module shows its options under it. Console Variables is its own page, Debug has testing options and the Self Test button, and Changelog has what changed in each release (also in [CHANGELOG.md](CHANGELOG.md)).
 
 | Command | What it does |
 |---|---|
@@ -64,6 +64,7 @@ Open Game Menu > Options > AddOns > Forever++. It opens on a welcome page with t
 | `/fpp set <module> <option> [value]` | Changes an option: `on`/`off`, a choice such as `/fpp set PlayerPlates level after`, or a number such as `/fpp set PointsOfInterest dungeonSize 150`. Leave out the value to see the choices. |
 | `/fpp reset` | Puts every setting back to its default and reloads. |
 | `/fpp cvar [search]` | Opens Console Variables. |
+| `/fpp selftest` | Probes the client APIs Forever++ depends on and records events (flights, deaths, duels) until `/reload`; the log is saved in `ForeverPlusPlusDB.selfTest`. Also a button on the Debug page. |
 | `/fpp scan` | Scans the open auction house now. |
 | `/fpp resetprices` | Forgets the saved auction prices. |
 

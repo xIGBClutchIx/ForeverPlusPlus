@@ -263,6 +263,10 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 - Flight times are not assumed equal both ways or additive over stops (Cameron, 2026-09-30, from play), so Flight Timer keeps a time per exact from and to pair. **[user]**
 - Edit Mode: `EditModeManagerFrame:EnterEditMode()` and `ExitEditMode()` are hooked, and `EditModeSystemSelectionLayout` with `NineSliceUtil.ApplyLayout` draws the selection box, as libraries like LibEditMode do. Addon frames can't join Edit Mode's saved layouts, so Flight Timer saves its own position. **[web]** **Unverified** on Forever.
 
+## Self test
+
+Debug page > Self Test > Run (or `/fpp selftest`) probes the "Unverified" items above and writes one line each to `ForeverPlusPlusDB.selfTest.lines`: `PASS`, `FAIL`, `INFO` (a value to read), `SKIP` (something must be open first), `REC` (a recorded event), then the manual steps. `/reload` saves it to `WTF\Account\<acct>\SavedVariables\ForeverPlusPlus.lua`. Run it more than once: at a flight master, with the world map open, with a creature targeted, in a group, and in combat, since several probes only answer then. After a run the recorder keeps logging flights (route slots, `UnitOnTaxi` times, what owns the flight map tooltip), deaths, duels, faction messages, and UI errors until the next `/reload`. `Modules/Tools/SelfTest.lua` has the probe list; once an item is confirmed, tag it here and drop its probe.
+
 ## Fonts
 
 - Text measured before its font file has loaded reads as 0 tall on Forever, even after preloading. Measure with a floor of the font size. **[in-game]** (2026-09-23)

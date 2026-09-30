@@ -36,6 +36,7 @@ Lib\EditMode.lua
 Modules\Nameplates\PlayerPlates.lua
 Modules\Nameplates\NpcPlates.lua
 Modules\Tools\CVarBrowser.lua
+Modules\Tools\SelfTest.lua
 Modules\Automation\FastLoot.lua
 Modules\Automation\AutoRepair.lua
 Modules\Items\SellPrice.lua

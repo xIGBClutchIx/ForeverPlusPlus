@@ -365,11 +365,11 @@ end
 
 -- A module's buttons (from `module.actions`: `{ name, button, description, fn }`, and `confirm`, a
 -- question to ask before `fn` runs, with `key` naming its popup), after its options.
-local function addActions(layout, module, parent, shown)
+local function addActions(layout, module, parent, shown, actions)
     if not (layout and CreateSettingsButtonInitializer) then
         return -- Probe: the button row is Mainline's Settings.
     end
-    for i, action in ipairs(module.actions or {}) do
+    for i, action in ipairs(actions or module.actions or {}) do
         local fn = action.fn
         if action.confirm then
             -- Asks first (ns.Confirm), in a popup named by `key`, so a command can ask the same one.
@@ -726,12 +726,14 @@ function ns.RegisterSettings()
     local debugPage, debugLayout
     for _, name in ipairs(order) do
         local module = ns.modules[name]
-        if hasOptions(module, true) then
+        if hasOptions(module, true) or module.debugActions then
             if not debugPage then
                 debugPage, debugLayout = Settings.RegisterVerticalLayoutSubcategory(category, L.DEBUG)
             end
             addHeader(debugLayout, module.title or name)
             addOptions(debugPage, debugLayout, module, nil, true)
+            -- Buttons (`module.debugActions`, the same shape as `actions`) after the options.
+            addActions(debugLayout, module, nil, nil, module.debugActions)
         end
     end
     changelogCategory = addCanvasPage(category, L.CHANGELOG, buildChangelog)
