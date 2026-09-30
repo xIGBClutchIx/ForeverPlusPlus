@@ -1,6 +1,6 @@
 -- Currency Bar: a small box, drawn like a Blizzard tooltip, that shows your gold and the
 -- currencies you have ticked "Show on Backpack" in the Currency tab, so they are in view without
--- opening a window. Which currencies show is Blizzard's own choice, not ours. Move it in Edit Mode.
+-- opening a window. Hovering it lists your gold and currencies with what this session gained or spent. Which currencies show is Blizzard's own choice, not ours. Move it in Edit Mode.
 local _, ns = ...
 
 local GetMoney, C_CurrencyInfo, GameTooltip = GetMoney, C_CurrencyInfo, GameTooltip
@@ -9,11 +9,14 @@ local format, max, floor, tconcat = string.format, math.max, math.floor, table.c
 local BreakUpLargeNumbers = BreakUpLargeNumbers
 
 local L = ns.L
+local Colors = ns.Colors
 
 local module = ns.NewModule("CurrencyBar", L.CURRENCYBAR_DESC, {
     enabled = false,
     money = true,
-    currencies = true,
+    currencies = false,
+    tooltip = true,
+    session = true,
     vertical = false,
     scale = 120, -- percent
     x = 0, -- the box's offset from the center of the screen
@@ -25,6 +28,11 @@ module.category = "interface"
 module.options = {
     { key = "money", name = L.CURRENCYBAR_MONEY, description = L.CURRENCYBAR_MONEY_DESC },
     { key = "currencies", name = L.CURRENCYBAR_CURRENCIES, description = L.CURRENCYBAR_CURRENCIES_DESC },
+    { key = "tooltip", name = L.CURRENCYBAR_TOOLTIP, description = L.CURRENCYBAR_TOOLTIP_DESC },
+    {
+        key = "session", requires = "tooltip",
+        name = L.CURRENCYBAR_SESSION, description = L.CURRENCYBAR_SESSION_DESC,
+    },
     { key = "vertical", name = L.CURRENCYBAR_VERTICAL, description = L.CURRENCYBAR_VERTICAL_DESC },
     {
         key = "scale",
@@ -89,6 +97,79 @@ local function place()
     frame:SetPoint("CENTER", UIParent, "CENTER", module.db.x, module.db.y)
 end
 
+-- The session ----------------------------------------------------------------------------------
+
+-- What you had when the box turned on, to say what this session gained or spent. Not saved.
+local startMoney
+local startCurrency = {} -- currency ID -> amount first seen
+
+local function backpackCurrency(index)
+    -- Probe: the Backpack currency list is Mainline's.
+    return C_CurrencyInfo and C_CurrencyInfo.GetBackpackCurrencyInfo
+        and C_CurrencyInfo.GetBackpackCurrencyInfo(index)
+end
+
+-- Remembers each Backpack currency the first time it is seen, so later changes count from there.
+local function noteCurrencies()
+    for index = 1, MAX_CURRENCIES do
+        local info = backpackCurrency(index)
+        if not info then
+            return
+        end
+        local id = info.currencyTypesID
+        if id and startCurrency[id] == nil then
+            startCurrency[id] = info.quantity or 0
+        end
+    end
+end
+
+-- "+12" in green or "-12" in red, or plain 0.
+local function signed(change, text)
+    if change > 0 then
+        return Colors.Code(0.1, 1, 0.1) .. "+" .. text .. "|r"
+    elseif change < 0 then
+        return Colors.Code(1, 0.2, 0.2) .. "-" .. text .. "|r"
+    end
+    return "0"
+end
+
+local function showTooltip(owner)
+    GameTooltip:SetOwner(owner, "ANCHOR_TOP")
+    GameTooltip:SetText(L.CURRENCYBAR_TITLE)
+    local money = GetMoney()
+    GameTooltip:AddDoubleLine(L.CURRENCYBAR_MONEY, ns.Money(money), 1, 1, 1)
+    if module.db.session and startMoney then
+        local change = money - startMoney
+        GameTooltip:AddDoubleLine(L.CURRENCYBAR_SESSION, signed(change, ns.Money(math.abs(change))),
+            0.8, 0.8, 0.8)
+    end
+    local header
+    for index = 1, MAX_CURRENCIES do
+        local info = backpackCurrency(index)
+        if not info then
+            break
+        end
+        if not header then
+            header = true
+            GameTooltip:AddLine(" ")
+            GameTooltip:AddLine(L.CURRENCYBAR_CURRENCIES)
+        end
+        local quantity = info.quantity or 0
+        local text = BreakUpLargeNumbers and BreakUpLargeNumbers(quantity) or quantity
+        local change = quantity - (startCurrency[info.currencyTypesID] or quantity)
+        if module.db.session and change ~= 0 then
+            text = text .. "  " .. signed(change, BreakUpLargeNumbers
+                and BreakUpLargeNumbers(math.abs(change)) or math.abs(change))
+        end
+        GameTooltip:AddDoubleLine(format("|T%s:%d|t %s", info.iconFileID or 134400, ICON, info.name or ""),
+            text, 1, 1, 1, 1, 1, 1)
+    end
+    if not header then
+        GameTooltip:AddLine(L.CURRENCYBAR_HINT, 0.8, 0.8, 0.8, true)
+    end
+    GameTooltip:Show()
+end
+
 -- The frame ---------------------------------------------------------------------------------------
 
 local function newFrame()
@@ -111,10 +192,9 @@ local function newFrame()
     box.text:SetJustifyH("CENTER")
     box:EnableMouse(true)
     box:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self, "ANCHOR_TOP")
-        GameTooltip:SetText(L.CURRENCYBAR_TITLE)
-        GameTooltip:AddLine(L.CURRENCYBAR_HINT, 1, 1, 1, true)
-        GameTooltip:Show()
+        if module.db.tooltip then
+            showTooltip(self)
+        end
     end)
     box:SetScript("OnLeave", function() GameTooltip:Hide() end)
     box:Hide()
@@ -160,12 +240,20 @@ function module:OnEnable()
     if not frame then
         frame = newFrame()
     end
+    startMoney = startMoney or GetMoney()
+    noteCurrencies()
     place()
     update()
     frame:Show()
     self:On("PLAYER_MONEY", update)
-    self:On("CURRENCY_DISPLAY_UPDATE", update)
-    self:On("PLAYER_ENTERING_WORLD", update)
+    self:On("CURRENCY_DISPLAY_UPDATE", function()
+        noteCurrencies()
+        update()
+    end)
+    self:On("PLAYER_ENTERING_WORLD", function()
+        noteCurrencies()
+        update()
+    end)
     ns.EditMode.Register(frame, L.CURRENCYBAR_TITLE, moved, editModeOptions)
 end
 
