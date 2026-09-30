@@ -455,12 +455,25 @@ function pick(frame)
     refreshDialog()
 end
 
+-- A frame with its own tooltip-style box loses it while Edit Mode shows its selection box, so the
+-- blue isn't laid over a dark fill: Blizzard's frames have nothing behind theirs.
+local function clearBox(frame, on)
+    local alpha = on and 0 or 1
+    if frame.NineSlice then
+        frame.NineSlice:SetAlpha(alpha)
+    elseif frame.SetBackdropColor then
+        frame:SetBackdropColor(0, 0, 0, alpha * 0.8)
+        frame:SetBackdropBorderColor(1, 1, 1, alpha)
+    end
+end
+
 local function setActive(active)
     if not active then
         deselect()
     end
-    for _, info in pairs(registered) do
+    for frame, info in pairs(registered) do
         info.selection:SetShown(active)
+        clearBox(frame, active)
         if info.onChange then
             call(info.onChange, active)
         end
@@ -514,6 +527,7 @@ function EditMode.Register(frame, label, onMove, options)
     install()
     if EditMode.IsActive() then
         info.selection:Show()
+        clearBox(frame, true)
         if info.onChange then
             call(info.onChange, true)
         end
@@ -532,6 +546,7 @@ function EditMode.Unregister(frame)
     end
     registered[frame] = nil
     info.selection:Hide()
+    clearBox(frame, false)
     if info.onChange then
         call(info.onChange, false)
     end
