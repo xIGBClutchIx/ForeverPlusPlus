@@ -24,6 +24,9 @@ jobs:
           done < <(find ForeverPlusPlus -name '*.lua' -print0)
           exit $status
 
+      - name: Offline tests (Lib logic)
+        run: lua5.1 tests/run.lua
+
       - name: ASCII only in .lua and .toc
         run: |
           if grep -rnP '[^\x00-\x7F]' --include='*.lua' --include='*.toc' ForeverPlusPlus; then

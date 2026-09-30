@@ -36,6 +36,7 @@ Names:
 - `README.md`: for players and contributors: the module list, install, settings and commands, and "Add a module". Keep it short; rules and client detail belong here and in `docs/`.
 - `docs/forever-api.md`: what we know about the Forever client API, with sources and how sure we are.
 - `.luarc.json`: LuaLS settings (Lua 5.1 and the known globals).
+- `tests/run.lua`: offline tests for pure-logic `Lib/` code (see "Verification").
 
 There is no build step or library folder. Plain Lua, loaded straight from the TOC; CI only zips the folder.
 
@@ -120,9 +121,11 @@ The goal is to add to Blizzard frames without tainting or breaking them.
 
 ## Verification
 
-There are no automated tests. Before calling a change done:
+`tests/run.lua` is a small set of offline tests for pure-logic `Lib/` code (colors, text and time formatting, instances, map helpers). It needs only Lua 5.1, no client: `lua5.1 tests/run.lua` from the repo root (CI runs it after the syntax check). It loads the real `Lib/` and `Locales/enUS/` files against a few stubbed WoW globals, so a Lib file that caches a global at load needs that global stubbed at the top of the file first. Add a check there when you change or add Lib logic that has no frames in it; don't test frame or UI code, and there is no other automated testing.
 
-1. Check syntax where a Lua 5.1 interpreter or LuaLS is available (`luac -p` on changed files).
+Before calling a change done:
+
+1. Run `tests/run.lua`, and check syntax where a Lua 5.1 interpreter or LuaLS is available (`luac -p` on changed files).
 2. In the Forever client: `/reload`, then check `/fpp` lists the module, toggle it off and on, and check BugSack and `Logs\FrameXML.log` for errors.
 3. For anything that touches unit, aura, cast, or combat data, also test in combat, where secret values apply.
 4. Report exactly what was checked. Name every step that still needs someone in the live client, and never claim in-game testing that didn't happen.
