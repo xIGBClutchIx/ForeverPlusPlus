@@ -106,7 +106,6 @@ L.AUTOSCREENSHOT_BATTLEGROUND_DESC = "When a battleground ends, with the scorebo
 L.AUTOSCREENSHOT_DEATH = "Death"
 L.AUTOSCREENSHOT_DEATH_DESC = "When you die."
 
-
 -- SpellRanks
 L.SPELLRANKS_TITLE = "Spell Ranks"
 L.SPELLRANKS_DESC = "Mark the spells on your action bars that have a higher rank you already "
@@ -126,3 +125,21 @@ L.SPELLRANKS_COMMAND = "List the action bar spells that have a higher rank"
 L.SPELLRANKS_OFF = "Spell Ranks is off."
 L.SPELLRANKS_NONE = "Every spell on your action bars is its highest rank."
 L.SPELLRANKS_LINE = "Bar %d, slot %d: %s is Rank %d, and Rank %d is known." -- bar, slot, spell link, ranks
+
+-- CombatAlert
+L.COMBATALERT_TITLE = "Combat Alert"
+L.COMBATALERT_DESC = "Show a line of text that floats up and fades when you enter or leave "
+    .. "combat. Move it in Edit Mode."
+L.COMBATALERT_ENTER_TEXT = "Entering Combat"
+L.COMBATALERT_LEAVE_TEXT = "Leaving Combat"
+L.COMBATALERT_ENTERING = "Entering Combat"
+L.COMBATALERT_ENTERING_DESC = "Show a red alert when you enter combat."
+L.COMBATALERT_LEAVING = "Leaving Combat"
+L.COMBATALERT_LEAVING_DESC = "Show a green alert when you leave combat."
+L.COMBATALERT_SCALE = "Size"
+L.COMBATALERT_SCALE_DESC = "How big the text is."
+L.COMBATALERT_DURATION = "Duration"
+L.COMBATALERT_DURATION_DESC = "How long the text stays up before it has faded away."
+L.COMBATALERT_RESET_POSITION = "Position"
+L.COMBATALERT_RESET_POSITION_BUTTON = "Reset"
+L.COMBATALERT_RESET_POSITION_DESC = "Puts the alert back where it starts."

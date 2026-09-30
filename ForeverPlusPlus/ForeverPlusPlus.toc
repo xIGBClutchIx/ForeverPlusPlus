@@ -59,6 +59,7 @@ Modules\Automation\AutoDismount.lua
 Modules\Interface\AutoScreenshot.lua
 Modules\Interface\SpellRanks.lua
 Modules\Interface\RecipeColors.lua
+Modules\Interface\CombatAlert.lua
 Modules\UnitFrames\ClassColors.lua
 Modules\Map\PointsOfInterest\PointsOfInterest.lua
 Modules\Map\PointsOfInterest\Data.lua

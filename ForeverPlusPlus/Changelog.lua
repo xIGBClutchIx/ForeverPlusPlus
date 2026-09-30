@@ -31,6 +31,11 @@ ns.changelog = {
                     .. "the icon, or a green tint. It shows on merchants, the auction house's "
                     .. "browse list, bags, mail, and the loot window, each with its own "
                     .. "checkbox." },
+                { L.COMBATALERT_TITLE, "New, off by default, in Interface. Floats a red "
+                    .. "\"Entering Combat\" or green \"Leaving Combat\" line up and away from "
+                    .. "the middle of the screen when combat starts or ends, in Blizzard's "
+                    .. "large title font. Each has a checkbox, with a size slider and a "
+                    .. "duration slider. Move it in Edit Mode." },
                 { L.AUTOSELLJUNK_TITLE, "New, off by default. Sells the gray items in your bags "
                     .. "when a merchant opens and says in chat what they sold for. Hold Shift to "
                     .. "skip it. A checkbox stops at 12 items per visit so everything can be "
