@@ -16,30 +16,33 @@ ns.changelog = {
                 { "Edit Mode", "Combat Alert, Currency Bar, and Flight Timer now look and work "
                     .. "like Blizzard's own frames. The box turns gold when you click it and opens "
                     .. "a small settings window with a Scale slider and Reset To Default Position. "
-                    .. "Right-click for the same options. Drag to move, with snapping to the middle and edges of the screen and to "
-                    .. "each other, or nudge a pixel at a time with the arrow keys. Flight Timer "
-                    .. "gets a Bar Size option too." },
-                { L.CURRENCYBAR_TITLE, "New, off by default, in Interface. A small "
-                    .. "tooltip-styled box showing your gold and the currencies you tick Show "
-                    .. "on Backpack in the Currency tab. Gold always shows all three coins, even 0 gold. Checkboxes for the gold and the "
-                    .. "currencies, one to stack them in a column, and a size slider. Move it in Edit Mode." },
-                { L.CATEGORY_CHAT, "New category, four modules, only Short Channel Names off by default. "
-                    .. "Chat Copy adds a button beside the chat window that opens the chat as "
-                    .. "plain text, already selected, to copy with Ctrl+C, with a slider for how "
-                    .. "many lines. Short Channel Names shows channels as [1], [G], or [1. G] instead of "
-                    .. "[1. General]. Chat History keeps each chat window's latest lines when "
-                    .. "you log out or reload and shows them again at login, with a slider for "
-                    .. "how many. Social Button moves the social (Quick Join) button down "
-                    .. "beside the chat window's other buttons." },
-                { L.AUTODECLINE_TITLE, "New option, off by default, for party invites. "
-                    .. "Turns them down without the invite sound. Friends and guildmates can "
-                    .. "still be let through, and chat says who was declined. Duels and party "
-                    .. "invites now each have their own checkbox, so you can decline only one." },
-                { L.FISHINGCAST_TITLE, "New, off by default, in Automation. "
-                    .. "Double right-click in the world with a fishing pole equipped to cast "
-                    .. "Fishing. It uses a temporary right-click binding that comes off on the "
-                    .. "next click, so looting the bobber works as usual, and it never arms in "
-                    .. "combat. A slider sets how fast the second click must follow the first." },
+                    .. "Right-click for the same options. Drag to move, with snapping to the "
+                    .. "middle and edges of the screen and to each other, or nudge a pixel at a "
+                    .. "time with the arrow keys. Flight Timer gets a Bar Size option too." },
+                { L.CATEGORY_CHAT, "New category with four modules. Short Channel Names is off by "
+                    .. "default. Chat Copy adds a button beside the chat window that opens the "
+                    .. "chat as plain text, selected and ready to copy with Ctrl+C, with a slider "
+                    .. "for how many lines. Short Channel Names shows channels as [1], [G], or "
+                    .. "[1. G] instead of [1. General]. Chat History keeps each chat window's "
+                    .. "latest lines through a logout or reload and shows them again at login, "
+                    .. "with a slider for how many. Social Button moves the social (Quick Join) "
+                    .. "button down beside the chat window's other buttons." },
+                { L.CHATFONT_TITLE, "New, off by default, in Chat. Draws the chat windows in "
+                    .. "Friz Quadrata, Arial Narrow, Skurri, or Morpheus, keeping each window's "
+                    .. "size. Turning it off gives Blizzard's font back. It is unavailable on "
+                    .. "Korean, Chinese, and Russian clients." },
+                { L.CURRENCYBAR_TITLE, "New, off by default, in Interface. A small box, styled "
+                    .. "like a tooltip, showing your gold and the currencies you tick Show on "
+                    .. "Backpack in the Currency tab. Gold always shows all three coins. Options "
+                    .. "stack them in a column and set the size. Move it in Edit Mode." },
+                { L.AUTODECLINE_TITLE, "Party invites, off by default, turned down without the "
+                    .. "invite sound. Friends and guildmates can still be let through, and chat "
+                    .. "says who was declined. Duels and party invites now each have their own "
+                    .. "checkbox, so you can decline only one." },
+                { L.FISHINGCAST_TITLE, "New, off by default, in Automation. Double right-click in "
+                    .. "the world with a fishing pole equipped to cast Fishing. Looting the "
+                    .. "bobber works as usual, and it never casts in combat. A slider sets how "
+                    .. "fast the second click must follow the first." },
                 { L.ADDONLIST_TITLE, "New, in Interface. The AddOns list "
                     .. "without category headers, with enabled addons first and the disabled "
                     .. "ones after, each in name order. Options to move disabled addons out of "
@@ -72,16 +75,17 @@ ns.changelog = {
                     .. "when a merchant opens and says in chat what they sold for. Hold Shift to "
                     .. "skip it. A checkbox stops at 12 items per visit so everything can be "
                     .. "bought back." },
-                { L.FLIGHTTIMER_TITLE, "New. Times every flight you take, "
-                    .. "remembered by the game's flight point IDs, then shows a bar counting "
-                    .. "the flight down that you can move in Edit Mode, and the flight time on "
-                    .. "a flight point's tooltip on the flight map. Each route is timed on its own, "
-                    .. "since flights differ each way. A Reset button forgets the times." },
+                { L.FLIGHTTIMER_TITLE, "New. Times every flight you take, then shows a bar "
+                    .. "counting the flight down, which you can move in Edit Mode, and the "
+                    .. "flight time on a flight point's tooltip on the flight map. Each route "
+                    .. "is timed on its own, since flights differ each way. A Reset button "
+                    .. "forgets the times." },
                 { L.PROFTOOLTIPS_TITLE, "Was Gathering Tooltips. Also shows the Lockpicking "
                     .. "skill a lockbox or locked chest needs, colored against your skill, for "
-                    .. "characters who can pick locks. A Locks checkbox turns it off. A Skeleton Keys checkbox (on by default) "
-                    .. "shows it to blacksmiths too, against the best skeleton key they can "
-                    .. "make, and puts the skill each skeleton key opens in its tooltip." },
+                    .. "characters who can pick locks. A Locks checkbox turns it off. A "
+                    .. "Skeleton Keys checkbox (on by default) shows it to blacksmiths too, "
+                    .. "against the best skeleton key they can make, and puts the skill each "
+                    .. "skeleton key opens in its tooltip." },
                 { L.ZONEINFO_TITLE, "A Detail Key (Shift, Alt, or Ctrl), and fishing, "
                     .. "dungeons, herbs, ore, and skinning can each show only while you hold "
                     .. "it. Long herb and ore lists split into rows of at most four, and the "
@@ -111,6 +115,8 @@ ns.changelog = {
                 { L.PLAYERPLATES_TITLE, "Recent allies get the Recent Allies icon beside "
                     .. "their name by default, so their class color stays. Recent Allies is now "
                     .. "a dropdown: Off, Colored Name (the old light blue name), or Icon." },
+                { L.PLAYERPLATES_TITLE .. " and " .. L.NPCPLATES_TITLE, "Name Size is 80% by "
+                    .. "default." },
                 { L.SKIPCINEMATICS_TITLE, "Forget asks you to confirm first, like the Auction "
                     .. "Prices reset." },
             } },
@@ -124,18 +130,15 @@ ns.changelog = {
                     .. "its turn with the server, gives way to the auction house's own "
                     .. "searches, pauses while an item is in the sell box, and stops if you "
                     .. "search." },
-                { L.PLAYERPLATES_TITLE, "The guild moves under the cast bar the moment it "
-                    .. "appears, and back only once it has faded, instead of lagging or "
-                    .. "overlapping it." },
-                { L.NPCPLATES_TITLE, "The title moves under the cast bar the moment it "
-                    .. "appears, and back only once it has faded, instead of lagging or "
-                    .. "overlapping it." },
-                { L.POI_TITLE, "A flight point the game calls undiscovered now says it isn't "
-                    .. "learned yet." },
-                { L.POI_TITLE, "Flight points you have learned now show as learned. They are "
-                    .. "remembered by the game's own flight point ID instead of by name, so "
-                    .. "translated names and the two Light's Hope Chapel points no longer get "
-                    .. "missed. Visit a flight master once to have yours picked up again." },
+                { L.PLAYERPLATES_TITLE .. " and " .. L.NPCPLATES_TITLE, "The guild or title "
+                    .. "moves under the cast bar the moment it appears, and back only once it "
+                    .. "has faded, instead of lagging or overlapping it." },
+                { L.POI_TITLE, "Flight points you have learned now show as learned, including "
+                    .. "with translated names and for the two Light's Hope Chapel points, and "
+                    .. "ones you haven't say so. Visit a flight master once to have yours "
+                    .. "picked up again." },
+                { L.PROFTOOLTIPS_TITLE, "The skill line sits right under the name, above quest "
+                    .. "lines, including on minimap pins." },
             } },
         },
     },

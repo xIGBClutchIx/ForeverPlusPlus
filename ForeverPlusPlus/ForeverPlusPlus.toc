@@ -67,6 +67,7 @@ Modules\Interface\AddOnList.lua
 Modules\Interface\CurrencyBar.lua
 Modules\Chat\ChatCopy.lua
 Modules\Chat\ChannelNames.lua
+Modules\Chat\ChatFont.lua
 Modules\Chat\ChatHistory.lua
 Modules\Chat\SocialButton.lua
 Modules\UnitFrames\ClassColors.lua
