@@ -6,10 +6,10 @@
 -- back at once.
 local _, ns = ...
 
-local _G, ipairs, type, pcall, sort, lower, gsub, find, format, tostring =
-    _G, ipairs, type, pcall, table.sort, string.lower, string.gsub, string.find, string.format, tostring
-local C_AddOns, UnitGUID, CreateTreeDataProvider, geterrorhandler, hooksecurefunc =
-    C_AddOns, UnitGUID, CreateTreeDataProvider, geterrorhandler, hooksecurefunc
+local _G, ipairs, type, pcall, sort, lower, gsub, find =
+    _G, ipairs, type, pcall, table.sort, string.lower, string.gsub, string.find
+local C_AddOns, UnitGUID, CreateTreeDataProvider, geterrorhandler =
+    C_AddOns, UnitGUID, CreateTreeDataProvider, geterrorhandler
 
 local L = ns.L
 
@@ -34,7 +34,6 @@ module.options = {
 local ADDON = "Blizzard_AddOnList"
 
 local busy = false
-local rebuilds = 0 -- for /fpp addons
 
 local function plain(text)
     local stripped = gsub(text or "", "|c%x%x%x%x%x%x%x%x", "")
@@ -50,8 +49,8 @@ local function addList()
 end
 
 ---The character the list asks about. On Forever the list passes a character's GUID to
----GetAddOnEnableState, not its name: a name gets "enabled" for every addon (probed 2026-09-30,
----with `/fpp addons spy`). It is the dropdown's pick when that can be read, else the player.
+---GetAddOnEnableState, not its name: a name gets "enabled" for every addon (probed 2026-09-30).
+---It is the dropdown's pick when that can be read, else the player.
 ---@param list table|nil
 ---@return string
 local function selectedCharacter(list)
@@ -70,13 +69,11 @@ end
 
 ---Everything the list needs to know about one addon, read once per rebuild.
 local function readAddOn(index, character)
-    local name, title, notes, _, infoReason = C_AddOns.GetAddOnInfo(index)
+    local name, title, notes = C_AddOns.GetAddOnInfo(index)
     local group = C_AddOns.GetAddOnMetadata(index, "Group")
     local state = C_AddOns.GetAddOnEnableState(index, character)
     local _, reason = C_AddOns.IsAddOnLoadable(index, character)
     local none = Enum and Enum.AddOnEnableState and Enum.AddOnEnableState.None or 0
-    -- The enable state for the player's name came back "on" for addons the list shows as
-    -- Disabled (Forever, 2026-09-30), so the load reasons count too.
     return {
         index = index,
         name = name,
@@ -85,8 +82,7 @@ local function readAddOn(index, character)
         text = plain(title or name),
         notes = plain(notes),
         -- A dependency that's switched off counts as disabled, like its own checkbox would.
-        disabled = state <= none or reason == "DISABLED" or reason == "DEP_DISABLED"
-            or infoReason == "DISABLED" or infoReason == "DEP_DISABLED",
+        disabled = state <= none or reason == "DEP_DISABLED",
     }
 end
 
@@ -185,7 +181,6 @@ local function rebuild()
     end
     busy = true
     local ok, provider = pcall(build, list)
-    rebuilds = rebuilds + 1
     if ok then
         list.ScrollBox:SetDataProvider(provider, ScrollBoxConstants and ScrollBoxConstants.RetainScrollPosition)
     else
@@ -195,34 +190,15 @@ local function rebuild()
     busy = false
 end
 
-local pending = false
-
-local function later()
-    pending = false
-    if module.enabled then
-        rebuild()
-    end
-end
-
--- Rebuilds now, and once more next frame in case Blizzard fills the list again after its own
--- hooks ran (it does when the window opens), which would put its order back.
-local function refresh()
-    rebuild()
-    if not pending and C_Timer then
-        pending = true
-        C_Timer.After(0, later)
-    end
-end
-
 local function start()
     local list = addList()
     if not list then
         return
     end
-    module:Hook("AddonList_Update", refresh)
-    module:HookScript(list.SearchBox, "OnTextChanged", refresh)
-    module:HookScript(list, "OnShow", refresh)
-    refresh()
+    module:Hook("AddonList_Update", rebuild)
+    module:HookScript(list.SearchBox, "OnTextChanged", rebuild)
+    module:HookScript(list, "OnShow", rebuild)
+    rebuild()
 end
 
 function module:OnEnable()
@@ -246,51 +222,3 @@ function module:OnOptionChanged()
         rebuild()
     end
 end
-
--- Reports what the module sees, to check it against what the list shows.
-ns.AddCommand("addons", "[name]", L.ADDONLIST_COMMAND, function(rest)
-    local character = selectedCharacter(addList())
-    if rest == "spy" then
-        -- What Blizzard's own list asks the game: the arguments of its enable state calls.
-        local seen, count = {}, 0
-        hooksecurefunc(C_AddOns, "GetAddOnEnableState", function(a, b)
-            if not busy then
-                count = count + 1
-                if #seen < 4 then
-                    seen[#seen + 1] = tostring(a) .. "," .. tostring(b)
-                end
-            end
-        end)
-        if type(_G.AddonList_Update) == "function" then
-            _G.AddonList_Update()
-        end
-        C_Timer.After(1, function()
-            ns.Print(format("%d calls, first: %s", count, table.concat(seen, " | ")))
-        end)
-        return
-    end
-    if rest and rest ~= "" then
-        -- The raw answers the game gives for one addon.
-        local _, _, _, _, infoReason = C_AddOns.GetAddOnInfo(rest)
-        local _, reason = C_AddOns.IsAddOnLoadable(rest, character)
-        local dropdown = addList() and addList().Dropdown
-        local shown = dropdown and dropdown.Text and dropdown.Text.GetText and dropdown.Text:GetText()
-        ns.Print(format(L.ADDONLIST_PROBE, rest, tostring(character),
-            tostring(C_AddOns.GetAddOnEnableState(rest, character)),
-            tostring(C_AddOns.GetAddOnEnableState(rest)), tostring(reason), tostring(infoReason),
-            tostring(shown)))
-        return
-    end
-    local total, off, first = 0, 0, "-"
-    for index = 1, C_AddOns.GetNumAddOns() do
-        local info = readAddOn(index, character)
-        total = total + 1
-        if info.disabled then
-            off = off + 1
-            if first == "-" then
-                first = info.name
-            end
-        end
-    end
-    ns.Print(format(L.ADDONLIST_REPORT, tostring(addList() ~= nil), rebuilds, off, total, first))
-end)
