@@ -225,8 +225,10 @@ local function hasKit(kit)
     return true
 end
 
--- Blizzard's boxes say "Click To Edit" while the mouse is over them and for as long as one is picked.
+-- Blizzard's boxes say "Click To Edit" while the mouse is over them, and the frame's name for as
+-- long as one is picked.
 local function showHint(selection, isSelected)
+    selection.hint:SetText(isSelected and selection.info.label or L.EDITMODE_CLICK_TO_EDIT)
     selection.hint:SetShown(selection.hovered or isSelected or false)
 end
 
@@ -254,9 +256,9 @@ local function newSelection(frame, info)
     selection:SetFrameLevel(frame:GetFrameLevel() + 10)
     selection:EnableMouse(true)
     selection:RegisterForDrag("LeftButton")
+    selection.info = info
     selection.hint = selection:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
     selection.hint:SetPoint("CENTER")
-    selection.hint:SetText(L.EDITMODE_CLICK_TO_EDIT)
     selection.tint = selection:CreateTexture(nil, "BACKGROUND")
     selection.tint:SetAllPoints()
     selection.tint:SetColorTexture(GOLD[1], GOLD[2], GOLD[3], 0.2)
