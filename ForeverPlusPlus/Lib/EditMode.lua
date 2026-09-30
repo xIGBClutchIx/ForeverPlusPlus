@@ -224,6 +224,11 @@ local function newSelection(frame, info)
     selection:SetFrameLevel(frame:GetFrameLevel() + 10)
     selection:EnableMouse(true)
     selection:RegisterForDrag("LeftButton")
+    -- Blizzard's frames have their own buttons and art under the blue, which lightens it; ours
+    -- have a dark box or nothing, so a pale wash goes under it.
+    local under = selection:CreateTexture(nil, "BACKGROUND", nil, -8)
+    under:SetAllPoints()
+    under:SetColorTexture(0.55, 0.75, 0.85, 0.3)
     selection.tint = selection:CreateTexture(nil, "BACKGROUND")
     selection.tint:SetAllPoints()
     selection.tint:SetColorTexture(GOLD[1], GOLD[2], GOLD[3], 0.2)
