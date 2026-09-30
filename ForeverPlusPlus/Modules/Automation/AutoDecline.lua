@@ -12,6 +12,7 @@ local Units = ns.Units
 local module = ns.NewModule("AutoDecline", L.AUTODECLINE_DESC, {
     enabled = false,
     allowFriends = false,
+    duels = true,
     partyInvites = false,
     chat = true,
 })
@@ -19,6 +20,7 @@ module.title = L.AUTODECLINE_TITLE
 module.category = "automation"
 
 module.options = {
+    { key = "duels", name = L.AUTODECLINE_DUELS, description = L.AUTODECLINE_DUELS_DESC },
     { key = "partyInvites", name = L.AUTODECLINE_PARTY_INVITES, description = L.AUTODECLINE_PARTY_INVITES_DESC },
     { key = "allowFriends", name = L.AUTODECLINE_ALLOW_FRIENDS, description = L.AUTODECLINE_ALLOW_FRIENDS_DESC },
     ns.ChatOption(L.AUTODECLINE_CHAT_DESC),
@@ -39,7 +41,7 @@ local function isAllowed(name)
 end
 
 local function onDuel(_, name)
-    if isAllowed(name) then
+    if not module.db.duels or isAllowed(name) then
         return
     end
     CancelDuel()

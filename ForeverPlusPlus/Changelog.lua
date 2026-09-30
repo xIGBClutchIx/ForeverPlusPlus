@@ -15,7 +15,8 @@ ns.changelog = {
             { L.CHANGELOG_ADDED, {
                 { L.AUTODECLINE_TITLE, "New option, off by default, for party invites. "
                     .. "Turns them down without the invite sound. Friends and guildmates can "
-                    .. "still be let through, and chat says who was declined." },
+                    .. "still be let through, and chat says who was declined. Duels and party "
+                    .. "invites now each have their own checkbox, so you can decline only one." },
                 { L.FISHINGCAST_TITLE, "New, off by default, in Automation. "
                     .. "Double right-click in the world with a fishing pole equipped to cast "
                     .. "Fishing. It uses a temporary right-click binding that comes off on the "
