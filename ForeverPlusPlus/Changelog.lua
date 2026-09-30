@@ -33,8 +33,11 @@ ns.changelog = {
                     .. "Korean, Chinese, and Russian clients." },
                 { L.CURRENCYBAR_TITLE, "New, off by default, in Interface. A small box, styled "
                     .. "like a tooltip, showing your gold and the currencies you tick Show on "
-                    .. "Backpack in the Currency tab. Gold always shows all three coins. Options "
-                    .. "stack them in a column and set the size. Move it in Edit Mode." },
+                    .. "Backpack in the Currency tab. Only gold shows by default, always with all "
+                    .. "three coins; a checkbox adds the currencies. Hovering it lists your gold "
+                    .. "and currencies with what this session gained or spent, each with its own "
+                    .. "checkbox. Options also stack them in a column and set the size. Move it "
+                    .. "in Edit Mode." },
                 { L.AUTODECLINE_TITLE, "Party invites, off by default, turned down without the "
                     .. "invite sound. Friends and guildmates can still be let through, and chat "
                     .. "says who was declined. Duels and party invites now each have their own "
