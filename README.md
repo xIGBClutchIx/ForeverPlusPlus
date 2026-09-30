@@ -36,6 +36,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Spell Ranks | Marks the spells on your action bars that have a higher rank you already know, with a warning badge or a red tint over the button, and says the best rank in the spell's tooltip. `/fpp ranks` lists them. |
 | Recipe Colors | Colors recipes in the professions window by your chance of a skill-up: orange, yellow, green, or gray, with the row's highlight to match. |
 | Combat Alert | Floats a red "Entering Combat" or green "Leaving Combat" line up and away from the middle of the screen, each with its own checkbox, plus a size slider and how long it stays (move it in Edit Mode). Off by default. |
+| Currency Bar | Shows your gold and the currencies you tick Show on Backpack in a small tooltip-styled box, each with its own checkbox, and can stack them in a column (move it in Edit Mode). Off by default. |
 | Tooltips | Colors unit and item tooltips by class, reaction, or quality, colors the Horde or Alliance line red or blue, and adds player titles and who a unit is targeting. |
 | **Map** | |
 | Points of Interest | Shows dungeons, raids, capital cities, flight masters, boats, zeppelins, and spirit healers on the world map, each with its own checkbox, icon size, and whether it also shows on continent maps. |

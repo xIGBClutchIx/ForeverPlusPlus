@@ -6,6 +6,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Added
 
+- **Currency Bar** (new, off by default, in Interface): a small tooltip-styled box showing your gold and the currencies you tick Show on Backpack in the Currency tab. Checkboxes for the gold and the currencies, and one to stack them in a column. Move it in Edit Mode.
 - **Auto Decline** (party invites): a new option, off by default, that also turns down party invites without the invite sound. Duels and party invites now each have their own checkbox, so you can decline only one. Friends and guildmates can still be let through, and chat says who was declined.
 - **Fishing Cast** (new, off by default, in Automation): double right-click in the world with a fishing pole equipped to cast Fishing. It uses a temporary right-click binding that comes off on the next click, so looting the bobber works as usual, and it never arms in combat. A slider sets how fast the second click must follow the first.
 - **AddOns List** (new, in Interface): the AddOns list without category headers, with enabled addons first and the disabled ones after, each in name order. Options to move disabled addons out of their group and to search addon notes. Turning it off gives Blizzard's list back at once.

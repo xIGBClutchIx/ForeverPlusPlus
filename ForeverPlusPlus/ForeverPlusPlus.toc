@@ -62,6 +62,7 @@ Modules\Interface\SpellRanks.lua
 Modules\Interface\RecipeColors.lua
 Modules\Interface\CombatAlert.lua
 Modules\Interface\AddOnList.lua
+Modules\Interface\CurrencyBar.lua
 Modules\UnitFrames\ClassColors.lua
 Modules\Map\PointsOfInterest\PointsOfInterest.lua
 Modules\Map\PointsOfInterest\Data.lua

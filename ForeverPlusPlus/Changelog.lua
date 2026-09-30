@@ -13,6 +13,10 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_ADDED, {
+                { L.CURRENCYBAR_TITLE, "New, off by default, in Interface. A small "
+                    .. "tooltip-styled box showing your gold and the currencies you tick Show "
+                    .. "on Backpack in the Currency tab. Checkboxes for the gold and the "
+                    .. "currencies, and one to stack them in a column. Move it in Edit Mode." },
                 { L.AUTODECLINE_TITLE, "New option, off by default, for party invites. "
                     .. "Turns them down without the invite sound. Friends and guildmates can "
                     .. "still be let through, and chat says who was declined. Duels and party "
