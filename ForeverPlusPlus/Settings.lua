@@ -581,7 +581,7 @@ local function buildWelcome(frame)
 
     local gameVersion, build, _, interface = GetBuildInfo()
     local game = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-    game:SetPoint("BOTTOMLEFT", 16, 12)
+    game:SetPoint("TOPLEFT", 16, y - 10) -- below the command list, which grows with modules
     game:SetText(format(L.HOME_GAME_BUILD, gameVersion, build, interface))
 end
 
