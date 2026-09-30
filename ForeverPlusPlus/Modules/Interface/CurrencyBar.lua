@@ -78,8 +78,10 @@ local function update()
     end
     local list = parts()
     frame.text:SetText(tconcat(list, module.db.vertical and "\n" or "   "))
-    frame:SetSize(max(frame.text:GetStringWidth(), 24) + PAD * 2,
-        max(frame.text:GetStringHeight(), 12) + PAD * 2)
+    local scale = module.db.scale / 100
+    frame.inner:SetScale(scale)
+    frame:SetSize(max(frame.text:GetStringWidth(), 24) * scale + PAD * 2,
+        max(frame.text:GetStringHeight(), 12) * scale + PAD * 2)
 end
 
 local function place()
