@@ -10,8 +10,8 @@ local L = ns.L
 local Chat = ns.Chat
 
 local module = ns.NewModule("ChatFont", L.CHATFONT_DESC, {
-    enabled = false,
-    font = "Fonts\\ARIALN.TTF",
+    enabled = true,
+    font = "Fonts\\FRIZQT__.TTF",
 })
 module.title = L.CHATFONT_TITLE
 module.category = "chat"
