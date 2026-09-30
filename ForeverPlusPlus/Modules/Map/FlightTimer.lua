@@ -1,9 +1,9 @@
 -- Flight Timer: how long a flight takes. The game doesn't say, so every flight you take is timed
 -- and remembered by the game's flight point IDs (the same IDs Points of Interest uses), one time
 -- for each pair of flight points. The next time, a bar shows the time left as you fly, and the
--- flight map's tooltip on a flight point shows how long it will take. A flight through several
--- stops adds up the ones you know, so it also works for a route you haven't flown whole. Times
--- are saved for the whole account, since a flight is the same for every character.
+-- flight map's tooltip on a flight point shows how long it will take. Each pair is its own time:
+-- flights differ each way, and a flight with stops is not the sum of its parts. Times are saved
+-- for the whole account, since a flight is the same for every character.
 local _, ns = ...
 
 local ipairs, floor, format, max, min = ipairs, math.floor, string.format, math.max, math.min
@@ -40,11 +40,11 @@ local clock = ns.Text.Clock
 
 -- Mainline's flight master API, at a flight master: slots are what the old API counts by, node
 -- IDs are the game's own. Filled when the flight map opens.
-local nodeOfSlot, slotOfNode, nameOfNode = {}, {}, {}
+local nodeOfSlot, nameOfNode = {}, {}
 local current -- the node ID the flight master is at
 
 local function readNodes()
-    nodeOfSlot, slotOfNode, nameOfNode, current = {}, {}, {}, nil
+    nodeOfSlot, nameOfNode, current = {}, {}, nil
     if not (C_TaxiMap and C_TaxiMap.GetAllTaxiNodes and GetTaxiMapID) then
         return
     end
@@ -53,7 +53,6 @@ local function readNodes()
         if node.nodeID then
             if node.slotIndex then
                 nodeOfSlot[node.slotIndex] = node.nodeID
-                slotOfNode[node.nodeID] = node.slotIndex
             end
             nameOfNode[node.nodeID] = node.name
             if Enum.FlightPathState and node.state == Enum.FlightPathState.Current then
@@ -63,65 +62,22 @@ local function readNodes()
     end
 end
 
--- The hops of the route to a slot, each as { fromNodeID, toNodeID }, or nil when the client
--- can't say. Probe: GetNumRoutes and TaxiGetNodeSlot are the old flight master API.
-local function routeTo(slot)
-    if not (GetNumRoutes and TaxiGetNodeSlot and slot) then
-        return nil
-    end
-    local hops = {}
-    for i = 1, GetNumRoutes(slot) do
-        local from, to = nodeOfSlot[TaxiGetNodeSlot(slot, i, true)],
-            nodeOfSlot[TaxiGetNodeSlot(slot, i, false)]
-        if not (from and to) then
-            return nil
-        end
-        hops[i] = { from, to }
-    end
-    return #hops > 0 and hops or nil
-end
-
 -- The times ------------------------------------------------------------------------------------
 
 local function key(from, to)
     return from .. ">" .. to
 end
 
--- One flown pair. The other way round counts when it hasn't been flown: a flight path is the same
--- both ways.
-local function pairTime(from, to)
-    local times = module.db.times
-    local time = times[key(from, to)]
-    if time then
-        return time, true
-    end
-    return times[key(to, from)], false
-end
-
--- How long a flight from one node to another takes: seconds, and whether it's exact (this pair
--- was flown, not added up from the stops or taken from the way back), or nil.
-local function estimate(from, to, hops)
-    local time, exact = pairTime(from, to)
-    if time then
-        return time, exact
-    end
-    if not hops or #hops < 2 then
-        return nil
-    end
-    local sum = 0
-    for _, hop in ipairs(hops) do
-        local hopTime = pairTime(hop[1], hop[2])
-        if not hopTime then
-            return nil
-        end
-        sum = sum + hopTime
-    end
-    return sum, false
+-- How long the flight from one node to another takes, if it has been flown: seconds. Each way and
+-- each route is its own time, since flights differ both ways and a chained flight isn't the sum of
+-- its stops.
+local function estimate(from, to)
+    return module.db.times[key(from, to)]
 end
 
 -- The flight underway ---------------------------------------------------------------------------
 
-local flight -- { from, to, hops, name, asked, started, aborted } from asking a flight master to go
+local flight -- { from, to, total, name, asked, started, aborted } from asking a flight master to go
 
 local bar, watcher
 
@@ -230,10 +186,9 @@ local function onTake(slot)
         flight = nil
         return
     end
-    local hops = routeTo(slot)
-    local total = estimate(current, to, hops)
+    local total = estimate(current, to)
     flight = {
-        from = current, to = to, hops = hops, total = total,
+        from = current, to = to, total = total,
         name = nameOfNode[to], asked = GetTime(),
     }
     watcher:Show()
@@ -276,12 +231,12 @@ local function onTooltipShow(tooltip)
     if not (to and current) or to == current then
         return
     end
-    local time, exact = estimate(current, to, routeTo(slotOfNode[to]))
+    local time = estimate(current, to)
     if not time then
         return
     end
     adding = true
-    tooltip:AddLine(format(exact and L.FLIGHTTIMER_TIME or L.FLIGHTTIMER_TIME_ABOUT, clock(time)),
+    tooltip:AddLine(format(L.FLIGHTTIMER_TIME, clock(time)),
         1, 1, 1)
     tooltip:Show() -- to fit the new line
     adding = false

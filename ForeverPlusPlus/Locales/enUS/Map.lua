@@ -162,9 +162,8 @@ L.FLIGHTTIMER_BAR_DESC = "A bar with the time left while you fly. Move it in Edi
     .. "you haven't taken before counts up instead, and is timed for next time."
 L.FLIGHTTIMER_TOOLTIP = "Flight Map Tooltip"
 L.FLIGHTTIMER_TOOLTIP_DESC = "How long the flight takes, on a flight point's tooltip on the flight "
-    .. "map, once you have flown it. A route with stops adds up the stops you know."
+    .. "map, once you have flown it. Each route is timed on its own."
 L.FLIGHTTIMER_TIME = "Flight time: %s" -- a time like 2:05
-L.FLIGHTTIMER_TIME_ABOUT = "Flight time: about %s" -- a time like 2:05, added up from other flights
 L.FLIGHTTIMER_RESET_POSITION = "Bar Position"
 L.FLIGHTTIMER_RESET_POSITION_BUTTON = "Reset"
 L.FLIGHTTIMER_RESET_POSITION_DESC = "Puts the timer bar back where it starts."

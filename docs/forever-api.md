@@ -260,7 +260,7 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 
 - No API for how long a flight takes was found: nothing in `C_TaxiMap`'s documented functions (`GetAllTaxiNodes`, `GetTaxiNodesForMap`, `GetDestinationMap`, `ShouldMapShowTaxiNodes`), and the taxi node info has `nodeID`, `name`, `slotIndex`, `position`, `state`, `cost`, and no duration. **[web]** (Retail `TaxiMapDocumentation.lua`) Whether Forever adds one is **Unverified**; Flight Timer times flights itself and saves seconds by `fromNodeID>toNodeID`.
 - Flight Timer relies on Retail's flight master API on Forever, all **Unverified** on the live client until tried: `TakeTaxiNode(slot)`, `GetNumRoutes(slot)`, `TaxiGetNodeSlot(slot, i, fromSource)`, `TaxiRequestEarlyLanding()`, `UnitOnTaxi("player")` turning true when the flight starts, `Enum.FlightPathState.Current` on `C_TaxiMap.GetAllTaxiNodes` for where the flight master is, and the flight map pins carrying `taxiNodeData` (with `nodeID`) as the owner of `GameTooltip`. **[web]** (Retail `Blizzard_FlightMap`, from memory of the source)
-- A flight path is assumed to take as long both ways. **Unverified**
+- Flight times are not assumed equal both ways or additive over stops (Cameron, 2026-09-30, from play), so Flight Timer keeps a time per exact from and to pair. **[user]**
 - Edit Mode: `EditModeManagerFrame:EnterEditMode()` and `ExitEditMode()` are hooked, and `EditModeSystemSelectionLayout` with `NineSliceUtil.ApplyLayout` draws the selection box, as libraries like LibEditMode do. Addon frames can't join Edit Mode's saved layouts, so Flight Timer saves its own position. **[web]** **Unverified** on Forever.
 
 ## Fonts
