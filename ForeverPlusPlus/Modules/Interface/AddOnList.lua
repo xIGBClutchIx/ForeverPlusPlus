@@ -229,8 +229,16 @@ function module:OnOptionChanged()
 end
 
 -- Reports what the module sees, to check it against what the list shows.
-ns.AddCommand("addons", "", L.ADDONLIST_COMMAND, function()
+ns.AddCommand("addons", "[name]", L.ADDONLIST_COMMAND, function(rest)
     local character = (UnitName("player"))
+    if rest and rest ~= "" then
+        -- The raw answers the game gives for one addon.
+        local _, _, _, _, infoReason = C_AddOns.GetAddOnInfo(rest)
+        local _, reason = C_AddOns.IsAddOnLoadable(rest, character)
+        ns.Print(format(L.ADDONLIST_PROBE, rest, tostring(C_AddOns.GetAddOnEnableState(rest, character)),
+            tostring(C_AddOns.GetAddOnEnableState(rest)), tostring(reason), tostring(infoReason)))
+        return
+    end
     local total, off, first = 0, 0, "-"
     for index = 1, C_AddOns.GetNumAddOns() do
         local info = readAddOn(index, character)
