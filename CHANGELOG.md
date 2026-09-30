@@ -17,12 +17,13 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 - **Profession Tooltips**: when Blizzard already shows "Requires Mining (1)" on a vein, herb, or creature, that line is recolored against your skill instead of a second line being added. Ours is added only when Blizzard's is missing.
 - **Zone Info** and **Points of Interest**: map tooltips now look the same. The title is white, then what kind of place it is in gold, then details in white, with the faction in Horde red or Alliance blue on cities, flight masters, boats, and zeppelins, and level ranges colored against yours. Each dungeon and raid is one row with Blizzard's icon, in the zone panel and in an entrance with several (such as Blackrock Mountain), so a long list no longer wraps through a name or a level range.
+- **Player Nameplates**: recent allies get the Recent Allies icon beside their name by default, so their class color stays. Recent Allies is now a dropdown: Off, Colored Name (the old light blue name), or Icon.
 - **Skip Cinematics**: Forget asks you to confirm first, like the Auction Prices reset.
 
 ### Fixed
 
 - **Points of Interest**: no more second icon beside ours for Undercity, or for a dungeon or raid entrance Blizzard also marks.
-- **Player Nameplates**: no more "action blocked" error at login. Recent allies turn light blue once the game has loaded the list, such as after you open the Recent Allies tab.
+- **Player Nameplates**: no more "action blocked" error at login. Recent allies are marked once the game has loaded the list, such as after you open the Recent Allies tab.
 - **Auction Prices**: posting works while a scan runs. The scan waits its turn with the server, gives way to the auction house's own searches, pauses while an item is in the sell box, and stops if you search.
 - **Player Nameplates** and **NPC Nameplates**: the guild or title moves under the cast bar the moment it appears, and back only once it has faded, instead of lagging or overlapping it.
 - **Points of Interest**: a flight point the game calls undiscovered now says it isn't learned yet.

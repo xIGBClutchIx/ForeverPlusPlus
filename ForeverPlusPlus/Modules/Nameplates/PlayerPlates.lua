@@ -10,7 +10,7 @@ local Units = ns.Units
 
 local module = ns.NewModule("PlayerPlates", L.PLAYERPLATES_DESC, ns.FriendlyPlates.Defaults({
     nameColor = "class", -- "class" or "white"
-    recentAllies = true,
+    recentAllies = "icon", -- "off", "color" (light blue name), or "icon"
     guildNames = "always", -- "always", "hidden" (only without the bar), or "off"
     guildColor = "gray", -- "gray" or "green"
     guildHighlight = true,
@@ -28,7 +28,14 @@ module.options = {
         choices = { { "class", L.PLAYERPLATES_NAME_COLOR_CLASS }, { "white", L.PLATES_COLOR_WHITE } },
     },
     ns.PlateLabel.NameSizeOption(),
-    { key = "recentAllies", name = L.PLAYERPLATES_RECENT_ALLIES, description = L.PLAYERPLATES_RECENT_ALLIES_DESC },
+    {
+        key = "recentAllies", name = L.PLAYERPLATES_RECENT_ALLIES, description = L.PLAYERPLATES_RECENT_ALLIES_DESC,
+        choices = {
+            { "off", L.PLAYERPLATES_RECENT_ALLIES_OFF },
+            { "color", L.PLAYERPLATES_RECENT_ALLIES_COLOR },
+            { "icon", L.PLAYERPLATES_RECENT_ALLIES_ICON },
+        },
+    },
     { key = "level", name = L.PLATES_LEVEL, description = L.PLATES_LEVEL_DESC, choices = ns.PlateLabel.LEVEL_CHOICES },
     {
         key = "guildNames", name = L.PLAYERPLATES_GUILD_NAMES, description = L.PLAYERPLATES_GUILD_NAMES_DESC,
@@ -74,12 +81,17 @@ local style = { icons = true }
 
 local RECENT_ALLY = ns.Colors.RECENT_ALLY
 
-local function isRecentAlly(unit)
-    return module.db.recentAllies and Units.IsRecentAlly(unit)
+local function isRecentAlly(unit, mode)
+    return module.db.recentAllies == mode and Units.IsRecentAlly(unit)
+end
+
+-- The icon goes beside the name, so the class color stays.
+function style.ShowAllyIcon(unit)
+    return isRecentAlly(unit, "icon")
 end
 
 function style.NameColor(unit)
-    if isRecentAlly(unit) then
+    if isRecentAlly(unit, "color") then
         return RECENT_ALLY[1], RECENT_ALLY[2], RECENT_ALLY[3]
     end
     if module.db.nameColor == "class" then
@@ -91,9 +103,9 @@ function style.NameColor(unit)
     return 1, 1, 1
 end
 
--- With the bar up, the name is plain white, as Blizzard draws it, except a recent ally's.
+-- With the bar up, the name is plain white, as Blizzard draws it, except a colored recent ally's.
 function style.BarNameColor(unit)
-    if isRecentAlly(unit) then
+    if isRecentAlly(unit, "color") then
         return RECENT_ALLY[1], RECENT_ALLY[2], RECENT_ALLY[3]
     end
     return 1, 1, 1
@@ -125,7 +137,7 @@ module.notice = ns.CVars.OffNotice(module, SHOW_FRIENDLY, L.PLATES_BLIZZARD_OFF,
 local plates -- set below; the recent allies list may load after login (or change): recolor
 
 local function onRecentAllies()
-    if module.db.recentAllies then
+    if module.db.recentAllies ~= "off" then
         plates:Refresh()
     end
 end

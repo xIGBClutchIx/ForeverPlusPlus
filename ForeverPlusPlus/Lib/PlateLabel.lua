@@ -13,7 +13,8 @@
 --   style.Subtitle(unit)   the subtitle text (nil for none; may be secret) and when it shows:
 --                          "always", "hidden" (only without the bar), or "off"
 --   style.SubtitleColor(unit)  { r, g, b }
---   style.icons            true to show the group and friend icons
+--   style.icons            true to show the group, friend, and recent ally icons
+--   style.ShowAllyIcon(unit)  whether this unit gets the recent ally icon (optional)
 -- Labels are kept per Blizzard unit frame and shared by every module, since plates are pooled.
 local _, ns = ...
 
@@ -56,18 +57,20 @@ local GAP = 3 -- pixels between the name, the level, and the icons
 local SUBTITLE_SCALE = 0.9 -- the subtitle is a touch smaller than the name
 
 -- Icons ---------------------------------------------------------------------------------------
--- Friends get the Battle.net logo; group members get their role, or the Looking for Group icon.
+-- Friends get the Battle.net logo; group members get their role, or the Looking for Group icon;
+-- recent allies get the icon Blizzard's Recent Allies tab uses.
 
 -- `round` crops a spell-style icon round, like a minimap button; `role` picks that role from
--- Blizzard's round role icons.
+-- Blizzard's round role icons; `atlas` is an atlas, the first of the list this client has.
 local ART = {
+    ally = { atlases = { "friendslist-recentallies-yellow", "friendslist-recentallies" } },
     battlenet = { file = "Interface\\FriendsFrame\\Battlenet-Battleneticon" },
     looking = { file = "Interface\\Icons\\INV_Misc_GroupLooking", round = true },
     TANK = { file = "Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES", role = "TANK" },
     HEALER = { file = "Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES", role = "HEALER" },
     DAMAGER = { file = "Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES", role = "DAMAGER" },
 }
-local ORDER = { "group", "friend" }
+local ORDER = { "group", "friend", "ally" }
 local ICON_SCALE = 1.4 -- icon size against the name's font size
 local ROUND_MASK = "Interface\\CharacterFrame\\TempPortraitAlphaMask"
 
@@ -75,6 +78,8 @@ local ROUND_MASK = "Interface\\CharacterFrame\\TempPortraitAlphaMask"
 local function artFor(kind, unit, db)
     if kind == "friend" then
         return "battlenet"
+    elseif kind == "ally" then
+        return "ally"
     end
     if db.groupIcon ~= "looking" then
         local role = UnitGroupRolesAssigned and UnitGroupRolesAssigned(unit)
@@ -84,6 +89,20 @@ local function artFor(kind, unit, db)
     return "looking"
 end
 
+-- The first of an art's atlases this client has (probed: atlas names change between builds).
+local function findAtlas(art)
+    if art.atlas == nil then
+        art.atlas = false
+        for _, name in ipairs(art.atlases) do
+            if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) then
+                art.atlas = name
+                break
+            end
+        end
+    end
+    return art.atlas
+end
+
 -- Sets an icon's art; only does the work when it changed.
 local function setArt(icon, key)
     if icon.art == key then
@@ -91,8 +110,19 @@ local function setArt(icon, key)
     end
     icon.art = key
     local art = ART[key]
-    icon:SetTexture(art.file)
-    if art.role and GetTexCoordsForRoleSmallCircle then
+    if art.atlases then
+        local atlas = findAtlas(art)
+        if atlas then
+            icon:SetAtlas(atlas, false)
+        else
+            icon:SetTexture(nil)
+        end
+    else
+        icon:SetTexture(art.file)
+    end
+    if art.atlases then
+        icon:SetTexCoord(0, 1, 0, 1)
+    elseif art.role and GetTexCoordsForRoleSmallCircle then
         icon:SetTexCoord(GetTexCoordsForRoleSmallCircle(art.role))
     elseif art.round then
         icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
@@ -110,6 +140,9 @@ end
 
 local function shouldShow(kind, unit, style)
     local db = style.db
+    if kind == "ally" then
+        return style.icons and style.ShowAllyIcon and style.ShowAllyIcon(unit) or false
+    end
     if not (style.icons and db.socialIcons) then
         return false
     end

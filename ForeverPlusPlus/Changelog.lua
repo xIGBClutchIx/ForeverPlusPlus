@@ -50,6 +50,9 @@ ns.changelog = {
                     .. "the zone panel and in an entrance with several (such as Blackrock "
                     .. "Mountain), so a long list no longer wraps through a name or a level "
                     .. "range." },
+                { L.PLAYERPLATES_TITLE, "Recent allies get the Recent Allies icon beside "
+                    .. "their name by default, so their class color stays. Recent Allies is now "
+                    .. "a dropdown: Off, Colored Name (the old light blue name), or Icon." },
                 { L.SKIPCINEMATICS_TITLE, "Forget asks you to confirm first, like the Auction "
                     .. "Prices reset." },
             } },
@@ -57,7 +60,7 @@ ns.changelog = {
                 { L.POI_TITLE, "No more second icon beside ours for Undercity, or for a "
                     .. "dungeon or raid entrance Blizzard also marks." },
                 { L.PLAYERPLATES_TITLE, "No more \"action blocked\" error at login. Recent "
-                    .. "allies turn light blue once the game has loaded the list, such as after "
+                    .. "allies are marked once the game has loaded the list, such as after "
                     .. "you open the Recent Allies tab." },
                 { L.AUCTIONPRICES_TITLE, "Posting works while a scan runs. The scan waits "
                     .. "its turn with the server, gives way to the auction house's own "
