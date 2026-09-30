@@ -16,7 +16,7 @@ ns.changelog = {
                 { "Edit Mode", "Combat Alert, Currency Bar, and Flight Timer now look and work "
                     .. "like Blizzard's own frames. The box turns gold when you click it and opens "
                     .. "a small settings window with a Scale slider and Reset To Default Position. "
-                    .. "Drag to move, with snapping to the middle and edges of the screen and to "
+                    .. "Right-click for the same options. Drag to move, with snapping to the middle and edges of the screen and to "
                     .. "each other, or nudge a pixel at a time with the arrow keys. Flight Timer "
                     .. "gets a Bar Size option too." },
                 { L.CURRENCYBAR_TITLE, "New, off by default, in Interface. A small "

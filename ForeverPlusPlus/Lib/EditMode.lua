@@ -237,6 +237,30 @@ local function newSelection(frame, info)
             pick(frame)
         end
     end)
+    -- Right-click, as on Blizzard's frames: a menu with the scale and reset.
+    selection:SetScript("OnMouseUp", function(self, button)
+        if button == "RightButton" and MenuUtil and MenuUtil.CreateContextMenu then
+            pick(frame)
+            MenuUtil.CreateContextMenu(self, function(_, root)
+                root:CreateTitle(info.label)
+                local scale = info.scale
+                if scale then
+                    local sub = root:CreateButton(L.EDITMODE_SCALE)
+                    for value = scale.min, scale.max, scale.step do
+                        sub:CreateRadio(format(scale.format or "%d%%", value),
+                            function() return scale.get() == value end,
+                            function()
+                                scale.set(value)
+                                EditMode.Refresh()
+                            end)
+                    end
+                end
+                if info.reset then
+                    root:CreateButton(L.EDITMODE_RESET_POSITION, function() call(info.reset) end)
+                end
+            end)
+        end
+    end)
     selection:SetScript("OnDragStart", function() pick(frame) dragStart(frame, info) end)
     selection:SetScript("OnDragStop", function() dragStop(frame, info) end)
     -- Arrow keys nudge the selected frame a pixel; every other key goes on to the game.
