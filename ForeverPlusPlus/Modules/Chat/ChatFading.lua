@@ -19,11 +19,11 @@ local original = setmetatable({}, { __mode = "k" })
 ---Stops a window's text fading out.
 ---@param frame table
 local function apply(frame)
-    if not (frame.SetFading and frame.IsFading) then
+    if not (frame.SetFading and frame.GetFading) then
         return
     end
     if original[frame] == nil then
-        original[frame] = frame:IsFading() and true or false
+        original[frame] = frame:GetFading() and true or false
     end
     frame:SetFading(false)
 end
