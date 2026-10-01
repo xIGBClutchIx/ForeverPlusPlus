@@ -470,7 +470,8 @@ function PlateLabel.Layout(label, record, unit, style)
     barRow:SetPoint("LEFT", label, "LEFT")
     barRow:SetPoint("RIGHT", label, "RIGHT")
     label.barName:ClearAllPoints()
-    label.barName:SetPoint("BOTTOM", barRow, "TOP", (iconsLeft and 1 or -1) * barIconsWidth / 2, 2)
+    label.barNameShift = (iconsLeft and 1 or -1) * barIconsWidth / 2
+    label.barName:SetPoint("BOTTOM", barRow, "TOP", label.barNameShift, 2)
     local leftWidth, rightWidth = 0, 0
     if levelLeft then
         leftWidth = levelWidth

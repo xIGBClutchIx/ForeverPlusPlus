@@ -69,9 +69,10 @@ end
 
 -- Blizzard's buff row (UnitFrame.AurasFrame.BuffListFrame) sits beside the bar, to the left of its
 -- classification icon, so on a name-only plate it floats far left of the name. There it moves to
--- the module's Buffs setting (`buffs`): above the whole row (level, name, and icons), or beside it
--- past the level and icons, so it never covers them. The subtitle and cast bar are below the
--- name, so neither choice reaches them. The buff row sizes itself to its icons.
+-- the module's Buffs setting (`buffs`): above the whole row (level, name, and icons; and above the
+-- bar view's name while the bar shows), or beside it past the level, icons, and guild/title line,
+-- so it never covers them. Beside, it goes back beside the bar while the bar shows. The buff row
+-- sizes itself to its icons.
 -- The row is a restricted region: its anchors can be set but never read, so we put back
 -- Blizzard's anchor from its XML (Blizzard_NamePlates.xml; Lua never changes it). pcall, so a
 -- client that refuses the anchor can't stop the fade around it.
@@ -82,18 +83,51 @@ local BUFF_SIDE_GAP = 4
 -- moved it inward on Forever, so the icon isn't where its XML suggests.)
 local BUFF_BAR_GAP = 8
 
+local aboveCurves = {} -- "hurt:full" -> a health curve giving the above row's y offset
+
+-- How far the bar view's name (above the bar) sits above the name-only one, from sizes alone:
+-- positions can't be read here, the plate's frames anchor to restricted ones.
+local function nameRise(label)
+    local ok, rowHeight = pcall(label.row.GetHeight, label.row)
+    if not ok then
+        return 0
+    end
+    local barHeight, nameHeight = label.barName:GetStringHeight(), label.name:GetStringHeight()
+    if not (readable(rowHeight) and readable(barHeight) and readable(nameHeight)) then
+        return 0
+    end
+    local barTop = rowHeight / 2 + 2 + barHeight -- see PlateLabel.Layout
+    local nameTop = label.subtitle:IsShown() and 1 + nameHeight or nameHeight / 2
+    return max(barTop - nameTop, 0)
+end
+
 ---@param where string "above", "before", "after", "bar" (beside the bar), or "blizzard"
 ---(Blizzard's own anchor, for giving the plate back)
-local function anchorBuffs(record, where)
+---@param unit string?
+---@param state string? for "above": "bar" (showing), "name" (hidden), or "unsure" (it shows when
+---the unit is hurt, but its health can't be read: the client picks the height from it)
+local function anchorBuffs(record, where, unit, state)
     local buffs, label = record.buffs, record.label
     if not (buffs and record.classification and label) then
         return
     end
-    local x
+    local x, y
     local shift = label.nameShift or 0
     if where == "above" then
-        -- The name sits off the row's center by its shift; undo it to center on the row.
-        x = -shift
+        -- Above the bar view's name, centered on the row; on a name-only plate, lowered to just
+        -- above our name. Unsure, the client lowers it from the health (a secret we can't read).
+        x = -(label.barNameShift or 0)
+        local rise = nameRise(label)
+        if state == "bar" then
+            y = BUFF_ABOVE_GAP
+        elseif state == "unsure" and unit and curve then
+            local key = BUFF_ABOVE_GAP .. ":" .. (BUFF_ABOVE_GAP - rise)
+            aboveCurves[key] = aboveCurves[key] or ns.HealthStepCurve(BUFF_ABOVE_GAP,
+                BUFF_ABOVE_GAP - rise)
+            y = UnitHealthPercent(unit, true, aboveCurves[key])
+        else
+            y = BUFF_ABOVE_GAP - rise
+        end
     elseif where == "before" or where == "after" then
         -- Past the level and icons on that side, or past the guild/title line under the name if
         -- that reaches further (it's centered on the row, and often longer than the name).
@@ -108,15 +142,23 @@ local function anchorBuffs(record, where)
         end
         x = (before and -1 or 1) * (reach + BUFF_SIDE_GAP)
     end
-    -- Untouched plates stay untouched, and an unchanged spot isn't set again.
-    if (record.buffsWhere or "blizzard") == where and record.buffsX == x then
+    -- Untouched plates stay untouched, and an unchanged spot isn't set again (a secret height
+    -- can't be compared, so that one is always set).
+    local secretY = y ~= nil and not readable(y)
+    if not secretY and (record.buffsWhere or "blizzard") == where and record.buffsX == x
+        and record.buffsY == y then
         return
     end
-    record.buffsWhere, record.buffsX = where, x
+    record.buffsWhere, record.buffsX, record.buffsY = where, x, (not secretY) and y or nil
     pcall(function()
         buffs:ClearAllPoints()
         if where == "above" then
-            buffs:SetPoint("BOTTOM", label.name, "TOP", x, BUFF_ABOVE_GAP)
+            -- A client that won't take a secret offset gets the bar view's height: clear of the
+            -- bar, a little high over a name-only plate.
+            local target = label.barName
+            if not (secretY and pcall(buffs.SetPoint, buffs, "BOTTOM", target, "TOP", x, y)) then
+                buffs:SetPoint("BOTTOM", target, "TOP", x, secretY and BUFF_ABOVE_GAP or y)
+            end
         elseif where == "before" then
             buffs:SetPoint("RIGHT", label.name, "LEFT", x, 0)
         elseif where == "after" then
@@ -206,7 +248,7 @@ function Plates:Layout(unit)
         PlateLabel.Layout(record.label, record, unit, self.style)
         -- The name, level, or icons may have moved; keep the buffs placed against them.
         if record.buffsWhere and record.buffsWhere ~= "blizzard" then
-            anchorBuffs(record, record.buffsWhere)
+            self:PlaceBuffs(unit, record.buffsInCombat)
         end
     end
 end
@@ -242,15 +284,39 @@ function Plates:Fade(unit)
         label.barFrame:SetAlpha(shown)
         label:SetAlpha(hidden)
     end
-    -- Whether the bar is surely hidden, for the buff row. The alpha above can be secret, so this
-    -- asks again in plain terms. Friendly health reads as secret even out of combat; only health
-    -- we can read as below full counts as the bar showing.
-    local nameOnly = not inCombat
-    if nameOnly and self.module.db.barWhenHurt then
-        local health, maxHealth = UnitHealth(unit), UnitHealthMax(unit)
-        nameOnly = not (readable(health) and readable(maxHealth) and health < maxHealth)
+    self:PlaceBuffs(unit, inCombat)
+end
+
+-- Places the buff row for the bar's state. The alpha in Fade can be secret, so this asks again in
+-- plain terms: "bar", "name", or "unsure". Friendly health reads as secret even out of combat,
+-- so a plate that shows its bar when hurt is usually unsure.
+function Plates:PlaceBuffs(unit, inCombat)
+    local record = self.records[unit]
+    if not record then
+        return
     end
-    anchorBuffs(record, nameOnly and self.module.db.buffs or "bar")
+    local db = self.module.db
+    local state
+    if inCombat or not curve and db.barWhenHurt then
+        state = "bar"
+    elseif not db.barWhenHurt then
+        state = "name"
+    else
+        local health, maxHealth = UnitHealth(unit), UnitHealthMax(unit)
+        if readable(health) and readable(maxHealth) then
+            state = health < maxHealth and "bar" or "name"
+        else
+            state = "unsure"
+        end
+    end
+    record.buffsInCombat = inCombat
+    local where = db.buffs
+    -- Beside the name would sit on the bar. (Unsure, it stays beside the name: that's the usual
+    -- case on a name-only plate, and a sideways move can't follow a secret like a height can.)
+    if where ~= "above" and where ~= "blizzard" and state == "bar" then
+        where = "bar"
+    end
+    anchorBuffs(record, where, unit, state)
 end
 
 function Plates:Add(unit, frame)
