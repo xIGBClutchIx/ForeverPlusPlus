@@ -66,7 +66,7 @@ local function fadeLevel(record, alpha)
     end
 end
 
--- The aura row (Blizzard's AurasFrame, Forever build 70009 name; may be nil elsewhere) is anchored
+-- The aura row (AurasFrame.BuffListFrame and DebuffListFrame; may be nil elsewhere) is anchored
 -- under the bar's width, which sits left of center. On a name-only plate it centers over our name
 -- instead. Blizzard re-anchors it as auras change, so a hook puts ours back while it's centered.
 -- plate's aura frame -> { label, points = Blizzard's anchors, busy } while we hold it
@@ -91,20 +91,15 @@ local function onAurasPoint(auras)
     end
 end
 
--- Centers the plate's aura row over our label (or gives it back to Blizzard's anchors).
-local function centerAuras(record, on)
-    local auras = record.auras
-    if not auras then
-        return
-    end
+local function centerFrame(auras, label, on)
     local held = centered[auras]
-    if on and record.label then
+    if on and label then
         if not held then
             local points = {}
             for i = 1, auras:GetNumPoints() do
                 points[i] = { auras:GetPoint(i) }
             end
-            held = { label = record.label, points = points }
+            held = { label = label, points = points }
             centered[auras] = held
             if not hookedAuras[auras] then
                 hookedAuras[auras] = true
@@ -117,6 +112,15 @@ local function centerAuras(record, on)
         auras:ClearAllPoints()
         for _, point in ipairs(held.points) do
             auras:SetPoint(point[1], point[2], point[3], point[4], point[5])
+        end
+    end
+end
+
+-- Centers the plate's buff and debuff rows over our label (or gives them back to Blizzard's).
+local function centerAuras(record, on)
+    if record.auras then
+        for _, list in ipairs(record.auras) do
+            centerFrame(list, record.label, on)
         end
     end
 end
@@ -248,7 +252,14 @@ function Plates:Add(unit, frame)
         record.levelFrame = parts.level
         record.levelDiffFrame = parts.levelDiff
         record.castBar = parts.castBar
-        record.auras = frame.AurasFrame
+        -- Frame Stack on Forever: UnitFrame.AurasFrame.BuffListFrame holds the buff icons.
+        local auras = frame.AurasFrame
+        if auras then
+            record.auras = {}
+            for _, list in ipairs({ auras.BuffListFrame, auras.DebuffListFrame }) do
+                record.auras[#record.auras + 1] = list
+            end
+        end
         record.label = PlateLabel.Show(frame)
         hookName(name)
         mirrored[name] = { self, unit }
