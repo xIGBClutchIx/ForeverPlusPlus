@@ -10,7 +10,8 @@ local L = ns.L
 
 ns.changelog = {
     {
-        version = L.CHANGELOG_UNRELEASED,
+        version = "0.5.0",
+        date = "2026-10-01",
         sections = {
             { L.CHANGELOG_ADDED, {
                 { L.CHATFADING_TITLE, "New, off by default, in Chat: keeps chat text on screen "
