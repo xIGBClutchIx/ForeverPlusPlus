@@ -66,6 +66,61 @@ local function fadeLevel(record, alpha)
     end
 end
 
+-- The aura row (Blizzard's AurasFrame, Forever build 70009 name; may be nil elsewhere) is anchored
+-- under the bar's width, which sits left of center. On a name-only plate it centers over our name
+-- instead. Blizzard re-anchors it as auras change, so a hook puts ours back while it's centered.
+-- plate's aura frame -> { label, points = Blizzard's anchors, busy } while we hold it
+local centered = setmetatable({}, weak)
+local hookedAuras = setmetatable({}, weak)
+
+local function holdAuras(auras)
+    local held = centered[auras]
+    if not held then
+        return
+    end
+    held.busy = true
+    auras:ClearAllPoints()
+    auras:SetPoint("BOTTOM", held.label.name, "TOP", 0, 4)
+    held.busy = false
+end
+
+local function onAurasPoint(auras)
+    local held = centered[auras]
+    if held and not held.busy then
+        holdAuras(auras)
+    end
+end
+
+-- Centers the plate's aura row over our label (or gives it back to Blizzard's anchors).
+local function centerAuras(record, on)
+    local auras = record.auras
+    if not auras then
+        return
+    end
+    local held = centered[auras]
+    if on and record.label then
+        if not held then
+            local points = {}
+            for i = 1, auras:GetNumPoints() do
+                points[i] = { auras:GetPoint(i) }
+            end
+            held = { label = record.label, points = points }
+            centered[auras] = held
+            if not hookedAuras[auras] then
+                hookedAuras[auras] = true
+                hooksecurefunc(auras, "SetPoint", onAurasPoint)
+            end
+        end
+        holdAuras(auras)
+    elseif held then
+        centered[auras] = nil
+        auras:ClearAllPoints()
+        for _, point in ipairs(held.points) do
+            auras:SetPoint(point[1], point[2], point[3], point[4], point[5])
+        end
+    end
+end
+
 ---Friendly plates for one module (see the top of this file).
 ---@param module table
 ---@param spec table players, cvars, style
@@ -155,16 +210,21 @@ function Plates:Fade(unit)
         inCombat = UnitAffectingCombat("player")
     end
     local shown, hidden
+    local nameOnly = false
     if inCombat then
         shown, hidden = 1, 0
     elseif not self.module.db.barWhenHurt then
         shown, hidden = 0, 1
+        nameOnly = true
     elseif not curve then
         shown, hidden = 1, 0
     else
         -- The percent can be secret in combat, so the client maps it to an alpha, not Lua.
         shown, hidden = UnitHealthPercent(unit, true, curve), UnitHealthPercent(unit, true, inverse)
+        -- Only a readable full-health reading counts as name-only; a secret one keeps Blizzard's row.
+        nameOnly = readable(shown) and shown == 0
     end
+    centerAuras(record, nameOnly)
     record.container:SetAlpha(shown)
     local label = record.label
     if label then
@@ -188,6 +248,7 @@ function Plates:Add(unit, frame)
         record.levelFrame = parts.level
         record.levelDiffFrame = parts.levelDiff
         record.castBar = parts.castBar
+        record.auras = frame.AurasFrame
         record.label = PlateLabel.Show(frame)
         hookName(name)
         mirrored[name] = { self, unit }
@@ -204,6 +265,7 @@ function Plates:Remove(unit)
         return
     end
     self.records[unit] = nil
+    centerAuras(record, false)
     record.container:SetAlpha(1)
     fadeLevel(record, 1)
     if record.name then
