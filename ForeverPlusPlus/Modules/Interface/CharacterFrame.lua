@@ -12,7 +12,7 @@ local L = ns.L
 local Colors = ns.Colors
 
 local module = ns.NewModule("CharacterFrame", L.CHARACTERFRAME_DESC, {
-    enabled = false,
+    enabled = true,
     sideTabs = true,
     colorTitle = true,
 })
