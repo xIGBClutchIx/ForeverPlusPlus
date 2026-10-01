@@ -10,6 +10,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Changed
 
+- **Hide Beta Feedback**: also hides the beta's feedback buttons on quest windows (quest, gossip, and quest log), with its own checkbox.
 - **Quest Nameplates**: the icon matches the objective: Blizzard's attack, pickup, or interact icon for kill, item, or object objectives, and the quest icon for the rest.
 
 ## 0.4.0 (2026-09-30)

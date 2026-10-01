@@ -17,6 +17,8 @@ ns.changelog = {
                     .. "instead of fading it out after a while." },
             } },
             { L.CHANGELOG_CHANGED, {
+                { L.HIDEFEEDBACK_TITLE, "Also hides the beta's feedback buttons on quest windows "
+                    .. "(quest, gossip, and quest log), with its own checkbox." },
                 { L.QUESTPLATES_TITLE, "The icon matches the objective: Blizzard's attack, pickup, "
                     .. "or interact icon for kill, item, or object objectives, and the quest icon "
                     .. "for the rest." },

@@ -1,11 +1,11 @@
 -- Hide Beta Feedback: takes the beta's "Press F6 to submit an issue for this Item" line off
 -- tooltips and hides its floating bug report button. F6 still reports an issue; only the
--- reminder and the button go. Off by default, so players keep sending beta feedback.
+-- reminder, the button, and the feedback buttons on quest windows go. Off by default, so players keep sending beta feedback.
 local _, ns = ...
 
 local _G, type, pairs, ipairs, setmetatable = _G, type, pairs, ipairs, setmetatable
 local find, gsub = string.find, string.gsub
-local hooksecurefunc = hooksecurefunc
+local hooksecurefunc, C_Timer = hooksecurefunc, C_Timer
 
 local L = ns.L
 
@@ -13,6 +13,7 @@ local module = ns.NewModule("HideFeedback", L.HIDEFEEDBACK_DESC, {
     enabled = false,
     tooltip = true, -- hide the "Press F6" reminder on tooltips
     button = true, -- hide the floating bug report button
+    quest = true, -- hide the feedback widgets on quest windows
 })
 module.title = L.HIDEFEEDBACK_TITLE
 module.category = "interface"
@@ -20,6 +21,7 @@ module.category = "interface"
 module.options = {
     { key = "tooltip", name = L.HIDEFEEDBACK_TOOLTIP, description = L.HIDEFEEDBACK_TOOLTIP_DESC },
     { key = "button", name = L.HIDEFEEDBACK_BUTTON, description = L.HIDEFEEDBACK_BUTTON_DESC },
+    { key = "quest", name = L.HIDEFEEDBACK_QUEST, description = L.HIDEFEEDBACK_QUEST_DESC },
 }
 
 -- Only test clients (the beta, a PTR) have the feedback code. Probe: IsBetaBuild and
@@ -175,6 +177,92 @@ local function showButton()
     end
 end
 
+-- Quest frames. The reporter has a quest setup (`Setup*Tooltips`), and the feedback widgets it
+-- puts on quest windows aren't known by name: Unverified in game, so every child of the quest
+-- frames whose name mentions the reporter or feedback is hidden, and anything else is left alone.
+local QUEST_FRAMES = { "QuestFrame", "GossipFrame", "QuestLogPopupDetailFrame", "QuestMapFrame" }
+local QUEST_EVENTS = { "QUEST_DETAIL", "QUEST_PROGRESS", "QUEST_COMPLETE", "GOSSIP_SHOW" }
+local MAX_DEPTH = 4
+local questHidden = setmetatable({}, { __mode = "k" }) -- widget -> alpha it had
+
+local function isFeedbackName(name)
+    if type(name) ~= "string" then
+        return false
+    end
+    return find(name, "PTR", 1, true) ~= nil or find(name, "IssueReport", 1, true) ~= nil
+        or find(name, "Feedback", 1, true) ~= nil or find(name, "BugReport", 1, true) ~= nil
+end
+
+local function hideQuestWidget(widget)
+    if questHidden[widget] == nil and widget.GetAlpha and widget.SetAlpha then
+        questHidden[widget] = widget:GetAlpha()
+    end
+    if widget.SetAlpha then
+        widget:SetAlpha(0)
+    end
+    if widget.EnableMouse then
+        widget:EnableMouse(false)
+    end
+end
+
+local function scanQuest(frame, depth)
+    if type(frame) ~= "table" or not frame.GetChildren then
+        return
+    end
+    for _, child in ipairs({ frame:GetChildren() }) do
+        local name = child.GetName and child:GetName()
+        if isFeedbackName(name) then
+            hideQuestWidget(child)
+        elseif depth < MAX_DEPTH then
+            scanQuest(child, depth + 1)
+        end
+    end
+end
+
+local function hideQuestFeedback()
+    if not (module.enabled and module.db.quest) then
+        return
+    end
+    for _, name in ipairs(QUEST_FRAMES) do
+        scanQuest(_G[name], 1)
+    end
+end
+
+-- Puts back what was hidden.
+local function showQuestFeedback()
+    for widget, alpha in pairs(questHidden) do
+        widget:SetAlpha(alpha)
+        if widget.EnableMouse then
+            widget:EnableMouse(true)
+        end
+        questHidden[widget] = nil
+    end
+end
+
+local function onQuestEvent()
+    -- The reporter adds its widgets as the window opens; look once it has.
+    C_Timer.After(0, hideQuestFeedback)
+end
+
+local function setupQuest()
+    for _, name in ipairs(QUEST_FRAMES) do
+        local frame = _G[name]
+        if frame and frame.HookScript then
+            module:HookScript(frame, "OnShow", onQuestEvent)
+        end
+    end
+    for _, event in ipairs(QUEST_EVENTS) do
+        module:On(event, onQuestEvent)
+    end
+    -- The quest log lives in the world map, which loads on demand.
+    ns.AddOns.WhenLoaded("Blizzard_WorldMap", function()
+        if module.enabled and _G.QuestMapFrame and _G.QuestMapFrame.HookScript then
+            module:HookScript(_G.QuestMapFrame, "OnShow", onQuestEvent)
+        end
+    end)
+    hideQuestFeedback()
+end
+
 -- The feedback code may load after Forever++; wait for it while the module is on.
 local function onLoad()
     if setupReporter() then
@@ -185,6 +273,9 @@ local function onLoad()
 end
 
 function module:OnEnable()
+    if self.db.quest then
+        setupQuest()
+    end
     if reporter or setupReporter() then
         hideButton()
     else
@@ -196,11 +287,18 @@ end
 function module:OnDisable()
     -- The hooks stay, but do nothing while the module is off.
     showButton()
+    showQuestFeedback()
 end
 
--- The tooltip setting takes effect on the next tooltip; the button one right away.
+-- The tooltip setting takes effect on the next tooltip; the button and quest ones right away.
 function module:OnOptionChanged(key)
-    if key == "button" and self.enabled then
+    if key == "quest" and self.enabled then
+        if self.db.quest then
+            setupQuest()
+        else
+            showQuestFeedback()
+        end
+    elseif key == "button" and self.enabled then
         if self.db.button then
             hideButton()
         else

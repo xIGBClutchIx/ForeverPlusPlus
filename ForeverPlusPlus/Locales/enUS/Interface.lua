@@ -68,6 +68,8 @@ L.HIDEFEEDBACK_TOOLTIP = "Hide Tooltip Reminder"
 L.HIDEFEEDBACK_TOOLTIP_DESC = "Hide the \"Press F6 to submit an issue\" line on tooltips."
 L.HIDEFEEDBACK_BUTTON = "Hide Bug Report Button"
 L.HIDEFEEDBACK_BUTTON_DESC = "Hide the floating bug report button."
+L.HIDEFEEDBACK_QUEST = "Hide Quest Feedback"
+L.HIDEFEEDBACK_QUEST_DESC = "Hide the feedback buttons on quest windows."
 
 -- AutoScreenshot
 L.AUTOSCREENSHOT_TITLE = "Auto Screenshot"
