@@ -21,6 +21,10 @@ ns.changelog = {
             { L.CHANGELOG_CHANGED, {
                 { L.CHATFADING_TITLE, "Renamed from Chat Fading, and now on by default." },
             } },
+            { L.CHANGELOG_FIXED, {
+                { L.FISHINGCAST_TITLE, "The second right-click now casts Fishing; the cast is "
+                    .. "set up when the first click is released." },
+            } },
         },
     },
     {

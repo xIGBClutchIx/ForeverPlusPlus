@@ -8,7 +8,7 @@ local _, ns = ...
 local GetTime, InCombatLockdown, CreateFrame = GetTime, InCombatLockdown, CreateFrame
 local SetOverrideBindingSpell, ClearOverrideBindings = SetOverrideBindingSpell, ClearOverrideBindings
 local GetInventoryItemID, UnitExists, GetUnitSpeed = GetInventoryItemID, UnitExists, GetUnitSpeed
-local C_Item, C_Spell, WorldFrame = C_Item, C_Spell, WorldFrame
+local C_Item, C_Spell, C_Timer, WorldFrame = C_Item, C_Spell, C_Timer, WorldFrame
 local GetMouseFoci, GetMouseFocus, UnitChannelInfo = GetMouseFoci, GetMouseFocus, UnitChannelInfo
 
 local L = ns.L
@@ -32,7 +32,6 @@ module.options = {
 local MAINHAND = 16
 local POLE_CLASS, POLE_SUBCLASS = 2, 20 -- weapons: fishing poles
 local FISHING = 131474 -- the Fishing spell; 7620 is the older ID for it
-local MIN_GAP = 0.05 -- seconds; a faster second click is a bounce, not a double click
 
 local button -- our secure button, made on first enable (a frame can't be removed)
 local lastClick = 0
@@ -71,12 +70,18 @@ local function arm()
     end
 end
 
--- Runs before the game handles the click, so arming here catches this same second click.
+-- The first right-click is only noted; the binding goes on when it is released, so it is already
+-- in place when the second press comes (arming during the press itself was too late for the game
+-- to see it). A timer takes it off again if no second click follows.
 local function onMouseDown(_, buttonName)
     if InCombatLockdown() then
         return
     end
-    disarm()
+    if armed then
+        -- This is the second click: leave the binding for it; the cast start removes it.
+        lastClick = 0
+        return
+    end
     if buttonName ~= "RightButton" then
         lastClick = 0
         return
@@ -86,14 +91,23 @@ local function onMouseDown(_, buttonName)
         lastClick = 0
         return
     end
-    local now = GetTime()
-    local gap = now - lastClick
-    if gap > MIN_GAP and gap < module.db.speed / 1000 then
-        lastClick = 0
-        arm()
-    else
-        lastClick = now
+    lastClick = GetTime()
+end
+
+local function onMouseUp(_, buttonName)
+    if InCombatLockdown() or armed or buttonName ~= "RightButton" or lastClick == 0 then
+        return
     end
+    local window = module.db.speed / 1000
+    if GetTime() - lastClick >= window then
+        lastClick = 0
+        return
+    end
+    arm()
+    C_Timer.After(window, function()
+        lastClick = 0
+        disarm()
+    end)
 end
 
 -- The cast has started: take the binding off so the next right-click is an ordinary one.
@@ -109,6 +123,7 @@ function module:OnEnable()
     end
     lastClick = 0
     self:On("GLOBAL_MOUSE_DOWN", onMouseDown)
+    self:On("GLOBAL_MOUSE_UP", onMouseUp)
     self:On("UNIT_SPELLCAST_CHANNEL_START", onCastStart)
     self:On("UNIT_SPELLCAST_START", onCastStart)
     -- Combat starts: never leave a right-click casting Fishing; if the lockdown already began,
