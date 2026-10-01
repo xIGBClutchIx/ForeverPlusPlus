@@ -19,6 +19,7 @@ local _, ns = ...
 local pairs, ipairs, setmetatable, hooksecurefunc = pairs, ipairs, setmetatable, hooksecurefunc
 local UnitIsPlayer, UnitIsFriend, UnitIsUnit = UnitIsPlayer, UnitIsFriend, UnitIsUnit
 local UnitAffectingCombat, UnitHealthPercent = UnitAffectingCombat, UnitHealthPercent
+local UnitHealth, UnitHealthMax, pcall = UnitHealth, UnitHealthMax, pcall
 
 local readable = ns.IsReadable
 local Nameplates, PlateLabel = ns.Nameplates, ns.PlateLabel
@@ -64,6 +65,31 @@ local function fadeLevel(record, alpha)
     if record.levelDiffFrame then
         record.levelDiffFrame:SetAlpha(alpha)
     end
+end
+
+-- Blizzard's buff row (UnitFrame.AurasFrame.BuffListFrame) sits beside the bar, to the left of its
+-- classification icon, so on a name-only plate it floats far left of the name. There it moves
+-- above our name instead, centered (the row sizes itself to its icons). The row is a restricted
+-- region: its anchors can be set but never read, so we put back Blizzard's anchor from its XML
+-- (Blizzard_NamePlates.xml; Lua never changes it). pcall, so a client that refuses the anchor
+-- can't stop the fade around it.
+local BUFF_GAP = 2
+
+local function anchorBuffs(record, nameOnly)
+    local buffs, label = record.buffs, record.label
+    local centered = record.buffsCentered or false
+    if not (buffs and record.classification and label) or centered == nameOnly then
+        return
+    end
+    record.buffsCentered = nameOnly
+    pcall(function()
+        buffs:ClearAllPoints()
+        if nameOnly then
+            buffs:SetPoint("BOTTOM", label.name, "TOP", 0, BUFF_GAP)
+        else
+            buffs:SetPoint("RIGHT", record.classification, "LEFT", -5, 0)
+        end
+    end)
 end
 
 ---Friendly plates for one module (see the top of this file).
@@ -174,6 +200,15 @@ function Plates:Fade(unit)
         label.barFrame:SetAlpha(shown)
         label:SetAlpha(hidden)
     end
+    -- Whether the bar is surely hidden, for the buff row. The alpha above can be secret, so this
+    -- asks again in plain terms. Friendly health reads as secret even out of combat; only health
+    -- we can read as below full counts as the bar showing.
+    local nameOnly = not inCombat
+    if nameOnly and self.module.db.barWhenHurt then
+        local health, maxHealth = UnitHealth(unit), UnitHealthMax(unit)
+        nameOnly = not (readable(health) and readable(maxHealth) and health < maxHealth)
+    end
+    anchorBuffs(record, nameOnly)
 end
 
 function Plates:Add(unit, frame)
@@ -188,6 +223,8 @@ function Plates:Add(unit, frame)
         record.levelFrame = parts.level
         record.levelDiffFrame = parts.levelDiff
         record.castBar = parts.castBar
+        record.buffs = parts.buffs
+        record.classification = parts.classification
         record.label = PlateLabel.Show(frame)
         hookName(name)
         mirrored[name] = { self, unit }
@@ -204,6 +241,7 @@ function Plates:Remove(unit)
         return
     end
     self.records[unit] = nil
+    anchorBuffs(record, false)
     record.container:SetAlpha(1)
     fadeLevel(record, 1)
     if record.name then

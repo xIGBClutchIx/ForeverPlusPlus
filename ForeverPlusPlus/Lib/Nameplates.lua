@@ -201,9 +201,14 @@ end
 ---never to the nameplate base (plate) above it: that fails with "anchor family connection" on
 ---12.x and breaks Blizzard's own anchors on the plate.
 ---@param frame table plate.UnitFrame
----@return table parts name, container (the health bar's frame), healthBar, level, levelDiff, castBar
+---@return table parts name, container (the health bar's frame), healthBar, level, levelDiff,
+---castBar, buffs, classification
 function Nameplates.Parts(frame)
+    local auras = frame.AurasFrame
     return {
+        -- The buff row beside the bar (a restricted region: set its anchors, never read them).
+        buffs = auras and auras.BuffListFrame,
+        classification = frame.ClassificationFrame, -- the buff row's anchor
         name = frame.name or frame.Name,
         container = frame.HealthBarsContainer or frame.healthBar,
         healthBar = frame.healthBar,
