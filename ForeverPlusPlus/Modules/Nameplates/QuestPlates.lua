@@ -16,6 +16,7 @@ local module = ns.NewModule("QuestPlates", L.QUESTPLATES_DESC, {
     enabled = true,
     progress = "count", -- "count" (3/8), "remaining" (5), or "off" (just the icon)
     completed = true, -- keep a green check on creatures whose objective is done
+    completedCount = true, -- and its final count beside it
     side = "left", -- which side of the bar: "left" or "right"
     size = 100, -- a percent
 })
@@ -32,6 +33,10 @@ module.options = {
         },
     },
     { key = "completed", name = L.QUESTPLATES_COMPLETED, description = L.QUESTPLATES_COMPLETED_DESC },
+    {
+        key = "completedCount", name = L.QUESTPLATES_COMPLETEDCOUNT, description = L.QUESTPLATES_COMPLETEDCOUNT_DESC,
+        requires = "completed",
+    },
     {
         key = "side", name = L.QUESTPLATES_SIDE, description = L.QUESTPLATES_SIDE_DESC,
         choices = { { "left", L.QUESTPLATES_SIDE_LEFT }, { "right", L.QUESTPLATES_SIDE_RIGHT } },
@@ -234,20 +239,24 @@ local function place(box, frame, current, needed, kind)
     elseif db.progress == "remaining" then
         label = max(needed - current, 0) .. (needed == 100 and "%" or "")
     end
+    if done and not db.completedCount then
+        label = nil -- just the check
+    end
     text:SetText(label or "")
     box.icon:ClearAllPoints()
     text:ClearAllPoints()
     box:ClearAllPoints()
     -- The icon sits above the count, both centered in a column as wide as the wider of the two.
+    local lift = label and LIFT or 0 -- a lone icon sits on the bar's middle
     local textWidth = label and text:GetStringWidth() or 0
     local textHeight = label and text:GetStringHeight() or 0
     box:SetSize(max(size, textWidth), size + (label and (GAP + textHeight) or 0))
     box.icon:SetPoint("TOP", box, "TOP")
     text:SetPoint("TOP", box.icon, "BOTTOM", 0, -GAP)
     if right then
-        box:SetPoint("LEFT", anchor, "RIGHT", PAD, LIFT)
+        box:SetPoint("LEFT", anchor, "RIGHT", PAD, lift)
     else
-        box:SetPoint("RIGHT", anchor, "LEFT", -PAD, LIFT)
+        box:SetPoint("RIGHT", anchor, "LEFT", -PAD, lift)
     end
     box:Show()
 end
