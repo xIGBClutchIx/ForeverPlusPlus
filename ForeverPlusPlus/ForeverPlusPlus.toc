@@ -65,6 +65,7 @@ Modules\Interface\RecipeColors.lua
 Modules\Interface\CombatAlert.lua
 Modules\Interface\AddOnList.lua
 Modules\Interface\CurrencyBar.lua
+Modules\Interface\CharacterFrame.lua
 Modules\Chat\ChatCopy.lua
 Modules\Chat\ChannelNames.lua
 Modules\Chat\ChatFont.lua
