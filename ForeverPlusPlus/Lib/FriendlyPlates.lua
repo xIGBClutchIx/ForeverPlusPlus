@@ -108,7 +108,6 @@ local function centerFrame(auras, label, on)
             end
         end
         holdAuras(auras)
-        print("DEBUG auras", auras:GetWidth(), auras:GetNumPoints(), auras:GetPoint(1))
     elseif held then
         centered[auras] = nil
         auras:ClearAllPoints()
@@ -227,12 +226,11 @@ function Plates:Fade(unit)
     else
         -- The percent can be secret in combat, so the client maps it to an alpha, not Lua.
         shown, hidden = UnitHealthPercent(unit, true, curve), UnitHealthPercent(unit, true, inverse)
-        -- Only a readable full-health reading counts as name-only; a secret one keeps Blizzard's
-        -- row. (The curve's result can be secret itself, so read the health directly.)
+        -- Friendly health reads as secret even out of combat (seen on Forever), so only a
+        -- readable reading below full health counts as the bar showing; otherwise name-only.
         local health, maxHealth = UnitHealth(unit), UnitHealthMax(unit)
-        nameOnly = readable(health) and readable(maxHealth) and health >= maxHealth
+        nameOnly = not (readable(health) and readable(maxHealth) and health < maxHealth)
     end
-    print("DEBUG fade nameOnly", nameOnly, record.auras and #record.auras)
     centerAuras(record, nameOnly)
     record.container:SetAlpha(shown)
     local label = record.label
