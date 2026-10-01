@@ -49,8 +49,9 @@ end
 -- Whether the mouse is over the world and not a window or button.
 local function overWorld()
     if GetMouseFoci then
+        -- Forever returns an empty list over the bare world, not WorldFrame.
         local foci = GetMouseFoci()
-        return foci and foci[1] == WorldFrame
+        return not foci or foci[1] == nil or foci[1] == WorldFrame
     end
     return GetMouseFocus and GetMouseFocus() == WorldFrame
 end
