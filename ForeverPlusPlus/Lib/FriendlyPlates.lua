@@ -108,6 +108,7 @@ local function centerFrame(auras, label, on)
             end
         end
         holdAuras(auras)
+        print("DEBUG auras", auras:GetWidth(), auras:GetNumPoints(), auras:GetPoint(1))
     elseif held then
         centered[auras] = nil
         auras:ClearAllPoints()
@@ -231,6 +232,7 @@ function Plates:Fade(unit)
         local health, maxHealth = UnitHealth(unit), UnitHealthMax(unit)
         nameOnly = readable(health) and readable(maxHealth) and health >= maxHealth
     end
+    print("DEBUG fade nameOnly", nameOnly, record.auras and #record.auras)
     centerAuras(record, nameOnly)
     record.container:SetAlpha(shown)
     local label = record.label
