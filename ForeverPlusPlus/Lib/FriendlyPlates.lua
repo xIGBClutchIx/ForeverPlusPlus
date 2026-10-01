@@ -77,9 +77,10 @@ end
 -- client that refuses the anchor can't stop the fade around it.
 local BUFF_ABOVE_GAP = 6
 local BUFF_SIDE_GAP = 4
--- While the bar shows: Blizzard's spot, with more room from the bar than its 5 (the
--- classification icon it's anchored past is empty on most units, leaving the row on the bar).
-local BUFF_BAR_GAP = 10
+-- While the bar shows: left of the bar itself, with room between. (Blizzard anchors past the
+-- classification icon instead, which sat the row too close; a bigger offset from that icon
+-- moved it inward on Forever, so the icon isn't where its XML suggests.)
+local BUFF_BAR_GAP = 8
 
 ---@param where string "above", "before", "after", "bar" (beside the bar), or "blizzard"
 ---(Blizzard's own anchor, for giving the plate back)
@@ -111,7 +112,7 @@ local function anchorBuffs(record, where)
         elseif where == "after" then
             buffs:SetPoint("LEFT", label.name, "RIGHT", x, 0)
         elseif where == "bar" then
-            buffs:SetPoint("RIGHT", record.classification, "LEFT", -BUFF_BAR_GAP, 0)
+            buffs:SetPoint("RIGHT", record.container, "LEFT", -BUFF_BAR_GAP, 0)
         else
             buffs:SetPoint("RIGHT", record.classification, "LEFT", -5, 0)
         end
