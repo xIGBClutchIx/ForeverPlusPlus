@@ -14,7 +14,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Fixed
 
-- **Fishing Cast**: the second right-click now casts Fishing; the cast is set up when the first click is released.
+- **Fishing Cast**: double right-click now casts Fishing; it never recognized the world under the mouse before.
 
 ## 0.5.0 (2026-10-01)
 
