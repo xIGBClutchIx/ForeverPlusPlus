@@ -44,11 +44,12 @@ local function updateTitle()
         return
     end
     local text = frame:GetTitleText()
-    text:SetText(format(L.CHARACTERFRAME_TITLE_FORMAT, UnitLevel("player"), UnitPVPName("player") or UnitName("player")))
+    -- The level in gold and the name in the class color, so the text itself is plain white.
+    local level = Colors.Text(NORMAL_FONT_COLOR, UnitLevel("player"))
+    local name = UnitPVPName("player") or UnitName("player")
     local color = Colors.Class("player")
-    if color then
-        text:SetTextColor(color:GetRGB())
-    end
+    text:SetText(format(L.CHARACTERFRAME_TITLE_FORMAT, level, color and Colors.Text(color, name) or name))
+    text:SetTextColor(1, 1, 1)
 end
 
 -- Blizzard's own title back, for when the option or the module turns off.
@@ -98,7 +99,8 @@ end
 
 local function refreshTabs()
     local frame = _G.CharacterFrame
-    local show = module.db.sideTabs and _G.PaperDollFrame:IsShown() and not collapsed()
+    local show = module.db.sideTabs and frame:IsShown()
+    local onPaperDoll = _G.PaperDollFrame:IsShown()
 
     local last
     for _, tab in ipairs(frame.ModeTabs.Tabs) do
@@ -108,6 +110,7 @@ local function refreshTabs()
     end
 
     local above, gap = last, GAP
+    local ownSelected
     for index = EQUIPMENT, PET do
         local tab = tabs[index]
         local visible = show and last and (index ~= PET or HasPetUI())
@@ -117,7 +120,9 @@ local function refreshTabs()
             tab:SetPoint("TOPLEFT", above, "BOTTOMLEFT", 0, -gap)
             above, gap = tab, 2
             local bar = frameOf(index)
-            tab:SetChecked(bar and bar:IsShown() or false)
+            local checked = onPaperDoll and bar and bar:IsShown() or false
+            ownSelected = ownSelected or checked
+            tab:SetChecked(checked)
             tab.active = _G.PAPERDOLL_SIDEBARS[index].IsActive()
             tab:SetAlpha(tab.active and 1 or 0.5)
             tab.Icon:SetDesaturated(not tab.active)
@@ -126,17 +131,35 @@ local function refreshTabs()
             end
         end
     end
+
+    -- The Character tab isn't the selected one while one of ours is.
+    if show then
+        frame.ModeTabs.CharacterTab:SetChecked(onPaperDoll and not ownSelected)
+    end
 end
 
--- A side tab shows its pane, or the stats again when its pane is already showing.
+-- A side tab opens the Character window's pane for it, and the Character tab goes back to stats.
 local function toggle(index)
-    local bar = frameOf(index)
-    _G.PaperDollFrame_SetSidebar(_G.PaperDollSidebarTabs, bar and bar:IsShown() and 1 or index)
+    local frame = _G.CharacterFrame
+    if frame:IsRightPaneCollapsed() then
+        frame:SetRightPaneCollapsed(false)
+    end
+    if not _G.PaperDollFrame:IsShown() then
+        _G.ToggleCharacter("PaperDollFrame", true)
+    end
+    _G.PaperDollFrame_SetSidebar(_G.PaperDollSidebarTabs, index)
+    refreshTabs()
+end
+
+local function onModeTabClicked(_, tab)
+    if module.db.sideTabs and tab.frameName == "PaperDollFrame" then
+        _G.PaperDollFrame_SetSidebar(_G.PaperDollSidebarTabs, 1)
+    end
 end
 
 local function makeTab(index)
     local info = _G.PAPERDOLL_SIDEBARS[index]
-    local tab = CreateFrame("Frame", nil, _G.PaperDollFrame, "LargeSideTabButtonTemplate")
+    local tab = CreateFrame("Frame", nil, _G.CharacterFrame, "LargeSideTabButtonTemplate")
     tab:EnableMouse(true)
     tab.tooltipText = info.name
     tab:Hide()
@@ -183,6 +206,10 @@ local function start()
     module:Hook("PaperDollFrame_SetSidebar", refreshTabs)
     module:Hook(_G.CharacterFrame, "RefreshRightPane", refreshTabs)
     module:Hook(_G.CharacterFrame, "UpdateTabLayout", refreshTabs)
+    module:Hook(_G.CharacterFrame, "SetSelectedModeTabByFrame", refreshTabs)
+    module:Hook(_G.CharacterFrame, "OnModeTabClicked", onModeTabClicked)
+    module:HookScript(_G.CharacterFrame, "OnShow", refreshTabs)
+    module:HookScript(_G.CharacterFrame, "OnHide", refreshTabs)
     module:Hook(_G.CharacterFrame, "UpdateTitle", updateTitle)
 
     applyHeader()
@@ -229,6 +256,7 @@ function module:OnDisable()
     for _, tab in pairs(tabs) do
         tab:Hide()
     end
+    _G.CharacterFrame.ModeTabs.CharacterTab:SetChecked(_G.PaperDollFrame:IsShown())
     restoreTitle()
 end
 
