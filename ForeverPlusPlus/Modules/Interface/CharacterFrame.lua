@@ -80,6 +80,11 @@ local function anchorPanes(up)
         else
             pane:SetPoint("TOPLEFT", host.StoneBg, "BOTTOMLEFT")
         end
+        -- The stats lists leave room at the bottom for a divider line; take most of it back so
+        -- they run further down.
+        if pane.ScrollBox and pane.ScrollBar then
+            pane.ScrollBox:SetPoint("BOTTOMRIGHT", pane, "BOTTOMRIGHT", -30, up and 8 or 30)
+        end
     end
     host.StoneBg:SetAlpha(up and 0 or 1)
 end
