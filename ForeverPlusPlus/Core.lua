@@ -348,7 +348,7 @@ local function enable(module)
     end
     module.enabled = true
     if module.OnEnable then
-        module:OnEnable()
+        call(module.OnEnable, module) -- an error here must not stop the modules after it
     end
 end
 
@@ -358,7 +358,7 @@ local function disable(module)
     end
     module.enabled = false
     if module.OnDisable then
-        module:OnDisable()
+        call(module.OnDisable, module)
     end
     offAll(module)
 end
@@ -381,7 +381,7 @@ function ns.Start()
         module.db = ns.db.modules[name]
         checkValues(module)
         if module.OnLoad then
-            module:OnLoad()
+            call(module.OnLoad, module)
         end
         if module.alwaysOn then
             module.db.enabled = true
