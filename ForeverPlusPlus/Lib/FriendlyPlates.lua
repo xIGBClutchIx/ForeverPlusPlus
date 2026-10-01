@@ -69,23 +69,27 @@ end
 
 -- Blizzard's buff row (UnitFrame.AurasFrame.BuffListFrame) sits beside the bar, to the left of its
 -- classification icon, so on a name-only plate it floats far left of the name. There it moves
--- above our name instead, centered (the row sizes itself to its icons). The row is a restricted
--- region: its anchors can be set but never read, so we put back Blizzard's anchor from its XML
--- (Blizzard_NamePlates.xml; Lua never changes it). pcall, so a client that refuses the anchor
--- can't stop the fade around it.
+-- above our name instead, centered on the whole row (level, name, and icons; the buff row sizes
+-- itself to its icons). The row is a restricted region: its anchors can be set but never read,
+-- so we put back Blizzard's anchor from its XML (Blizzard_NamePlates.xml; Lua never changes it).
+-- pcall, so a client that refuses the anchor can't stop the fade around it.
 local BUFF_GAP = 2
 
 local function anchorBuffs(record, nameOnly)
     local buffs, label = record.buffs, record.label
-    local centered = record.buffsCentered or false
-    if not (buffs and record.classification and label) or centered == nameOnly then
+    if not (buffs and record.classification and label) then
         return
     end
-    record.buffsCentered = nameOnly
+    -- The name sits off the row's center by its shift; undo it to center on the row.
+    local x = nameOnly and -(label.nameShift or 0) or nil
+    if (record.buffsCentered or false) == nameOnly and record.buffsX == x then
+        return
+    end
+    record.buffsCentered, record.buffsX = nameOnly, x
     pcall(function()
         buffs:ClearAllPoints()
         if nameOnly then
-            buffs:SetPoint("BOTTOM", label.name, "TOP", 0, BUFF_GAP)
+            buffs:SetPoint("BOTTOM", label.name, "TOP", x, BUFF_GAP)
         else
             buffs:SetPoint("RIGHT", record.classification, "LEFT", -5, 0)
         end
@@ -166,6 +170,10 @@ function Plates:Layout(unit)
     local record = self.records[unit]
     if record and record.label then
         PlateLabel.Layout(record.label, record, unit, self.style)
+        -- The name may have moved on its row; keep the buffs centered on the row.
+        if record.buffsCentered then
+            anchorBuffs(record, true)
+        end
     end
 end
 

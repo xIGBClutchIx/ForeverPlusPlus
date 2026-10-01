@@ -394,6 +394,8 @@ end
 local function placeSubtitle(label, record, unit, style, shift)
     local row = placeRow(label, record, style)
     local text, mode = style.Subtitle(unit)
+    -- How far the name sits off the row's center, so things above it can center on the whole row.
+    label.nameShift = shift
     label.name:ClearAllPoints()
     label.subtitle:ClearAllPoints()
     label.barSubtitle:ClearAllPoints()
