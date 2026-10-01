@@ -77,8 +77,12 @@ end
 -- client that refuses the anchor can't stop the fade around it.
 local BUFF_ABOVE_GAP = 6
 local BUFF_SIDE_GAP = 4
+-- While the bar shows: Blizzard's spot, with more room from the bar than its 5 (the
+-- classification icon it's anchored past is empty on most units, leaving the row on the bar).
+local BUFF_BAR_GAP = 10
 
----@param where string "above", "before", "after", or "blizzard" (Blizzard's own anchor)
+---@param where string "above", "before", "after", "bar" (beside the bar), or "blizzard"
+---(Blizzard's own anchor, for giving the plate back)
 local function anchorBuffs(record, where)
     local buffs, label = record.buffs, record.label
     if not (buffs and record.classification and label) then
@@ -106,6 +110,8 @@ local function anchorBuffs(record, where)
             buffs:SetPoint("RIGHT", label.name, "LEFT", x, 0)
         elseif where == "after" then
             buffs:SetPoint("LEFT", label.name, "RIGHT", x, 0)
+        elseif where == "bar" then
+            buffs:SetPoint("RIGHT", record.classification, "LEFT", -BUFF_BAR_GAP, 0)
         else
             buffs:SetPoint("RIGHT", record.classification, "LEFT", -5, 0)
         end
@@ -233,7 +239,7 @@ function Plates:Fade(unit)
         local health, maxHealth = UnitHealth(unit), UnitHealthMax(unit)
         nameOnly = not (readable(health) and readable(maxHealth) and health < maxHealth)
     end
-    anchorBuffs(record, nameOnly and self.module.db.buffs or "blizzard")
+    anchorBuffs(record, nameOnly and self.module.db.buffs or "bar")
 end
 
 function Plates:Add(unit, frame)
