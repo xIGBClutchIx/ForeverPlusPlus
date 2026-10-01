@@ -132,12 +132,8 @@ end
 -- when it has none, or nil when the game won't
 -- say (secret values in combat or an instance), so the plate keeps what it shows.
 local function scan(unit)
-    if C_QuestLog and C_QuestLog.UnitIsRelatedToActiveQuest then
-        local related = C_QuestLog.UnitIsRelatedToActiveQuest(unit)
-        if readable(related) and not related then
-            return false
-        end
-    end
+    -- No UnitIsRelatedToActiveQuest pre-filter: it probably says false once the objective is done,
+    -- and the check for done objectives needs the tooltip's finished lines.
     if not (C_TooltipInfo and C_TooltipInfo.GetUnit) then
         return false
     end
