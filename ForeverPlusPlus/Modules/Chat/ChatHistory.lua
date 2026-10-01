@@ -12,7 +12,7 @@ local Chat = ns.Chat
 
 local module = ns.NewModule("ChatHistory", L.CHATHISTORY_DESC, {
     lines = 100,
-    divider = true,
+    divider = false,
     saved = {}, -- chat window number -> { { text, r, g, b }, ... }
 })
 module.title = L.CHATHISTORY_TITLE
