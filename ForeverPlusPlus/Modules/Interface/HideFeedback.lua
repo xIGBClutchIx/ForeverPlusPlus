@@ -221,9 +221,14 @@ end
 
 local alertHooked = setmetatable({}, { __mode = "k" }) -- widget -> true
 
+-- Fading it out isn't enough: the alert plays an animation that sets its alpha back, so it is
+-- also hidden, and hidden again whenever the reporter shows it.
 local function hideAlert(widget)
     if module.enabled and module.db.quest then
         hideQuestWidget(widget)
+        if widget.Hide and not widget:IsForbidden() then
+            widget:Hide()
+        end
     end
 end
 
@@ -242,7 +247,7 @@ local function hideAlertFrames()
     end
     for _, widget in ipairs(found) do
         if type(widget) == "table" and widget.HookScript then
-            hideQuestWidget(widget)
+            hideAlert(widget)
             if not alertHooked[widget] then
                 alertHooked[widget] = true
                 module:HookScript(widget, "OnShow", hideAlert)
