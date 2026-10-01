@@ -19,6 +19,7 @@ local _, ns = ...
 local pairs, ipairs, setmetatable, hooksecurefunc = pairs, ipairs, setmetatable, hooksecurefunc
 local UnitIsPlayer, UnitIsFriend, UnitIsUnit = UnitIsPlayer, UnitIsFriend, UnitIsUnit
 local UnitAffectingCombat, UnitHealthPercent = UnitAffectingCombat, UnitHealthPercent
+local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
 
 local readable = ns.IsReadable
 local Nameplates, PlateLabel = ns.Nameplates, ns.PlateLabel
@@ -225,8 +226,10 @@ function Plates:Fade(unit)
     else
         -- The percent can be secret in combat, so the client maps it to an alpha, not Lua.
         shown, hidden = UnitHealthPercent(unit, true, curve), UnitHealthPercent(unit, true, inverse)
-        -- Only a readable full-health reading counts as name-only; a secret one keeps Blizzard's row.
-        nameOnly = readable(shown) and shown == 0
+        -- Only a readable full-health reading counts as name-only; a secret one keeps Blizzard's
+        -- row. (The curve's result can be secret itself, so read the health directly.)
+        local health, maxHealth = UnitHealth(unit), UnitHealthMax(unit)
+        nameOnly = readable(health) and readable(maxHealth) and health >= maxHealth
     end
     centerAuras(record, nameOnly)
     record.container:SetAlpha(shown)
