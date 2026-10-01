@@ -43,7 +43,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Short Channel Names | Shows chat channels as [1], [G], or [1. G] instead of [1. General], as number and letter ([3. T]) by default. Off by default. |
 | Chat Font | Draws the chat windows in another of the game's fonts (Friz Quadrata, Arial Narrow, Skurri, or Morpheus), keeping their size. Unavailable on Korean, Chinese, and Russian clients, whose chat font needs fallbacks. |
 | Chat Fading | Keeps chat text on screen instead of fading it out after a while. Off by default. |
-| Chat History | Keeps each chat window's latest lines when you log out or reload and shows them again at login. A slider sets how many lines. |
+| Chat History | Keeps each chat window's latest lines when you log out or reload and shows them again at login. A slider sets how many lines, and a checkbox the line that marks where it ends. |
 | Social Button | Moves the social (Quick Join) button down beside the chat window's other buttons. |
 | **Map** | |
 | Points of Interest | Shows dungeons, raids, capital cities, flight masters, boats, zeppelins, and spirit healers on the world map, each with its own checkbox, icon size, and whether it also shows on continent maps. |

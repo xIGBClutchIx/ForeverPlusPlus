@@ -33,6 +33,8 @@ L.CHATHISTORY_DESC = "Keep the chat windows' latest lines when you log out or re
 L.CHATHISTORY_LINES = "Lines Saved"
 L.CHATHISTORY_LINES_DESC = "How many of each chat window's latest lines are kept."
 L.CHATHISTORY_DIVIDER = "-- Earlier chat --"
+L.CHATHISTORY_DIVIDER_OPTION = "Earlier Chat Line"
+L.CHATHISTORY_DIVIDER_DESC = "Show a gray line between the restored chat and new chat."
 
 -- SocialButton
 L.SOCIALBUTTON_TITLE = "Social Button"

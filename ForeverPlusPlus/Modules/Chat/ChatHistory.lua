@@ -12,12 +12,14 @@ local Chat = ns.Chat
 
 local module = ns.NewModule("ChatHistory", L.CHATHISTORY_DESC, {
     lines = 100,
+    divider = true,
     saved = {}, -- chat window number -> { { text, r, g, b }, ... }
 })
 module.title = L.CHATHISTORY_TITLE
 module.category = "chat"
 
 module.options = {
+    { key = "divider", name = L.CHATHISTORY_DIVIDER_OPTION, description = L.CHATHISTORY_DIVIDER_DESC },
     {
         key = "lines",
         name = L.CHATHISTORY_LINES,
@@ -55,7 +57,9 @@ local function restore(_, isLogin, isReload)
             for _, line in ipairs(lines) do
                 frame:AddMessage(line[1], line[2], line[3], line[4])
             end
-            frame:AddMessage(L.CHATHISTORY_DIVIDER, 0.6, 0.6, 0.6)
+            if module.db.divider then
+                frame:AddMessage(L.CHATHISTORY_DIVIDER, 0.6, 0.6, 0.6)
+            end
         end
     end
 end
