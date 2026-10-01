@@ -74,7 +74,7 @@ end
 -- they move up to the top of the right pane.
 local function anchorPanes(up)
     local host = _G.CharacterFrame.RightPaneHost
-    for _, pane in ipairs(panes) do
+    for index, pane in ipairs(panes) do
         if up then
             pane:SetPoint("TOPLEFT", host, "TOPLEFT")
         else
@@ -82,7 +82,7 @@ local function anchorPanes(up)
         end
         -- The stats lists leave room at the bottom for a divider line; take most of it back so
         -- they run further down.
-        if pane.ScrollBox and pane.ScrollBar then
+        if index <= 2 then -- the two stats lists, not the equipment sets pane
             pane.ScrollBox:SetPoint("BOTTOMRIGHT", pane, "BOTTOMRIGHT", -30, up and 4 or 30)
         end
     end
