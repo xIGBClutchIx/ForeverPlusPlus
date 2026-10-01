@@ -32,6 +32,14 @@ ns.changelog = {
                     .. "replaced by \"Requires Mining (1)\" in the difficulty color instead of showing "
                     .. "both. When Blizzard already says \"Requires Mining (1)\", a bare name line "
                     .. "below it shows your skill (\"Your Mining skill: 150\")." },
+                { L.CHATHISTORY_TITLE, "The \"Earlier chat\" line between old and new chat is "
+                    .. "now an option, off by default." },
+            } },
+            { L.CHANGELOG_FIXED, {
+                { L.HIDEFEEDBACK_TITLE, "The feedback box on quest windows no longer fades "
+                    .. "back in." },
+                { "Forever++", "An error in one module no longer stops the others from loading, "
+                    .. "turning on, or turning off." },
             } },
         },
     },
