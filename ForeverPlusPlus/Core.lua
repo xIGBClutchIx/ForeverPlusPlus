@@ -428,11 +428,17 @@ end
 local clutchEnables = { "FishingCast", "SkipCinematics", "AutoScreenshot", "CurrencyBar",
     "HideFeedback", "ChannelNames" }
 
+-- Options the Clutch's Default preset sets differently from the module's default.
+local clutchOptions = {
+    ZoneInfo = { dungeons = "key", fishing = "key" },
+}
+
 ---Puts every module's settings back to their defaults, then turns on the modules in `enable`.
 ---Saved data (prices, seen cinematics, chat history, positions) stays: only plain settings reset.
 ---Modules that are always on have nothing to reset. Applies live, like the checkboxes do.
 ---@param enable? string[] module names to turn on whatever their default is
-function ns.ApplyPreset(enable)
+---@param options? table<string, table<string, any>> per module, option values used instead of its defaults
+function ns.ApplyPreset(enable, options)
     local wanted = {}
     for _, name in ipairs(enable or {}) do
         wanted[name] = true
@@ -441,7 +447,12 @@ function ns.ApplyPreset(enable)
     for _, name in ipairs(ns.order) do
         local module = ns.modules[name]
         if not (module.alwaysOn or module.unavailable) then
-            for key, value in pairs(module.defaults) do
+            local overrides = options and options[name]
+            for key, default in pairs(module.defaults) do
+                local value = default
+                if overrides and overrides[key] ~= nil then
+                    value = overrides[key]
+                end
                 if key ~= "enabled" and type(value) ~= "table" and module.db[key] ~= value then
                     module.db[key] = value
                     changed[#changed + 1] = { module, key }
@@ -471,7 +482,7 @@ end
 
 ---Defaults plus the modules the author recommends (the Clutch's Default button).
 function ns.ApplyClutchDefault()
-    ns.ApplyPreset(clutchEnables)
+    ns.ApplyPreset(clutchEnables, clutchOptions)
 end
 
 -- /fpp ----------------------------------------------------------------------------------------

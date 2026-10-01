@@ -70,7 +70,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 
 ## Use
 
-Open Game Menu > Options > AddOns > Forever++. It opens on a welcome page with the version, links, and commands, and two buttons: Defaults puts every module's settings back to how they start, and Clutch's Default does that and also turns on Fishing Cast, Skip Cinematics, Auto Screenshot, Currency Bar, Hide Beta Feedback, and Short Channel Names. Modules has a checkbox for each module, grouped by category; the gear beside a module shows its options under it. Console Variables is its own page, Debug has testing options and the Self Test button, and Changelog has what changed in each release (also in [CHANGELOG.md](CHANGELOG.md)).
+Open Game Menu > Options > AddOns > Forever++. It opens on a welcome page with the version, links, and commands, and two buttons: Defaults puts every module's settings back to how they start, and Clutch's Default does that and also turns on Fishing Cast, Skip Cinematics, Auto Screenshot, Currency Bar, Hide Beta Feedback, and Short Channel Names, and sets Zone Info's Dungeons and Fishing to Hold Detail Key. Modules has a checkbox for each module, grouped by category; the gear beside a module shows its options under it. Console Variables is its own page, Debug has testing options and the Self Test button, and Changelog has what changed in each release (also in [CHANGELOG.md](CHANGELOG.md)).
 
 | Command | What it does |
 |---|---|

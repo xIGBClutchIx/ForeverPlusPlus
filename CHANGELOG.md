@@ -12,6 +12,8 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 - **Persistent Chat**: renamed from Chat Fading, and now on by default.
 
+- **Settings**: Clutch's Default also sets Zone Info's Dungeons and Fishing to Hold Detail Key.
+
 ### Fixed
 
 - **Fishing Cast**: double right-click now casts Fishing; it never recognized the world under the mouse before.

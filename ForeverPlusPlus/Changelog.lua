@@ -20,6 +20,8 @@ ns.changelog = {
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.CHATFADING_TITLE, "Renamed from Chat Fading, and now on by default." },
+                { L.CHANGELOG_SETTINGS, "Clutch's Default also sets Zone Info's Dungeons and "
+                    .. "Fishing to Hold Detail Key." },
             } },
             { L.CHANGELOG_FIXED, {
                 { L.FISHINGCAST_TITLE, "Double right-click now casts Fishing; it never "
