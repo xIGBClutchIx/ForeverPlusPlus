@@ -20,6 +20,7 @@ local pairs, ipairs, setmetatable, hooksecurefunc = pairs, ipairs, setmetatable,
 local UnitIsPlayer, UnitIsFriend, UnitIsUnit = UnitIsPlayer, UnitIsFriend, UnitIsUnit
 local UnitAffectingCombat, UnitHealthPercent = UnitAffectingCombat, UnitHealthPercent
 local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
+local min, max, C_Timer = math.min, math.max, C_Timer
 
 local readable = ns.IsReadable
 local Nameplates, PlateLabel = ns.Nameplates, ns.PlateLabel
@@ -67,53 +68,100 @@ local function fadeLevel(record, alpha)
     end
 end
 
--- The aura row (AurasFrame.BuffListFrame and DebuffListFrame; may be nil elsewhere) is anchored
--- under the bar's width, which sits left of center. On a name-only plate it centers over our name
--- instead. Blizzard re-anchors it as auras change, so a hook puts ours back while it's centered.
--- plate's aura frame -> { label, points = Blizzard's anchors, busy } while we hold it
+-- The aura rows (UnitFrame.AurasFrame.BuffListFrame and DebuffListFrame, seen with Frame Stack on
+-- Forever; may be nil elsewhere) line their icons up from the bar's left end, which sits left of
+-- center. On a name-only plate we slide each row sideways so its icons center over our name.
+-- Blizzard's anchors are kept as they are (only their x offset moves), so the row keeps its size,
+-- and its icons are measured on screen, since we can't know how Blizzard sizes the row.
+-- aura row -> { label, points = Blizzard's anchors, dx = our shift, busy } while we hold it
 local centered = setmetatable({}, weak)
 local hookedAuras = setmetatable({}, weak)
 
-local function holdAuras(auras)
-    local held = centered[auras]
+local function readPoints(list)
+    local points = {}
+    for i = 1, list:GetNumPoints() do
+        points[i] = { list:GetPoint(i) }
+    end
+    return points
+end
+
+local function setPoints(list, points, dx)
+    list:ClearAllPoints()
+    for _, point in ipairs(points) do
+        list:SetPoint(point[1], point[2], point[3], (point[4] or 0) + dx, point[5] or 0)
+    end
+end
+
+-- The screen-space center of the row's shown icons, or nil when none is shown or laid out yet.
+local function iconsCenter(list)
+    local left, right
+    for _, icon in ipairs({ list:GetChildren() }) do
+        local shown = icon:IsShown()
+        if readable(shown) and shown then
+            local l, r, scale = icon:GetLeft(), icon:GetRight(), icon:GetEffectiveScale()
+            if readable(l) and readable(r) and l and r then
+                l, r = l * scale, r * scale
+                left = left and min(left, l) or l
+                right = right and max(right, r) or r
+            end
+        end
+    end
+    return left and (left + right) / 2
+end
+
+local function holdAuras(list)
+    local held = centered[list]
     if not held then
         return
     end
+    local target = held.label.name
+    local x, scale = target:GetCenter(), target:GetEffectiveScale()
+    local current = iconsCenter(list)
+    if not (current and readable(x) and x) then
+        return
+    end
+    held.dx = held.dx + (x * scale - current) / list:GetEffectiveScale()
     held.busy = true
-    auras:ClearAllPoints()
-    auras:SetPoint("BOTTOM", held.label.name, "TOP", 0, 4)
+    setPoints(list, held.points, held.dx)
     held.busy = false
 end
 
-local function onAurasPoint(auras)
-    local held = centered[auras]
+-- Blizzard anchored the row again: those are its anchors now, and ours go on top of them.
+local function onAurasPoint(list)
+    local held = centered[list]
     if held and not held.busy then
-        holdAuras(auras)
+        held.points, held.dx = readPoints(list), 0
+        holdAuras(list)
     end
 end
 
-local function centerFrame(auras, label, on)
-    local held = centered[auras]
+-- Blizzard laid the icons out again (one came or went): center the new set.
+local function onAurasLayout(list)
+    if centered[list] then
+        holdAuras(list)
+    end
+end
+
+local function centerFrame(list, label, on)
+    local held = centered[list]
     if on and label then
         if not held then
-            local points = {}
-            for i = 1, auras:GetNumPoints() do
-                points[i] = { auras:GetPoint(i) }
-            end
-            held = { label = label, points = points }
-            centered[auras] = held
-            if not hookedAuras[auras] then
-                hookedAuras[auras] = true
-                hooksecurefunc(auras, "SetPoint", onAurasPoint)
+            held = { label = label, points = readPoints(list), dx = 0 }
+            centered[list] = held
+            if not hookedAuras[list] then
+                hookedAuras[list] = true
+                hooksecurefunc(list, "SetPoint", onAurasPoint)
+                if list.Layout then
+                    hooksecurefunc(list, "Layout", onAurasLayout)
+                end
             end
         end
-        holdAuras(auras)
+        holdAuras(list)
+        -- Icons can be laid out after this; measure again on the next frame.
+        C_Timer.After(0, function() onAurasLayout(list) end)
     elseif held then
-        centered[auras] = nil
-        auras:ClearAllPoints()
-        for _, point in ipairs(held.points) do
-            auras:SetPoint(point[1], point[2], point[3], point[4], point[5])
-        end
+        centered[list] = nil
+        setPoints(list, held.points, 0)
     end
 end
 
