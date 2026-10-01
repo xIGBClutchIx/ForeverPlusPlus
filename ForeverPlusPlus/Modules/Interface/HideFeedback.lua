@@ -205,12 +205,26 @@ local function hideQuestWidget(widget)
     end
 end
 
+-- A frame's name, or its debug name (the frame stack's, which includes its parent key) when it
+-- has none. Forbidden frames are skipped: addon code can't ask them anything.
+local function frameName(frame)
+    if type(frame) ~= "table" or (frame.IsForbidden and frame:IsForbidden()) then
+        return nil
+    end
+    local name = frame.GetName and frame:GetName()
+    if type(name) ~= "string" and frame.GetDebugName then
+        name = frame:GetDebugName()
+    end
+    return name
+end
+
 local function scanQuest(frame, depth)
-    if type(frame) ~= "table" or not frame.GetChildren then
+    if type(frame) ~= "table" or not frame.GetChildren
+        or (frame.IsForbidden and frame:IsForbidden()) then
         return
     end
     for _, child in ipairs({ frame:GetChildren() }) do
-        local name = child.GetName and child:GetName()
+        local name = frameName(child)
         if isFeedbackName(name) then
             hideQuestWidget(child)
         elseif depth < MAX_DEPTH then
@@ -236,11 +250,20 @@ end
 -- windows) isn't a child of the quest frames, so the scan above never finds it. Look for it, and
 -- for other named feedback frames directly under UIParent, and hide it again whenever it shows.
 local function hideAlertFrames()
-    local found = { _G.PTRIssueReporterAlertFrame }
+    local found = {}
+    local alert = _G.PTRIssueReporterAlertFrame
+    if type(alert) == "table" then
+        found[1] = alert
+        -- Its other frames hang off it by key (PTRIssueReporterAlertFrame.<id>).
+        for _, value in pairs(alert) do
+            if type(value) == "table" and value.HookScript and value.GetChildren then
+                found[#found + 1] = value
+            end
+        end
+    end
     if UIParent and UIParent.GetChildren then
         for _, child in ipairs({ UIParent:GetChildren() }) do
-            local name = child.GetName and child:GetName()
-            if isFeedbackName(name) and child ~= found[1] then
+            if child ~= alert and isFeedbackName(frameName(child)) then
                 found[#found + 1] = child
             end
         end
