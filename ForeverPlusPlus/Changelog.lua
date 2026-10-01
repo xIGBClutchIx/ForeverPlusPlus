@@ -10,7 +10,8 @@ local L = ns.L
 
 ns.changelog = {
     {
-        version = L.CHANGELOG_UNRELEASED,
+        version = "0.5.0",
+        date = "2026-10-01",
         sections = {
             { L.CHANGELOG_ADDED, {
                 { L.CHARACTERFRAME_TITLE, "New, in Interface: moves the Character "

@@ -98,4 +98,36 @@ jobs:
           if [ -n "$prev" ]; then
             printf '\n---\n**Full Changelog**: %s/%s/compare/%s...%s\n' "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$prev" "$GITHUB_REF_NAME" >> notes.md
           fi
-          gh release create "$GITHUB_REF_NAME" "dist/${{ steps.name.outputs.name }}.zip" --title "Forever++ $GITHUB_REF_NAME" --notes-file notes.md
+          gh release create "$GITHUB_REF_NAME" "dist/${{ steps.name.outputs.name }}.zip" --title "$version" --notes-file notes.md
+
+      # Same zip and the same CHANGELOG.md section as the GitHub release (without the compare link).
+      # Needs the CF_API_KEY secret and the CF_PROJECT_ID and CF_GAME_VERSION_IDS variables (comma
+      # separated CurseForge game version ids); with any missing it says so and the job fails after
+      # the GitHub release is already out.
+      - name: Upload to CurseForge on a version tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          CF_PROJECT_ID: ${{ vars.CF_PROJECT_ID }}
+          CF_GAME_VERSION_IDS: ${{ vars.CF_GAME_VERSION_IDS }}
+        run: |
+          missing=0
+          [ -n "$CF_API_KEY" ] || { echo "Secret CF_API_KEY is not set."; missing=1; }
+          [ -n "$CF_PROJECT_ID" ] || { echo "Variable CF_PROJECT_ID is not set."; missing=1; }
+          if [ -z "$CF_GAME_VERSION_IDS" ]; then
+            echo "Variable CF_GAME_VERSION_IDS is not set. Game versions CurseForge offers:"
+            [ -n "$CF_API_KEY" ] && curl -fsS -H "X-Api-Token: $CF_API_KEY" https://wow.curseforge.com/api/game/versions | jq -r '.[] | "\(.id)\t\(.name)"'
+            missing=1
+          fi
+          [ "$missing" = 0 ] || exit 1
+          version=${GITHUB_REF_NAME#v}
+          awk -v v="$version" '/^## /{f=($2==v);next} f' CHANGELOG.md | sed '/./,$!d' > cf-notes.md
+          metadata=$(jq -n \
+            --rawfile changelog cf-notes.md \
+            --arg name "$version" \
+            --arg ids "$CF_GAME_VERSION_IDS" \
+            '{changelog: $changelog, changelogType: "markdown", displayName: $name, releaseType: "release", gameVersions: ($ids | split(",") | map(gsub(" "; "") | tonumber))}')
+          curl -fsS -X POST "https://wow.curseforge.com/api/projects/$CF_PROJECT_ID/upload-file" \
+            -H "X-Api-Token: $CF_API_KEY" \
+            -F "metadata=$metadata" \
+            -F "file=@dist/${{ steps.name.outputs.name }}.zip"

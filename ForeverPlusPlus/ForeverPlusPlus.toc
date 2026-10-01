@@ -2,7 +2,7 @@
 ## Title: Forever++
 ## Notes: Small additions and changes to the default UI for WoW Forever.
 ## Author: xIGBClutchIx
-## Version: 0.4.0
+## Version: 0.5.0
 ## SavedVariables: ForeverPlusPlusDB
 ## IconTexture: Interface\AddOns\ForeverPlusPlus\Media\Icon
 
