@@ -44,6 +44,7 @@ local ICON_SIZE = 18 -- at 100%
 local TEXT_SIZE = 12
 local GAP = 2 -- between the icon and the count
 local PAD = 8 -- between the column and the health bar
+local LIFT = 2 -- the column sits a little above the bar's middle, which looks centered
 -- Blizzard's quest atlases, the first this client has (probed: names change between builds).
 -- `default` is the plain quest icon; the others are the cursor icons Blizzard shows over that
 -- kind of target, by the objective type C_QuestLog.GetQuestObjectives reports.
@@ -242,9 +243,9 @@ local function place(box, frame, current, needed, kind)
     box.icon:SetPoint("TOP", box, "TOP")
     text:SetPoint("TOP", box.icon, "BOTTOM", 0, -GAP)
     if right then
-        box:SetPoint("LEFT", anchor, "RIGHT", PAD, 0)
+        box:SetPoint("LEFT", anchor, "RIGHT", PAD, LIFT)
     else
-        box:SetPoint("RIGHT", anchor, "LEFT", -PAD, 0)
+        box:SetPoint("RIGHT", anchor, "LEFT", -PAD, LIFT)
     end
     box:Show()
 end
