@@ -341,6 +341,14 @@ end
 -- line, text }.
 local function restyle(tooltip, job)
     local fontString = leftLine(tooltip, job[1])
+    if job[5] then
+        -- Blizzard's bare profession name line: it says what we would, so ours replaces it.
+        local text, color = skillLine(job[2], job[5], L.PROFTOOLTIPS_REQUIRES)
+        if fontString and text then
+            fontString:SetText(Colors.Text(color, text))
+        end
+        return
+    end
     local color, _, _, rank, name = requiresColor(job[3], job[2])
     if fontString and color then
         fontString:SetText(Colors.Text(color, clean(job[3])))
@@ -380,6 +388,14 @@ local function addNodeLines(tooltip, data)
             restyling[tooltip] = { index, node[1], data.lines[index].leftText,
                 findNameLine(data, index, node[1]) }
             return
+        end
+        -- The game's own "Mining" line under a vein: ours takes its place instead of repeating it.
+        for i = 2, #data.lines do
+            local other = data.lines[i] and data.lines[i].leftText
+            if readable(other) and type(other) == "string" and isProfessionName(other, node[1]) then
+                restyling[tooltip] = { i, node[1], other, nil, node[2] }
+                return
+            end
         end
         local line, color = nodeLine(text)
         if line then
@@ -422,6 +438,10 @@ local function addNodeLines(tooltip, data)
             if line then
                 parts[#parts + 1] = Colors.Text(lineColor, line)
                 changed = true
+                -- The game's own bare name line after it is replaced, not repeated.
+                if node and nextPart and isProfessionName(nextPart, node[1]) then
+                    i = i + 1
+                end
             end
         end
         i = i + 1

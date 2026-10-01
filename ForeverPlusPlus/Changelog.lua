@@ -28,9 +28,10 @@ ns.changelog = {
                     .. "buffs sit centered above the name instead of far off to the left. A Buffs "
                     .. "setting puts them above, before, or after the name, or back in Blizzard's "
                     .. "spot." },
-                { L.PROFTOOLTIPS_TITLE, "A bare profession name line under Blizzard's \"Requires "
-                    .. "Mining (1)\" (herbs, veins, skinnable beasts, locks) now shows your skill "
-                    .. "in the same color (\"Your Mining skill: 150\") instead of repeating the name." },
+                { L.PROFTOOLTIPS_TITLE, "The game's own bare \"Mining\" line under a vein is "
+                    .. "replaced by \"Requires Mining (1)\" in the difficulty color instead of showing "
+                    .. "both. When Blizzard already says \"Requires Mining (1)\", a bare name line "
+                    .. "below it shows your skill (\"Your Mining skill: 150\")." },
             } },
         },
     },

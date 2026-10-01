@@ -13,7 +13,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Hide Beta Feedback**: also hides the beta's feedback buttons on quest windows (quest, gossip, and quest log), with its own checkbox.
 - **Quest Nameplates**: the icon matches the objective: Blizzard's attack, pickup, or interact icon for kill, item, or object objectives, and the quest icon for the rest. A creature whose objective is done shows a green check and its final count (8/8), unless you turn off Show Completed, and the count can be turned off to leave just the check.
 - **Player Nameplates and NPC Nameplates**: on name-only plates the buffs sit centered above the name instead of far off to the left. A Buffs setting puts them above, before, or after the name, or back in Blizzard's spot.
-- **Profession Tooltips**: a bare profession name line under Blizzard's "Requires Mining (1)" (herbs, veins, skinnable beasts, locks) now shows your skill in the same color ("Your Mining skill: 150") instead of repeating the name.
+- **Profession Tooltips**: the game's own bare "Mining" line under a vein is replaced by "Requires Mining (1)" in the difficulty color instead of showing both. When Blizzard already says "Requires Mining (1)", a bare name line below it shows your skill ("Your Mining skill: 150").
 
 ## 0.4.0 (2026-09-30)
 
