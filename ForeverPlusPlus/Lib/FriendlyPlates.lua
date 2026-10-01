@@ -19,7 +19,7 @@ local _, ns = ...
 local pairs, ipairs, setmetatable, hooksecurefunc = pairs, ipairs, setmetatable, hooksecurefunc
 local UnitIsPlayer, UnitIsFriend, UnitIsUnit = UnitIsPlayer, UnitIsFriend, UnitIsUnit
 local UnitAffectingCombat, UnitHealthPercent = UnitAffectingCombat, UnitHealthPercent
-local UnitHealth, UnitHealthMax, pcall = UnitHealth, UnitHealthMax, pcall
+local UnitHealth, UnitHealthMax, pcall, max = UnitHealth, UnitHealthMax, pcall, math.max
 
 local readable = ns.IsReadable
 local Nameplates, PlateLabel = ns.Nameplates, ns.PlateLabel
@@ -90,13 +90,23 @@ local function anchorBuffs(record, where)
         return
     end
     local x
+    local shift = label.nameShift or 0
     if where == "above" then
         -- The name sits off the row's center by its shift; undo it to center on the row.
-        x = -(label.nameShift or 0)
-    elseif where == "before" then
-        x = -((label.leftWidth or 0) + BUFF_SIDE_GAP)
-    elseif where == "after" then
-        x = (label.rightWidth or 0) + BUFF_SIDE_GAP
+        x = -shift
+    elseif where == "before" or where == "after" then
+        -- Past the level and icons on that side, or past the guild/title line under the name if
+        -- that reaches further (it's centered on the row, and often longer than the name).
+        local before = where == "before"
+        local reach = (before and label.leftWidth or label.rightWidth) or 0
+        if label.subtitle:IsShown() then
+            local nameWidth, subWidth = label.name:GetStringWidth(), label.subtitle:GetStringWidth()
+            if readable(nameWidth) and readable(subWidth) then
+                local overhang = (subWidth - nameWidth) / 2 + (before and shift or -shift)
+                reach = max(reach, overhang)
+            end
+        end
+        x = (before and -1 or 1) * (reach + BUFF_SIDE_GAP)
     end
     -- Untouched plates stay untouched, and an unchanged spot isn't set again.
     if (record.buffsWhere or "blizzard") == where and record.buffsX == x then
