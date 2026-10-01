@@ -172,7 +172,8 @@ L.PROFTOOLTIPS_ITEMS = "Items"
 L.PROFTOOLTIPS_ITEMS_DESC = "Show in herb, ore, stone, and lockbox tooltips the skill needed to "
     .. "gather or open them."
 L.PROFTOOLTIPS_REQUIRES = "Requires %s (%d)" -- profession, skill
-L.PROFTOOLTIPS_GATHERED = "Gathered with %s (%d)" -- profession, skill
+L.PROFTOOLTIPS_YOURS = "Your %s skill: %d" -- profession, the player's skill
+L.PROFTOOLTIPS_GATHERED ="Gathered with %s (%d)" -- profession, skill
 L.PROFTOOLTIPS_HERBALISM_NAME = "Herbalism" -- until the client gives its own name
 L.PROFTOOLTIPS_MINING_NAME = "Mining"
 L.PROFTOOLTIPS_SKINNING_NAME = "Skinning"

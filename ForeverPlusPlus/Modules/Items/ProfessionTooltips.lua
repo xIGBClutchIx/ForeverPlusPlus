@@ -252,7 +252,15 @@ local function skillLine(line, need, text)
         end
     end
     local color = Professions.Difficulty(rank, need)
-    return format(text, name or FALLBACK_NAME[line], need), color
+    return format(text, name or FALLBACK_NAME[line], need), color, rank, name or FALLBACK_NAME[line]
+end
+
+-- The "your skill" text that stands in for a bare profession name line under Blizzard's
+-- requirement, colored like it: nil when the player has no skill to show.
+local function yourSkill(color, rank, name)
+    if rank then
+        return Colors.Text(color, format(L.PROFTOOLTIPS_YOURS, name, rank))
+    end
 end
 
 local function addLine(tooltip, text, color)
@@ -293,8 +301,25 @@ local function requiresColor(text, line)
     local _, digits = match(plain, REQUIRES)
     local need = tonumber(digits)
     if need then
-        local _, color = skillLine(line, need, L.PROFTOOLTIPS_REQUIRES)
-        return color, plain, true
+        local _, color, rank, name = skillLine(line, need, L.PROFTOOLTIPS_REQUIRES)
+        return color, plain, true, rank, name
+    end
+end
+
+-- Whether `text` is just the profession's name (Blizzard or another addon repeating it under the
+-- requirement), in either the client's language or ours.
+local function isProfessionName(text, line)
+    local plain = clean(text)
+    local _, name = Professions.Rank(line)
+    return plain == FALLBACK_NAME[line] or (name ~= nil and plain == name)
+end
+
+-- The index of the line after `index` in data when it only repeats the profession's name, or nil.
+local function findNameLine(data, index, line)
+    local entry = data.lines[index + 1]
+    local text = entry and entry.leftText
+    if readable(text) and type(text) == "string" and isProfessionName(text, line) then
+        return index + 1
     end
 end
 
@@ -316,9 +341,15 @@ end
 -- line, text }.
 local function restyle(tooltip, job)
     local fontString = leftLine(tooltip, job[1])
-    local color = requiresColor(job[3], job[2])
+    local color, _, _, rank, name = requiresColor(job[3], job[2])
     if fontString and color then
         fontString:SetText(Colors.Text(color, clean(job[3])))
+        -- A bare name line below it becomes the player's skill against that requirement.
+        local nameString = job[4] and leftLine(tooltip, job[4])
+        local text = nameString and yourSkill(color, rank, name)
+        if text then
+            nameString:SetText(text)
+        end
     end
 end
 
@@ -346,7 +377,8 @@ local function addNodeLines(tooltip, data)
         -- Blizzard already says what it needs: recolor that once it's drawn, don't add another.
         local index = findRequires(data)
         if index then
-            restyling[tooltip] = { index, node[1], data.lines[index].leftText }
+            restyling[tooltip] = { index, node[1], data.lines[index].leftText,
+                findNameLine(data, index, node[1]) }
             return
         end
         local line, color = nodeLine(text)
@@ -365,15 +397,22 @@ local function addNodeLines(tooltip, data)
         parts[#parts + 1] = part
         local node = NODES[clean(part)]
         local nextPart = raw[i + 1]
-        local color, plain = nil, nil
+        local color, plain, rank, skillName = nil, nil, nil, nil
         if node and nextPart then
-            color, plain = requiresColor(nextPart, node[1])
+            color, plain, _, rank, skillName = requiresColor(nextPart, node[1])
         end
         if node and nextPart and match(clean(nextPart), REQUIRES) then
-            -- Blizzard's own line follows the name: color it.
+            -- Blizzard's own line follows the name: color it, and a bare name line after it
+            -- becomes the player's skill.
             if color then
                 parts[#parts + 1] = Colors.Text(color, plain)
                 changed = true
+                local after = raw[i + 2]
+                local yours = after and isProfessionName(after, node[1]) and yourSkill(color, rank, skillName)
+                if yours then
+                    parts[#parts + 1] = yours
+                    i = i + 1
+                end
             else
                 parts[#parts + 1] = nextPart
             end
@@ -463,7 +502,7 @@ local function addSkinLine(tooltip)
     local data = unitData[tooltip]
     local index = data and findRequires(data)
     if index then
-        restyling[tooltip] = { index, SKIN, data.lines[index].leftText }
+        restyling[tooltip] = { index, SKIN, data.lines[index].leftText, findNameLine(data, index, SKIN) }
         return
     end
     local level = UnitLevel(unit)
