@@ -10,6 +10,16 @@ local L = ns.L
 
 ns.changelog = {
     {
+        version = L.CHANGELOG_UNRELEASED,
+        sections = {
+            { L.CHANGELOG_CHANGED, {
+                { L.QUESTPLATES_TITLE, "The icon matches the objective: Blizzard's attack, pickup, "
+                    .. "or interact icon for kill, item, or object objectives, and the quest icon "
+                    .. "for the rest." },
+            } },
+        },
+    },
+    {
         version = "0.4.0",
         date = "2026-09-30",
         sections = {
