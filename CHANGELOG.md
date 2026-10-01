@@ -2,12 +2,21 @@
 
 What changed in each release of Forever++. The same notes show in game under Settings > AddOns > Forever++ > Changelog, from [`ForeverPlusPlus/Changelog.lua`](ForeverPlusPlus/Changelog.lua); change both together.
 
-## 0.5.0 (2026-10-01)
+## Unreleased
 
 ### Added
 
 - **Character Frame Enhancements** (new, in Interface): moves the Character window's Equipment and Pet tabs to the side with the other tabs, removes the portrait and level line above the stats so they start at the top, and shows your level and name in your class color as the title.
-- **Persistent Chat** (new, in Chat): keeps chat text on screen instead of fading it out after a while.
+
+### Changed
+
+- **Persistent Chat**: renamed from Chat Fading, and now on by default.
+
+## 0.5.0 (2026-10-01)
+
+### Added
+
+- **Chat Fading** (new, off by default, in Chat): keeps chat text on screen instead of fading it out after a while.
 
 ### Changed
 
