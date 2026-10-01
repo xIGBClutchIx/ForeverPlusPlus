@@ -42,7 +42,8 @@ module.options = {
 
 local ICON_SIZE = 18 -- at 100%
 local TEXT_SIZE = 12
-local GAP = 2
+local GAP = 2 -- between the icon and the count
+local PAD = 4 -- between the column and the health bar
 -- Blizzard's quest atlases, the first this client has (probed: names change between builds).
 -- `default` is the plain quest icon; the others are the cursor icons Blizzard shows over that
 -- kind of target, by the objective type C_QuestLog.GetQuestObjectives reports.
@@ -234,15 +235,16 @@ local function place(box, frame, current, needed, kind)
     box.icon:ClearAllPoints()
     text:ClearAllPoints()
     box:ClearAllPoints()
-    box:SetSize(size, size)
+    -- The icon sits above the count, both centered in a column as wide as the wider of the two.
+    local textWidth = label and text:GetStringWidth() or 0
+    local textHeight = label and text:GetStringHeight() or 0
+    box:SetSize(max(size, textWidth), size + (label and (GAP + textHeight) or 0))
+    box.icon:SetPoint("TOP", box, "TOP")
+    text:SetPoint("TOP", box.icon, "BOTTOM", 0, -GAP)
     if right then
-        box:SetPoint("LEFT", anchor, "RIGHT", GAP, 0)
-        box.icon:SetPoint("LEFT", box, "LEFT")
-        text:SetPoint("LEFT", box.icon, "RIGHT", GAP, 0)
+        box:SetPoint("LEFT", anchor, "RIGHT", PAD, 0)
     else
-        box:SetPoint("RIGHT", anchor, "LEFT", -GAP, 0)
-        box.icon:SetPoint("RIGHT", box, "RIGHT")
-        text:SetPoint("RIGHT", box.icon, "LEFT", -GAP, 0)
+        box:SetPoint("RIGHT", anchor, "LEFT", -PAD, 0)
     end
     box:Show()
 end
