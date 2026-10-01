@@ -47,8 +47,8 @@ ns.changelog = {
                     .. "shows [1] instead of [1. General] (off by default). Chat History shows "
                     .. "each window's latest lines again after a logout or reload. Social Button "
                     .. "moves the Quick Join button beside the chat's other buttons. Chat Font "
-                    .. "draws chat in Friz Quadrata or another Blizzard font (not on Korean, "
-                    .. "Chinese, or Russian clients)." },
+                    .. "draws chat, and by default the chat input box, in Friz Quadrata or "
+                    .. "another Blizzard font (not on Korean, Chinese, or Russian clients)." },
                 { L.CURRENCYBAR_TITLE, "New, off by default, in Interface. A small box showing "
                     .. "your gold and, if you choose, the currencies you show on your Backpack. "
                     .. "Hover it for what this session gained or spent. Move it in Edit Mode." },
