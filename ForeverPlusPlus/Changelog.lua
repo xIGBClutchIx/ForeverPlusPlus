@@ -22,7 +22,7 @@ ns.changelog = {
                 { L.QUESTPLATES_TITLE, "The icon matches the objective: Blizzard's attack, pickup, "
                     .. "or interact icon for kill, item, or object objectives, and the quest icon "
                     .. "for the rest. A creature whose objective is done shows a green check "
-                    .. "and its final count (8/8)." },
+                    .. "and its final count (8/8), unless you turn off Show Completed." },
                 { L.PLAYERPLATES_TITLE .. " and " .. L.NPCPLATES_TITLE, "On name-only plates the "
                     .. "buff and debuff row centers over the name instead of sitting off to the "
                     .. "left." },

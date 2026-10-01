@@ -15,6 +15,7 @@ local readable = ns.IsReadable
 local module = ns.NewModule("QuestPlates", L.QUESTPLATES_DESC, {
     enabled = true,
     progress = "count", -- "count" (3/8), "remaining" (5), or "off" (just the icon)
+    completed = true, -- keep a green check on creatures whose objective is done
     side = "left", -- which side of the bar: "left" or "right"
     size = 100, -- a percent
 })
@@ -30,6 +31,7 @@ module.options = {
             { "off", L.QUESTPLATES_PROGRESS_OFF },
         },
     },
+    { key = "completed", name = L.QUESTPLATES_COMPLETED, description = L.QUESTPLATES_COMPLETED_DESC },
     {
         key = "side", name = L.QUESTPLATES_SIDE, description = L.QUESTPLATES_SIDE_DESC,
         choices = { { "left", L.QUESTPLATES_SIDE_LEFT }, { "right", L.QUESTPLATES_SIDE_RIGHT } },
@@ -255,6 +257,9 @@ local function update(unit, frame)
     local current, needed, kind = scan(unit)
     if current == nil then
         return
+    end
+    if kind == "done" and not module.db.completed then
+        current = false
     end
     if not current then
         if box then
