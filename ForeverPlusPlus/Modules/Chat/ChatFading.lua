@@ -8,7 +8,7 @@ local L = ns.L
 local Chat = ns.Chat
 
 local module = ns.NewModule("ChatFading", L.CHATFADING_DESC, {
-    enabled = false,
+    enabled = true,
 })
 module.title = L.CHATFADING_TITLE
 module.category = "chat"
