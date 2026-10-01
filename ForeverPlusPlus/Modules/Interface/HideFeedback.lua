@@ -219,6 +219,38 @@ local function scanQuest(frame, depth)
     end
 end
 
+local alertHooked = setmetatable({}, { __mode = "k" }) -- widget -> true
+
+local function hideAlert(widget)
+    if module.enabled and module.db.quest then
+        hideQuestWidget(widget)
+    end
+end
+
+-- The reporter's alert frame (PTRIssueReporterAlertFrame, seen in the frame stack on quest
+-- windows) isn't a child of the quest frames, so the scan above never finds it. Look for it, and
+-- for other named feedback frames directly under UIParent, and hide it again whenever it shows.
+local function hideAlertFrames()
+    local found = { _G.PTRIssueReporterAlertFrame }
+    if UIParent and UIParent.GetChildren then
+        for _, child in ipairs({ UIParent:GetChildren() }) do
+            local name = child.GetName and child:GetName()
+            if isFeedbackName(name) and child ~= found[1] then
+                found[#found + 1] = child
+            end
+        end
+    end
+    for _, widget in ipairs(found) do
+        if type(widget) == "table" and widget.HookScript then
+            hideQuestWidget(widget)
+            if not alertHooked[widget] then
+                alertHooked[widget] = true
+                module:HookScript(widget, "OnShow", hideAlert)
+            end
+        end
+    end
+end
+
 local function hideQuestFeedback()
     if not (module.enabled and module.db.quest) then
         return
@@ -226,6 +258,7 @@ local function hideQuestFeedback()
     for _, name in ipairs(QUEST_FRAMES) do
         scanQuest(_G[name], 1)
     end
+    hideAlertFrames()
 end
 
 -- Puts back what was hidden.
