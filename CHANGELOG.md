@@ -4,6 +4,10 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ## Unreleased
 
+### Added
+
+- **Chat Fading** (new, off by default, in Chat): keeps chat text on screen instead of fading it out after a while.
+
 ### Changed
 
 - **Quest Nameplates**: the icon matches the objective: Blizzard's attack, pickup, or interact icon for kill, item, or object objectives, and the quest icon for the rest.

@@ -12,6 +12,10 @@ ns.changelog = {
     {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
+            { L.CHANGELOG_ADDED, {
+                { L.CHATFADING_TITLE, "New, off by default, in Chat: keeps chat text on screen "
+                    .. "instead of fading it out after a while." },
+            } },
             { L.CHANGELOG_CHANGED, {
                 { L.QUESTPLATES_TITLE, "The icon matches the objective: Blizzard's attack, pickup, "
                     .. "or interact icon for kill, item, or object objectives, and the quest icon "
