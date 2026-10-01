@@ -98,7 +98,7 @@ jobs:
           if [ -n "$prev" ]; then
             printf '\n---\n**Full Changelog**: %s/%s/compare/%s...%s\n' "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$prev" "$GITHUB_REF_NAME" >> notes.md
           fi
-          gh release create "$GITHUB_REF_NAME" "dist/${{ steps.name.outputs.name }}.zip" --title "Forever++ $GITHUB_REF_NAME" --notes-file notes.md
+          gh release create "$GITHUB_REF_NAME" "dist/${{ steps.name.outputs.name }}.zip" --title "$version" --notes-file notes.md
 
       # Same zip and the same CHANGELOG.md section as the GitHub release (without the compare link).
       # Needs the CF_API_KEY secret and the CF_PROJECT_ID and CF_GAME_VERSION_IDS variables (comma
@@ -124,7 +124,7 @@ jobs:
           awk -v v="$version" '/^## /{f=($2==v);next} f' CHANGELOG.md | sed '/./,$!d' > cf-notes.md
           metadata=$(jq -n \
             --rawfile changelog cf-notes.md \
-            --arg name "Forever++ $GITHUB_REF_NAME" \
+            --arg name "$version" \
             --arg ids "$CF_GAME_VERSION_IDS" \
             '{changelog: $changelog, changelogType: "markdown", displayName: $name, releaseType: "release", gameVersions: ($ids | split(",") | map(gsub(" "; "") | tonumber))}')
           curl -fsS -X POST "https://wow.curseforge.com/api/projects/$CF_PROJECT_ID/upload-file" \
