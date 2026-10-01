@@ -342,6 +342,24 @@ end
 local function restyle(tooltip, job)
     local fontString = leftLine(tooltip, job[1])
     if job[5] then
+        -- Data lines and drawn lines don't always line up (the game may skip some): when the one
+        -- at the data's index isn't the line we mean, find the drawn line with its text. Object
+        -- tooltip text isn't secret; a secret one never matches.
+        local want = clean(job[3])
+        local function drawn(fs)
+            local text = fs and fs.GetText and fs:GetText()
+            return readable(text) and type(text) == "string" and clean(text) == want
+        end
+        if not drawn(fontString) then
+            fontString = nil
+            for i = 2, tooltip.NumLines and tooltip:NumLines() or 0 do
+                local fs = leftLine(tooltip, i)
+                if drawn(fs) then
+                    fontString = fs
+                    break
+                end
+            end
+        end
         -- Blizzard's bare profession name line: it says what we would, so ours replaces it.
         local text, color = skillLine(job[2], job[5], L.PROFTOOLTIPS_REQUIRES)
         if fontString and text then
