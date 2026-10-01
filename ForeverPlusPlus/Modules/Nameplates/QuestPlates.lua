@@ -52,6 +52,7 @@ local ATLASES = {
     player = { "worldquest-icon-pvp-ffa", "Crosshair_Attack_32" },
     item = { "Crosshair_Pickup_32", "Crosshair_Take_32", "Crosshair_Loot_32" },
     object = { "Crosshair_Interact_32", "Crosshair_Gossip_32" },
+    done = { "common-icon-checkmark", "UI-QuestTracker-Tracker-Check", "ui-questtracker-tracker-check" },
 }
 
 local indicators = setmetatable({}, { __mode = "k" }) -- Blizzard unit frame -> our indicator
@@ -127,7 +128,8 @@ end
 
 -- The first objective of this unit's quests that isn't done, as `current, needed, kind` (a
 -- percentage objective has `needed` of 100; `kind` is the quest log's objective type, or false
--- when it can't be matched), `false` when it has none, or nil when the game won't
+-- when it can't be matched), or `current, needed, "done"` when all it lists are done, `false`
+-- when it has none, or nil when the game won't
 -- say (secret values in combat or an instance), so the plate keeps what it shows.
 local function scan(unit)
     if C_QuestLog and C_QuestLog.UnitIsRelatedToActiveQuest then
@@ -147,6 +149,7 @@ local function scan(unit)
     local objectiveType, titleType, playerType = types and types.QuestObjective, types and types.QuestTitle,
         types and types.QuestPlayer
     local inQuest, unknown = false, false
+    local doneCurrent, doneNeeded
     for _, line in ipairs(data.lines) do
         local text, kind = line.leftText, line.type
         if not (readable(text) and readable(kind) and type(text) == "string") then
@@ -164,10 +167,17 @@ local function scan(unit)
             if current and needed and current < needed then
                 return current, needed, objectiveKind(text)
             end
+            if current and needed and not doneCurrent then
+                doneCurrent, doneNeeded = current, needed
+            end
         end
     end
     if unknown then
         return nil
+    end
+    -- Every objective listed is done: show the check and the final count.
+    if doneCurrent then
+        return doneCurrent, doneNeeded, "done"
     end
     return false
 end
@@ -209,7 +219,14 @@ local function place(box, frame, current, needed, kind)
         text:SetFontHeight(TEXT_SIZE * scale)
     end
     local label
-    if db.progress == "count" then
+    local done = kind == "done"
+    if done then
+        text:SetTextColor(0.1, 1, 0.1)
+    else
+        text:SetTextColor(1, 0.82, 0)
+    end
+    -- A finished objective has nothing remaining, so it shows its count either way.
+    if db.progress == "count" or (done and db.progress == "remaining") then
         label = current .. "/" .. needed
         if needed == 100 then
             label = current .. "%"
