@@ -12,7 +12,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 - **Hide Beta Feedback**: also hides the beta's feedback buttons on quest windows (quest, gossip, and quest log), with its own checkbox.
 - **Quest Nameplates**: the icon matches the objective: Blizzard's attack, pickup, or interact icon for kill, item, or object objectives, and the quest icon for the rest. A creature whose objective is done shows a green check and its final count (8/8), unless you turn off Show Completed, and the count can be turned off to leave just the check.
-- **Player Nameplates and NPC Nameplates**: on name-only plates the buffs sit centered above the name instead of far off to the left. A Buffs setting puts them above, before, or after the name, or back in Blizzard's spot.
+- **Player Nameplates and NPC Nameplates**: on name-only plates the buffs sit just before the name instead of far off to the left. A Buffs setting puts them before, above, or after the name, or back in Blizzard's spot.
 
 ## 0.4.0 (2026-09-30)
 
