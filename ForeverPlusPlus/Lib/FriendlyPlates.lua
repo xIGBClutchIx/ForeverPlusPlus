@@ -73,7 +73,7 @@ end
 -- itself to its icons). The row is a restricted region: its anchors can be set but never read,
 -- so we put back Blizzard's anchor from its XML (Blizzard_NamePlates.xml; Lua never changes it).
 -- pcall, so a client that refuses the anchor can't stop the fade around it.
-local BUFF_GAP = 2
+local BUFF_GAP = 6
 
 local function anchorBuffs(record, nameOnly)
     local buffs, label = record.buffs, record.label
