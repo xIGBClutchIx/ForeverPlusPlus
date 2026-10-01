@@ -43,7 +43,7 @@ module.options = {
 local ICON_SIZE = 18 -- at 100%
 local TEXT_SIZE = 12
 local GAP = 2 -- between the icon and the count
-local PAD = 4 -- between the column and the health bar
+local PAD = 8 -- between the column and the health bar
 -- Blizzard's quest atlases, the first this client has (probed: names change between builds).
 -- `default` is the plain quest icon; the others are the cursor icons Blizzard shows over that
 -- kind of target, by the objective type C_QuestLog.GetQuestObjectives reports.
