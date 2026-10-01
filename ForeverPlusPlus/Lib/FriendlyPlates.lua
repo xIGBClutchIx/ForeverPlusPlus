@@ -183,7 +183,7 @@ function FriendlyPlates.Defaults(extra)
     extra.barWhenHurt = true
     extra.nameSize = 80 -- percent of Blizzard's name size
     extra.level = "before" -- "before", "after", or "off"
-    extra.buffs = "before" -- where the buff row sits without the bar: see PlateLabel.BUFF_CHOICES
+    extra.buffs = "above" -- where the buff row sits without the bar: see PlateLabel.BUFF_CHOICES
     extra.centerLine = false -- debug: a line through each plate's center
     extra.saved = {} -- CVar -> the player's own value, put back when the module turns off
     return extra

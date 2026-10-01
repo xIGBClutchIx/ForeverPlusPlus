@@ -25,8 +25,8 @@ ns.changelog = {
                     .. "and its final count (8/8), unless you turn off Show Completed; the count can be "
                     .. "turned off to leave just the check." },
                 { L.PLAYERPLATES_TITLE .. " and " .. L.NPCPLATES_TITLE, "On name-only plates the "
-                    .. "buffs sit just before the name instead of far off to the left. A Buffs "
-                    .. "setting puts them before, above, or after the name, or back in Blizzard's "
+                    .. "buffs sit centered above the name instead of far off to the left. A Buffs "
+                    .. "setting puts them above, before, or after the name, or back in Blizzard's "
                     .. "spot." },
             } },
         },
