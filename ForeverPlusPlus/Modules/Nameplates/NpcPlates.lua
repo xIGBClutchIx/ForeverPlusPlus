@@ -22,6 +22,7 @@ module.options = {
     },
     ns.PlateLabel.NameSizeOption(),
     { key = "level", name = L.PLATES_LEVEL, description = L.PLATES_LEVEL_DESC, choices = ns.PlateLabel.LEVEL_CHOICES },
+    { key = "buffs", name = L.PLATES_BUFFS, description = L.PLATES_BUFFS_DESC, choices = ns.PlateLabel.BUFF_CHOICES },
     {
         key = "titles", name = L.NPCPLATES_TITLES, description = L.NPCPLATES_TITLES_DESC,
         choices = ns.PlateLabel.SUBTITLE_CHOICES,

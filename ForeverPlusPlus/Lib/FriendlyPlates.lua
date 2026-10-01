@@ -13,7 +13,7 @@
 --
 -- New gives the module its OnEnable, OnDisable and OnOptionChanged (unless it has its own
 -- OnDisable or OnOptionChanged). The module's settings come from FriendlyPlates.Defaults: they
--- need barWhenHurt, level, nameSize, centerLine, and `saved = {}` for the CVars.
+-- need barWhenHurt, level, buffs, nameSize, centerLine, and `saved = {}` for the CVars.
 local _, ns = ...
 
 local pairs, ipairs, setmetatable, hooksecurefunc = pairs, ipairs, setmetatable, hooksecurefunc
@@ -68,28 +68,44 @@ local function fadeLevel(record, alpha)
 end
 
 -- Blizzard's buff row (UnitFrame.AurasFrame.BuffListFrame) sits beside the bar, to the left of its
--- classification icon, so on a name-only plate it floats far left of the name. There it moves
--- above our name instead, centered on the whole row (level, name, and icons; the buff row sizes
--- itself to its icons). The row is a restricted region: its anchors can be set but never read,
--- so we put back Blizzard's anchor from its XML (Blizzard_NamePlates.xml; Lua never changes it).
--- pcall, so a client that refuses the anchor can't stop the fade around it.
-local BUFF_GAP = 6
+-- classification icon, so on a name-only plate it floats far left of the name. There it moves to
+-- the module's Buffs setting (`buffs`): above the whole row (level, name, and icons), or beside it
+-- past the level and icons, so it never covers them. The subtitle and cast bar are below the
+-- name, so neither choice reaches them. The buff row sizes itself to its icons.
+-- The row is a restricted region: its anchors can be set but never read, so we put back
+-- Blizzard's anchor from its XML (Blizzard_NamePlates.xml; Lua never changes it). pcall, so a
+-- client that refuses the anchor can't stop the fade around it.
+local BUFF_ABOVE_GAP = 6
+local BUFF_SIDE_GAP = 4
 
-local function anchorBuffs(record, nameOnly)
+---@param where string "above", "before", "after", or "blizzard" (Blizzard's own anchor)
+local function anchorBuffs(record, where)
     local buffs, label = record.buffs, record.label
     if not (buffs and record.classification and label) then
         return
     end
-    -- The name sits off the row's center by its shift; undo it to center on the row.
-    local x = nameOnly and -(label.nameShift or 0) or nil
-    if (record.buffsCentered or false) == nameOnly and record.buffsX == x then
+    local x
+    if where == "above" then
+        -- The name sits off the row's center by its shift; undo it to center on the row.
+        x = -(label.nameShift or 0)
+    elseif where == "before" then
+        x = -((label.leftWidth or 0) + BUFF_SIDE_GAP)
+    elseif where == "after" then
+        x = (label.rightWidth or 0) + BUFF_SIDE_GAP
+    end
+    -- Untouched plates stay untouched, and an unchanged spot isn't set again.
+    if (record.buffsWhere or "blizzard") == where and record.buffsX == x then
         return
     end
-    record.buffsCentered, record.buffsX = nameOnly, x
+    record.buffsWhere, record.buffsX = where, x
     pcall(function()
         buffs:ClearAllPoints()
-        if nameOnly then
-            buffs:SetPoint("BOTTOM", label.name, "TOP", x, BUFF_GAP)
+        if where == "above" then
+            buffs:SetPoint("BOTTOM", label.name, "TOP", x, BUFF_ABOVE_GAP)
+        elseif where == "before" then
+            buffs:SetPoint("RIGHT", label.name, "LEFT", x, 0)
+        elseif where == "after" then
+            buffs:SetPoint("LEFT", label.name, "RIGHT", x, 0)
         else
             buffs:SetPoint("RIGHT", record.classification, "LEFT", -5, 0)
         end
@@ -150,6 +166,7 @@ function FriendlyPlates.Defaults(extra)
     extra.barWhenHurt = true
     extra.nameSize = 80 -- percent of Blizzard's name size
     extra.level = "before" -- "before", "after", or "off"
+    extra.buffs = "above" -- where the buff row sits without the bar: see PlateLabel.BUFF_CHOICES
     extra.centerLine = false -- debug: a line through each plate's center
     extra.saved = {} -- CVar -> the player's own value, put back when the module turns off
     return extra
@@ -170,9 +187,9 @@ function Plates:Layout(unit)
     local record = self.records[unit]
     if record and record.label then
         PlateLabel.Layout(record.label, record, unit, self.style)
-        -- The name may have moved on its row; keep the buffs centered on the row.
-        if record.buffsCentered then
-            anchorBuffs(record, true)
+        -- The name, level, or icons may have moved; keep the buffs placed against them.
+        if record.buffsWhere and record.buffsWhere ~= "blizzard" then
+            anchorBuffs(record, record.buffsWhere)
         end
     end
 end
@@ -216,7 +233,7 @@ function Plates:Fade(unit)
         local health, maxHealth = UnitHealth(unit), UnitHealthMax(unit)
         nameOnly = not (readable(health) and readable(maxHealth) and health < maxHealth)
     end
-    anchorBuffs(record, nameOnly)
+    anchorBuffs(record, nameOnly and self.module.db.buffs or "blizzard")
 end
 
 function Plates:Add(unit, frame)
@@ -249,7 +266,7 @@ function Plates:Remove(unit)
         return
     end
     self.records[unit] = nil
-    anchorBuffs(record, false)
+    anchorBuffs(record, "blizzard")
     record.container:SetAlpha(1)
     fadeLevel(record, 1)
     if record.name then

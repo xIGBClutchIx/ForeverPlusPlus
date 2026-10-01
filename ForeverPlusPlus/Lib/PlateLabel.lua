@@ -38,6 +38,13 @@ PlateLabel.LEVEL_CHOICES = {
     { "after", L.PLATES_LEVEL_AFTER },
     { "off", L.PLATES_LEVEL_OFF },
 }
+-- Where Blizzard's buff row sits while the bar is hidden (FriendlyPlates places it).
+PlateLabel.BUFF_CHOICES = {
+    { "above", L.PLATES_BUFFS_ABOVE },
+    { "before", L.PLATES_BUFFS_BEFORE },
+    { "after", L.PLATES_BUFFS_AFTER },
+    { "blizzard", L.PLATES_BUFFS_BLIZZARD },
+}
 PlateLabel.SUBTITLE_CHOICES = {
     { "always", L.PLATES_SUBTITLE_ALWAYS },
     { "hidden", L.PLATES_SUBTITLE_HIDDEN },
@@ -475,5 +482,7 @@ function PlateLabel.Layout(label, record, unit, style)
     else
         rightWidth = rightWidth + iconsWidth
     end
+    -- What sits beside the name on each side, so things placed beside the row can clear it.
+    label.leftWidth, label.rightWidth = leftWidth, rightWidth
     placeSubtitle(label, record, unit, style, (leftWidth - rightWidth) / 2)
 end

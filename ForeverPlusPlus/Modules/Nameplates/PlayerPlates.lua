@@ -38,6 +38,7 @@ module.options = {
         },
     },
     { key = "level", name = L.PLATES_LEVEL, description = L.PLATES_LEVEL_DESC, choices = ns.PlateLabel.LEVEL_CHOICES },
+    { key = "buffs", name = L.PLATES_BUFFS, description = L.PLATES_BUFFS_DESC, choices = ns.PlateLabel.BUFF_CHOICES },
     {
         key = "guildNames", name = L.PLAYERPLATES_GUILD_NAMES, description = L.PLAYERPLATES_GUILD_NAMES_DESC,
         choices = ns.PlateLabel.SUBTITLE_CHOICES,
