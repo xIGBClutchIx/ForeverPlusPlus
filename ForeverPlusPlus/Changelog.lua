@@ -13,11 +13,22 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_ADDED, {
-                { L.CHARACTERFRAME_TITLE, "New, in Interface: moves the Character "
+                { L.CHARACTERFRAME_TITLE, "New, on by default, in Interface: moves the Character "
                     .. "window's Equipment and Pet tabs to the side with the other tabs, removes "
                     .. "the portrait and level line above the stats so they start at the top, and "
                     .. "shows your level and name in your class color as the title." },
-                { L.CHATFADING_TITLE, "New, off by default, in Chat: keeps chat text on screen "
+            } },
+            { L.CHANGELOG_CHANGED, {
+                { L.CHATFADING_TITLE, "Renamed from Chat Fading, and now on by default." },
+            } },
+        },
+    },
+    {
+        version = "0.5.0",
+        date = "2026-10-01",
+        sections = {
+            { L.CHANGELOG_ADDED, {
+                { "Chat Fading", "New, off by default, in Chat: keeps chat text on screen "
                     .. "instead of fading it out after a while." },
             } },
             { L.CHANGELOG_CHANGED, {

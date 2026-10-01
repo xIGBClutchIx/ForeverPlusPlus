@@ -1,4 +1,4 @@
--- Chat Fading: keeps chat text on screen. Blizzard fades each window's lines out after a while;
+-- Persistent Chat: keeps chat text on screen. Blizzard fades each window's lines out after a while;
 -- this turns that off per window and gives the window's own setting back when the module stops.
 local _, ns = ...
 
@@ -8,7 +8,7 @@ local L = ns.L
 local Chat = ns.Chat
 
 local module = ns.NewModule("ChatFading", L.CHATFADING_DESC, {
-    enabled = false,
+    enabled = true,
 })
 module.title = L.CHATFADING_TITLE
 module.category = "chat"

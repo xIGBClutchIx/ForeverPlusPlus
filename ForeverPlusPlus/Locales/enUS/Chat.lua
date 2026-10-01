@@ -55,6 +55,6 @@ L.CHATFONT_SKURRI = "Skurri"
 L.CHATFONT_MORPHEUS = "Morpheus"
 
 -- ChatFading
-L.CHATFADING_TITLE = "Chat Fading"
+L.CHATFADING_TITLE = "Persistent Chat"
 L.CHATFADING_DESC = "Keep chat text on screen instead of fading it out after a while. Turning "
     .. "this off gives Blizzard's fading back."
