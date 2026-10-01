@@ -7,7 +7,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Added
 
 - **Character Frame Enhancements** (new, in Interface): moves the Character window's Equipment and Pet tabs to the side with the other tabs, removes the portrait and level line above the stats so they start at the top, and shows your level and name in your class color as the title.
-- **Chat Fading** (new, in Chat): keeps chat text on screen instead of fading it out after a while.
+- **Keep Chat Visible** (new, in Chat): keeps chat text on screen instead of fading it out after a while.
 
 ### Changed
 

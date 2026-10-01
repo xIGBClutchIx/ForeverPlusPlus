@@ -43,7 +43,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Chat Copy | Adds a button beside the chat window that opens the chat as text, already selected, so you can copy it with Ctrl+C. A slider sets how many lines. |
 | Short Channel Names | Shows chat channels as [1], [G], or [1. G] instead of [1. General], as number and letter ([3. T]) by default. Off by default. |
 | Chat Font | Draws the chat windows in another of the game's fonts (Friz Quadrata, Arial Narrow, Skurri, or Morpheus), keeping their size, and optionally the chat input box too. Unavailable on Korean, Chinese, and Russian clients, whose chat font needs fallbacks. |
-| Chat Fading | Keeps chat text on screen instead of fading it out after a while. |
+| Keep Chat Visible | Keeps chat text on screen instead of fading it out after a while. |
 | Chat History | Keeps each chat window's latest lines when you log out or reload and shows them again at login. A slider sets how many lines, and a checkbox the line that marks where it ends. |
 | Social Button | Moves the social (Quick Join) button down beside the chat window's other buttons. |
 | **Map** | |

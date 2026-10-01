@@ -1,4 +1,4 @@
--- Chat Fading: keeps chat text on screen. Blizzard fades each window's lines out after a while;
+-- Keep Chat Visible: keeps chat text on screen. Blizzard fades each window's lines out after a while;
 -- this turns that off per window and gives the window's own setting back when the module stops.
 local _, ns = ...
 
