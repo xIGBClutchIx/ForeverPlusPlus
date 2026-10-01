@@ -128,6 +128,8 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 - `issecretvalue`, `canaccessvalue`, `issecrettable`, `scrub`, `secretwrap` exist, as does `C_Secrets` with 27 predicates (`HasSecretRestrictions`, `ShouldAurasBeSecret`, `ShouldUnitHealthMaxBeSecret`, `GetSpellAuraSecrecy`, ...). **[in-game]** (2026-09-23) **[dump]**
 - In a solo open-world fight, `UnitHealth`, `UnitHealthPercent`, and `UnitHealthMissing` were secret for player and target, and the target's `UnitHealthMax` was secret. The player's `UnitHealthMax` and all `UNIT_COMBAT` amounts stayed readable. **[web]** (forever-addon-kit)
 - In combat, while `C_Secrets.ShouldAurasBeSecret()` is true, reading a secret aura throws, including your own buffs. Secrecy is per spell: `C_Secrets.GetSpellAuraSecrecy(id)`. **[web]**
+- Nameplate aura rows (`UnitFrame.AurasFrame.BuffListFrame` / `DebuffListFrame`, from Frame Stack) are restricted regions: `GetPoint` on them throws "Can't measure restricted regions" and taints, even out of combat on a friendly plate. So an addon can't read or safely re-anchor them. **[in-game]** (2026-10-01, BugSack)
+- Friendly units' `UnitHealth` read as secret out of combat on name-only plates. **[in-game]** (2026-10-01)
 - `Cooldown:SetCooldown` rejects secret numbers from addon code. Get a duration object from `C_Spell.GetSpellCooldownDuration` and pass it to `Cooldown:SetCooldownFromDurationObject`. **[web]**
 - Range checks stay readable in open-world combat (`C_Spell.IsSpellInRange`, `CheckInteractDistance`, some `C_Item.IsItemInRange` distances). **[web]**
 - `COMBAT_LOG_EVENT_UNFILTERED` never fires for addons. **[addon]** (Manners `Core.lua`) **[web]** Use `C_DamageMeter` (Blizzard's built-in meter) or events like `UNIT_COMBAT`.

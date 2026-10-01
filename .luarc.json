@@ -32,8 +32,6 @@
     "C_CurveUtil",
     "Enum",
     "issecretvalue",
-    "UnitHealth",
-    "UnitHealthMax",
     "UnitHealthPercent",
     "UnitIsPlayer",
     "UnitIsConnected",

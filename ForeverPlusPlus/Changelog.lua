@@ -24,9 +24,6 @@ ns.changelog = {
                     .. "for the rest. A creature whose objective is done shows a green check "
                     .. "and its final count (8/8), unless you turn off Show Completed; the count can be "
                     .. "turned off to leave just the check." },
-                { L.PLAYERPLATES_TITLE .. " and " .. L.NPCPLATES_TITLE, "On name-only plates the "
-                    .. "buff and debuff row centers over the name instead of sitting off to the "
-                    .. "left." },
             } },
         },
     },
