@@ -84,6 +84,9 @@ local function anchorPanes(up)
         -- they run further down.
         if index <= 2 then -- the two stats lists, not the equipment sets pane
             pane.ScrollBox:SetPoint("BOTTOMRIGHT", pane, "BOTTOMRIGHT", -30, up and 4 or 30)
+            -- The scrollbar stops a little short of the list's end, so it isn't pressed against
+            -- the window's edge.
+            pane.ScrollBar:SetPoint("BOTTOMLEFT", pane.ScrollBox, "BOTTOMRIGHT", 0, up and 10 or 0)
         end
     end
     host.StoneBg:SetAlpha(up and 0 or 1)
