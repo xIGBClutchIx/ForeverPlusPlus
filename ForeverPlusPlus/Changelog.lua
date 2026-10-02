@@ -26,9 +26,8 @@ ns.changelog = {
             { L.CHANGELOG_FIXED, {
                 { L.FISHINGCAST_TITLE, "Double right-click now casts Fishing; it never "
                     .. "recognized the world under the mouse before." },
-                { L.TOOLTIPS_TITLE, "The level and class lines on a player's tooltip are colored "
-                    .. "again, including when the game won't tell the addon the unit's level or "
-                    .. "class." },
+                { L.TOOLTIPS_TITLE, "Levels and class names are colored again, player titles "
+                    .. "show, and the Target line shows the target's name instead of its level." },
             } },
         },
     },

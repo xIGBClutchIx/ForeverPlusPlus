@@ -9,11 +9,9 @@
 local _, ns = ...
 
 local type, setmetatable = type, setmetatable
-local max = math.max
-local find, sub, gsub, match = string.find, string.sub, string.gsub, string.match
-local tonumber, TOOLTIP_UNIT_LEVEL = tonumber, TOOLTIP_UNIT_LEVEL
+local find, sub, gsub = string.find, string.sub, string.gsub
 local TooltipDataProcessor, Enum, C_Item = TooltipDataProcessor, Enum, C_Item
-local UnitExists, UnitClass, UnitLevel, UnitName = UnitExists, UnitIsPlayer, UnitClass, UnitLevel, UnitName
+local UnitExists, UnitClass, UnitLevel, UnitName = UnitExists, UnitClass, UnitLevel, UnitName
 local UnitPVPName, UnitIsUnit, UnitReaction, UnitSelectionColor = UnitPVPName, UnitIsUnit, UnitReaction, UnitSelectionColor
 local GetGuildInfo, GetCreatureDifficultyColor = GetGuildInfo, GetCreatureDifficultyColor
 local GetQuestDifficultyColor, FACTION_BAR_COLORS = GetQuestDifficultyColor, FACTION_BAR_COLORS
@@ -89,25 +87,14 @@ local YOU_COLOR = ns.Colors.RED
 
 local leftLine = ns.Text.LeftLine
 
--- The text on line `i`: from the tooltip's data when it has the line, else from the font string
--- (Forever can add lines such as the class after the data is built). nil when it's missing or
--- secret.
-local function lineText(tooltip, data, i)
+-- The text Blizzard put on line `i`, from the tooltip's data rather than the font string, or
+-- nil when it's missing or secret.
+local function lineText(data, i)
     local lineData = data.lines[i]
     local text = lineData and lineData.leftText
-    if not lineData then
-        local line = leftLine(tooltip, i)
-        text = line and line:IsShown() and line:GetText()
-    end
     if readable(text) and type(text) == "string" then
         return text
     end
-end
-
--- How many lines to look through: the data's, or the tooltip's if it has more.
-local function lineCount(tooltip, data)
-    local shown = tooltip.NumLines and tooltip:NumLines()
-    return max(#data.lines, readable(shown) and type(shown) == "number" and shown or 0)
 end
 
 local function escape(text)
@@ -209,7 +196,7 @@ end
 
 -- Puts the title in the name when Blizzard's line is only the name.
 local function addTitle(tooltip, data, unit)
-    local shown, name = lineText(tooltip, data, 1), UnitName(unit)
+    local shown, name = lineText(data, 1), UnitName(unit)
     local full = UnitPVPName and UnitPVPName(unit)
     if shown and readable(name) and readable(full) and full and shown == name and full ~= name then
         local line = leftLine(tooltip, 1)
@@ -226,7 +213,7 @@ local function colorGuild(tooltip, data, unit)
         return nil
     end
     for i = 2, 4 do
-        local text = lineText(tooltip, data, i)
+        local text = lineText(data, i)
         if text and find(text, guild, 1, true) then
             local mode, color = module.db.guildColor, nil
             if mode ~= "off" and Units.IsGuildmate(unit) then
@@ -243,41 +230,25 @@ local function colorGuild(tooltip, data, unit)
     end
 end
 
--- What a level line starts with ("Level "), from Blizzard's own format.
-local LEVEL_PREFIX = TOOLTIP_UNIT_LEVEL and match(TOOLTIP_UNIT_LEVEL, "^(.-)%%s")
-if LEVEL_PREFIX == "" then
-    LEVEL_PREFIX = nil
-end
-
 -- Colors the level by difficulty and the class name by class, on the level line (and the line
 -- after it, where Mainline puts a player's specialization and class).
 local function colorLevelLine(tooltip, data, unit, guildLine)
     local db = module.db
-    -- The unit's level and class may be secret; then the level is read from the line's own text
-    -- and the class line is colored whole.
     local level = UnitLevel(unit)
-    local levelKnown = readable(level) and type(level) == "number"
-    local levelPattern = levelKnown and (level > 0 and "%f[%d]" .. level .. "%f[%D]" or "%?%?")
+    if not (readable(level) and type(level) == "number") then
+        return
+    end
+    local levelPattern = level > 0 and "%f[%d]" .. level .. "%f[%D]" or "%?%?"
     local className = db.classColor and UnitClass(unit)
-    local class = db.classColor and classColor(unit)
-    local classPattern = class and readable(className) and className
+    local class = classColor(unit)
+    local classPattern = readable(className) and className and class
         and "%f[%w]" .. escape(className) .. "%f[%W]"
-    for i = 2, lineCount(tooltip, data) do
-        local text = i ~= guildLine and lineText(tooltip, data, i)
-        local isLevel = false
-        if text then
-            if levelKnown then
-                isLevel = find(text, levelPattern) ~= nil
-            else
-                isLevel = LEVEL_PREFIX and sub(text, 1, #LEVEL_PREFIX) == LEVEL_PREFIX
-                levelPattern = isLevel and (find(text, "%f[%d]%d+%f[%D]") and "%f[%d]%d+%f[%D]" or "%?%?")
-            end
-        end
-        if isLevel then
+    for i = 2, #data.lines do
+        local text = i ~= guildLine and lineText(data, i)
+        if text and find(text, levelPattern) then
             local changed, found = false
             if db.levelColor then
-                local shownLevel = levelKnown and level or tonumber(match(text, "%f[%d]%d+%f[%D]")) or 0
-                local color = levelColor(shownLevel)
+                local color = levelColor(level)
                 if color then
                     text, changed = colorMatch(text, levelPattern, color.r, color.g, color.b)
                 end
@@ -286,21 +257,13 @@ local function colorLevelLine(tooltip, data, unit, guildLine)
                 local r, g, b = class:GetRGB()
                 text, found = colorMatch(text, classPattern, r, g, b)
                 changed = changed or found
-                local nextText = not found and lineText(tooltip, data, i + 1)
+                local nextText = not found and lineText(data, i + 1)
                 if nextText then
                     local nextLine = leftLine(tooltip, i + 1)
                     nextText, found = colorMatch(nextText, classPattern, r, g, b)
                     if found and nextLine then
                         nextLine:SetText(nextText)
                     end
-                end
-            elseif class then
-                -- Class name unreadable: the line after the level is the class; color all of it.
-                local nextText = lineText(tooltip, data, i + 1)
-                local nextLine = nextText and nextText ~= FACTION_HORDE and nextText ~= FACTION_ALLIANCE
-                    and leftLine(tooltip, i + 1)
-                if nextLine then
-                    nextLine:SetTextColor(class:GetRGB())
                 end
             end
             local line = changed and leftLine(tooltip, i)
@@ -314,8 +277,8 @@ end
 
 -- Colors the "Horde" or "Alliance" line Blizzard adds to a unit, in the side's color, as on maps.
 local function colorFaction(tooltip, data)
-    for i = 2, lineCount(tooltip, data) do
-        local text = lineText(tooltip, data, i)
+    for i = 2, #data.lines do
+        local text = lineText(data, i)
         local side = text and (text == FACTION_HORDE and "H" or text == FACTION_ALLIANCE and "A")
         local line = side and leftLine(tooltip, i)
         if line then
