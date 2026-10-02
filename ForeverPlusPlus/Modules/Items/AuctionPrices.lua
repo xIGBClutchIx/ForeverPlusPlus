@@ -631,9 +631,16 @@ local function placeAtTop(form)
     end
     local anchor = reagentsAnchor
     panel:ClearAllPoints()
-    panel:SetPoint("TOPLEFT", anchor[1], anchor[2], anchor[3], anchor[4])
+    -- A recipe with no description still keeps its empty line's space: the totals take it.
+    local description = form.Description
+    local text = description and description.GetText and description:GetText()
+    if anchor[1] == description and (text == nil or text == "") then
+        panel:SetPoint("TOPLEFT", description, "TOPLEFT", anchor[3], 0)
+    else
+        panel:SetPoint("TOPLEFT", anchor[1], anchor[2], anchor[3], anchor[4] / 2)
+    end
     reagents:ClearAllPoints()
-    reagents:SetPoint("TOPLEFT", panel, "BOTTOMLEFT", 0, anchor[4] < 0 and anchor[4] or -12)
+    reagents:SetPoint("TOPLEFT", panel, "BOTTOMLEFT", 0, -14)
     return true
 end
 
