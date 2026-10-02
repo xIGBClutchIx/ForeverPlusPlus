@@ -25,6 +25,7 @@
     "Settings",
     "SettingsInbound",
     "SettingsPanel",
+    "C_SettingsUtil",
     "CreateSettingsListSectionHeaderInitializer",
     "C_CVar",
     "C_XMLUtil",

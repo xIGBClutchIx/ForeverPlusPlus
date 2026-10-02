@@ -422,7 +422,10 @@ local function newWindow()
         f:Hide()
     end)
     -- Selected on click, ready for Ctrl+C.
-    edit:SetScript("OnEditFocusGained", edit.HighlightText)
+    -- Not edit.HighlightText itself: the script's extra arguments would become its range.
+    edit:SetScript("OnEditFocusGained", function(self)
+        self:HighlightText()
+    end)
     -- Read only: typing puts the error back.
     edit:SetScript("OnTextChanged", function(_, userInput)
         if userInput then
