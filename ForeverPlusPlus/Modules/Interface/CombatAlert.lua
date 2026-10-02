@@ -25,12 +25,6 @@ module.options = {
     { key = "entering", name = L.COMBATALERT_ENTERING, description = L.COMBATALERT_ENTERING_DESC },
     { key = "leaving", name = L.COMBATALERT_LEAVING, description = L.COMBATALERT_LEAVING_DESC },
     {
-        key = "scale",
-        name = L.COMBATALERT_SCALE,
-        description = L.COMBATALERT_SCALE_DESC,
-        min = 50, max = 200, step = 10, format = "%d%%",
-    },
-    {
         key = "duration",
         name = L.COMBATALERT_DURATION,
         description = L.COMBATALERT_DURATION_DESC,
@@ -144,15 +138,6 @@ local editModeOptions = {
             module.db.scale = value
             place()
         end,
-    },
-}
-
-module.actions = {
-    {
-        name = L.COMBATALERT_RESET_POSITION,
-        button = L.COMBATALERT_RESET_POSITION_BUTTON,
-        description = L.COMBATALERT_RESET_POSITION_DESC,
-        fn = resetPosition,
     },
 }
 

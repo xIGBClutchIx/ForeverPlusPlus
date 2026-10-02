@@ -50,6 +50,9 @@ ns.changelog = {
                 { L.CHATFADING_TITLE, "Renamed from Chat Fading, and now on by default." },
                 { L.CHANGELOG_SETTINGS, "Clutch's Default also sets Zone Info's Dungeons and "
                     .. "Fishing to Hold Detail Key." },
+                { L.CHANGELOG_SETTINGS, "Combat Alert, Currency Bar, and Flight Timer no longer "
+                    .. "have Size sliders or Reset Position buttons in Settings. Edit Mode already "
+                    .. "sizes and resets each of them." },
             } },
             { L.CHANGELOG_FIXED, {
                 { L.FISHINGCAST_TITLE, "Double right-click now casts Fishing; it never "

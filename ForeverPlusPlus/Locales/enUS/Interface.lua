@@ -131,20 +131,15 @@ L.SPELLRANKS_LINE = "Bar %d, slot %d: %s is Rank %d, and Rank %d is known." -- b
 -- CombatAlert
 L.COMBATALERT_TITLE = "Combat Alert"
 L.COMBATALERT_DESC = "Show a line of text that floats up and fades when you enter or leave "
-    .. "combat. Move it in Edit Mode."
+    .. "combat. Move and resize it in Edit Mode."
 L.COMBATALERT_ENTER_TEXT = "Entering Combat"
 L.COMBATALERT_LEAVE_TEXT = "Leaving Combat"
 L.COMBATALERT_ENTERING = "Entering Combat"
 L.COMBATALERT_ENTERING_DESC = "Show a red alert when you enter combat."
 L.COMBATALERT_LEAVING = "Leaving Combat"
 L.COMBATALERT_LEAVING_DESC = "Show a green alert when you leave combat."
-L.COMBATALERT_SCALE = "Size"
-L.COMBATALERT_SCALE_DESC = "How big the text is."
 L.COMBATALERT_DURATION = "Duration"
 L.COMBATALERT_DURATION_DESC = "How long the text stays up before it has faded away."
-L.COMBATALERT_RESET_POSITION = "Position"
-L.COMBATALERT_RESET_POSITION_BUTTON = "Reset"
-L.COMBATALERT_RESET_POSITION_DESC = "Puts the alert back where it starts."
 
 -- AddOnList
 L.ADDONLIST_TITLE = "AddOns List"
@@ -160,7 +155,7 @@ L.ADDONLIST_NOTES_DESC = "Let the search box also find words in an addon's notes
 -- CurrencyBar
 L.CURRENCYBAR_TITLE = "Currency Bar"
 L.CURRENCYBAR_DESC = "Show your gold and the currencies you track in a small box, so they are "
-    .. "always in view. Move it in Edit Mode."
+    .. "always in view. Move and resize it in Edit Mode."
 L.CURRENCYBAR_HINT = "Track currencies by ticking Show on Backpack in the Currency tab."
 L.CURRENCYBAR_MONEY = "Gold"
 L.CURRENCYBAR_MONEY_DESC = "Show how much gold, silver, and copper you carry."
@@ -173,11 +168,6 @@ L.CURRENCYBAR_CURRENCIES_DESC = "Show the currencies you have ticked Show on Bac
     .. "Currency tab."
 L.CURRENCYBAR_VERTICAL = "Vertical"
 L.CURRENCYBAR_VERTICAL_DESC = "Stack the gold and currencies in a column instead of a row."
-L.CURRENCYBAR_RESET_POSITION = "Position"
-L.CURRENCYBAR_RESET_POSITION_BUTTON = "Reset"
-L.CURRENCYBAR_RESET_POSITION_DESC = "Puts the box back where it starts."
-L.CURRENCYBAR_SCALE = "Size"
-L.CURRENCYBAR_SCALE_DESC = "How big the box and its text are."
 
 -- CharacterFrame
 L.CHARACTERFRAME_TITLE = "Character Frame Enhancements"

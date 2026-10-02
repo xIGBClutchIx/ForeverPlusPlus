@@ -28,12 +28,6 @@ module.category = "map"
 module.options = {
     { key = "bar", name = L.FLIGHTTIMER_BAR, description = L.FLIGHTTIMER_BAR_DESC },
     { key = "tooltip", name = L.FLIGHTTIMER_TOOLTIP, description = L.FLIGHTTIMER_TOOLTIP_DESC },
-    {
-        key = "scale",
-        name = L.FLIGHTTIMER_SCALE,
-        description = L.FLIGHTTIMER_SCALE_DESC,
-        min = 50, max = 200, step = 10, format = "%d%%",
-    },
 }
 
 local DEFAULT_X, DEFAULT_Y = 0, 250
@@ -292,12 +286,6 @@ local editModeOptions = {
 }
 
 module.actions = {
-    {
-        name = L.FLIGHTTIMER_RESET_POSITION,
-        button = L.FLIGHTTIMER_RESET_POSITION_BUTTON,
-        description = L.FLIGHTTIMER_RESET_POSITION_DESC,
-        fn = resetPosition,
-    },
     {
         name = L.FLIGHTTIMER_RESET_TIMES,
         button = L.FLIGHTTIMER_RESET_TIMES_BUTTON,

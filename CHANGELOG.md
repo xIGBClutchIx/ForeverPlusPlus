@@ -19,6 +19,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Persistent Chat**: renamed from Chat Fading, and now on by default.
 
 - **Settings**: Clutch's Default also sets Zone Info's Dungeons and Fishing to Hold Detail Key.
+- **Settings**: Combat Alert, Currency Bar, and Flight Timer no longer have Size sliders or Reset Position buttons in Settings. Edit Mode already sizes and resets each of them.
 
 ### Fixed
 

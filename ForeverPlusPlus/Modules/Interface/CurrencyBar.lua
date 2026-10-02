@@ -34,12 +34,6 @@ module.options = {
         name = L.CURRENCYBAR_SESSION, description = L.CURRENCYBAR_SESSION_DESC,
     },
     { key = "vertical", name = L.CURRENCYBAR_VERTICAL, description = L.CURRENCYBAR_VERTICAL_DESC },
-    {
-        key = "scale",
-        name = L.CURRENCYBAR_SCALE,
-        description = L.CURRENCYBAR_SCALE_DESC,
-        min = 50, max = 200, step = 10, format = "%d%%",
-    },
 }
 
 local DEFAULT_X, DEFAULT_Y = 0, -300
@@ -224,15 +218,6 @@ local editModeOptions = {
             module.db.scale = value
             update()
         end,
-    },
-}
-
-module.actions = {
-    {
-        name = L.CURRENCYBAR_RESET_POSITION,
-        button = L.CURRENCYBAR_RESET_POSITION_BUTTON,
-        description = L.CURRENCYBAR_RESET_POSITION_DESC,
-        fn = resetPosition,
     },
 }
 
