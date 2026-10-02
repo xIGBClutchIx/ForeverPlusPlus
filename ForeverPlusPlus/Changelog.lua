@@ -15,7 +15,8 @@ ns.changelog = {
             { L.CHANGELOG_ADDED, {
                 { L.QUESTTRACKER_TITLE, "New, on by default, in Interface: restyles Blizzard's "
                     .. "quest tracker with a font, font size, and outline, a dark box behind it "
-                    .. "that fits your quests (with opacity and a border), and fading in combat. "
+                    .. "that fits your quests (with opacity, a border, and padding), and fading in "
+                    .. "combat. "
                     .. "It stays Blizzard's tracker, so Edit Mode, its menus, and quest items work "
                     .. "as before." },
                 { L.ERRORCATCHER_TITLE, "New, on by default, in Interface: catches Lua errors, "

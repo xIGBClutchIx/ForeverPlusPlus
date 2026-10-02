@@ -21,6 +21,7 @@ local module = ns.NewModule("QuestTracker", L.QUESTTRACKER_DESC, {
     background = true,
     opacity = 30, -- percent
     border = false,
+    padding = 10,
     fade = false,
 })
 module.title = L.QUESTTRACKER_TITLE
@@ -76,6 +77,13 @@ module.options = {
         requires = "background",
     },
     {
+        key = "padding",
+        name = L.QUESTTRACKER_PADDING,
+        description = L.QUESTTRACKER_PADDING_DESC,
+        requires = "background",
+        min = 0, max = 24, step = 2, format = "%d",
+    },
+    {
         key = "fade",
         name = L.QUESTTRACKER_FADE,
         description = L.QUESTTRACKER_FADE_DESC,
@@ -87,7 +95,6 @@ module.options = {
 local NON_ROMAN = { koKR = true, zhCN = true, zhTW = true, ruRU = true }
 
 local FADED = 0.3 -- the tracker's alpha in combat with Fade in Combat
-local PAD = 6 -- how far the box reaches past what the tracker shows
 
 -- Font objects the tracker is known to use, set before its first layout when they exist. The
 -- tracker's text is searched for more as it updates.
@@ -253,8 +260,9 @@ local function fitBox()
     end
     local frameTop = frameBottom + frameHeight
     box:ClearAllPoints()
-    box:SetPoint("TOPLEFT", frame, "TOPLEFT", left - frameLeft - PAD, top - frameTop + PAD)
-    box:SetPoint("BOTTOMRIGHT", frame, "TOPLEFT", right - frameLeft + PAD, bottom - frameTop - PAD)
+    local pad = module.db.padding -- how far the box reaches past what the tracker shows
+    box:SetPoint("TOPLEFT", frame, "TOPLEFT", left - frameLeft - pad, top - frameTop + pad)
+    box:SetPoint("BOTTOMRIGHT", frame, "TOPLEFT", right - frameLeft + pad, bottom - frameTop - pad)
     setColors()
     box:Show()
 end
