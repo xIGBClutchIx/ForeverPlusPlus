@@ -46,7 +46,14 @@ local function open(category)
         ns.Print(L.SETTINGS_AFTER_COMBAT)
     end
     ns.AfterCombat(function()
-        Settings.OpenToCategory(category:GetID())
+        -- Through the client when it can: it opens the panel from its own event, so Blizzard's
+        -- pages (and the pooled rows they share) aren't set up while our code is running, which
+        -- taints them (the Nameplates preview and Discord buttons then error).
+        if C_SettingsUtil and C_SettingsUtil.OpenSettingsPanel then
+            C_SettingsUtil.OpenSettingsPanel(category:GetID())
+        else
+            Settings.OpenToCategory(category:GetID())
+        end
     end)
     return true
 end
