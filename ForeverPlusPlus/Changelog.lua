@@ -10,6 +10,17 @@ local L = ns.L
 
 ns.changelog = {
     {
+        version = L.CHANGELOG_UNRELEASED,
+        sections = {
+            { L.CHANGELOG_FIXED, {
+                { L.AUCTIONPRICES_TITLE, "The age under an auction price is when that item was "
+                    .. "last seen, not the last scan, so an item missing from a scan no longer "
+                    .. "looks freshly checked. Saved prices are cleared once; the next visit to "
+                    .. "the auction house scans again." },
+            } },
+        },
+    },
+    {
         version = "0.6.0",
         date = "2026-10-01",
         sections = {

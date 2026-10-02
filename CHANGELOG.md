@@ -2,6 +2,12 @@
 
 What changed in each release of Forever++. The same notes show in game under Settings > AddOns > Forever++ > Changelog, from [`ForeverPlusPlus/Changelog.lua`](ForeverPlusPlus/Changelog.lua); change both together.
 
+## Unreleased
+
+### Fixed
+
+- **Auction Prices**: the age under an auction price is when that item was last seen, not the last scan, so an item missing from a scan no longer looks freshly checked. Saved prices are cleared once; the next visit to the auction house scans again.
+
 ## 0.6.0 (2026-10-01)
 
 ### Added

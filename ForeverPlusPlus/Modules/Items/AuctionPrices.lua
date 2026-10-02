@@ -24,8 +24,11 @@ local module = ns.NewModule("AuctionPrices", L.AUCTIONPRICES_DESC, ItemTooltip.P
     scanAgeColor = "age", -- "age" (green when fresh to red when old), "gray", "white", or "gold"
     scanAgeRedHours = 12, -- hours old at which "age" is fully red
     chat = true,
-    -- Per auction house ("Realm-Faction"): { scannedAt = time(), prices = { [itemID] = copper } }.
-    -- Data, not a setting: it isn't in module.options.
+    -- Per auction house ("Realm-Faction"): { scannedAt = time(), items = { [itemID] = { price =
+    -- copper, seenAt = time() } } }. scannedAt is the last full scan and decides when to scan
+    -- again; seenAt is when that item's price was last seen, which the tooltip's age shows, since
+    -- an item missing from a scan keeps its older price. Data, not a setting: it isn't in
+    -- module.options.
     houses = {},
 }, "gold"))
 module.title = L.AUCTIONPRICES_TITLE
@@ -84,8 +87,8 @@ local function house()
     local faction = UnitFactionGroup("player")
     local key = format("%s-%s", GetRealmName(), faction or "")
     local data = module.db.houses[key]
-    if not data then
-        data = { scannedAt = 0, prices = {} }
+    if not (data and data.items) then
+        data = { scannedAt = 0, items = {} } -- new, or saved before items kept their own age
         module.db.houses[key] = data
     end
     if faction then
@@ -169,23 +172,30 @@ local seen, seenCount -- itemIDs priced in this scan, and how many
 -- Keeps the lowest price from browse results. Any browse (the player's own searches too) updates
 -- the prices, so they stay fresh between full scans.
 local function addResults(results)
-    local prices = house().prices
+    local items = house().items
+    local now = time()
     for _, result in ipairs(results or {}) do
         local itemID = result.itemKey and result.itemKey.itemID
-        if itemID and result.totalQuantity and result.totalQuantity > 0 and result.minPrice
-            and result.minPrice > 0 then
-            if scanning then
-                -- The first price this scan replaces the old one; later ones only lower it,
-                -- since one item can come back once per item level or suffix.
-                if not seen[itemID] then
-                    seen[itemID] = true
-                    seenCount = seenCount + 1
-                    prices[itemID] = result.minPrice
-                elseif result.minPrice < prices[itemID] then
-                    prices[itemID] = result.minPrice
+        local price = result.minPrice
+        if itemID and result.totalQuantity and result.totalQuantity > 0 and price
+            and price > 0 then
+            local item = items[itemID]
+            if scanning and seen[itemID] then
+                -- One item can come back once per item level or suffix: keep the lowest.
+                if price < item.price then
+                    item.price = price
                 end
             else
-                prices[itemID] = result.minPrice
+                -- The first price this scan, or from any other browse, replaces the old one.
+                if scanning then
+                    seen[itemID] = true
+                    seenCount = seenCount + 1
+                end
+                if item then
+                    item.price, item.seenAt = price, now
+                else
+                    items[itemID] = { price = price, seenAt = now }
+                end
             end
         end
     end
@@ -402,7 +412,7 @@ ns.AddCommand("scan", "", L.AUCTIONPRICES_COMMAND, scanCommand)
 -- Reset: forgets this auction house's prices, after the player confirms in a popup.
 local function resetPrices()
     local data = house()
-    data.prices = {}
+    data.items = {}
     data.scannedAt = 0
     ns.Print(L.AUCTIONPRICES_RESET_DONE)
 end
@@ -445,17 +455,16 @@ end
 
 local function addAuctionPrice(tooltip, data)
     local itemID = module.enabled and ItemTooltip.ItemID(data)
-    local ah = itemID and house()
-    local price = ah and ah.prices[itemID]
-    if not price then
+    local item = itemID and house().items[itemID]
+    if not item then
         return
     end
     local db = module.db
-    ItemTooltip.AddPrice(tooltip, data, L.AUCTIONPRICES_LINE, price, db)
-    -- The last full scan; prices can also come from the player's own searches since then.
-    local scannedAt = ah.scannedAt
-    if db.scanAge ~= "off" and scannedAt > 0 then
-        local age = time() - scannedAt
+    ItemTooltip.AddPrice(tooltip, data, L.AUCTIONPRICES_LINE, item.price, db)
+    -- When this item's price was last seen, by a scan or the player's own search: an item
+    -- missing from the last scan keeps its older price and age.
+    if db.scanAge ~= "off" then
+        local age = time() - item.seenAt
         local color = db.scanAgeColor == "age" and ageColor(age) or db.scanAgeColor
         ItemTooltip.AddInfo(tooltip, L.AUCTIONPRICES_SCAN_AGE_LINE, ns.Text.Ago(age), db.scanAge, color)
     end
