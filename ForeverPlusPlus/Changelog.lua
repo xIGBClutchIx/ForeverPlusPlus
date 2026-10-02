@@ -13,6 +13,14 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_ADDED, {
+                { L.BESTREWARD_TITLE, "New, on by default, in Items: puts a gold coin on the "
+                    .. "quest reward choice that sells to a vendor for the most (price times "
+                    .. "count), in the quest window and the quest log. Ties are all marked, and it "
+                    .. "never picks for you." },
+                { L.ITEMCOUNT_TITLE, "New, off by default, in Items: shows how many of an item "
+                    .. "you own in its tooltip, above the prices, and how many are in your bags "
+                    .. "and your bank, with small bag and bank icons (or words). The bank is "
+                    .. "counted each time you open it." },
                 { L.FISHINGCAST_TITLE, "New Combat Warning option (on by default) shows one red "
                     .. "line where Blizzard's errors appear when combat starts while you have a "
                     .. "fishing pole equipped." },
@@ -24,6 +32,9 @@ ns.changelog = {
                     .. "errors each choice has. A Copy Bug Report button selects a report with the "
                     .. "addon version, client build, modules on, other addons, and the error's "
                     .. "stack and locals, ready for Ctrl+C." },
+                { L.SPELLRANKS_TITLE, "The tooltip line is now \"Higher Rank Known:\" with the "
+                    .. "rank at the right edge in white, like the price lines, instead of a gold "
+                    .. "line that read as part of the spell's description." },
             } },
             { L.CHANGELOG_FIXED, {
                 { L.AUCTIONPRICES_TITLE, "The age under an auction price is when that item was "

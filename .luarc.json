@@ -187,6 +187,7 @@
     "GetSubZoneText",
     "GetInstanceInfo",
     "C_EventUtils",
+    "GetFileIDFromPath",
     "Screenshot",
     "GetNumTitles",
     "IsTitleKnown",

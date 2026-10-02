@@ -71,6 +71,32 @@ L.ALREADYKNOWN_MAIL_DESC = "Mark mail whose attachments you already know, in the
 L.ALREADYKNOWN_LOOT = "Loot"
 L.ALREADYKNOWN_LOOT_DESC = "Mark known items in the loot window."
 
+-- ItemCount
+L.ITEMCOUNT_TITLE = "Item Count"
+L.ITEMCOUNT_DESC = "Show how many of an item you own in its tooltip, and how many are in your "
+    .. "bags and your bank."
+L.ITEMCOUNT_BANK = "Count the Bank"
+L.ITEMCOUNT_BANK_DESC = "Add what's in your bank. It's counted each time you open the bank, so "
+    .. "open it once on each character."
+L.ITEMCOUNT_LABELS = "Bags and Bank As"
+L.ITEMCOUNT_LABELS_DESC = "Show where your items are with Blizzard's bag and bank icons, or in words."
+L.ITEMCOUNT_LABELS_ICONS = "Icons"
+L.ITEMCOUNT_LABELS_WORDS = "Words"
+L.ITEMCOUNT_ALIGN = "Count Alignment"
+L.ITEMCOUNT_ALIGN_DESC = "Where the count goes, like the price lines' alignment."
+L.ITEMCOUNT_LINE = "Owned"
+L.ITEMCOUNT_TOTAL = "%d %s" -- total, where they are (in parentheses)
+L.ITEMCOUNT_WHERE = "(%s)" -- the bag and bank counts
+L.ITEMCOUNT_SEPARATOR = "  " -- between the bag and bank counts
+L.ITEMCOUNT_ICON_COUNT = "%s %d" -- bag or bank icon, count
+L.ITEMCOUNT_IN_BAGS = "%d in bags" -- count
+L.ITEMCOUNT_IN_BANK = "%d in bank" -- count
+
+-- BestReward
+L.BESTREWARD_TITLE = "Best Quest Reward"
+L.BESTREWARD_DESC = "Mark the quest reward choice that sells to a vendor for the most with a gold "
+    .. "coin, in the quest window and the quest log. It doesn't choose it for you."
+
 -- SellPrice
 L.SELLPRICE_TITLE = "Sell Price"
 L.SELLPRICE_DESC = "Show the vendor price of the whole stack in item tooltips. Hold Shift to see "

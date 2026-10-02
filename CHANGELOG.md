@@ -6,11 +6,14 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Added
 
+- **Best Quest Reward** (new, on by default, in Items): puts a gold coin on the quest reward choice that sells to a vendor for the most (price times count), in the quest window and the quest log. Ties are all marked, and it never picks for you.
+- **Item Count** (new, off by default, in Items): shows how many of an item you own in its tooltip, above the prices, and how many are in your bags and your bank, with small bag and bank icons (or words). The bank is counted each time you open it.
 - **Fishing Cast**: new Combat Warning option (on by default) shows one red line where Blizzard's errors appear when combat starts while you have a fishing pole equipped.
 
 ### Changed
 
 - **Error Catcher**: the window is redesigned: a list of errors on the left with their kind, count, and age, the one you pick on the right with when it first and last happened, and the session filter showing how many errors each choice has. A Copy Bug Report button selects a report with the addon version, client build, modules on, other addons, and the error's stack and locals, ready for Ctrl+C.
+- **Spell Ranks**: the tooltip line is now "Higher Rank Known:" with the rank at the right edge in white, like the price lines, instead of a gold line that read as part of the spell's description.
 
 ### Fixed
 

@@ -208,7 +208,9 @@ local function onLoaded()
     queue()
 end
 
--- Adds "Best known rank" to a spell's tooltip when a higher rank than this one is known.
+-- Adds "Higher Rank Known: Rank 7" to a spell's tooltip when a higher rank than this one is
+-- known, shaped like our item tooltip lines (white label, value at the right edge) so it doesn't
+-- read as part of the gold spell description.
 local function onTooltip(tooltip, data)
     if not (module.enabled and module.db.tooltip and known and tooltip == GameTooltip
         and data and readable(data.id) and data.id) then
@@ -217,7 +219,7 @@ local function onTooltip(tooltip, data)
     local name, rank = spellRank(data.id)
     local best = name and rank and known[name]
     if best and rank < best then
-        tooltip:AddLine(format(L.SPELLRANKS_BEST, best), 1, 0.82, 0)
+        tooltip:AddDoubleLine(L.SPELLRANKS_BEST, format(L.SPELLRANKS_BEST_RANK, best), 1, 1, 1, 1, 1, 1)
     end
 end
 
