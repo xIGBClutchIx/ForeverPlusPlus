@@ -22,15 +22,23 @@ local module = ns.NewModule("QuestIcons", L.QUESTICONS_DESC, {
     tracker = true,
     givers = true,
     icon = "infinity",
-    size = 100, -- percent
+    -- Icon size in each place, in percent.
+    logSize = 100,
+    trackerSize = 100,
+    giversSize = 100,
 })
 module.title = L.QUESTICONS_TITLE
 module.category = "interface"
 
+-- A place's checkbox, with its size slider in the same row.
+local function place(key, name, description)
+    local sizeKey = key .. "Size"
+    return { key = key, name = name, description = description, slider = sizeKey },
+        { key = sizeKey, name = L.QUESTICONS_SIZE, description = L.QUESTICONS_SIZE_DESC,
+            requires = key, min = 50, max = 300, step = 10, format = "%d%%" }
+end
+
 module.options = {
-    { key = "log", name = L.QUESTICONS_LOG, description = L.QUESTICONS_LOG_DESC },
-    { key = "tracker", name = L.QUESTICONS_TRACKER, description = L.QUESTICONS_TRACKER_DESC },
-    { key = "givers", name = L.QUESTICONS_GIVERS, description = L.QUESTICONS_GIVERS_DESC },
     {
         key = "icon", name = L.QUESTICONS_ICON, description = L.QUESTICONS_ICON_DESC,
         choices = {
@@ -38,27 +46,32 @@ module.options = {
             { "logo", L.QUESTICONS_ICON_LOGO },
         },
     },
-    {
-        key = "size", name = L.QUESTICONS_SIZE, description = L.QUESTICONS_SIZE_DESC,
-        min = 50, max = 200, step = 10, format = "%d%%",
-    },
 }
+for _, args in ipairs({
+    { "log", L.QUESTICONS_LOG, L.QUESTICONS_LOG_DESC },
+    { "tracker", L.QUESTICONS_TRACKER, L.QUESTICONS_TRACKER_DESC },
+    { "givers", L.QUESTICONS_GIVERS, L.QUESTICONS_GIVERS_DESC },
+}) do
+    local toggle, size = place(args[1], args[2], args[3])
+    module.options[#module.options + 1] = toggle
+    module.options[#module.options + 1] = size
+end
 
 local LAST_CLASSIC_QUEST = 9665
 
 -- Blizzard atlases (the Trading Post's infinity sign and the WoW Forever logo), each with its
--- height and width at 100% as a share of the text's font size. Probed: atlas names change
--- between builds.
+-- height and width at 100% as a share of the text's font size. The logo's square art has room
+-- around it, so it's drawn larger. Probed: atlas names change between builds.
 local ICONS = {
     infinity = { atlas = "perks-infinity", height = 1, width = 1.9 },
-    logo = { atlas = "logo-wow-forever", height = 1.6, width = 1.6 },
+    logo = { atlas = "logo-wow-forever", height = 2.6, width = 2.6 },
 }
 
 local function hasAtlas(name)
     return C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) ~= nil
 end
 
-local function iconFor(fontString)
+local function iconFor(fontString, percent)
     local icon = ICONS[module.db.icon] or ICONS.infinity
     if not hasAtlas(icon.atlas) then
         icon = icon == ICONS.infinity and ICONS.logo or ICONS.infinity
@@ -67,7 +80,7 @@ local function iconFor(fontString)
         end
     end
     local _, size = fontString:GetFont()
-    size = (size or 12) * module.db.size / 100
+    size = (size or 12) * (percent or 100) / 100
     return format("|A:%s:%d:%d|a", icon.atlas, floor(size * icon.height + 0.5),
         floor(size * icon.width + 0.5))
 end
@@ -84,8 +97,8 @@ local marked = setmetatable({}, { __mode = "k" })
 ---Adds the icon to a quest title, or takes it off.
 ---@param fontString table the title's font string
 ---@param questID number|nil
----@param on boolean whether this place is ticked
-local function mark(fontString, questID, on)
+---@param place string "log", "tracker", or "givers": its checkbox and size
+local function mark(fontString, questID, place)
     if not fontString then
         return
     end
@@ -97,7 +110,9 @@ local function mark(fontString, questID, on)
         text = original[fontString]
     end
     original[fontString] = text
-    local icon = on and module.enabled and isNew(questID) and iconFor(fontString)
+    local db = module.db
+    local icon = module.enabled and db[place] and isNew(questID)
+        and iconFor(fontString, db[place .. "Size"])
     local wanted = icon and text .. " " .. icon or text
     if wanted ~= fontString:GetText() then
         if icon and fontString.GetNumLines then
@@ -123,7 +138,7 @@ local function markLog()
         return
     end
     for button in pool:EnumerateActive() do
-        mark(button.Text, button.questID, module.db.log)
+        mark(button.Text, button.questID, "log")
     end
 end
 
@@ -131,7 +146,7 @@ end
 local TRACKERS = { "QuestObjectiveTracker", "CampaignQuestObjectiveTracker" }
 
 local function markBlock(block)
-    mark(block.HeaderText, block.id, module.db.tracker)
+    mark(block.HeaderText, block.id, "tracker")
 end
 
 local function markTrackerQuest(tracker, quest)
@@ -162,7 +177,7 @@ local function markGossip()
         local data = button.GetElementData and button:GetElementData()
         local kind = data and data.buttonType
         if kind == GOSSIP_BUTTON_TYPE_ACTIVE_QUEST or kind == GOSSIP_BUTTON_TYPE_AVAILABLE_QUEST then
-            mark(button:GetFontString(), data.info and data.info.questID, module.db.givers)
+            mark(button:GetFontString(), data.info and data.info.questID, "givers")
         end
     end)
 end
@@ -183,7 +198,7 @@ local function markGreeting()
         elseif GetAvailableQuestInfo then
             questID = select(5, GetAvailableQuestInfo(id))
         end
-        mark(button:GetFontString(), questID, module.db.givers)
+        mark(button:GetFontString(), questID, "givers")
     end
 end
 
