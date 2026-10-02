@@ -37,9 +37,8 @@ ns.changelog = {
                     .. "its own checkbox and icon size slider. Idea from ForeverQuestTint." },
                 { L.MIRROREDBARS_TITLE, "New, on by default, in Unit Frames: fills your "
                     .. "target's and focus's health, mana, and cast bars from the right, so they empty "
-                    .. "from left to right like a mirror of your own frame. Heal prediction, "
-                    .. "absorbs, and the bars' shading follow, and each bar and frame has its own "
-                    .. "checkbox." },
+                    .. "from left to right like a mirror of your own frame. Heal prediction and "
+                    .. "absorbs follow, and each bar and frame has its own checkbox." },
                 { L.CLASSCOLORS_TITLE, "The Names checkbox is now a Name Color choice: Default "
                     .. "(Blizzard's), White, or Class Color (players only)." },
                 { L.QUESTPLATES_TITLE, "New Party Progress option: Own Only (as before), Party "

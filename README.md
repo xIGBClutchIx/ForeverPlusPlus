@@ -58,7 +58,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Hide Filter Reset | Hides the reset button on the world map's filter dropdown, which otherwise shows whenever a filter is off. |
 | **Unit Frames** | |
 | Class Colors | Shows players' health bars, and optionally names (class color or white) and target and focus name backgrounds, in their class color on the player, target, focus, party, and target-of-target frames, and hostile and neutral NPCs' health bars in red and yellow. |
-| Mirrored Bars | Fills your target's and focus's health, mana, and cast bars from the right, so they empty from left to right like a mirror of your own frame, heal prediction, absorbs, and the bars' shading included. Each bar and frame has its own checkbox. |
+| Mirrored Bars | Fills your target's and focus's health, mana, and cast bars from the right, so they empty from left to right like a mirror of your own frame, heal prediction and absorbs included. Each bar and frame has its own checkbox. |
 | **Nameplates** | |
 | NPC Nameplates | Always shows friendly NPCs' names with their title, with a name size slider and a choice of where buffs sit. The health bar appears only when they're hurt or in combat. |
 | Player Nameplates | Always shows friendly players' names with their guild, with a name size slider, a choice of where buffs sit, and an icon (or light blue name) for recent allies. The health bar appears only when they're hurt or in combat. |
