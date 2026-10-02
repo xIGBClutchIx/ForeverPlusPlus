@@ -110,7 +110,8 @@ local function getIndicator()
         indicator:SetSize(1, 20)
         indicator:SetPoint("TOPRIGHT", parent, "TOPRIGHT", -30, -1)
         -- Above the window's border and title art, which are child frames of their own.
-        indicator:SetFrameStrata("HIGH")
+        -- A level, not a strata, so it stays with the window instead of floating over others.
+        indicator:SetFrameLevel(parent:GetFrameLevel() + 100)
         indicator.text = indicator:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         indicator.text:SetPoint("RIGHT")
         -- Probe: LoadingSpinnerTemplate is Mainline SharedXML; without it, only the text shows.

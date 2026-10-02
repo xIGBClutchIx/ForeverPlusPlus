@@ -95,7 +95,7 @@ local function newBar()
     local frame = CreateFrame("Frame", nil, UIParent,
         hasTemplate and "TooltipBackdropTemplate" or "BackdropTemplate")
     frame:SetSize(WIDTH, HEIGHT)
-    frame:SetFrameStrata("HIGH")
+    -- No strata of its own: MEDIUM like Blizzard's cast bar, so windows draw over it.
     if not hasTemplate and frame.SetBackdrop and BACKDROP_TOOLTIP_16_16_5555 then
         frame:SetBackdrop(BACKDROP_TOOLTIP_16_16_5555)
         frame:SetBackdropColor(0, 0, 0, 0.8)
