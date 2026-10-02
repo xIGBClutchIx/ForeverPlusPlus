@@ -8,6 +8,7 @@
 local _, ns = ...
 
 local pairs, ipairs, type, floor, min, max = pairs, ipairs, type, math.floor, math.min, math.max
+local format, tostring = string.format, tostring
 local setmetatable, GetLocale, CreateFrame = setmetatable, GetLocale, CreateFrame
 local InCombatLockdown, C_Timer = InCombatLockdown, C_Timer
 
@@ -233,22 +234,43 @@ local function isDrawn(region)
     return true
 end
 
--- Widens `bounds` ({ left, right, top, bottom }) to what a frame draws, and its children's: the
--- headers' art and text, the quest lines, their map buttons on the left and item buttons on the
--- right. Only what's drawn counts, not frame sizes: a collapsed section keeps its full height,
--- and some of the tracker's frames are wider than what shows in them.
+local fitBox
+local pending = false
+
+-- Fits the box on the next frame, once, however many of the tracker's frames changed.
+local function requestFit()
+    if pending or not module.enabled then
+        return
+    end
+    pending = true
+    C_Timer.After(0, function()
+        pending = false
+        fitBox()
+    end)
+end
+
+-- Collapsing a section, or a quest coming or going, shows, hides or resizes one of the tracker's
+-- frames without always going through an update we can hook, so every frame measured refits the
+-- box when that happens to it.
+local function watch(frame)
+    module:HookScript(frame, "OnShow", requestFit)
+    module:HookScript(frame, "OnHide", requestFit)
+    module:HookScript(frame, "OnSizeChanged", requestFit)
+end
+
+-- Lowers `bounds.bottom` to the lowest thing a frame and its children draw: header art and text,
+-- quest lines, map and item buttons. Only what's drawn counts, not frame sizes, since a
+-- collapsed section can keep its full height.
 local function measure(frame, bounds, depth)
+    watch(frame)
     if not frame:IsVisible() or frame:GetEffectiveAlpha() <= 0 then
         return
     end
     for _, region in ipairs({ frame:GetRegions() }) do
         if isDrawn(region) then
-            local left, bottom, width, height = region:GetRect()
-            if left and width > 1 and height > 1 then
-                bounds[1] = min(bounds[1] or left, left)
-                bounds[2] = max(bounds[2] or left + width, left + width)
-                bounds[3] = max(bounds[3] or bottom + height, bottom + height)
-                bounds[4] = min(bounds[4] or bottom, bottom)
+            local _, bottom, width, height = region:GetRect()
+            if bottom and width > 1 and height > 1 then
+                bounds.bottom = min(bounds.bottom or bottom, bottom)
             end
         end
     end
@@ -259,9 +281,10 @@ local function measure(frame, bounds, depth)
     end
 end
 
--- Fits the box around what the tracker shows: its header, and the blocks under it unless it's
--- collapsed. Blizzard's own background (Edit Mode's Opacity) fills the whole height instead.
-local function fitBox()
+-- Fits the box to the tracker's width (Edit Mode's) and down to the last thing it draws, so a
+-- collapsed tracker or section takes a short box. Blizzard's own background (Edit Mode's
+-- Opacity) fills the whole height instead.
+function fitBox()
     local frame = tracker()
     if not (module.enabled and module.db.background) or not frame:IsVisible() then
         if box then
@@ -276,28 +299,48 @@ local function fitBox()
             measure(child, bounds, 5)
         end
     end
-    local left, right, top, bottom = bounds[1], bounds[2], bounds[3], bounds[4]
-    local frameLeft, frameBottom, _, frameHeight = frame:GetRect()
-    if not (left and frameLeft) then
+    local _, frameBottom, _, frameHeight = frame:GetRect()
+    if not (bounds.bottom and frameBottom) then
         box:Hide()
         return
     end
     local frameTop = frameBottom + frameHeight
-    box:ClearAllPoints()
     local pad = module.db.padding -- how far the box reaches past what the tracker shows
-    box:SetPoint("TOPLEFT", frame, "TOPLEFT", left - frameLeft - pad, top - frameTop + pad)
-    box:SetPoint("BOTTOMRIGHT", frame, "TOPLEFT", right - frameLeft + pad, bottom - frameTop - pad)
+    box:ClearAllPoints()
+    box:SetPoint("TOPLEFT", frame, "TOPLEFT", -pad, pad)
+    box:SetPoint("BOTTOMRIGHT", frame, "TOPRIGHT", pad, bounds.bottom - frameTop - pad)
     setColors()
     box:Show()
 end
 
+-- What the box measures, for working out a box that doesn't fit: the tracker, then each of its
+-- frames with whether it shows, its rect, and the lowest thing it draws.
+ns.AddCommand("tracker", "", L.QUESTTRACKER_COMMAND, function()
+    local frame = tracker()
+    if not frame then
+        return
+    end
+    local function rect(f)
+        local l, b, w, h = f:GetRect()
+        if not l then
+            return "no rect"
+        end
+        return format("left %d bottom %d width %d height %d", l, b, w, h)
+    end
+    ns.Print(format("ObjectiveTrackerFrame: %s, %s", tostring(frame:IsVisible()), rect(frame)))
+    for _, child in ipairs({ frame:GetChildren() }) do
+        local bounds = {}
+        measure(child, bounds, 5)
+        ns.Print(format("  %s: shown %s, %s, drawn bottom %s", tostring(child:GetDebugName()),
+            tostring(child:IsVisible()), rect(child), tostring(bounds.bottom and floor(bounds.bottom))))
+    end
+end)
+
 -- After the tracker lays itself out: style fonts it has started using, and fit the box.
 local function onUpdate()
-    local frame = tracker()
-    findFonts(frame, 4)
+    findFonts(tracker(), 4)
     fitBox()
-    -- Collapsing a section can hide its lines after the update returns, so look again a frame on.
-    C_Timer.After(0, fitBox)
+    requestFit()
 end
 
 -- Fading ------------------------------------------------------------------------------------------
@@ -331,8 +374,8 @@ function module:OnEnable()
         self:On("QUEST_WATCH_LIST_CHANGED", later)
     end
     -- The header's collapse and Edit Mode's height change what shows without always updating.
-    self:HookScript(frame, "OnSizeChanged", fitBox)
-    self:HookScript(frame, "OnShow", fitBox)
+    self:HookScript(frame, "OnSizeChanged", requestFit)
+    self:HookScript(frame, "OnShow", requestFit)
     self:On("PLAYER_REGEN_DISABLED", function() setFaded(true) end)
     self:On("PLAYER_REGEN_ENABLED", function() setFaded(false) end)
     setFaded(InCombatLockdown())
