@@ -260,6 +260,8 @@
     "QuestFrameGreetingPanel",
     "QuestFrameGreetingPanel_OnShow",
     "GetActiveQuestID",
-    "GetAvailableQuestInfo"
+    "GetAvailableQuestInfo",
+    "QuestObjectiveTracker",
+    "CampaignQuestObjectiveTracker"
   ]
 }

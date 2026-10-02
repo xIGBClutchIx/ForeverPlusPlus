@@ -1,28 +1,36 @@
 -- Forever Quest Icons: a small icon after the name of quests that are new to Forever, the ones
--- that weren't in original Classic, in the quest log on the world map and in a quest giver's
--- list of quests. Idea from ForeverQuestTint; none of its code.
+-- that weren't in original Classic, in the quest log on the world map, the objective tracker, and
+-- a quest giver's list of quests, each with its own checkbox. Idea from ForeverQuestTint; none of
+-- its code.
 --
 -- New quests are told apart by ID. Every quest of original Classic has an ID of 9665 or less
 -- (inferred from Classic quest data), so a higher ID is a quest Forever added.
 --
 -- The icon is an atlas in the title's text. Blizzard measures a row's height from its text before
--- we add to it, so a title the icon would push onto a second line is left without one.
+-- we add to it, so a title the icon would push onto another line is left without one.
 local _, ns = ...
 
-local setmetatable, select, type, format, floor = setmetatable, select, type, string.format,
-    math.floor
+local setmetatable, ipairs, select, type, format, floor = setmetatable, ipairs, select, type,
+    string.format, math.floor
 local C_Texture = C_Texture
 
 local L = ns.L
 
 local module = ns.NewModule("QuestIcons", L.QUESTICONS_DESC, {
     enabled = true,
+    log = true,
+    tracker = true,
+    givers = true,
     icon = "infinity",
+    size = 100, -- percent
 })
 module.title = L.QUESTICONS_TITLE
 module.category = "interface"
 
 module.options = {
+    { key = "log", name = L.QUESTICONS_LOG, description = L.QUESTICONS_LOG_DESC },
+    { key = "tracker", name = L.QUESTICONS_TRACKER, description = L.QUESTICONS_TRACKER_DESC },
+    { key = "givers", name = L.QUESTICONS_GIVERS, description = L.QUESTICONS_GIVERS_DESC },
     {
         key = "icon", name = L.QUESTICONS_ICON, description = L.QUESTICONS_ICON_DESC,
         choices = {
@@ -30,15 +38,20 @@ module.options = {
             { "logo", L.QUESTICONS_ICON_LOGO },
         },
     },
+    {
+        key = "size", name = L.QUESTICONS_SIZE, description = L.QUESTICONS_SIZE_DESC,
+        min = 50, max = 200, step = 10, format = "%d%%",
+    },
 }
 
 local LAST_CLASSIC_QUEST = 9665
 
 -- Blizzard atlases (the Trading Post's infinity sign and the WoW Forever logo), each with its
--- height and width as a share of the text's font size. Probed: atlas names change between builds.
+-- height and width at 100% as a share of the text's font size. Probed: atlas names change
+-- between builds.
 local ICONS = {
-    infinity = { atlas = "perks-infinity", height = 0.7, width = 1.3 },
-    logo = { atlas = "logo-wow-forever", height = 1.3, width = 1.3 },
+    infinity = { atlas = "perks-infinity", height = 1, width = 1.9 },
+    logo = { atlas = "logo-wow-forever", height = 1.6, width = 1.6 },
 }
 
 local function hasAtlas(name)
@@ -54,7 +67,7 @@ local function iconFor(fontString)
         end
     end
     local _, size = fontString:GetFont()
-    size = size or 12
+    size = (size or 12) * module.db.size / 100
     return format("|A:%s:%d:%d|a", icon.atlas, floor(size * icon.height + 0.5),
         floor(size * icon.width + 0.5))
 end
@@ -71,7 +84,8 @@ local marked = setmetatable({}, { __mode = "k" })
 ---Adds the icon to a quest title, or takes it off.
 ---@param fontString table the title's font string
 ---@param questID number|nil
-local function mark(fontString, questID)
+---@param on boolean whether this place is ticked
+local function mark(fontString, questID, on)
     if not fontString then
         return
     end
@@ -82,18 +96,21 @@ local function mark(fontString, questID)
     if marked[fontString] == text then
         text = original[fontString]
     end
-    local wanted = text
-    local icon = module.enabled and isNew(questID) and iconFor(fontString)
-    if icon then
-        wanted = text .. " " .. icon
-    end
     original[fontString] = text
+    local icon = on and module.enabled and isNew(questID) and iconFor(fontString)
+    local wanted = icon and text .. " " .. icon or text
     if wanted ~= fontString:GetText() then
-        local lines = fontString.GetNumLines and fontString:GetNumLines()
-        fontString:SetText(wanted)
-        if icon and lines and fontString:GetNumLines() > lines then
-            wanted = text
+        if icon and fontString.GetNumLines then
+            -- Count the lines of the plain title, not of one we marked before.
             fontString:SetText(text)
+            local lines = fontString:GetNumLines()
+            fontString:SetText(wanted)
+            if fontString:GetNumLines() > lines then
+                wanted = text
+                fontString:SetText(text)
+            end
+        else
+            fontString:SetText(wanted)
         end
     end
     marked[fontString] = wanted
@@ -106,7 +123,31 @@ local function markLog()
         return
     end
     for button in pool:EnumerateActive() do
-        mark(button.Text, button.questID)
+        mark(button.Text, button.questID, module.db.log)
+    end
+end
+
+-- The objective tracker: its quest and campaign quest sections, each block's id a quest ID.
+local TRACKERS = { "QuestObjectiveTracker", "CampaignQuestObjectiveTracker" }
+
+local function markBlock(block)
+    mark(block.HeaderText, block.id, module.db.tracker)
+end
+
+local function markTrackerQuest(tracker, quest)
+    local block = quest and quest.GetID and tracker.GetExistingBlock
+        and tracker:GetExistingBlock(quest:GetID())
+    if block then
+        markBlock(block)
+    end
+end
+
+local function markTracker()
+    for _, name in ipairs(TRACKERS) do
+        local tracker = _G[name]
+        if tracker and tracker.EnumerateActiveBlocks then
+            tracker:EnumerateActiveBlocks(markBlock)
+        end
     end
 end
 
@@ -121,7 +162,7 @@ local function markGossip()
         local data = button.GetElementData and button:GetElementData()
         local kind = data and data.buttonType
         if kind == GOSSIP_BUTTON_TYPE_ACTIVE_QUEST or kind == GOSSIP_BUTTON_TYPE_AVAILABLE_QUEST then
-            mark(button:GetFontString(), data.info and data.info.questID)
+            mark(button:GetFontString(), data.info and data.info.questID, module.db.givers)
         end
     end)
 end
@@ -142,12 +183,25 @@ local function markGreeting()
         elseif GetAvailableQuestInfo then
             questID = select(5, GetAvailableQuestInfo(id))
         end
-        mark(button:GetFontString(), questID)
+        mark(button:GetFontString(), questID, module.db.givers)
     end
+end
+
+-- The tracker is its own Blizzard addon. Each tracker frame has its own copy of the method, so
+-- the frame is hooked.
+local function hookTracker()
+    for _, name in ipairs(TRACKERS) do
+        local tracker = _G[name]
+        if tracker and tracker.UpdateSingle then
+            module:Hook(tracker, "UpdateSingle", markTrackerQuest)
+        end
+    end
+    markTracker()
 end
 
 local function markAll()
     markLog()
+    markTracker()
     markGossip()
     markGreeting()
 end
@@ -156,6 +210,7 @@ function module:OnEnable()
     if QuestLogQuests_Update then
         self:Hook("QuestLogQuests_Update", markLog)
     end
+    ns.AddOns.WhenLoaded("Blizzard_ObjectiveTracker", hookTracker)
     local box = GossipFrame and GossipFrame.GreetingPanel and GossipFrame.GreetingPanel.ScrollBox
     if box then
         -- Runs when the list is filled and when it scrolls.
@@ -174,6 +229,7 @@ end
 
 -- Hooks stop by themselves; the titles showing now get their own text back.
 function module:OnDisable()
+    ns.AddOns.Cancel("Blizzard_ObjectiveTracker", hookTracker)
     markAll()
 end
 
