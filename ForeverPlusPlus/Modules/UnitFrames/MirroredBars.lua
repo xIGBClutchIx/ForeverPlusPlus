@@ -1,10 +1,12 @@
--- Mirrored Bars: the target's and focus's health and mana bars fill from the right, so they
--- empty from left to right, mirroring the player frame across the screen.
+-- Mirrored Bars: the target's and focus's health, power, and cast bars fill from the right, so
+-- they empty from left to right, mirroring the player frame across the screen.
 --
 -- The bars are flipped with StatusBar:SetReverseFill. Blizzard draws heal prediction and absorbs
 -- as segments whose mask it anchors to the right edge of the bar's fill, and an over-absorb glow
 -- on the bar's right end, so those are mirrored too: each segment is re-anchored to the fill's
--- left edge after Blizzard places it, and the glows swap ends. Turning off flips everything back.
+-- left edge after Blizzard places it, and the glows swap ends. The cast bar's spark is placed
+-- from the bar's left edge every frame, so it's moved to the same distance from the right edge
+-- after each. Turning off flips everything back.
 local _, ns = ...
 
 local _G, setmetatable, ipairs, unpack = _G, setmetatable, ipairs, unpack
@@ -16,6 +18,7 @@ local module = ns.NewModule("MirroredBars", L.MIRROREDBARS_DESC, {
     enabled = false,
     health = true,
     mana = true,
+    castBar = true,
     target = true,
     focus = true,
 })
@@ -27,6 +30,7 @@ local FRAMES = L.MIRROREDBARS_SECTION_FRAMES
 module.options = {
     { key = "health", name = L.MIRROREDBARS_HEALTH, description = L.MIRROREDBARS_HEALTH_DESC, section = BARS },
     { key = "mana", name = L.MIRROREDBARS_MANA, description = L.MIRROREDBARS_MANA_DESC, section = BARS },
+    { key = "castBar", name = L.MIRROREDBARS_CAST, description = L.MIRROREDBARS_CAST_DESC, section = BARS },
     { key = "target", name = L.MIRROREDBARS_TARGET, description = L.MIRROREDBARS_TARGET_DESC, section = FRAMES },
     { key = "focus", name = L.MIRROREDBARS_FOCUS, description = L.MIRROREDBARS_FOCUS_DESC, section = FRAMES },
 }
@@ -39,6 +43,7 @@ local GLOW_INSET = 7
 local weak = { __mode = "k" }
 local glowTexCoords = setmetatable({}, weak) -- Texture -> Blizzard's tex coords before we flipped it
 local mirroredHealth = setmetatable({}, weak) -- unit frame -> true while its health bar is mirrored
+local mirroredCast = setmetatable({}, weak) -- cast bar -> true while it's mirrored
 
 -- The frames the module can mirror, with the setting each falls under.
 local function frames()
@@ -142,6 +147,45 @@ local function applyHealth(frame, mirrored)
     end
 end
 
+-- Blizzard puts the spark's center a distance from the bar's left edge (CastingBarMixin:OnUpdate);
+-- this moves it to that distance from the right edge, or back.
+local function flipSpark(bar, mirrored)
+    local spark = bar.Spark
+    if not spark or (spark.IsAnchoringRestricted and spark:IsAnchoringRestricted()) then
+        return
+    end
+    local point, relativeTo, relativePoint, x, y = spark:GetPoint(1)
+    if point ~= "CENTER" or relativeTo ~= bar or not readable(x) then
+        return
+    end
+    local from, to = "LEFT", "RIGHT"
+    if not mirrored then
+        from, to = "RIGHT", "LEFT"
+    end
+    if relativePoint == from then
+        spark:ClearAllPoints()
+        spark:SetPoint("CENTER", bar, to, -(x or 0), y)
+    end
+end
+
+local function onCastUpdate(bar)
+    if mirroredCast[bar] then
+        flipSpark(bar, true)
+    end
+end
+
+local function applyCast(bar, mirrored)
+    if not bar or (mirroredCast[bar] or false) == mirrored then
+        return
+    end
+    mirroredCast[bar] = mirrored or nil
+    bar:SetReverseFill(mirrored)
+    if mirrored then
+        module:HookScript(bar, "OnUpdate", onCastUpdate)
+    end
+    flipSpark(bar, mirrored)
+end
+
 local function apply()
     for _, entry in ipairs(frames()) do
         local frame, part = entry[1], entry[2]
@@ -150,6 +194,7 @@ local function apply()
             if frame.manabar then
                 frame.manabar:SetReverseFill(wants(part, "mana"))
             end
+            applyCast(frame.spellbar, wants(part, "castBar"))
         end
     end
 end
