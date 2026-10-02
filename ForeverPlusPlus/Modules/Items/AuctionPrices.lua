@@ -13,7 +13,6 @@ local C_AuctionHouse, C_Timer, GetTime = C_AuctionHouse, C_Timer, GetTime
 local GetRealmName, UnitFactionGroup = GetRealmName, UnitFactionGroup
 local CreateFrame, pcall, type, hooksecurefunc = CreateFrame, pcall, type, hooksecurefunc
 local select, tostring, C_Item, C_TradeSkillUI, Enum = select, tostring, C_Item, C_TradeSkillUI, Enum
-local pairs, setmetatable = pairs, setmetatable
 
 local L = ns.L
 local ItemTooltip = ns.ItemTooltip
@@ -487,12 +486,13 @@ local function addAuctionPrice(tooltip, data)
 end
 
 -- Crafting -----------------------------------------------------------------------------------
--- In the professions window: under each reagent's name, what the recipe's count of it costs;
--- under the description, the total, what the crafted items are worth, and the profit. A reagent
+-- In the professions window, under the recipe's description: what each reagent costs for the
+-- count the recipe takes, the total, what the crafted items are worth, and the profit. A reagent
 -- a merchant sells costs the merchant's price when that's lower than the auction's; those
 -- prices are learned at merchants. A crafted item with no auction price is worth what a
--- merchant pays for it. Our own font strings and frame, on Blizzard's recipe form; only the
--- anchors of the reagents and their names are changed, to make room, and put back when ours go.
+-- merchant pays for it. Our own frame on Blizzard's recipe form; only the reagents' anchor is
+-- changed, to move them down under it, and put back when it goes. (Prices inside Blizzard's
+-- reagent slots didn't fit: their names wrap in a narrow column.)
 
 -- A merchant's item: its price, how many that price buys, how many are left (-1: unlimited),
 -- and whether it costs something besides money. Probe: C_MerchantFrame.GetItemInfo is newer
@@ -593,7 +593,6 @@ end
 local CRAFT_WIDTH, ROW_HEIGHT = 280, 14
 
 local panel -- our frame for the totals, made the first time a recipe shows
-local slotPrices = setmetatable({}, { __mode = "k" }) -- Blizzard's reagent slot -> our price text
 local reagentsAnchor -- Blizzard's anchor for the reagents, which our totals take over
 
 local function craftForm()
@@ -651,61 +650,6 @@ local function restoreReagents(form)
     end
 end
 
--- Blizzard's reagent slot frames on the form: the Reagents frame's children, and the form's own
--- list of them. Probe: either may be missing; a slot is a frame with GetReagentSlotSchematic.
-local function eachSlot(form, fn)
-    local done = {}
-    local function visit(slot)
-        if type(slot) == "table" and not done[slot] and slot.GetReagentSlotSchematic and slot.Name then
-            done[slot] = true
-            fn(slot)
-        end
-    end
-    if form.Reagents then
-        for _, child in ipairs({ form.Reagents:GetChildren() }) do
-            visit(child)
-        end
-    end
-    if type(form.reagentSlots) == "table" then
-        for _, list in pairs(form.reagentSlots) do
-            if type(list) == "table" then
-                for _, slot in pairs(list) do
-                    visit(slot)
-                end
-            end
-        end
-    end
-end
-
--- A slot's name sits centered beside its icon, so with our price under it the pair would hang
--- below the icon: the name moves up by half a line while the price shows, and back after. Only
--- a name with one anchor, as Mainline's has; its anchor is kept the first time it's seen.
-local nameAnchors = setmetatable({}, { __mode = "k" }) -- slot -> { point, to, relativePoint, x, y }
-local NAME_LIFT = 6
-
-local function liftName(slot, lift)
-    local name = slot.Name
-    local anchor = nameAnchors[slot]
-    if not anchor then
-        if name:GetNumPoints() ~= 1 then
-            return
-        end
-        anchor = { name:GetPoint(1) }
-        nameAnchors[slot] = anchor
-    end
-    name:ClearAllPoints()
-    name:SetPoint(anchor[1], anchor[2], anchor[3], anchor[4], anchor[5] + (lift and NAME_LIFT or 0))
-end
-
-local function hideSlotPrices()
-    for slot, text in pairs(slotPrices) do
-        if text:IsShown() then
-            text:Hide()
-            liftName(slot, false)
-        end
-    end
-end
-
 -- Row `i` at `y`: a label on the left and a value at the right edge.
 local function setRow(i, y, label, value)
     local row = panel.rows[i]
@@ -749,7 +693,6 @@ local function refreshCrafting(recipeInfo)
             panel:Hide()
             restoreReagents(form)
         end
-        hideSlotPrices()
         return
     end
     getPanel(form)
@@ -764,47 +707,34 @@ local function refreshCrafting(recipeInfo)
         panel:SetPoint("TOPLEFT", below, "BOTTOMLEFT", 0, -12)
     end
 
-    -- Each reagent's price under its name in Blizzard's slot: the cost for the count the recipe
-    -- takes, and one's price in gray when it takes more than one.
-    hideSlotPrices()
-    eachSlot(form, function(slot)
-        local slotSchematic = slot:IsShown() and slot:GetReagentSlotSchematic()
-        local itemID, count
-        if slotSchematic then
-            itemID, count = basicReagent(slotSchematic)
-        end
-        if not itemID then
-            return
-        end
-        local text = slotPrices[slot]
-        if not text then
-            text = slot:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-            text:SetPoint("TOPLEFT", slot.Name, "BOTTOMLEFT", 0, -1)
-            slotPrices[slot] = text
-        end
-        liftName(slot, true)
-        local unit = reagentCost(itemID)
-        if not unit then
-            text:SetText(noPrice())
-        elseif count > 1 then
-            text:SetText(format(L.AUCTIONPRICES_CRAFT_EACH, coins(unit * count),
-                GRAY:WrapTextInColorCode(format(L.AUCTIONPRICES_CRAFT_PER, coins(unit)))))
-        else
-            text:SetText(coins(unit))
-        end
-        text:Show()
-    end)
-
+    -- A row per reagent: its name and count, then what the recipe's count of it costs, with one's
+    -- price in gray when it takes more than one.
+    local i, y = 0, 0
     local total, missing = 0, false
     for _, reagent in ipairs(reagents) do
-        local unit = reagentCost(reagent[1])
+        local itemID, count = reagent[1], reagent[2]
+        local name = C_Item.GetItemNameByID(itemID) or L.AUCTIONPRICES_CRAFT_UNKNOWN
+        local label = format(L.AUCTIONPRICES_CRAFT_EACH, name,
+            GRAY:WrapTextInColorCode(format(L.AUCTIONPRICES_CRAFT_COUNT, count)))
+        local unit = reagentCost(itemID)
+        local value
         if unit then
-            total = total + unit * reagent[2]
+            total = total + unit * count
+            value = coins(unit * count)
+            if count > 1 then
+                value = format(L.AUCTIONPRICES_CRAFT_EACH,
+                    GRAY:WrapTextInColorCode(format(L.AUCTIONPRICES_CRAFT_PER, coins(unit))), value)
+            end
         else
             missing = true
+            value = noPrice()
         end
+        i = i + 1
+        setRow(i, y, label, value)
+        y = y - ROW_HEIGHT
     end
-    local i, y = 1, 0
+    y = y - 6
+    i = i + 1
     setRow(i, y, L.AUCTIONPRICES_CRAFT_COST, missing and noPrice() or coins(total))
     y = y - ROW_HEIGHT
 
@@ -888,7 +818,6 @@ function module:OnDisable()
     if panel then
         panel:Hide()
     end
-    hideSlotPrices()
     local form = craftForm()
     if form then
         restoreReagents(form)
