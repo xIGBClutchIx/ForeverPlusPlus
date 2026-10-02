@@ -237,6 +237,10 @@ end
 local fitBox
 local pending, settling = false, false
 local SETTLE = 0.2 -- seconds; when to fit once more after a change
+-- How far the header art and the quests' map buttons reach past the tracker's left edge (about
+-- 5 pixels in game), so the padding on the left measures from them whether sections are open or
+-- not. Measured from what's drawn, the buttons' glow made it jump.
+local OVERHANG = 6
 
 -- Fits the box on the next frame, once, however many of the tracker's frames changed. Opening a
 -- section shows its quests a moment before Blizzard has moved them all into place, which fires
@@ -272,23 +276,17 @@ end
 
 -- Lowers `bounds.bottom` to the lowest thing a frame and its children draw: header art and text,
 -- quest lines, map and item buttons. Only what's drawn counts, not frame sizes, since a
--- collapsed section can keep its full height. `bounds.left` is the leftmost button drawn: the
--- quests' map buttons hang out past the tracker's left edge (header art does too, further than
--- shows, so only buttons count).
+-- collapsed section can keep its full height.
 local function measure(frame, bounds, depth)
     watch(frame)
     if not frame:IsVisible() or frame:GetEffectiveAlpha() <= 0 then
         return
     end
-    local button = frame:GetObjectType() == "Button"
     for _, region in ipairs({ frame:GetRegions() }) do
         if isDrawn(region) then
-            local left, bottom, width, height = region:GetRect()
+            local _, bottom, width, height = region:GetRect()
             if bottom and width > 1 and height > 1 then
                 bounds.bottom = min(bounds.bottom or bottom, bottom)
-                if button then
-                    bounds.left = min(bounds.left or left, left)
-                end
             end
         end
     end
@@ -317,16 +315,15 @@ function fitBox()
             measure(child, bounds, 5)
         end
     end
-    local frameLeft, frameBottom, _, frameHeight = frame:GetRect()
+    local _, frameBottom, _, frameHeight = frame:GetRect()
     if not (bounds.bottom and frameBottom) then
         box:Hide()
         return
     end
     local frameTop = frameBottom + frameHeight
-    local left = min(0, (bounds.left or frameLeft) - frameLeft)
     local pad = module.db.padding -- how far the box reaches past what the tracker shows
     box:ClearAllPoints()
-    box:SetPoint("TOPLEFT", frame, "TOPLEFT", left - pad, pad)
+    box:SetPoint("TOPLEFT", frame, "TOPLEFT", -OVERHANG - pad, pad)
     box:SetPoint("BOTTOMRIGHT", frame, "TOPRIGHT", pad, bounds.bottom - frameTop - pad)
     setColors()
     box:Show()
@@ -350,9 +347,8 @@ ns.AddCommand("tracker", "", L.QUESTTRACKER_COMMAND, function()
     for _, child in ipairs({ frame:GetChildren() }) do
         local bounds = {}
         measure(child, bounds, 5)
-        ns.Print(format("  %s: shown %s, %s, drawn bottom %s, button left %s",
-            tostring(child:GetDebugName()), tostring(child:IsVisible()), rect(child),
-            tostring(bounds.bottom and floor(bounds.bottom)), tostring(bounds.left and floor(bounds.left))))
+        ns.Print(format("  %s: shown %s, %s, drawn bottom %s", tostring(child:GetDebugName()),
+            tostring(child:IsVisible()), rect(child), tostring(bounds.bottom and floor(bounds.bottom))))
     end
 end)
 
