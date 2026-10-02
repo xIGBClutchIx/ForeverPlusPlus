@@ -37,8 +37,8 @@ ns.changelog = {
                     .. "its own checkbox and icon size slider. Idea from ForeverQuestTint." },
                 { L.CLASSCOLORS_TITLE, "The Names checkbox is now a Name Color choice: Default "
                     .. "(Blizzard's), White, or Class Color (players only)." },
-                { L.QUESTPLATES_TITLE, "New Party Progress option: Own Only (as before), Party "
-                    .. "Combined (everyone's counts added up), or Lowest (the party member "
+                { L.QUESTPLATES_TITLE, "New Party Progress option: Party Combined (everyone's "
+                    .. "counts added up, the default), Own Only (as before), or Lowest (the party member "
                     .. "furthest from done). With a party member on the quest, creatures only "
                     .. "they need now show too." },
                 { L.CLASSCOLORS_TITLE, "New Name Backgrounds option (on by default) tints the "

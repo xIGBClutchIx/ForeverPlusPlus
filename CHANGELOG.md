@@ -11,7 +11,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Character Frame Enhancements** (new, on by default, in Interface): moves the Character window's Equipment and Pet tabs to the side with the other tabs, removes the portrait and level line above the stats so they start at the top, and shows your level and name in your class color as the title.
 - **Forever Quest Icons** (new, on by default, in Interface): marks quests that are new to Forever, the ones that weren't in original Classic, with an infinity sign (or the Forever logo) after their name in the quest log on the world map, the objective tracker, and quest givers' lists, each with its own checkbox and icon size slider. Idea from ForeverQuestTint.
 - **Class Colors**: the Names checkbox is now a Name Color choice: Default (Blizzard's), White, or Class Color (players only).
-- **Quest Nameplates**: new Party Progress option: Own Only (as before), Party Combined (everyone's counts added up), or Lowest (the party member furthest from done). With a party member on the quest, creatures only they need now show too.
+- **Quest Nameplates**: new Party Progress option: Party Combined (everyone's counts added up, the default), Own Only (as before), or Lowest (the party member furthest from done). With a party member on the quest, creatures only they need now show too.
 - **Class Colors**: new Name Backgrounds option (on by default) tints the bar behind a player's name on the target and focus frames in their class color instead of Blizzard's faction color.
 
 ### Changed
