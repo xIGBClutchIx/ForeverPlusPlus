@@ -29,9 +29,8 @@ L.AUCTIONPRICES_SCAN_AGE_RED_DESC = "With Scan Age Color on By Age, how old a sc
 L.AUCTIONPRICES_SCAN_AGE_LINE = "Scanned"
 L.AUCTIONPRICES_SECTION_CRAFTING = "Crafting"
 L.AUCTIONPRICES_CRAFTING = "Crafting Costs"
-L.AUCTIONPRICES_CRAFTING_DESC = "In the professions window, under the recipe's description: what "
-    .. "its reagents cost, what the crafted items are worth, and the profit. Reagents a merchant "
-    .. "sells use the merchant's price once you've visited one that has them, when it's lower."
+L.AUCTIONPRICES_CRAFTING_DESC = "Show Total Cost, Value, and Profit for the selected recipe in "
+    .. "the professions window."
 L.AUCTIONPRICES_CRAFT_NO_PRICE = "No price"
 L.AUCTIONPRICES_CRAFT_EACH = "%s  %s" -- coins, then a gray note
 L.AUCTIONPRICES_CRAFT_COST = "Total Cost"
