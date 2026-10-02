@@ -39,3 +39,18 @@ L.CLASSCOLORS_PARTY_DESC = "Your party members' frames. Raid-style party frames 
 L.CLASSCOLORS_TOT = "Target of Target"
 L.CLASSCOLORS_TOT_DESC = "The small frames for your target's target and your focus's target."
 
+
+-- MirroredBars
+L.MIRROREDBARS_TITLE = "Mirrored Bars"
+L.MIRROREDBARS_DESC = "Fill your target's and focus's health and mana bars from the right, so they "
+    .. "empty from left to right, mirroring your own frame."
+L.MIRROREDBARS_SECTION_BARS = "Bars"
+L.MIRROREDBARS_SECTION_FRAMES = "Frames"
+L.MIRROREDBARS_HEALTH = "Health Bar"
+L.MIRROREDBARS_HEALTH_DESC = "Mirror the health bar, with its heal prediction and absorbs."
+L.MIRROREDBARS_MANA = "Mana Bar"
+L.MIRROREDBARS_MANA_DESC = "Mirror the mana, rage, or energy bar."
+L.MIRROREDBARS_TARGET = "Target"
+L.MIRROREDBARS_TARGET_DESC = "Your target's frame."
+L.MIRROREDBARS_FOCUS = "Focus"
+L.MIRROREDBARS_FOCUS_DESC = "Your focus's frame."

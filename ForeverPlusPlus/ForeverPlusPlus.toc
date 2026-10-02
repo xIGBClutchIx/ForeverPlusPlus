@@ -76,6 +76,7 @@ Modules\Chat\ChatFading.lua
 Modules\Chat\ChatHistory.lua
 Modules\Chat\SocialButton.lua
 Modules\UnitFrames\ClassColors.lua
+Modules\UnitFrames\MirroredBars.lua
 Modules\Map\PointsOfInterest\PointsOfInterest.lua
 Modules\Map\PointsOfInterest\Data.lua
 Modules\Map\ZoneInfo\ZoneInfo.lua
