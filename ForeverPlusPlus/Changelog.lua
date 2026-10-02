@@ -26,7 +26,9 @@ ns.changelog = {
                     .. "reagents, what the crafted items are worth, and the profit in green or "
                     .. "red. Reagents a merchant sells use the merchant's "
                     .. "price once you've visited one, when it's lower; a crafted item with no "
-                    .. "auction price is valued at its vendor price. Missing prices say No price." },
+                    .. "auction price is valued at its vendor price. Missing prices say No price. "
+                    .. "Hovering a reagent there prices the count the recipe takes (Shift for "
+                    .. "one), in the auction and sell price lines." },
                 { L.FISHINGCAST_TITLE, "New Combat Warning option (on by default) shows one red "
                     .. "line where Blizzard's errors appear when combat starts while you have a "
                     .. "fishing pole equipped." },

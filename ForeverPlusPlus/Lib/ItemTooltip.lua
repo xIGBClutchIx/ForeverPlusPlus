@@ -6,6 +6,7 @@
 local _, ns = ...
 
 local ipairs, next, setmetatable, format, type = ipairs, next, setmetatable, string.format, type
+local pcall = pcall
 local floor, max, UIParent = math.floor, math.max, UIParent
 local TooltipDataProcessor, Enum, C_Item, GameTooltip = TooltipDataProcessor, Enum, C_Item, GameTooltip
 local IsShiftKeyDown = IsShiftKeyDown
@@ -201,10 +202,33 @@ local function inBagsOrWorn(location)
     return (bag or worn) and location:IsValid() or false
 end
 
----How many items the hovered stack holds, or 1 when it can't tell (links, merchants, buyback).
+-- A reagent in the professions window: how many the recipe takes, or nil. The tooltip's owner is
+-- the slot's button, or the slot. Probe: Mainline's reagent slot has GetReagentSlotSchematic.
+local function reagentCount(tooltip)
+    local owner = tooltip and tooltip.GetOwner and tooltip:GetOwner()
+    for _ = 1, 2 do
+        if type(owner) ~= "table" then
+            return nil
+        end
+        if owner.GetReagentSlotSchematic then
+            local ok, schematic = pcall(owner.GetReagentSlotSchematic, owner)
+            local count = ok and type(schematic) == "table" and schematic.quantityRequired
+            return type(count) == "number" and count > 0 and count or nil
+        end
+        owner = owner.GetParent and owner:GetParent()
+    end
+end
+
+---How many items the hovered stack holds, or how many a recipe takes of a reagent in the
+---professions window; 1 when it can't tell (links, merchants, buyback).
 ---@param data table tooltip data
+---@param tooltip? table the tooltip, to find a reagent slot it belongs to
 ---@return number
-function ItemTooltip.StackCount(data)
+function ItemTooltip.StackCount(data, tooltip)
+    local reagent = reagentCount(tooltip)
+    if reagent then
+        return reagent
+    end
     if data.guid and C_Item.GetItemLocation and C_Item.GetStackCount then
         local location = C_Item.GetItemLocation(data.guid)
         if inBagsOrWorn(location) then
@@ -226,9 +250,9 @@ end
 
 -- How many items a price line counts: the whole stack, or one while Shift is held. `mode` "one"
 -- turns that round (one, and the stack with Shift).
-local function priceCount(data, mode)
+local function priceCount(tooltip, data, mode)
     local stack = (mode == "one") == IsShiftKeyDown()
-    return stack and ItemTooltip.StackCount(data) or 1
+    return stack and ItemTooltip.StackCount(data, tooltip) or 1
 end
 
 -- Alignment ----------------------------------------------------------------------------------
@@ -271,7 +295,7 @@ end
 ---@param unitPrice number copper for one item
 ---@param db table
 function ItemTooltip.AddPrice(tooltip, data, name, unitPrice, db)
-    local count = priceCount(data, db.mode)
+    local count = priceCount(tooltip, data, db.mode)
     local amount = unitPrice * count
     local color = COLORS[db.color] or GRAY_FONT_COLOR
     local quantity = color:WrapTextInColorCode(format(L.PRICE_QUANTITY, count))
