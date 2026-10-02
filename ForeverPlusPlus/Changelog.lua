@@ -23,7 +23,7 @@ ns.changelog = {
                     .. "popup, saves them per session with counts, stack, and locals, and shows "
                     .. "them in a window you can copy from (/fpp errors, or a minimap button with "
                     .. "this session's count), with previous and next, a session filter, and "
-                    .. "Clear." },
+                    .. "Clear. A Test Error button on the Debug page throws one to try it." },
                 { L.CHARACTERFRAME_TITLE, "New, on by default, in Interface: moves the Character "
                     .. "window's Equipment and Pet tabs to the side with the other tabs, removes "
                     .. "the portrait and level line above the stats so they start at the top, and "

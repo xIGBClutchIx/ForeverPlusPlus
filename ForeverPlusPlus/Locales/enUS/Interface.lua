@@ -263,6 +263,11 @@ L.ERRORCATCHER_TIP_SAVED = "Saved errors: %d"
 L.ERRORCATCHER_TIP_CLICK = "Click to show the errors."
 L.ERRORCATCHER_TIP_RIGHT = "Right-click for options."
 L.ERRORCATCHER_TIP_DRAG = "Drag to move the button."
+L.ERRORCATCHER_TEST = "Test Error"
+L.ERRORCATCHER_TEST_BUTTON = "Throw"
+L.ERRORCATCHER_TEST_DESC = "Raises a Lua error on purpose, to check that Error Catcher (or, "
+    .. "with it off, Blizzard's error window) catches it."
+L.ERRORCATCHER_TEST_MESSAGE = "Forever++ test error. Nothing is wrong."
 
 -- QuestIcons
 L.QUESTICONS_TITLE = "Forever Quest Icons"

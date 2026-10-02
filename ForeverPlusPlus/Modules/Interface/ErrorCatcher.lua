@@ -15,6 +15,7 @@ local min, floor = math.min, math.floor
 local concat, tremove, wipe, time, date = table.concat, table.remove, wipe, time, date
 local cos, sin, rad, deg, atan2 = math.cos, math.sin, math.rad, math.deg, math.atan2
 local CreateFrame, UIParent, GetTime, GetCursorPosition = CreateFrame, UIParent, GetTime, GetCursorPosition
+local C_Timer, error = C_Timer, error
 local seterrorhandler, geterrorhandler = seterrorhandler, geterrorhandler
 local debugstack, debuglocals = debugstack, debuglocals
 local GetCallstackHeight, GetErrorCallstackHeight = GetCallstackHeight, GetErrorCallstackHeight
@@ -574,6 +575,24 @@ module.actions = {
         confirm = L.ERRORCATCHER_CLEAR_CONFIRM,
         key = "ERRORCATCHER_CLEAR",
         fn = clear,
+    },
+}
+
+-- Raises a Lua error on purpose, to see what catches it. On the next frame, so it goes to the
+-- error handler on its own instead of out of the Settings button's click.
+local function testError()
+    C_Timer.After(0, function()
+        error(L.ERRORCATCHER_TEST_MESSAGE)
+    end)
+end
+
+-- On the Debug page (Settings.lua). Works with the module off too, to see Blizzard's handler.
+module.debugActions = {
+    {
+        name = L.ERRORCATCHER_TEST,
+        button = L.ERRORCATCHER_TEST_BUTTON,
+        description = L.ERRORCATCHER_TEST_DESC,
+        fn = testError,
     },
 }
 
