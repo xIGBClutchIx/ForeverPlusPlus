@@ -53,9 +53,10 @@ ns.changelog = {
                 { L.CHANGELOG_SETTINGS, "Combat Alert, Currency Bar, and Flight Timer no longer "
                     .. "have Size sliders or Reset Position buttons in Settings. Edit Mode already "
                     .. "sizes and resets each of them." },
-                { L.CHANGELOG_SETTINGS, "Blizzard's Defaults > All Settings no longer resets "
-                    .. "Forever++. Defaults > These Settings on a Forever++ page, or the Defaults "
-                    .. "button on the welcome page, still does." },
+                { L.CHANGELOG_SETTINGS, "On the Modules and Debug pages, the Defaults button at "
+                    .. "the top right now only asks to reset Forever++, without Blizzard's All "
+                    .. "Settings choice that resets the whole game. On other pages, Blizzard's All "
+                    .. "Settings no longer resets Forever++." },
                 { L.AUTOREPAIR_TITLE, "New Hold Shift to Skip option (on by default, as before), "
                     .. "like Auto Gossip's." },
                 { L.AUTOSELLJUNK_TITLE, "New Hold Shift to Skip option (on by default, as "

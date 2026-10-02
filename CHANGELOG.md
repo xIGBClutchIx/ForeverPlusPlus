@@ -20,7 +20,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 - **Settings**: Clutch's Default also sets Zone Info's Dungeons and Fishing to Hold Detail Key.
 - **Settings**: Combat Alert, Currency Bar, and Flight Timer no longer have Size sliders or Reset Position buttons in Settings. Edit Mode already sizes and resets each of them.
-- **Settings**: Blizzard's Defaults > All Settings no longer resets Forever++. Defaults > These Settings on a Forever++ page, or the Defaults button on the welcome page, still does.
+- **Settings**: on the Modules and Debug pages, the Defaults button at the top right now only asks to reset Forever++, without Blizzard's All Settings choice that resets the whole game. On other pages, Blizzard's All Settings no longer resets Forever++.
 - **Auto Repair** and **Auto Sell Junk**: new Hold Shift to Skip option (on by default, as before), like Auto Gossip's.
 
 ### Fixed

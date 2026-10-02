@@ -460,6 +460,56 @@ local function addNotice(layout, module, parent)
     end
 end
 
+-- Defaults button -----------------------------------------------------------------------------
+-- Blizzard's Defaults button, at the top right of a settings list, asks "These Settings" or "All
+-- Settings", and All Settings resets the whole game. On our list pages our own Defaults button
+-- sits over it instead and asks only whether to put Forever++ back to its defaults. Blizzard's is
+-- faded out underneath (never changed otherwise), and ours shows and hides with it, since Blizzard
+-- hides it while searching.
+
+local ourPages = {} -- category -> true, for the list pages that are ours
+local defaultsButton -- ours, while it's made
+
+local function onOurPage()
+    return SettingsPanel and SettingsPanel.GetCurrentCategory
+        and ourPages[SettingsPanel:GetCurrentCategory()] or false
+end
+
+local function updateDefaults(blizzard)
+    local ours = onOurPage() and blizzard:IsShown()
+    defaultsButton:SetShown(ours and true or false)
+    blizzard:SetAlpha(ours and 0 or 1)
+end
+
+-- Probe: the list header's DefaultsButton, GetSettingsList, and the Settings.CategoryChanged event
+-- are Mainline's (the `forever` UI source has them); without them Blizzard's button stays as is.
+local function addDefaultsButton()
+    local list = SettingsPanel and SettingsPanel.GetSettingsList and SettingsPanel:GetSettingsList()
+    local blizzard = list and list.Header and list.Header.DefaultsButton
+    if not (blizzard and EventRegistry and EventRegistry.RegisterCallback) then
+        return
+    end
+    defaultsButton = CreateFrame("Button", nil, list.Header, "UIPanelButtonTemplate")
+    defaultsButton:SetAllPoints(blizzard)
+    defaultsButton:SetFrameLevel(blizzard:GetFrameLevel() + 5)
+    defaultsButton:SetText(SETTINGS_DEFAULTS or L.HOME_DEFAULTS)
+    defaultsButton:SetScript("OnClick", function()
+        ns.Confirm("DEFAULTS", L.HOME_DEFAULTS_ASK, ns.ApplyDefaults)
+    end)
+    defaultsButton:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:SetText(L.HOME_DEFAULTS)
+        GameTooltip:AddLine(L.HOME_DEFAULTS_TIP, 1, 1, 1, true)
+        GameTooltip:Show()
+    end)
+    defaultsButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    defaultsButton:Hide()
+    blizzard:HookScript("OnShow", function() updateDefaults(blizzard) end)
+    blizzard:HookScript("OnHide", function() updateDefaults(blizzard) end)
+    EventRegistry:RegisterCallback("Settings.CategoryChanged", function() updateDefaults(blizzard) end,
+        defaultsButton)
+end
+
 -- Welcome page --------------------------------------------------------------------------------
 -- The top Forever++ page: what the addon is, how many modules are on, the way to the Modules and
 -- Changelog pages, links, and the /fpp commands. Built the first time it's shown; the module count
@@ -789,6 +839,8 @@ function ns.RegisterSettings()
         addModules(category, layout, grouped, false)
         Settings.RegisterAddOnCategory(category)
         mainCategory, modulesCategory = category, category
+        ourPages[category] = true
+        addDefaultsButton()
         return
     end
 
@@ -823,6 +875,11 @@ function ns.RegisterSettings()
     changelogCategory = addCanvasPage(category, L.CHANGELOG, buildChangelog)
     Settings.RegisterAddOnCategory(category)
     mainCategory = category
+    ourPages[modulesPage] = true
+    if debugPage then
+        ourPages[debugPage] = true
+    end
+    addDefaultsButton()
 end
 
 ---Opens the Forever++ welcome page in Settings, or a module's options: its own page, or the

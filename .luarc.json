@@ -26,6 +26,7 @@
     "SettingsInbound",
     "SettingsPanel",
     "EventRegistry",
+    "SETTINGS_DEFAULTS",
     "C_SettingsUtil",
     "CreateSettingsListSectionHeaderInitializer",
     "C_CVar",
