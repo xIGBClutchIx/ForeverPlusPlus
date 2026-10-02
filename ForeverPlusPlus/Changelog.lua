@@ -33,7 +33,7 @@ ns.changelog = {
                     .. "infinity sign (or the Forever logo) after their name in the quest log on "
                     .. "the world map, the objective tracker, and quest givers' lists, each with "
                     .. "its own checkbox, plus an icon size slider. Idea from ForeverQuestTint." },
-                { L.MIRROREDBARS_TITLE, "New, off by default, in Unit Frames: fills your "
+                { L.MIRROREDBARS_TITLE, "New, on by default, in Unit Frames: fills your "
                     .. "target's and focus's health, mana, and cast bars from the right, so they empty "
                     .. "from left to right like a mirror of your own frame. Heal prediction and "
                     .. "absorbs follow, and each bar and frame has its own checkbox." },

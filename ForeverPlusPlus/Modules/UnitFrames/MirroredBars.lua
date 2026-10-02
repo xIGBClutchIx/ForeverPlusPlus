@@ -15,7 +15,7 @@ local L = ns.L
 local readable = ns.IsReadable
 
 local module = ns.NewModule("MirroredBars", L.MIRROREDBARS_DESC, {
-    enabled = false,
+    enabled = true,
     health = true,
     mana = true,
     castBar = true,
