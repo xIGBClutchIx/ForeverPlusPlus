@@ -28,6 +28,10 @@ ns.changelog = {
                     .. "window's Equipment and Pet tabs to the side with the other tabs, removes "
                     .. "the portrait and level line above the stats so they start at the top, and "
                     .. "shows your level and name in your class color as the title." },
+                { L.QUESTICONS_TITLE, "New, on by default, in Interface: marks quests that are "
+                    .. "new to Forever, the ones that weren't in original Classic, with an "
+                    .. "infinity sign (or the Forever logo) after their name in the quest log on "
+                    .. "the world map and in quest givers' lists. Idea from ForeverQuestTint." },
                 { L.CLASSCOLORS_TITLE, "The Names checkbox is now a Name Color choice: Default "
                     .. "(Blizzard's), White, or Class Color (players only)." },
                 { L.CLASSCOLORS_TITLE, "New Name Backgrounds option (on by default) tints the "

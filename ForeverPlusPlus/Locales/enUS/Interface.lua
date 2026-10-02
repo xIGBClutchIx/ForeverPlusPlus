@@ -263,3 +263,12 @@ L.ERRORCATCHER_TIP_SAVED = "Saved errors: %d"
 L.ERRORCATCHER_TIP_CLICK = "Click to show the errors."
 L.ERRORCATCHER_TIP_RIGHT = "Right-click for options."
 L.ERRORCATCHER_TIP_DRAG = "Drag to move the button."
+
+-- QuestIcons
+L.QUESTICONS_TITLE = "Forever Quest Icons"
+L.QUESTICONS_DESC = "Mark quests that are new to Forever, the ones that weren't in original "
+    .. "Classic, with an icon after their name in the quest log and in quest givers' lists."
+L.QUESTICONS_ICON = "Icon"
+L.QUESTICONS_ICON_DESC = "The icon after the quest's name."
+L.QUESTICONS_ICON_INFINITY = "Infinity"
+L.QUESTICONS_ICON_LOGO = "Forever Logo"

@@ -251,6 +251,15 @@
     "GetCallstackHeight",
     "GetErrorCallstackHeight",
     "Minimap",
-    "ScriptErrorsFrame"
+    "ScriptErrorsFrame",
+    "QuestScrollFrame",
+    "QuestLogQuests_Update",
+    "GossipFrame",
+    "GOSSIP_BUTTON_TYPE_ACTIVE_QUEST",
+    "GOSSIP_BUTTON_TYPE_AVAILABLE_QUEST",
+    "QuestFrameGreetingPanel",
+    "QuestFrameGreetingPanel_OnShow",
+    "GetActiveQuestID",
+    "GetAvailableQuestInfo"
   ]
 }
