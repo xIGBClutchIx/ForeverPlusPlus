@@ -6,10 +6,11 @@
 -- on the bar's right end, so those are mirrored too: each segment is re-anchored to the fill's
 -- left edge after Blizzard places it, and the glows swap ends. The cast bar's spark is placed
 -- from the bar's left edge every frame, so it's moved to the same distance from the right edge
--- after each. Turning off flips everything back.
+-- after each. The bars' art is flipped too, so its shading isn't backwards. Turning off flips
+-- everything back.
 local _, ns = ...
 
-local _G, setmetatable, ipairs, unpack = _G, setmetatable, ipairs, unpack
+local _G, setmetatable, ipairs, unpack, C_Texture = _G, setmetatable, ipairs, unpack, C_Texture
 
 local L = ns.L
 local readable = ns.IsReadable
@@ -19,6 +20,7 @@ local module = ns.NewModule("MirroredBars", L.MIRROREDBARS_DESC, {
     health = true,
     mana = true,
     castBar = true,
+    flipArt = true,
     target = true,
     focus = true,
 })
@@ -31,6 +33,7 @@ module.options = {
     { key = "health", name = L.MIRROREDBARS_HEALTH, description = L.MIRROREDBARS_HEALTH_DESC, section = BARS },
     { key = "mana", name = L.MIRROREDBARS_MANA, description = L.MIRROREDBARS_MANA_DESC, section = BARS },
     { key = "castBar", name = L.MIRROREDBARS_CAST, description = L.MIRROREDBARS_CAST_DESC, section = BARS },
+    { key = "flipArt", name = L.MIRROREDBARS_ART, description = L.MIRROREDBARS_ART_DESC, section = BARS },
     { key = "target", name = L.MIRROREDBARS_TARGET, description = L.MIRROREDBARS_TARGET_DESC, section = FRAMES },
     { key = "focus", name = L.MIRROREDBARS_FOCUS, description = L.MIRROREDBARS_FOCUS_DESC, section = FRAMES },
 }
@@ -44,6 +47,8 @@ local weak = { __mode = "k" }
 local glowTexCoords = setmetatable({}, weak) -- Texture -> Blizzard's tex coords before we flipped it
 local mirroredHealth = setmetatable({}, weak) -- unit frame -> true while its health bar is mirrored
 local mirroredCast = setmetatable({}, weak) -- cast bar -> true while it's mirrored
+local wantArt = setmetatable({}, weak) -- StatusBar -> true while its art should be flipped
+local artFlipped = setmetatable({}, weak) -- StatusBar -> the atlas we flipped, or false for a file
 
 -- The frames the module can mirror, with the setting each falls under.
 local function frames()
@@ -186,15 +191,80 @@ local function applyCast(bar, mirrored)
     flipSpark(bar, mirrored)
 end
 
+-- Draws a bar's art mirrored, so its shading runs the other way too: the atlas's file with its
+-- left and right tex coords swapped, which the bar then crops as it fills. A bar drawn from a
+-- whole file just swaps 0 and 1. Only once per texture Blizzard sets, since after this the
+-- texture no longer reports its atlas.
+local function flipArt(bar)
+    if artFlipped[bar] ~= nil then
+        return
+    end
+    local texture = bar:GetStatusBarTexture()
+    if not texture then
+        return
+    end
+    local atlas = texture:GetAtlas()
+    if atlas then
+        local info = C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(atlas)
+        local file = info and (info.file or info.filename)
+        if not file or info.tilesHorizontally then
+            return
+        end
+        texture:SetTexture(file)
+        texture:SetTexCoord(info.rightTexCoord, info.leftTexCoord, info.topTexCoord, info.bottomTexCoord)
+        artFlipped[bar] = atlas
+    else
+        texture:SetTexCoord(1, 0, 0, 1)
+        artFlipped[bar] = false
+    end
+end
+
+local function restoreArt(bar)
+    local atlas = artFlipped[bar]
+    local texture = bar:GetStatusBarTexture()
+    artFlipped[bar] = nil
+    if atlas then
+        texture:SetAtlas(atlas)
+    elseif atlas == false then
+        texture:SetTexCoord(0, 1, 0, 1)
+    end
+end
+
+-- Blizzard changes some bars' art (the power bar by power type, the cast bar by cast type).
+local function onBarTexture(bar)
+    artFlipped[bar] = nil
+    if wantArt[bar] then
+        flipArt(bar)
+    end
+end
+
+local function applyArt(bar, flipped)
+    if not bar then
+        return
+    end
+    wantArt[bar] = flipped or nil
+    if flipped then
+        module:Hook(bar, "SetStatusBarTexture", onBarTexture)
+        flipArt(bar)
+    else
+        restoreArt(bar)
+    end
+end
+
 local function apply()
+    local art = module.db.flipArt
     for _, entry in ipairs(frames()) do
         local frame, part = entry[1], entry[2]
         if frame then
-            applyHealth(frame, wants(part, "health"))
+            local health, mana, cast = wants(part, "health"), wants(part, "mana"), wants(part, "castBar")
+            applyHealth(frame, health)
+            applyArt(frame.healthbar, health and art)
             if frame.manabar then
-                frame.manabar:SetReverseFill(wants(part, "mana"))
+                frame.manabar:SetReverseFill(mana)
+                applyArt(frame.manabar, mana and art)
             end
-            applyCast(frame.spellbar, wants(part, "castBar"))
+            applyCast(frame.spellbar, cast)
+            applyArt(frame.spellbar, cast and art)
         end
     end
 end
