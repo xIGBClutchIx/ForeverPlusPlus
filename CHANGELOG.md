@@ -4,6 +4,14 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ## Unreleased
 
+### Added
+
+- **Item Count** (new, off by default, in Items): shows how many of an item you own in its tooltip, above the prices, and how many are in your bags and your bank, with small bag and bank icons (or words). The bank is counted each time you open it.
+
+### Changed
+
+- **Spell Ranks**: the tooltip line is now "Higher Rank Known:" with the rank at the right edge in white, like the price lines, instead of a gold line that read as part of the spell's description.
+
 ### Fixed
 
 - **Auction Prices**: the age under an auction price is when that item was last seen, not the last scan, so an item missing from a scan no longer looks freshly checked. Saved prices are cleared once; the next visit to the auction house scans again.

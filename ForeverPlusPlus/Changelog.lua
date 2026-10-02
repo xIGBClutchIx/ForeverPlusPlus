@@ -12,6 +12,17 @@ ns.changelog = {
     {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
+            { L.CHANGELOG_ADDED, {
+                { L.ITEMCOUNT_TITLE, "New, off by default, in Items: shows how many of an item "
+                    .. "you own in its tooltip, above the prices, and how many are in your bags "
+                    .. "and your bank, with small bag and bank icons (or words). The bank is "
+                    .. "counted each time you open it." },
+            } },
+            { L.CHANGELOG_CHANGED, {
+                { L.SPELLRANKS_TITLE, "The tooltip line is now \"Higher Rank Known:\" with the "
+                    .. "rank at the right edge in white, like the price lines, instead of a gold "
+                    .. "line that read as part of the spell's description." },
+            } },
             { L.CHANGELOG_FIXED, {
                 { L.AUCTIONPRICES_TITLE, "The age under an auction price is when that item was "
                     .. "last seen, not the last scan, so an item missing from a scan no longer "

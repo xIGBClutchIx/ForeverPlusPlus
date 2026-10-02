@@ -194,6 +194,12 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 - Fast looting works the Retail way: `LOOT_READY`, then `LootSlot(i)` from `GetNumLootItems()` down to 1, when `autoLootDefault` differs from `IsModifiedClick("AUTOLOOTTOGGLE")`. **[addon]** (Leatrix_Plus `Leatrix_Plus.lua`, BleakfibersQuestTracker `SocialModule.lua`)
 - `CanMerchantRepair`, `GetRepairAllCost`, `RepairAllItems(guildBank)`, `CanGuildBankRepair` and `IsInGuild` are there. **[addon]** (Leatrix_Plus `Leatrix_Plus.lua`, repairs at `MERCHANT_SHOW`) `GetGuildBankWithdrawMoney` returning -1 for no limit, and a failed guild bank repair raising `UI_ERROR_MESSAGE` (the AutoRepair module's fallback to the player's own money), are Retail behavior and **Unverified** on Forever.
 
+## Bags and the bank
+
+- `C_Item.GetItemCount(itemID, true)` (bags plus bank) is used by Lootified. **[addon]** (Lootified `Core/Items.lua`) Whether it counts the bank away from the bank, before it was opened this session, is **Unverified**; Item Count keeps its own count of the bank from the last visit for that reason.
+- Which bank bag ids Forever has is **Unverified**: Retail went from `Enum.BagIndex.Bank` and `BankBag_1..7` to `CharacterBankTab_1..6` in 11.2. Item Count reads every `Enum.BagIndex` with "Bank" in its name (not the account bank). Check: `/run for k,v in pairs(Enum.BagIndex)do print(k,v)end` at the bank. `BANKFRAME_OPENED`, `BANKFRAME_CLOSED`, and `PLAYERBANKSLOTS_CHANGED` are **Unverified** too; the last is registered only when `C_EventUtils.IsEventValid` says it exists.
+- The bag and bank icons are the atlases `bag-main` and `Banker`, with the files `Interface\Buttons\Button-Backpack-Up` and `Interface\Minimap\Tracking\Banker` as fallbacks. Which ones Forever has is **Unverified**.
+
 ## Minimap tracking
 
 - `C_Minimap.GetNumTrackingTypes()` and `C_Minimap.GetTrackingInfo(i)` work, and the info is a table with `name`, `active`, `type`, and `spellID` (Find Herbs 2383, Find Minerals 2580). It has no secret values, in or out of combat. **[addon]** (GatherSkillTooltip `Warnings.lua`, `Data.lua`; AutoTrackers `AutoTrackers.lua`)

@@ -121,7 +121,8 @@ L.SPELLRANKS_TOOLTIP_DESC = "Add the best rank you know to the tooltip of a spel
     .. "higher rank."
 L.SPELLRANKS_CHAT_DESC = "Say in chat how many action bar spells have a higher rank after you "
     .. "learn new spells or level up."
-L.SPELLRANKS_BEST = "Higher rank known: Rank %d"
+L.SPELLRANKS_BEST = "Higher Rank Known:"
+L.SPELLRANKS_BEST_RANK = "Rank %d" -- the best rank known
 L.SPELLRANKS_FOUND = "%d action bar spells have a higher rank. /fpp ranks lists them."
 L.SPELLRANKS_COMMAND = "List the action bar spells that have a higher rank"
 L.SPELLRANKS_OFF = "Spell Ranks is off."
