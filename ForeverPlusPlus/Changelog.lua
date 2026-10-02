@@ -26,6 +26,8 @@ ns.changelog = {
             { L.CHANGELOG_FIXED, {
                 { L.FISHINGCAST_TITLE, "Double right-click now casts Fishing; it never "
                     .. "recognized the world under the mouse before." },
+                { L.TOOLTIPS_TITLE, "The level and class lines on a player's tooltip are colored "
+                    .. "again when the game adds those lines after Blizzard builds the tooltip." },
             } },
         },
     },

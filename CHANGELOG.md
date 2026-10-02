@@ -17,6 +17,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Fixed
 
 - **Fishing Cast**: double right-click now casts Fishing; it never recognized the world under the mouse before.
+- **Tooltips**: the level and class lines on a player's tooltip are colored again when the game adds those lines after Blizzard builds the tooltip.
 
 ## 0.5.0 (2026-10-01)
 
