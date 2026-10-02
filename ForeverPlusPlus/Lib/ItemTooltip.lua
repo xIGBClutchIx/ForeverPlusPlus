@@ -189,13 +189,25 @@ function ItemTooltip.ReplaceSellPrice(fn)
     replacer = fn
 end
 
----How many items the hovered stack holds, or 1 when it can't tell (links, merchants).
+-- Whether a location from GetItemLocation points at a bag slot or equipment slot holding the item.
+-- A merchant's buyback slot gives a location that is neither, and IsValid (DoesItemExist) throws
+-- an error on it, so it's only asked once the location is one of those two.
+local function inBagsOrWorn(location)
+    if not location then
+        return false
+    end
+    local bag = location.IsBagAndSlot and location:IsBagAndSlot()
+    local worn = location.IsEquipmentSlot and location:IsEquipmentSlot()
+    return (bag or worn) and location:IsValid() or false
+end
+
+---How many items the hovered stack holds, or 1 when it can't tell (links, merchants, buyback).
 ---@param data table tooltip data
 ---@return number
 function ItemTooltip.StackCount(data)
     if data.guid and C_Item.GetItemLocation and C_Item.GetStackCount then
         local location = C_Item.GetItemLocation(data.guid)
-        if location and location:IsValid() then
+        if inBagsOrWorn(location) then
             return C_Item.GetStackCount(location) or 1
         end
     end

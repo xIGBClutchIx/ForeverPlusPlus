@@ -198,6 +198,7 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 
 - `C_Item.GetItemCount(itemID, true)` (bags plus bank) is used by Lootified. **[addon]** (Lootified `Core/Items.lua`) Whether it counts the bank away from the bank, before it was opened this session, is **Unverified**; Item Count keeps its own count of the bank from the last visit for that reason.
 - Which bank bag ids Forever has is **Unverified**: Retail went from `Enum.BagIndex.Bank` and `BankBag_1..7` to `CharacterBankTab_1..6` in 11.2. Item Count reads every `Enum.BagIndex` with "Bank" in its name (not the account bank). Check: `/run for k,v in pairs(Enum.BagIndex)do print(k,v)end` at the bank. `BANKFRAME_OPENED`, `BANKFRAME_CLOSED`, and `PLAYERBANKSLOTS_CHANGED` are **Unverified** too; the last is registered only when `C_EventUtils.IsEventValid` says it exists.
+- `C_Item.GetItemLocation(guid)` for an item in a vendor's buyback tab returns a location that is neither a bag slot nor an equipment slot, and `location:IsValid()` (`C_Item.DoesItemExist`) throws a Lua error on it instead of returning false. **[in game]** (Cameron's bug report, 2026-10-02) Check `IsBagAndSlot()` or `IsEquipmentSlot()` first, as `ItemTooltip.StackCount` does.
 - The bag and bank icons are the atlases `bag-main` and `Banker`, with the files `Interface\Buttons\Button-Backpack-Up` and `Interface\Minimap\Tracking\Banker` as fallbacks. Which ones Forever has is **Unverified**.
 
 ## Minimap tracking
