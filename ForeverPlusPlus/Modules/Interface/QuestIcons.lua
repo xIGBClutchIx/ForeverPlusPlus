@@ -23,9 +23,9 @@ local module = ns.NewModule("QuestIcons", L.QUESTICONS_DESC, {
     givers = true,
     icon = "infinity",
     -- Icon size in each place, in percent.
-    logSize = 100,
-    trackerSize = 100,
-    giversSize = 100,
+    logSize = 80,
+    trackerSize = 80,
+    giversSize = 80,
 })
 module.title = L.QUESTICONS_TITLE
 module.category = "interface"

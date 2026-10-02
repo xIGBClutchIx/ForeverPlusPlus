@@ -24,7 +24,7 @@ local issecretvalue = issecretvalue
 local L = ns.L
 
 local module = ns.NewModule("ErrorCatcher", L.ERRORCATCHER_DESC, {
-    enabled = false,
+    enabled = true,
     chat = true,
     minimap = true,
     clearModifier = "ctrl",
