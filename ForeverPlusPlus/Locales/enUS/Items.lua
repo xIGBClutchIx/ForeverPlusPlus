@@ -92,6 +92,11 @@ L.ITEMCOUNT_ICON_COUNT = "%s %d" -- bag or bank icon, count
 L.ITEMCOUNT_IN_BAGS = "%d in bags" -- count
 L.ITEMCOUNT_IN_BANK = "%d in bank" -- count
 
+-- BestReward
+L.BESTREWARD_TITLE = "Best Quest Reward"
+L.BESTREWARD_DESC = "Mark the quest reward choice that sells to a vendor for the most with a gold "
+    .. "coin, in the quest window and the quest log. It doesn't choose it for you."
+
 -- SellPrice
 L.SELLPRICE_TITLE = "Sell Price"
 L.SELLPRICE_DESC = "Show the vendor price of the whole stack in item tooltips. Hold Shift to see "
