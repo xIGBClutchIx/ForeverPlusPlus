@@ -13,6 +13,11 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_ADDED, {
+                { L.QUESTTRACKER_TITLE, "New, off by default, in Interface: restyles Blizzard's "
+                    .. "quest tracker with a font, font size, and outline, a dark box behind it "
+                    .. "that fits your quests (with opacity and a border), and fading in combat. "
+                    .. "It stays Blizzard's tracker, so Edit Mode, its menus, and quest items work "
+                    .. "as before." },
                 { L.CHARACTERFRAME_TITLE, "New, on by default, in Interface: moves the Character "
                     .. "window's Equipment and Pet tabs to the side with the other tabs, removes "
                     .. "the portrait and level line above the stats so they start at the top, and "
