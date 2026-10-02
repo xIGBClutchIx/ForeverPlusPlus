@@ -27,6 +27,8 @@ L.AUTOREPAIR_MIN_COST = "Minimum Cost"
 L.AUTOREPAIR_MIN_COST_DESC = "Only repair when it costs at least this much, so a quick stop at a "
     .. "merchant doesn't spend a few copper each time."
 L.AUTOREPAIR_MIN_COST_ANY = "Any Cost"
+L.AUTOREPAIR_SHIFT = "Hold Shift to Skip"
+L.AUTOREPAIR_SHIFT_DESC = "Holding Shift as you talk to the merchant leaves your gear unrepaired."
 L.AUTOREPAIR_CHAT_DESC = "Say in chat what repairs cost, or why they couldn't be paid for."
 L.AUTOREPAIR_REPAIRED = "Repaired for %s." -- cost
 L.AUTOREPAIR_REPAIRED_GUILD = "Repaired for %s from the guild bank." -- cost
@@ -40,6 +42,8 @@ L.AUTOSELLJUNK_DESC = "Sell the gray items in your bags when you talk to a merch
 L.AUTOSELLJUNK_BUYBACK = "Keep Everything Buyable Back"
 L.AUTOSELLJUNK_BUYBACK_DESC = "Sell at most 12 items per visit, the number the merchant's buyback "
     .. "list holds, so you can still buy back anything sold by mistake."
+L.AUTOSELLJUNK_SHIFT = "Hold Shift to Skip"
+L.AUTOSELLJUNK_SHIFT_DESC = "Holding Shift as you talk to the merchant leaves your junk unsold."
 L.AUTOSELLJUNK_CHAT_DESC = "Say in chat how many items were sold and what they sold for."
 L.AUTOSELLJUNK_SOLD = "Sold %d junk items for %s." -- count, money
 

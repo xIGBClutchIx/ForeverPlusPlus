@@ -15,8 +15,8 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Auto Dismount | Gets you off your mount or stands you up when a spell, flight, loot, or attack fails because you're mounted or sitting. Can also leave shapeshift forms (off by default). |
 | Auto Gossip | When an NPC has only one thing to say and no quests, picks it for you, so the bank, shop, or flight map opens straight away. Hold Shift to choose yourself. |
 | Auto Release | Releases your spirit when you die in a battleground, unless you can resurrect yourself or someone is resurrecting you. Off by default. |
-| Auto Repair | Repairs your gear at any merchant who repairs and says in chat what it cost. Hold Shift to skip it. |
-| Auto Sell Junk | Sells the gray items in your bags when a merchant opens and says in chat what they sold for. Can stop at 12 items so all can be bought back. Hold Shift to skip it. Off by default. |
+| Auto Repair | Repairs your gear at any merchant who repairs and says in chat what it cost. Hold Shift to skip it (an option). |
+| Auto Sell Junk | Sells the gray items in your bags when a merchant opens and says in chat what they sold for. Can stop at 12 items so all can be bought back. Hold Shift to skip it (an option). Off by default. |
 | Auto Stow | Puts your weapons away a few seconds after combat ends. |
 | Fishing Cast | Double right-click in the world with a fishing pole equipped to cast Fishing, and the click after that loots as usual. Never while in combat. Off by default. |
 | Fast Loot | With auto loot on, takes everything at once instead of waiting for the loot window. |

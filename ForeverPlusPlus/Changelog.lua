@@ -53,6 +53,10 @@ ns.changelog = {
                 { L.CHANGELOG_SETTINGS, "Combat Alert, Currency Bar, and Flight Timer no longer "
                     .. "have Size sliders or Reset Position buttons in Settings. Edit Mode already "
                     .. "sizes and resets each of them." },
+                { L.AUTOREPAIR_TITLE, "New Hold Shift to Skip option (on by default, as before), "
+                    .. "like Auto Gossip's." },
+                { L.AUTOSELLJUNK_TITLE, "New Hold Shift to Skip option (on by default, as "
+                    .. "before), like Auto Gossip's." },
             } },
             { L.CHANGELOG_FIXED, {
                 { L.FISHINGCAST_TITLE, "Double right-click now casts Fishing; it never "

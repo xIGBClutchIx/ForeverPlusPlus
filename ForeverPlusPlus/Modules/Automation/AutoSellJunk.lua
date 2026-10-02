@@ -15,6 +15,7 @@ local BUYBACK_SLOTS = 12 -- the merchant's buyback list holds this many; older s
 local module = ns.NewModule("AutoSellJunk", L.AUTOSELLJUNK_DESC, {
     enabled = false,
     buybackOnly = true,
+    shiftSkips = true,
     chat = true,
 })
 module.title = L.AUTOSELLJUNK_TITLE
@@ -26,11 +27,12 @@ module.options = {
         name = L.AUTOSELLJUNK_BUYBACK,
         description = L.AUTOSELLJUNK_BUYBACK_DESC,
     },
+    { key = "shiftSkips", name = L.AUTOSELLJUNK_SHIFT, description = L.AUTOSELLJUNK_SHIFT_DESC },
     ns.ChatOption(L.AUTOSELLJUNK_CHAT_DESC),
 }
 
 local function onMerchantShow()
-    if IsShiftKeyDown() then
+    if module.db.shiftSkips and IsShiftKeyDown() then
         return
     end
     local limit = module.db.buybackOnly and BUYBACK_SLOTS or nil

@@ -15,6 +15,7 @@ local module = ns.NewModule("AutoRepair", L.AUTOREPAIR_DESC, {
     enabled = true,
     funds = "guildFirst", -- "guildFirst", "guild", or "own"
     minCost = "0", -- copper; repairs cheaper than this are left alone
+    shiftSkips = true,
     chat = true,
 })
 module.title = L.AUTOREPAIR_TITLE
@@ -42,6 +43,7 @@ module.options = {
             { "10000", money(10000) },
         },
     },
+    { key = "shiftSkips", name = L.AUTOREPAIR_SHIFT, description = L.AUTOREPAIR_SHIFT_DESC },
     ns.ChatOption(L.AUTOREPAIR_CHAT_DESC),
 }
 
@@ -115,7 +117,7 @@ local function repairGuild(cost)
 end
 
 local function onMerchantShow()
-    if IsShiftKeyDown() or not CanMerchantRepair() then
+    if (module.db.shiftSkips and IsShiftKeyDown()) or not CanMerchantRepair() then
         return
     end
     local cost, canRepair = GetRepairAllCost()
