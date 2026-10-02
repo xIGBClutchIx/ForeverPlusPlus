@@ -8,6 +8,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 - **Error Catcher** (new, off by default, in Interface): catches Lua errors, blocked actions, and Lua warnings instead of Blizzard's error window and popup, saves them per session with counts, stack, and locals, and shows them in a window you can copy from (`/fpp errors`, or a minimap button with this session's count), with previous and next, a session filter, and Clear.
 - **Character Frame Enhancements** (new, on by default, in Interface): moves the Character window's Equipment and Pet tabs to the side with the other tabs, removes the portrait and level line above the stats so they start at the top, and shows your level and name in your class color as the title.
+- **Forever Quest Icons** (new, on by default, in Interface): marks quests that are new to Forever, the ones that weren't in original Classic, with an infinity sign (or the Forever logo) after their name in the quest log on the world map and in quest givers' lists. Idea from ForeverQuestTint.
 - **Class Colors**: the Names checkbox is now a Name Color choice: Default (Blizzard's), White, or Class Color (players only).
 - **Class Colors**: new Name Backgrounds option (on by default) tints the bar behind a player's name on the target and focus frames in their class color instead of Blizzard's faction color.
 
