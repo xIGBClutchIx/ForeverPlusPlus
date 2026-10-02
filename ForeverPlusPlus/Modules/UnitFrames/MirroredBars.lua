@@ -6,8 +6,8 @@
 -- on the bar's right end, so those are mirrored too: each segment is re-anchored to the fill's
 -- left edge after Blizzard places it, and the glows swap ends. The cast bar's spark is placed
 -- from the bar's left edge every frame, so it's moved to the same distance from the right edge
--- after each. The bars' art is flipped too, so its shading isn't backwards. Turning off flips
--- everything back.
+-- after each. The bars' art is mirrored too, by a copy of it over Blizzard's, so its shading
+-- isn't backwards. Turning off flips everything back.
 local _, ns = ...
 
 local _G, setmetatable, ipairs, unpack, C_Texture = _G, setmetatable, ipairs, unpack, C_Texture
@@ -47,8 +47,8 @@ local weak = { __mode = "k" }
 local glowTexCoords = setmetatable({}, weak) -- Texture -> Blizzard's tex coords before we flipped it
 local mirroredHealth = setmetatable({}, weak) -- unit frame -> true while its health bar is mirrored
 local mirroredCast = setmetatable({}, weak) -- cast bar -> true while it's mirrored
-local wantArt = setmetatable({}, weak) -- StatusBar -> true while its art should be flipped
-local artFlipped = setmetatable({}, weak) -- StatusBar -> the atlas we flipped, or false for a file
+local mirrorArt = setmetatable({}, weak) -- StatusBar -> our mirrored copy of its fill texture
+local artShown = setmetatable({}, weak) -- StatusBar -> its fill's alpha while our copy covers it
 
 -- The frames the module can mirror, with the setting each falls under.
 local function frames()
@@ -191,63 +191,79 @@ local function applyCast(bar, mirrored)
     flipSpark(bar, mirrored)
 end
 
--- Draws a bar's art mirrored, so its shading runs the other way too: the atlas's file with its
--- left and right tex coords swapped, which the bar then crops as it fills. A bar drawn from a
--- whole file just swaps 0 and 1. Only once per texture Blizzard sets, since after this the
--- texture no longer reports its atlas.
-local function flipArt(bar)
-    if artFlipped[bar] ~= nil then
+-- The bar's art drawn mirrored, so its shading runs the other way too. The bar crops its own
+-- fill texture as it fills, and swapping that texture's tex coords drew it dark in game, so
+-- Blizzard's fill is hidden (alpha 0) and our own texture, with the art's left and right tex
+-- coords swapped, is anchored over it. Anchoring follows the fill without reading the bar's
+-- value, which can be secret; the cost is that the art stretches to the fill instead of being
+-- cropped. Its color and desaturation are copied from Blizzard's fill whenever Blizzard (or
+-- Class Colors) changes them.
+local function syncArt(bar)
+    local art, fill = mirrorArt[bar], bar:GetStatusBarTexture()
+    if not (art and fill) then
         return
     end
-    local texture = bar:GetStatusBarTexture()
-    if not texture then
-        return
-    end
-    local atlas = texture:GetAtlas()
-    if atlas then
-        local info = C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(atlas)
-        local file = info and (info.file or info.filename)
-        if not file or info.tilesHorizontally then
-            return
-        end
-        texture:SetTexture(file)
-        texture:SetTexCoord(info.rightTexCoord, info.leftTexCoord, info.topTexCoord, info.bottomTexCoord)
-        artFlipped[bar] = atlas
+    art:ClearAllPoints()
+    art:SetPoint("TOPLEFT", fill, "TOPLEFT")
+    art:SetPoint("BOTTOMRIGHT", fill, "BOTTOMRIGHT")
+    local atlas = fill:GetAtlas()
+    local info = atlas and C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(atlas)
+    local file = info and (info.file or info.filename)
+    if file then
+        art:SetTexture(file)
+        art:SetTexCoord(info.rightTexCoord, info.leftTexCoord, info.topTexCoord, info.bottomTexCoord)
     else
-        texture:SetTexCoord(1, 0, 0, 1)
-        artFlipped[bar] = false
+        art:SetTexture(fill:GetTexture())
+        art:SetTexCoord(1, 0, 0, 1)
+    end
+    art:SetVertexColor(fill:GetVertexColor())
+    art:SetDesaturated(fill:IsDesaturated())
+    art:SetBlendMode(fill:GetBlendMode())
+end
+
+local function onBarChanged(bar)
+    if artShown[bar] then
+        syncArt(bar)
+        bar:GetStatusBarTexture():SetAlpha(0) -- in case Blizzard gave the bar a new texture
     end
 end
 
-local function restoreArt(bar)
-    local atlas = artFlipped[bar]
-    local texture = bar:GetStatusBarTexture()
-    artFlipped[bar] = nil
-    if atlas then
-        texture:SetAtlas(atlas)
-    elseif atlas == false then
-        texture:SetTexCoord(0, 1, 0, 1)
+local function createArt(bar)
+    local fill = bar:GetStatusBarTexture()
+    if not fill then
+        return nil
     end
-end
-
--- Blizzard changes some bars' art (the power bar by power type, the cast bar by cast type).
-local function onBarTexture(bar)
-    artFlipped[bar] = nil
-    if wantArt[bar] then
-        flipArt(bar)
+    local layer, sublevel = fill:GetDrawLayer()
+    local art = bar:CreateTexture(nil, layer, nil, sublevel)
+    for i = 1, (fill.GetNumMaskTextures and fill:GetNumMaskTextures() or 0) do
+        art:AddMaskTexture(fill:GetMaskTexture(i))
     end
+    mirrorArt[bar] = art
+    return art
 end
 
 local function applyArt(bar, flipped)
-    if not bar then
+    flipped = flipped and true or false
+    if not bar or (artShown[bar] ~= nil) == flipped then
         return
     end
-    wantArt[bar] = flipped or nil
+    local fill = bar:GetStatusBarTexture()
+    local art = mirrorArt[bar] or (flipped and createArt(bar))
+    if not (fill and art) then
+        return
+    end
     if flipped then
-        module:Hook(bar, "SetStatusBarTexture", onBarTexture)
-        flipArt(bar)
+        artShown[bar] = fill:GetAlpha()
+        module:Hook(bar, "SetStatusBarTexture", onBarChanged)
+        module:Hook(bar, "SetStatusBarColor", onBarChanged)
+        module:Hook(bar, "SetStatusBarDesaturated", onBarChanged)
+        syncArt(bar)
+        art:Show()
+        fill:SetAlpha(0)
     else
-        restoreArt(bar)
+        fill:SetAlpha(artShown[bar])
+        artShown[bar] = nil
+        art:Hide()
     end
 end
 
