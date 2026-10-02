@@ -1,12 +1,14 @@
 -- Quest Nameplates: a quest icon and what's left to do (3/8, or how many more) beside the health bar
 -- of a creature that's part of one of your quests. It reads the objective lines of the unit's
 -- tooltip, which are the game's own word on which quest a creature belongs to and how far along
--- it is, and draws a small frame of our own on the plate's UnitFrame.
+-- it is, and draws a small frame of our own on the plate's UnitFrame. In a party the tooltip also
+-- lists members' progress, which the Party Progress option can add up or take the lowest of.
 local _, ns = ...
 
 local ipairs, pairs, setmetatable, tonumber, floor, max = ipairs, pairs, setmetatable, tonumber, math.floor,
     math.max
-local CreateFrame, C_Timer, C_TooltipInfo, C_QuestLog = CreateFrame, C_Timer, C_TooltipInfo, C_QuestLog
+local CreateFrame, C_Timer, C_TooltipInfo, C_QuestLog, UnitName = CreateFrame, C_Timer, C_TooltipInfo,
+    C_QuestLog, UnitName
 
 local L = ns.L
 local Nameplates = ns.Nameplates
@@ -15,6 +17,7 @@ local readable = ns.IsReadable
 local module = ns.NewModule("QuestPlates", L.QUESTPLATES_DESC, {
     enabled = true,
     progress = "count", -- "count" (3/8), "remaining" (5), or "off" (just the icon)
+    party = "own", -- whose progress: "own", "combined" (the party's added up), or "lowest"
     completed = true, -- keep a green check on creatures whose objective is done
     completedCount = true, -- and its final count beside it
     side = "left", -- which side of the bar: "left" or "right"
@@ -30,6 +33,14 @@ module.options = {
             { "count", L.QUESTPLATES_PROGRESS_COUNT },
             { "remaining", L.QUESTPLATES_PROGRESS_REMAINING },
             { "off", L.QUESTPLATES_PROGRESS_OFF },
+        },
+    },
+    {
+        key = "party", name = L.QUESTPLATES_PARTY, description = L.QUESTPLATES_PARTY_DESC,
+        choices = {
+            { "own", L.QUESTPLATES_PARTY_OWN },
+            { "combined", L.QUESTPLATES_PARTY_COMBINED },
+            { "lowest", L.QUESTPLATES_PARTY_LOWEST },
         },
     },
     { key = "completed", name = L.QUESTPLATES_COMPLETED, description = L.QUESTPLATES_COMPLETED_DESC },
@@ -135,11 +146,43 @@ local function objectiveKind(text)
     return kind
 end
 
+-- Whether a QuestPlayer line names the player. Forever's UnitName gives a surname second, so the
+-- line may carry it after the name.
+local function isMe(text, me)
+    return me and (text == me or text:sub(1, #me + 1) == me .. " ")
+end
+
+-- One objective's progress as the `party` setting counts it: `current, needed`. Combined adds
+-- everyone's counts up (percentages are averaged, so they stay out of 100); Lowest is the member
+-- with the most left.
+local function tally(objective, party)
+    local members = objective.members
+    if party == "combined" then
+        local current, needed = 0, 0
+        for _, member in ipairs(members) do
+            current, needed = current + member[1], needed + member[2]
+        end
+        if objective.percent then
+            return floor(current / #members), 100
+        end
+        return current, needed
+    end
+    local worst = members[1]
+    for _, member in ipairs(members) do
+        if member[2] - member[1] > worst[2] - worst[1] then
+            worst = member
+        end
+    end
+    return worst[1], worst[2]
+end
+
 -- The first objective of this unit's quests that isn't done, as `current, needed, kind` (a
 -- percentage objective has `needed` of 100; `kind` is the quest log's objective type, or false
 -- when it can't be matched), or `current, needed, "done"` when all it lists are done, `false`
 -- when it has none, or nil when the game won't
 -- say (secret values in combat or an instance), so the plate keeps what it shows.
+-- In a group the tooltip puts a QuestPlayer line with a name (the player's own too) before each
+-- member's objectives; lines before any name are the player's.
 local function scan(unit)
     -- No UnitIsRelatedToActiveQuest pre-filter: it probably says false once the objective is done,
     -- and the check for done objectives needs the tooltip's finished lines.
@@ -153,15 +196,22 @@ local function scan(unit)
     local types = Enum and Enum.TooltipDataLineType
     local objectiveType, titleType, playerType = types and types.QuestObjective, types and types.QuestTitle,
         types and types.QuestPlayer
-    local inQuest, unknown = false, false
-    local doneCurrent, doneNeeded
+    local party = module.db.party
+    local me = UnitName("player")
+    if not readable(me) then
+        me = nil
+    end
+    local quest, mine, inQuest, unknown = 0, true, false, false
+    local objectives, order = {}, {} -- quest and objective text -> its members' progress, in tooltip order
     for _, line in ipairs(data.lines) do
         local text, kind = line.leftText, line.type
         if not (readable(text) and readable(kind) and type(text) == "string") then
             unknown = true
         elseif titleType and kind == titleType then
-            inQuest = true
-        elseif not (playerType and kind == playerType) and (inQuest or (objectiveType and kind == objectiveType)) then
+            inQuest, mine, quest = true, true, quest + 1
+        elseif playerType and kind == playerType then
+            mine = isMe(text, me)
+        elseif (mine or party ~= "own") and (inQuest or (objectiveType and kind == objectiveType)) then
             -- "0/8 Boars", "Boars: 0/8", and "Escort (45%)" read the same in every language.
             local current, needed = text:match("(%d+)%s*/%s*(%d+)")
             local percent = not current and text:match("(%d+)%%")
@@ -169,16 +219,30 @@ local function scan(unit)
                 current, needed = percent, 100
             end
             current, needed = tonumber(current), tonumber(needed)
-            if current and needed and current < needed then
-                return current, needed, objectiveKind(text)
-            end
-            if current and needed and not doneCurrent then
-                doneCurrent, doneNeeded = current, needed
+            if current and needed then
+                local key = quest .. ":" .. normalize(text)
+                local objective = objectives[key]
+                if not objective then
+                    objective = { text = text, percent = percent and true, members = {} }
+                    objectives[key] = objective
+                    order[#order + 1] = objective
+                end
+                objective.members[#objective.members + 1] = { current, needed }
             end
         end
     end
     if unknown then
         return nil
+    end
+    local doneCurrent, doneNeeded
+    for _, objective in ipairs(order) do
+        local current, needed = tally(objective, party)
+        if current < needed then
+            return current, needed, objectiveKind(objective.text)
+        end
+        if not doneCurrent then
+            doneCurrent, doneNeeded = current, needed
+        end
     end
     -- Every objective listed is done: show the check and the final count.
     if doneCurrent then
@@ -314,6 +378,7 @@ function module:OnEnable()
     self:On("QUEST_LOG_UPDATE", refreshSoon)
     self:On("UNIT_QUEST_LOG_CHANGED", refreshSoon)
     self:On("QUEST_WATCH_UPDATE", refreshSoon)
+    self:On("GROUP_ROSTER_UPDATE", refreshSoon) -- party members' lines come and go
 end
 
 function module:OnDisable()

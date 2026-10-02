@@ -39,6 +39,10 @@ ns.changelog = {
                     .. "absorbs follow, and each bar and frame has its own checkbox." },
                 { L.CLASSCOLORS_TITLE, "The Names checkbox is now a Name Color choice: Default "
                     .. "(Blizzard's), White, or Class Color (players only)." },
+                { L.QUESTPLATES_TITLE, "New Party Progress option: Own Only (as before), Party "
+                    .. "Combined (everyone's counts added up), or Lowest (the party member "
+                    .. "furthest from done). With a party member on the quest, creatures only "
+                    .. "they need now show too." },
                 { L.CLASSCOLORS_TITLE, "New Name Backgrounds option (on by default) tints the "
                     .. "bar behind a player's name on the target and focus frames in their class "
                     .. "color instead of Blizzard's faction color." },
