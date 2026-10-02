@@ -16,6 +16,7 @@
 local _, ns = ...
 
 local ipairs, format, type, sort, strlower = ipairs, string.format, type, table.sort, string.lower
+local concat = table.concat
 local InCombatLockdown, CreateFrame, GetBuildInfo = InCombatLockdown, CreateFrame, GetBuildInfo
 local setmetatable, hooksecurefunc = setmetatable, hooksecurefunc
 local C_AddOns, GetAddOnMetadata, GameTooltip = C_AddOns, GetAddOnMetadata, GameTooltip
@@ -607,8 +608,9 @@ local function buildWelcome(frame)
     end
     local defaults = addPreset(L.HOME_DEFAULTS, L.HOME_DEFAULTS_TIP, "DEFAULTS",
         L.HOME_DEFAULTS_ASK, ns.ApplyDefaults, last)
-    addPreset(L.HOME_CLUTCH, L.HOME_CLUTCH_TIP, "CLUTCH", L.HOME_CLUTCH_ASK,
-        ns.ApplyClutchDefault, defaults)
+    local clutchTip = format(L.HOME_CLUTCH_TIP, concat(ns.ClutchModules(), L.HOME_LIST_SEPARATOR))
+    addPreset(L.HOME_CLUTCH, clutchTip, "CLUTCH", L.HOME_CLUTCH_ASK, ns.ApplyClutchDefault,
+        defaults)
 
     y = y - 44
     addHeading(frame, y, L.HOME_LINKS)

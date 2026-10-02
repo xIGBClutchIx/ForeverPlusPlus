@@ -485,6 +485,20 @@ function ns.ApplyClutchDefault()
     ns.ApplyPreset(clutchEnables, clutchOptions)
 end
 
+---The titles of the modules Clutch's Default turns on, for its button's tooltip, so the tooltip
+---can't drift from the list. Modules this client doesn't get are left out.
+---@return string[]
+function ns.ClutchModules()
+    local titles = {}
+    for _, name in ipairs(clutchEnables) do
+        local module = ns.modules[name]
+        if module and not module.unavailable then
+            titles[#titles + 1] = module.title or name
+        end
+    end
+    return titles
+end
+
 -- /fpp ----------------------------------------------------------------------------------------
 
 local commands, commandOrder = {}, {} -- name -> { usage, description, fn }, and their order

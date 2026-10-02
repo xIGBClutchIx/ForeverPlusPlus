@@ -85,9 +85,9 @@ L.HOME_DEFAULTS = "Defaults"
 L.HOME_DEFAULTS_TIP = "Puts every module's settings back to how they start for a new player."
 L.HOME_DEFAULTS_ASK = "Put all Forever++ settings back to their defaults?"
 L.HOME_CLUTCH = "Clutch's Default"
-L.HOME_CLUTCH_TIP = "The defaults, plus the extra modules the author turns on: Fishing Cast, "
-    .. "Skip Cinematics, Auto Screenshot, Currency Bar, Hide Beta Feedback, and Short Channel Names, "
-    .. "and Zone Info shows Dungeons and Fishing only while you hold its detail key."
+L.HOME_CLUTCH_TIP = "The defaults, plus the extra modules the author turns on: %s. Zone Info "
+    .. "also shows Dungeons and Fishing only while you hold its detail key." -- module titles
+L.HOME_LIST_SEPARATOR = ", " -- between module titles in a list
 L.HOME_CLUTCH_ASK = "Use Clutch's recommended settings? This replaces your current Forever++ settings."
 L.HOME_GAME_BUILD = "Game %s (build %s, interface %s)" -- version, build, interface
 L.HOME_LINKS = "Links"
