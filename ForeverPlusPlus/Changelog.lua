@@ -23,7 +23,9 @@ ns.changelog = {
                     .. "popup, saves them per session with counts, stack, and locals, and shows "
                     .. "them in a window you can copy from (/fpp errors, or a minimap button with "
                     .. "this session's count), with previous and next, a session filter, and "
-                    .. "Clear." },
+                    .. "Clear. Ctrl-right-click the minimap button to clear this session's errors "
+                    .. "(the key is a setting). A Test Error button on the Debug page throws one "
+                    .. "to try it." },
                 { L.CHARACTERFRAME_TITLE, "New, on by default, in Interface: moves the Character "
                     .. "window's Equipment and Pet tabs to the side with the other tabs, removes "
                     .. "the portrait and level line above the stats so they start at the top, and "
@@ -32,13 +34,17 @@ ns.changelog = {
                     .. "new to Forever, the ones that weren't in original Classic, with an "
                     .. "infinity sign (or the Forever logo) after their name in the quest log on "
                     .. "the world map, the objective tracker, and quest givers' lists, each with "
-                    .. "its own checkbox, plus an icon size slider. Idea from ForeverQuestTint." },
+                    .. "its own checkbox and icon size slider. Idea from ForeverQuestTint." },
                 { L.MIRROREDBARS_TITLE, "New, on by default, in Unit Frames: fills your "
                     .. "target's and focus's health, mana, and cast bars from the right, so they empty "
                     .. "from left to right like a mirror of your own frame. Heal prediction and "
                     .. "absorbs follow, and each bar and frame has its own checkbox." },
                 { L.CLASSCOLORS_TITLE, "The Names checkbox is now a Name Color choice: Default "
                     .. "(Blizzard's), White, or Class Color (players only)." },
+                { L.QUESTPLATES_TITLE, "New Party Progress option: Own Only (as before), Party "
+                    .. "Combined (everyone's counts added up), or Lowest (the party member "
+                    .. "furthest from done). With a party member on the quest, creatures only "
+                    .. "they need now show too." },
                 { L.CLASSCOLORS_TITLE, "New Name Backgrounds option (on by default) tints the "
                     .. "bar behind a player's name on the target and focus frames in their class "
                     .. "color instead of Blizzard's faction color." },

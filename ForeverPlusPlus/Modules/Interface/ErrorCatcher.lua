@@ -15,6 +15,7 @@ local min, floor = math.min, math.floor
 local concat, tremove, wipe, time, date = table.concat, table.remove, wipe, time, date
 local cos, sin, rad, deg, atan2 = math.cos, math.sin, math.rad, math.deg, math.atan2
 local CreateFrame, UIParent, GetTime, GetCursorPosition = CreateFrame, UIParent, GetTime, GetCursorPosition
+local C_Timer, error = C_Timer, error
 local seterrorhandler, geterrorhandler = seterrorhandler, geterrorhandler
 local debugstack, debuglocals = debugstack, debuglocals
 local GetCallstackHeight, GetErrorCallstackHeight = GetCallstackHeight, GetErrorCallstackHeight
@@ -26,6 +27,7 @@ local module = ns.NewModule("ErrorCatcher", L.ERRORCATCHER_DESC, {
     enabled = false,
     chat = true,
     minimap = true,
+    clearModifier = "ctrl",
     -- Data, not settings: a table, so presets leave it alone.
     saved = {
         session = 0, -- counts logins and reloads
@@ -228,6 +230,22 @@ local function clear()
         wipe(data.errors)
         changed()
     end
+end
+
+-- Forgets this session's errors, keeping earlier sessions'.
+local function clearSession()
+    local data = saved()
+    if not data then
+        return
+    end
+    local kept = {}
+    for _, entry in ipairs(data.errors) do
+        if entry.session ~= data.session then
+            kept[#kept + 1] = entry
+        end
+    end
+    data.errors = kept
+    changed()
 end
 
 -- Caught from here on (see the top of the file).
@@ -481,6 +499,25 @@ function refreshButton()
     button.icon:SetDesaturated(count == 0)
 end
 
+-- The keys that, held with a right-click on the minimap button, clear this session's errors.
+local MODIFIERS = {
+    ctrl = { name = L.ERRORCATCHER_KEY_CTRL, down = IsControlKeyDown },
+    shift = { name = L.ERRORCATCHER_KEY_SHIFT, down = IsShiftKeyDown },
+    alt = { name = L.ERRORCATCHER_KEY_ALT, down = IsAltKeyDown },
+}
+
+local function onClick(_, mouse)
+    if mouse ~= "RightButton" then
+        toggleWindow()
+        return
+    end
+    -- A right-click alone does nothing, so clearing is never an accident.
+    local modifier = MODIFIERS[module.db.clearModifier]
+    if modifier and modifier.down() then
+        clearSession()
+    end
+end
+
 local function onEnter(self)
     GameTooltip:SetOwner(self, "ANCHOR_LEFT")
     GameTooltip:SetText(L.ERRORCATCHER_TITLE)
@@ -488,7 +525,10 @@ local function onEnter(self)
     GameTooltip:AddLine(format(L.ERRORCATCHER_TIP_SAVED, saved() and #saved().errors or 0), 1, 1, 1)
     GameTooltip:AddLine(" ")
     GameTooltip:AddLine(L.ERRORCATCHER_TIP_CLICK, 0.1, 1, 0.1)
-    GameTooltip:AddLine(L.ERRORCATCHER_TIP_RIGHT, 0.1, 1, 0.1)
+    local modifier = MODIFIERS[module.db.clearModifier]
+    if modifier then
+        GameTooltip:AddLine(format(L.ERRORCATCHER_TIP_CLEAR, modifier.name), 0.1, 1, 0.1)
+    end
     GameTooltip:AddLine(L.ERRORCATCHER_TIP_DRAG, 0.1, 1, 0.1)
     GameTooltip:Show()
 end
@@ -518,13 +558,7 @@ local function newMinimapButton()
     b.count = b:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
     b.count:SetPoint("BOTTOMRIGHT", 2, 1)
 
-    b:SetScript("OnClick", function(_, mouse)
-        if mouse == "RightButton" then
-            ns.OpenSettings(module.name)
-        else
-            toggleWindow()
-        end
-    end)
+    b:SetScript("OnClick", onClick)
     b:SetScript("OnDragStart", function(self)
         GameTooltip_Hide()
         self:SetScript("OnUpdate", follow)
@@ -557,6 +591,17 @@ module.options = {
         name = L.ERRORCATCHER_MINIMAP,
         description = L.ERRORCATCHER_MINIMAP_DESC,
     },
+    {
+        key = "clearModifier",
+        name = L.ERRORCATCHER_CLEAR_KEY,
+        description = L.ERRORCATCHER_CLEAR_KEY_DESC,
+        choices = {
+            { "ctrl", L.ERRORCATCHER_KEY_CTRL },
+            { "shift", L.ERRORCATCHER_KEY_SHIFT },
+            { "alt", L.ERRORCATCHER_KEY_ALT },
+            { "none", L.ERRORCATCHER_KEY_NONE },
+        },
+    },
     ns.ChatOption(L.ERRORCATCHER_CHAT_DESC),
 }
 
@@ -574,6 +619,24 @@ module.actions = {
         confirm = L.ERRORCATCHER_CLEAR_CONFIRM,
         key = "ERRORCATCHER_CLEAR",
         fn = clear,
+    },
+}
+
+-- Raises a Lua error on purpose, to see what catches it. On the next frame, so it goes to the
+-- error handler on its own instead of out of the Settings button's click.
+local function testError()
+    C_Timer.After(0, function()
+        error(L.ERRORCATCHER_TEST_MESSAGE)
+    end)
+end
+
+-- On the Debug page (Settings.lua). Works with the module off too, to see Blizzard's handler.
+module.debugActions = {
+    {
+        name = L.ERRORCATCHER_TEST,
+        button = L.ERRORCATCHER_TEST_BUTTON,
+        description = L.ERRORCATCHER_TEST_DESC,
+        fn = testError,
     },
 }
 
