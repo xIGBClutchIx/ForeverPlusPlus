@@ -799,10 +799,12 @@ local function onClick(_, mouse)
         toggleWindow()
         return
     end
-    -- A right-click alone does nothing, so clearing is never an accident.
+    -- Clearing needs the key held, so it's never an accident; a right-click alone opens Settings.
     local modifier = MODIFIERS[module.db.clearModifier]
     if modifier and modifier.down() then
         clearSession()
+    else
+        ns.OpenSettings()
     end
 end
 
@@ -813,6 +815,7 @@ local function onEnter(self)
     GameTooltip:AddLine(format(L.ERRORCATCHER_TIP_SAVED, saved() and #saved().errors or 0), 1, 1, 1)
     GameTooltip:AddLine(" ")
     GameTooltip:AddLine(L.ERRORCATCHER_TIP_CLICK, 0.1, 1, 0.1)
+    GameTooltip:AddLine(L.ERRORCATCHER_TIP_SETTINGS, 0.1, 1, 0.1)
     local modifier = MODIFIERS[module.db.clearModifier]
     if modifier then
         GameTooltip:AddLine(format(L.ERRORCATCHER_TIP_CLEAR, modifier.name), 0.1, 1, 0.1)

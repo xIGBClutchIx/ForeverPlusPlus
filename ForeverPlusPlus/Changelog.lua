@@ -31,7 +31,8 @@ ns.changelog = {
                     .. "it first and last happened, and the session filter showing how many "
                     .. "errors each choice has. A Copy Bug Report button selects a report with the "
                     .. "addon version, client build, modules on, other addons, and the error's "
-                    .. "stack and locals, ready for Ctrl+C." },
+                    .. "stack and locals, ready for Ctrl+C. Right-clicking the minimap button "
+                    .. "opens Forever++ settings." },
                 { L.SPELLRANKS_TITLE, "The tooltip line is now \"Higher Rank Known:\" with the "
                     .. "rank at the right edge in white, like the price lines, instead of a gold "
                     .. "line that read as part of the spell's description." },
