@@ -492,7 +492,7 @@ end
 -- a merchant sells costs the merchant's price when that's lower than the auction's; those
 -- prices are learned at merchants. A crafted item with no auction price is worth what a
 -- merchant pays for it. Our own font strings and frame, on Blizzard's recipe form; only the
--- reagents' anchor is changed, to make room, and put back when ours go.
+-- anchors of the reagents and their names are changed, to make room, and put back when ours go.
 
 -- A merchant's item: its price, how many that price buys, how many are left (-1: unlimited),
 -- and whether it costs something besides money. Probe: C_MerchantFrame.GetItemInfo is newer
@@ -677,9 +677,32 @@ local function eachSlot(form, fn)
     end
 end
 
+-- A slot's name sits centered beside its icon, so with our price under it the pair would hang
+-- below the icon: the name moves up by half a line while the price shows, and back after. Only
+-- a name with one anchor, as Mainline's has; its anchor is kept the first time it's seen.
+local nameAnchors = setmetatable({}, { __mode = "k" }) -- slot -> { point, to, relativePoint, x, y }
+local NAME_LIFT = 6
+
+local function liftName(slot, lift)
+    local name = slot.Name
+    local anchor = nameAnchors[slot]
+    if not anchor then
+        if name:GetNumPoints() ~= 1 then
+            return
+        end
+        anchor = { name:GetPoint(1) }
+        nameAnchors[slot] = anchor
+    end
+    name:ClearAllPoints()
+    name:SetPoint(anchor[1], anchor[2], anchor[3], anchor[4], anchor[5] + (lift and NAME_LIFT or 0))
+end
+
 local function hideSlotPrices()
-    for _, text in pairs(slotPrices) do
-        text:Hide()
+    for slot, text in pairs(slotPrices) do
+        if text:IsShown() then
+            text:Hide()
+            liftName(slot, false)
+        end
     end
 end
 
@@ -756,9 +779,10 @@ local function refreshCrafting(recipeInfo)
         local text = slotPrices[slot]
         if not text then
             text = slot:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-            text:SetPoint("TOPLEFT", slot.Name, "BOTTOMLEFT", 0, -2)
+            text:SetPoint("TOPLEFT", slot.Name, "BOTTOMLEFT", 0, -1)
             slotPrices[slot] = text
         end
+        liftName(slot, true)
         local unit = reagentCost(itemID)
         if not unit then
             text:SetText(noPrice())
