@@ -118,6 +118,7 @@
     "StaticPopup_Show",
     "YES",
     "NO",
+    "CANCEL",
     "CreateSettingsButtonInitializer",
     "IsBetaBuild",
     "IsPublicTestClient",

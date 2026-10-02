@@ -88,6 +88,11 @@ L.HOME_CLUTCH = "Clutch's Default"
 L.HOME_CLUTCH_TIP = "The defaults, plus the extra modules the author turns on: %s. Zone Info "
     .. "also shows Dungeons and Fishing only while you hold its detail key." -- module titles
 L.HOME_LIST_SEPARATOR = ", " -- between module titles in a list
+-- The popup of the Defaults button at the top right of the Modules and Debug pages
+L.DEFAULTS_ASK = "Put all Forever++ settings back to defaults? This replaces your current "
+    .. "Forever++ settings. The rest of the game's settings stay as they are."
+L.DEFAULTS_CLUTCH = "Clutch's Defaults"
+L.DEFAULTS_RECOMMENDED = "Recommended Defaults"
 L.HOME_CLUTCH_ASK = "Use Clutch's recommended settings? This replaces your current Forever++ settings."
 L.HOME_GAME_BUILD = "Game %s (build %s, interface %s)" -- version, build, interface
 L.HOME_LINKS = "Links"

@@ -463,7 +463,8 @@ end
 -- Defaults button -----------------------------------------------------------------------------
 -- Blizzard's Defaults button, at the top right of a settings list, asks "These Settings" or "All
 -- Settings", and All Settings resets the whole game. On our list pages our own Defaults button
--- sits over it instead and asks only whether to put Forever++ back to its defaults. Blizzard's is
+-- sits over it instead, with a popup laid out like Blizzard's that offers only Forever++'s two
+-- presets: Clutch's Defaults | Cancel | Recommended Defaults. Blizzard's is
 -- faded out underneath (never changed otherwise), and ours shows and hides with it, since Blizzard
 -- hides it while searching.
 
@@ -494,15 +495,9 @@ local function addDefaultsButton()
     defaultsButton:SetFrameLevel(blizzard:GetFrameLevel() + 5)
     defaultsButton:SetText(SETTINGS_DEFAULTS or L.HOME_DEFAULTS)
     defaultsButton:SetScript("OnClick", function()
-        ns.Confirm("DEFAULTS", L.HOME_DEFAULTS_ASK, ns.ApplyDefaults)
+        ns.ConfirmChoice("DEFAULTS_CHOICE", L.DEFAULTS_ASK, L.DEFAULTS_CLUTCH, ns.ApplyClutchDefault,
+            L.DEFAULTS_RECOMMENDED, ns.ApplyDefaults)
     end)
-    defaultsButton:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-        GameTooltip:SetText(L.HOME_DEFAULTS)
-        GameTooltip:AddLine(L.HOME_DEFAULTS_TIP, 1, 1, 1, true)
-        GameTooltip:Show()
-    end)
-    defaultsButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
     defaultsButton:Hide()
     blizzard:HookScript("OnShow", function() updateDefaults(blizzard) end)
     blizzard:HookScript("OnHide", function() updateDefaults(blizzard) end)
