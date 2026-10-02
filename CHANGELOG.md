@@ -8,7 +8,8 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 - **Best Quest Reward** (new, on by default, in Items): puts a gold coin on the quest reward choice that sells to a vendor for the most (price times count), in the quest window and the quest log. Ties are all marked, and it never picks for you.
 - **Item Count** (new, off by default, in Items): shows how many of an item you own in its tooltip, above the prices, and how many are in your bags and your bank, with small bag and bank icons (or words). The bank is counted each time you open it.
-- **Auction Prices**: new Crafting Costs option (on by default): in the professions window, under the recipe's description, the total cost of its reagents, what the crafted items are worth, and the profit in green or red. Reagents a merchant sells use the merchant's price once you've visited one, when it's lower; a crafted item with no auction price is valued at its vendor price. Missing prices say No price. Hovering a reagent there prices the count the recipe takes (Shift for one), in the auction and sell price lines.
+- **Auction Prices**: new Crafting Costs option (on by default) shows Total Cost, Value, and Profit (green or red) under a recipe's description in the professions window. Reagents a merchant sells count at the merchant's price when it's lower, once you've visited one; a crafted item with no auction price is valued at its vendor price.
+- **Sell Price** and **Auction Prices**: a reagent's tooltip in the professions window prices the amount the recipe needs (x4) instead of one; Shift shows one.
 - **Fishing Cast**: new Combat Warning option (on by default) shows one red line where Blizzard's errors appear when combat starts while you have a fishing pole equipped.
 
 ### Changed
