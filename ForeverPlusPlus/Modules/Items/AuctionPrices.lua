@@ -112,9 +112,12 @@ local function getIndicator()
         indicator = CreateFrame("Frame", nil, parent)
         indicator:SetSize(1, 20)
         indicator:SetPoint("TOPRIGHT", parent, "TOPRIGHT", -30, -1)
-        -- Above the window's border and title art, which are child frames of their own.
-        -- A level, not a strata, so it stays with the window instead of floating over others.
-        indicator:SetFrameLevel(parent:GetFrameLevel() + 100)
+        -- Above the window's border and title art, which are child frames with their own fixed
+        -- levels, well above the window's (parent + 100 drew under them). A level over the title
+        -- bar, as Coordinates does on the map, not a strata, so it stays with the window instead
+        -- of floating over others.
+        local title = parent.TitleContainer
+        indicator:SetFrameLevel((title or parent):GetFrameLevel() + (title and 1 or 500))
         indicator.text = indicator:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         indicator.text:SetPoint("RIGHT")
         -- Probe: LoadingSpinnerTemplate is Mainline SharedXML; without it, only the text shows.
