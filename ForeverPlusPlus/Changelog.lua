@@ -17,6 +17,9 @@ ns.changelog = {
                     .. "quest reward choice that sells to a vendor for the most (price times "
                     .. "count), in the quest window and the quest log. Ties are all marked, and it "
                     .. "never picks for you." },
+                { L.FISHINGCAST_TITLE, "New Combat Warning option (on by default) shows one red "
+                    .. "line where Blizzard's errors appear when combat starts while you have a "
+                    .. "fishing pole equipped." },
             } },
             { L.CHANGELOG_FIXED, {
                 { L.AUCTIONPRICES_TITLE, "The age under an auction price is when that item was "

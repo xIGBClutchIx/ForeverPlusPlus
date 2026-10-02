@@ -7,6 +7,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Added
 
 - **Best Quest Reward** (new, on by default, in Items): puts a gold coin on the quest reward choice that sells to a vendor for the most (price times count), in the quest window and the quest log. Ties are all marked, and it never picks for you.
+- **Fishing Cast**: new Combat Warning option (on by default) shows one red line where Blizzard's errors appear when combat starts while you have a fishing pole equipped.
 
 ### Fixed
 

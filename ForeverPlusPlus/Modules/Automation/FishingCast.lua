@@ -9,6 +9,7 @@ local GetTime, InCombatLockdown, CreateFrame = GetTime, InCombatLockdown, Create
 local SetOverrideBindingSpell, ClearOverrideBindings = SetOverrideBindingSpell, ClearOverrideBindings
 local GetInventoryItemID, UnitExists, GetUnitSpeed = GetInventoryItemID, UnitExists, GetUnitSpeed
 local C_Item, C_Spell, C_Timer, WorldFrame = C_Item, C_Spell, C_Timer, WorldFrame
+local UIErrorsFrame = UIErrorsFrame
 local GetMouseFoci, GetMouseFocus, UnitChannelInfo = GetMouseFoci, GetMouseFocus, UnitChannelInfo
 
 local L = ns.L
@@ -16,6 +17,7 @@ local L = ns.L
 local module = ns.NewModule("FishingCast", L.FISHINGCAST_DESC, {
     enabled = false,
     speed = 400, -- milliseconds allowed between the two clicks
+    combatWarning = true,
 })
 module.title = L.FISHINGCAST_TITLE
 module.category = "automation"
@@ -27,6 +29,7 @@ module.options = {
         description = L.FISHINGCAST_SPEED_DESC,
         min = 200, max = 600, step = 50, format = function(ms) return L.FISHINGCAST_MS:format(ms) end,
     },
+    { key = "combatWarning", name = L.FISHINGCAST_COMBAT, description = L.FISHINGCAST_COMBAT_DESC },
 }
 
 local MAINHAND = 16
@@ -134,6 +137,11 @@ function module:OnEnable()
             ns.AfterCombat(disarm)
         end
         lastClick = 0
+        -- Combat with a pole still in hand: one red line where Blizzard's own errors show.
+        if module.db.combatWarning and poleEquipped() and UIErrorsFrame then
+            local red = ns.Colors.RED
+            UIErrorsFrame:AddMessage(L.FISHINGCAST_COMBAT_TEXT, red[1], red[2], red[3])
+        end
     end)
 end
 
