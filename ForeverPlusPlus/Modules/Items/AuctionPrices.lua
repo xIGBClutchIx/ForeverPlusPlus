@@ -486,13 +486,14 @@ local function addAuctionPrice(tooltip, data)
 end
 
 -- Crafting -----------------------------------------------------------------------------------
--- In the professions window, under the recipe's description: what each reagent costs for the
--- count the recipe takes, the total, what the crafted items are worth, and the profit. A reagent
+-- In the professions window, under the recipe's description: what its reagents cost in all (each
+-- one's price times the count the recipe takes), what the crafted items are worth, and the
+-- profit. A reagent
 -- a merchant sells costs the merchant's price when that's lower than the auction's; those
 -- prices are learned at merchants. A crafted item with no auction price is worth what a
 -- merchant pays for it. Our own frame on Blizzard's recipe form; only the reagents' anchor is
 -- changed, to move them down under it, and put back when it goes. (Prices inside Blizzard's
--- reagent slots didn't fit: their names wrap in a narrow column.)
+-- reagent slots didn't fit, and a row per reagent was too much.)
 
 -- A merchant's item: its price, how many that price buys, how many are left (-1: unlimited),
 -- and whether it costs something besides money. Probe: C_MerchantFrame.GetItemInfo is newer
@@ -707,34 +708,16 @@ local function refreshCrafting(recipeInfo)
         panel:SetPoint("TOPLEFT", below, "BOTTOMLEFT", 0, -12)
     end
 
-    -- A row per reagent: its name and count, then what the recipe's count of it costs, with one's
-    -- price in gray when it takes more than one.
-    local i, y = 0, 0
     local total, missing = 0, false
     for _, reagent in ipairs(reagents) do
-        local itemID, count = reagent[1], reagent[2]
-        local name = C_Item.GetItemNameByID(itemID) or L.AUCTIONPRICES_CRAFT_UNKNOWN
-        local label = format(L.AUCTIONPRICES_CRAFT_EACH, name,
-            GRAY:WrapTextInColorCode(format(L.AUCTIONPRICES_CRAFT_COUNT, count)))
-        local unit = reagentCost(itemID)
-        local value
+        local unit = reagentCost(reagent[1])
         if unit then
-            total = total + unit * count
-            value = coins(unit * count)
-            if count > 1 then
-                value = format(L.AUCTIONPRICES_CRAFT_EACH,
-                    GRAY:WrapTextInColorCode(format(L.AUCTIONPRICES_CRAFT_PER, coins(unit))), value)
-            end
+            total = total + unit * reagent[2]
         else
             missing = true
-            value = noPrice()
         end
-        i = i + 1
-        setRow(i, y, label, value)
-        y = y - ROW_HEIGHT
     end
-    y = y - 6
-    i = i + 1
+    local i, y = 1, 0
     setRow(i, y, L.AUCTIONPRICES_CRAFT_COST, missing and noPrice() or coins(total))
     y = y - ROW_HEIGHT
 

@@ -30,14 +30,10 @@ L.AUCTIONPRICES_SCAN_AGE_LINE = "Scanned"
 L.AUCTIONPRICES_SECTION_CRAFTING = "Crafting"
 L.AUCTIONPRICES_CRAFTING = "Crafting Costs"
 L.AUCTIONPRICES_CRAFTING_DESC = "In the professions window, under the recipe's description: what "
-    .. "each reagent costs, the total, what the crafted items are worth, and the profit. Reagents "
-    .. "a merchant sells use the merchant's price once you've visited one that has them, when "
-    .. "it's lower."
+    .. "its reagents cost, what the crafted items are worth, and the profit. Reagents a merchant "
+    .. "sells use the merchant's price once you've visited one that has them, when it's lower."
 L.AUCTIONPRICES_CRAFT_NO_PRICE = "No price"
-L.AUCTIONPRICES_CRAFT_UNKNOWN = "..." -- a reagent whose name hasn't loaded yet
-L.AUCTIONPRICES_CRAFT_COUNT = "x%d" -- how many the recipe takes
-L.AUCTIONPRICES_CRAFT_PER = "%s each" -- one's price
-L.AUCTIONPRICES_CRAFT_EACH = "%s  %s" -- two pieces of a row, one of them a gray note
+L.AUCTIONPRICES_CRAFT_EACH = "%s  %s" -- coins, then a gray note
 L.AUCTIONPRICES_CRAFT_COST = "Total Cost"
 L.AUCTIONPRICES_CRAFT_VALUE = "Value"
 L.AUCTIONPRICES_CRAFT_VALUE_COUNT = "Value x%s" -- how many the recipe makes

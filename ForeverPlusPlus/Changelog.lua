@@ -22,9 +22,9 @@ ns.changelog = {
                     .. "and your bank, with small bag and bank icons (or words). The bank is "
                     .. "counted each time you open it." },
                 { L.AUCTIONPRICES_TITLE, "New Crafting Costs option (on by default): in the "
-                    .. "professions window, under the recipe's description, each reagent's price "
-                    .. "for the count the recipe takes, the total cost, what the crafted items are "
-                    .. "worth, and the profit in green or red. Reagents a merchant sells use the merchant's "
+                    .. "professions window, under the recipe's description, the total cost of its "
+                    .. "reagents, what the crafted items are worth, and the profit in green or "
+                    .. "red. Reagents a merchant sells use the merchant's "
                     .. "price once you've visited one, when it's lower; a crafted item with no "
                     .. "auction price is valued at its vendor price. Missing prices say No price." },
                 { L.FISHINGCAST_TITLE, "New Combat Warning option (on by default) shows one red "
