@@ -12,6 +12,12 @@ ns.changelog = {
     {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
+            { L.CHANGELOG_ADDED, {
+                { L.BESTREWARD_TITLE, "New, on by default, in Items: puts a gold coin on the "
+                    .. "quest reward choice that sells to a vendor for the most (price times "
+                    .. "count), in the quest window and the quest log. Ties are all marked, and it "
+                    .. "never picks for you." },
+            } },
             { L.CHANGELOG_FIXED, {
                 { L.AUCTIONPRICES_TITLE, "The age under an auction price is when that item was "
                     .. "last seen, not the last scan, so an item missing from a scan no longer "

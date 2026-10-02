@@ -25,6 +25,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | **Items** | |
 | Already Known | Marks recipes, mounts, pets, toys, and other items you already know or have with a green check (or tint) on their icon, on merchants, the auction house, bags, mail, and the loot window, each with its own checkbox. |
 | Auction Prices | Scans the auction house when you open it and shows the lowest buyout in item tooltips, under the sell price. |
+| Best Quest Reward | Puts a gold coin on the quest reward choice that sells to a vendor for the most (price times count), in the quest window and the quest log. Ties are all marked; it never picks for you. |
 | Bag Slot Counter | Shows how many bag slots are free on the backpack button, or each bag's own count on its button, with the reagent bag counted on its own. |
 | Durability Bars | Shows a small bar beside each item on the character window with how worn it is. |
 | Profession Tooltips | Shows the skill a herb, ore, skinnable beast, or locked lockbox or chest needs in its tooltip, colored like trainer recipes against your skill, and the skill that gathers herb, ore, and stone items. Gathering for professions you have, or always; Lockpicking only for characters who can pick locks, or blacksmiths with their skeleton keys. |

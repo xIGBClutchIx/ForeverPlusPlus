@@ -4,6 +4,10 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ## Unreleased
 
+### Added
+
+- **Best Quest Reward** (new, on by default, in Items): puts a gold coin on the quest reward choice that sells to a vendor for the most (price times count), in the quest window and the quest log. Ties are all marked, and it never picks for you.
+
 ### Fixed
 
 - **Auction Prices**: the age under an auction price is when that item was last seen, not the last scan, so an item missing from a scan no longer looks freshly checked. Saved prices are cleared once; the next visit to the auction house scans again.

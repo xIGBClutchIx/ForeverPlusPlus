@@ -71,6 +71,11 @@ L.ALREADYKNOWN_MAIL_DESC = "Mark mail whose attachments you already know, in the
 L.ALREADYKNOWN_LOOT = "Loot"
 L.ALREADYKNOWN_LOOT_DESC = "Mark known items in the loot window."
 
+-- BestReward
+L.BESTREWARD_TITLE = "Best Quest Reward"
+L.BESTREWARD_DESC = "Mark the quest reward choice that sells to a vendor for the most with a gold "
+    .. "coin, in the quest window and the quest log. It doesn't choose it for you."
+
 -- SellPrice
 L.SELLPRICE_TITLE = "Sell Price"
 L.SELLPRICE_DESC = "Show the vendor price of the whole stack in item tooltips. Hold Shift to see "
