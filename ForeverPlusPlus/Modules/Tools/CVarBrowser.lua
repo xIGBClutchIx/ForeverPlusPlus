@@ -171,10 +171,12 @@ local function buildRow(row)
     row.value:SetSize(VALUE_WIDTH, 20)
     row.value:SetPoint("RIGHT", VALUE_RIGHT, 0)
     row.value:SetAutoFocus(false)
-    row.value:HookScript("OnEnterPressed", function(self)
-        self:ClearFocus()
+    -- Our own box, so its Enter script is ours to set. Read the text before clearing focus: losing
+    -- focus puts the current value back in the box, which used to undo every edit.
+    row.value:SetScript("OnEnterPressed", function(self)
+        local text = strtrim(self:GetText() or "")
         local value = read(row.entry.name)
-        local text = self:GetText()
+        self:ClearFocus()
         if text ~= value then
             apply(row.entry.name, text)
         end
