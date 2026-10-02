@@ -13,6 +13,7 @@ local C_AuctionHouse, C_Timer, GetTime = C_AuctionHouse, C_Timer, GetTime
 local GetRealmName, UnitFactionGroup = GetRealmName, UnitFactionGroup
 local CreateFrame, pcall, type, hooksecurefunc = CreateFrame, pcall, type, hooksecurefunc
 local select, tostring, C_Item, C_TradeSkillUI, Enum = select, tostring, C_Item, C_TradeSkillUI, Enum
+local pairs, setmetatable = pairs, setmetatable
 
 local L = ns.L
 local ItemTooltip = ns.ItemTooltip
@@ -486,11 +487,12 @@ local function addAuctionPrice(tooltip, data)
 end
 
 -- Crafting -----------------------------------------------------------------------------------
--- Under a recipe's reagents in the professions window: what each reagent costs (one's price
--- times how many the recipe takes), the total, what the crafted items are worth, and the
--- profit. A reagent a merchant sells costs the merchant's price when that's lower than the
--- auction's; those prices are learned at merchants. A crafted item with no auction price is
--- worth what a merchant pays for it. Our own frame, parented to Blizzard's recipe form.
+-- In the professions window: under each reagent's name, what the recipe's count of it costs;
+-- under the description, the total, what the crafted items are worth, and the profit. A reagent
+-- a merchant sells costs the merchant's price when that's lower than the auction's; those
+-- prices are learned at merchants. A crafted item with no auction price is worth what a
+-- merchant pays for it. Our own font strings and frame, on Blizzard's recipe form; only the
+-- reagents' anchor is changed, to make room, and put back when ours go.
 
 -- A merchant's item: its price, how many that price buys, how many are left (-1: unlimited),
 -- and whether it costs something besides money. Probe: C_MerchantFrame.GetItemInfo is newer
@@ -548,21 +550,29 @@ local function craftedValue(itemID)
     end
 end
 
--- The reagents every craft uses (not optional or finishing ones): { itemID, count } each. Probe:
--- reagentType and its enum are Mainline's; without them, the required slots.
-local function basicReagents(schematic)
+-- A reagent slot every craft uses (not an optional or finishing one): its item and how many, or
+-- nil. Probe: reagentType and its enum are Mainline's; without them, whether it's required.
+local function basicReagent(slot)
     local basic = Enum.CraftingReagentType and Enum.CraftingReagentType.Basic
+    local isBasic
+    if basic and slot.reagentType ~= nil then
+        isBasic = slot.reagentType == basic
+    else
+        isBasic = slot.required
+    end
+    local reagent = slot.reagents and slot.reagents[1]
+    if isBasic and reagent and reagent.itemID and (slot.quantityRequired or 0) > 0 then
+        return reagent.itemID, slot.quantityRequired
+    end
+end
+
+-- The reagents every craft uses: { itemID, count } each.
+local function basicReagents(schematic)
     local list = {}
     for _, slot in ipairs(schematic.reagentSlotSchematics or {}) do
-        local reagent = slot.reagents and slot.reagents[1]
-        local isBasic
-        if basic and slot.reagentType ~= nil then
-            isBasic = slot.reagentType == basic
-        else
-            isBasic = slot.required
-        end
-        if isBasic and reagent and reagent.itemID and (slot.quantityRequired or 0) > 0 then
-            list[#list + 1] = { reagent.itemID, slot.quantityRequired }
+        local itemID, count = basicReagent(slot)
+        if itemID then
+            list[#list + 1] = { itemID, count }
         end
     end
     return list
@@ -582,7 +592,9 @@ end
 
 local CRAFT_WIDTH, ROW_HEIGHT = 280, 14
 
-local panel -- our frame under the reagents, made the first time a recipe shows
+local panel -- our frame for the totals, made the first time a recipe shows
+local slotPrices = setmetatable({}, { __mode = "k" }) -- Blizzard's reagent slot -> our price text
+local reagentsAnchor -- Blizzard's anchor for the reagents, which our totals take over
 
 local function craftForm()
     local frame = _G.ProfessionsFrame
@@ -594,15 +606,84 @@ local function getPanel(form)
     if not panel then
         panel = CreateFrame("Frame", nil, form)
         panel:SetSize(CRAFT_WIDTH, ROW_HEIGHT)
-        panel.title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        panel.title:SetPoint("TOPLEFT")
-        panel.title:SetText(L.AUCTIONPRICES_CRAFT_TITLE)
         panel.rows = {}
     end
     return panel
 end
 
--- Row `i` at `y` below the title: a label on the left and a value at the right edge.
+-- The totals go where Blizzard put the reagents, under the description, and the reagents move
+-- down under them. Only for a reagents frame with one TOPLEFT anchor, as Mainline's has; false
+-- otherwise. Blizzard may anchor the reagents again for each recipe, so the anchor is read again
+-- each time unless it's still ours.
+local function placeAtTop(form)
+    local reagents = form.Reagents
+    if not (reagents and reagents:GetNumPoints() == 1) then
+        return false
+    end
+    local point, relativeTo, relativePoint, x, y = reagents:GetPoint(1)
+    if relativeTo ~= panel then
+        if point ~= "TOPLEFT" then
+            return false
+        end
+        reagentsAnchor = { relativeTo or form, relativePoint, x, y }
+    elseif not reagentsAnchor then
+        return false
+    end
+    local anchor = reagentsAnchor
+    panel:ClearAllPoints()
+    panel:SetPoint("TOPLEFT", anchor[1], anchor[2], anchor[3], anchor[4])
+    reagents:ClearAllPoints()
+    reagents:SetPoint("TOPLEFT", panel, "BOTTOMLEFT", 0, anchor[4] < 0 and anchor[4] or -12)
+    return true
+end
+
+-- Puts the reagents back where Blizzard had them, when our totals go.
+local function restoreReagents(form)
+    local reagents = form.Reagents
+    if not (reagentsAnchor and reagents) then
+        return
+    end
+    local _, relativeTo = reagents:GetPoint(1)
+    if relativeTo == panel then
+        local anchor = reagentsAnchor
+        reagents:ClearAllPoints()
+        reagents:SetPoint("TOPLEFT", anchor[1], anchor[2], anchor[3], anchor[4])
+    end
+end
+
+-- Blizzard's reagent slot frames on the form: the Reagents frame's children, and the form's own
+-- list of them. Probe: either may be missing; a slot is a frame with GetReagentSlotSchematic.
+local function eachSlot(form, fn)
+    local done = {}
+    local function visit(slot)
+        if type(slot) == "table" and not done[slot] and slot.GetReagentSlotSchematic and slot.Name then
+            done[slot] = true
+            fn(slot)
+        end
+    end
+    if form.Reagents then
+        for _, child in ipairs({ form.Reagents:GetChildren() }) do
+            visit(child)
+        end
+    end
+    if type(form.reagentSlots) == "table" then
+        for _, list in pairs(form.reagentSlots) do
+            if type(list) == "table" then
+                for _, slot in pairs(list) do
+                    visit(slot)
+                end
+            end
+        end
+    end
+end
+
+local function hideSlotPrices()
+    for _, text in pairs(slotPrices) do
+        text:Hide()
+    end
+end
+
+-- Row `i` at `y`: a label on the left and a value at the right edge.
 local function setRow(i, y, label, value)
     local row = panel.rows[i]
     if not row then
@@ -640,45 +721,66 @@ local function refreshCrafting(recipeInfo)
     local schematic = recipeID and C_TradeSkillUI and C_TradeSkillUI.GetRecipeSchematic
         and C_TradeSkillUI.GetRecipeSchematic(recipeID, false)
     local reagents = schematic and basicReagents(schematic)
-    -- Under the optional reagents when the recipe has them, or else the reagents.
-    local below = form.OptionalReagents
-    if not (below and below:IsShown()) then
-        below = form.Reagents
-    end
-    if not (reagents and #reagents > 0 and below) then
+    if not (reagents and #reagents > 0 and form.Reagents) then
         if panel then
             panel:Hide()
+            restoreReagents(form)
         end
+        hideSlotPrices()
         return
     end
     getPanel(form)
-    panel:ClearAllPoints()
-    panel:SetPoint("TOPLEFT", below, "BOTTOMLEFT", 0, -12)
+    if not placeAtTop(form) then
+        -- Not the layout we know: under the reagents instead, moving nothing of Blizzard's.
+        restoreReagents(form)
+        local below = form.OptionalReagents
+        if not (below and below:IsShown()) then
+            below = form.Reagents
+        end
+        panel:ClearAllPoints()
+        panel:SetPoint("TOPLEFT", below, "BOTTOMLEFT", 0, -12)
+    end
 
-    local i, y = 0, -(ROW_HEIGHT + 4)
+    -- Each reagent's price under its name in Blizzard's slot: the cost for the count the recipe
+    -- takes, and one's price in gray when it takes more than one.
+    hideSlotPrices()
+    eachSlot(form, function(slot)
+        local slotSchematic = slot:IsShown() and slot:GetReagentSlotSchematic()
+        local itemID, count
+        if slotSchematic then
+            itemID, count = basicReagent(slotSchematic)
+        end
+        if not itemID then
+            return
+        end
+        local text = slotPrices[slot]
+        if not text then
+            text = slot:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+            text:SetPoint("TOPLEFT", slot.Name, "BOTTOMLEFT", 0, -2)
+            slotPrices[slot] = text
+        end
+        local unit = reagentCost(itemID)
+        if not unit then
+            text:SetText(noPrice())
+        elseif count > 1 then
+            text:SetText(format(L.AUCTIONPRICES_CRAFT_EACH, coins(unit * count),
+                GRAY:WrapTextInColorCode(format(L.AUCTIONPRICES_CRAFT_PER, coins(unit)))))
+        else
+            text:SetText(coins(unit))
+        end
+        text:Show()
+    end)
+
     local total, missing = 0, false
     for _, reagent in ipairs(reagents) do
-        local itemID, count = reagent[1], reagent[2]
-        local name = C_Item.GetItemNameByID(itemID) or L.AUCTIONPRICES_CRAFT_UNKNOWN
-        local unit = reagentCost(itemID)
-        local value
+        local unit = reagentCost(reagent[1])
         if unit then
-            total = total + unit * count
-            value = coins(unit * count)
-            if count > 1 then
-                value = format(L.AUCTIONPRICES_CRAFT_EACH, GRAY:WrapTextInColorCode(
-                    format(L.AUCTIONPRICES_CRAFT_TIMES, coins(unit), count)), value)
-            end
+            total = total + unit * reagent[2]
         else
             missing = true
-            value = noPrice()
         end
-        i = i + 1
-        setRow(i, y, name, value)
-        y = y - ROW_HEIGHT
     end
-    y = y - 4
-    i = i + 1
+    local i, y = 1, 0
     setRow(i, y, L.AUCTIONPRICES_CRAFT_COST, missing and noPrice() or coins(total))
     y = y - ROW_HEIGHT
 
@@ -699,8 +801,8 @@ local function refreshCrafting(recipeInfo)
             unitValue = unitValue * made
             valueText = coins(unitValue)
             if fromVendor then
-                valueText = format(L.AUCTIONPRICES_CRAFT_EACH,
-                    GRAY:WrapTextInColorCode(L.AUCTIONPRICES_CRAFT_VENDOR), valueText)
+                valueText = format(L.AUCTIONPRICES_CRAFT_EACH, valueText,
+                    GRAY:WrapTextInColorCode(L.AUCTIONPRICES_CRAFT_VENDOR))
             end
         end
         i = i + 1
@@ -761,6 +863,11 @@ function module:OnDisable()
     ns.AddOns.Cancel("Blizzard_Professions", hookProfessions)
     if panel then
         panel:Hide()
+    end
+    hideSlotPrices()
+    local form = craftForm()
+    if form then
+        restoreReagents(form)
     end
 end
 
