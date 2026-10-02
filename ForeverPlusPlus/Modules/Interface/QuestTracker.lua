@@ -215,18 +215,42 @@ local function setColors()
     end
 end
 
--- Widens `bounds` ({ left, right, top, bottom }) to a shown frame and what's in it, a few frames
--- deep: the quest blocks, their map buttons on the left and item buttons on the right.
+---Whether a texture or font string is drawn now: shown, not see-through, not a mouseover
+---highlight, and for text, not empty.
+---@param region table
+---@return boolean
+local function isDrawn(region)
+    if not (region.IsVisible and region:IsVisible()) or region:GetAlpha() <= 0 then
+        return false
+    end
+    if region.GetDrawLayer and region:GetDrawLayer() == "HIGHLIGHT" then
+        return false
+    end
+    if region.GetText then
+        local text = region:GetText()
+        return text ~= nil and text ~= ""
+    end
+    return true
+end
+
+-- Widens `bounds` ({ left, right, top, bottom }) to what a frame draws, and its children's: the
+-- headers' art and text, the quest lines, their map buttons on the left and item buttons on the
+-- right. Only what's drawn counts, not frame sizes: a collapsed section keeps its full height,
+-- and some of the tracker's frames are wider than what shows in them.
 local function measure(frame, bounds, depth)
-    if not frame:IsShown() then
+    if not frame:IsVisible() or frame:GetEffectiveAlpha() <= 0 then
         return
     end
-    local left, bottom, width, height = frame:GetRect()
-    if left and width > 1 and height > 1 then
-        bounds[1] = min(bounds[1] or left, left)
-        bounds[2] = max(bounds[2] or left + width, left + width)
-        bounds[3] = max(bounds[3] or bottom + height, bottom + height)
-        bounds[4] = min(bounds[4] or bottom, bottom)
+    for _, region in ipairs({ frame:GetRegions() }) do
+        if isDrawn(region) then
+            local left, bottom, width, height = region:GetRect()
+            if left and width > 1 and height > 1 then
+                bounds[1] = min(bounds[1] or left, left)
+                bounds[2] = max(bounds[2] or left + width, left + width)
+                bounds[3] = max(bounds[3] or bottom + height, bottom + height)
+                bounds[4] = min(bounds[4] or bottom, bottom)
+            end
+        end
     end
     if depth > 0 then
         for _, child in ipairs({ frame:GetChildren() }) do
@@ -239,7 +263,7 @@ end
 -- collapsed. Blizzard's own background (Edit Mode's Opacity) fills the whole height instead.
 local function fitBox()
     local frame = tracker()
-    if not module.db.background or not frame:IsVisible() then
+    if not (module.enabled and module.db.background) or not frame:IsVisible() then
         if box then
             box:Hide()
         end
@@ -249,7 +273,7 @@ local function fitBox()
     local bounds = {}
     for _, child in ipairs({ frame:GetChildren() }) do
         if child ~= box and child ~= frame.NineSlice and child ~= frame.Selection then
-            measure(child, bounds, 3)
+            measure(child, bounds, 5)
         end
     end
     local left, right, top, bottom = bounds[1], bounds[2], bounds[3], bounds[4]
@@ -272,6 +296,8 @@ local function onUpdate()
     local frame = tracker()
     findFonts(frame, 4)
     fitBox()
+    -- Collapsing a section can hide its lines after the update returns, so look again a frame on.
+    C_Timer.After(0, fitBox)
 end
 
 -- Fading ------------------------------------------------------------------------------------------
