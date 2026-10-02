@@ -219,9 +219,7 @@ L.QUESTTRACKER_OPACITY_DESC = "How dark the box is."
 L.QUESTTRACKER_BORDER = "Border"
 L.QUESTTRACKER_BORDER_DESC = "Give the box a tooltip's border."
 L.QUESTTRACKER_PADDING = "Padding"
-L.QUESTTRACKER_PADDING_DESC = "How much room the box leaves around the text."
-L.QUESTTRACKER_COMMAND = "print the quest tracker's frames, to fix its background"
-L.QUESTTRACKER_FADE = "Fade in Combat"
+L.QUESTTRACKER_PADDING_DESC = "How much room the box leaves around the text."L.QUESTTRACKER_FADE = "Fade in Combat"
 L.QUESTTRACKER_FADE_DESC = "Make the tracker faint while you're in combat, and clear again after."
 
 -- ErrorCatcher

@@ -8,7 +8,6 @@
 local _, ns = ...
 
 local pairs, ipairs, type, floor, min, max = pairs, ipairs, type, math.floor, math.min, math.max
-local format, tostring = string.format, tostring
 local setmetatable, GetLocale, CreateFrame = setmetatable, GetLocale, CreateFrame
 local InCombatLockdown, C_Timer = InCombatLockdown, C_Timer
 
@@ -328,29 +327,6 @@ function fitBox()
     setColors()
     box:Show()
 end
-
--- What the box measures, for working out a box that doesn't fit: the tracker, then each of its
--- frames with whether it shows, its rect, and the lowest thing it draws.
-ns.AddCommand("tracker", "", L.QUESTTRACKER_COMMAND, function()
-    local frame = tracker()
-    if not frame then
-        return
-    end
-    local function rect(f)
-        local l, b, w, h = f:GetRect()
-        if not l then
-            return "no rect"
-        end
-        return format("left %d bottom %d width %d height %d", l, b, w, h)
-    end
-    ns.Print(format("ObjectiveTrackerFrame: %s, %s", tostring(frame:IsVisible()), rect(frame)))
-    for _, child in ipairs({ frame:GetChildren() }) do
-        local bounds = {}
-        measure(child, bounds, 5)
-        ns.Print(format("  %s: shown %s, %s, drawn bottom %s", tostring(child:GetDebugName()),
-            tostring(child:IsVisible()), rect(child), tostring(bounds.bottom and floor(bounds.bottom))))
-    end
-end)
 
 -- After the tracker lays itself out: style fonts it has started using, and fit the box.
 local function onUpdate()
