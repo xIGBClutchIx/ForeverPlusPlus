@@ -36,6 +36,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Spell Ranks | Marks the spells on your action bars that have a higher rank you already know, with a warning badge or a red tint over the button, and says the best rank in the spell's tooltip. `/fpp ranks` lists them. |
 | Recipe Colors | Colors recipes in the professions window by your chance of a skill-up: orange, yellow, green, or gray, with the row's highlight to match. |
 | Combat Alert | Floats a red "Entering Combat" or green "Leaving Combat" line up and away from the middle of the screen, each with its own checkbox, plus a size slider and how long it stays (move and scale it in Edit Mode). Off by default. |
+| Error Catcher | Catches Lua errors, blocked actions, and Lua warnings quietly instead of in Blizzard's error window and popup, and keeps them per session with how often each happened, its stack, and its locals. A window (`/fpp errors`, or the minimap button with this session's count) shows them as text you can copy, one at a time, for this session, the last one, or all. Options for the minimap button and the chat message. Off by default. |
 | Currency Bar | Shows your gold in a small tooltip-styled box, all three coins always, and optionally the currencies you tick Show on Backpack. Hovering it lists your gold and currencies with what this session gained or spent. Options for the tooltip, the session figures, a column layout, and size (move and scale it in Edit Mode). Off by default. |
 | Character Frame Enhancements | Moves the Character window's Equipment and Pet tabs to the side with the Reputation and Skills tabs, removes the portrait and level line above the stats so they start at the top, and shows your level and name in your class color as the title. Options for each. On by default. |
 | Tooltips | Colors unit and item tooltips by class, reaction, or quality, colors the Horde or Alliance line red or blue, and adds player titles and who a unit is targeting. |
@@ -82,6 +83,7 @@ Open Game Menu > Options > AddOns > Forever++. It opens on a welcome page with t
 | `/fpp reset` | Puts every setting back to its default and reloads. |
 | `/fpp cvar [search]` | Opens Console Variables. |
 | `/fpp selftest` | Probes the client APIs Forever++ depends on and records events (flights, deaths, duels) until `/reload`; the log is saved in `ForeverPlusPlusDB.selfTest`. Also a button on the Debug page. |
+| `/fpp errors` | Shows the errors Error Catcher caught. |
 | `/fpp scan` | Scans the open auction house now. |
 | `/fpp resetprices` | Forgets the saved auction prices. |
 

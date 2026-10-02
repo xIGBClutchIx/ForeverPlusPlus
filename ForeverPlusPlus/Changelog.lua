@@ -13,6 +13,12 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_ADDED, {
+                { L.ERRORCATCHER_TITLE, "New, off by default, in Interface: catches Lua errors, "
+                    .. "blocked actions, and Lua warnings instead of Blizzard's error window and "
+                    .. "popup, saves them per session with counts, stack, and locals, and shows "
+                    .. "them in a window you can copy from (/fpp errors, or a minimap button with "
+                    .. "this session's count), with previous and next, a session filter, and "
+                    .. "Clear." },
                 { L.CHARACTERFRAME_TITLE, "New, on by default, in Interface: moves the Character "
                     .. "window's Equipment and Pet tabs to the side with the other tabs, removes "
                     .. "the portrait and level line above the stats so they start at the top, and "
