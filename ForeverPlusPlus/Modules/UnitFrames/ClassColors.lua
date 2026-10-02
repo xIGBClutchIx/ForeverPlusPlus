@@ -22,7 +22,7 @@ local module = ns.NewModule("ClassColors", L.CLASSCOLORS_DESC, {
     enabled = true,
     healthBars = true,
     npcBars = true,
-    names = false,
+    nameColor = "default",
     nameBackgrounds = true,
     player = true,
     target = true,
@@ -38,7 +38,14 @@ local FRAMES = L.CLASSCOLORS_SECTION_FRAMES
 module.options = {
     { key = "healthBars", name = L.CLASSCOLORS_BARS, description = L.CLASSCOLORS_BARS_DESC, section = PARTS },
     { key = "npcBars", name = L.CLASSCOLORS_NPC_BARS, description = L.CLASSCOLORS_NPC_BARS_DESC, section = PARTS },
-    { key = "names", name = L.CLASSCOLORS_NAMES, description = L.CLASSCOLORS_NAMES_DESC, section = PARTS },
+    {
+        key = "nameColor", name = L.CLASSCOLORS_NAMES, description = L.CLASSCOLORS_NAMES_DESC, section = PARTS,
+        choices = {
+            { "default", L.CLASSCOLORS_NAMES_DEFAULT },
+            { "white", L.CLASSCOLORS_NAMES_WHITE },
+            { "class", L.CLASSCOLORS_NAMES_CLASS },
+        },
+    },
     { key = "nameBackgrounds", name = L.CLASSCOLORS_NAME_BG, description = L.CLASSCOLORS_NAME_BG_DESC, section = PARTS },
     { key = "player", name = L.CLASSCOLORS_PLAYER, description = L.CLASSCOLORS_PLAYER_DESC, section = FRAMES },
     { key = "target", name = L.CLASSCOLORS_TARGET, description = L.CLASSCOLORS_TARGET_DESC, section = FRAMES },
@@ -50,6 +57,7 @@ module.options = {
 local MAX_PARTY = 4
 -- Blizzard's own hostile, neutral, and tapped colors (UnitSelectionColor, Classic's tapped bar).
 local HOSTILE, NEUTRAL, TAPPED = CreateColor(1, 0, 0), CreateColor(1, 1, 0), CreateColor(0.5, 0.5, 0.5)
+local WHITE = CreateColor(1, 1, 1)
 local NEUTRAL_REACTION = 4 -- UnitReaction: 1-3 hostile, 4 neutral, 5-8 friendly
 local weak = { __mode = "k" }
 local barHooked = setmetatable({}, weak) -- StatusBar -> true once its setters are hooked
@@ -115,7 +123,7 @@ local function wanted(frame, unit, setting)
         return nil
     elseif not player then
         return setting == "healthBars" and module.db.npcBars and reactionColor(unit) or nil
-    elseif not module.db[setting] then
+    elseif setting ~= "names" and not module.db[setting] then
         return nil
     end
     local connected = UnitIsConnected(unit)
@@ -185,7 +193,13 @@ local function paintName(frame)
     if not text then
         return
     end
-    local color = wanted(frame, frame.unit, "names")
+    local color
+    local choice = module.db.nameColor
+    if choice == "white" then
+        color = frameOn(frame, frame.unit) and WHITE or nil
+    elseif choice == "class" then
+        color = wanted(frame, frame.unit, "names")
+    end
     if color then
         if not nameColor[text] then
             nameColor[text] = { text:GetTextColor() }

@@ -7,6 +7,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Added
 
 - **Character Frame Enhancements** (new, on by default, in Interface): moves the Character window's Equipment and Pet tabs to the side with the other tabs, removes the portrait and level line above the stats so they start at the top, and shows your level and name in your class color as the title.
+- **Class Colors**: the Names checkbox is now a Name Color choice: Default (Blizzard's), White, or Class Color (players only).
 - **Class Colors**: new Name Backgrounds option (on by default) tints the bar behind a player's name on the target and focus frames in their class color instead of Blizzard's faction color.
 
 ### Changed
