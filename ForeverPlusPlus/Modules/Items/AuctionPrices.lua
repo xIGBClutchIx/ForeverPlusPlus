@@ -1,6 +1,7 @@
 -- Auction Prices: scans the auction house when it opens and shows the lowest buyout in item
 -- tooltips, under the sell price. Like the sell price, it counts the stack (Shift for one), or
--- the other way round.
+-- the other way round. In the professions window, it adds up what a recipe's reagents cost
+-- against what the crafted items are worth.
 --
 -- The scan is an empty browse search paged to the end, the same one Auctionator's default scan
 -- uses on Forever. C_AuctionHouse.ReplicateItems is in the client too, but it's unproven here,
@@ -11,6 +12,7 @@ local ipairs, format, time, floor = ipairs, string.format, time, math.floor
 local C_AuctionHouse, C_Timer, GetTime = C_AuctionHouse, C_Timer, GetTime
 local GetRealmName, UnitFactionGroup = GetRealmName, UnitFactionGroup
 local CreateFrame, pcall, type, hooksecurefunc = CreateFrame, pcall, type, hooksecurefunc
+local select, tostring, C_Item, C_TradeSkillUI, Enum = select, tostring, C_Item, C_TradeSkillUI, Enum
 
 local L = ns.L
 local ItemTooltip = ns.ItemTooltip
@@ -24,6 +26,10 @@ local module = ns.NewModule("AuctionPrices", L.AUCTIONPRICES_DESC, ItemTooltip.P
     scanAgeColor = "age", -- "age" (green when fresh to red when old), "gray", "white", or "gold"
     scanAgeRedHours = 12, -- hours old at which "age" is fully red
     chat = true,
+    crafting = true, -- costs, value, and profit under a recipe's reagents
+    -- What merchants charge for one of an item: { [itemID] = copper }, learned at each visit.
+    -- Data, not a setting, like houses.
+    vendor = {},
     -- Per auction house ("Realm-Faction"): { scannedAt = time(), items = { [itemID] = { price =
     -- copper, seenAt = time() } } }. scannedAt is the last full scan and decides when to scan
     -- again; seenAt is when that item's price was last seen, which the tooltip's age shows, since
@@ -34,7 +40,7 @@ local module = ns.NewModule("AuctionPrices", L.AUCTIONPRICES_DESC, ItemTooltip.P
 module.title = L.AUCTIONPRICES_TITLE
 module.category = "items"
 
--- The price line first, then scanning, with the Reset button (module.actions) under it.
+-- The price line first, then crafting, then scanning, with the Reset button (module.actions) under it.
 module.options = ItemTooltip.PriceOptions({
     {
         key = "scanAge",
@@ -66,6 +72,12 @@ module.options = ItemTooltip.PriceOptions({
         section = L.AUCTIONPRICES_SECTION_TOOLTIP,
         min = 1, max = 48, step = 1,
         format = ns.Text.Hours,
+    },
+    {
+        key = "crafting",
+        name = L.AUCTIONPRICES_CRAFTING,
+        description = L.AUCTIONPRICES_CRAFTING_DESC,
+        section = L.AUCTIONPRICES_SECTION_CRAFTING,
     },
     {
         key = "scanOnOpen",
@@ -473,6 +485,261 @@ local function addAuctionPrice(tooltip, data)
     end
 end
 
+-- Crafting -----------------------------------------------------------------------------------
+-- Under a recipe's reagents in the professions window: what each reagent costs (one's price
+-- times how many the recipe takes), the total, what the crafted items are worth, and the
+-- profit. A reagent a merchant sells costs the merchant's price when that's lower than the
+-- auction's; those prices are learned at merchants. A crafted item with no auction price is
+-- worth what a merchant pays for it. Our own frame, parented to Blizzard's recipe form.
+
+-- A merchant's item: its price, how many that price buys, how many are left (-1: unlimited),
+-- and whether it costs something besides money. Probe: C_MerchantFrame.GetItemInfo is newer
+-- Mainline; GetMerchantItemInfo the older one.
+local function merchantItem(index)
+    local C_MerchantFrame = _G.C_MerchantFrame
+    if C_MerchantFrame and C_MerchantFrame.GetItemInfo then
+        local info = C_MerchantFrame.GetItemInfo(index)
+        if info then
+            return info.price, info.stackCount, info.numAvailable, info.hasExtendedCost
+        end
+    elseif _G.GetMerchantItemInfo then
+        local _, _, price, stack, available, _, _, extended = _G.GetMerchantItemInfo(index)
+        return price, stack, available, extended
+    end
+end
+
+-- Remembers what the open merchant charges for one of each item it always has, for money only.
+local function recordMerchant()
+    local count = _G.GetMerchantNumItems and _G.GetMerchantNumItems() or 0
+    local getID = _G.GetMerchantItemID
+    if not getID then
+        return
+    end
+    local vendor = module.db.vendor
+    for i = 1, count do
+        local id = getID(i)
+        local price, stack, available, extended = merchantItem(i)
+        if id and price and price > 0 and available == -1 and not extended then
+            vendor[id] = price / ((stack and stack > 0) and stack or 1)
+        end
+    end
+end
+
+-- What one of a reagent costs: the lower of its auction and merchant prices, or nil.
+local function reagentCost(itemID)
+    local item = house().items[itemID]
+    local auction = item and item.price
+    local vendor = module.db.vendor[itemID]
+    if auction and vendor then
+        return auction < vendor and auction or vendor
+    end
+    return auction or vendor
+end
+
+-- What one crafted item is worth: its auction price, or else what a merchant pays (and true).
+local function craftedValue(itemID)
+    local item = house().items[itemID]
+    if item then
+        return item.price, false
+    end
+    local sell = select(11, C_Item.GetItemInfo(itemID))
+    if sell and sell > 0 then
+        return sell, true
+    end
+end
+
+-- The reagents every craft uses (not optional or finishing ones): { itemID, count } each. Probe:
+-- reagentType and its enum are Mainline's; without them, the required slots.
+local function basicReagents(schematic)
+    local basic = Enum.CraftingReagentType and Enum.CraftingReagentType.Basic
+    local list = {}
+    for _, slot in ipairs(schematic.reagentSlotSchematics or {}) do
+        local reagent = slot.reagents and slot.reagents[1]
+        local isBasic
+        if basic and slot.reagentType ~= nil then
+            isBasic = slot.reagentType == basic
+        else
+            isBasic = slot.required
+        end
+        if isBasic and reagent and reagent.itemID and (slot.quantityRequired or 0) > 0 then
+            list[#list + 1] = { reagent.itemID, slot.quantityRequired }
+        end
+    end
+    return list
+end
+
+local GRAY, WHITE = GRAY_FONT_COLOR, HIGHLIGHT_FONT_COLOR
+local GREEN, RED = GREEN_FONT_COLOR, RED_FONT_COLOR
+
+-- Copper as coins, with a minus sign when it's negative.
+local function coins(amount)
+    amount = floor(amount + 0.5)
+    if amount < 0 then
+        return "-" .. ns.Money(-amount)
+    end
+    return ns.Money(amount)
+end
+
+local CRAFT_WIDTH, ROW_HEIGHT = 280, 14
+
+local panel -- our frame under the reagents, made the first time a recipe shows
+
+local function craftForm()
+    local frame = _G.ProfessionsFrame
+    local page = frame and frame.CraftingPage
+    return page and page.SchematicForm
+end
+
+local function getPanel(form)
+    if not panel then
+        panel = CreateFrame("Frame", nil, form)
+        panel:SetSize(CRAFT_WIDTH, ROW_HEIGHT)
+        panel.title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        panel.title:SetPoint("TOPLEFT")
+        panel.title:SetText(L.AUCTIONPRICES_CRAFT_TITLE)
+        panel.rows = {}
+    end
+    return panel
+end
+
+-- Row `i` at `y` below the title: a label on the left and a value at the right edge.
+local function setRow(i, y, label, value)
+    local row = panel.rows[i]
+    if not row then
+        row = {
+            left = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"),
+            right = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"),
+        }
+        row.left:SetJustifyH("LEFT")
+        row.left:SetWordWrap(false)
+        row.right:SetJustifyH("RIGHT")
+        panel.rows[i] = row
+    end
+    row.right:ClearAllPoints()
+    row.right:SetPoint("TOPRIGHT", 0, y)
+    row.left:ClearAllPoints()
+    row.left:SetPoint("TOPLEFT", 0, y)
+    row.left:SetPoint("RIGHT", row.right, "LEFT", -8, 0)
+    row.left:SetText(label)
+    row.right:SetText(value)
+    row.left:Show()
+    row.right:Show()
+end
+
+local function noPrice()
+    return GRAY:WrapTextInColorCode(L.AUCTIONPRICES_CRAFT_NO_PRICE)
+end
+
+local function refreshCrafting(recipeInfo)
+    local form = craftForm()
+    if not form then
+        return
+    end
+    recipeInfo = recipeInfo or (form.GetRecipeInfo and form:GetRecipeInfo())
+    local recipeID = module.enabled and module.db.crafting and recipeInfo and recipeInfo.recipeID
+    local schematic = recipeID and C_TradeSkillUI and C_TradeSkillUI.GetRecipeSchematic
+        and C_TradeSkillUI.GetRecipeSchematic(recipeID, false)
+    local reagents = schematic and basicReagents(schematic)
+    -- Under the optional reagents when the recipe has them, or else the reagents.
+    local below = form.OptionalReagents
+    if not (below and below:IsShown()) then
+        below = form.Reagents
+    end
+    if not (reagents and #reagents > 0 and below) then
+        if panel then
+            panel:Hide()
+        end
+        return
+    end
+    getPanel(form)
+    panel:ClearAllPoints()
+    panel:SetPoint("TOPLEFT", below, "BOTTOMLEFT", 0, -12)
+
+    local i, y = 0, -(ROW_HEIGHT + 4)
+    local total, missing = 0, false
+    for _, reagent in ipairs(reagents) do
+        local itemID, count = reagent[1], reagent[2]
+        local name = C_Item.GetItemNameByID(itemID) or L.AUCTIONPRICES_CRAFT_UNKNOWN
+        local unit = reagentCost(itemID)
+        local value
+        if unit then
+            total = total + unit * count
+            value = coins(unit * count)
+            if count > 1 then
+                value = format(L.AUCTIONPRICES_CRAFT_EACH, GRAY:WrapTextInColorCode(
+                    format(L.AUCTIONPRICES_CRAFT_TIMES, coins(unit), count)), value)
+            end
+        else
+            missing = true
+            value = noPrice()
+        end
+        i = i + 1
+        setRow(i, y, name, value)
+        y = y - ROW_HEIGHT
+    end
+    y = y - 4
+    i = i + 1
+    setRow(i, y, L.AUCTIONPRICES_CRAFT_COST, missing and noPrice() or coins(total))
+    y = y - ROW_HEIGHT
+
+    -- Enchants and other recipes that make no item have no value or profit.
+    local output = schematic.outputItemID
+    local unitValue, fromVendor
+    if output then
+        unitValue, fromVendor = craftedValue(output)
+        local low, high = schematic.quantityMin or 1, schematic.quantityMax or 1
+        local made = (low + high) / 2 -- some recipes make a random number: count the middle
+        local label = L.AUCTIONPRICES_CRAFT_VALUE
+        if high > 1 then
+            local amount = low == high and tostring(low) or format(L.AUCTIONPRICES_CRAFT_RANGE, low, high)
+            label = format(L.AUCTIONPRICES_CRAFT_VALUE_COUNT, amount)
+        end
+        local valueText = noPrice()
+        if unitValue then
+            unitValue = unitValue * made
+            valueText = coins(unitValue)
+            if fromVendor then
+                valueText = format(L.AUCTIONPRICES_CRAFT_EACH,
+                    GRAY:WrapTextInColorCode(L.AUCTIONPRICES_CRAFT_VENDOR), valueText)
+            end
+        end
+        i = i + 1
+        setRow(i, y, label, valueText)
+        y = y - ROW_HEIGHT
+
+        local profitText = noPrice()
+        if unitValue and not missing then
+            local profit = unitValue - total
+            local color = profit > 0 and GREEN or profit < 0 and RED or WHITE
+            profitText = color:WrapTextInColorCode(coins(profit))
+        end
+        i = i + 1
+        setRow(i, y, L.AUCTIONPRICES_CRAFT_PROFIT, profitText)
+        y = y - ROW_HEIGHT
+    end
+
+    for j = i + 1, #panel.rows do
+        panel.rows[j].left:Hide()
+        panel.rows[j].right:Hide()
+    end
+    panel:SetHeight(-y)
+    panel:Show()
+end
+
+local function onRecipeInit(_, recipeInfo)
+    refreshCrafting(recipeInfo)
+end
+
+-- Blizzard_Professions is load-on-demand: hook its recipe form once it has loaded. Init runs each
+-- time a recipe is picked.
+local function hookProfessions()
+    local form = craftForm()
+    if form then
+        module:Hook(form, "Init", onRecipeInit)
+        refreshCrafting()
+    end
+end
+
 function module:OnEnable()
     self:On("AUCTION_HOUSE_SHOW", onShow)
     self:On("AUCTION_HOUSE_CLOSED", onClosed)
@@ -481,6 +748,9 @@ function module:OnEnable()
     -- The hook can't be removed; addAuctionPrice checks module.enabled instead.
     ItemTooltip.OnPrices(addAuctionPrice)
     ItemTooltip.RedrawOnShift(self, true)
+    self:On("MERCHANT_SHOW", recordMerchant)
+    self:On("MERCHANT_UPDATE", recordMerchant)
+    ns.AddOns.WhenLoaded("Blizzard_Professions", hookProfessions)
 end
 
 function module:OnDisable()
@@ -488,4 +758,14 @@ function module:OnDisable()
     stopScan()
     hideIndicator()
     open = false
+    ns.AddOns.Cancel("Blizzard_Professions", hookProfessions)
+    if panel then
+        panel:Hide()
+    end
+end
+
+function module:OnOptionChanged(key)
+    if key == "crafting" then
+        refreshCrafting()
+    end
 end

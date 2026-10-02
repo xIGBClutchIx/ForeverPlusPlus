@@ -27,6 +27,23 @@ L.AUCTIONPRICES_SCAN_AGE_RED = "Red After"
 L.AUCTIONPRICES_SCAN_AGE_RED_DESC = "With Scan Age Color on By Age, how old a scan is when its age "
     .. "turns fully red. It's yellow at half that."
 L.AUCTIONPRICES_SCAN_AGE_LINE = "Scanned"
+L.AUCTIONPRICES_SECTION_CRAFTING = "Crafting"
+L.AUCTIONPRICES_CRAFTING = "Crafting Costs"
+L.AUCTIONPRICES_CRAFTING_DESC = "In the professions window, under a recipe's reagents: what each "
+    .. "reagent costs, the total, what the crafted items are worth, and the profit. Reagents a "
+    .. "merchant sells use the merchant's price once you've visited one that has them, when it's "
+    .. "lower."
+L.AUCTIONPRICES_CRAFT_TITLE = "Crafting Costs:"
+L.AUCTIONPRICES_CRAFT_NO_PRICE = "No price"
+L.AUCTIONPRICES_CRAFT_UNKNOWN = "..." -- a reagent whose name hasn't loaded yet
+L.AUCTIONPRICES_CRAFT_TIMES = "%s x %d" -- one's price, how many
+L.AUCTIONPRICES_CRAFT_EACH = "%s   %s" -- a gray note, then the coins
+L.AUCTIONPRICES_CRAFT_COST = "Total Cost"
+L.AUCTIONPRICES_CRAFT_VALUE = "Value"
+L.AUCTIONPRICES_CRAFT_VALUE_COUNT = "Value x%s" -- how many the recipe makes
+L.AUCTIONPRICES_CRAFT_RANGE = "%d-%d" -- fewest and most the recipe makes
+L.AUCTIONPRICES_CRAFT_VENDOR = "Vendor"
+L.AUCTIONPRICES_CRAFT_PROFIT = "Profit"
 L.AUCTIONPRICES_SECTION_SCANNING = "Scanning"
 L.AUCTIONPRICES_CHAT_DESC = "Say in chat when a scan finishes after the auction house closed."
 L.AUCTIONPRICES_SCANNING = "Scanning prices... %d items" -- count so far

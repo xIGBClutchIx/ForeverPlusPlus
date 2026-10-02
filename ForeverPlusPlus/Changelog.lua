@@ -21,6 +21,12 @@ ns.changelog = {
                     .. "you own in its tooltip, above the prices, and how many are in your bags "
                     .. "and your bank, with small bag and bank icons (or words). The bank is "
                     .. "counted each time you open it." },
+                { L.AUCTIONPRICES_TITLE, "New Crafting Costs option (on by default): under a "
+                    .. "recipe's reagents in the professions window, each reagent's price times "
+                    .. "how many it takes, the total cost, what the crafted items are worth, and "
+                    .. "the profit in green or red. Reagents a merchant sells use the merchant's "
+                    .. "price once you've visited one, when it's lower; a crafted item with no "
+                    .. "auction price is valued at its vendor price. Missing prices say No price." },
                 { L.FISHINGCAST_TITLE, "New Combat Warning option (on by default) shows one red "
                     .. "line where Blizzard's errors appear when combat starts while you have a "
                     .. "fishing pole equipped." },
