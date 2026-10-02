@@ -4,6 +4,10 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ## Unreleased
 
+### Added
+
+- **Fishing Cast**: new Combat Warning option (on by default) shows one red line where Blizzard's errors appear when combat starts while you have a fishing pole equipped.
+
 ### Fixed
 
 - **Auction Prices**: the age under an auction price is when that item was last seen, not the last scan, so an item missing from a scan no longer looks freshly checked. Saved prices are cleared once; the next visit to the auction house scans again.

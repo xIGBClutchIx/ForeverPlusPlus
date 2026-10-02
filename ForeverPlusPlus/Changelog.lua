@@ -12,6 +12,11 @@ ns.changelog = {
     {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
+            { L.CHANGELOG_ADDED, {
+                { L.FISHINGCAST_TITLE, "New Combat Warning option (on by default) shows one red "
+                    .. "line where Blizzard's errors appear when combat starts while you have a "
+                    .. "fishing pole equipped." },
+            } },
             { L.CHANGELOG_FIXED, {
                 { L.AUCTIONPRICES_TITLE, "The age under an auction price is when that item was "
                     .. "last seen, not the last scan, so an item missing from a scan no longer "

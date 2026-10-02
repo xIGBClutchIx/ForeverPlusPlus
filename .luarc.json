@@ -107,6 +107,7 @@
     "EASY_DIFFICULTY_COLOR",
     "TRIVIAL_DIFFICULTY_COLOR",
     "UIParent",
+    "UIErrorsFrame",
     "NUM_CHAT_WINDOWS",
     "SELECTED_CHAT_FRAME",
     "ChatFrame1",

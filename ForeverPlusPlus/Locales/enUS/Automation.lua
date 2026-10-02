@@ -185,3 +185,6 @@ L.FISHINGCAST_DESC = "Double right-click in the world with a fishing pole equipp
 L.FISHINGCAST_SPEED = "Double-Click Speed"
 L.FISHINGCAST_SPEED_DESC = "How quickly the second right-click must follow the first."
 L.FISHINGCAST_MS = "%d ms" -- milliseconds
+L.FISHINGCAST_COMBAT = "Combat Warning"
+L.FISHINGCAST_COMBAT_DESC = "Warn once when combat starts while a fishing pole is equipped."
+L.FISHINGCAST_COMBAT_TEXT = "You have a fishing pole equipped."
