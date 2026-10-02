@@ -14,60 +14,47 @@ ns.changelog = {
         sections = {
             { L.CHANGELOG_ADDED, {
                 { L.QUESTTRACKER_TITLE, "New, on by default, in Interface: restyles Blizzard's "
-                    .. "quest tracker with a font, font size, and outline, a dark box behind it "
-                    .. "that fits your quests (with opacity, a border, and padding), and fading in "
-                    .. "combat. "
-                    .. "It stays Blizzard's tracker, so Edit Mode, its menus, and quest items work "
-                    .. "as before." },
-                { L.ERRORCATCHER_TITLE, "New, on by default, in Interface: catches Lua errors, "
-                    .. "blocked actions, and Lua warnings instead of Blizzard's error window and "
-                    .. "popup, saves them per session with counts, stack, and locals, and shows "
-                    .. "them in a window you can copy from (/fpp errors, or a minimap button with "
-                    .. "this session's count), with previous and next, a session filter, and "
-                    .. "Clear. Ctrl-right-click the minimap button to clear this session's errors "
-                    .. "(the key is a setting). A Test Error button on the Debug page throws one "
-                    .. "to try it." },
+                    .. "quest tracker with a font, size, and outline, a dark box behind it that "
+                    .. "fits your quests, and fading in combat. It's still Blizzard's tracker, so "
+                    .. "Edit Mode and quest items work as before." },
+                { L.ERRORCATCHER_TITLE, "New, on by default, in Interface: catches Lua errors "
+                    .. "and blocked actions in place of Blizzard's error popup, saves them per "
+                    .. "session, and shows them in a window you can copy from (/fpp errors or the "
+                    .. "minimap button). Ctrl-right-click the minimap button to clear this "
+                    .. "session's errors." },
                 { L.CHARACTERFRAME_TITLE, "New, on by default, in Interface: moves the Character "
-                    .. "window's Equipment and Pet tabs to the side with the other tabs, removes "
-                    .. "the portrait and level line above the stats so they start at the top, and "
-                    .. "shows your level and name in your class color as the title." },
+                    .. "window's Equipment and Pet tabs to the side with the others, removes the "
+                    .. "portrait and level line so the stats start at the top, and shows your "
+                    .. "level and name in your class color as the title." },
                 { L.QUESTICONS_TITLE, "New, on by default, in Interface: marks quests that are "
-                    .. "new to Forever, the ones that weren't in original Classic, with an "
-                    .. "infinity sign (or the Forever logo) after their name in the quest log on "
-                    .. "the world map, the objective tracker, and quest givers' lists, each with "
-                    .. "its own checkbox and icon size slider. Idea from ForeverQuestTint." },
-                { L.CLASSCOLORS_TITLE, "The Names checkbox is now a Name Color choice: Default "
-                    .. "(Blizzard's), White, or Class Color (players only)." },
-                { L.QUESTPLATES_TITLE, "New Party Progress option: Party Combined (everyone's "
-                    .. "counts added up, the default), Own Only (as before), or Lowest (the party member "
-                    .. "furthest from done). With a party member on the quest, creatures only "
-                    .. "they need now show too." },
-                { L.CLASSCOLORS_TITLE, "New Name Backgrounds option (on by default) tints the "
-                    .. "bar behind a player's name on the target and focus frames in their class "
-                    .. "color instead of Blizzard's faction color." },
+                    .. "new to Forever with an infinity sign (or the Forever logo) after their "
+                    .. "name in the quest log, the objective tracker, and quest givers' lists. "
+                    .. "Idea from ForeverQuestTint." },
+                { L.QUESTPLATES_TITLE, "New Party Progress option to count everyone's progress "
+                    .. "added up (the default), only yours, or the party member furthest from "
+                    .. "done. Creatures only a party member needs now show too." },
+                { L.CLASSCOLORS_TITLE, "The Names checkbox is now a Name Color choice (Default, "
+                    .. "White, or Class Color), and a new Name Backgrounds option (on by default) "
+                    .. "tints the bar behind a player's name on the target and focus frames in "
+                    .. "their class color." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.CHATFADING_TITLE, "Renamed from Chat Fading, and now on by default." },
+                { L.AUTOREPAIR_TITLE, "Holding Shift to skip is now an option (on by default)." },
+                { L.AUTOSELLJUNK_TITLE, "Holding Shift to skip is now an option (on by default)." },
+                { L.CHANGELOG_SETTINGS, "The Defaults button on the Modules and Debug pages now "
+                    .. "offers Clutch's Defaults or Recommended Defaults and resets only "
+                    .. "Forever++. Blizzard's All Settings reset no longer touches Forever++." },
                 { L.CHANGELOG_SETTINGS, "Clutch's Default also sets Zone Info's Dungeons and "
                     .. "Fishing to Hold Detail Key." },
-                { L.CHANGELOG_SETTINGS, "Combat Alert, Currency Bar, and Flight Timer no longer "
-                    .. "have Size sliders or Reset Position buttons in Settings. Edit Mode already "
-                    .. "sizes and resets each of them." },
-                { L.CHANGELOG_SETTINGS, "On the Modules and Debug pages, the Defaults button at "
-                    .. "the top right now asks Clutch's Defaults | Cancel | Recommended Defaults "
-                    .. "and resets only Forever++, without Blizzard's All Settings choice that "
-                    .. "resets the whole game. On other pages, Blizzard's All "
-                    .. "Settings no longer resets Forever++." },
-                { L.AUTOREPAIR_TITLE, "New Hold Shift to Skip option (on by default, as before), "
-                    .. "like Auto Gossip's." },
-                { L.AUTOSELLJUNK_TITLE, "New Hold Shift to Skip option (on by default, as "
-                    .. "before), like Auto Gossip's." },
+                { L.CHANGELOG_SETTINGS, "Combat Alert, Currency Bar, and Flight Timer are sized "
+                    .. "and reset only in Edit Mode now." },
             } },
             { L.CHANGELOG_FIXED, {
-                { L.FISHINGCAST_TITLE, "Double right-click now casts Fishing; it never "
-                    .. "recognized the world under the mouse before." },
+                { L.FISHINGCAST_TITLE, "Double right-click now casts Fishing." },
                 { L.TOOLTIPS_TITLE, "Levels and class names are colored again, player titles "
                     .. "show, and the Target line shows the target's name instead of its level." },
+                { L.FLIGHTTIMER_TITLE, "No longer draws over other windows." },
             } },
         },
     },

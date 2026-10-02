@@ -6,27 +6,26 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Added
 
-- **Quest Tracker** (new, on by default, in Interface): restyles Blizzard's quest tracker with a font, font size, and outline, a dark box behind it that fits your quests (with opacity, a border, and padding), and fading in combat. It stays Blizzard's tracker, so Edit Mode, its menus, and quest items work as before.
-- **Error Catcher** (new, on by default, in Interface): catches Lua errors, blocked actions, and Lua warnings instead of Blizzard's error window and popup, saves them per session with counts, stack, and locals, and shows them in a window you can copy from (`/fpp errors`, or a minimap button with this session's count), with previous and next, a session filter, and Clear. Ctrl-right-click the minimap button to clear this session's errors (the key is a setting). A Test Error button on the Debug page throws one to try it.
-- **Character Frame Enhancements** (new, on by default, in Interface): moves the Character window's Equipment and Pet tabs to the side with the other tabs, removes the portrait and level line above the stats so they start at the top, and shows your level and name in your class color as the title.
-- **Forever Quest Icons** (new, on by default, in Interface): marks quests that are new to Forever, the ones that weren't in original Classic, with an infinity sign (or the Forever logo) after their name in the quest log on the world map, the objective tracker, and quest givers' lists, each with its own checkbox and icon size slider. Idea from ForeverQuestTint.
-- **Class Colors**: the Names checkbox is now a Name Color choice: Default (Blizzard's), White, or Class Color (players only).
-- **Quest Nameplates**: new Party Progress option: Party Combined (everyone's counts added up, the default), Own Only (as before), or Lowest (the party member furthest from done). With a party member on the quest, creatures only they need now show too.
-- **Class Colors**: new Name Backgrounds option (on by default) tints the bar behind a player's name on the target and focus frames in their class color instead of Blizzard's faction color.
+- **Quest Tracker** (new, on by default, in Interface): restyles Blizzard's quest tracker with a font, size, and outline, a dark box behind it that fits your quests, and fading in combat. It's still Blizzard's tracker, so Edit Mode and quest items work as before.
+- **Error Catcher** (new, on by default, in Interface): catches Lua errors and blocked actions in place of Blizzard's error popup, saves them per session, and shows them in a window you can copy from (`/fpp errors` or the minimap button). Ctrl-right-click the minimap button to clear this session's errors.
+- **Character Frame Enhancements** (new, on by default, in Interface): moves the Character window's Equipment and Pet tabs to the side with the others, removes the portrait and level line so the stats start at the top, and shows your level and name in your class color as the title.
+- **Forever Quest Icons** (new, on by default, in Interface): marks quests that are new to Forever with an infinity sign (or the Forever logo) after their name in the quest log, the objective tracker, and quest givers' lists. Idea from ForeverQuestTint.
+- **Quest Nameplates**: new Party Progress option to count everyone's progress added up (the default), only yours, or the party member furthest from done. Creatures only a party member needs now show too.
+- **Class Colors**: the Names checkbox is now a Name Color choice (Default, White, or Class Color), and a new Name Backgrounds option (on by default) tints the bar behind a player's name on the target and focus frames in their class color.
 
 ### Changed
 
 - **Persistent Chat**: renamed from Chat Fading, and now on by default.
-
+- **Auto Repair** and **Auto Sell Junk**: holding Shift to skip is now an option (on by default).
+- **Settings**: the Defaults button on the Modules and Debug pages now offers Clutch's Defaults or Recommended Defaults and resets only Forever++. Blizzard's All Settings reset no longer touches Forever++.
 - **Settings**: Clutch's Default also sets Zone Info's Dungeons and Fishing to Hold Detail Key.
-- **Settings**: Combat Alert, Currency Bar, and Flight Timer no longer have Size sliders or Reset Position buttons in Settings. Edit Mode already sizes and resets each of them.
-- **Settings**: on the Modules and Debug pages, the Defaults button at the top right now asks Clutch's Defaults | Cancel | Recommended Defaults and resets only Forever++, without Blizzard's All Settings choice that resets the whole game. On other pages, Blizzard's All Settings no longer resets Forever++.
-- **Auto Repair** and **Auto Sell Junk**: new Hold Shift to Skip option (on by default, as before), like Auto Gossip's.
+- **Settings**: Combat Alert, Currency Bar, and Flight Timer are sized and reset only in Edit Mode now.
 
 ### Fixed
 
-- **Fishing Cast**: double right-click now casts Fishing; it never recognized the world under the mouse before.
+- **Fishing Cast**: double right-click now casts Fishing.
 - **Tooltips**: levels and class names are colored again, player titles show, and the Target line shows the target's name instead of its level.
+- **Flight Timer**: no longer draws over other windows.
 
 ## 0.5.0 (2026-10-01)
 
