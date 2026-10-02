@@ -23,6 +23,7 @@ local module = ns.NewModule("ClassColors", L.CLASSCOLORS_DESC, {
     healthBars = true,
     npcBars = true,
     names = false,
+    nameBackgrounds = false,
     player = true,
     target = true,
     focus = true,
@@ -38,6 +39,7 @@ module.options = {
     { key = "healthBars", name = L.CLASSCOLORS_BARS, description = L.CLASSCOLORS_BARS_DESC, section = PARTS },
     { key = "npcBars", name = L.CLASSCOLORS_NPC_BARS, description = L.CLASSCOLORS_NPC_BARS_DESC, section = PARTS },
     { key = "names", name = L.CLASSCOLORS_NAMES, description = L.CLASSCOLORS_NAMES_DESC, section = PARTS },
+    { key = "nameBackgrounds", name = L.CLASSCOLORS_NAME_BG, description = L.CLASSCOLORS_NAME_BG_DESC, section = PARTS },
     { key = "player", name = L.CLASSCOLORS_PLAYER, description = L.CLASSCOLORS_PLAYER_DESC, section = FRAMES },
     { key = "target", name = L.CLASSCOLORS_TARGET, description = L.CLASSCOLORS_TARGET_DESC, section = FRAMES },
     { key = "focus", name = L.CLASSCOLORS_FOCUS, description = L.CLASSCOLORS_FOCUS_DESC, section = FRAMES },
@@ -56,6 +58,8 @@ local painted = setmetatable({}, weak) -- StatusBar or FontString -> true while 
 local blizzardColor = setmetatable({}, weak) -- StatusBar -> { r, g, b, a } Blizzard last set
 local blizzardDesaturated = setmetatable({}, weak) -- StatusBar -> what Blizzard last set
 local nameColor = setmetatable({}, weak) -- FontString -> { r, g, b, a } before we colored it
+local backgroundHooked = setmetatable({}, weak) -- Texture -> true once SetVertexColor is hooked
+local blizzardBackground = setmetatable({}, weak) -- Texture -> { r, g, b, a } Blizzard last set
 
 -- Which of the module's frame settings a Blizzard unit frame falls under, or nil.
 local function partOf(frame)
@@ -195,6 +199,55 @@ local function paintName(frame)
     end
 end
 
+-- The bar behind a target or focus name that Blizzard tints by faction. The field name differs
+-- between builds, so probe both; frames without one (player, party) return nil.
+local function backgroundOf(frame)
+    if frame.nameBackground then
+        return frame.nameBackground
+    end
+    local content = frame.TargetFrameContent
+    local main = content and content.TargetFrameContentMain
+    return main and main.ReputationColor
+end
+
+local function restoreBackground(texture)
+    local color = blizzardBackground[texture]
+    applying[texture] = true
+    if color then
+        texture:SetVertexColor(color[1], color[2], color[3], color[4])
+    end
+    applying[texture] = nil
+    painted[texture] = nil
+end
+
+local function paintBackground(texture, frame)
+    local color = wanted(frame, frame.unit, "nameBackgrounds")
+    if not color then
+        if painted[texture] then
+            restoreBackground(texture)
+        end
+        return
+    end
+    applying[texture] = true
+    texture:SetVertexColor(color:GetRGB())
+    applying[texture] = nil
+    painted[texture] = true
+end
+
+local function hookBackground(texture, frame)
+    if backgroundHooked[texture] then
+        return
+    end
+    backgroundHooked[texture] = true
+    hooksecurefunc(texture, "SetVertexColor", function(self, r, g, b, a)
+        if applying[self] then
+            return
+        end
+        blizzardBackground[self] = { r, g, b, a }
+        paintBackground(self, frame)
+    end)
+end
+
 local function update(frame)
     if not partOf(frame) then
         return
@@ -205,6 +258,11 @@ local function update(frame)
         paintBar(bar)
     end
     paintName(frame)
+    local texture = backgroundOf(frame)
+    if texture then
+        hookBackground(texture, frame)
+        paintBackground(texture, frame)
+    end
 end
 
 -- Blizzard calls UnitFrame_Update whenever a frame's unit changes (a new target, the party

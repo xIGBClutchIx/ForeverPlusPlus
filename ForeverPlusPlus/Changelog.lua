@@ -17,6 +17,9 @@ ns.changelog = {
                     .. "window's Equipment and Pet tabs to the side with the other tabs, removes "
                     .. "the portrait and level line above the stats so they start at the top, and "
                     .. "shows your level and name in your class color as the title." },
+                { L.CLASSCOLORS_TITLE, "New Name Backgrounds option (off by default) tints the "
+                    .. "bar behind a player's name on the target and focus frames in their class "
+                    .. "color instead of Blizzard's faction color." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.CHATFADING_TITLE, "Renamed from Chat Fading, and now on by default." },
