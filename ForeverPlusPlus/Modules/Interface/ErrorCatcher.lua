@@ -25,7 +25,7 @@ local L = ns.L
 
 local module = ns.NewModule("ErrorCatcher", L.ERRORCATCHER_DESC, {
     enabled = true,
-    chat = true,
+    chat = false,
     minimap = true,
     clearModifier = "ctrl",
     -- Data, not settings: a table, so presets leave it alone.
