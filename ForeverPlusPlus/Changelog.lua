@@ -13,12 +13,12 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_ADDED, {
-                { L.QUESTTRACKER_TITLE, "New, off by default, in Interface: restyles Blizzard's "
+                { L.QUESTTRACKER_TITLE, "New, on by default, in Interface: restyles Blizzard's "
                     .. "quest tracker with a font, font size, and outline, a dark box behind it "
                     .. "that fits your quests (with opacity and a border), and fading in combat. "
                     .. "It stays Blizzard's tracker, so Edit Mode, its menus, and quest items work "
                     .. "as before." },
-                { L.ERRORCATCHER_TITLE, "New, off by default, in Interface: catches Lua errors, "
+                { L.ERRORCATCHER_TITLE, "New, on by default, in Interface: catches Lua errors, "
                     .. "blocked actions, and Lua warnings instead of Blizzard's error window and "
                     .. "popup, saves them per session with counts, stack, and locals, and shows "
                     .. "them in a window you can copy from (/fpp errors, or a minimap button with "

@@ -14,7 +14,7 @@ local InCombatLockdown, C_Timer = InCombatLockdown, C_Timer
 local L = ns.L
 
 local module = ns.NewModule("QuestTracker", L.QUESTTRACKER_DESC, {
-    enabled = false,
+    enabled = true,
     font = "default",
     size = 100, -- percent of Blizzard's size
     outline = "default",
