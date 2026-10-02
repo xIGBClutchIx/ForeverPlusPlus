@@ -8,6 +8,10 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 - **Fishing Cast**: new Combat Warning option (on by default) shows one red line where Blizzard's errors appear when combat starts while you have a fishing pole equipped.
 
+### Changed
+
+- **Error Catcher**: the window is redesigned: a list of errors on the left with their kind, count, and age, the one you pick on the right with when it first and last happened, and the session filter showing how many errors each choice has. A Copy Bug Report button selects a report with the addon version, client build, modules on, other addons, and the error's stack and locals, ready for Ctrl+C.
+
 ### Fixed
 
 - **Auction Prices**: the age under an auction price is when that item was last seen, not the last scan, so an item missing from a scan no longer looks freshly checked. Saved prices are cleared once; the next visit to the auction house scans again.

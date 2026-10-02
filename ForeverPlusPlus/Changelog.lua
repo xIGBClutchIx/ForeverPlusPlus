@@ -17,6 +17,14 @@ ns.changelog = {
                     .. "line where Blizzard's errors appear when combat starts while you have a "
                     .. "fishing pole equipped." },
             } },
+            { L.CHANGELOG_CHANGED, {
+                { L.ERRORCATCHER_TITLE, "The window is redesigned: a list of errors on the left "
+                    .. "with their kind, count, and age, the one you pick on the right with when "
+                    .. "it first and last happened, and the session filter showing how many "
+                    .. "errors each choice has. A Copy Bug Report button selects a report with the "
+                    .. "addon version, client build, modules on, other addons, and the error's "
+                    .. "stack and locals, ready for Ctrl+C." },
+            } },
             { L.CHANGELOG_FIXED, {
                 { L.AUCTIONPRICES_TITLE, "The age under an auction price is when that item was "
                     .. "last seen, not the last scan, so an item missing from a scan no longer "
