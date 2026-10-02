@@ -242,6 +242,15 @@
     "GetNumGroupMembers",
     "IsInRaid",
     "WOW_PROJECT_ID",
-    "date"
+    "date",
+    "time",
+    "wipe",
+    "seterrorhandler",
+    "debugstack",
+    "debuglocals",
+    "GetCallstackHeight",
+    "GetErrorCallstackHeight",
+    "Minimap",
+    "ScriptErrorsFrame"
   ]
 }

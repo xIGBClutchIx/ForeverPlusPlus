@@ -35,6 +35,7 @@ Lib\Instances.lua
 Lib\MapPins.lua
 Lib\EditMode.lua
 Lib\Chat.lua
+Modules\Interface\ErrorCatcher.lua
 Modules\Nameplates\PlayerPlates.lua
 Modules\Nameplates\NpcPlates.lua
 Modules\Nameplates\QuestPlates.lua
