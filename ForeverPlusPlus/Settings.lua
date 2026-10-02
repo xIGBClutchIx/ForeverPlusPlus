@@ -95,6 +95,48 @@ local function track(module, setting)
     list[#list + 1] = setting
 end
 
+-- Blizzard's Defaults button asks "These Settings" or "All Settings". All Settings sets every
+-- setting in the panel to its default, every addon's included, so one misclick would throw away
+-- every Forever++ choice. While Blizzard is setting defaults our setters hold their change back,
+-- and the event the panel fires after says which button it was: Settings.CategoryDefaulted (These
+-- Settings, on one of our pages) applies them, Settings.Defaulted (All Settings) drops them. The
+-- welcome page's Defaults button is the way to reset everything of ours.
+local held -- changes held back while Blizzard sets defaults, to apply or drop after
+
+-- Probe: CheckIsSettingDefaults is Mainline's (the `forever` UI source has it); without it,
+-- changes apply at once, as before.
+local function settingDefaults()
+    return SettingsPanel and SettingsPanel.CheckIsSettingDefaults
+        and SettingsPanel:CheckIsSettingDefaults() and true or false
+end
+
+-- Runs `fn`, a setter's change, now or once Blizzard's Defaults says which button it was.
+local function change(fn)
+    if settingDefaults() then
+        held = held or {}
+        held[#held + 1] = fn
+    else
+        fn()
+    end
+end
+
+local function release(apply)
+    local list = held
+    held = nil
+    if not list then
+        return
+    end
+    if apply then
+        for _, fn in ipairs(list) do
+            fn()
+        end
+    end
+    -- The rows show the defaults Blizzard set; put them back to what's saved.
+    for name in pairs(settings) do
+        ns.RefreshSetting(name)
+    end
+end
+
 -- Gear icons beside the Modules page's checkboxes, for modules with options: a click shows or
 -- hides them (or opens the module's own page, for one that draws it). The list's row frames are
 -- Blizzard's and pooled across every Settings page, so the gear is our own child button kept in a
@@ -177,11 +219,13 @@ local function addToggle(category, module, hasGear)
         module.title or module.name, module.defaults.enabled,
         function() return module.db.enabled end,
         function(value)
-            ns.SetEnabled(module.name, value)
-            -- A row under one of its options only rechecks that option, not the module: redraw.
-            if nested[module.name] and canRedraw() then
-                SettingsInbound.RepairDisplay()
-            end
+            change(function()
+                ns.SetEnabled(module.name, value)
+                -- A row under one of its options only rechecks that option, not the module: redraw.
+                if nested[module.name] and canRedraw() then
+                    SettingsInbound.RepairDisplay()
+                end
+            end)
         end)
     track(module, setting)
     local initializer = Settings.CreateCheckbox(category, setting, module.description)
@@ -249,7 +293,9 @@ local function optionSetting(category, module, option)
             if option.min then
                 value = ns.SliderValue(option, value)
             end
-            ns.SetOption(module.name, option.key, value)
+            change(function()
+                ns.SetOption(module.name, option.key, value)
+            end)
         end)
     track(module, setting)
     return setting
@@ -715,6 +761,11 @@ function ns.RegisterSettings()
     -- Probe: the Mainline Settings API is on Forever (build 70009), but it's a beta.
     if not (Settings and Settings.RegisterVerticalLayoutCategory and Settings.RegisterAddOnCategory) then
         return
+    end
+    -- Probe: both events are Mainline's (the `forever` UI source fires them).
+    if EventRegistry and EventRegistry.RegisterCallback then
+        EventRegistry:RegisterCallback("Settings.CategoryDefaulted", function() release(true) end, ns)
+        EventRegistry:RegisterCallback("Settings.Defaulted", function() release(false) end, ns)
     end
     local subpages = Settings.RegisterVerticalLayoutSubcategory ~= nil
         and Settings.RegisterCanvasLayoutSubcategory ~= nil
