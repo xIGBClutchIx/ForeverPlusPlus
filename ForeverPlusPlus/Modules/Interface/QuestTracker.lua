@@ -19,8 +19,8 @@ local module = ns.NewModule("QuestTracker", L.QUESTTRACKER_DESC, {
     size = 100, -- percent of Blizzard's size
     outline = "default",
     background = true,
-    opacity = 60, -- percent
-    border = true,
+    opacity = 30, -- percent
+    border = false,
     fade = false,
 })
 module.title = L.QUESTTRACKER_TITLE
