@@ -98,6 +98,8 @@
     "C_Item",
     "GetRealmName",
     "UnitFactionGroup",
+    "UnitRace",
+    "C_UnitAuras",
     "TooltipDataProcessor",
     "GRAY_FONT_COLOR",
     "Professions",

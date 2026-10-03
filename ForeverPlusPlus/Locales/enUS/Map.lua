@@ -13,8 +13,8 @@ L.INSTANCES_RANGE = "%d-%d" -- lowest, highest
 
 -- PointsOfInterest. Place names on the map come from the game, or from Data.lua.
 L.POI_TITLE = "Points of Interest"
-L.POI_DESC = "Show dungeons, raids, capital cities, flight masters, boats, zeppelins, and spirit "
-    .. "healers on the world map."
+L.POI_DESC = "Show dungeons, raids, capital cities, flight masters, boats, zeppelins, spirit "
+    .. "healers, and Skyborne ley lines on the world map."
 L.POI_DUNGEONS = "Dungeons"
 L.POI_DUNGEONS_DESC = "Dungeon entrances, with their level range colored against yours."
 L.POI_RAIDS = "Raids"
@@ -40,6 +40,21 @@ L.POI_WORLD = "On Continent Maps"
 L.POI_WORLD_DESC = "Also show them on the continent and world maps, not just zone maps."
 L.POI_OTHER_FACTION = "Other Faction"
 L.POI_OTHER_FACTION_DESC = "Also show the other faction's flight masters, boats, and zeppelins."
+L.POI_LEYLINES = "Ley Lines"
+L.POI_LEYLINES_DESC = "Ley lines (High Order Skyborne) and elemental convergences (Windshaper "
+    .. "Skyborne), saved where a Skyborne on this account got the 15-minute buff from Read Ley "
+    .. "Line or Skysight. Shown to a Skyborne for their own kind, to every character, or to none."
+L.POI_LEYLINES_SKYBORNE = "Skyborne"
+L.POI_LEYLINES_EVERYONE = "Everyone"
+L.POI_LEYLINES_OFF = "None"
+L.POI_CHAT_DESC = "Say in chat when a new ley line is saved."
+L.POI_LEYLINES_FORGET = "Saved Ley Lines"
+L.POI_LEYLINES_FORGET_BUTTON = "Forget"
+L.POI_LEYLINES_FORGET_DESC = "Forget every ley line and elemental convergence saved on this account."
+L.POI_LEYLINES_FORGET_CONFIRM = "Forget every saved ley line and elemental convergence?"
+L.POI_LEYLINES_FORGET_DONE = "Saved ley lines forgotten."
+L.POI_LEYLINE_SAVED = "Ley line saved on the map in %s." -- a zone
+L.POI_CONVERGENCE_SAVED = "Elemental convergence saved on the map in %s." -- a zone
 -- Tooltips
 L.POI_DUNGEON = "Dungeon"
 L.POI_RAID = "Raid"
@@ -56,6 +71,9 @@ L.POI_SHIP_TO = "Boat to %s" -- a place
 L.POI_ZEPPELIN_TO = "Zeppelin to %s" -- a place
 L.POI_VIA = "Stops at %s first" -- a place, on a boat's way
 L.POI_SPIRIT_HEALER = "Spirit Healer"
+L.POI_LEYLINE = "Ley Line"
+L.POI_CONVERGENCE = "Elemental Convergence"
+L.POI_LEYLINE_CAST = "Cast %s here" -- a spell
 
 -- ZoneInfo
 L.ZONEINFO_TITLE = "Zone Info"
