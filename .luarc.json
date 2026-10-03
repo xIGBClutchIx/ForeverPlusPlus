@@ -73,6 +73,7 @@
     "ScrollBoxConstants",
     "CreateTreeDataProvider",
     "geterrorhandler",
+    "AddonCompartmentFrame",
     "AddonList",
     "AddonList_Update",
     "GetTime",

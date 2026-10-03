@@ -7,6 +7,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Changed
 
 - **Auction Prices**: Crafting Costs shows Estimated Profit, after the auction house's 5% cut, and how old the oldest auction price in the totals is.
+- **Error Catcher**: new Button option puts its button on the minimap, in the addon compartment, both, or neither. The minimap is still the default.
 
 ## 0.7.0 (2026-10-02)
 
