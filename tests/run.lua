@@ -164,8 +164,15 @@ eq(ns.Chat.Plain("100||"), "100|", "plain escaped pipe")
 local Chat = ns.Chat
 eq(Chat.Colored("hi", 1, 0, 0), "|cffff0000hi|r", "colored line")
 eq(Chat.Colored("hi"), "hi", "colored without a color")
-eq(Chat.Colored("[|cff00ff00Bob|r]: hi", 0, 0, 1), "|cff0000ff[|cff00ff00Bob|cff0000ff]: hi|r",
-    "colored inner reset goes back to the line color")
+eq(Chat.Colored("[|cff00ff00Bob|r]: hi", 0, 0, 1),
+    "|cff0000ff[|r|cff00ff00Bob|r|cff0000ff]: hi|r", "colored keeps a name's color apart from the line's")
+eq(Chat.Colored("|Hplayer:Bob|h[|cff00ff00Bob|r]|h: |cnIQ4:|Hitem:1|h[Axe]|h|r", 1, 1, 1),
+    "|cffffffff[|r|cff00ff00Bob|r|cffffffff]: |r|cnIQ4:[Axe]|r|cffffffff|r",
+    "colored keeps link colors apart from the line's")
+ITEM_QUALITY_COLORS = { [4] = { r = 1, g = 0.5, b = 0 } }
+eq(Chat.Colored("|cnIQ4:[Axe]|r |cnIQ9:[Odd]|r"), "|cffff8000[Axe]|r |cnIQ9:[Odd]|r",
+    "colored turns item quality into a color code")
+ITEM_QUALITY_COLORS = nil
 eq(Chat.Colored("|Hplayer:Bob|h[Bob]|h |TIcon:0|tx", 1, 1, 1), "|cffffffff[Bob] x|r",
     "colored drops links and textures")
 eq(Chat.Colored("a||rb", 1, 1, 1), "|cffffffffa||rb|r", "colored keeps an escaped pipe")

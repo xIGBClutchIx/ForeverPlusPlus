@@ -2,8 +2,9 @@
 -- of small buttons beside the main chat window (Blizzard's menu and channel buttons, then ours).
 local _, ns = ...
 
-local _G, ipairs, type, gsub = _G, ipairs, type, string.gsub
-local byte, find, format, sub = string.byte, string.find, string.format, string.sub
+local _G, ipairs, type, tonumber, gsub = _G, ipairs, type, tonumber, string.gsub
+local byte, find, format, match, sub = string.byte, string.find, string.format, string.match,
+    string.sub
 local floor, min, concat = math.floor, math.min, table.concat
 
 local Chat = {}
@@ -45,6 +46,37 @@ end
 
 local PIPE, LOWER_C, LOWER_R = 124, 99, 114
 
+---A color code for red, green, and blue from 0 to 1.
+---@param r number
+---@param g number
+---@param b number
+---@return string
+local function hexCode(r, g, b)
+    return format("|cff%02x%02x%02x", floor(r * 255 + 0.5), floor(g * 255 + 0.5),
+        floor(b * 255 + 0.5))
+end
+
+---A named color (|cnIQ4: for an item's quality, |cnNAME: for a color global) as a plain color
+---code, which edit boxes show; nil when the name isn't known.
+---@param name string
+---@return string?
+local function namedCode(name)
+    local quality = tonumber(match(name, "^IQ(%d+)$"))
+    local color
+    if quality then
+        color = ITEM_QUALITY_COLORS and ITEM_QUALITY_COLORS[quality]
+    else
+        color = _G[name]
+    end
+    if type(color) ~= "table" then
+        return nil
+    end
+    local r, g, b = color.r, color.g, color.b
+    if type(r) == "number" and type(g) == "number" and type(b) == "number" then
+        return hexCode(r, g, b)
+    end
+end
+
 ---A chat line in its chat colors, for an edit box. Nothing here may be given a secret value.
 ---@param text string
 ---@param r number?
@@ -55,16 +87,27 @@ function Chat.Colored(text, r, g, b)
     text = gsub(text, "|H[^|]*|h(.-)|h", "%1")
     text = gsub(text, "|T[^|]*|t", "")
     text = gsub(text, "|A[^|]*|a", "")
+    -- Item links color their names with |cnIQ1: and the like.
+    text = gsub(text, "(|+)cn([^:|]*):", function(pipes, name)
+        local code = #pipes % 2 == 1 and namedCode(name)
+        if code then
+            return sub(pipes, 2) .. code
+        end
+    end)
     if type(r) ~= "number" or type(g) ~= "number" or type(b) ~= "number" then
         return text
     end
-    local color = format("|cff%02x%02x%02x", floor(r * 255 + 0.5), floor(g * 255 + 0.5),
-        floor(b * 255 + 0.5))
-    -- A |r inside the line would end in the edit box's white, so it goes back to the line's color.
-    -- An even run of pipes before the r is escaped pipes, not a code.
-    text = gsub(text, "(|+)r", function(pipes)
+    local color = hexCode(r, g, b)
+    -- An edit box keeps the first color until a |r and ignores a color code inside it, so the
+    -- line's color ends before each color of its own (a name, a link) and comes back after it.
+    -- An even run of pipes before the letter is escaped pipes, not a code.
+    text = gsub(text, "(|+)([cr])", function(pipes, letter)
         if #pipes % 2 == 1 then
-            return sub(pipes, 2) .. color
+            local escaped = sub(pipes, 2)
+            if letter == "r" then
+                return escaped .. "|r" .. color
+            end
+            return escaped .. "|r|c"
         end
     end)
     return color .. text .. "|r"
