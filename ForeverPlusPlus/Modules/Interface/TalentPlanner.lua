@@ -19,7 +19,7 @@ local Plan = ns.TalentPlan
 local readable = ns.IsReadable
 
 local module = ns.NewModule("TalentPlanner", L.TALENTPLANNER_DESC, {
-    enabled = false,
+    enabled = true,
     glow = true, -- the plan's next talent glows
     tooltip = true, -- talent tooltips say when the plan takes them
     plans = {}, -- "<player GUID>-<spec tab>" -> { level = cap, picks = { nodeID, ... } }
