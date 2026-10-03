@@ -733,10 +733,6 @@ local function refreshCrafting(recipeInfo)
             oldest = seenAt
         end
     end
-    local i, y = 1, 0
-    setRow(i, y, L.AUCTIONPRICES_CRAFT_COST, missing and noPrice() or coins(total))
-    y = y - ROW_HEIGHT
-
     -- Enchants and other recipes that make no item have no value or profit.
     local output = schematic.outputItemID
     local unitValue, fromVendor, seenAt
@@ -745,6 +741,29 @@ local function refreshCrafting(recipeInfo)
         if seenAt and (not oldest or seenAt < oldest) then
             oldest = seenAt
         end
+    end
+
+    local i, y = 0, 0
+    -- How old the oldest auction price in these totals is, colored like the tooltip's age.
+    if oldest then
+        local age = time() - oldest
+        local color = module.db.scanAgeColor == "age" and ageColor(age) or AGE_COLORS[module.db.scanAgeColor]
+        local text = ns.Text.Ago(age)
+        if color and color.WrapTextInColorCode then
+            text = color:WrapTextInColorCode(text)
+        elseif color then
+            text = ns.Colors.Code(color[1], color[2], color[3]) .. text .. "|r"
+        end
+        i = i + 1
+        setRow(i, y, L.AUCTIONPRICES_CRAFT_AGE, text)
+        y = y - ROW_HEIGHT
+    end
+
+    i = i + 1
+    setRow(i, y, L.AUCTIONPRICES_CRAFT_COST, missing and noPrice() or coins(total))
+    y = y - ROW_HEIGHT
+
+    if output then
         local low, high = schematic.quantityMin or 1, schematic.quantityMax or 1
         local made = (low + high) / 2 -- some recipes make a random number: count the middle
         local label = L.AUCTIONPRICES_CRAFT_VALUE
@@ -774,21 +793,6 @@ local function refreshCrafting(recipeInfo)
         end
         i = i + 1
         setRow(i, y, L.AUCTIONPRICES_CRAFT_PROFIT, profitText)
-        y = y - ROW_HEIGHT
-    end
-
-    -- How old the oldest auction price in these totals is, colored like the tooltip's age.
-    if oldest then
-        local age = time() - oldest
-        local color = module.db.scanAgeColor == "age" and ageColor(age) or AGE_COLORS[module.db.scanAgeColor]
-        local text = ns.Text.Ago(age)
-        if color and color.WrapTextInColorCode then
-            text = color:WrapTextInColorCode(text)
-        elseif color then
-            text = ns.Colors.Code(color[1], color[2], color[3]) .. text .. "|r"
-        end
-        i = i + 1
-        setRow(i, y, L.AUCTIONPRICES_CRAFT_AGE, text)
         y = y - ROW_HEIGHT
     end
 
