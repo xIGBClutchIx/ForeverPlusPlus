@@ -1,11 +1,11 @@
--- Chat Copy: a button in the column beside the chat window that opens the selected chat tab as
--- plain text in a window, already selected, so Ctrl+C copies it. The lines come from the chat
--- frame's own buffer (GetMessageInfo); a line the game marks secret can't be read, so it shows
--- as a placeholder instead.
+-- Chat Copy: a button in the column beside the chat window that opens the selected chat tab in a
+-- window, in its chat colors and already selected, so Ctrl+C copies it as plain text. The lines
+-- come from the chat frame's own buffer (GetMessageInfo); a line the game marks secret can't be
+-- read, so it shows as a placeholder instead.
 local _, ns = ...
 
 local CreateFrame, UIParent, C_Timer = CreateFrame, UIParent, C_Timer
-local max, concat = math.max, table.concat
+local max, floor, concat = math.max, math.floor, table.concat
 
 local L = ns.L
 local Chat = ns.Chat
@@ -25,12 +25,20 @@ module.options = {
     },
 }
 
--- The window's text box is limited in length; a long chat drops its oldest lines to fit.
+-- The window's text box is limited in length; a long chat drops its oldest lines to fit, with
+-- room left for the selection marker below.
 local MAX_LETTERS = 200000
+local MAX_TEXT = MAX_LETTERS - 100
+
+-- Copying from an edit box copies its raw text, color codes and all, so while Ctrl (or Cmd) is
+-- held the box holds the plain text instead, with the same selection.
+local COPY_KEYS = { LCTRL = true, RCTRL = true, LMETA = true, RMETA = true }
+-- Typed over the selection to find where it is; edit boxes have no way to ask.
+local MARKER = "{fpp:selection}"
 
 local button, window
 
----The text of the chat window the player is looking at, newest line last.
+---The chat window the player is looking at in its chat colors, newest line last.
 ---@return string
 local function chatText()
     local frame = SELECTED_CHAT_FRAME or ChatFrame1
@@ -38,20 +46,71 @@ local function chatText()
         return ""
     end
     local total = frame:GetNumMessages()
-    local lines = {}
-    for i = max(1, total - module.db.lines + 1), total do
-        local text = frame:GetMessageInfo(i)
+    local lines, size = {}, 0
+    for i = total, max(1, total - module.db.lines + 1), -1 do
+        local text, r, g, b = frame:GetMessageInfo(i)
+        local line
         if ns.IsReadable(text) and type(text) == "string" then
-            lines[#lines + 1] = Chat.Plain(text)
+            if not (ns.IsReadable(r) and ns.IsReadable(g) and ns.IsReadable(b)) then
+                r, g, b = nil, nil, nil
+            end
+            line = Chat.Colored(text, r, g, b)
         else
-            lines[#lines + 1] = L.CHATCOPY_HIDDEN
+            line = L.CHATCOPY_HIDDEN
         end
+        size = size + #line + 1
+        if size > MAX_TEXT then
+            break
+        end
+        lines[#lines + 1] = line
     end
-    local text = concat(lines, "\n")
-    if #text > MAX_LETTERS then
-        text = text:sub(-MAX_LETTERS)
+    -- Gathered newest first; the window shows them oldest first.
+    local count = #lines
+    for i = 1, floor(count / 2) do
+        lines[i], lines[count - i + 1] = lines[count - i + 1], lines[i]
     end
-    return text
+    return concat(lines, "\n")
+end
+
+---Where the selection is in the box's text, as the bytes before its start and its end. This types
+---over the selection, so the caller sets the box's text again after.
+---@param edit table
+---@param text string what the box holds
+---@return number? start
+---@return number? finish
+local function selection(edit, text)
+    edit:Insert(MARKER)
+    local now = edit:GetText()
+    local at = now:find(MARKER, 1, true)
+    if not at then
+        return nil
+    end
+    local start = at - 1
+    return start, #text - (#now - start - #MARKER)
+end
+
+---Shows the plain or the colored text, keeping the selection and the scroll.
+---@param plain boolean
+local function showPlain(plain)
+    if not window or window.plain == plain then
+        return
+    end
+    local edit, colored = window.edit, window.colored
+    local from = window.plain and Chat.Uncolor(colored) or colored
+    local scroll = window.scroll:GetVerticalScroll()
+    local start, finish = selection(edit, from)
+    local length = #from
+    edit:SetText(plain and Chat.Uncolor(colored) or colored)
+    window.plain = plain
+    if start == 0 and finish == length then
+        edit:HighlightText()
+    elseif start then
+        local convert = plain and Chat.PlainOffset or Chat.ColoredOffset
+        start, finish = convert(colored, start), convert(colored, finish)
+        edit:SetCursorPosition(finish)
+        edit:HighlightText(start, finish)
+    end
+    window.scroll:SetVerticalScroll(scroll)
 end
 
 local function newWindow()
@@ -85,6 +144,19 @@ local function newWindow()
     edit:SetScript("OnEscapePressed", function()
         f:Hide()
     end)
+    edit:SetScript("OnKeyDown", function(_, key)
+        if COPY_KEYS[key] then
+            showPlain(true)
+        end
+    end)
+    edit:SetScript("OnKeyUp", function(_, key)
+        if COPY_KEYS[key] then
+            showPlain(false)
+        end
+    end)
+    edit:SetScript("OnEditFocusLost", function()
+        showPlain(false)
+    end)
     scroll:SetScrollChild(edit)
     scroll:SetScript("OnSizeChanged", function(_, width)
         edit:SetWidth(width)
@@ -98,7 +170,9 @@ end
 local function open()
     window = window or newWindow()
     local text = chatText()
-    window.edit:SetText(text ~= "" and text or L.CHATCOPY_EMPTY)
+    window.colored = text ~= "" and text or L.CHATCOPY_EMPTY
+    window.plain = false
+    window.edit:SetText(window.colored)
     window:Show()
     window.edit:SetFocus()
     window.edit:HighlightText()

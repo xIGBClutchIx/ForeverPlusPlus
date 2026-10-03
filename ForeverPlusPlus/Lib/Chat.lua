@@ -3,6 +3,8 @@
 local _, ns = ...
 
 local _G, ipairs, type, gsub = _G, ipairs, type, string.gsub
+local byte, find, format, sub = string.byte, string.find, string.format, string.sub
+local floor, min, concat = math.floor, math.min, table.concat
 
 local Chat = {}
 ns.Chat = Chat
@@ -33,6 +35,125 @@ function Chat.Plain(text)
     text = gsub(text, "|A[^|]*|a", "")
     text = gsub(text, "||", "|")
     return text
+end
+
+-- Colored lines -----------------------------------------------------------------------------------
+-- A chat line as an edit box can show it in its chat colors: the line's color around it, its own
+-- color codes (names, links) kept, and links, textures, and atlases gone. Copying from an edit box
+-- copies its raw text, codes and all, so Chat.Uncolor and the offsets below turn colored text and
+-- positions in it into plain ones.
+
+local PIPE, LOWER_C, LOWER_R = 124, 99, 114
+
+---A chat line in its chat colors, for an edit box. Nothing here may be given a secret value.
+---@param text string
+---@param r number?
+---@param g number?
+---@param b number?
+---@return string
+function Chat.Colored(text, r, g, b)
+    text = gsub(text, "|H[^|]*|h(.-)|h", "%1")
+    text = gsub(text, "|T[^|]*|t", "")
+    text = gsub(text, "|A[^|]*|a", "")
+    if type(r) ~= "number" or type(g) ~= "number" or type(b) ~= "number" then
+        return text
+    end
+    local color = format("|cff%02x%02x%02x", floor(r * 255 + 0.5), floor(g * 255 + 0.5),
+        floor(b * 255 + 0.5))
+    -- A |r inside the line would end in the edit box's white, so it goes back to the line's color.
+    -- An even run of pipes before the r is escaped pipes, not a code.
+    text = gsub(text, "(|+)r", function(pipes)
+        if #pipes % 2 == 1 then
+            return sub(pipes, 2) .. color
+        end
+    end)
+    return color .. text .. "|r"
+end
+
+---The length of the color code at byte i, or nil when there isn't one.
+---@param text string
+---@param i number
+---@return number?
+local function codeLength(text, i)
+    if byte(text, i) ~= PIPE then
+        return nil
+    end
+    local nextByte = byte(text, i + 1)
+    if nextByte == LOWER_R then
+        return 2
+    elseif nextByte == LOWER_C then
+        local _, last = find(text, "^|c%x%x%x%x%x%x%x%x", i)
+        if not last then
+            _, last = find(text, "^|cn[^:|]*:", i)
+        end
+        return last and last - i + 1
+    end
+end
+
+---Walks colored text: a color code shows nothing and "||" shows one "|". Stops after `rawStop`
+---bytes of it or once `shownStop` bytes show, and returns the bytes walked and the bytes shown.
+---@param text string
+---@param rawStop number?
+---@param shownStop number?
+---@param pieces table? gets the shown text
+---@return number raw
+---@return number shown
+local function walk(text, rawStop, shownStop, pieces)
+    local length = #text
+    local i, shown = 1, 0
+    while i <= length and not (rawStop and i > rawStop) and not (shownStop and shown >= shownStop) do
+        local pipe = find(text, "|", i, true) or length + 1
+        if pipe > i then
+            local run = pipe - i
+            if rawStop then
+                run = min(run, rawStop - i + 1)
+            end
+            if shownStop then
+                run = min(run, shownStop - shown)
+            end
+            if pieces then
+                pieces[#pieces + 1] = sub(text, i, i + run - 1)
+            end
+            i, shown = i + run, shown + run
+        else
+            local code = codeLength(text, i)
+            if code then
+                i = i + code
+            else
+                if pieces then
+                    pieces[#pieces + 1] = "|"
+                end
+                i, shown = i + (byte(text, i + 1) == PIPE and 2 or 1), shown + 1
+            end
+        end
+    end
+    return i - 1, shown
+end
+
+---Colored text as the plain text it shows.
+---@param text string
+---@return string
+function Chat.Uncolor(text)
+    local pieces = {}
+    walk(text, nil, nil, pieces)
+    return concat(pieces)
+end
+
+---Where a position in colored text falls in its plain text (both count bytes before it).
+---@param text string colored text
+---@param offset number
+---@return number
+function Chat.PlainOffset(text, offset)
+    local _, shown = walk(text, offset)
+    return shown
+end
+
+---Where a position in plain text falls in its colored text, before any codes there.
+---@param text string colored text
+---@param offset number
+---@return number
+function Chat.ColoredOffset(text, offset)
+    return (walk(text, nil, offset))
 end
 
 -- The button column ----------------------------------------------------------------------------

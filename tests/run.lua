@@ -160,6 +160,28 @@ eq(ns.Chat.Plain("|Hplayer:Bob:1|h[Bob]|h: hi"), "[Bob]: hi", "plain link keeps 
 eq(ns.Chat.Plain("a |TInterface\\Icon:0|t b |A:Raid:14:14|a c"), "a  b  c", "plain textures")
 eq(ns.Chat.Plain("100||"), "100|", "plain escaped pipe")
 
+-- Chat.Colored, Chat.Uncolor, and offsets between them
+local Chat = ns.Chat
+eq(Chat.Colored("hi", 1, 0, 0), "|cffff0000hi|r", "colored line")
+eq(Chat.Colored("hi"), "hi", "colored without a color")
+eq(Chat.Colored("[|cff00ff00Bob|r]: hi", 0, 0, 1), "|cff0000ff[|cff00ff00Bob|cff0000ff]: hi|r",
+    "colored inner reset goes back to the line color")
+eq(Chat.Colored("|Hplayer:Bob|h[Bob]|h |TIcon:0|tx", 1, 1, 1), "|cffffffff[Bob] x|r",
+    "colored drops links and textures")
+eq(Chat.Colored("a||rb", 1, 1, 1), "|cffffffffa||rb|r", "colored keeps an escaped pipe")
+local colored = "|cffff0000ab|cnRED:cd|r||e|r"
+eq(Chat.Uncolor(colored), "abcd|e", "uncolor")
+eq(Chat.Uncolor(Chat.Colored("[|cff00ff00Bob|r]: 5||6", 1, 0, 0)), "[Bob]: 5|6", "uncolor colored")
+eq(Chat.PlainOffset(colored, 0), 0, "plain offset start")
+eq(Chat.PlainOffset(colored, 12), 2, "plain offset after ab")
+eq(Chat.PlainOffset(colored, 5), 0, "plain offset inside a code")
+eq(Chat.PlainOffset(colored, #colored), 6, "plain offset end")
+eq(Chat.ColoredOffset(colored, 0), 0, "colored offset start")
+eq(Chat.ColoredOffset(colored, 2), 12, "colored offset after ab")
+eq(Chat.ColoredOffset(colored, 3), 20, "colored offset after a code")
+eq(Chat.ColoredOffset(colored, 5), 25, "colored offset after an escaped pipe")
+eq(Chat.ColoredOffset(colored, 6), 26, "colored offset end, before the last code")
+
 -- TalentPlan ------------------------------------------------------------------------------------
 
 local Plan = ns.TalentPlan

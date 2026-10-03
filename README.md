@@ -48,7 +48,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Talent Planner | Adds a Plan Talents button to the talent window. While planning, clicking a talent adds a point to a saved plan instead of learning it (right-click takes one out, Shift for every rank), in the order you click, and a Level box limits the plan to the points you have at that level. Tab headers show the plan's points, and the tooltip says at which level each rank comes. Afterwards the plan's next talent glows gold when you have a point to spend, and talent tooltips list the plan's levels. One plan per character and spec. On by default. |
 | Tooltips | Colors unit and item tooltips by class, reaction, or quality, colors the Horde or Alliance line red or blue, and adds player titles and who a unit is targeting. |
 | **Chat** | |
-| Chat Copy | Adds a button beside the chat window that opens the chat as text, already selected, so you can copy it with Ctrl+C. A slider sets how many lines. |
+| Chat Copy | Adds a button beside the chat window that opens the chat in its colors, already selected, so you can copy it as plain text with Ctrl+C. A slider sets how many lines. |
 | Short Channel Names | Shows chat channels as [1], [G], or [1. G] instead of [1. General], as number and letter ([3. T]) by default. Off by default. |
 | Chat Font | Draws the chat windows in another of the game's fonts (Friz Quadrata, Arial Narrow, Skurri, or Morpheus), keeping their size, and optionally the chat input box too. Unavailable on Korean, Chinese, and Russian clients, whose chat font needs fallbacks. |
 | Persistent Chat | Keeps chat text on screen instead of fading it out after a while. |

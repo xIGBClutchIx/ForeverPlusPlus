@@ -23,6 +23,8 @@ ns.changelog = {
                 { L.AUCTIONPRICES_TITLE, "Crafting Costs shows Estimated Profit, after the "
                     .. "auction house's 5% cut, and how old the oldest auction price in the "
                     .. "totals is." },
+                { L.CHATCOPY_TITLE, "The window shows chat lines in their chat colors, the way "
+                    .. "they look in chat. Copying still gives plain text." },
                 { L.ERRORCATCHER_TITLE, "New Button option puts its button on the minimap, in "
                     .. "the addon compartment, both, or neither. The minimap is still the "
                     .. "default." },
