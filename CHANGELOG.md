@@ -12,7 +12,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Auction Prices**: new Crafting Costs option (on by default) shows Total Cost, Value, and Profit (green or red) under a recipe's description in the professions window. Reagents a merchant sells count at the merchant's price when it's lower, once you've visited one; a crafted item with no auction price is valued at its vendor price.
 - **Sell Price** and **Auction Prices**: a reagent's tooltip in the professions window prices the amount the recipe needs (x4) instead of one; Shift shows one.
 - **Fishing Cast**: new Combat Warning option (on by default) shows one red line where Blizzard's errors appear when combat starts while you have a fishing pole equipped.
-- **Points of Interest**: Forever's new boats: Stormwind Harbor to Auberdine, Southshore on the Menethil boat's way to Auberdine (its tooltip says it stops there first), and Steamwheedle Port in Tanaris to Powderfuse Port in the Riverglades. Also Zephras Isle's skyships to Mulgore and Dalaran.
+- **Points of Interest**: Forever's new boats: Stormwind Harbor to Auberdine, Southshore on the Menethil boat's way to Auberdine (its tooltip says it stops there first), and Steamwheedle Port in Tanaris to Powderfuse Port in the Riverglades. Also Zephras Isle's skyships to Mulgore and Dalaran, and the entrances of Forever's Excavation Site (above the Wetlands' spider cave) and City of Dalaran (at the back of the city).
 - **Zone Info**: lists Excavation Site in the Wetlands and City of Dalaran in Alterac Mountains with their levels.
 
 ### Changed

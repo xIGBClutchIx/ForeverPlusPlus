@@ -38,7 +38,9 @@ ns.changelog = {
                 { L.POI_TITLE, "Forever's new boats: Stormwind Harbor to Auberdine, Southshore "
                     .. "on the Menethil boat's way to Auberdine (its tooltip says it stops there "
                     .. "first), and Steamwheedle Port in Tanaris to Powderfuse Port in the "
-                    .. "Riverglades. Also Zephras Isle's skyships to Mulgore and Dalaran." },
+                    .. "Riverglades. Also Zephras Isle's skyships to Mulgore and Dalaran, and the "
+                    .. "entrances of Forever's Excavation Site (above the Wetlands' spider cave) "
+                    .. "and City of Dalaran (at the back of the city)." },
                 { L.ZONEINFO_TITLE, "Lists Excavation Site in the Wetlands and City of Dalaran "
                     .. "in Alterac Mountains with their levels." },
             } },

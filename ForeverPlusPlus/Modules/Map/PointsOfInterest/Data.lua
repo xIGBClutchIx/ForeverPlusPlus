@@ -10,8 +10,7 @@
 --   { "spirit", x, y }
 -- Factions are "A" (Alliance), "H" (Horde), and "N" (both). Places are English; a locale file can
 -- translate one with L["Booty Bay"] = "...". Dungeons the game's own entrance list has and this
--- list doesn't place (Excavation Site and City of Dalaran, whose entrances guides disagree on)
--- are added from the game; see gameEntrances.
+-- list doesn't place (Forever's later ones) are added from the game; see gameEntrances.
 local _, ns = ...
 
 local setmetatable = setmetatable
@@ -57,6 +56,9 @@ internal.cities = {
 internal.points = {
     -- Eastern Kingdoms -------------------------------------------------------------------------
     [1416] = { -- Alterac Mountains
+        -- At the back of Dalaran, by the Violet Citadel's dome: a guide's /way 19.4 85.6, which
+        -- Cameron's description matches. Not checked in game.
+        { "dungeon", 19.4, 85.6, "dalaran" },
         -- Zephras Isle's skyship, which lands north of Dalaran. Not checked in game.
         { "zeppelin", 12.8, 51.2, "N", "Valanaar", 2521 },
         { "spirit", 42.9, 38.0 },
@@ -185,6 +187,9 @@ internal.points = {
         { "spirit", 51.7, 49.7 },
     },
     [1437] = { -- Wetlands
+        -- Above Thelgen Rock's spider cave: a guide's 47.9, 56.5, which Cameron's description
+        -- matches. Not checked in game.
+        { "dungeon", 47.9, 56.5, "excavationSite" },
         { "flight", 9.5, 59.7, "A", "Menethil Harbor" },
         { "ship", 5.0, 63.5, "A", "Theramore Isle", 1445 },
         -- On Forever this boat sails one way round Menethil, Southshore, and Auberdine.
