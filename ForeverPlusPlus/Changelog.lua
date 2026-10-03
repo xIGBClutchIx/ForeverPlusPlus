@@ -12,6 +12,13 @@ ns.changelog = {
     {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
+            { L.CHANGELOG_ADDED, {
+                { L.TALENTPLANNER_TITLE, "New, off by default, in Interface: a Plan Talents "
+                    .. "button on the talent window. Place talents freely without learning them, "
+                    .. "in order, up to the points you have at a level you choose, then follow the "
+                    .. "plan as you level: its next talent glows, and tooltips say at which level "
+                    .. "each rank comes." },
+            } },
             { L.CHANGELOG_CHANGED, {
                 { L.AUCTIONPRICES_TITLE, "Crafting Costs shows Estimated Profit, after the "
                     .. "auction house's 5% cut, and how old the oldest auction price in the "

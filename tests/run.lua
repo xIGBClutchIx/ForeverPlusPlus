@@ -44,7 +44,8 @@ end
 for _, file in ipairs({ "Core", "Map" }) do
     load("ForeverPlusPlus/Locales/enUS/" .. file .. ".lua")
 end
-for _, file in ipairs({ "Secret", "Colors", "Text", "WorldMap", "Instances", "Chat" }) do
+for _, file in ipairs({ "Secret", "Colors", "Text", "WorldMap", "Instances", "Chat",
+    "TalentPlan" }) do
     load("ForeverPlusPlus/Lib/" .. file .. ".lua")
 end
 
@@ -158,6 +159,67 @@ eq(ns.Chat.Plain("|cnCOLOR:named|r"), "named", "plain named color")
 eq(ns.Chat.Plain("|Hplayer:Bob:1|h[Bob]|h: hi"), "[Bob]: hi", "plain link keeps its text")
 eq(ns.Chat.Plain("a |TInterface\\Icon:0|t b |A:Raid:14:14|a c"), "a  b  c", "plain textures")
 eq(ns.Chat.Plain("100||"), "100|", "plain escaped pipe")
+
+-- TalentPlan ------------------------------------------------------------------------------------
+
+local Plan = ns.TalentPlan
+-- Two tabs. Tab 1: a (5 ranks, row 0), b (3, row 1, needs 5), c (1, row 1, needs a maxed).
+-- Tab 2: d (5, row 0), e (1, row 0, needs d or a maxed: Sufficient edges).
+local talents = {
+    nodes = {
+        a = { max = 5, tab = 1, req = 0, prereqs = {} },
+        b = { max = 3, tab = 1, req = 5, prereqs = {} },
+        c = { max = 1, tab = 1, req = 5, prereqs = { { id = "a", required = true } } },
+        d = { max = 5, tab = 2, req = 0, prereqs = {} },
+        e = { max = 1, tab = 2, req = 0, prereqs = { { id = "d" }, { id = "a" } } },
+    },
+    order = { "a", "d", "e", "b", "c" },
+}
+
+local picks = {}
+eq(Plan.Add(talents, picks, "b", 10), false, "row 1 needs 5 points in the tab")
+eq(select(2, Plan.Add(talents, picks, "b", 10)), "tier", "tier reason")
+for _ = 1, 4 do
+    Plan.Add(talents, picks, "a", 10)
+end
+eq(select(2, Plan.Add(talents, picks, "c", 10)), "tier", "4 points aren't 5")
+eq(select(2, Plan.Add(talents, picks, "e", 10)), "prereq", "sufficient edge unmet")
+eq(Plan.Add(talents, picks, "a", 10), true, "fifth rank")
+eq(select(2, Plan.Add(talents, picks, "a", 10)), "max", "no sixth rank")
+eq(Plan.Add(talents, picks, "c", 10), true, "prerequisite maxed")
+eq(Plan.Add(talents, picks, "e", 10), true, "any sufficient edge is enough")
+eq(#picks, 7, "seven points")
+eq(select(2, Plan.Add(talents, picks, "d", 7)), "points", "no points left at the cap")
+
+eq(select(2, Plan.Remove(talents, picks, "a")), "needed", "c and e need the fifth a")
+eq(Plan.Remove(talents, picks, "e"), true, "remove the last point")
+eq(Plan.Remove(talents, picks, "c"), true, "then c")
+eq(Plan.Remove(talents, picks, "a"), true, "then a is free")
+eq(#picks, 4, "four points left")
+eq(select(2, Plan.Remove(talents, picks, "d")), "none", "nothing in d")
+eq(select(2, Plan.Remove(talents, { "a", "a", "d" }, "d", 2)), "none", "remove looks under the cap")
+
+local counts, tabs, bad, why = Plan.Simulate(talents, { "a", "b" })
+eq(bad, 2, "simulate finds the bad point")
+eq(why, "tier", "and why")
+eq(counts.a, 1, "counts before it")
+eq(tabs[1], 1, "tab points before it")
+eq(select(3, Plan.Simulate(talents, { "a", "b" }, 1)), nil, "limit stops before it")
+
+local order = Plan.FromRanks(talents, { a = 5, c = 1, e = 1, d = 2 })
+eq(#order, 9, "learned points all placed")
+eq(select(3, Plan.Simulate(talents, order)), nil, "learned order is valid")
+eq(order[1], "a", "top row first")
+
+eq(select(2, Plan.Next({ "a", "a", "d", "a" }, { a = 2 })), "d", "next unlearned point")
+eq(Plan.Next({ "a", "a", "d", "a" }, { a = 2 }), 3, "its place")
+eq(Plan.Next({ "a" }, { a = 1 }), nil, "plan done")
+
+eq(Plan.FirstLevel(30, 21), 10, "first point at 10")
+eq(Plan.FirstLevel(5, 0), 10, "none earned yet: Classic's 10")
+eq(Plan.PointsAt(30, 10), 21, "21 points at 30")
+eq(Plan.PointsAt(9, 10), 0, "none before 10")
+eq(Plan.LevelOf(21, 10), 30, "21st point at 30")
 
 -- Done ------------------------------------------------------------------------------------------
 

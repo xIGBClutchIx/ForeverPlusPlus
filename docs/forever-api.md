@@ -120,6 +120,12 @@ From the dumps **[dump]**: `C_AddOns`, `C_Item`, `C_Spell`, `C_Container`, `C_Un
   - Purchased nodes (`C_Traits.GetNodeInfo(configID, nodeID)`) have `subTreeID = nil`, and `posX` / `posY` in tree coordinates. Two Arms nodes had `groupIDs[1] = 11650`; a third had `groupIDs[1] = 11649`, a group that isn't a tab.
   - A node's tab is whichever of its `groupIDs` matches a display group, not the first one. That third node's `groupIDs` were `{ 11649, 12820, 12821, 12822, 12823, 12824, 11650 }`: the tab (11650) came last. What 11649 and 12820-12824 gate (tiers?) is unknown.
   - **Points per tab:** `C_Traits.GetGroupCurrencyInfo(configID, { 11650, 11657, 11670 })` returned `{ traitNodeGroupID = 11650, currencyInfos = { { traitCurrencyID = 3820, spent = 6, quantity = 0, maxQuantity = 6 } } }`. Fury and Protection, with nothing spent, were left out of the result entirely, so treat a missing group as 0.
+- The talent window is `PlayerSpellsFrame.TalentsFrame` from load-on-demand `Blizzard_PlayerSpells`, with Camelot files (`[Game]/ClassTalents/...`, `[AllowLoadGameType camelot]`) over Mainline's shared talent frame (`Blizzard_SharedTalentUI`). **[web]** (Gethe `forever` branch, 2026-10-03)
+  - Talents are staged and learned with the Apply Changes button (`ApplyButton`), as on Retail. Nodes use the square art set (`talents-node-square-*`); talent buttons hide with alpha 0 for the Invisible state (`TalentDisplayMixin:SetVisualState`).
+  - The loadout dropdown (`LoadSystem`) is hidden, the search box stays, and there are no PvP talents. A primary and secondary tab are spec groups, the second locked until dual spec (`GetNumSpecGroups() > 1`).
+  - Tab headers (`frame.treeHeaders`, each with `displayInfo` and a `Text` of points spent) are rebuilt by `RefreshTreeHeaders`, from `GetGroupCurrencyInfo`. Row gates come from `C_Traits.GetTreeInfo(...).gates` and the nodes' gate conditions (`isGate`, `spentAmountRequired`).
+  - `EventRegistry` fires `TalentFrameBase.ButtonsUpdated` after the buttons update and `TalentDisplay.TooltipCreated` (button, tooltip) after a talent tooltip is shown.
+  - Talent Planner reads a row's points from a node's gate condition when it has one, counted in the node's tab as Classic does, and otherwise as 5 per row from `posY`. Whether Forever's gate conditions count tab or tree points is **Unverified**. Talent points from level 10 are inferred from Classic; the planner calibrates from points earned (spent plus unspent) once there are any.
 
 ## Secret values and combat data
 
@@ -320,6 +326,7 @@ Check these in the live client and move them up with a tag and date:
 - [x] Talent points are in `C_Traits`, one `CamelotCombat` config with one tree per class. (2026-09-25, see Talents)
 - [x] The three talent tabs are trait groups from `C_Traits.GetGroupDisplayInfoByTreeID`. (2026-09-25)
 - [x] Nodes list their tab's group in `groupIDs` (not always first), and `C_Traits.GetGroupCurrencyInfo` gives points spent per tab. (2026-09-25)
+- [ ] Do Forever's talent nodes carry gate conditions with `spentAmountRequired`, and do they count points in the tab or the whole tree? Do arrows use `RequiredForAvailability` edges? (Talent Planner falls back to 5 points per row and maxed arrow sources.)
 - [ ] Does `GetGroupCurrencyInfo` return an entry for a tab once it has points, with points in two tabs? (Only one tab had points when tested.)
 - [x] `RECENT_ALLY_FONT_COLOR:GetRGB()` gives (0.325, 0.788, 1). (2026-09-27)
 - [ ] Does `RepopMe()` work from an addon's timer after `PLAYER_DEAD`, and does `IsInInstance()` say `"pvp"` in battlegrounds?

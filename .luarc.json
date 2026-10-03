@@ -275,6 +275,15 @@
     "GetActiveQuestID",
     "GetAvailableQuestInfo",
     "QuestObjectiveTracker",
-    "CampaignQuestObjectiveTracker"
+    "CampaignQuestObjectiveTracker",
+    "C_Traits",
+    "PlayerSpellsFrame",
+    "TalentButtonUtil",
+    "TALENT_BUTTON_TOOLTIP_NEXT_RANK",
+    "GetMaxLevelForPlayerExpansion",
+    "SOUNDKIT",
+    "PlaySound",
+    "YELLOW_FONT_COLOR",
+    "DISABLED_FONT_COLOR"
   ]
 }

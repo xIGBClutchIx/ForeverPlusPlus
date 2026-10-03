@@ -35,6 +35,7 @@ Lib\Instances.lua
 Lib\MapPins.lua
 Lib\EditMode.lua
 Lib\Chat.lua
+Lib\TalentPlan.lua
 Modules\Interface\ErrorCatcher.lua
 Modules\Nameplates\PlayerPlates.lua
 Modules\Nameplates\NpcPlates.lua
@@ -73,6 +74,7 @@ Modules\Interface\CurrencyBar.lua
 Modules\Interface\CharacterFrame.lua
 Modules\Interface\QuestIcons.lua
 Modules\Interface\QuestTracker.lua
+Modules\Interface\TalentPlanner.lua
 Modules\Chat\ChatCopy.lua
 Modules\Chat\ChannelNames.lua
 Modules\Chat\ChatFont.lua

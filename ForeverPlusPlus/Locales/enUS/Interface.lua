@@ -305,3 +305,38 @@ L.QUESTICONS_ICON = "Icon"
 L.QUESTICONS_ICON_DESC = "The icon after the quest's name."
 L.QUESTICONS_ICON_INFINITY = "Infinity"
 L.QUESTICONS_ICON_LOGO = "Forever Logo"
+
+-- Talent Planner
+L.TALENTPLANNER_TITLE = "Talent Planner"
+L.TALENTPLANNER_DESC = "Add a Plan Talents button to the talent window: place talents freely, in "
+    .. "order, up to the points you have at a level you choose, and follow the plan as you level."
+L.TALENTPLANNER_GLOW = "Highlight Next Talent"
+L.TALENTPLANNER_GLOW_DESC = "Make the plan's next talent glow gold when you have a point to spend."
+L.TALENTPLANNER_TOOLTIP = "Tooltip Line"
+L.TALENTPLANNER_TOOLTIP_DESC = "Add the levels at which the plan takes a talent to its tooltip."
+L.TALENTPLANNER_PLAN = "Plan Talents"
+L.TALENTPLANNER_DONE = "Done Planning"
+L.TALENTPLANNER_PLAN_DESC = "Place talents without learning them. Each click adds a point to the "
+    .. "plan, in order, so you can follow it as you level. The plan is saved for this character."
+L.TALENTPLANNER_CLICK = "Left-click to add a point, right-click to remove one. Hold Shift for "
+    .. "every rank."
+L.TALENTPLANNER_RANK = "Rank %d/%d" -- planned ranks, most ranks
+L.TALENTPLANNER_NEXT_RANK = "Next Rank:"
+L.TALENTPLANNER_PLANNED = "Planned at Level:"
+L.TALENTPLANNER_POINTS = "Points Planned: %d/%d" -- planned, points at the plan's level
+L.TALENTPLANNER_MORE = "(%d more after this level)"
+L.TALENTPLANNER_NEXT = "Next: %s (Level %d)" -- talent name, level
+L.TALENTPLANNER_COMPLETE = "Talent plan complete."
+L.TALENTPLANNER_LEVEL = "Level"
+L.TALENTPLANNER_LEVEL_DESC = "Plan only the talent points a character has at this level."
+L.TALENTPLANNER_CLEAR = "Clear"
+L.TALENTPLANNER_CLEAR_DESC = "Take every point out of the plan."
+L.TALENTPLANNER_CLEAR_CONFIRM = "Clear your talent plan?"
+L.TALENTPLANNER_RESET = "Reset"
+L.TALENTPLANNER_RESET_DESC = "Start the plan over from the talents you have learned."
+L.TALENTPLANNER_RESET_CONFIRM = "Start your talent plan over from the talents you have learned?"
+L.TALENTPLANNER_NO_POINTS = "No talent points left at level %d."
+L.TALENTPLANNER_MAXED = "That talent is at its highest rank."
+L.TALENTPLANNER_TIER = "Requires %d points in %s." -- points, tab name
+L.TALENTPLANNER_PREREQ = "Requires %s at its highest rank." -- talent names
+L.TALENTPLANNER_NEEDED = "Talents planned after this one need that point."
