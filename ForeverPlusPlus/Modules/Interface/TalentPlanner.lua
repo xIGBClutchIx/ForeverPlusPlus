@@ -510,6 +510,59 @@ local function drawGlow(plan)
     end
 end
 
+local function withIcon(node)
+    return format("|T%s:0|t %s", tostring(node.icon), node.name)
+end
+
+local ORDER_LINES = 20 -- runs listed before "...and N more"
+
+-- The plan in order, a line for each run of points in one talent: its ranks on the left and their
+-- levels on the right, green once you're that level. Out of planning, only what's left to learn.
+local function orderTooltip(owner)
+    local plan = tree and getPlan(false)
+    if not (plan and #plan.picks > 0) then
+        return
+    end
+    local first = firstLevel()
+    local points = Plan.PointsAt(plan.level, first)
+    local level = UnitLevel("player")
+    local runs, counts = {}, {}
+    for i = 1, min(#plan.picks, points) do
+        local id = plan.picks[i]
+        counts[id] = (counts[id] or 0) + 1
+        if planning or counts[id] > (tree.ranks[id] or 0) then
+            local run = runs[#runs]
+            if run and run.id == id and run.last == i - 1 then
+                run.last, run.toRank = i, counts[id]
+            else
+                runs[#runs + 1] = { id = id, first = i, last = i, fromRank = counts[id],
+                    toRank = counts[id] }
+            end
+        end
+    end
+    if #runs == 0 then
+        return
+    end
+    GameTooltip:SetOwner(owner, "ANCHOR_TOP")
+    GameTooltip:SetText(planning and L.TALENTPLANNER_ORDER or L.TALENTPLANNER_UPCOMING, 1, 1, 1)
+    for i, run in ipairs(runs) do
+        if i > ORDER_LINES then
+            GameTooltip:AddLine(format(L.TALENTPLANNER_MORE_LINES, #runs - ORDER_LINES), 0.5, 0.5, 0.5)
+            break
+        end
+        local node = describe(tree.nodes[run.id])
+        local ranks = run.fromRank == run.toRank and format("%d/%d", run.toRank, node.max)
+            or format("%d-%d/%d", run.fromRank, run.toRank, node.max)
+        local from, to = Plan.LevelOf(run.first, first), Plan.LevelOf(run.last, first)
+        local levels = from == to and format(L.TALENTPLANNER_LEVEL_ONE, from)
+            or format(L.TALENTPLANNER_LEVEL_RANGE, from, to)
+        local ready = not planning and from <= level
+        GameTooltip:AddDoubleLine(withIcon(node) .. " |cff808080" .. ranks .. "|r", levels,
+            1, 1, 1, ready and 0.1 or 1, 1, ready and 0.1 or 1)
+    end
+    GameTooltip:Show()
+end
+
 local function drawBar(plan)
     ui.planButton:SetText(planning and L.TALENTPLANNER_DONE or L.TALENTPLANNER_PLAN)
     ui.controls:SetShown(planning)
@@ -527,7 +580,7 @@ local function drawBar(plan)
     end
     local index, id = Plan.Next(plan and plan.picks or {}, tree.ranks)
     if plan and index and index <= pointsOf(plan) then
-        ui.summary:SetText(format(L.TALENTPLANNER_NEXT, describe(tree.nodes[id]).name,
+        ui.summary:SetText(format(L.TALENTPLANNER_NEXT, withIcon(describe(tree.nodes[id])),
             Plan.LevelOf(index, firstLevel())))
     elseif plan and #plan.picks > 0 then
         ui.summary:SetText(L.TALENTPLANNER_COMPLETE)
@@ -619,8 +672,23 @@ local function createUI()
     simpleTooltip(planButton, L.TALENTPLANNER_TITLE, L.TALENTPLANNER_PLAN_DESC)
     ui.planButton = planButton
 
-    local summary = bar:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    summary:SetPoint("LEFT", planButton, "RIGHT", 12, 0)
+    -- One line between our button and Blizzard's Apply Changes, cut short with "..." when the
+    -- talent's name is long; hovering it lists the plan in order.
+    local info = CreateFrame("Frame", nil, bar)
+    info:SetHeight(22)
+    info:SetPoint("LEFT", planButton, "RIGHT", 12, 0)
+    if frame.ApplyButton then
+        info:SetPoint("RIGHT", frame.ApplyButton, "LEFT", -12, 0)
+    else
+        info:SetWidth(260)
+    end
+    info:SetScript("OnEnter", orderTooltip)
+    info:SetScript("OnLeave", onLeave)
+    local summary = info:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    summary:SetPoint("LEFT")
+    summary:SetPoint("RIGHT")
+    summary:SetJustifyH("LEFT")
+    summary:SetWordWrap(false)
     ui.summary = summary
 
     local controls = CreateFrame("Frame", nil, bar)

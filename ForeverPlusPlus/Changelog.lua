@@ -16,8 +16,9 @@ ns.changelog = {
                 { L.TALENTPLANNER_TITLE, "New, on by default, in Interface: a Plan Talents "
                     .. "button on the talent window. Place talents freely without learning them, "
                     .. "in order, up to the points you have at a level you choose, then follow the "
-                    .. "plan as you level: its next talent glows, and tooltips say at which level "
-                    .. "each rank comes." },
+                    .. "plan as you level: its next talent glows, tooltips say at which level "
+                    .. "each rank comes, and hovering the line beside the button lists the plan "
+                    .. "in order." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.AUCTIONPRICES_TITLE, "Crafting Costs shows Estimated Profit, after the "
