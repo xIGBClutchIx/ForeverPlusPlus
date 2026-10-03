@@ -223,12 +223,17 @@ local function reasonText(reason, node, plan)
     end
 end
 
--- The levels at which the plan's first `points` points put ranks in a node.
+-- The levels at which the plan's first `points` points put ranks in a node, leaving out ranks
+-- already learned (the plan's first ranks in a node count as the learned ones).
 local function levelsFor(plan, id, points, first)
-    local levels = {}
+    local levels, skip = {}, tree.ranks[id] or 0
     for i = 1, min(#plan.picks, points) do
         if plan.picks[i] == id then
-            levels[#levels + 1] = Plan.LevelOf(i, first)
+            if skip > 0 then
+                skip = skip - 1
+            else
+                levels[#levels + 1] = Plan.LevelOf(i, first)
+            end
         end
     end
     return levels
