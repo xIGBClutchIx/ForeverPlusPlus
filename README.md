@@ -24,7 +24,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Skip Cinematics | Skips cinematics and movies you've already seen on any character, or every one. Hold Shift to watch. Off by default. |
 | **Items** | |
 | Already Known | Marks recipes, mounts, pets, toys, and other items you already know or have with a green check (or tint) on their icon, on merchants, the auction house, bags, mail, and the loot window, each with its own checkbox. |
-| Auction Prices | Scans the auction house when you open it and shows the lowest buyout in item tooltips, under the sell price. In the professions window, shows a recipe's total reagent cost, the crafted items' worth, and the profit under the recipe's description. |
+| Auction Prices | Scans the auction house when you open it and shows the lowest buyout in item tooltips, under the sell price. In the professions window, shows a recipe's total reagent cost, the crafted items' worth, the estimated profit after the auction house's 5% cut, and the age of the oldest price used, under the recipe's description. |
 | Best Quest Reward | Puts a gold coin on the quest reward choice that sells to a vendor for the most (price times count), in the quest window and the quest log. Ties are all marked; it never picks for you. |
 | Bag Slot Counter | Shows how many bag slots are free on the backpack button, or each bag's own count on its button, with the reagent bag counted on its own. |
 | Durability Bars | Shows a small bar beside each item on the character window with how worn it is. |

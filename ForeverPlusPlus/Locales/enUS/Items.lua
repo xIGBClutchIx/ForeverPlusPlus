@@ -29,8 +29,9 @@ L.AUCTIONPRICES_SCAN_AGE_RED_DESC = "With Scan Age Color on By Age, how old a sc
 L.AUCTIONPRICES_SCAN_AGE_LINE = "Scanned"
 L.AUCTIONPRICES_SECTION_CRAFTING = "Crafting"
 L.AUCTIONPRICES_CRAFTING = "Crafting Costs"
-L.AUCTIONPRICES_CRAFTING_DESC = "Show Total Cost, Value, and Profit for the selected recipe in "
-    .. "the professions window."
+L.AUCTIONPRICES_CRAFTING_DESC = "Show Total Cost, Value, and Estimated Profit (after the auction "
+    .. "house's 5% cut) for the selected recipe in the professions window, with the age of the "
+    .. "oldest auction price used."
 L.AUCTIONPRICES_CRAFT_NO_PRICE = "No price"
 L.AUCTIONPRICES_CRAFT_EACH = "%s  %s" -- coins, then a gray note
 L.AUCTIONPRICES_CRAFT_COST = "Total Cost"
@@ -38,7 +39,8 @@ L.AUCTIONPRICES_CRAFT_VALUE = "Value"
 L.AUCTIONPRICES_CRAFT_VALUE_COUNT = "Value x%s" -- how many the recipe makes
 L.AUCTIONPRICES_CRAFT_RANGE = "%d-%d" -- fewest and most the recipe makes
 L.AUCTIONPRICES_CRAFT_VENDOR = "Vendor"
-L.AUCTIONPRICES_CRAFT_PROFIT = "Profit"
+L.AUCTIONPRICES_CRAFT_PROFIT = "Estimated Profit"
+L.AUCTIONPRICES_CRAFT_AGE = "Oldest Price"
 L.AUCTIONPRICES_SECTION_SCANNING = "Scanning"
 L.AUCTIONPRICES_CHAT_DESC = "Say in chat when a scan finishes after the auction house closed."
 L.AUCTIONPRICES_SCANNING = "Scanning prices... %d items" -- count so far

@@ -487,8 +487,8 @@ end
 
 -- Crafting -----------------------------------------------------------------------------------
 -- In the professions window, under the recipe's description: what its reagents cost in all (each
--- one's price times the count the recipe takes), what the crafted items are worth, and the
--- profit. A reagent
+-- one's price times the count the recipe takes), what the crafted items are worth, the profit
+-- after the auction house's cut, and how old the oldest auction price in them is. A reagent
 -- a merchant sells costs the merchant's price when that's lower than the auction's; those
 -- prices are learned at merchants. A crafted item with no auction price is worth what a
 -- merchant pays for it. Our own frame on Blizzard's recipe form; only the reagents' anchor is
@@ -528,22 +528,24 @@ local function recordMerchant()
     end
 end
 
--- What one of a reagent costs: the lower of its auction and merchant prices, or nil.
+-- What one of a reagent costs: the lower of its auction and merchant prices, or nil. Then when
+-- the auction price was seen, when that's the one used.
 local function reagentCost(itemID)
     local item = house().items[itemID]
     local auction = item and item.price
     local vendor = module.db.vendor[itemID]
-    if auction and vendor then
-        return auction < vendor and auction or vendor
+    if auction and (not vendor or auction < vendor) then
+        return auction, item.seenAt
     end
-    return auction or vendor
+    return vendor
 end
 
 -- What one crafted item is worth: its auction price, or else what a merchant pays (and true).
+-- Then when the auction price was seen.
 local function craftedValue(itemID)
     local item = house().items[itemID]
     if item then
-        return item.price, false
+        return item.price, false, item.seenAt
     end
     local sell = select(11, C_Item.GetItemInfo(itemID))
     if sell and sell > 0 then
@@ -581,6 +583,9 @@ end
 
 local GRAY, WHITE = GRAY_FONT_COLOR, HIGHLIGHT_FONT_COLOR
 local GREEN, RED = GREEN_FONT_COLOR, RED_FONT_COLOR
+local AGE_COLORS = { gray = GRAY, white = WHITE, gold = NORMAL_FONT_COLOR } -- Scan Age Color's choices
+
+local AUCTION_CUT = 0.05 -- the auction house's cut of a sale
 
 -- Copper as coins, with a minus sign when it's negative.
 local function coins(amount)
@@ -715,13 +720,17 @@ local function refreshCrafting(recipeInfo)
         panel:SetPoint("TOPLEFT", below, "BOTTOMLEFT", 0, -12)
     end
 
-    local total, missing = 0, false
+    -- oldest: when the oldest auction price used was seen, for how much to trust the totals.
+    local total, missing, oldest = 0, false, nil
     for _, reagent in ipairs(reagents) do
-        local unit = reagentCost(reagent[1])
+        local unit, seenAt = reagentCost(reagent[1])
         if unit then
             total = total + unit * reagent[2]
         else
             missing = true
+        end
+        if seenAt and (not oldest or seenAt < oldest) then
+            oldest = seenAt
         end
     end
     local i, y = 1, 0
@@ -730,9 +739,12 @@ local function refreshCrafting(recipeInfo)
 
     -- Enchants and other recipes that make no item have no value or profit.
     local output = schematic.outputItemID
-    local unitValue, fromVendor
+    local unitValue, fromVendor, seenAt
     if output then
-        unitValue, fromVendor = craftedValue(output)
+        unitValue, fromVendor, seenAt = craftedValue(output)
+        if seenAt and (not oldest or seenAt < oldest) then
+            oldest = seenAt
+        end
         local low, high = schematic.quantityMin or 1, schematic.quantityMax or 1
         local made = (low + high) / 2 -- some recipes make a random number: count the middle
         local label = L.AUCTIONPRICES_CRAFT_VALUE
@@ -753,14 +765,30 @@ local function refreshCrafting(recipeInfo)
         setRow(i, y, label, valueText)
         y = y - ROW_HEIGHT
 
+        -- Selling at auction loses the house's cut; a merchant pays in full.
         local profitText = noPrice()
         if unitValue and not missing then
-            local profit = unitValue - total
+            local profit = (fromVendor and unitValue or unitValue * (1 - AUCTION_CUT)) - total
             local color = profit > 0 and GREEN or profit < 0 and RED or WHITE
             profitText = color:WrapTextInColorCode(coins(profit))
         end
         i = i + 1
         setRow(i, y, L.AUCTIONPRICES_CRAFT_PROFIT, profitText)
+        y = y - ROW_HEIGHT
+    end
+
+    -- How old the oldest auction price in these totals is, colored like the tooltip's age.
+    if oldest then
+        local age = time() - oldest
+        local color = module.db.scanAgeColor == "age" and ageColor(age) or AGE_COLORS[module.db.scanAgeColor]
+        local text = ns.Text.Ago(age)
+        if color and color.WrapTextInColorCode then
+            text = color:WrapTextInColorCode(text)
+        elseif color then
+            text = ns.Colors.Code(color[1], color[2], color[3]) .. text .. "|r"
+        end
+        i = i + 1
+        setRow(i, y, L.AUCTIONPRICES_CRAFT_AGE, text)
         y = y - ROW_HEIGHT
     end
 

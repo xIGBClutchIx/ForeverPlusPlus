@@ -2,6 +2,12 @@
 
 What changed in each release of Forever++. The same notes show in game under Settings > AddOns > Forever++ > Changelog, from [`ForeverPlusPlus/Changelog.lua`](ForeverPlusPlus/Changelog.lua); change both together.
 
+## Unreleased
+
+### Changed
+
+- **Auction Prices**: Crafting Costs shows Estimated Profit, after the auction house's 5% cut, and how old the oldest auction price in the totals is.
+
 ## 0.7.0 (2026-10-02)
 
 ### Added

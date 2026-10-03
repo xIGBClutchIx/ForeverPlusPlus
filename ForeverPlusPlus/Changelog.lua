@@ -10,6 +10,16 @@ local L = ns.L
 
 ns.changelog = {
     {
+        version = L.CHANGELOG_UNRELEASED,
+        sections = {
+            { L.CHANGELOG_CHANGED, {
+                { L.AUCTIONPRICES_TITLE, "Crafting Costs shows Estimated Profit, after the "
+                    .. "auction house's 5% cut, and how old the oldest auction price in the "
+                    .. "totals is." },
+            } },
+        },
+    },
+    {
         version = "0.7.0",
         date = "2026-10-02",
         sections = {
