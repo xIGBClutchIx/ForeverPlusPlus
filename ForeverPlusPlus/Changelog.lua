@@ -10,7 +10,8 @@ local L = ns.L
 
 ns.changelog = {
     {
-        version = L.CHANGELOG_UNRELEASED,
+        version = "0.7.0",
+        date = "2026-10-02",
         sections = {
             { L.CHANGELOG_ADDED, {
                 { L.BESTREWARD_TITLE, "New, on by default, in Items: marks the quest reward that "
