@@ -67,6 +67,7 @@ Modules\Interface\AutoScreenshot.lua
 Modules\Interface\SpellRanks.lua
 Modules\Interface\RecipeColors.lua
 Modules\Interface\CombatAlert.lua
+Modules\Interface\Framerate.lua
 Modules\Interface\AddOnList.lua
 Modules\Interface\CurrencyBar.lua
 Modules\Interface\CharacterFrame.lua

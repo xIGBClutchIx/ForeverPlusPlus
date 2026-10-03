@@ -295,6 +295,10 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 
 Debug page > Self Test > Run (or `/fpp selftest`) probes the "Unverified" items above and writes one line each to `ForeverPlusPlusDB.selfTest.lines`: `PASS`, `FAIL`, `INFO` (a value to read), `SKIP` (something must be open first), `REC` (a recorded event), then the manual steps. `/reload` saves it to `WTF\Account\<acct>\SavedVariables\ForeverPlusPlus.lua`. Run it more than once: at a flight master, with the world map open, with a creature targeted, in a group, and in combat, since several probes only answer then. After a run the recorder keeps logging flights (route slots, `UnitOnTaxi` times, what owns the flight map tooltip), deaths, duels, faction messages, and UI errors until the next `/reload`. `Modules/Tools/SelfTest.lua` has the probe list; once an item is confirmed, tag it here and drop its probe.
 
+## Framerate text
+
+- `FramerateFrame` (Ctrl+R, from `Blizzard_FramerateFrame`) is parented to `WorldFrame`, inherits `ResizeLayoutFrame` (its width follows the text), and on Forever stays at its XML anchor, `BOTTOMRIGHT` of `WorldFrame` at (-2, 2): `FramerateFrameOverrides.lua`, which moves it beside the micro menu on Retail, is `[ExcludeLoadGameType camelot, classic]`, so `UpdatePosition` and `OnLoad` do nothing. Movable Framerate anchors it to a frame of its own once moved. **[web]** (Gethe `forever` branch, 2026-10-02) **Unverified** in game.
+
 ## Fonts
 
 - Text measured before its font file has loaded reads as 0 tall on Forever, even after preloading. Measure with a floor of the font size. **[in-game]** (2026-09-23)

@@ -142,6 +142,11 @@ L.COMBATALERT_LEAVING_DESC = "Show a green alert when you leave combat."
 L.COMBATALERT_DURATION = "Duration"
 L.COMBATALERT_DURATION_DESC = "How long the text stays up before it has faded away."
 
+-- Framerate
+L.FRAMERATE_TITLE = "Movable Framerate"
+L.FRAMERATE_DESC = "Lets you move and resize the framerate text (Ctrl+R) in Edit Mode, like "
+    .. "Blizzard's own frames. Until you move it, it stays where Blizzard puts it."
+
 -- AddOnList
 L.ADDONLIST_TITLE = "AddOns List"
 L.ADDONLIST_DESC = "Show the AddOns list without category headers, with enabled addons first."

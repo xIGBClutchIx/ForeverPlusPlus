@@ -24,6 +24,10 @@ ns.changelog = {
                 { L.EASYDELETE_TITLE, "New, off by default, in Items: types DELETE for you when "
                     .. "you destroy a good item, so Yes is a single click. Clutch's Default turns "
                     .. "it on." },
+                { L.FRAMERATE_TITLE, "New, off by default, in Interface: move and resize "
+                    .. "Blizzard's framerate text (Ctrl+R) in Edit Mode, like Blizzard's own "
+                    .. "frames. Until you move it, it stays where Blizzard puts it, and Reset To "
+                    .. "Default Position puts it back there." },
                 { L.AUCTIONPRICES_TITLE, "New Crafting Costs option (on by default) shows Total "
                     .. "Cost, Value, and Profit (green or red) under a recipe's description in the "
                     .. "professions window. Reagents a merchant sells count at the merchant's "
