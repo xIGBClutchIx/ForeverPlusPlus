@@ -26,6 +26,11 @@ ns.changelog = {
                 { L.ERRORCATCHER_TITLE, "New Button option puts its button on the minimap, in "
                     .. "the addon compartment, both, or neither. The minimap is still the "
                     .. "default." },
+                { L.POI_TITLE, "New Ley Lines option shows Skyborne ley lines and elemental "
+                    .. "convergences on the map. A spot is saved when a Skyborne gets the "
+                    .. "15-minute buff from Read Ley Line or Skysight there, and every character "
+                    .. "on the account sees it. Shown to Skyborne for their own kind by default, "
+                    .. "or to everyone, or to no one." },
             } },
         },
     },
