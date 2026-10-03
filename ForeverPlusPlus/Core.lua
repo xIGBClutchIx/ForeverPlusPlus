@@ -426,7 +426,7 @@ end
 
 -- Modules the Clutch's Default preset turns on, on top of every module's default settings.
 local clutchEnables = { "FishingCast", "SkipCinematics", "AutoScreenshot", "CurrencyBar",
-    "HideFeedback", "ChannelNames" }
+    "HideFeedback", "ChannelNames", "EasyDelete" }
 
 -- Options the Clutch's Default preset sets differently from the module's default.
 local clutchOptions = {

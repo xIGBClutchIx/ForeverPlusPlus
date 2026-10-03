@@ -177,6 +177,8 @@
     "CancelDuel",
     "DeclineGroup",
     "StaticPopup_Hide",
+    "StaticPopup_FindVisible",
+    "DELETE_ITEM_CONFIRM_STRING",
     "C_GuildInfo",
     "BNGetNumFriends",
     "GetNumGuildMembers",

@@ -21,6 +21,9 @@ ns.changelog = {
                     .. "you own in its tooltip, above the prices, and how many are in your bags "
                     .. "and your bank, with small bag and bank icons (or words). The bank is "
                     .. "counted each time you open it." },
+                { L.EASYDELETE_TITLE, "New, off by default, in Items: types DELETE for you when "
+                    .. "you destroy a good item, so Yes is a single click. Clutch's Default turns "
+                    .. "it on." },
                 { L.AUCTIONPRICES_TITLE, "New Crafting Costs option (on by default) shows Total "
                     .. "Cost, Value, and Profit (green or red) under a recipe's description in the "
                     .. "professions window. Reagents a merchant sells count at the merchant's "

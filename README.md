@@ -28,6 +28,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Best Quest Reward | Puts a gold coin on the quest reward choice that sells to a vendor for the most (price times count), in the quest window and the quest log. Ties are all marked; it never picks for you. |
 | Bag Slot Counter | Shows how many bag slots are free on the backpack button, or each bag's own count on its button, with the reagent bag counted on its own. |
 | Durability Bars | Shows a small bar beside each item on the character window with how worn it is. |
+| Easy Delete | Types DELETE for you in the box Blizzard asks for when you destroy a good item, so Yes is a single click. Off by default. |
 | Item Count | Shows how many of an item you own in its tooltip, above the prices, and how many are in your bags and your bank, with small bag and bank icons (or words). The bank is counted each time you open it. Off by default. |
 | Profession Tooltips | Shows the skill a herb, ore, skinnable beast, or locked lockbox or chest needs in its tooltip, colored like trainer recipes against your skill, and the skill that gathers herb, ore, and stone items. Gathering for professions you have, or always; Lockpicking only for characters who can pick locks, or blacksmiths with their skeleton keys. |
 | Sell Price | Shows the vendor price of the whole stack in item tooltips. Hold Shift for one item. |
@@ -75,7 +76,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 
 ## Use
 
-Open Game Menu > Options > AddOns > Forever++. It opens on a welcome page with the version, links, and commands, and two buttons: Defaults puts every module's settings back to how they start, and Clutch's Default does that and also turns on Fishing Cast, Skip Cinematics, Auto Screenshot, Currency Bar, Hide Beta Feedback, and Short Channel Names, and sets Zone Info's Dungeons and Fishing to Hold Detail Key. Modules has a checkbox for each module, grouped by category; the gear beside a module shows its options under it. Console Variables is its own page, Debug has testing options and the Self Test button, and Changelog has what changed in each release (also in [CHANGELOG.md](CHANGELOG.md)).
+Open Game Menu > Options > AddOns > Forever++. It opens on a welcome page with the version, links, and commands, and two buttons: Defaults puts every module's settings back to how they start, and Clutch's Default does that and also turns on Fishing Cast, Skip Cinematics, Auto Screenshot, Currency Bar, Hide Beta Feedback, Short Channel Names, and Easy Delete, and sets Zone Info's Dungeons and Fishing to Hold Detail Key. Modules has a checkbox for each module, grouped by category; the gear beside a module shows its options under it. Console Variables is its own page, Debug has testing options and the Self Test button, and Changelog has what changed in each release (also in [CHANGELOG.md](CHANGELOG.md)).
 
 | Command | What it does |
 |---|---|

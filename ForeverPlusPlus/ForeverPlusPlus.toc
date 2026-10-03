@@ -51,6 +51,7 @@ Modules\Items\BagSlots.lua
 Modules\Items\AlreadyKnown.lua
 Modules\Items\ItemCount.lua
 Modules\Items\BestReward.lua
+Modules\Items\EasyDelete.lua
 Modules\Interface\HideFeedback.lua
 Modules\Interface\Tooltips.lua
 Modules\Automation\GatherTracking.lua

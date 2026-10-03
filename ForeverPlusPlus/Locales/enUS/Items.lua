@@ -109,6 +109,10 @@ L.BESTREWARD_TITLE = "Best Quest Reward"
 L.BESTREWARD_DESC = "Mark the quest reward choice that sells to a vendor for the most with a gold "
     .. "coin, in the quest window and the quest log. It doesn't choose it for you."
 
+-- EasyDelete
+L.EASYDELETE_TITLE = "Easy Delete"
+L.EASYDELETE_DESC = "Type DELETE for you when destroying a good item, so Yes is a single click."
+
 -- SellPrice
 L.SELLPRICE_TITLE = "Sell Price"
 L.SELLPRICE_DESC = "Show the vendor price of the whole stack in item tooltips. Hold Shift to see "
