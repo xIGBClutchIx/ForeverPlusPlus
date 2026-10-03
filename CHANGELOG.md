@@ -6,27 +6,25 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Added
 
-- **Best Quest Reward** (new, on by default, in Items): puts a gold coin on the quest reward choice that sells to a vendor for the most (price times count), in the quest window and the quest log. Ties are all marked, and it never picks for you.
-- **Item Count** (new, off by default, in Items): shows how many of an item you own in its tooltip, above the prices, and how many are in your bags and your bank, with small bag and bank icons (or words). The bank is counted each time you open it.
-- **Easy Delete** (new, off by default, in Items): types DELETE for you when you destroy a good item, so Yes is a single click. Clutch's Default turns it on.
-- **Movable Framerate** (new, off by default, in Interface): move and resize Blizzard's framerate text (Ctrl+R) in Edit Mode, like Blizzard's own frames. Until you move it, it stays where Blizzard puts it, and Reset To Default Position puts it back there.
-- **Auction Prices**: new Crafting Costs option (on by default) shows Total Cost, Value, and Profit (green or red) under a recipe's description in the professions window. Reagents a merchant sells count at the merchant's price when it's lower, once you've visited one; a crafted item with no auction price is valued at its vendor price.
-- **Sell Price** and **Auction Prices**: a reagent's tooltip in the professions window prices the amount the recipe needs (x4) instead of one; Shift shows one.
-- **Fishing Cast**: new Combat Warning option (on by default) shows one red line where Blizzard's errors appear when combat starts while you have a fishing pole equipped.
-- **Points of Interest**: Forever's new boats: Stormwind Harbor to Auberdine, Southshore on the Menethil boat's way to Auberdine (its tooltip says it stops there first), and Steamwheedle Port in Tanaris to Powderfuse Port in the Riverglades. Also Zephras Isle's skyships to Mulgore and Dalaran, and the entrances of Forever's Excavation Site (above the Wetlands' spider cave) and City of Dalaran (at the back of the city).
-- **Zone Info**: lists Excavation Site in the Wetlands and City of Dalaran in Alterac Mountains with their levels.
+- **Best Quest Reward** (new, on by default, in Items): marks the quest reward that sells to a vendor for the most with a gold coin, in the quest window and the quest log.
+- **Item Count** (new, off by default, in Items): shows in an item's tooltip how many you own, in your bags and in your bank.
+- **Easy Delete** (new, off by default, in Items): types DELETE for you when you destroy a good item.
+- **Movable Framerate** (new, off by default, in Interface): move and resize the framerate text (Ctrl+R) in Edit Mode.
+- **Auction Prices**: new Crafting Costs option shows a recipe's total cost, value, and profit in the professions window. Reagent tooltips there now price the amount the recipe needs, for Sell Price too.
+- **Fishing Cast**: new Combat Warning option warns you when combat starts with a fishing pole equipped.
+- **Points of Interest** and **Zone Info**: Forever's new boats and skyships, and the Excavation Site and City of Dalaran dungeons.
 
 ### Changed
 
-- **Points of Interest**: Forever's flight masters are named for their places (Summit of Eternity, Tainted Foothills, Farholde Keep, Rog'mar), and Forever's dungeons get their names in your language from the game.
-- **Error Catcher**: the window is redesigned: a list of errors on the left with their kind, count, and age, the one you pick on the right with when it first and last happened, and the session filter showing how many errors each choice has. A Copy Bug Report button selects a report with the addon version, client build, modules on, other addons, and the error's stack and locals, ready for Ctrl+C. Right-clicking the minimap button opens Forever++ settings.
-- **Spell Ranks**: the tooltip line is now "Higher Rank Known:" with the rank at the right edge in white, like the price lines, instead of a gold line that read as part of the spell's description.
+- **Points of Interest**: Forever's flight masters are named for their places, and its dungeons show in your language.
+- **Error Catcher**: a redesigned window with a list of errors and a Copy Bug Report button. Right-click the minimap button to open Forever++ settings.
+- **Spell Ranks**: "Higher Rank Known:" in spell tooltips now looks like the other tooltip lines.
 
 ### Fixed
 
-- **Edit Mode**: the arrow keys nudge a selected Combat Alert, Currency Bar, Flight Timer, or Movable Framerate again, a pixel at a time or ten with Shift, as Blizzard's frames do. While one is selected, Escape lets go of it.
-- **Auction Prices**: the age under an auction price is when that item was last seen, not the last scan, so an item missing from a scan no longer looks freshly checked. Saved prices are cleared once; the next visit to the auction house scans again.
-- **Sell Price**: hovering an item in a vendor's buyback tab no longer throws a Lua error.
+- **Edit Mode**: the arrow keys nudge Combat Alert, Currency Bar, and Flight Timer again.
+- **Auction Prices**: a price's age is when the item was last seen, not the last scan. Saved prices are cleared once.
+- **Sell Price**: no more Lua error on a vendor's buyback tab.
 
 ## 0.6.0 (2026-10-01)
 
