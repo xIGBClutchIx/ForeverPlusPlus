@@ -35,8 +35,17 @@ ns.changelog = {
                 { L.FISHINGCAST_TITLE, "New Combat Warning option (on by default) shows one red "
                     .. "line where Blizzard's errors appear when combat starts while you have a "
                     .. "fishing pole equipped." },
+                { L.POI_TITLE, "Forever's new boats: Stormwind Harbor to Auberdine, Southshore "
+                    .. "on the Menethil boat's way to Auberdine (its tooltip says it stops there "
+                    .. "first), and Steamwheedle Port in Tanaris to Powderfuse Port in the "
+                    .. "Riverglades. Also Zephras Isle's skyships to Mulgore and Dalaran." },
+                { L.ZONEINFO_TITLE, "Lists Excavation Site in the Wetlands and City of Dalaran "
+                    .. "in Alterac Mountains with their levels." },
             } },
             { L.CHANGELOG_CHANGED, {
+                { L.POI_TITLE, "Forever's flight masters are named for their places (Summit of "
+                    .. "Eternity, Tainted Foothills, Farholde Keep, Rog'mar), and Forever's "
+                    .. "dungeons get their names in your language from the game." },
                 { L.ERRORCATCHER_TITLE, "The window is redesigned: a list of errors on the left "
                     .. "with their kind, count, and age, the one you pick on the right with when "
                     .. "it first and last happened, and the session filter showing how many "

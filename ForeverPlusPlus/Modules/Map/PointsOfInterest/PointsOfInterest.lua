@@ -311,7 +311,8 @@ local function pinFor(point, mapID, world)
         info.atlas = atlasOf(kindInfo)
         info.title = format(kindName == "ship" and L.POI_SHIP_TO or L.POI_ZEPPELIN_TO,
             place(point[5]))
-        info.lines = linesOf(MapTooltip.Side(point[4]), MapTooltip.Detail(zoneName(point[6] or mapID)))
+        info.lines = linesOf(MapTooltip.Side(point[4]), MapTooltip.Detail(zoneName(point[6] or mapID)),
+            point.via and MapTooltip.Note(format(L.POI_VIA, place(point.via))))
     else
         info.atlas = atlasOf(kindInfo)
         info.title = L.POI_SPIRIT_HEALER
@@ -328,8 +329,33 @@ local function listedNear(listed, x, y)
     return false
 end
 
+-- The instances Data.lua places somewhere, by their entry in Lib/Instances.lua, once asked. The
+-- rest (Forever dungeons whose entrance isn't known) are left to the game's own icons.
+local placed
+
+local function placedByUs(name)
+    if not placed then
+        placed = {}
+        for _, points in pairs(internal.points) do
+            for _, point in ipairs(points) do
+                if point[1] == "dungeon" or point[1] == "raid" then
+                    local instance = internal.instances[point[4]]
+                    for _, key in ipairs(instance.parts or { point[4] }) do
+                        local found = ns.Instances.ByName(internal.instances[key][2])
+                        if found then
+                            placed[found] = true
+                        end
+                    end
+                end
+            end
+        end
+    end
+    local instance = ns.Instances.ByName(name)
+    return instance ~= nil and placed[instance] == true, instance
+end
+
 -- Dungeon and raid entrances the game itself has for the map (Blizzard's own entrance list, which
--- its map hides behind a CVar), for ones Data.lua doesn't have, such as Forever's new dungeons.
+-- its map hides behind a CVar), for ones Data.lua doesn't place, such as Forever's new dungeons.
 -- Probe: which entrances Forever lists there is Unverified.
 local function gameEntrances(mapID, listed, add)
     if not (C_EncounterJournal and C_EncounterJournal.GetDungeonEntrancesForMap) then
@@ -342,10 +368,12 @@ local function gameEntrances(mapID, listed, add)
         local kindInfo = KINDS[raid and "raid" or "dungeon"]
         -- Not one Data.lua has, by place or by name: the Ruins of Lordaeron's entrance is listed
         -- on the Undercity's map, so the game's, on Tirisfal Glades, would be a second icon.
-        if db[kindInfo.show] and not listedNear(listed, x * 100, y * 100)
-            and not ns.Instances.ByName(entrance.name) then
+        local ours, instance = placedByUs(entrance.name)
+        if db[kindInfo.show] and not listedNear(listed, x * 100, y * 100) and not ours then
             local lines = { raid and L.POI_RAID or L.POI_DUNGEON }
-            if entrance.description and entrance.description ~= "" then
+            if instance then
+                lines[2] = MapTooltip.Detail(ns.Instances.Levels(instance))
+            elseif entrance.description and entrance.description ~= "" then
                 lines[2] = MapTooltip.Detail(entrance.description)
             end
             add(x, y, {
@@ -519,8 +547,17 @@ local function hidesBlizzard(mapID, name)
     if isCity(name) then
         return db.capitals == "off" or (db.capitals == "ours" and (not world or db.capitalsWorld))
     end
-    local instance = ns.Instances.ByName(name)
-    return instance ~= nil and shows(KINDS[instance[5] and "raid" or "dungeon"], world) or false
+    local ours, instance = placedByUs(name)
+    if not instance then
+        return false
+    end
+    local kindInfo = KINDS[instance[5] and "raid" or "dungeon"]
+    if ours then
+        return shows(kindInfo, world) and true or false
+    end
+    -- One we don't place: gameEntrances draws it on zone maps, and on a continent the game's icon
+    -- is the only one.
+    return not world and shows(kindInfo) and true or false
 end
 
 -- After the world map acquires a pin of its own. The pin is hidden, not faded, so its tooltip

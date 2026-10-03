@@ -18,9 +18,13 @@ local Instances = {
     deadmines = { 36, "The Deadmines", 17, 26 },
     diremaul = { 429, "Dire Maul", 56, 60 },
     gnomeregan = { 90, "Gnomeregan", 29, 38 },
-    -- Forever's. Their instance IDs aren't known yet, so the names are the English ones.
-    hallOfThanes = { nil, "The Hall of Thanes", 13, 18 },
-    ruinsOfLordaeron = { nil, "Ruins of Lordaeron", 15, 20 },
+    -- Forever's. The instance IDs are the client's Map table (build 70009); the lowest levels are
+    -- its dungeon finder's, the highest are guides'. The other five Forever dungeons aren't in
+    -- the client yet.
+    hallOfThanes = { 3065, "The Hall of Thanes", 13, 18 },
+    ruinsOfLordaeron = { 2999, "Ruins of Lordaeron", 15, 20 },
+    excavationSite = { 2998, "Excavation Site: Wetlands", 26, 31 },
+    dalaran = { 2959, "City of Dalaran", 28, 33 },
     maraudon = { 349, "Maraudon", 46, 55 },
     mc = { 409, "Molten Core", 60, 60, true },
     naxxramas = { 533, "Naxxramas", 60, 60, true },

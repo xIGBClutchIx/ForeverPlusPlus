@@ -54,6 +54,7 @@ L.POI_FLIGHT_MASTER = "Flight Master"
 L.POI_FLIGHT_UNLEARNED = "Not learned yet"
 L.POI_SHIP_TO = "Boat to %s" -- a place
 L.POI_ZEPPELIN_TO = "Zeppelin to %s" -- a place
+L.POI_VIA = "Stops at %s first" -- a place, on a boat's way
 L.POI_SPIRIT_HEALER = "Spirit Healer"
 
 -- ZoneInfo

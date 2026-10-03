@@ -12,9 +12,12 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Auction Prices**: new Crafting Costs option (on by default) shows Total Cost, Value, and Profit (green or red) under a recipe's description in the professions window. Reagents a merchant sells count at the merchant's price when it's lower, once you've visited one; a crafted item with no auction price is valued at its vendor price.
 - **Sell Price** and **Auction Prices**: a reagent's tooltip in the professions window prices the amount the recipe needs (x4) instead of one; Shift shows one.
 - **Fishing Cast**: new Combat Warning option (on by default) shows one red line where Blizzard's errors appear when combat starts while you have a fishing pole equipped.
+- **Points of Interest**: Forever's new boats: Stormwind Harbor to Auberdine, Southshore on the Menethil boat's way to Auberdine (its tooltip says it stops there first), and Steamwheedle Port in Tanaris to Powderfuse Port in the Riverglades. Also Zephras Isle's skyships to Mulgore and Dalaran.
+- **Zone Info**: lists Excavation Site in the Wetlands and City of Dalaran in Alterac Mountains with their levels.
 
 ### Changed
 
+- **Points of Interest**: Forever's flight masters are named for their places (Summit of Eternity, Tainted Foothills, Farholde Keep, Rog'mar), and Forever's dungeons get their names in your language from the game.
 - **Error Catcher**: the window is redesigned: a list of errors on the left with their kind, count, and age, the one you pick on the right with when it first and last happened, and the session filter showing how many errors each choice has. A Copy Bug Report button selects a report with the addon version, client build, modules on, other addons, and the error's stack and locals, ready for Ctrl+C. Right-clicking the minimap button opens Forever++ settings.
 - **Spell Ranks**: the tooltip line is now "Higher Rank Known:" with the rank at the right edge in white, like the price lines, instead of a gold line that read as part of the spell's description.
 

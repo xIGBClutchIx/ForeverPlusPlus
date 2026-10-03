@@ -1,13 +1,17 @@
 -- Where Points of Interest puts its icons, by zone map ID. Coordinates are percent across and
 -- down the zone map, as the game's /way coordinates. Leatrix Maps' point list was the reference
--- for them. Each point is one of:
+-- for them; Forever's flight masters, boats, and zeppelins are worked out from the client's own
+-- tables for build 70009 (TaxiNodes, and the stops of TaxiPathNode's transport paths, placed with
+-- UiMapAssignment), which agree with the Classic ones here to 0.5%. Each point is one of:
 --   { "dungeon" or "raid", x, y, instance key }
 --   { "flight", x, y, faction, place }
---   { "ship" or "zeppelin", x, y, faction, destination place, destination map ID (or this map) }
+--   { "ship" or "zeppelin", x, y, faction, destination place, destination map ID (or this map),
+--     via = place it stops at first }
 --   { "spirit", x, y }
 -- Factions are "A" (Alliance), "H" (Horde), and "N" (both). Places are English; a locale file can
 -- translate one with L["Booty Bay"] = "...". Dungeons the game's own entrance list has and this
--- list doesn't (Forever's new ones) are added from the game; see gameEntrances.
+-- list doesn't place (Excavation Site and City of Dalaran, whose entrances guides disagree on)
+-- are added from the game; see gameEntrances.
 local _, ns = ...
 
 local setmetatable = setmetatable
@@ -53,6 +57,8 @@ internal.cities = {
 internal.points = {
     -- Eastern Kingdoms -------------------------------------------------------------------------
     [1416] = { -- Alterac Mountains
+        -- Zephras Isle's skyship, which lands north of Dalaran. Not checked in game.
+        { "zeppelin", 12.8, 51.2, "N", "Valanaar", 2521 },
         { "spirit", 42.9, 38.0 },
     },
     [1417] = { -- Arathi Highlands
@@ -107,6 +113,8 @@ internal.points = {
     [1424] = { -- Hillsbrad Foothills
         { "flight", 49.3, 52.3, "A", "Southshore" },
         { "flight", 60.1, 18.6, "H", "Tarren Mill" },
+        -- Forever's Menethil boat calls here on its way round to Auberdine.
+        { "ship", 50.7, 70.4, "A", "Auberdine", 1439 },
         { "spirit", 64.5, 19.7 },
         { "spirit", 51.8, 52.5 },
     },
@@ -179,13 +187,16 @@ internal.points = {
     [1437] = { -- Wetlands
         { "flight", 9.5, 59.7, "A", "Menethil Harbor" },
         { "ship", 5.0, 63.5, "A", "Theramore Isle", 1445 },
-        { "ship", 4.6, 57.1, "A", "Auberdine", 1439 },
+        -- On Forever this boat sails one way round Menethil, Southshore, and Auberdine.
+        { "ship", 4.6, 57.1, "A", "Auberdine", 1439, via = "Southshore" },
         { "spirit", 11.0, 43.8 },
         { "spirit", 49.3, 41.8 },
     },
     [1453] = { -- Stormwind City
         { "dungeon", 52.4, 70.0, "stockade" },
         { "flight", 70.9, 72.5, "A", "Trade District" },
+        -- Forever's Stormwind Harbor, the southern-most dock.
+        { "ship", 21.8, 56.9, "A", "Auberdine", 1439 },
     },
     [1455] = { -- Ironforge
         -- The webbed stairs down, left of the High Seat. From Warcraft Tavern's and Wowhead
@@ -212,6 +223,9 @@ internal.points = {
         { "spirit", 44.2, 69.4 },
         { "spirit", 57.2, 73.3 },
     },
+    [1412] = { -- Mulgore
+        { "zeppelin", 34.3, 26.1, "N", "Valanaar", 2521 }, -- Skywatcher Plateau, Forever's
+    },
     [1413] = { -- The Barrens
         { "dungeon", 46.0, 36.4, "wailing" },
         { "dungeon", 42.9, 90.2, "razorfenKraul" },
@@ -235,6 +249,7 @@ internal.points = {
         { "flight", 36.3, 45.6, "A", "Auberdine" },
         { "ship", 32.4, 43.8, "A", "Menethil Harbor", 1437 },
         { "ship", 33.2, 40.1, "A", "Rut'theran Village", 1438 },
+        { "ship", 30.5, 40.9, "A", "Stormwind Harbor", 1453 },
         { "spirit", 41.8, 36.6 },
         { "spirit", 43.6, 92.4 },
     },
@@ -291,6 +306,7 @@ internal.points = {
         { "dungeon", 38.7, 20.0, "zulfarrak" },
         { "flight", 51.0, 29.3, "A", "Gadgetzan" },
         { "flight", 51.6, 25.4, "H", "Gadgetzan" },
+        { "ship", 68.6, 23.0, "N", "Powderfuse Port", 2548 }, -- from Steamwheedle Port
         { "spirit", 53.9, 28.8 },
         { "spirit", 49.4, 59.0 },
         { "spirit", 69.0, 40.7 },
@@ -347,13 +363,16 @@ internal.points = {
 
     -- Added in Forever -------------------------------------------------------------------------
     [2482] = { -- Hyjal
-        { "flight", 68.6, 44.0, "N", "Fayran Elthas" },
-        { "flight", 55.0, 82.8, "N", "Bluebell" },
+        { "flight", 68.6, 44.1, "N", "Summit of Eternity" },
+        { "flight", 55.1, 82.5, "N", "Tainted Foothills" },
         { "spirit", 9.4, 47.0 },
         { "spirit", 81.2, 44.0 },
         { "spirit", 85.6, 68.8 },
     },
     [2521] = { -- Zephras Isle
+        -- Valanaar's skyships. Not checked in game.
+        { "zeppelin", 57.7, 81.0, "N", "Skywatcher Plateau", 1412 },
+        { "zeppelin", 65.8, 83.8, "N", "Dalaran", 1416 },
         { "spirit", 41.0, 22.4 },
         { "spirit", 55.4, 45.0 },
         { "spirit", 68.8, 50.2 },
@@ -361,7 +380,8 @@ internal.points = {
         { "spirit", 55.0, 68.2 },
     },
     [2548] = { -- Riverglades
-        { "flight", 60.6, 81.4, "A", "Gretchen Mayberry" },
-        { "flight", 59.6, 45.2, "H", "Grakna" },
+        { "flight", 60.6, 81.6, "A", "Farholde Keep" },
+        { "flight", 59.6, 45.1, "H", "Rog'mar" },
+        { "ship", 80.6, 54.6, "N", "Steamwheedle Port", 1446 }, -- from Powderfuse Port
     },
 }
