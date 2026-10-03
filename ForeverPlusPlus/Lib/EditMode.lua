@@ -1,8 +1,9 @@
 -- Edit Mode for our own frames, made to look and work like Blizzard's own system frames: while
 -- the player is in Blizzard's Edit Mode, a frame registered here gets the same blue selection box,
 -- which turns gold when clicked, and can be dragged with snapping to the screen's middle and
--- edges and to the other frames, nudged a pixel at a time with the arrow keys, and opens a small
--- settings dialog (scale and reset position) like the one Blizzard's frames open. Blizzard's Edit
+-- edges and to the other frames, and opens a small settings dialog (scale and reset position)
+-- like the one Blizzard's frames open; while it's open, the arrow keys nudge the frame a pixel
+-- (ten with Shift). Blizzard's Edit
 -- Mode has no way for an addon to add a frame to its layouts (that needs its protected system
 -- code), so the position is the module's, not part of an Edit Mode layout. Nothing is hooked until
 -- a module registers a frame.
@@ -11,7 +12,7 @@ local _, ns = ...
 local pairs, type, pcall, abs, min, max = pairs, type, pcall, math.abs, math.min, math.max
 local format = string.format
 local CreateFrame, UIParent, hooksecurefunc = CreateFrame, UIParent, hooksecurefunc
-local GetCursorPosition = GetCursorPosition
+local GetCursorPosition, Screenshot, wipe = GetCursorPosition, Screenshot, wipe
 
 local L = ns.L
 local call = ns.Call
@@ -309,21 +310,6 @@ local function newSelection(frame, info)
     end)
     selection:SetScript("OnDragStart", function() pick(frame) dragStart(frame, info) end)
     selection:SetScript("OnDragStop", function() dragStop(frame, info) end)
-    -- Arrow keys nudge the selected frame a pixel; every other key goes on to the game.
-    selection:SetScript("OnKeyDown", function(self, key)
-        local dx = (key == "RIGHT" and 1) or (key == "LEFT" and -1) or 0
-        local dy = (key == "UP" and 1) or (key == "DOWN" and -1) or 0
-        if dx == 0 and dy == 0 then
-            self:SetPropagateKeyboardInput(true)
-            return
-        end
-        self:SetPropagateKeyboardInput(false)
-        local cx, cy, width, height = box(frame)
-        if cx then
-            moveTo(frame, info, clamp(cx + dx, width, UIParent:GetWidth()),
-                clamp(cy + dy, height, UIParent:GetHeight()))
-        end
-    end)
     selection:Hide()
     return selection
 end
@@ -331,6 +317,27 @@ end
 -- The settings dialog -----------------------------------------------------------------------------
 
 local dialog
+
+-- The keys held while the dialog is up, for Shift: the dialog keeps every key, as Blizzard's does.
+local downKeys = {}
+local NUDGE = { UP = { 0, 1 }, DOWN = { 0, -1 }, LEFT = { -1, 0 }, RIGHT = { 1, 0 } }
+
+-- An arrow key moves the selected frame a pixel, or ten with Shift, as Blizzard's frames do.
+local function nudge(key)
+    local frame = selected
+    local info = frame and registered[frame]
+    local step = NUDGE[key]
+    if not (info and step) then
+        return
+    end
+    local cx, cy, width, height = box(frame)
+    if not cx then
+        return
+    end
+    local amount = (downKeys.LSHIFT or downKeys.RSHIFT) and 10 or 1
+    moveTo(frame, info, clamp(cx + step[1] * amount, width, UIParent:GetWidth()),
+        clamp(cy + step[2] * amount, height, UIParent:GetHeight()))
+end
 
 local function newSlider(parent)
     local ok, slider = pcall(CreateFrame, "Slider", nil, parent, "MinimalSliderWithSteppersTemplate")
@@ -356,6 +363,26 @@ local function newDialog()
     frame:RegisterForDrag("LeftButton")
     frame:SetScript("OnDragStart", frame.StartMoving)
     frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
+    -- Like Blizzard's settings dialog, this one takes the keyboard while a frame is selected and
+    -- keeps every key: the arrows nudge, Escape lets go, and Print Screen still takes a picture.
+    -- No key goes on to the game, so nothing changes keyboard propagation.
+    frame:EnableKeyboard(true)
+    frame:SetScript("OnKeyDown", function(_, key)
+        downKeys[key] = true
+        if key == "PRINTSCREEN" then
+            Screenshot()
+        elseif key == "ESCAPE" then
+            deselect()
+        else
+            nudge(key)
+        end
+    end)
+    frame:SetScript("OnKeyUp", function(_, key)
+        downKeys[key] = nil
+    end)
+    frame:SetScript("OnHide", function()
+        wipe(downKeys)
+    end)
 
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
     frame.title:SetPoint("TOP", 0, -15)
@@ -474,7 +501,6 @@ function deselect()
         selected = nil
         if info then
             info.selection:SetScript("OnUpdate", nil)
-            info.selection:EnableKeyboard(false)
             look(info.selection, false)
         end
     end
@@ -499,8 +525,6 @@ function pick(frame)
         selecting = false
     end
     look(info.selection, true)
-    info.selection:EnableKeyboard(true)
-    info.selection:SetPropagateKeyboardInput(true)
     refreshDialog()
 end
 

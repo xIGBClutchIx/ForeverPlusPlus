@@ -24,6 +24,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Fixed
 
+- **Edit Mode**: the arrow keys nudge a selected Combat Alert, Currency Bar, Flight Timer, or Movable Framerate again, a pixel at a time or ten with Shift, as Blizzard's frames do. While one is selected, Escape lets go of it.
 - **Auction Prices**: the age under an auction price is when that item was last seen, not the last scan, so an item missing from a scan no longer looks freshly checked. Saved prices are cleared once; the next visit to the auction house scans again.
 - **Sell Price**: hovering an item in a vendor's buyback tab no longer throws a Lua error.
 

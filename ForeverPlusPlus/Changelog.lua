@@ -64,6 +64,10 @@ ns.changelog = {
                     .. "line that read as part of the spell's description." },
             } },
             { L.CHANGELOG_FIXED, {
+                { "Edit Mode", "The arrow keys nudge a selected Combat Alert, Currency Bar, "
+                    .. "Flight Timer, or Movable Framerate again, a pixel at a time or ten with "
+                    .. "Shift, as Blizzard's frames do. While one is selected, Escape lets go of "
+                    .. "it." },
                 { L.AUCTIONPRICES_TITLE, "The age under an auction price is when that item was "
                     .. "last seen, not the last scan, so an item missing from a scan no longer "
                     .. "looks freshly checked. Saved prices are cleared once; the next visit to "
