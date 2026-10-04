@@ -432,7 +432,9 @@ local function drawOverlays(plan)
             local count = counts[node.id] or 0
             local open = not full and Plan.CanTake(tree, counts, tabs, node.id)
             local atlas, color
-            if count >= node.max then
+            -- Gold only once it's learned: a talent maxed in the plan alone stays green, so the
+            -- tree shows what's still to learn.
+            if count >= node.max and (tree.ranks[node.id] or 0) >= node.max then
                 atlas, color = ATLAS_MAXED, YELLOW_FONT_COLOR
             elseif count > 0 or open then
                 atlas, color = ATLAS_OPEN, GREEN_FONT_COLOR
