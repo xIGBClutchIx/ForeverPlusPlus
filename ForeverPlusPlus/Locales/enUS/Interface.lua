@@ -366,3 +366,23 @@ L.TALENTPLANNER_IMPORT_CLASS = "That talent plan is for another class."
 L.TALENTPLANNER_IMPORT_INVALID = "That talent plan doesn't fit this talent tree."
 L.TALENTPLANNER_DELETE = "Delete Plan"
 L.TALENTPLANNER_DELETE_CONFIRM = "Delete this talent plan?"
+
+-- Commands
+L.COMMANDS_TITLE = "Commands"
+L.COMMANDS_DESC = "Add short slash commands: /way for a map waypoint and /rl to reload the UI."
+L.COMMANDS_WAY = "/way"
+L.COMMANDS_WAY_DESC = "/way [zone] x y puts the game's map pin on a spot and tracks it, in your "
+    .. "zone or the one named. /way clear takes it away. Left to TomTom or another addon that "
+    .. "already has /way."
+L.COMMANDS_RELOAD = "/rl"
+L.COMMANDS_RELOAD_DESC = "/rl reloads the UI, like /reload. Left to another addon that already "
+    .. "has /rl."
+L.COMMANDS_WAY_USAGE = "/way [zone] x y, such as /way 45.2 67.8 or /way Elwynn Forest 45 67. "
+    .. "/way clear takes the pin away."
+L.COMMANDS_WAY_SET = "Waypoint set in %s at %.1f, %.1f." -- zone, x, y
+L.COMMANDS_WAY_CLEARED = "Waypoint cleared."
+L.COMMANDS_WAY_RANGE = "Coordinates go from 0 to 100."
+L.COMMANDS_WAY_NO_ZONE = "No zone called %s." -- what was typed
+L.COMMANDS_WAY_NO_MAP = "There's no map here. Name a zone: /way Elwynn Forest 45 67."
+L.COMMANDS_WAY_NOT_HERE = "Can't put a waypoint on the %s map." -- zone
+L.COMMANDS_WAY_UNAVAILABLE = "This client has no map waypoints."

@@ -7,6 +7,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Added
 
 - **Talent Planner** (new, on by default, in Interface): a Plan Talents button on the talent window. Place talents freely without learning them, in order, up to the points you have at a level you choose, then follow the plan as you level: its next talent glows, tooltips say at which level each rank comes, and hovering the line beside the button lists the plan in order. A dropdown keeps several named plans, and shares or imports one as a line of text.
+- **Commands** (new, on by default, in Interface): short slash commands, each with its own checkbox. `/way [zone] x y` puts the game's map pin on a spot and tracks it (`/way clear` takes it away), and `/rl` reloads the UI. A command another addon already has, like TomTom's `/way`, is left to it.
 
 ### Changed
 

@@ -244,6 +244,10 @@ local function checkMap()
         "C_Map.GetMapPosFromWorldPos", "C_Map.GetMapArtID", "C_Map.GetBestMapForUnit",
         "C_Map.GetMapArtLayers", "C_EncounterJournal.GetDungeonEntrancesForMap",
         "C_MapExplorationInfo.GetExploredMapTextures", "C_Texture.GetAtlasInfo" })
+    present("map.waypoint", { "C_Map.SetUserWaypoint", "C_Map.ClearUserWaypoint",
+        "C_Map.CanSetUserWaypointOnMap", "C_Map.GetMapChildrenInfo",
+        "UiMapPoint.CreateFromCoordinates", "C_SuperTrack.SetSuperTrackedUserWaypoint",
+        "hash_SlashCmdList" })
     local mapID = C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit("player")
     if not mapID then
         skip("map.here", "the player has no map here")

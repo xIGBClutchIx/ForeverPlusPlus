@@ -291,6 +291,8 @@
     "SOUNDKIT",
     "PlaySound",
     "YELLOW_FONT_COLOR",
-    "DISABLED_FONT_COLOR"
+    "DISABLED_FONT_COLOR",
+    "C_SuperTrack",
+    "UiMapPoint"
   ]
 }
