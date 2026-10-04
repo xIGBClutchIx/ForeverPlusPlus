@@ -8,7 +8,9 @@
 -- of the ones without it, any one maxed is enough (C_Traits' Required and Sufficient edges).
 local _, ns = ...
 
-local ipairs, max, remove = ipairs, math.max, table.remove
+local ipairs, max, remove, concat = ipairs, math.max, table.remove, table.concat
+local tostring, tonumber = tostring, tonumber
+local gsub, strmatch, gmatch = string.gsub, string.match, string.gmatch
 
 local TalentPlan = {}
 ns.TalentPlan = TalentPlan
@@ -180,6 +182,49 @@ function TalentPlan.FirstLevel(level, earned)
         return level - earned + 1
     end
     return TalentPlan.FIRST_LEVEL
+end
+
+-- Share strings: "FPP:1:<treeID>:<level>:<name>:<points>", the points in order as nodeIDs with
+-- "*n" for n points in a row on one node ("101*5,102,103*2"), so a plan fits on one line to paste.
+local PREFIX = "FPP:1:"
+
+---A plan as a share string.
+---@param treeID number the class's talent tree, so another class's string is refused
+---@param plan table { name, level, picks }
+---@return string
+function TalentPlan.Encode(treeID, plan)
+    local runs, i, picks = {}, 1, plan.picks
+    while i <= #picks do
+        local id, n = picks[i], 1
+        while picks[i + n] == id do
+            n = n + 1
+        end
+        runs[#runs + 1] = n > 1 and (id .. "*" .. n) or tostring(id)
+        i = i + n
+    end
+    local name = gsub(plan.name or "", "[:|]", "")
+    return PREFIX .. treeID .. ":" .. plan.level .. ":" .. name .. ":" .. concat(runs, ",")
+end
+
+---Reads a share string, or nil when it isn't one.
+---@param text string
+---@return table? plan { treeID, name, level, picks }
+function TalentPlan.Decode(text)
+    local treeID, level, name, list = strmatch(text or "", "^%s*FPP:1:(%d+):(%d+):([^:]*):([%d,%*]*)%s*$")
+    if not treeID then
+        return nil
+    end
+    local picks = {}
+    for run in gmatch(list, "[^,]+") do
+        local id, n = strmatch(run, "^(%d+)%*?(%d*)$")
+        if not id then
+            return nil
+        end
+        for _ = 1, tonumber(n) or 1 do
+            picks[#picks + 1] = tonumber(id)
+        end
+    end
+    return { treeID = tonumber(treeID), level = tonumber(level), name = name, picks = picks }
 end
 
 ---How many talent points a character has at a level.

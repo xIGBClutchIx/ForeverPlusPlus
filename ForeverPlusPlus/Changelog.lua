@@ -18,7 +18,8 @@ ns.changelog = {
                     .. "in order, up to the points you have at a level you choose, then follow the "
                     .. "plan as you level: its next talent glows, tooltips say at which level "
                     .. "each rank comes, and hovering the line beside the button lists the plan "
-                    .. "in order." },
+                    .. "in order. A dropdown keeps several named plans, and shares or imports one "
+                    .. "as a line of text." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.AUCTIONPRICES_TITLE, "Crafting Costs shows Estimated Profit, after the "

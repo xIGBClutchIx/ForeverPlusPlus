@@ -126,6 +126,7 @@ From the dumps **[dump]**: `C_AddOns`, `C_Item`, `C_Spell`, `C_Container`, `C_Un
   - The loadout dropdown (`LoadSystem`) is hidden, the search box stays, and there are no PvP talents. A primary and secondary tab are spec groups, the second locked until dual spec (`GetNumSpecGroups() > 1`).
   - Tab headers (`frame.treeHeaders`, each with `displayInfo` and a `Text` of points spent) are rebuilt by `RefreshTreeHeaders`, from `GetGroupCurrencyInfo`. Row gates come from `C_Traits.GetTreeInfo(...).gates` and the nodes' gate conditions (`isGate`, `spentAmountRequired`).
   - `EventRegistry` fires `TalentFrameBase.ButtonsUpdated` after the buttons update and `TalentDisplay.TooltipCreated` (button, tooltip) after a talent tooltip is shown.
+- Popups with a text box (`hasEditBox`) reach it through `dialog:GetEditBox()`, and call a dialog's `EditBoxOnEnterPressed(editBox, data)` and `EditBoxOnEscapePressed`. Menu dropdowns are Mainline's `DropdownButton` with `WowStyle1DropdownTemplate` and `SetupMenu`. **[web]** (Gethe `forever` branch, `Blizzard_StaticPopup`, `Blizzard_Menu`, 2026-10-04)
   - Talent Planner reads a row's points from a node's gate condition when it has one, counted in the node's tab as Classic does, and otherwise as 5 per row from `posY`. Whether Forever's gate conditions count tab or tree points is **Unverified**. Talent points from level 10 are inferred from Classic; the planner calibrates from points earned (spent plus unspent) once there are any.
 
 ## Secret values and combat data

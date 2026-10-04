@@ -9,7 +9,8 @@ local _, ns = ...
 
 local ipairs, pairs, format, tonumber, tostring, concat, sort = ipairs, pairs, string.format,
     tonumber, tostring, table.concat, table.sort
-local max, min, floor, setmetatable = math.max, math.min, math.floor, setmetatable
+local max, min, floor, setmetatable, tremove = math.max, math.min, math.floor, setmetatable,
+    table.remove
 local CreateFrame, C_Traits, C_Spell, UnitLevel, UnitGUID, IsShiftKeyDown, PlaySound = CreateFrame,
     C_Traits, C_Spell, UnitLevel, UnitGUID, IsShiftKeyDown, PlaySound
 local GameTooltip, EventRegistry, UIErrorsFrame = GameTooltip, EventRegistry, UIErrorsFrame
@@ -22,7 +23,9 @@ local module = ns.NewModule("TalentPlanner", L.TALENTPLANNER_DESC, {
     enabled = true,
     glow = true, -- the plan's next talent glows
     tooltip = true, -- talent tooltips say when the plan takes them
-    plans = {}, -- "<player GUID>-<spec tab>" -> { level = cap, picks = { nodeID, ... } }
+    -- "<player GUID>-<spec tab>" -> { active = index, list = { { name, level, picks }, ... } },
+    -- where picks are nodeIDs in order and level is the plan's level cap.
+    builds = {},
 })
 module.title = L.TALENTPLANNER_TITLE
 module.category = "interface"
@@ -79,20 +82,33 @@ local function firstLevel()
     return Plan.FirstLevel(UnitLevel("player"), spent + unspent)
 end
 
--- The saved plan for this character and the shown spec tab, made when `create` is true.
-local function getPlan(create)
+-- A new plan starts from the talents already learned.
+local function newPlan(name)
+    return { name = name, level = maxLevel(), picks = tree and Plan.FromRanks(tree, tree.ranks) or {} }
+end
+
+-- The saved plans for this character and the shown spec tab, made when `create` is true.
+local function getBuilds(create)
     local guid = UnitGUID("player")
     if not (guid and readable(guid)) then
         return nil
     end
     local key = guid .. "-" .. tostring(frame.GetTab and frame:GetTab() or 1)
-    local plan = module.db.plans[key]
-    if not plan and create then
-        -- A new plan starts from the talents already learned.
-        plan = { level = maxLevel(), picks = tree and Plan.FromRanks(tree, tree.ranks) or {} }
-        module.db.plans[key] = plan
+    local builds = module.db.builds[key]
+    if not builds and create then
+        builds = { active = 1, list = { newPlan(format(L.TALENTPLANNER_PLAN_NAME, 1)) } }
+        module.db.builds[key] = builds
     end
-    return plan
+    if builds and not builds.list[builds.active] then
+        builds.active = 1
+    end
+    return builds
+end
+
+-- The plan picked in the dropdown.
+local function getPlan(create)
+    local builds = getBuilds(create)
+    return builds and builds.list[builds.active]
 end
 
 -- The points a plan may hold at its level.
@@ -568,6 +584,9 @@ end
 local function drawBar(plan)
     ui.planButton:SetText(planning and L.TALENTPLANNER_DONE or L.TALENTPLANNER_PLAN)
     ui.controls:SetShown(planning)
+    if ui.dropdown then
+        ui.dropdown:GenerateMenu() -- shows the picked plan's name, for this spec tab
+    end
     if planning then
         local points = pointsOf(plan)
         local text = format(L.TALENTPLANNER_POINTS, min(#plan.picks, points), points)
@@ -646,6 +665,111 @@ local function simpleTooltip(owner, title, text)
     owner:SetScript("OnLeave", onLeave)
 end
 
+local function trim(text)
+    return (text or ""):match("^%s*(.-)%s*$")
+end
+
+-- Adds a plan to this character's list and picks it.
+local function addPlan(plan)
+    local builds = getBuilds(true)
+    if builds then
+        builds.list[#builds.list + 1] = plan
+        builds.active = #builds.list
+        refresh()
+    end
+end
+
+local function promptNew()
+    local builds = getBuilds(true)
+    ns.Prompt("TALENTPLANNER_NEW", L.TALENTPLANNER_NEW_PROMPT,
+        format(L.TALENTPLANNER_PLAN_NAME, builds and #builds.list + 1 or 1), function(text)
+            if trim(text) ~= "" then
+                addPlan(newPlan(trim(text)))
+            end
+        end)
+end
+
+local function promptRename()
+    local plan = getPlan(true)
+    ns.Prompt("TALENTPLANNER_RENAME", L.TALENTPLANNER_RENAME_PROMPT, plan and plan.name,
+        function(text)
+            local current = getPlan(true)
+            if current and trim(text) ~= "" then
+                current.name = trim(text)
+                refresh()
+            end
+        end)
+end
+
+local function share()
+    local plan = getPlan(true)
+    if plan and tree then
+        ns.Prompt("TALENTPLANNER_SHARE", L.TALENTPLANNER_SHARE_PROMPT, Plan.Encode(tree.treeID, plan))
+    end
+end
+
+-- Reads a pasted share string into a new plan, if it's this class's and fits this tree.
+local function import(text)
+    local data = Plan.Decode(text)
+    if not (data and tree) then
+        showError(L.TALENTPLANNER_IMPORT_BAD)
+        return
+    end
+    if data.treeID ~= tree.treeID then
+        showError(L.TALENTPLANNER_IMPORT_CLASS)
+        return
+    end
+    local _, _, bad = Plan.Simulate(tree, data.picks)
+    if bad then
+        showError(L.TALENTPLANNER_IMPORT_INVALID)
+        return
+    end
+    local builds = getBuilds(true)
+    local name = data.name ~= "" and data.name
+        or format(L.TALENTPLANNER_PLAN_NAME, builds and #builds.list + 1 or 1)
+    addPlan({ name = name, level = max(firstLevel(), min(maxLevel(), data.level)), picks = data.picks })
+end
+
+local function promptImport()
+    ns.Prompt("TALENTPLANNER_IMPORT", L.TALENTPLANNER_IMPORT_PROMPT, "", import)
+end
+
+local function deletePlan()
+    ns.Confirm("TALENTPLANNER_DELETE", L.TALENTPLANNER_DELETE_CONFIRM, function()
+        local builds = getBuilds(true)
+        if not builds then
+            return
+        end
+        tremove(builds.list, builds.active)
+        if #builds.list == 0 then
+            builds.list[1] = newPlan(format(L.TALENTPLANNER_PLAN_NAME, 1))
+        end
+        builds.active = min(builds.active, #builds.list)
+        refresh()
+    end)
+end
+
+local function setupMenu(_, root)
+    local builds = frame and tree and getBuilds(true)
+    if not builds then
+        return
+    end
+    for index, plan in ipairs(builds.list) do
+        root:CreateRadio(plan.name, function(i)
+            return builds.active == i
+        end, function(i)
+            builds.active = i
+            refresh()
+        end, index)
+    end
+    root:CreateDivider()
+    root:CreateButton(L.TALENTPLANNER_NEW, promptNew)
+    root:CreateButton(L.TALENTPLANNER_RENAME, promptRename)
+    root:CreateButton(L.TALENTPLANNER_SHARE, share)
+    root:CreateButton(L.TALENTPLANNER_IMPORT, promptImport)
+    root:CreateButton(L.TALENTPLANNER_DELETE, deletePlan)
+end
+
 local function applyLevel(box)
     local plan = getPlan(true)
     local value = tonumber(box:GetText())
@@ -693,14 +817,29 @@ local function createUI()
     summary:SetWordWrap(false)
     ui.summary = summary
 
+    -- The plans of this character and spec, in Blizzard's dropdown, with what can be done to them.
+    -- Probe: WowStyle1DropdownTemplate is Mainline's menu dropdown.
+    local dropdown
+    if WowStyle1DropdownMixin then
+        dropdown = CreateFrame("DropdownButton", nil, bar, "WowStyle1DropdownTemplate")
+        dropdown:SetWidth(170)
+        dropdown:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMRIGHT", -48, 8)
+        dropdown:SetupMenu(setupMenu)
+        ui.dropdown = dropdown
+    end
+
     local controls = CreateFrame("Frame", nil, bar)
     controls:SetAllPoints()
     controls:Hide()
     ui.controls = controls
 
     local clear = CreateFrame("Button", nil, controls, "UIPanelButtonTemplate")
-    clear:SetSize(100, 22)
-    clear:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMRIGHT", -48, 8)
+    clear:SetSize(90, 22)
+    if dropdown then
+        clear:SetPoint("RIGHT", dropdown, "LEFT", -12, 0)
+    else
+        clear:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMRIGHT", -48, 8)
+    end
     clear:SetText(L.TALENTPLANNER_CLEAR)
     clear:SetScript("OnClick", function()
         ns.Confirm("TALENTPLANNER_CLEAR", L.TALENTPLANNER_CLEAR_CONFIRM, function()
@@ -714,7 +853,7 @@ local function createUI()
     simpleTooltip(clear, L.TALENTPLANNER_CLEAR, L.TALENTPLANNER_CLEAR_DESC)
 
     local reset = CreateFrame("Button", nil, controls, "UIPanelButtonTemplate")
-    reset:SetSize(100, 22)
+    reset:SetSize(90, 22)
     reset:SetPoint("RIGHT", clear, "LEFT", -6, 0)
     reset:SetText(L.TALENTPLANNER_RESET)
     reset:SetScript("OnClick", function()
