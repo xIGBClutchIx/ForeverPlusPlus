@@ -22,8 +22,8 @@ ns.changelog = {
                     .. "as a line of text." },
                 { L.COMMANDS_TITLE, "New, on by default, in Interface: short slash commands, "
                     .. "each with its own checkbox. /way [zone] x y puts the game's map pin on a "
-                    .. "spot and tracks it (/way clear takes it away), and /rl reloads the UI. A "
-                    .. "command another addon already has, like TomTom's /way, is left to it." },
+                    .. "spot and tracks it (/way clear takes it away), /rl reloads the UI, and "
+                    .. "/clear empties a chat window. A command another addon already has, like TomTom's /way, is left to it." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.AUCTIONPRICES_TITLE, "Crafting Costs shows Estimated Profit, after the "

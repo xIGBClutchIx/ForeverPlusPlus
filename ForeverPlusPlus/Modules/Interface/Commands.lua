@@ -1,6 +1,6 @@
 -- Commands: short slash commands players expect from other games' addons, each its own checkbox.
 -- /way puts Blizzard's own map pin (the user waypoint) on a spot and tracks it, so the arrow and
--- distance come from the game; /rl reloads the UI. A command another addon already has (TomTom's
+-- distance come from the game; /rl reloads the UI; /clear empties a chat window. A command another addon already has (TomTom's
 -- /way) is left to that addon. /fpp is Core's and is always there, whatever this module does.
 local _, ns = ...
 
@@ -13,6 +13,7 @@ local module = ns.NewModule("Commands", L.COMMANDS_DESC, {
     enabled = true,
     way = true,
     reload = true,
+    clear = true,
 })
 module.title = L.COMMANDS_TITLE
 module.category = "interface"
@@ -20,6 +21,7 @@ module.category = "interface"
 module.options = {
     { key = "way", name = L.COMMANDS_WAY, description = L.COMMANDS_WAY_DESC },
     { key = "reload", name = L.COMMANDS_RELOAD, description = L.COMMANDS_RELOAD_DESC },
+    { key = "clear", name = L.COMMANDS_CLEAR, description = L.COMMANDS_CLEAR_DESC },
 }
 
 -- Slash commands ------------------------------------------------------------------------------
@@ -215,10 +217,25 @@ local function reload()
     end
 end
 
+-- /clear --------------------------------------------------------------------------------------
+
+-- Empties the chat window the command was typed in: the edit box's own window, else the one
+-- selected, else the main one. Only its lines go; Chat History's saved lines stay.
+local function clear(_, editBox)
+    if not (module.enabled and module.db.clear) then
+        return
+    end
+    local frame = editBox and editBox.chatFrame or SELECTED_CHAT_FRAME or DEFAULT_CHAT_FRAME
+    if frame and frame.Clear then
+        frame:Clear()
+    end
+end
+
 -- The commands, each behind the option with its key.
 local COMMANDS = {
     { option = "way", key = "FOREVERPLUSPLUS_WAY", slash = "/way", fn = way },
     { option = "reload", key = "FOREVERPLUSPLUS_RELOAD", slash = "/rl", fn = reload },
+    { option = "clear", key = "FOREVERPLUSPLUS_CLEAR", slash = "/clear", fn = clear },
 }
 
 local function sync()
