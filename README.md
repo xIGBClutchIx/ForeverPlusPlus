@@ -113,7 +113,7 @@ mklink /J "<WoW folder>\_classic_beta_\Interface\AddOns\ForeverPlusPlus" "<this 
 
 ### Add a module
 
-1. Create `Modules/<Category>/YourThing.lua` (the folder is its category: Automation, Items, Interface, Map, UnitFrames, Nameplates, or Tools) starting with `local _, ns = ...`, and add it to the TOC before `Init.lua`.
+1. Create `Modules/<Category>/YourThing.lua` (the folder is its category: Automation, Items, Interface, Chat, Map, UnitFrames, Nameplates, or Tools) starting with `local _, ns = ...`, and add it to the TOC before `Init.lua`.
 2. Call `ns.NewModule("YourThing", ns.L.YOURTHING_DESC, { enabled = true, ... })`. The description is its tooltip in Settings, and `module.title = ns.L.YOURTHING_TITLE` is the name shown there. Every string the player sees goes in `Locales/enUS/` (the file for its category), keyed with the module's name.
 3. Do the work in `OnEnable` and undo it in `OnDisable`: modules turn on and off without a reload. A hook can't be removed, so use `self:Hook(object, "Method", fn)` (or `self:Hook("GlobalFunction", fn)`, or `self:HookScript(frame, "OnShow", fn)`): it hooks once and does nothing while the module is off. Events added with `self:On(event, fn)` stop by themselves, so a module that only uses those and hooks needs no `OnDisable`.
 4. Set `module.category` (`automation`, `items`, `interface`, `chat`, `map`, `unitframes`, or `nameplates`). A tool with nothing to turn off sets `module.alwaysOn = true` and gets no checkbox. A module only for some clients gives `module:IsAvailable()`.
