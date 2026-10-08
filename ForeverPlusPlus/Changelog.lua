@@ -24,8 +24,17 @@ ns.changelog = {
                     .. "each with its own checkbox. /way [zone] x y puts the game's map pin on a "
                     .. "spot and tracks it (/way clear takes it away), /rl reloads the UI, and "
                     .. "/clear empties a chat window. A command another addon already has, like TomTom's /way, is left to it." },
+                { L.CHANGELOG_SETTINGS, "A search box at the top of the Modules page shows "
+                    .. "only the modules whose name or description has what you type, under "
+                    .. "their category headers. Clear it to see every module again." },
                 { L.CHANGELOG_SETTINGS, "The Modules page marks modules added since you last "
                     .. "looked at it with Blizzard's NEW label, until you've seen the page." },
+                { L.AUTOQUEST_TITLE, "New, off by default, in Automation: accepts quests and "
+                    .. "turns in finished ones as you talk to quest givers, one by one down a "
+                    .. "quest giver's list. It never picks a reward when there's a choice. "
+                    .. "Accepting and turning in have their own checkboxes, repeatable and shared "
+                    .. "quests can be left out, and holding Shift (or Ctrl, Alt, or no key) lets "
+                    .. "you do it yourself. Developer's Defaults turn it on." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.AUCTIONPRICES_TITLE, "Crafting Costs shows Estimated Profit, after the "
@@ -37,11 +46,21 @@ ns.changelog = {
                 { L.ERRORCATCHER_TITLE, "New Button option puts its button on the minimap, in "
                     .. "the addon compartment, both, or neither. The minimap is still the "
                     .. "default." },
+                { L.CHANGELOG_SETTINGS, "Clutch's Default is now Developer's Defaults, and the "
+                    .. "welcome page's Defaults button is now Recommended Defaults, matching the "
+                    .. "Defaults popup on the Modules and Debug pages." },
                 { L.POI_TITLE, "New Ley Lines option shows Skyborne ley lines and elemental "
                     .. "convergences on the map. A spot is saved when a Skyborne gets the "
                     .. "15-minute buff from Read Ley Line or Skysight there, and every character "
                     .. "on the account sees it. Shown to Skyborne for their own kind by default, "
                     .. "or to everyone, or to no one." },
+            } },
+            { L.CHANGELOG_FIXED, {
+                { L.CHARACTERFRAME_TITLE, "Works with Forever's new Titles tab. Titles gets its "
+                    .. "own side tab, the Pet tab opens your pet's stats again instead of Titles, "
+                    .. "the titles list starts at the top like the stats, and the pet pane keeps "
+                    .. "your pet's level and loyalty. Your pet's tab also comes and goes with your "
+                    .. "pet while another tab is open." },
             } },
         },
     },

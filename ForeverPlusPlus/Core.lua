@@ -432,12 +432,12 @@ end
 
 -- Presets -------------------------------------------------------------------------------------
 
--- Modules the Clutch's Default preset turns on, on top of every module's default settings.
-local clutchEnables = { "FishingCast", "SkipCinematics", "AutoScreenshot", "CurrencyBar",
-    "HideFeedback", "ChannelNames", "EasyDelete" }
+-- Modules the Developer's Defaults preset turns on, on top of every module's default settings.
+local developerEnables = { "FishingCast", "SkipCinematics", "AutoScreenshot", "CurrencyBar",
+    "HideFeedback", "ChannelNames", "EasyDelete", "AutoQuest" }
 
--- Options the Clutch's Default preset sets differently from the module's default.
-local clutchOptions = {
+-- Options the Developer's Defaults preset sets differently from the module's default.
+local developerOptions = {
     ZoneInfo = { dungeons = "key", fishing = "key" },
 }
 
@@ -483,22 +483,22 @@ function ns.ApplyPreset(enable, options)
     end
 end
 
----Puts every module back to its defaults (the Defaults button on the welcome page).
+---Puts every module back to its defaults (the Recommended Defaults button on the welcome page).
 function ns.ApplyDefaults()
     ns.ApplyPreset()
 end
 
----Defaults plus the modules the author recommends (the Clutch's Default button).
-function ns.ApplyClutchDefault()
-    ns.ApplyPreset(clutchEnables, clutchOptions)
+---Defaults plus the modules the developer turns on (the Developer's Defaults button).
+function ns.ApplyDeveloperDefaults()
+    ns.ApplyPreset(developerEnables, developerOptions)
 end
 
----The titles of the modules Clutch's Default turns on, for its button's tooltip, so the tooltip
----can't drift from the list. Modules this client doesn't get are left out.
+---The titles of the modules Developer's Defaults turns on, for its button's tooltip, so the
+---tooltip can't drift from the list. Modules this client doesn't get are left out.
 ---@return string[]
-function ns.ClutchModules()
+function ns.DeveloperModules()
     local titles = {}
-    for _, name in ipairs(clutchEnables) do
+    for _, name in ipairs(developerEnables) do
         local module = ns.modules[name]
         if module and not module.unavailable then
             titles[#titles + 1] = module.title or name

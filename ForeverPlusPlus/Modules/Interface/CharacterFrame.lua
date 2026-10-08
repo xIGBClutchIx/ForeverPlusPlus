@@ -1,7 +1,8 @@
--- Character Frame Enhancements: tidies the Character window. The Equipment Manager and Pet tabs
--- that sit across the top of the stats pane move to the side, under the Character, Reputation,
--- and other tabs, and the pane's header (the portrait tab and the "Level 60 Class" line) goes, so
--- the stats start at the top. The window's title becomes your level and name in your class color.
+-- Character Frame Enhancements: tidies the Character window. The Equipment Manager, Titles, and
+-- Pet tabs that sit across the top of the stats pane move to the side, under the Character,
+-- Reputation, and other tabs, and the pane's header (the portrait tab and the "Level 60 Class"
+-- line) goes, so the stats start at the top. The window's title becomes your level and name in
+-- your class color.
 local _, ns = ...
 
 local _G, ipairs, pairs, CreateFrame = _G, ipairs, pairs, CreateFrame
@@ -25,15 +26,24 @@ module.options = {
 }
 
 local ADDON = "Blizzard_UIPanels_Game"
-local EQUIPMENT, PET = 2, 3 -- indexes in Blizzard's PAPERDOLL_SIDEBARS (1 is Stats)
+local STATS = 1 -- Blizzard's PAPERDOLL_SIDEBARS index for the stats; every other one gets a side tab
 local GAP = 10 -- between Blizzard's tabs and ours
+local LEVEL_TOP = 8 -- from the top of the right pane to the pet's level line
 
 local started
-local tabs = {} -- sidebar index -> our side tab
-local panes -- the panes that hang from the header
+local tabs = {} -- sidebar index -> our side tab, from STATS + 1 to numSidebars
+local numSidebars = 0
+local panes -- pane -> true for the stats lists, false for the others that hang from the header
+local petPane
 
 local function frameOf(index)
     return _G.GetPaperDollSideBarFrame and _G.GetPaperDollSideBarFrame(index)
+end
+
+-- Sidebars are found by their pane, not their place: build 70170 put Titles third and moved the
+-- pet to fourth (Forever only).
+local function isPet(index)
+    return frameOf(index) == petPane
 end
 
 -- Title ----------------------------------------------------------------------------------------
@@ -63,43 +73,66 @@ local function collapsed()
     return _G.CharacterFrame:IsRightPaneCollapsed()
 end
 
-local function hideHeader()
+-- The tab row always goes. The level line goes too, except on the pet pane: there it carries the
+-- pet's level, family, and loyalty, which the title doesn't, so it moves to the top of the pane.
+local function updateHeader()
     if module.db.sideTabs then
         _G.PaperDollSidebarTabs:Hide()
-        _G.PaperDollLevelInfo:Hide()
+        _G.PaperDollLevelInfo:SetShown(petPane:IsVisible())
     end
 end
 
--- The stats, pet stats, and equipment sets panes hang from the bottom of the stone header, so
--- they move up to the top of the right pane.
+-- The stats, pet stats, titles, and equipment sets panes hang from the bottom of the stone
+-- header, so they move up to the top of the right pane.
 local function anchorPanes(up)
     local host = _G.CharacterFrame.RightPaneHost
-    for index, pane in ipairs(panes) do
-        if up then
+    local info = _G.PaperDollLevelInfo
+    for pane, stats in pairs(panes) do
+        if pane == petPane then
+            -- The pet stats start under the level line, which is two lines tall with loyalty.
+            pane:ClearAllPoints()
+            if up then
+                pane:SetPoint("TOP", info, "BOTTOM", 0, -4)
+            else
+                pane:SetPoint("TOPLEFT", host.StoneBg, "BOTTOMLEFT")
+            end
+            pane:SetPoint("BOTTOMRIGHT", host, "BOTTOMRIGHT")
+        elseif up then
             pane:SetPoint("TOPLEFT", host, "TOPLEFT")
         else
             pane:SetPoint("TOPLEFT", host.StoneBg, "BOTTOMLEFT")
         end
         -- The stats lists leave room at the bottom for a divider line; take most of it back so
         -- they run further down.
-        if index <= 2 then -- the two stats lists, not the equipment sets pane
+        if stats then
             pane.ScrollBox:SetPoint("BOTTOMRIGHT", pane, "BOTTOMRIGHT", -30, up and 4 or 30)
             -- The scrollbar stops a little short of the list's end, so it isn't pressed against
             -- the window's edge.
             pane.ScrollBar:SetPoint("BOTTOMLEFT", pane.ScrollBox, "BOTTOMRIGHT", 0, up and 10 or 0)
         end
     end
+    info:ClearAllPoints()
+    if up then
+        info:SetPoint("TOP", host, "TOP", 0, -LEVEL_TOP)
+    else
+        info:SetPoint("TOP", _G.PaperDollSidebarTabs, "TOP", 0, -50)
+    end
     host.StoneBg:SetAlpha(up and 0 or 1)
+end
+
+-- Blizzard's header back.
+local function showHeader()
+    anchorPanes(false)
+    _G.PaperDollLevelInfo:Show()
+    _G.PaperDollSidebarTabs:SetShown(_G.PaperDollFrame:IsShown() and not collapsed())
 end
 
 local function applyHeader()
     if module.db.sideTabs then
         anchorPanes(true)
-        hideHeader()
+        updateHeader()
     else
-        anchorPanes(false)
-        _G.PaperDollLevelInfo:Show()
-        _G.PaperDollSidebarTabs:SetShown(_G.PaperDollFrame:IsShown() and not collapsed())
+        showHeader()
     end
 end
 
@@ -108,7 +141,7 @@ end
 local function refreshTabs()
     local frame = _G.CharacterFrame
     local show = module.db.sideTabs and frame:IsShown()
-    local onPaperDoll = _G.PaperDollFrame:IsShown()
+    local onPaperDoll = _G.PaperDollFrame:IsShown() and not collapsed()
 
     local last
     for _, tab in ipairs(frame.ModeTabs.Tabs) do
@@ -119,9 +152,10 @@ local function refreshTabs()
 
     local above, gap = last, GAP
     local ownSelected
-    for index = EQUIPMENT, PET do
+    for index = STATS + 1, numSidebars do
         local tab = tabs[index]
-        local visible = show and last and (index ~= PET or HasPetUI())
+        local pet = isPet(index)
+        local visible = show and last and (not pet or HasPetUI())
         tab:SetShown(visible and true or false)
         if visible then
             tab:ClearAllPoints()
@@ -134,7 +168,7 @@ local function refreshTabs()
             tab.active = _G.PAPERDOLL_SIDEBARS[index].IsActive()
             tab:SetAlpha(tab.active and 1 or 0.5)
             tab.Icon:SetDesaturated(not tab.active)
-            if index == PET then
+            if pet then
                 SetPortraitTexture(tab.Icon, "pet")
             end
         end
@@ -142,8 +176,9 @@ local function refreshTabs()
 
     -- The Character tab isn't the selected one while one of ours is.
     if show then
-        frame.ModeTabs.CharacterTab:SetChecked(onPaperDoll and not ownSelected)
+        frame.ModeTabs.CharacterTab:SetChecked(_G.PaperDollFrame:IsShown() and not ownSelected)
     end
+    updateHeader()
 end
 
 -- A side tab opens the Character window's pane for it, and the Character tab goes back to stats.
@@ -161,8 +196,21 @@ end
 
 local function onModeTabClicked(_, tab)
     if module.db.sideTabs and tab.frameName == "PaperDollFrame" then
-        _G.PaperDollFrame_SetSidebar(_G.PaperDollSidebarTabs, 1)
+        _G.PaperDollFrame_SetSidebar(_G.PaperDollSidebarTabs, STATS)
     end
+end
+
+-- Use the icon Blizzard's own tab shows, so it stays in step with the game, at our tab's size.
+local function copyIcon(icon, source)
+    local atlas = source.GetAtlas and source:GetAtlas()
+    if atlas then
+        icon:SetAtlas(atlas)
+    else
+        icon:SetTexture(source:GetTexture())
+        icon:SetTexCoord(source:GetTexCoord())
+    end
+    local width, height = source:GetSize()
+    icon:SetSize(36, width > 0 and 36 * height / width or 36)
 end
 
 local function makeTab(index)
@@ -171,14 +219,11 @@ local function makeTab(index)
     tab:EnableMouse(true)
     tab.tooltipText = info.name
     tab:Hide()
-    if index == PET then
+    local source = _G["PaperDollSidebarTab" .. index]
+    if isPet(index) then
         tab:SetFillToInterior(true)
-    else
-        -- Use the icon Blizzard's own tab shows, so it stays in step with the game.
-        local source = _G["PaperDollSidebarTab" .. index].Icon
-        tab.Icon:SetTexture(source:GetTexture())
-        tab.Icon:SetTexCoord(source:GetTexCoord())
-        tab.Icon:SetSize(36, 36)
+    elseif source then
+        copyIcon(tab.Icon, source.Icon)
     end
     tab:SetCustomOnMouseUpHandler(function(self, button, upInside)
         if button == "LeftButton" and upInside and self.active then
@@ -197,17 +242,24 @@ local function start()
     end
     started = true
 
+    petPane = _G.CharacterStatsPanePetScrollBox
     panes = {
-        _G.CharacterStatsPaneScrollBox, _G.CharacterStatsPanePetScrollBox, _G.CharacterStatsPane,
-        _G.PaperDollFrame.EquipmentManagerPane,
+        [_G.CharacterStatsPaneScrollBox] = true,
+        [petPane] = true,
+        [_G.CharacterStatsPane] = false,
+        [_G.PaperDollFrame.EquipmentManagerPane] = false,
     }
-    for index = EQUIPMENT, PET do
+    if _G.PaperDollFrame.TitleManagerPane then
+        panes[_G.PaperDollFrame.TitleManagerPane] = false
+    end
+    numSidebars = #_G.PAPERDOLL_SIDEBARS
+    for index = STATS + 1, numSidebars do
         tabs[index] = makeTab(index)
     end
 
     -- Blizzard shows the header again whenever the pane opens.
-    module:HookScript(_G.PaperDollSidebarTabs, "OnShow", hideHeader)
-    module:HookScript(_G.PaperDollLevelInfo, "OnShow", hideHeader)
+    module:HookScript(_G.PaperDollSidebarTabs, "OnShow", updateHeader)
+    module:HookScript(_G.PaperDollLevelInfo, "OnShow", updateHeader)
     module:HookScript(_G.PaperDollFrame, "OnShow", refreshTabs)
     module:HookScript(_G.PaperDollFrame, "OnHide", refreshTabs)
     module:Hook("PaperDollFrame_UpdateSidebarTabs", refreshTabs)
@@ -226,11 +278,25 @@ local function start()
 end
 
 local function onPortrait()
-    if started and tabs[PET]:IsShown() then
-        SetPortraitTexture(tabs[PET].Icon, "pet")
+    if not started then
+        return
+    end
+    for index, tab in pairs(tabs) do
+        if isPet(index) and tab:IsShown() then
+            SetPortraitTexture(tab.Icon, "pet")
+        end
     end
 end
 
+-- Blizzard only updates its pet tab while the stats pane is open, so ours follows the pet on the
+-- Reputation and other panes too.
+local function onPet(_, unit)
+    if started and unit == "player" then
+        refreshTabs()
+    end
+end
+
+-- Blizzard redoes the title for a new name or title, but not for a new level.
 local function onLevel(_, unit)
     if started and unit == "player" and _G.CharacterFrame:IsShown() then
         updateTitle()
@@ -239,6 +305,7 @@ end
 
 function module:OnEnable()
     self:On("UNIT_LEVEL", onLevel)
+    self:On("UNIT_PET", onPet)
     self:On("UNIT_PORTRAIT_UPDATE", onPortrait)
     self:On("PORTRAITS_UPDATED", onPortrait)
     if _G.CharacterFrame then
@@ -258,9 +325,7 @@ function module:OnDisable()
     if not started then
         return
     end
-    anchorPanes(false)
-    _G.PaperDollLevelInfo:Show()
-    _G.PaperDollSidebarTabs:SetShown(_G.PaperDollFrame:IsShown() and not collapsed())
+    showHeader()
     for _, tab in pairs(tabs) do
         tab:Hide()
     end

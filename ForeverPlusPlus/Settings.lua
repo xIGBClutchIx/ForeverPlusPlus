@@ -8,7 +8,8 @@
 --                    its checkbox, hidden until its gear is clicked, and greyed out while it's
 --                    off. An option can sit under another (`requires`). The indent groups them, so
 --                    their `section`s get no header here. A module's `notice` (a warning) shows under its
---                    checkbox while it applies. `alwaysOn` modules (tools) have no checkbox.
+--                    checkbox while it applies. `alwaysOn` modules (tools) have no checkbox. A
+--                    search box in its header narrows it to modules by title and description.
 --                    A module added since the player last looked (`module.added`) is marked NEW
 --     <Tool>         a page a module draws itself (`BuildPage`)
 --     Debug          options marked `debug = true`, for testing
@@ -531,7 +532,7 @@ end
 -- while `shown()` is true, such as a Blizzard setting the module needs being off, with a button
 -- that fixes it. A normal settings row, so it's the size of the options around it. It shows
 -- whether or not the module's options do. ns.CVars.OffNotice makes one for a CVar.
-local function addNotice(layout, module, parent)
+local function addNotice(layout, module, parent, shown)
     local notice = module.notice
     if not (notice and layout and CreateSettingsButtonInitializer) then
         return
@@ -543,15 +544,53 @@ local function addNotice(layout, module, parent)
     end
     if initializer.AddShownPredicate then
         initializer:AddShownPredicate(notice.shown)
+        showWhen(initializer, shown)
         layout:AddInitializer(initializer)
     end
+end
+
+-- Search box ----------------------------------------------------------------------------------
+-- A search box in the Modules page's header, left of the Defaults button, that narrows the page
+-- to the modules whose title or description has the text. Every row there has a shown predicate
+-- that asks `matches`, and a category header shows while any of its modules does. Blizzard's own
+-- search, at the top left of the panel, finds settings across every addon, not modules.
+
+local filter -- the search text, lowercased, or nil while the box is empty
+local searchText = {} -- module name -> its title and description, lowercased
+local searchBox -- ours, while it's made
+
+local function matches(name)
+    return not filter or (searchText[name] or ""):find(filter, 1, true) ~= nil
+end
+
+-- Probe: SearchBoxTemplate is Mainline's, and filtering needs the list to redraw.
+local function addSearchBox(header, blizzard)
+    if not (canRedraw() and C_XMLUtil and C_XMLUtil.GetTemplateInfo
+        and C_XMLUtil.GetTemplateInfo("SearchBoxTemplate")) then
+        return
+    end
+    searchBox = CreateFrame("EditBox", nil, header, "SearchBoxTemplate")
+    searchBox:SetSize(200, 20)
+    searchBox:SetPoint("RIGHT", blizzard, "LEFT", -12, 0)
+    searchBox:SetFrameLevel(blizzard:GetFrameLevel() + 5)
+    searchBox:SetAutoFocus(false)
+    if searchBox.Instructions then
+        searchBox.Instructions:SetText(L.SETTINGS_SEARCH)
+    end
+    -- After the template's own OnTextChanged, which shows the clear button and the gray text.
+    searchBox:HookScript("OnTextChanged", function(self)
+        local text = strlower(self:GetText():match("^%s*(.-)%s*$"))
+        filter = text ~= "" and text or nil
+        SettingsInbound.RepairDisplay()
+    end)
+    searchBox:Hide()
 end
 
 -- Defaults button -----------------------------------------------------------------------------
 -- Blizzard's Defaults button, at the top right of a settings list, asks "These Settings" or "All
 -- Settings", and All Settings resets the whole game. On our list pages our own Defaults button
 -- sits over it instead, with a popup laid out like Blizzard's that offers only Forever++'s two
--- presets: Clutch's Defaults | Cancel | Recommended Defaults. Blizzard's is
+-- presets: Developer's Defaults | Cancel | Recommended Defaults. Blizzard's is
 -- faded out underneath (never changed otherwise), and ours shows and hides with it, since Blizzard
 -- hides it while searching.
 
@@ -567,6 +606,9 @@ local function updateDefaults(blizzard)
     local ours = onOurPage() and blizzard:IsShown()
     defaultsButton:SetShown(ours and true or false)
     blizzard:SetAlpha(ours and 0 or 1)
+    if searchBox then
+        searchBox:SetShown(ours and SettingsPanel:GetCurrentCategory() == modulesCategory or false)
+    end
 end
 
 -- Probe: the list header's DefaultsButton, GetSettingsList, and the Settings.CategoryChanged event
@@ -582,10 +624,11 @@ local function addDefaultsButton()
     defaultsButton:SetFrameLevel(blizzard:GetFrameLevel() + 5)
     defaultsButton:SetText(SETTINGS_DEFAULTS or L.HOME_DEFAULTS)
     defaultsButton:SetScript("OnClick", function()
-        ns.ConfirmChoice("DEFAULTS_CHOICE", L.DEFAULTS_ASK, L.DEFAULTS_CLUTCH, ns.ApplyClutchDefault,
-            L.DEFAULTS_RECOMMENDED, ns.ApplyDefaults)
+        ns.ConfirmChoice("DEFAULTS_CHOICE", L.DEFAULTS_ASK, L.DEFAULTS_DEVELOPER,
+            ns.ApplyDeveloperDefaults, L.DEFAULTS_RECOMMENDED, ns.ApplyDefaults)
     end)
     defaultsButton:Hide()
+    addSearchBox(list.Header, blizzard)
     blizzard:HookScript("OnShow", function() updateDefaults(blizzard) end)
     blizzard:HookScript("OnHide", function() updateDefaults(blizzard) end)
     EventRegistry:RegisterCallback("Settings.CategoryChanged", function() updateDefaults(blizzard) end,
@@ -725,7 +768,7 @@ local function buildWelcome(frame)
     -- Two presets on the same row, each asking first since they overwrite the player's settings.
     local function addPreset(text, tooltip, key, question, fn, anchor)
         local button = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-        button:SetSize(140, 24)
+        button:SetSize(155, 24)
         button:SetText(text)
         button:SetScript("OnClick", function() ns.Confirm(key, question, fn) end)
         button:SetScript("OnEnter", function(self)
@@ -738,11 +781,12 @@ local function buildWelcome(frame)
         button:SetPoint("LEFT", anchor, "RIGHT", 8, 0)
         return button
     end
-    local defaults = addPreset(L.HOME_DEFAULTS, L.HOME_DEFAULTS_TIP, "DEFAULTS",
+    local defaults = addPreset(L.DEFAULTS_RECOMMENDED, L.HOME_DEFAULTS_TIP, "DEFAULTS",
         L.HOME_DEFAULTS_ASK, ns.ApplyDefaults, last)
-    local clutchTip = format(L.HOME_CLUTCH_TIP, concat(ns.ClutchModules(), L.HOME_LIST_SEPARATOR))
-    addPreset(L.HOME_CLUTCH, clutchTip, "CLUTCH", L.HOME_CLUTCH_ASK, ns.ApplyClutchDefault,
-        defaults)
+    local developerTip = format(L.HOME_DEVELOPER_TIP,
+        concat(ns.DeveloperModules(), L.HOME_LIST_SEPARATOR))
+    addPreset(L.DEFAULTS_DEVELOPER, developerTip, "DEVELOPER", L.HOME_DEVELOPER_ASK,
+        ns.ApplyDeveloperDefaults, defaults)
 
     y = y - 44
     addHeading(frame, y, L.HOME_LINKS)
@@ -865,8 +909,20 @@ local function categoryOf(module)
 end
 
 -- The Modules page: each category's modules under its header, each module's options under its
--- checkbox. With `collapse`, those options show only while the module's gear has them open.
+-- checkbox. With `collapse`, those options show only while the module's gear has them open. Only
+-- the modules the search box `matches` show, and the headers over them.
 local function addModules(category, layout, grouped, collapse)
+    local members = {} -- category -> its modules' names, for its header
+    for _, name in ipairs(grouped) do
+        local module = ns.modules[name]
+        if not module.alwaysOn then
+            local group = categoryOf(module)
+            members[group] = members[group] or {}
+            members[group][#members[group] + 1] = name
+            searchText[name] = strlower(format("%s\n%s", module.title or name,
+                module.description or ""))
+        end
+    end
     local current
     for _, name in ipairs(grouped) do
         local module = ns.modules[name]
@@ -874,15 +930,29 @@ local function addModules(category, layout, grouped, collapse)
             local group = categoryOf(module)
             if group ~= current then
                 current = group
-                addHeader(layout, CATEGORY_NAMES[group])
+                local names = members[group]
+                addHeader(layout, CATEGORY_NAMES[group], function()
+                    for _, member in ipairs(names) do
+                        if matches(member) then
+                            return true
+                        end
+                    end
+                    return false
+                end)
             end
             inline[name] = not module.BuildPage
                 and (hasOptions(module, false) or module.actions) and true or nil
             local hasGear = module.BuildPage and pages[name] or (collapse and inline[name])
             local parent = addToggle(category, module, hasGear)
-            addNotice(layout, module, parent)
+            local function found()
+                return matches(name)
+            end
+            showWhen(parent, found)
+            addNotice(layout, module, parent, found)
             if inline[name] then
-                local shown = collapse and function() return expanded[name] end or nil
+                local shown = function()
+                    return matches(name) and (not collapse or expanded[name]) and true or false
+                end
                 addOptions(category, layout, module, parent, false, shown)
                 addActions(layout, module, parent, shown)
             end

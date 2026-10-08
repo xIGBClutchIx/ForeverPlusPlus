@@ -62,6 +62,7 @@ L.SETTINGS_SHOW_OPTIONS = "Show %s Options"
 L.SETTINGS_HIDE_OPTIONS = "Hide %s Options"
 L.SETTINGS_OPEN_PAGE = "Open %s" -- for a module with a page of its own
 L.SETTINGS_TURN_ON = "Turn On" -- the button on a "Blizzard's ... is off" row
+L.SETTINGS_SEARCH = "Search modules" -- gray text in the Modules page's empty search box
 
 -- Settings: Changelog page. The notes themselves are in Changelog.lua.
 L.CHANGELOG = "Changelog"
@@ -83,17 +84,16 @@ L.HOME_INTRO = "Each module is one small change to Blizzard's interface, made to
 L.HOME_MODULES_ON = "%d of %d modules on" -- on, total
 L.HOME_DEFAULTS = "Defaults"
 L.HOME_DEFAULTS_TIP = "Puts every module's settings back to how they start for a new player."
-L.HOME_DEFAULTS_ASK = "Put all Forever++ settings back to their defaults?"
-L.HOME_CLUTCH = "Clutch's Default"
-L.HOME_CLUTCH_TIP = "The defaults, plus the extra modules the author turns on: %s. Zone Info "
-    .. "also shows Dungeons and Fishing only while you hold its detail key." -- module titles
+L.HOME_DEFAULTS_ASK = "Put all Forever++ settings back to the recommended defaults?"
+L.HOME_DEVELOPER_TIP = "The recommended defaults, plus the extra modules the developer turns "
+    .. "on: %s. Zone Info also shows Dungeons and Fishing only while you hold its detail key." -- module titles
 L.HOME_LIST_SEPARATOR = ", " -- between module titles in a list
 -- The popup of the Defaults button at the top right of the Modules and Debug pages
 L.DEFAULTS_ASK = "Put all Forever++ settings back to defaults? This replaces your current "
     .. "Forever++ settings. The rest of the game's settings stay as they are."
-L.DEFAULTS_CLUTCH = "Clutch's Defaults"
+L.DEFAULTS_DEVELOPER = "Developer's Defaults"
 L.DEFAULTS_RECOMMENDED = "Recommended Defaults"
-L.HOME_CLUTCH_ASK = "Use Clutch's recommended settings? This replaces your current Forever++ settings."
+L.HOME_DEVELOPER_ASK = "Use the developer's settings? This replaces your current Forever++ settings."
 L.HOME_GAME_BUILD = "Game %s (build %s, interface %s)" -- version, build, interface
 L.HOME_LINKS = "Links"
 L.HOME_WEBSITE = "Website"
