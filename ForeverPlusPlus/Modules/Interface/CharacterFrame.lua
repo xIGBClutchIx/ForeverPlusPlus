@@ -33,7 +33,7 @@ local LEVEL_TOP = 8 -- from the top of the right pane to the pet's level line
 local started
 local tabs = {} -- sidebar index -> our side tab, from STATS + 1 to numSidebars
 local numSidebars = 0
-local panes -- pane -> true for the stats lists, false for the others that hang from the header
+local panes -- pane -> true for the scrolling lists (stats, pet, titles), false for the others
 local petPane
 
 local function frameOf(index)
@@ -102,8 +102,8 @@ local function anchorPanes(up)
         else
             pane:SetPoint("TOPLEFT", host.StoneBg, "BOTTOMLEFT")
         end
-        -- The stats lists leave room at the bottom for a divider line; take most of it back so
-        -- they run further down.
+        -- The lists leave room at the bottom for a divider line; take most of it back so they
+        -- run further down.
         if stats then
             pane.ScrollBox:SetPoint("BOTTOMRIGHT", pane, "BOTTOMRIGHT", -30, up and 4 or 30)
             -- The scrollbar stops a little short of the list's end, so it isn't pressed against
@@ -249,8 +249,9 @@ local function start()
         [_G.CharacterStatsPane] = false,
         [_G.PaperDollFrame.EquipmentManagerPane] = false,
     }
+    -- The titles list has the stats lists' scroll box and bar, and the same gap under them.
     if _G.PaperDollFrame.TitleManagerPane then
-        panes[_G.PaperDollFrame.TitleManagerPane] = false
+        panes[_G.PaperDollFrame.TitleManagerPane] = true
     end
     numSidebars = #_G.PAPERDOLL_SIDEBARS
     for index = STATS + 1, numSidebars do
