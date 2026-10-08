@@ -8,7 +8,8 @@
 --                    its checkbox, hidden until its gear is clicked, and greyed out while it's
 --                    off. An option can sit under another (`requires`). The indent groups them, so
 --                    their `section`s get no header here. A module's `notice` (a warning) shows under its
---                    checkbox while it applies. `alwaysOn` modules (tools) have no checkbox
+--                    checkbox while it applies. `alwaysOn` modules (tools) have no checkbox.
+--                    A module added since the player last looked (`module.added`) is marked NEW
 --     <Tool>         a page a module draws itself (`BuildPage`)
 --     Debug          options marked `debug = true`, for testing
 --     Changelog      the release notes from Changelog.lua
@@ -18,7 +19,7 @@ local _, ns = ...
 local ipairs, format, type, sort, strlower = ipairs, string.format, type, table.sort, string.lower
 local concat = table.concat
 local InCombatLockdown, CreateFrame, GetBuildInfo = InCombatLockdown, CreateFrame, GetBuildInfo
-local setmetatable, hooksecurefunc = setmetatable, hooksecurefunc
+local setmetatable, hooksecurefunc, wipe = setmetatable, hooksecurefunc, wipe
 local C_AddOns, GetAddOnMetadata, GameTooltip = C_AddOns, GetAddOnMetadata, GameTooltip
 local C_XMLUtil = C_XMLUtil
 local L = ns.L
@@ -212,8 +213,91 @@ local function addGear(initializer, module)
     end)
 end
 
+-- New-module labels ---------------------------------------------------------------------------
+-- A module added (`module.added`) after the version the player last saw the Modules page in gets
+-- Blizzard's NEW label beside its checkbox, the one Blizzard's own new settings get. Seeing the
+-- page saves this version (ns.db.seenVersion); the labels stay while the player is on it and are
+-- gone once they leave. Our own label in a weak table, like the gears, since the rows are pooled.
+local newModules = {} -- module name -> true while it's marked new
+local labels = setmetatable({}, { __mode = "k" }) -- row frame -> our label
+local seen -- true once the Modules page has been shown this session
+
+-- Probe: NewFeatureLabelTemplate is Mainline's (LibUIDropDownMenu uses it on Forever).
+local function canLabel()
+    return C_XMLUtil and C_XMLUtil.GetTemplateInfo
+        and C_XMLUtil.GetTemplateInfo("NewFeatureLabelTemplate") and true or false
+end
+
+-- Added after the version last seen, and not after this one (a module still unreleased).
+local function isNew(module)
+    local added, Text = module.added, ns.Text
+    return type(added) == "string" and Text.NewerVersion(added, ns.db.seenVersion)
+        and not Text.NewerVersion(added, ns.version)
+end
+
+local function labelFor(frame)
+    local label = labels[frame]
+    if not label then
+        label = CreateFrame("Frame", nil, frame, "NewFeatureLabelTemplate")
+        -- The frame goes back to the pool hidden; another page's row may get it next.
+        frame:HookScript("OnHide", function() label:Hide() end)
+        labels[frame] = label
+    end
+    return label
+end
+
+-- Puts the label after the checkbox (and its gear) each time Blizzard sets the row up.
+local function addNewLabel(initializer, module, hasGear)
+    if not (newModules[module.name] and initializer.InitFrame) then
+        return
+    end
+    hooksecurefunc(initializer, "InitFrame", function(_, frame)
+        local anchor = frame.Checkbox or frame.CheckBox
+        if not (anchor and newModules[module.name]) then
+            return
+        end
+        local label = labelFor(frame)
+        -- The template centers its text on the frame, so move it half the text's width along.
+        local half = label.Label and ns.Text.Width(label.Label) / 2 or 16
+        label:ClearAllPoints()
+        label:SetPoint("CENTER", anchor, "RIGHT", (hasGear and 32 or 8) + half, 0)
+        label:Show()
+    end)
+end
+
+-- Saves the version once the Modules page shows, and drops the labels once the player leaves it.
+local function updateSeen()
+    local current = SettingsPanel:IsShown() and SettingsPanel:GetCurrentCategory()
+    if current == modulesCategory then
+        if not seen and ns.Text.NewerVersion(ns.version, ns.db.seenVersion) then
+            ns.db.seenVersion = ns.version
+        end
+        seen = true
+    elseif seen then
+        wipe(newModules)
+    end
+end
+
+-- Probe: Settings.CategoryChanged and GetCurrentCategory are Mainline's (the `forever` UI source
+-- has them); without them nothing is marked new.
+local function trackNew(order)
+    if not (SettingsPanel and SettingsPanel.GetCurrentCategory and EventRegistry
+        and EventRegistry.RegisterCallback and canLabel()) then
+        return
+    end
+    for _, name in ipairs(order) do
+        if isNew(ns.modules[name]) then
+            newModules[name] = true
+        end
+    end
+    EventRegistry:RegisterCallback("Settings.CategoryChanged", updateSeen, newModules)
+    SettingsPanel:HookScript("OnShow", updateSeen)
+    SettingsPanel:HookScript("OnHide", updateSeen)
+end
+
 -- The module's on/off checkbox on the Modules page. It reads and writes through the module, so
--- /fpp and the page agree. A gear beside it shows its options, or opens its own page.
+-- /fpp and the page agree. A gear beside it shows its options, or opens its own page, and a NEW
+-- label follows a module the player hasn't seen yet.
 local function addToggle(category, module, hasGear)
     local setting = Settings.RegisterProxySetting(category,
         format("ForeverPlusPlus_%s", module.name), Settings.VarType.Boolean,
@@ -232,6 +316,9 @@ local function addToggle(category, module, hasGear)
     local initializer = Settings.CreateCheckbox(category, setting, module.description)
     if hasGear and initializer then
         addGear(initializer, module)
+    end
+    if initializer then
+        addNewLabel(initializer, module, hasGear)
     end
     return initializer
 end
@@ -818,6 +905,7 @@ function ns.RegisterSettings()
         and Settings.RegisterCanvasLayoutSubcategory ~= nil
         and Settings.RegisterCanvasLayoutCategory ~= nil
     local order = byTitle()
+    trackNew(order) -- before the toggles, which label the new ones
     -- Modules by category, then title: the order of the Modules page and of the tool pages.
     local grouped = {}
     for _, group in ipairs(CATEGORIES) do
