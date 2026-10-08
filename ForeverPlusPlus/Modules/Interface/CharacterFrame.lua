@@ -5,7 +5,7 @@
 -- your class color.
 local _, ns = ...
 
-local _G, ipairs, pairs, CreateFrame = _G, ipairs, pairs, CreateFrame
+local _G, ipairs, pairs, type, CreateFrame = _G, ipairs, pairs, type, CreateFrame
 local format, UnitLevel, UnitName, UnitPVPName = string.format, UnitLevel, UnitName, UnitPVPName
 local HasPetUI, SetPortraitTexture = HasPetUI, SetPortraitTexture
 
@@ -138,6 +138,31 @@ end
 
 -- Side tabs ------------------------------------------------------------------------------------
 
+-- The pet's portrait, cropped to the tab like the Character tab's. A new portrait can undo the
+-- crop, so it goes on again each time.
+local function petPortrait(tab)
+    SetPortraitTexture(tab.Icon, "pet")
+    if tab.UpdateIconInterior then
+        tab:UpdateIconInterior()
+    end
+end
+
+-- Like Blizzard's sidebar tabs: the name, and while the tab can't be used, why in red (no titles
+-- yet, no pet).
+local function tooltipFor(info, tab)
+    return function(tooltip)
+        _G.GameTooltip_SetTitle(tooltip, info.name)
+        local reason = info.disabledTooltip
+        if type(reason) == "function" then
+            reason = reason()
+        end
+        if not tab.active and reason then
+            _G.GameTooltip_AddErrorLine(tooltip, reason, true)
+        end
+        return true
+    end
+end
+
 local function refreshTabs()
     local frame = _G.CharacterFrame
     local show = module.db.sideTabs and frame:IsShown()
@@ -169,7 +194,7 @@ local function refreshTabs()
             tab:SetAlpha(tab.active and 1 or 0.5)
             tab.Icon:SetDesaturated(not tab.active)
             if pet then
-                SetPortraitTexture(tab.Icon, "pet")
+                petPortrait(tab)
             end
         end
     end
@@ -218,6 +243,10 @@ local function makeTab(index)
     local tab = CreateFrame("Frame", nil, _G.CharacterFrame, "LargeSideTabButtonTemplate")
     tab:EnableMouse(true)
     tab.tooltipText = info.name
+    local setup = tooltipFor(info, tab)
+    function tab:GetTooltipTextSetupFunction()
+        return setup
+    end
     tab:Hide()
     local source = _G["PaperDollSidebarTab" .. index]
     if isPet(index) then
@@ -284,7 +313,7 @@ local function onPortrait()
     end
     for index, tab in pairs(tabs) do
         if isPet(index) and tab:IsShown() then
-            SetPortraitTexture(tab.Icon, "pet")
+            petPortrait(tab)
         end
     end
 end
@@ -293,6 +322,14 @@ end
 -- Reputation and other panes too.
 local function onPet(_, unit)
     if started and unit == "player" then
+        refreshTabs()
+    end
+end
+
+-- Blizzard only rechecks which of its tabs can be used when the stats pane changes, so a first
+-- title or equipment set wouldn't wake up our tab until then.
+local function onTabsChanged()
+    if started and _G.CharacterFrame:IsShown() then
         refreshTabs()
     end
 end
@@ -309,6 +346,8 @@ function module:OnEnable()
     self:On("UNIT_PET", onPet)
     self:On("UNIT_PORTRAIT_UPDATE", onPortrait)
     self:On("PORTRAITS_UPDATED", onPortrait)
+    self:On("KNOWN_TITLES_UPDATE", onTabsChanged)
+    self:On("EQUIPMENT_SETS_CHANGED", onTabsChanged)
     if _G.CharacterFrame then
         start()
     end

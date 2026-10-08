@@ -63,9 +63,9 @@ ns.changelog = {
                 { L.CHARACTERFRAME_TITLE, "Works with Forever's new Titles tab. Titles gets its "
                     .. "own side tab, the Pet tab opens your pet's stats again instead of Titles, "
                     .. "the titles list starts at the top and runs further down like the stats, "
-                    .. "and the pet pane keeps "
-                    .. "your pet's level and loyalty. Your pet's tab also comes and goes with your "
-                    .. "pet while another tab is open." },
+                    .. "and the pet pane keeps your pet's level and loyalty. Your pet's tab also "
+                    .. "comes and goes with your pet while another tab is open, and a tab you "
+                    .. "can't use yet (no titles, no pet) says why when you point at it." },
             } },
         },
     },
