@@ -27,9 +27,9 @@ ns.changelog = {
                 { L.CHANGELOG_SETTINGS, "A search box at the top of the Modules page shows "
                     .. "only the modules whose name or description has what you type, under "
                     .. "their category headers. Clear it to see every module again." },
-                { L.CHANGELOG_SETTINGS, "The Modules page marks modules and options added since "
-                    .. "you last looked at it with Blizzard's NEW label, until you've seen the "
-                    .. "page. A module with a new option shows its options already open." },
+                { L.CHANGELOG_SETTINGS, "The Modules page marks new modules, and new or changed "
+                    .. "options of other modules, with Blizzard's NEW label until you've seen the "
+                    .. "page. A module with a marked option shows its options already open." },
                 { L.AUTOQUEST_TITLE, "New, off by default, in Automation: accepts quests and "
                     .. "turns in finished ones as you talk to quest givers, one by one down a "
                     .. "quest giver's list. It never picks a reward when there's a choice. "

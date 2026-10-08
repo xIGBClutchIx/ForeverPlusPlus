@@ -215,9 +215,10 @@ local function addGear(initializer, module)
 end
 
 -- NEW labels ----------------------------------------------------------------------------------
--- A module or option added (`added`) after the version the player last saw the Modules page in
--- gets Blizzard's NEW label after its name, the one Blizzard's own new settings get, and a module
--- with a new option starts with its options open. Seeing the page saves this version
+-- A module added (`added`) after the version the player last saw the Modules page in gets
+-- Blizzard's NEW label after its name, the one Blizzard's own new settings get. So does an option
+-- added or changed (`changed`) since then, unless its module is new itself, and its module starts
+-- with its options open. Seeing the page saves this version
 -- (ns.db.seenVersion); the labels stay while the player is on it and are gone once they leave.
 -- Our own label in a weak table, like the gears, since the rows are pooled.
 local newRows = {} -- module name, or option table -> true while it's marked new
@@ -230,12 +231,11 @@ local function canLabel()
         and C_XMLUtil.GetTemplateInfo("NewFeatureLabelTemplate") and true or false
 end
 
--- A module or option added after the version last seen, and not after this one (still
--- unreleased).
-local function isNew(thing)
-    local added, Text = thing.added, ns.Text
-    return type(added) == "string" and Text.NewerVersion(added, ns.db.seenVersion)
-        and not Text.NewerVersion(added, ns.version)
+-- A version after the one last seen, and not after this one (still unreleased).
+local function since(version)
+    local Text = ns.Text
+    return type(version) == "string" and Text.NewerVersion(version, ns.db.seenVersion)
+        and not Text.NewerVersion(version, ns.version)
 end
 
 local function labelFor(frame)
@@ -296,13 +296,14 @@ local function trackNew(order)
     end
     for _, name in ipairs(order) do
         local module = ns.modules[name]
-        if isNew(module) then
-            newRows[name] = true
-        end
-        for _, option in ipairs(module.options or {}) do
-            if not option.debug and isNew(option) then
-                newRows[option] = true
-                expanded[name] = true -- open behind its gear, so the new option is seen
+        if since(module.added) then
+            newRows[name] = true -- all of it is new, so its options aren't marked
+        else
+            for _, option in ipairs(module.options or {}) do
+                if not option.debug and (since(option.added) or since(option.changed)) then
+                    newRows[option] = true
+                    expanded[name] = true -- open behind its gear, so the new option is seen
+                end
             end
         end
     end

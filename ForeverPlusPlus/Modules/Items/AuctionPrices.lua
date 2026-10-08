@@ -77,6 +77,7 @@ module.options = ItemTooltip.PriceOptions({
         key = "crafting",
         name = L.AUCTIONPRICES_CRAFTING,
         description = L.AUCTIONPRICES_CRAFTING_DESC,
+        changed = "0.8.0", -- Estimated Profit, and the age of the oldest price
         section = L.AUCTIONPRICES_SECTION_CRAFTING,
     },
     {
