@@ -27,6 +27,12 @@ ns.changelog = {
                 { L.CHANGELOG_SETTINGS, "A search box at the top of the Modules page shows "
                     .. "only the modules whose name or description has what you type, under "
                     .. "their category headers. Clear it to see every module again." },
+                { L.AUTOQUEST_TITLE, "New, off by default, in Automation: accepts quests and "
+                    .. "turns in finished ones as you talk to quest givers, one by one down a "
+                    .. "quest giver's list. It never picks a reward when there's a choice. "
+                    .. "Accepting and turning in have their own checkboxes, repeatable and shared "
+                    .. "quests can be left out, and holding Shift (or Ctrl, Alt, or no key) lets "
+                    .. "you do it yourself. Developer's Defaults turn it on." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.AUCTIONPRICES_TITLE, "Crafting Costs shows Estimated Profit, after the "
