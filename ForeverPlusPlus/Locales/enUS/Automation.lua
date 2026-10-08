@@ -125,6 +125,27 @@ L.AUTOGOSSIP_PRINT_RESULT = "  -> %s" -- the kind picked, or why not (debug code
 -- The title under a stable master's name, exactly as the game shows it.
 L.AUTOGOSSIP_TITLE_STABLE = "Stable Master"
 
+-- AutoQuest
+L.AUTOQUEST_TITLE = "Auto Quest"
+L.AUTOQUEST_DESC = "Accept quests and turn in finished ones as you talk to quest givers. It never "
+    .. "picks a reward for you when there's a choice."
+L.AUTOQUEST_ACCEPT = "Accept Quests"
+L.AUTOQUEST_ACCEPT_DESC = "Accept new quests, and take them one by one from a quest giver's list."
+L.AUTOQUEST_REPEATABLE = "Repeatable Quests"
+L.AUTOQUEST_REPEATABLE_DESC = "Also take repeatable and daily quests from a quest giver's list."
+L.AUTOQUEST_SHARED = "Shared Quests"
+L.AUTOQUEST_SHARED_DESC = "Also accept quests other players share with you."
+L.AUTOQUEST_TURN_IN = "Turn In Quests"
+L.AUTOQUEST_TURN_IN_DESC = "Turn in finished quests. With more than one reward to choose from, "
+    .. "the choice stays yours."
+L.AUTOQUEST_KEY = "Pause Key"
+L.AUTOQUEST_KEY_DESC = "Hold this key as you talk to a quest giver to accept and turn in "
+    .. "yourself."
+L.AUTOQUEST_KEY_SHIFT = "Shift"
+L.AUTOQUEST_KEY_CTRL = "Ctrl"
+L.AUTOQUEST_KEY_ALT = "Alt"
+L.AUTOQUEST_KEY_NONE = "None"
+
 -- AutoDecline
 L.AUTODECLINE_TITLE = "Auto Decline"
 L.AUTODECLINE_DESC = "Turn down duel requests, and optionally party invites, as they arrive, so "

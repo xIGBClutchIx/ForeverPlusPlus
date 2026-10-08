@@ -27,11 +27,20 @@ ns.changelog = {
                 { L.CHANGELOG_SETTINGS, "A search box at the top of the Modules page shows "
                     .. "only the modules whose name or description has what you type, under "
                     .. "their category headers. Clear it to see every module again." },
+                { L.AUTOQUEST_TITLE, "New, off by default, in Automation: accepts quests and "
+                    .. "turns in finished ones as you talk to quest givers, one by one down a "
+                    .. "quest giver's list. It never picks a reward when there's a choice. "
+                    .. "Accepting and turning in have their own checkboxes, repeatable and shared "
+                    .. "quests can be left out, and holding Shift (or Ctrl, Alt, or no key) lets "
+                    .. "you do it yourself." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.AUCTIONPRICES_TITLE, "Crafting Costs shows Estimated Profit, after the "
                     .. "auction house's 5% cut, and, at the top, how old the oldest auction "
                     .. "price in the totals is." },
+                { L.CLASSCOLORS_TITLE, "New Friends and Who List option (on by default) shows "
+                    .. "online friends' names in the friends list and names in the who list in "
+                    .. "their class color." },
                 { L.CHATCOPY_TITLE, "The window shows chat lines in their chat colors, with "
                     .. "names in their class colors and links in theirs, the way they look in "
                     .. "chat. Copying still gives plain text." },

@@ -2,6 +2,8 @@
 -- party, and target-of-target frames, and NPCs' health bars by reaction: red when hostile, yellow
 -- when neutral, gray when tapped by someone else. Friendly NPCs, and units whose class or
 -- reaction can't be read, keep Blizzard's green. Idea from MiniClassColors; none of its code.
+-- With Friends and Who List on, online friends' names in the friends list and names in the who
+-- list are in their class color too (the guild roster already does this itself).
 --
 -- Blizzard's health bars are a green texture with lockColor set, so Blizzard never colors them
 -- except party frames, which desaturate the bar for a disconnected member. The bar is
@@ -11,6 +13,8 @@
 local _, ns = ...
 
 local _G, setmetatable, hooksecurefunc = _G, setmetatable, hooksecurefunc
+local pairs, ipairs, format, wipe = pairs, ipairs, string.format, wipe
+local C_ClassColor, C_FriendList, GetPlayerInfoByGUID = C_ClassColor, C_FriendList, GetPlayerInfoByGUID
 local UnitIsPlayer, UnitIsConnected, UnitReaction = UnitIsPlayer, UnitIsConnected, UnitReaction
 local UnitIsTapDenied, UnitPlayerControlled, CreateColor = UnitIsTapDenied, UnitPlayerControlled, CreateColor
 
@@ -24,6 +28,7 @@ local module = ns.NewModule("ClassColors", L.CLASSCOLORS_DESC, {
     npcBars = true,
     nameColor = "default",
     nameBackgrounds = true,
+    socialNames = true,
     player = true,
     target = true,
     focus = true,
@@ -47,6 +52,7 @@ module.options = {
         },
     },
     { key = "nameBackgrounds", name = L.CLASSCOLORS_NAME_BG, description = L.CLASSCOLORS_NAME_BG_DESC, section = PARTS },
+    { key = "socialNames", name = L.CLASSCOLORS_SOCIAL, description = L.CLASSCOLORS_SOCIAL_DESC, section = PARTS },
     { key = "player", name = L.CLASSCOLORS_PLAYER, description = L.CLASSCOLORS_PLAYER_DESC, section = FRAMES },
     { key = "target", name = L.CLASSCOLORS_TARGET, description = L.CLASSCOLORS_TARGET_DESC, section = FRAMES },
     { key = "focus", name = L.CLASSCOLORS_FOCUS, description = L.CLASSCOLORS_FOCUS_DESC, section = FRAMES },
@@ -188,6 +194,21 @@ local function hookBar(bar)
     hooksecurefunc(bar, "SetStatusBarDesaturated", onBarDesaturated)
 end
 
+-- Puts a font string in `color`, or back in the color it had before we first colored it.
+local function colorText(text, color)
+    if color then
+        if not nameColor[text] then
+            nameColor[text] = { text:GetTextColor() }
+        end
+        text:SetTextColor(color:GetRGB())
+        painted[text] = true
+    elseif painted[text] then
+        local old = nameColor[text]
+        text:SetTextColor(old[1], old[2], old[3], old[4])
+        painted[text] = nil
+    end
+end
+
 local function paintName(frame)
     local text = frame.name
     if not text then
@@ -200,17 +221,7 @@ local function paintName(frame)
     elseif choice == "class" then
         color = wanted(frame, frame.unit, "names")
     end
-    if color then
-        if not nameColor[text] then
-            nameColor[text] = { text:GetTextColor() }
-        end
-        text:SetTextColor(color:GetRGB())
-        painted[text] = true
-    elseif painted[text] then
-        local old = nameColor[text]
-        text:SetTextColor(old[1], old[2], old[3], old[4])
-        painted[text] = nil
-    end
+    colorText(text, color)
 end
 
 -- The bar behind a target or focus name that Blizzard tints by faction. The field name differs
@@ -293,6 +304,108 @@ local function updateAll()
     end
 end
 
+-- The friends list and the who list. Their rows are scroll box buttons, so we listen for the
+-- scroll box's OnInitializedFrame, which it sends for addons after Blizzard's own initializer has
+-- filled a row, and recolor the row then.
+
+local FRIENDS_ADDON, WHO_ADDON = "Blizzard_FriendsFrame", "Blizzard_GroupFinder_VanillaStyle"
+local lists = {} -- scroll box -> its paint function, while the module is on
+local classTokens -- localized class name -> class token, filled on first use
+local friendPainted = setmetatable({}, weak) -- friend button -> true while its name is colored
+
+local function socialOn()
+    return module.enabled and module.db.socialNames
+end
+
+local function classColorOf(class)
+    return class and C_ClassColor and C_ClassColor.GetClassColor(class)
+end
+
+-- A friend's class token: from their GUID when the client knows it, else from the localized
+-- class name the friend info carries.
+local function friendClass(info)
+    if info.guid and GetPlayerInfoByGUID then
+        local _, class = GetPlayerInfoByGUID(info.guid)
+        if readable(class) and class then
+            return class
+        end
+    end
+    if not classTokens then
+        classTokens = {}
+        for _, names in ipairs({ _G.LOCALIZED_CLASS_NAMES_MALE or {}, _G.LOCALIZED_CLASS_NAMES_FEMALE or {} }) do
+            for token, name in pairs(names) do
+                classTokens[name] = token
+            end
+        end
+    end
+    return info.className and classTokens[info.className]
+end
+
+-- Blizzard draws an online WoW friend as "Name, Level 60 Warrior" in one flat color, so we write
+-- the same line with only the name in its class color. Without `color` it's Blizzard's line.
+local function friendText(info, color)
+    local name = color and ns.Colors.Text(color, info.name) or info.name
+    return name .. ", " .. format(_G.FRIENDS_LEVEL_TEMPLATE, info.level, info.className)
+end
+
+local function paintFriend(_, button, elementData)
+    local info
+    if elementData and elementData.buttonType == _G.FRIENDS_BUTTON_TYPE_WOW and button.name then
+        info = C_FriendList.GetFriendInfoByIndex(elementData.id)
+    end
+    if not (info and info.connected and info.name) then
+        friendPainted[button] = nil -- a different kind of row now, which Blizzard has redrawn
+        return
+    end
+    local color = socialOn() and classColorOf(friendClass(info))
+    if color then
+        button.name:SetText(friendText(info, color))
+        friendPainted[button] = true
+    elseif friendPainted[button] then
+        button.name:SetText(friendText(info))
+        friendPainted[button] = nil
+    end
+end
+
+-- The who list colors only the Class column; this colors the name too.
+local function paintWho(_, button, elementData)
+    local info = elementData and elementData.info
+    if button.Name then
+        colorText(button.Name, socialOn() and info and classColorOf(info.filename) or nil)
+    end
+end
+
+local function repaint(scrollBox, paint)
+    scrollBox:ForEachFrame(function(frame, elementData)
+        paint(module, frame, elementData)
+    end)
+end
+
+local function watchList(scrollBox, paint)
+    if not scrollBox or lists[scrollBox] then
+        return
+    end
+    lists[scrollBox] = paint
+    scrollBox:RegisterCallback(_G.ScrollBoxListMixin.Event.OnInitializedFrame, paint, module)
+    repaint(scrollBox, paint)
+end
+
+local function watchFriends()
+    local frame = _G.FriendsListFrame
+    watchList(frame and frame.ScrollBox, paintFriend)
+end
+
+local function watchWho()
+    local frame = _G.LFGWhoListFrame
+    watchList(frame and frame.ScrollBox, paintWho)
+end
+
+local function repaintLists()
+    for scrollBox, paint in pairs(lists) do
+        repaint(scrollBox, paint)
+    end
+end
+
 function module:OnEnable()
     if _G.UnitFrame_Update then
         self:Hook("UnitFrame_Update", update)
@@ -300,13 +413,25 @@ function module:OnEnable()
     -- A reaction or tap can change without a new unit (a mob turns hostile, someone tags it).
     self:On("UNIT_FACTION", updateAll)
     updateAll()
+    if _G.ScrollBoxListMixin then
+        ns.AddOns.WhenLoaded(FRIENDS_ADDON, watchFriends)
+        ns.AddOns.WhenLoaded(WHO_ADDON, watchWho)
+    end
 end
 
 -- module.enabled is already false here, so every painted bar and name goes back to Blizzard's.
 function module:OnDisable()
     updateAll()
+    ns.AddOns.Cancel(FRIENDS_ADDON, watchFriends)
+    ns.AddOns.Cancel(WHO_ADDON, watchWho)
+    repaintLists()
+    for scrollBox in pairs(lists) do
+        scrollBox:UnregisterCallback(_G.ScrollBoxListMixin.Event.OnInitializedFrame, module)
+    end
+    wipe(lists)
 end
 
 function module:OnOptionChanged()
     updateAll()
+    repaintLists()
 end

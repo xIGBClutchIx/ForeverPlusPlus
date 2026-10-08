@@ -59,6 +59,7 @@ Modules\Automation\GatherTracking.lua
 Modules\Items\ProfessionTooltips.lua
 Modules\Automation\AutoStow.lua
 Modules\Automation\AutoGossip.lua
+Modules\Automation\AutoQuest.lua
 Modules\Automation\AutoDecline.lua
 Modules\Automation\AutoRelease.lua
 Modules\Automation\SkipCinematics.lua

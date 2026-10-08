@@ -14,6 +14,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Auto Decline | Turns down duel requests, and optionally party invites without the invite sound, and says in chat who asked. Can let friends and guildmates through. Off by default. |
 | Auto Dismount | Gets you off your mount or stands you up when a spell, flight, loot, or attack fails because you're mounted or sitting. Can also leave shapeshift forms (off by default). |
 | Auto Gossip | When an NPC has only one thing to say and no quests, picks it for you, so the bank, shop, or flight map opens straight away. Hold Shift to choose yourself. |
+| Auto Quest | Accepts quests and turns in finished ones as you talk to quest givers, going through a quest giver's list one by one. Never picks a reward when there's a choice, skips shared quests unless you allow them, and pauses while you hold Shift (or another key). Off by default. |
 | Auto Release | Releases your spirit when you die in a battleground, unless you can resurrect yourself or someone is resurrecting you. Off by default. |
 | Auto Repair | Repairs your gear at any merchant who repairs and says in chat what it cost. Hold Shift to skip it (an option). |
 | Auto Sell Junk | Sells the gray items in your bags when a merchant opens and says in chat what they sold for. Can stop at 12 items so all can be bought back. Hold Shift to skip it (an option). Off by default. |
@@ -63,7 +64,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Flight Timer | Times every flight you take, remembered by the game's flight point IDs, then shows a bar counting the flight down (move and scale it in Edit Mode) and the time on the flight map's tooltip. |
 | Hide Filter Reset | Hides the reset button on the world map's filter dropdown, which otherwise shows whenever a filter is off. |
 | **Unit Frames** | |
-| Class Colors | Shows players' health bars, and optionally names (class color or white) and target and focus name backgrounds, in their class color on the player, target, focus, party, and target-of-target frames, and hostile and neutral NPCs' health bars in red and yellow. |
+| Class Colors | Shows players' health bars, and optionally names (class color or white) and target and focus name backgrounds, in their class color on the player, target, focus, party, and target-of-target frames, and hostile and neutral NPCs' health bars in red and yellow. Also colors online friends' names in the friends list and names in the who list by class. |
 | **Nameplates** | |
 | NPC Nameplates | Always shows friendly NPCs' names with their title, with a name size slider and a choice of where buffs sit. The health bar appears only when they're hurt or in combat. |
 | Player Nameplates | Always shows friendly players' names with their guild, with a name size slider, a choice of where buffs sit, and an icon (or light blue name) for recent allies. The health bar appears only when they're hurt or in combat. |

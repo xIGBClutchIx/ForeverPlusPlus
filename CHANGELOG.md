@@ -9,10 +9,12 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Talent Planner** (new, on by default, in Interface): a Plan Talents button on the talent window. Place talents freely without learning them, in order, up to the points you have at a level you choose, then follow the plan as you level: its next talent glows, tooltips say at which level each rank comes, and hovering the line beside the button lists the plan in order. A dropdown keeps several named plans, and shares or imports one as a line of text.
 - **Commands** (new, on by default, in Interface): short slash commands, each with its own checkbox. `/way [zone] x y` puts the game's map pin on a spot and tracks it (`/way clear` takes it away), `/rl` reloads the UI, and `/clear` empties a chat window. A command another addon already has, like TomTom's `/way`, is left to it.
 - **Settings**: a search box at the top of the Modules page shows only the modules whose name or description has what you type, under their category headers. Clear it to see every module again.
+- **Auto Quest** (new, off by default, in Automation): accepts quests and turns in finished ones as you talk to quest givers, one by one down a quest giver's list. It never picks a reward when there's a choice. Accepting and turning in have their own checkboxes, repeatable and shared quests can be left out, and holding Shift (or Ctrl, Alt, or no key) lets you do it yourself.
 
 ### Changed
 
 - **Auction Prices**: Crafting Costs shows Estimated Profit, after the auction house's 5% cut, and, at the top, how old the oldest auction price in the totals is.
+- **Class Colors**: new Friends and Who List option (on by default) shows online friends' names in the friends list and names in the who list in their class color.
 - **Chat Copy**: the window shows chat lines in their chat colors, with names in their class colors and links in theirs, the way they look in chat. Copying still gives plain text.
 - **Error Catcher**: new Button option puts its button on the minimap, in the addon compartment, both, or neither. The minimap is still the default.
 - **Settings**: Clutch's Default is now Developer's Defaults, and the welcome page's Defaults button is now Recommended Defaults, matching the Defaults popup on the Modules and Debug pages.
