@@ -20,6 +20,7 @@ local module = ns.NewModule("AutoQuest", L.AUTOQUEST_DESC, {
 })
 module.title = L.AUTOQUEST_TITLE
 module.category = "automation"
+module.added = "0.8.0"
 
 module.options = {
     { key = "accept", name = L.AUTOQUEST_ACCEPT, description = L.AUTOQUEST_ACCEPT_DESC },

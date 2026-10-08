@@ -29,6 +29,7 @@ local module = ns.NewModule("TalentPlanner", L.TALENTPLANNER_DESC, {
 })
 module.title = L.TALENTPLANNER_TITLE
 module.category = "interface"
+module.added = "0.8.0"
 
 module.options = {
     { key = "glow", name = L.TALENTPLANNER_GLOW, description = L.TALENTPLANNER_GLOW_DESC },
