@@ -15,7 +15,12 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Auction Prices**: Crafting Costs shows Estimated Profit, after the auction house's 5% cut, and, at the top, how old the oldest auction price in the totals is.
 - **Chat Copy**: the window shows chat lines in their chat colors, with names in their class colors and links in theirs, the way they look in chat. Copying still gives plain text.
 - **Error Catcher**: new Button option puts its button on the minimap, in the addon compartment, both, or neither. The minimap is still the default.
+- **Settings**: Clutch's Default is now Developer's Defaults, and the welcome page's Defaults button is now Recommended Defaults, matching the Defaults popup on the Modules and Debug pages.
 - **Points of Interest**: new Ley Lines option shows Skyborne ley lines and elemental convergences on the map. A spot is saved when a Skyborne gets the 15-minute buff from Read Ley Line or Skysight there, and every character on the account sees it. Shown to Skyborne for their own kind by default, or to everyone, or to no one.
+
+### Fixed
+
+- **Character Frame Enhancements**: works with Forever's new Titles tab. Titles gets its own side tab, the Pet tab opens your pet's stats again instead of Titles, the titles list starts at the top like the stats, and the pet pane keeps your pet's level and loyalty. Your pet's tab also comes and goes with your pet while another tab is open.
 
 ## 0.7.0 (2026-10-02)
 
