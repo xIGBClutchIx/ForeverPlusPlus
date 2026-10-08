@@ -325,6 +325,12 @@ Debug page > Self Test > Run (or `/fpp selftest`) probes the "Unverified" items 
 - Text measured before its font file has loaded reads as 0 tall on Forever, even after preloading. Measure with a floor of the font size. **[in-game]** (2026-09-23)
 - `SystemFont_NamePlate` (and its `_Outlined` twin) is a `FontFamily`: FRIZQT for roman, and its own font for `korean`, `simplifiedchinese`, `traditionalchinese`, and `russian`. `FontString:GetFont()` returns only the roman file, so `SetFont` with it drops the other alphabets and CJK names draw blank. To change the size, do what Blizzard's plates do: `SetFontObject` the family, then `FontString:SetFontHeight(height)`, which keeps every alphabet (`Blizzard_NamePlateUnitFrame.lua`). `CreateFontFamily(name, members)` also exists but needs a global name. **[web]** (Gethe `forever` branch, `GameFonts.xml`, `Blizzard_NamePlateUnitFrame.lua`, and the API docs, 2026-09-28)
 
+## Friends and who lists
+
+- The friends list is `FriendsListFrame.ScrollBox` (Camelot `Blizzard_FriendsFrame/FriendsFrame.lua`). `FriendsFrame_UpdateFriendButton` writes an online WoW friend as one `button.name` line, `info.name .. ", " .. format(FRIENDS_LEVEL_TEMPLATE, level, className)`, in the flat `FRIENDS_WOW_NAME_COLOR`; element data is `{ buttonType = FRIENDS_BUTTON_TYPE_WOW, id }` for `C_FriendList.GetFriendInfoByIndex(id)`. The element factory holds the function by reference, so hooking the global wouldn't reach it. **[web]** (local copy of the 1.60.1 UI source, checked 2026-10-08)
+- The who list is `LFGWhoListFrame.ScrollBox` in the load-on-demand `Blizzard_GroupFinder_VanillaStyle` (`Mainline/WhoList.lua`); `InitButton` colors only the `Class` column from `info.filename`, and the `Name` font string keeps its template color. The guild roster already class-colors names itself. **[web]** (same source)
+- Both rows are filled by scroll box initializers, which then send `ScrollBoxListMixin.Event.OnInitializedFrame` (Blizzard's comment says it's for addons), so Class Colors listens to that with `RegisterCallback` instead of hooking. Drawing in game is **Unverified**.
+
 ## Open questions
 
 Check these in the live client and move them up with a tag and date:

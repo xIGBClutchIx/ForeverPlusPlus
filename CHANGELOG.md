@@ -14,6 +14,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Changed
 
 - **Auction Prices**: Crafting Costs shows Estimated Profit, after the auction house's 5% cut, and, at the top, how old the oldest auction price in the totals is.
+- **Class Colors**: new Friends and Who List option (on by default) shows online friends' names in the friends list and names in the who list in their class color.
 - **Chat Copy**: the window shows chat lines in their chat colors, with names in their class colors and links in theirs, the way they look in chat. Copying still gives plain text.
 - **Error Catcher**: new Button option puts its button on the minimap, in the addon compartment, both, or neither. The minimap is still the default.
 - **Settings**: Clutch's Default is now Developer's Defaults, and the welcome page's Defaults button is now Recommended Defaults, matching the Defaults popup on the Modules and Debug pages.

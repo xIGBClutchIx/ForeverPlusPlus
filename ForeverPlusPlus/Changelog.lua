@@ -38,6 +38,9 @@ ns.changelog = {
                 { L.AUCTIONPRICES_TITLE, "Crafting Costs shows Estimated Profit, after the "
                     .. "auction house's 5% cut, and, at the top, how old the oldest auction "
                     .. "price in the totals is." },
+                { L.CLASSCOLORS_TITLE, "New Friends and Who List option (on by default) shows "
+                    .. "online friends' names in the friends list and names in the who list in "
+                    .. "their class color." },
                 { L.CHATCOPY_TITLE, "The window shows chat lines in their chat colors, with "
                     .. "names in their class colors and links in theirs, the way they look in "
                     .. "chat. Copying still gives plain text." },

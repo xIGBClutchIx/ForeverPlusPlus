@@ -262,6 +262,7 @@
     "date",
     "time",
     "wipe",
+    "GetPlayerInfoByGUID",
     "seterrorhandler",
     "debugstack",
     "debuglocals",
