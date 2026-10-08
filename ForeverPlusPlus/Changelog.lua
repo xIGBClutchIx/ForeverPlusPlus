@@ -35,6 +35,9 @@ ns.changelog = {
                 { L.ERRORCATCHER_TITLE, "New Button option puts its button on the minimap, in "
                     .. "the addon compartment, both, or neither. The minimap is still the "
                     .. "default." },
+                { L.CHANGELOG_SETTINGS, "Clutch's Default is now Developer's Defaults, and the "
+                    .. "welcome page's Defaults button is now Recommended Defaults, matching the "
+                    .. "Defaults popup on the Modules and Debug pages." },
                 { L.POI_TITLE, "New Ley Lines option shows Skyborne ley lines and elemental "
                     .. "convergences on the map. A spot is saved when a Skyborne gets the "
                     .. "15-minute buff from Read Ley Line or Skysight there, and every character "

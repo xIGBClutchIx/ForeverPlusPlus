@@ -464,7 +464,7 @@ end
 -- Blizzard's Defaults button, at the top right of a settings list, asks "These Settings" or "All
 -- Settings", and All Settings resets the whole game. On our list pages our own Defaults button
 -- sits over it instead, with a popup laid out like Blizzard's that offers only Forever++'s two
--- presets: Clutch's Defaults | Cancel | Recommended Defaults. Blizzard's is
+-- presets: Developer's Defaults | Cancel | Recommended Defaults. Blizzard's is
 -- faded out underneath (never changed otherwise), and ours shows and hides with it, since Blizzard
 -- hides it while searching.
 
@@ -495,8 +495,8 @@ local function addDefaultsButton()
     defaultsButton:SetFrameLevel(blizzard:GetFrameLevel() + 5)
     defaultsButton:SetText(SETTINGS_DEFAULTS or L.HOME_DEFAULTS)
     defaultsButton:SetScript("OnClick", function()
-        ns.ConfirmChoice("DEFAULTS_CHOICE", L.DEFAULTS_ASK, L.DEFAULTS_CLUTCH, ns.ApplyClutchDefault,
-            L.DEFAULTS_RECOMMENDED, ns.ApplyDefaults)
+        ns.ConfirmChoice("DEFAULTS_CHOICE", L.DEFAULTS_ASK, L.DEFAULTS_DEVELOPER,
+            ns.ApplyDeveloperDefaults, L.DEFAULTS_RECOMMENDED, ns.ApplyDefaults)
     end)
     defaultsButton:Hide()
     blizzard:HookScript("OnShow", function() updateDefaults(blizzard) end)
@@ -638,7 +638,7 @@ local function buildWelcome(frame)
     -- Two presets on the same row, each asking first since they overwrite the player's settings.
     local function addPreset(text, tooltip, key, question, fn, anchor)
         local button = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-        button:SetSize(140, 24)
+        button:SetSize(155, 24)
         button:SetText(text)
         button:SetScript("OnClick", function() ns.Confirm(key, question, fn) end)
         button:SetScript("OnEnter", function(self)
@@ -651,11 +651,12 @@ local function buildWelcome(frame)
         button:SetPoint("LEFT", anchor, "RIGHT", 8, 0)
         return button
     end
-    local defaults = addPreset(L.HOME_DEFAULTS, L.HOME_DEFAULTS_TIP, "DEFAULTS",
+    local defaults = addPreset(L.DEFAULTS_RECOMMENDED, L.HOME_DEFAULTS_TIP, "DEFAULTS",
         L.HOME_DEFAULTS_ASK, ns.ApplyDefaults, last)
-    local clutchTip = format(L.HOME_CLUTCH_TIP, concat(ns.ClutchModules(), L.HOME_LIST_SEPARATOR))
-    addPreset(L.HOME_CLUTCH, clutchTip, "CLUTCH", L.HOME_CLUTCH_ASK, ns.ApplyClutchDefault,
-        defaults)
+    local developerTip = format(L.HOME_DEVELOPER_TIP,
+        concat(ns.DeveloperModules(), L.HOME_LIST_SEPARATOR))
+    addPreset(L.DEFAULTS_DEVELOPER, developerTip, "DEVELOPER", L.HOME_DEVELOPER_ASK,
+        ns.ApplyDeveloperDefaults, defaults)
 
     y = y - 44
     addHeading(frame, y, L.HOME_LINKS)
