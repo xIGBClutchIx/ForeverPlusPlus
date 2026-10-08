@@ -24,6 +24,9 @@ ns.changelog = {
                     .. "each with its own checkbox. /way [zone] x y puts the game's map pin on a "
                     .. "spot and tracks it (/way clear takes it away), /rl reloads the UI, and "
                     .. "/clear empties a chat window. A command another addon already has, like TomTom's /way, is left to it." },
+                { L.CHANGELOG_SETTINGS, "A search box at the top of the Modules page shows "
+                    .. "only the modules whose name or description has what you type, under "
+                    .. "their category headers. Clear it to see every module again." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.AUCTIONPRICES_TITLE, "Crafting Costs shows Estimated Profit, after the "

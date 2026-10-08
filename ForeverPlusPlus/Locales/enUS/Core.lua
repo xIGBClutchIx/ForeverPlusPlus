@@ -62,6 +62,7 @@ L.SETTINGS_SHOW_OPTIONS = "Show %s Options"
 L.SETTINGS_HIDE_OPTIONS = "Hide %s Options"
 L.SETTINGS_OPEN_PAGE = "Open %s" -- for a module with a page of its own
 L.SETTINGS_TURN_ON = "Turn On" -- the button on a "Blizzard's ... is off" row
+L.SETTINGS_SEARCH = "Search modules" -- gray text in the Modules page's empty search box
 
 -- Settings: Changelog page. The notes themselves are in Changelog.lua.
 L.CHANGELOG = "Changelog"
