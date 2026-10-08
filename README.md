@@ -80,7 +80,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 
 ## Use
 
-Open Game Menu > Options > AddOns > Forever++. It opens on a welcome page with the version, links, and commands, and two buttons: Recommended Defaults puts every module's settings back to how they start, and Developer's Defaults does that and also turns on Fishing Cast, Skip Cinematics, Auto Screenshot, Currency Bar, Hide Beta Feedback, Short Channel Names, Easy Delete, and Auto Quest, and sets Zone Info's Dungeons and Fishing to Hold Detail Key. Modules has a checkbox for each module, grouped by category, and a search box at the top that narrows the list by name and description; the gear beside a module shows its options under it. Console Variables is its own page, Debug has testing options and the Self Test button, and Changelog has what changed in each release (also in [CHANGELOG.md](CHANGELOG.md)).
+Open Game Menu > Options > AddOns > Forever++. It opens on a welcome page with the version, links, and commands, and two buttons: Recommended Defaults puts every module's settings back to how they start, and Developer's Defaults does that and also turns on Fishing Cast, Skip Cinematics, Auto Screenshot, Currency Bar, Hide Beta Feedback, Short Channel Names, and Easy Delete, and sets Zone Info's Dungeons and Fishing to Hold Detail Key. Modules has a checkbox for each module, grouped by category, and a search box at the top that narrows the list by name and description; the gear beside a module shows its options under it. Console Variables is its own page, Debug has testing options and the Self Test button, and Changelog has what changed in each release (also in [CHANGELOG.md](CHANGELOG.md)).
 
 | Command | What it does |
 |---|---|

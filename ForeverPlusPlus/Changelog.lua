@@ -32,7 +32,7 @@ ns.changelog = {
                     .. "quest giver's list. It never picks a reward when there's a choice. "
                     .. "Accepting and turning in have their own checkboxes, repeatable and shared "
                     .. "quests can be left out, and holding Shift (or Ctrl, Alt, or no key) lets "
-                    .. "you do it yourself. Developer's Defaults turn it on." },
+                    .. "you do it yourself." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.AUCTIONPRICES_TITLE, "Crafting Costs shows Estimated Profit, after the "
