@@ -10,7 +10,7 @@
 --                    their `section`s get no header here. A module's `notice` (a warning) shows under its
 --                    checkbox while it applies. `alwaysOn` modules (tools) have no checkbox. A
 --                    search box in its header narrows it to modules by title and description.
---                    A module added since the player last looked (`module.added`) is marked NEW
+--                    A module or option added since the player last looked (`added`) is marked NEW
 --     <Tool>         a page a module draws itself (`BuildPage`)
 --     Debug          options marked `debug = true`, for testing
 --     Changelog      the release notes from Changelog.lua
@@ -214,12 +214,13 @@ local function addGear(initializer, module)
     end)
 end
 
--- New-module labels ---------------------------------------------------------------------------
--- A module added (`module.added`) after the version the player last saw the Modules page in gets
--- Blizzard's NEW label beside its checkbox, the one Blizzard's own new settings get. Seeing the
--- page saves this version (ns.db.seenVersion); the labels stay while the player is on it and are
--- gone once they leave. Our own label in a weak table, like the gears, since the rows are pooled.
-local newModules = {} -- module name -> true while it's marked new
+-- NEW labels ----------------------------------------------------------------------------------
+-- A module or option added (`added`) after the version the player last saw the Modules page in
+-- gets Blizzard's NEW label after its name, the one Blizzard's own new settings get, and a module
+-- with a new option starts with its options open. Seeing the page saves this version
+-- (ns.db.seenVersion); the labels stay while the player is on it and are gone once they leave.
+-- Our own label in a weak table, like the gears, since the rows are pooled.
+local newRows = {} -- module name, or option table -> true while it's marked new
 local labels = setmetatable({}, { __mode = "k" }) -- row frame -> our label
 local seen -- true once the Modules page has been shown this session
 
@@ -229,9 +230,10 @@ local function canLabel()
         and C_XMLUtil.GetTemplateInfo("NewFeatureLabelTemplate") and true or false
 end
 
--- Added after the version last seen, and not after this one (a module still unreleased).
-local function isNew(module)
-    local added, Text = module.added, ns.Text
+-- A module or option added after the version last seen, and not after this one (still
+-- unreleased).
+local function isNew(thing)
+    local added, Text = thing.added, ns.Text
     return type(added) == "string" and Text.NewerVersion(added, ns.db.seenVersion)
         and not Text.NewerVersion(added, ns.version)
 end
@@ -247,21 +249,27 @@ local function labelFor(frame)
     return label
 end
 
--- Puts the label after the checkbox (and its gear) each time Blizzard sets the row up.
-local function addNewLabel(initializer, module, hasGear)
-    if not (newModules[module.name] and initializer.InitFrame) then
+-- Puts the label just after the row's name each time Blizzard sets the row up, while `key` (a
+-- module's name, or one of its options) is new.
+local function addNewLabel(initializer, key)
+    if not (initializer and newRows[key] and initializer.InitFrame) then
         return
     end
     hooksecurefunc(initializer, "InitFrame", function(_, frame)
-        local anchor = frame.Checkbox or frame.CheckBox
-        if not (anchor and newModules[module.name]) then
+        local name = frame.Text
+        if not (name and newRows[key]) then
             return
         end
         local label = labelFor(frame)
-        -- The template centers its text on the frame, so move it half the text's width along.
+        -- The name's width, unless it's cut short, then half the label's text: the template
+        -- centers its text on the frame.
+        local width = ns.Text.Width(name)
+        if name:GetWidth() > 0 and width > name:GetWidth() then
+            width = name:GetWidth()
+        end
         local half = label.Label and ns.Text.Width(label.Label) / 2 or 16
         label:ClearAllPoints()
-        label:SetPoint("CENTER", anchor, "RIGHT", (hasGear and 32 or 8) + half, 0)
+        label:SetPoint("CENTER", name, "LEFT", width + 6 + half, 0)
         label:Show()
     end)
 end
@@ -275,7 +283,7 @@ local function updateSeen()
         end
         seen = true
     elseif seen then
-        wipe(newModules)
+        wipe(newRows)
     end
 end
 
@@ -287,11 +295,18 @@ local function trackNew(order)
         return
     end
     for _, name in ipairs(order) do
-        if isNew(ns.modules[name]) then
-            newModules[name] = true
+        local module = ns.modules[name]
+        if isNew(module) then
+            newRows[name] = true
+        end
+        for _, option in ipairs(module.options or {}) do
+            if not option.debug and isNew(option) then
+                newRows[option] = true
+                expanded[name] = true -- open behind its gear, so the new option is seen
+            end
         end
     end
-    EventRegistry:RegisterCallback("Settings.CategoryChanged", updateSeen, newModules)
+    EventRegistry:RegisterCallback("Settings.CategoryChanged", updateSeen, newRows)
     SettingsPanel:HookScript("OnShow", updateSeen)
     SettingsPanel:HookScript("OnHide", updateSeen)
 end
@@ -318,9 +333,7 @@ local function addToggle(category, module, hasGear)
     if hasGear and initializer then
         addGear(initializer, module)
     end
-    if initializer then
-        addNewLabel(initializer, module, hasGear)
-    end
+    addNewLabel(initializer, module.name)
     return initializer
 end
 
@@ -466,6 +479,9 @@ local function addOption(category, layout, module, option, parent, shown, added)
         placeUnder(initializer, module, parent)
     end
     showWhen(initializer, shown)
+    if parent then
+        addNewLabel(initializer, option) -- on the Modules page only, where seeing it counts
+    end
     added[option.key] = initializer
 end
 

@@ -89,7 +89,7 @@ for _, rows in ipairs({
     { kind("spiritHealers", "spiritSize", L.POI_SPIRIT, L.POI_SPIRIT_DESC) },
     -- Who sees them, so like Capital Cities there's no checkbox.
     { {
-        key = "leyLines", name = L.POI_LEYLINES, description = L.POI_LEYLINES_DESC,
+        key = "leyLines", name = L.POI_LEYLINES, description = L.POI_LEYLINES_DESC, added = "0.8.0",
         choices = {
             { "skyborne", L.POI_LEYLINES_SKYBORNE },
             { "everyone", L.POI_LEYLINES_EVERYONE },

@@ -954,6 +954,7 @@ module.options = {
         key = "button",
         name = L.ERRORCATCHER_BUTTON,
         description = L.ERRORCATCHER_BUTTON_DESC,
+        added = "0.8.0",
         choices = {
             { "none", L.ERRORCATCHER_BUTTON_NONE },
             { "compartment", L.ERRORCATCHER_BUTTON_COMPARTMENT },
