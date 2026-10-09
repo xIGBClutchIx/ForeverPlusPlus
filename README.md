@@ -19,6 +19,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Auto Repair | Repairs your gear at any merchant who repairs and says in chat what it cost. Hold Shift to skip it (an option). |
 | Auto Sell Junk | Sells the gray items in your bags when a merchant opens and says in chat what they sold for. Can stop at 12 items so all can be bought back. Hold Shift to skip it (an option). Off by default. |
 | Auto Stow | Puts your weapons away a few seconds after combat ends. |
+| Auto Weapon Buff | Puts a sharpening stone, weightstone, oil, poison, or fishing lure straight onto your weapon when you use it, without clicking the weapon. Main hand first; the off hand when only it can take it, or when the main hand already has a buff and the off hand doesn't (or its buff runs out sooner). Off by default. |
 | Fishing Cast | Double right-click in the world with a fishing pole equipped to cast Fishing, and the click after that loots as usual. Never while in combat, and it warns you once when combat starts with the pole still equipped. Off by default. |
 | Fast Loot | With auto loot on, takes everything at once instead of waiting for the loot window. |
 | Gathering Tracking | Keeps Find Minerals or Find Herbs on after logging in, zoning, or dying, and can swap between the two. |

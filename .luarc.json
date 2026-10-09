@@ -308,6 +308,14 @@
     "DISABLED_FONT_COLOR",
     "C_SuperTrack",
     "UiMapPoint",
-    "DEFAULT_CHAT_FRAME"
+    "DEFAULT_CHAT_FRAME",
+    "C_PaperDollInfo",
+    "GetWeaponEnchantInfo",
+    "SpellIsTargeting",
+    "CursorHasItem",
+    "PickupInventoryItem",
+    "ItemLocation",
+    "UseAction",
+    "UseItemByName"
   ]
 }

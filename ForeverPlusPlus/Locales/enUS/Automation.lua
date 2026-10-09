@@ -209,3 +209,15 @@ L.FISHINGCAST_MS = "%d ms" -- milliseconds
 L.FISHINGCAST_COMBAT = "Combat Warning"
 L.FISHINGCAST_COMBAT_DESC = "Warn once when combat starts while a fishing pole is equipped."
 L.FISHINGCAST_COMBAT_TEXT = "You have a fishing pole equipped."
+
+
+-- AutoWeaponBuff
+L.AUTOWEAPONBUFF_TITLE = "Auto Weapon Buff"
+L.AUTOWEAPONBUFF_DESC = "Put a sharpening stone, weightstone, oil, poison, or fishing lure straight "
+    .. "onto your weapon when you use it, without clicking the weapon. Main hand first, or the off "
+    .. "hand when only it can take it or the main hand already has a buff."
+L.AUTOWEAPONBUFF_PRINT = "Print Weapon Checks"
+L.AUTOWEAPONBUFF_PRINT_DESC = "Print in chat, each time an item waits for a target, which weapons "
+    .. "the game says it can go on and which one was picked."
+-- debug codes: enchanting spell, item condition, main hand fits, off hand fits, slot picked
+L.AUTOWEAPONBUFF_PRINT_LINE = "Weapon buff: enchanting=%s condition=%s main=%s off=%s -> slot %s"

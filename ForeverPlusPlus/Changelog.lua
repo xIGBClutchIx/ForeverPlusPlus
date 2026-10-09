@@ -36,6 +36,11 @@ ns.changelog = {
                     .. "Accepting and turning in have their own checkboxes, repeatable and shared "
                     .. "quests can be left out, and holding Shift (or Ctrl, Alt, or no key) lets "
                     .. "you do it yourself." },
+                { L.AUTOWEAPONBUFF_TITLE, "New, off by default, in Automation: using a "
+                    .. "sharpening stone, weightstone, oil, poison, or fishing lure puts it "
+                    .. "straight onto your weapon, without clicking the weapon. Main hand first; "
+                    .. "the off hand when only it can take it, or when the main hand already has "
+                    .. "a buff and the off hand doesn't (or its buff runs out sooner)." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.AUCTIONPRICES_TITLE, "Crafting Costs shows Estimated Profit, after the "

@@ -11,6 +11,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Settings**: a search box at the top of the Modules page shows only the modules whose name or description has what you type, under their category headers. Clear it to see every module again.
 - **Settings**: the Modules page marks new modules, and new or changed options of other modules, with Blizzard's NEW label until you've seen the page. A module with a marked option shows its options already open.
 - **Auto Quest** (new, off by default, in Automation): accepts quests and turns in finished ones as you talk to quest givers, one by one down a quest giver's list. It never picks a reward when there's a choice. Accepting and turning in have their own checkboxes, repeatable and shared quests can be left out, and holding Shift (or Ctrl, Alt, or no key) lets you do it yourself.
+- **Auto Weapon Buff** (new, off by default, in Automation): using a sharpening stone, weightstone, oil, poison, or fishing lure puts it straight onto your weapon, without clicking the weapon. Main hand first; the off hand when only it can take it, or when the main hand already has a buff and the off hand doesn't (or its buff runs out sooner).
 
 ### Changed
 
