@@ -142,7 +142,8 @@ function ns.AfterCombat(fn)
 end
 
 -- Saved settings ------------------------------------------------------------------------------
--- ForeverPlusPlusDB = { modules = { [name] = { enabled = bool, ... } } }. Missing values are
+-- ForeverPlusPlusDB = { modules = { [name] = { enabled = bool, ... } }, seenVersion, modulesLayout
+-- (the Modules page's layout, which Settings.lua reads and checks) }. Missing values are
 -- filled from each module's defaults when the addon loads, and settings no module defines any
 -- more (a removed module or option) are dropped.
 

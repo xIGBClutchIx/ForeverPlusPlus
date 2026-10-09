@@ -57,12 +57,32 @@ L.CATEGORY_OTHER = "Other"
 L.DEBUG = "Debug"
 L.SETTINGS_AFTER_COMBAT = "Settings open after combat."
 L.MODULES = "Modules" -- the page with every module's checkbox, and a button to it
+-- The Modules page's Layout dropdown and its choices
+L.SETTINGS_LAYOUT = "Layout"
+L.SETTINGS_LAYOUT_TIP = "How the Modules page shows the modules and their options."
+L.SETTINGS_LAYOUT_DETAILS = "List and Details"
+L.SETTINGS_LAYOUT_LIST = "List"
+L.SETTINGS_LAYOUT_TABS = "Category Tabs"
+L.SETTINGS_LAYOUT_ADDONS = "AddOn List"
+L.SETTINGS_LAYOUT_CARDS = "Cards"
+L.SETTINGS_TAB_ALL = "All" -- the Category Tabs tab with every module
+L.SETTINGS_ON_COUNT = "%d of %d on" -- modules on, modules in the category
+-- A module's details and options on the Modules page
+L.SETTINGS_ENABLED = "Enabled" -- the module's own on/off checkbox
+L.SETTINGS_OPTIONS = "Options" -- the header over its options
+L.SETTINGS_NO_OPTIONS = "This module has no options."
 -- The gear beside a module's checkbox: module title
 L.SETTINGS_SHOW_OPTIONS = "Show %s Options"
 L.SETTINGS_HIDE_OPTIONS = "Hide %s Options"
-L.SETTINGS_OPEN_PAGE = "Open %s" -- for a module with a page of its own
+L.SETTINGS_OPEN_PAGE = "Open %s" -- module title, for a module with a page of its own
 L.SETTINGS_TURN_ON = "Turn On" -- the button on a "Blizzard's ... is off" row
+L.SETTINGS_FIX_NOTICE = "Open its options to fix this." -- a card's mark while its notice applies
 L.SETTINGS_SEARCH = "Search modules" -- gray text in the Modules page's empty search box
+L.SETTINGS_NO_MATCH = "No modules match \"%s\"." -- the search text
+-- The Cards layout's options dialog
+L.SETTINGS_REVERT = "Revert to Defaults"
+L.SETTINGS_REVERT_TIP = "Puts this module's options back to their defaults. Whether it's on stays as it is."
+L.SETTINGS_CLOSE = "Close"
 
 -- Settings: Changelog page. The notes themselves are in Changelog.lua.
 L.CHANGELOG = "Changelog"
@@ -79,8 +99,8 @@ L.HOME_WELCOME = "Welcome to %s" -- addon title
 L.HOME_TAGLINE = "Small additions and changes to the default UI for WoW Forever."
 L.HOME_VERSION = "Version %s by %s" -- version, author
 L.HOME_INTRO = "Each module is one small change to Blizzard's interface, made to look like it "
-    .. "shipped with the game. Turn them on and off on the Modules page; the gear beside a "
-    .. "module shows its options. Settings are saved for your whole account."
+    .. "shipped with the game. Turn them on and off and change their options on the Modules "
+    .. "page, laid out the way you like. Settings are saved for your whole account."
 L.HOME_MODULES_ON = "%d of %d modules on" -- on, total
 L.HOME_DEFAULTS = "Defaults"
 L.HOME_DEFAULTS_TIP = "Puts every module's settings back to how they start for a new player."
