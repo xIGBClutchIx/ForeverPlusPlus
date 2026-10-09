@@ -435,7 +435,7 @@ end
 
 -- Modules the Developer's Defaults preset turns on, on top of every module's default settings.
 local developerEnables = { "FishingCast", "SkipCinematics", "AutoScreenshot", "CurrencyBar",
-    "HideFeedback", "ChannelNames", "EasyDelete" }
+    "HideFeedback", "ChannelNames", "EasyDelete", "AutoWeaponBuff" }
 
 -- Options the Developer's Defaults preset sets differently from the module's default.
 local developerOptions = {
