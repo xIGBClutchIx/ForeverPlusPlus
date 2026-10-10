@@ -3,17 +3,20 @@
 local _, ns = ...
 
 local StaticPopupDialogs, StaticPopup_Show, YES, NO = StaticPopupDialogs, StaticPopup_Show, YES, NO
+local StaticPopup_Hide = StaticPopup_Hide
 local CANCEL, ACCEPT, CLOSE = CANCEL, ACCEPT, CLOSE
 
----Asks the player to confirm, then calls `onAccept`. The same `key` always asks the same question
----and does the same thing: the popup is made the first time it's used.
+---Asks the player to confirm, then calls `onAccept(arg)`. The same `key` always asks the same
+---question: the popup is made the first time it's used. `arg` fills a `%s` in `text`, such as an
+---item link, so one key can ask about different things.
 ---@param key string a name for this question, such as "AUCTIONPRICES_RESET"
 ---@param text string the question
----@param onAccept function
-function ns.Confirm(key, text, onAccept)
+---@param onAccept fun(arg?: string)
+---@param arg? string
+function ns.Confirm(key, text, onAccept, arg)
     -- Probe: StaticPopup is Blizzard's confirmation dialog; without it, just do it.
     if not (StaticPopupDialogs and StaticPopup_Show) then
-        onAccept()
+        onAccept(arg)
         return
     end
     local which = "FOREVERPLUSPLUS_" .. key
@@ -22,8 +25,8 @@ function ns.Confirm(key, text, onAccept)
             text = text,
             button1 = YES,
             button2 = NO,
-            OnAccept = function()
-                onAccept()
+            OnAccept = function(_, data)
+                data.onAccept(data.arg)
             end,
             timeout = 0,
             whileDead = true,
@@ -31,7 +34,16 @@ function ns.Confirm(key, text, onAccept)
             preferredIndex = 3, -- clear of the popups the game's own UI uses
         }
     end
-    StaticPopup_Show(which)
+    -- This call's function and arg travel with the popup, not in the closure made the first time.
+    StaticPopup_Show(which, arg, nil, { onAccept = onAccept, arg = arg })
+end
+
+---Closes the popup for `key` if it's showing, for a question that no longer makes sense.
+---@param key string
+function ns.ConfirmHide(key)
+    if StaticPopup_Hide then
+        StaticPopup_Hide("FOREVERPLUSPLUS_" .. key)
+    end
 end
 
 ---Asks the player to pick one of two things or cancel, laid out like Blizzard's own Defaults popup

@@ -53,6 +53,7 @@ Modules\Items\AlreadyKnown.lua
 Modules\Items\ItemCount.lua
 Modules\Items\BestReward.lua
 Modules\Items\EasyDelete.lua
+Modules\Items\SellGuard.lua
 Modules\Interface\HideFeedback.lua
 Modules\Interface\Tooltips.lua
 Modules\Automation\GatherTracking.lua

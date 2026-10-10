@@ -14,6 +14,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Auto Quest** (new, off by default, in Automation): accepts quests and turns in finished ones as you talk to quest givers, one by one down a quest giver's list. It never picks a reward when there's a choice. Accepting and turning in have their own checkboxes, repeatable and shared quests can be left out, and holding Shift (or Ctrl, Alt, or no key) lets you do it yourself.
 - **Auto Weapon Buff** (new, off by default, in Automation): using a sharpening stone, weightstone, oil, poison, or fishing lure puts it straight onto your weapon, without clicking the weapon. Main hand first; the off hand when only it can take it, or when the main hand already has a buff and the off hand doesn't (or its buff runs out sooner).
 - **Minimap Button** (new, on by default, in Interface): Forever++'s own button on the minimap, in the addon compartment, or both. Click it to open Forever++ settings; while Error Catcher is on, right-click it to see the errors, and it shows how many this session caught.
+- **Sell Guard** (new, off by default, in Items): asks before you sell a Rare or better item, or anything that sells for 1 gold or more, to a merchant. The item comes straight back for what it sold for, and Yes sells it. Minimum Quality and Price Over set what it asks about; hold Shift to sell without asking. Gray items are never asked about, so Auto Sell Junk works as before.
 
 ### Changed
 

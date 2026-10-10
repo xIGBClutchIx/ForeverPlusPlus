@@ -51,6 +51,12 @@ ns.changelog = {
                     .. "button on the minimap, in the addon compartment, or both. Click it to open "
                     .. "Forever++ settings; while Error Catcher is on, right-click it to see the "
                     .. "errors, and it shows how many this session caught." },
+                { L.SELLGUARD_TITLE, "New, off by default, in Items: asks before you sell a "
+                    .. "Rare or better item, or anything that sells for 1 gold or more, to a "
+                    .. "merchant. The item comes straight back for what it sold for, and Yes "
+                    .. "sells it. Minimum Quality and Price Over set what it asks about; hold "
+                    .. "Shift to sell without asking. Gray items are never asked about, so Auto "
+                    .. "Sell Junk works as before." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.AUCTIONPRICES_TITLE, "Crafting Costs shows Estimated Profit, after the "

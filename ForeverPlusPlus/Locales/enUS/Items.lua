@@ -115,6 +115,22 @@ L.BESTREWARD_DESC = "Mark the quest reward choice that sells to a vendor for the
 L.EASYDELETE_TITLE = "Easy Delete"
 L.EASYDELETE_DESC = "Type DELETE for you when destroying a good item, so Yes is a single click."
 
+-- SellGuard
+L.SELLGUARD_TITLE = "Sell Guard"
+L.SELLGUARD_DESC = "Ask before selling a good or valuable item to a merchant. The item comes "
+    .. "straight back for what it sold for, and Yes sells it. Hold Shift to sell without asking. "
+    .. "Gray items are never asked about."
+L.SELLGUARD_QUALITY = "Minimum Quality"
+L.SELLGUARD_QUALITY_DESC = "Ask before selling items of this quality or better."
+L.SELLGUARD_UNCOMMON = "Uncommon"
+L.SELLGUARD_RARE = "Rare"
+L.SELLGUARD_EPIC = "Epic"
+L.SELLGUARD_PRICE = "Price Over"
+L.SELLGUARD_PRICE_DESC = "Also ask before selling a white or better item, or a stack, that sells "
+    .. "for at least this much. Off at 0."
+L.SELLGUARD_PRICE_OFF = "Off"
+L.SELLGUARD_CONFIRM = "Sell %s?" -- item link
+
 -- SellPrice
 L.SELLPRICE_TITLE = "Sell Price"
 L.SELLPRICE_DESC = "Show the vendor price of the whole stack in item tooltips. Hold Shift to see "
