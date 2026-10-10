@@ -38,6 +38,34 @@ function Chat.Plain(text)
     return text
 end
 
+---A pattern that finds a chat timestamp at the start of a line, for one of Blizzard's chat
+---timestamp formats ("%I:%M ", "[%H:%M:%S] ", "%I:%M %p "). Its numbers can be any digits, so it
+---finds the stamp of a line from any time.
+---@param stampFormat string a `date` format, as the chat timestamp setting holds it
+---@return string
+function Chat.TimestampPattern(stampFormat)
+    local pieces, i = { "^" }, 1
+    while i <= #stampFormat do
+        local c = sub(stampFormat, i, i)
+        local spec = c == "%" and sub(stampFormat, i + 1, i + 1) or ""
+        if spec == "p" then
+            -- AM or PM in the player's language.
+            pieces[#pieces + 1] = "[^%s%d]+"
+            i = i + 2
+        elseif spec == "%" then
+            pieces[#pieces + 1] = "%%"
+            i = i + 2
+        elseif spec ~= "" then
+            pieces[#pieces + 1] = "%d+"
+            i = i + 2
+        else
+            pieces[#pieces + 1] = find(c, "[%^%$%(%)%%%.%[%]%*%+%-%?]") and "%" .. c or c
+            i = i + 1
+        end
+    end
+    return concat(pieces)
+end
+
 -- Colored lines -----------------------------------------------------------------------------------
 -- A chat line as an edit box can show it in its chat colors: the line's color around it, its own
 -- color codes (names, links) kept, and links, textures, and atlases gone. Copying from an edit box
