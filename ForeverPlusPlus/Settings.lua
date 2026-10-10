@@ -15,14 +15,14 @@
 --     Debug          Show Tags, then options marked `debug = true` and buttons from
 --                    `module.debugActions`, for testing
 --     Changelog      the release notes from Changelog.lua
---     About          what the addon is, how many modules are on, a button to the Changelog, the
---                    Recommended and Developer's Defaults, the version, links, and /fpp commands
+--     About          what the addon is, how many modules are on, the version, links, and the /fpp
+--                    commands, with the Defaults button at the top right like Modules
 -- Without subpages (an older Settings API), the Modules page is the only page.
 local _, ns = ...
 
 local ipairs, pairs, next, format, type, sort = ipairs, pairs, next, string.format, type, table.sort
 local strlower = string.lower
-local concat, min, max, pcall = table.concat, math.min, math.max, pcall
+local min, max, pcall = math.min, math.max, pcall
 local InCombatLockdown, CreateFrame, GetBuildInfo = InCombatLockdown, CreateFrame, GetBuildInfo
 local wipe = wipe
 local C_AddOns, GetAddOnMetadata, GameTooltip = C_AddOns, GetAddOnMetadata, GameTooltip
@@ -31,7 +31,6 @@ local L = ns.L
 
 local settings = {} -- module name -> its Blizzard setting objects, to refresh after /fpp changes
 local modulesCategory -- the Modules page, the top Forever++ entry, for /fpp
-local changelogCategory -- the Changelog page, for the About page's button
 local pages = {} -- module name -> the page it draws itself, for ns.OpenSettings(name)
 
 -- Opens a Forever++ page (after combat, if the player is in combat).
@@ -119,8 +118,8 @@ end
 -- setting in the panel to its default, every addon's included, so one misclick would throw away
 -- every Forever++ choice. While Blizzard is setting defaults our setters hold their change back,
 -- and the event the panel fires after says which button it was: Settings.CategoryDefaulted (These
--- Settings, on one of our pages) applies them, Settings.Defaulted (All Settings) drops them. The
--- About page's Recommended Defaults button is the way to reset everything of ours.
+-- Settings, on one of our pages) applies them, Settings.Defaulted (All Settings) drops them. Our own
+-- Defaults button (askDefaults) is the way to reset everything of ours.
 local held -- changes held back while Blizzard sets defaults, to apply or drop after
 
 -- Probe: CheckIsSettingDefaults is Mainline's (the `forever` UI source has it); without it,
@@ -545,7 +544,7 @@ end
 -- Settings", and All Settings resets the whole game. On our list page (Debug) our own Defaults
 -- button sits over it instead, with our popup (askDefaults). Blizzard's is faded out underneath
 -- (never changed otherwise), and ours shows and hides with it, since Blizzard hides it while
--- searching. The Modules page is drawn by us and has its own.
+-- searching. The Modules and About pages are drawn by us and have their own.
 
 local ourPages = {} -- category -> true, for the list pages that are ours
 local defaultsButton -- ours, while it's made
@@ -1297,8 +1296,9 @@ local function buildModules(frame)
 end
 
 -- About page ----------------------------------------------------------------------------------
--- What the addon is, how many modules are on, the way to the Changelog page, the presets, links,
--- and the /fpp commands. Built the first time it's shown; the module count updates each time.
+-- What the addon is, how many modules are on, links, and the /fpp commands, with the Defaults
+-- button at the top right like the Modules page. Built the first time it's shown; the module
+-- count updates each time.
 
 local WEBSITE = "https://github.com/xIGBClutchIx/ForeverPlusPlus"
 local ISSUES = WEBSITE .. "/issues"
@@ -1351,14 +1351,6 @@ local function addHeading(frame, y, text)
     heading:SetText(text)
 end
 
-local function addButton(frame, text, category)
-    local button = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-    button:SetSize(140, 24)
-    button:SetText(text)
-    button:SetScript("OnClick", function() open(category) end)
-    return button
-end
-
 -- How many modules the player can turn on, and how many are on.
 local function countModules()
     local on, total = 0, 0
@@ -1376,6 +1368,8 @@ end
 
 local function buildAbout(frame)
     ns.AddPageTitle(frame, L.ABOUT)
+    local defaults = newButton(frame, SETTINGS_DEFAULTS or L.HOME_DEFAULTS, 96, askDefaults)
+    defaults:SetPoint("TOPRIGHT", -10, -18) -- where the Modules page has it
 
     local icon = frame:CreateTexture(nil, "ARTWORK")
     icon:SetSize(64, 64)
@@ -1415,35 +1409,8 @@ local function buildAbout(frame)
     end
     update()
     frame:HookScript("OnShow", update) -- after /fpp or the Modules page changed some
-    y = y - 22
 
-    local changelog = addButton(frame, L.CHANGELOG, changelogCategory)
-    changelog:SetPoint("TOPLEFT", 16, y)
-
-    -- Two presets on the same row, each asking first since they overwrite the player's settings.
-    local function addPreset(text, tooltip, key, question, fn, anchor)
-        local button = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-        button:SetSize(155, 24)
-        button:SetText(text)
-        button:SetScript("OnClick", function() ns.Confirm(key, question, fn) end)
-        button:SetScript("OnEnter", function(self)
-            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-            GameTooltip:SetText(text)
-            GameTooltip:AddLine(tooltip, 1, 1, 1, true)
-            GameTooltip:Show()
-        end)
-        button:SetScript("OnLeave", function() GameTooltip:Hide() end)
-        button:SetPoint("LEFT", anchor, "RIGHT", 8, 0)
-        return button
-    end
-    local defaults = addPreset(L.DEFAULTS_RECOMMENDED, L.HOME_DEFAULTS_TIP, "DEFAULTS",
-        L.HOME_DEFAULTS_ASK, ns.ApplyDefaults, changelog)
-    local developerTip = format(L.HOME_DEVELOPER_TIP,
-        concat(ns.DeveloperModules(), L.HOME_LIST_SEPARATOR))
-    addPreset(L.DEFAULTS_DEVELOPER, developerTip, "DEVELOPER", L.HOME_DEVELOPER_ASK,
-        ns.ApplyDeveloperDefaults, defaults)
-
-    y = y - 44
+    y = y - 52
     addHeading(frame, y, L.HOME_LINKS)
     y = y - 26
     addLink(frame, y, L.HOME_WEBSITE, WEBSITE)
@@ -1606,7 +1573,7 @@ function ns.RegisterSettings()
             addDebugActions(debugLayout, module)
         end
     end
-    changelogCategory = addCanvasPage(category, L.CHANGELOG, buildChangelog)
+    addCanvasPage(category, L.CHANGELOG, buildChangelog)
     addCanvasPage(category, L.ABOUT, buildAbout)
     Settings.RegisterAddOnCategory(category)
     ourPages[debugPage] = true

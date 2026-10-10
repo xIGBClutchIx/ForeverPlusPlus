@@ -483,28 +483,14 @@ function ns.ApplyPreset(enable, options)
     end
 end
 
----Puts every module back to its defaults (the Recommended Defaults button on the About page).
+---Puts every module back to its defaults (Recommended Defaults in the Defaults popup).
 function ns.ApplyDefaults()
     ns.ApplyPreset()
 end
 
----Defaults plus the modules the developer turns on (the Developer's Defaults button).
+---Defaults plus the modules the developer turns on (Developer's Defaults in the Defaults popup).
 function ns.ApplyDeveloperDefaults()
     ns.ApplyPreset(developerEnables, developerOptions)
-end
-
----The titles of the modules Developer's Defaults turns on, for its button's tooltip, so the
----tooltip can't drift from the list. Modules this client doesn't get are left out.
----@return string[]
-function ns.DeveloperModules()
-    local titles = {}
-    for _, name in ipairs(developerEnables) do
-        local module = ns.modules[name]
-        if module and not module.unavailable then
-            titles[#titles + 1] = module.title or name
-        end
-    end
-    return titles
 end
 
 -- /fpp ----------------------------------------------------------------------------------------
