@@ -40,6 +40,9 @@ local module = ns.NewModule("ProfessionTooltips", L.PROFTOOLTIPS_DESC, {
 module.title = L.PROFTOOLTIPS_TITLE
 module.category = "items"
 
+-- Gathering in the world, then locks, then the same skills on items in your bags.
+local GATHERING, LOCKS, ITEMS = L.PROFTOOLTIPS_SECTION_GATHERING, L.PROFTOOLTIPS_SECTION_LOCKS,
+    L.PROFTOOLTIPS_SECTION_ITEMS
 module.options = {
     {
         key = "show", name = L.PROFTOOLTIPS_SHOW, description = L.PROFTOOLTIPS_SHOW_DESC,
@@ -47,16 +50,32 @@ module.options = {
             { "known", L.PROFTOOLTIPS_SHOW_KNOWN },
             { "always", L.PROFTOOLTIPS_SHOW_ALWAYS },
         },
+        section = GATHERING,
     },
-    { key = "herbalism", name = L.PROFTOOLTIPS_HERBALISM, description = L.PROFTOOLTIPS_HERBALISM_DESC },
-    { key = "mining", name = L.PROFTOOLTIPS_MINING, description = L.PROFTOOLTIPS_MINING_DESC },
-    { key = "skinning", name = L.PROFTOOLTIPS_SKINNING, description = L.PROFTOOLTIPS_SKINNING_DESC },
-    { key = "lockpicking", name = L.PROFTOOLTIPS_LOCKPICKING, description = L.PROFTOOLTIPS_LOCKPICKING_DESC },
+    {
+        key = "herbalism", name = L.PROFTOOLTIPS_HERBALISM, description = L.PROFTOOLTIPS_HERBALISM_DESC,
+        section = GATHERING,
+    },
+    {
+        key = "mining", name = L.PROFTOOLTIPS_MINING, description = L.PROFTOOLTIPS_MINING_DESC,
+        section = GATHERING,
+    },
+    {
+        key = "skinning", name = L.PROFTOOLTIPS_SKINNING, description = L.PROFTOOLTIPS_SKINNING_DESC,
+        section = GATHERING,
+    },
+    {
+        key = "lockpicking", name = L.PROFTOOLTIPS_LOCKPICKING, description = L.PROFTOOLTIPS_LOCKPICKING_DESC,
+        section = LOCKS,
+    },
     {
         key = "blacksmithing", name = L.PROFTOOLTIPS_BLACKSMITHING,
-        description = L.PROFTOOLTIPS_BLACKSMITHING_DESC,
+        description = L.PROFTOOLTIPS_BLACKSMITHING_DESC, section = LOCKS,
     },
-    { key = "items", name = L.PROFTOOLTIPS_ITEMS, description = L.PROFTOOLTIPS_ITEMS_DESC },
+    {
+        key = "items", name = L.PROFTOOLTIPS_ITEMS, description = L.PROFTOOLTIPS_ITEMS_DESC,
+        section = ITEMS,
+    },
 }
 
 -- Data ---------------------------------------------------------------------------------------

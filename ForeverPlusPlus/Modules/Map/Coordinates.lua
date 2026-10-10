@@ -22,12 +22,13 @@ local module = ns.NewModule("Coordinates", L.COORDS_DESC, {
 module.title = L.COORDS_TITLE
 module.category = "map"
 
+-- Whose coordinates, then where they show, then how precise.
 module.options = {
     { key = "player", name = L.COORDS_PLAYER, description = L.COORDS_PLAYER_DESC },
     { key = "cursor", name = L.COORDS_CURSOR, description = L.COORDS_CURSOR_DESC },
-    { key = "tenths", name = L.COORDS_TENTHS, description = L.COORDS_TENTHS_DESC },
-    { key = "minimap", name = L.COORDS_MINIMAP, description = L.COORDS_MINIMAP_DESC },
     { key = "titleBar", name = L.COORDS_TITLEBAR, description = L.COORDS_TITLEBAR_DESC },
+    { key = "minimap", name = L.COORDS_MINIMAP, description = L.COORDS_MINIMAP_DESC },
+    { key = "tenths", name = L.COORDS_TENTHS, description = L.COORDS_TENTHS_DESC },
 }
 
 -- The client's own setting behind each option: the checkboxes under Settings > Gameplay >

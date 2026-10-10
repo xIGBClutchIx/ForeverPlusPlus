@@ -58,6 +58,7 @@ module.options = ItemTooltip.PriceOptions({
         name = L.AUCTIONPRICES_SCAN_AGE_COLOR,
         description = L.AUCTIONPRICES_SCAN_AGE_COLOR_DESC,
         section = L.AUCTIONPRICES_SECTION_TOOLTIP,
+        requires = "scanAge",
         choices = {
             { "age", L.AUCTIONPRICES_SCAN_AGE_COLOR_AGE },
             { "gray", L.PRICE_COLOR_GRAY },
@@ -70,6 +71,7 @@ module.options = ItemTooltip.PriceOptions({
         name = L.AUCTIONPRICES_SCAN_AGE_RED,
         description = L.AUCTIONPRICES_SCAN_AGE_RED_DESC,
         section = L.AUCTIONPRICES_SECTION_TOOLTIP,
+        requires = "scanAge",
         min = 1, max = 48, step = 1,
         format = ns.Text.Hours,
     },

@@ -53,11 +53,12 @@ PlateLabel.SUBTITLE_CHOICES = {
 
 ---The Name Size slider every plate module has (setting `nameSize`, a percent). A new table each
 ---call, so each module's list has its own.
+---@param section? string the Settings section it goes under
 ---@return table option
-function PlateLabel.NameSizeOption()
+function PlateLabel.NameSizeOption(section)
     return {
         key = "nameSize", name = L.PLATES_NAME_SIZE, description = L.PLATES_NAME_SIZE_DESC,
-        min = 50, max = 200, step = 10, format = "%d%%",
+        min = 50, max = 200, step = 10, format = "%d%%", section = section,
     }
 end
 

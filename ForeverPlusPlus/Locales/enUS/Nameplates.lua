@@ -8,6 +8,12 @@ end
 
 -- Friendly nameplates (Lib/PlateLabel.lua and both plate modules)
 L.PLATES_BLIZZARD_OFF = "Blizzard's nameplates are off" -- a gray row atop the page, with a button
+-- Headers over the plate modules' options in Settings
+L.PLATES_SECTION_GENERAL = "General"
+L.PLATES_SECTION_NAME = "Name"
+L.PLAYERPLATES_SECTION_GUILD = "Guild"
+L.PLAYERPLATES_SECTION_ICONS = "Icons"
+L.NPCPLATES_SECTION_TITLE = "Title"
 L.PLATES_BAR_WHEN_HURT = "Health Bar When Hurt"
 L.PLATES_NAME_COLOR = "Name Color"
 L.PLATES_NAME_SIZE = "Name Size"

@@ -27,11 +27,15 @@ local module = ns.NewModule("QuestTracker", L.QUESTTRACKER_DESC, {
 module.title = L.QUESTTRACKER_TITLE
 module.category = "interface"
 
+-- The text first, then the box behind it, then combat.
+local TEXT, BOX, COMBAT = L.QUESTTRACKER_SECTION_TEXT, L.QUESTTRACKER_SECTION_BOX,
+    L.QUESTTRACKER_SECTION_COMBAT
 module.options = {
     {
         key = "font",
         name = L.QUESTTRACKER_FONT,
         description = L.QUESTTRACKER_FONT_DESC,
+        section = TEXT,
         choices = {
             { "default", L.QUESTTRACKER_DEFAULT },
             { "Fonts\\FRIZQT__.TTF", L.QUESTTRACKER_FRIZQT },
@@ -44,12 +48,14 @@ module.options = {
         key = "size",
         name = L.QUESTTRACKER_SIZE,
         description = L.QUESTTRACKER_SIZE_DESC,
+        section = TEXT,
         min = 80, max = 150, step = 5, format = "%d%%",
     },
     {
         key = "outline",
         name = L.QUESTTRACKER_OUTLINE,
         description = L.QUESTTRACKER_OUTLINE_DESC,
+        section = TEXT,
         choices = {
             { "default", L.QUESTTRACKER_DEFAULT },
             { "", L.QUESTTRACKER_OUTLINE_NONE },
@@ -61,12 +67,14 @@ module.options = {
         key = "background",
         name = L.QUESTTRACKER_BACKGROUND,
         description = L.QUESTTRACKER_BACKGROUND_DESC,
+        section = BOX,
         slider = "opacity",
     },
     {
         key = "opacity",
         name = L.QUESTTRACKER_OPACITY,
         description = L.QUESTTRACKER_OPACITY_DESC,
+        section = BOX,
         requires = "background",
         min = 10, max = 100, step = 10, format = "%d%%",
     },
@@ -74,12 +82,14 @@ module.options = {
         key = "border",
         name = L.QUESTTRACKER_BORDER,
         description = L.QUESTTRACKER_BORDER_DESC,
+        section = BOX,
         requires = "background",
     },
     {
         key = "padding",
         name = L.QUESTTRACKER_PADDING,
         description = L.QUESTTRACKER_PADDING_DESC,
+        section = BOX,
         requires = "background",
         min = 0, max = 24, step = 2, format = "%d",
     },
@@ -87,6 +97,7 @@ module.options = {
         key = "fade",
         name = L.QUESTTRACKER_FADE,
         description = L.QUESTTRACKER_FADE_DESC,
+        section = COMBAT,
     },
 }
 

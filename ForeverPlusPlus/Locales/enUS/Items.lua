@@ -188,6 +188,10 @@ L.BAGSLOTS_POSITION_CENTER = "Center"
 
 -- ProfessionTooltips
 L.PROFTOOLTIPS_TITLE = "Profession Tooltips"
+-- Headers over its options in Settings
+L.PROFTOOLTIPS_SECTION_GATHERING = "Gathering"
+L.PROFTOOLTIPS_SECTION_LOCKS = "Locks"
+L.PROFTOOLTIPS_SECTION_ITEMS = "In Your Bags"
 L.PROFTOOLTIPS_DESC = "Show the skill a herb, ore, skinnable creature, or locked box or chest "
     .. "needs, colored by how hard it is for you, like recipes at a trainer."
 L.PROFTOOLTIPS_SHOW = "Show Gathering"

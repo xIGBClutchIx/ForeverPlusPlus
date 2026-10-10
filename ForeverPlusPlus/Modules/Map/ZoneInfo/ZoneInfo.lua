@@ -33,6 +33,24 @@ local module = ns.NewModule("ZoneInfo", L.ZONEINFO_DESC, {
 module.title = L.ZONEINFO_TITLE
 module.category = "map"
 
+-- What a line can be: never, always, or only while holding the detail key, and for professions
+-- also only with the profession.
+local SHOW_ALWAYS = {
+    { "off", L.ZONEINFO_SHOW_OFF },
+    { "always", L.ZONEINFO_SHOW_ALWAYS },
+    { "key", L.ZONEINFO_SHOW_KEY },
+}
+local SHOW_KNOWN = {
+    { "off", L.ZONEINFO_SHOW_OFF },
+    { "known", L.ZONEINFO_SHOW_KNOWN },
+    { "always", L.ZONEINFO_SHOW_ALWAYS },
+    { "key", L.ZONEINFO_SHOW_KEY },
+}
+
+-- Where the panel is first, with the detail key that some lines wait for; then the zone's own
+-- lines, then the profession ones.
+local GENERAL, ZONE, PROFESSIONS = L.ZONEINFO_SECTION_GENERAL, L.ZONEINFO_SECTION_ZONE,
+    L.ZONEINFO_SECTION_PROFESSIONS
 module.options = {
     {
         key = "corner", name = L.ZONEINFO_CORNER, description = L.ZONEINFO_CORNER_DESC,
@@ -42,40 +60,16 @@ module.options = {
             { "TOPLEFT", L.ZONEINFO_TOPLEFT },
             { "TOPRIGHT", L.ZONEINFO_TOPRIGHT },
         },
+        section = GENERAL,
     },
     {
         key = "scale", name = L.ZONEINFO_SIZE, description = L.ZONEINFO_SIZE_DESC,
-        min = 70, max = 150, step = 10, format = "%d%%",
+        min = 70, max = 150, step = 10, format = "%d%%", section = GENERAL,
     },
-    { key = "hover", name = L.ZONEINFO_HOVER, description = L.ZONEINFO_HOVER_DESC },
+    { key = "hover", name = L.ZONEINFO_HOVER, description = L.ZONEINFO_HOVER_DESC, section = GENERAL },
     {
         key = "hideLabel", name = L.ZONEINFO_HIDE_LABEL, description = L.ZONEINFO_HIDE_LABEL_DESC,
-        requires = "hover",
-    },
-    { key = "levels", name = L.ZONEINFO_LEVELS, description = L.ZONEINFO_LEVELS_DESC },
-    {
-        key = "faction", name = L.ZONEINFO_FACTION, description = L.ZONEINFO_FACTION_DESC,
-        choices = {
-            { "off", L.ZONEINFO_SHOW_OFF },
-            { "name", L.ZONEINFO_FACTION_NAME },
-            { "line", L.ZONEINFO_FACTION_LINE },
-        },
-    },
-    {
-        key = "dungeons", name = L.ZONEINFO_DUNGEONS, description = L.ZONEINFO_DUNGEONS_DESC,
-        choices = {
-            { "off", L.ZONEINFO_SHOW_OFF },
-            { "always", L.ZONEINFO_SHOW_ALWAYS },
-            { "key", L.ZONEINFO_SHOW_KEY },
-        },
-    },
-    {
-        key = "fishing", name = L.ZONEINFO_FISHING, description = L.ZONEINFO_FISHING_DESC,
-        choices = {
-            { "off", L.ZONEINFO_SHOW_OFF },
-            { "always", L.ZONEINFO_SHOW_ALWAYS },
-            { "key", L.ZONEINFO_SHOW_KEY },
-        },
+        requires = "hover", section = GENERAL,
     },
     {
         key = "detailKey", name = L.ZONEINFO_DETAIL_KEY, description = L.ZONEINFO_DETAIL_KEY_DESC,
@@ -84,23 +78,39 @@ module.options = {
             { "alt", L.ZONEINFO_KEY_ALT },
             { "ctrl", L.ZONEINFO_KEY_CTRL },
         },
+        section = GENERAL,
+    },
+    { key = "levels", name = L.ZONEINFO_LEVELS, description = L.ZONEINFO_LEVELS_DESC, section = ZONE },
+    {
+        key = "faction", name = L.ZONEINFO_FACTION, description = L.ZONEINFO_FACTION_DESC,
+        choices = {
+            { "off", L.ZONEINFO_SHOW_OFF },
+            { "name", L.ZONEINFO_FACTION_NAME },
+            { "line", L.ZONEINFO_FACTION_LINE },
+        },
+        section = ZONE,
+    },
+    {
+        key = "dungeons", name = L.ZONEINFO_DUNGEONS, description = L.ZONEINFO_DUNGEONS_DESC,
+        choices = SHOW_ALWAYS, section = ZONE,
+    },
+    {
+        key = "herbs", name = L.ZONEINFO_HERBS, description = L.ZONEINFO_HERBS_DESC,
+        choices = SHOW_KNOWN, section = PROFESSIONS,
+    },
+    {
+        key = "ore", name = L.ZONEINFO_ORE, description = L.ZONEINFO_ORE_DESC,
+        choices = SHOW_KNOWN, section = PROFESSIONS,
+    },
+    {
+        key = "skinning", name = L.ZONEINFO_SKINNING, description = L.ZONEINFO_SKINNING_DESC,
+        choices = SHOW_KNOWN, section = PROFESSIONS,
+    },
+    {
+        key = "fishing", name = L.ZONEINFO_FISHING, description = L.ZONEINFO_FISHING_DESC,
+        choices = SHOW_ALWAYS, section = PROFESSIONS,
     },
 }
-
-local SHOW = {
-    { "off", L.ZONEINFO_SHOW_OFF },
-    { "known", L.ZONEINFO_SHOW_KNOWN },
-    { "always", L.ZONEINFO_SHOW_ALWAYS },
-    { "key", L.ZONEINFO_SHOW_KEY },
-}
-for _, option in ipairs({
-    { key = "herbs", name = L.ZONEINFO_HERBS, description = L.ZONEINFO_HERBS_DESC },
-    { key = "ore", name = L.ZONEINFO_ORE, description = L.ZONEINFO_ORE_DESC },
-    { key = "skinning", name = L.ZONEINFO_SKINNING, description = L.ZONEINFO_SKINNING_DESC },
-}) do
-    option.choices = SHOW
-    module.options[#module.options + 1] = option
-end
 
 -- Shared with Data.lua: `zones` (by map ID), `herbs` and `ores` (by item ID).
 module.internal = {}

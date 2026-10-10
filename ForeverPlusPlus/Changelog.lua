@@ -29,8 +29,9 @@ ns.changelog = {
                     .. "their categories. Clear it to see every module again." },
                 { L.CHANGELOG_SETTINGS, "The Modules page marks new modules, and new or changed "
                     .. "options of other modules, with Blizzard's NEW label until you've seen the "
-                    .. "page. A module with a marked option starts selected or with its options "
-                    .. "open." },
+                    .. "page. It opens on the first module with a marked option. Show New Tags on "
+                    .. "the Debug page marks everything new since the last release, to check how "
+                    .. "they look." },
                 { L.AUTOQUEST_TITLE, "New, off by default, in Automation: accepts quests and "
                     .. "turns in finished ones as you talk to quest givers, one by one down a "
                     .. "quest giver's list. It never picks a reward when there's a choice. "
@@ -59,13 +60,13 @@ ns.changelog = {
                 { L.CHANGELOG_SETTINGS, "Clutch's Default is now Developer's Defaults, and the "
                     .. "welcome page's Defaults button is now Recommended Defaults, matching the "
                     .. "Defaults popup on the Modules and Debug pages." },
-                { L.CHANGELOG_SETTINGS, "The Modules page has a Layout dropdown. The new "
-                    .. "default, List and Details, lists every module on the left, each with its "
-                    .. "checkbox, and shows the one you click on the right: what it does, an "
-                    .. "Enabled checkbox, and its options and buttons. Or pick List (the old one "
-                    .. "long list with gears), Category Tabs, AddOn List (collapsible categories, "
-                    .. "with descriptions), or Cards (options in a dialog). It switches at once, "
-                    .. "no reload." },
+                { L.CHANGELOG_SETTINGS, "The Modules page lists every module on the left, each "
+                    .. "with its checkbox, and shows the one you click on the right: its title "
+                    .. "with an Enabled checkbox, what it does, and its options and buttons. No "
+                    .. "more gears or options opening inside the list. Modules with many options "
+                    .. "group them under headers, and options that only matter while another is "
+                    .. "on sit under it: Player Nameplates, NPC Nameplates, Zone Info, Points of "
+                    .. "Interest, Quest Tracker, Profession Tooltips, and Auction Prices." },
                 { L.POI_TITLE, "New Ley Lines option shows Skyborne ley lines and elemental "
                     .. "convergences on the map. A spot is saved when a Skyborne gets the "
                     .. "15-minute buff from Read Ley Line or Skysight there, and every character "

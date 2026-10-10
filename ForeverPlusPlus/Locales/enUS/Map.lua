@@ -13,6 +13,10 @@ L.INSTANCES_RANGE = "%d-%d" -- lowest, highest
 
 -- PointsOfInterest. Place names on the map come from the game, or from Data.lua.
 L.POI_TITLE = "Points of Interest"
+-- Headers over its options in Settings
+L.POI_SECTION_INSTANCES = "Dungeons and Raids"
+L.POI_SECTION_TRAVEL = "Cities and Travel"
+L.POI_SECTION_OTHER = "Other"
 L.POI_DESC = "Show dungeons, raids, capital cities, flight masters, boats, zeppelins, spirit "
     .. "healers, and Skyborne ley lines on the world map."
 L.POI_DUNGEONS = "Dungeons"
@@ -77,6 +81,10 @@ L.POI_LEYLINE_CAST = "Cast %s here" -- a spell
 
 -- ZoneInfo
 L.ZONEINFO_TITLE = "Zone Info"
+-- Headers over its options in Settings
+L.ZONEINFO_SECTION_GENERAL = "General"
+L.ZONEINFO_SECTION_ZONE = "Zone"
+L.ZONEINFO_SECTION_PROFESSIONS = "Professions"
 L.ZONEINFO_DESC = "Show a zone's level range, fishing skill, and the herbs, ore, and skinning in "
     .. "it for your professions, in a corner of the world map."
 L.ZONEINFO_CORNER = "Corner"

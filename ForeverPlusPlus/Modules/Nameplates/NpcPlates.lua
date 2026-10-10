@@ -14,18 +14,29 @@ local module = ns.NewModule("NpcPlates", L.NPCPLATES_DESC, ns.FriendlyPlates.Def
 module.title = L.NPCPLATES_TITLE
 module.category = "nameplates"
 
+-- Laid out like Player Nameplates: general, the name, then the title line.
 module.options = {
-    { key = "barWhenHurt", name = L.PLATES_BAR_WHEN_HURT, description = L.NPCPLATES_BAR_WHEN_HURT_DESC },
+    {
+        key = "barWhenHurt", name = L.PLATES_BAR_WHEN_HURT, description = L.NPCPLATES_BAR_WHEN_HURT_DESC,
+        section = L.PLATES_SECTION_GENERAL,
+    },
+    {
+        key = "level", name = L.PLATES_LEVEL, description = L.PLATES_LEVEL_DESC,
+        choices = ns.PlateLabel.LEVEL_CHOICES, section = L.PLATES_SECTION_GENERAL,
+    },
+    {
+        key = "buffs", name = L.PLATES_BUFFS, description = L.PLATES_BUFFS_DESC,
+        choices = ns.PlateLabel.BUFF_CHOICES, section = L.PLATES_SECTION_GENERAL,
+    },
     {
         key = "nameColor", name = L.PLATES_NAME_COLOR, description = L.NPCPLATES_NAME_COLOR_DESC,
         choices = { { "green", L.PLATES_COLOR_GREEN }, { "white", L.PLATES_COLOR_WHITE } },
+        section = L.PLATES_SECTION_NAME,
     },
-    ns.PlateLabel.NameSizeOption(),
-    { key = "level", name = L.PLATES_LEVEL, description = L.PLATES_LEVEL_DESC, choices = ns.PlateLabel.LEVEL_CHOICES },
-    { key = "buffs", name = L.PLATES_BUFFS, description = L.PLATES_BUFFS_DESC, choices = ns.PlateLabel.BUFF_CHOICES },
+    ns.PlateLabel.NameSizeOption(L.PLATES_SECTION_NAME),
     {
         key = "titles", name = L.NPCPLATES_TITLES, description = L.NPCPLATES_TITLES_DESC,
-        choices = ns.PlateLabel.SUBTITLE_CHOICES,
+        choices = ns.PlateLabel.SUBTITLE_CHOICES, section = L.NPCPLATES_SECTION_TITLE,
     },
     {
         key = "titleColor", name = L.NPCPLATES_TITLE_COLOR, description = L.NPCPLATES_TITLE_COLOR_DESC,
@@ -34,6 +45,7 @@ module.options = {
             { "gray", L.PLATES_COLOR_GRAY },
             { "green", L.PLATES_COLOR_GREEN },
         },
+        requires = "titles", section = L.NPCPLATES_SECTION_TITLE,
     },
     { key = "centerLine", name = L.PLATES_CENTER_LINE, description = L.PLATES_CENTER_LINE_DESC, debug = true },
 }

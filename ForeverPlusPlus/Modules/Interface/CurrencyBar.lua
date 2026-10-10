@@ -25,15 +25,16 @@ local module = ns.NewModule("CurrencyBar", L.CURRENCYBAR_DESC, {
 module.title = L.CURRENCYBAR_TITLE
 module.category = "interface"
 
+-- What the box shows and how it's laid out, then its tooltip.
 module.options = {
     { key = "money", name = L.CURRENCYBAR_MONEY, description = L.CURRENCYBAR_MONEY_DESC },
     { key = "currencies", name = L.CURRENCYBAR_CURRENCIES, description = L.CURRENCYBAR_CURRENCIES_DESC },
+    { key = "vertical", name = L.CURRENCYBAR_VERTICAL, description = L.CURRENCYBAR_VERTICAL_DESC },
     { key = "tooltip", name = L.CURRENCYBAR_TOOLTIP, description = L.CURRENCYBAR_TOOLTIP_DESC },
     {
         key = "session", requires = "tooltip",
         name = L.CURRENCYBAR_SESSION, description = L.CURRENCYBAR_SESSION_DESC,
     },
-    { key = "vertical", name = L.CURRENCYBAR_VERTICAL, description = L.CURRENCYBAR_VERTICAL_DESC },
 }
 
 local DEFAULT_X, DEFAULT_Y = 0, -300

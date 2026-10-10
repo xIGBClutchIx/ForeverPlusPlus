@@ -68,12 +68,14 @@ local function kind(key, sizeKey, name, description)
         { key = key .. "World", name = L.POI_WORLD, description = L.POI_WORLD_DESC, requires = key }
 end
 
+-- Each row's options go under its `section` in Settings.
 module.options = {}
+local INSTANCES, TRAVEL, OTHER = L.POI_SECTION_INSTANCES, L.POI_SECTION_TRAVEL, L.POI_SECTION_OTHER
 for _, rows in ipairs({
-    { kind("dungeons", "dungeonSize", L.POI_DUNGEONS, L.POI_DUNGEONS_DESC) },
-    { kind("raids", "raidSize", L.POI_RAIDS, L.POI_RAIDS_DESC) },
+    { section = INSTANCES, kind("dungeons", "dungeonSize", L.POI_DUNGEONS, L.POI_DUNGEONS_DESC) },
+    { section = INSTANCES, kind("raids", "raidSize", L.POI_RAIDS, L.POI_RAIDS_DESC) },
     -- Ours, Blizzard's, or none: ours hide Blizzard's city icons, so there's no checkbox.
-    { {
+    { section = TRAVEL, {
         key = "capitals", name = L.POI_CAPITALS, description = L.POI_CAPITALS_DESC,
         choices = {
             { "ours", L.POI_CAPITALS_OURS },
@@ -81,14 +83,15 @@ for _, rows in ipairs({
             { "off", L.POI_CAPITALS_OFF },
         },
     }, select(2, kind("capitals", "capitalSize")) },
-    { kind("flightMasters", "flightSize", L.POI_FLIGHT, L.POI_FLIGHT_DESC) },
-    { kind("ships", "shipSize", L.POI_SHIPS, L.POI_SHIPS_DESC) },
-    { kind("zeppelins", "zeppelinSize", L.POI_ZEPPELINS, L.POI_ZEPPELINS_DESC) },
+    { section = TRAVEL, kind("flightMasters", "flightSize", L.POI_FLIGHT, L.POI_FLIGHT_DESC) },
+    { section = TRAVEL, kind("ships", "shipSize", L.POI_SHIPS, L.POI_SHIPS_DESC) },
+    { section = TRAVEL, kind("zeppelins", "zeppelinSize", L.POI_ZEPPELINS, L.POI_ZEPPELINS_DESC) },
     -- After the travel points it's about.
-    { { key = "otherFaction", name = L.POI_OTHER_FACTION, description = L.POI_OTHER_FACTION_DESC } },
-    { kind("spiritHealers", "spiritSize", L.POI_SPIRIT, L.POI_SPIRIT_DESC) },
+    { section = TRAVEL,
+        { key = "otherFaction", name = L.POI_OTHER_FACTION, description = L.POI_OTHER_FACTION_DESC } },
+    { section = OTHER, kind("spiritHealers", "spiritSize", L.POI_SPIRIT, L.POI_SPIRIT_DESC) },
     -- Who sees them, so like Capital Cities there's no checkbox.
-    { {
+    { section = OTHER, {
         key = "leyLines", name = L.POI_LEYLINES, description = L.POI_LEYLINES_DESC, added = "0.8.0",
         choices = {
             { "skyborne", L.POI_LEYLINES_SKYBORNE },
@@ -96,9 +99,11 @@ for _, rows in ipairs({
             { "off", L.POI_LEYLINES_OFF },
         },
     }, select(2, kind("leyLines", "leyLineSize")) },
-    { ns.ChatOption(L.POI_CHAT_DESC) },
+    -- Said when a ley line is saved, so with them.
+    { section = OTHER, ns.ChatOption(L.POI_CHAT_DESC) },
 }) do
     for _, option in ipairs(rows) do
+        option.section = rows.section
         module.options[#module.options + 1] = option
     end
 end

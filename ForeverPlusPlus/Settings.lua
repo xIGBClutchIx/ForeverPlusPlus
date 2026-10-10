@@ -2,16 +2,15 @@
 -- templates so they look like any other options page. Few entries, so the sidebar stays short:
 --   Forever++        a welcome page: what the addon is, how many modules are on, buttons to the
 --                    Modules and Changelog pages, the version, links, and the /fpp commands
---     Modules        every module (the only place modules turn on and off), with a checkbox each,
---                    grouped by `module.category`, in the layout the player picks at the top:
---                    a list with the selected module's details beside it, one long list, a tab
---                    per category, collapsible categories, or cards. Wherever a module's options
---                    show (checkboxes, dropdowns and sliders, and buttons from `module.actions`),
---                    they're greyed out while it's off, an option can sit under another
---                    (`requires`), and its `notice` (a warning) shows while that applies.
+--     Modules        every module (the only place modules turn on and off) in a list on the left,
+--                    with a checkbox each, under a label per `module.category`. Clicking one shows
+--                    it on the right: its title with its Enabled checkbox, its category and
+--                    description, its `notice` (a warning) while that applies, then its options
+--                    (checkboxes, dropdowns and sliders) and buttons (from `module.actions`),
+--                    greyed out while it's off. An option can sit under another (`requires`).
 --                    `alwaysOn` modules (tools) aren't listed. A search box at the top narrows
---                    it to modules by title and description. A module or option added since the
---                    player last looked (`added`) is marked NEW
+--                    the list to modules by title and description. A module or option added
+--                    since the player last looked (`added`) is marked NEW
 --     <Tool>         a page a module draws itself (`BuildPage`)
 --     Debug          options marked `debug = true`, for testing
 --     Changelog      the release notes from Changelog.lua
@@ -20,7 +19,7 @@ local _, ns = ...
 
 local ipairs, pairs, next, format, type, sort = ipairs, pairs, next, string.format, type, table.sort
 local strlower = string.lower
-local concat, min, max, floor, pcall = table.concat, math.min, math.max, math.floor, pcall
+local concat, min, max, pcall = table.concat, math.min, math.max, pcall
 local InCombatLockdown, CreateFrame, GetBuildInfo = InCombatLockdown, CreateFrame, GetBuildInfo
 local wipe = wipe
 local C_AddOns, GetAddOnMetadata, GameTooltip = C_AddOns, GetAddOnMetadata, GameTooltip
@@ -55,9 +54,12 @@ local function open(category)
 end
 
 -- A frame for a page drawn by `build(frame)` instead of from settings, such as a list. Settings
--- needs the frame now, so it starts empty and is filled the first time it's shown.
+-- needs the frame now, so it starts empty and is filled the first time it's shown. It starts
+-- hidden: a new frame is shown, and Settings showing a frame that already is doesn't fire OnShow,
+-- so the page stayed empty until the player left it and came back.
 local function canvasFrame(build)
     local frame = CreateFrame("Frame")
+    frame:Hide()
     local built = false
     frame:SetScript("OnShow", function(self)
         if not built then
@@ -163,10 +165,14 @@ end
 -- NEW labels ----------------------------------------------------------------------------------
 -- A module added (`added`) after the version the player last saw the Modules page in gets
 -- Blizzard's NEW label after its name, the one Blizzard's own new settings get. So does an option
--- added or changed (`changed`) since then, unless its module is new itself; its module starts
--- selected or open, so the option is seen. Seeing the page saves this version
--- (ns.db.seenVersion); the labels stay while the player is on it and are gone once they leave.
+-- added or changed (`changed`) since then, unless its module is new itself; the page opens on the
+-- first module with one, so the option is seen. A version after this one isn't marked yet: what's
+-- tagged for the next release shows once the TOC's version reaches it. Seeing the page saves this
+-- version (ns.db.seenVersion); the labels stay while the player is on it and are gone once they
+-- leave. Show New Tags on the Debug page (ns.db.showNewTags) marks everything tagged after the
+-- last release in Changelog.lua instead, whatever was seen, and keeps it marked, to check them.
 local newRows = {} -- module name, or option table -> true while it's marked new
+local newOrder -- the modules to mark, once trackNew has run
 local seen -- true once the Modules page has been shown this session
 local refreshAll -- redraws the Modules page, once it's built
 
@@ -175,25 +181,52 @@ local function canLabel()
     return hasTemplate("NewFeatureLabelTemplate")
 end
 
--- A version after the one last seen, and not after this one (still unreleased).
-local function since(version)
-    local Text = ns.Text
-    return type(version) == "string" and Text.NewerVersion(version, ns.db.seenVersion)
-        and not Text.NewerVersion(version, ns.version)
+-- The newest version in Changelog.lua with a date, so released.
+local function lastRelease()
+    for _, release in ipairs(ns.changelog or {}) do
+        if release.date then
+            return release.version
+        end
+    end
+    return "0"
 end
 
--- A NEW label for `text`, a font string, put just after its text.
-local function newLabel(parent, text)
-    local label = CreateFrame("Frame", nil, parent, "NewFeatureLabelTemplate")
-    -- The text's width, unless it's cut short, then half the label's text: the template centers
-    -- its text on the frame.
-    local width = ns.Text.Width(text)
-    if text:GetWidth() > 0 and width > text:GetWidth() then
-        width = text:GetWidth()
+-- A version after the one last seen, and not after this one (still unreleased). With Show New
+-- Tags, any version after the last release.
+local function since(version)
+    local Text = ns.Text
+    if type(version) ~= "string" then
+        return false
     end
-    local half = label.Label and ns.Text.Width(label.Label) / 2 or 16
-    label:SetPoint("CENTER", text, "LEFT", width + 6 + half, 0)
-    return label
+    if ns.db.showNewTags then
+        return Text.NewerVersion(version, lastRelease()) and true or false
+    end
+    return Text.NewerVersion(version, ns.db.seenVersion) and not Text.NewerVersion(version, ns.version)
+        and true or false
+end
+
+local NEW_ROOM = 40 -- the room a NEW label takes after its text
+
+-- An update that keeps a NEW label just after `text`, a font string, while `key` (a module's name,
+-- or one of its options) is new: the text at most `room` wide, less the label's room while it
+-- shows. The label is made the first time it's needed, so it can come and go with Show New Tags.
+local function newMark(parent, text, room, key)
+    local label
+    return function()
+        local new = newRows[key] and true or false
+        text:SetWidth(min(ns.Text.Width(text) + 2, room - (new and NEW_ROOM or 0)))
+        if new and not label and canLabel() then
+            label = CreateFrame("Frame", nil, parent, "NewFeatureLabelTemplate")
+            -- The text's width, unless it's cut short, then half the label's text: the template
+            -- centers its text on the frame.
+            local width = min(ns.Text.Width(text), text:GetWidth())
+            local half = label.Label and ns.Text.Width(label.Label) / 2 or 16
+            label:SetPoint("CENTER", text, "LEFT", width + 6 + half, 0)
+        end
+        if label then
+            label:SetShown(new)
+        end
+    end
 end
 
 -- Whether a module has an option the player hasn't seen yet.
@@ -214,7 +247,7 @@ local function updateSeen()
             ns.db.seenVersion = ns.version
         end
         seen = true
-    elseif seen and next(newRows) then
+    elseif seen and next(newRows) and not ns.db.showNewTags then
         wipe(newRows)
         if refreshAll then
             refreshAll()
@@ -222,14 +255,10 @@ local function updateSeen()
     end
 end
 
--- Probe: Settings.CategoryChanged and GetCurrentCategory are Mainline's (the `forever` UI source
--- has them); without them nothing is marked new.
-local function trackNew(order)
-    if not (SettingsPanel and SettingsPanel.GetCurrentCategory and EventRegistry
-        and EventRegistry.RegisterCallback and canLabel()) then
-        return
-    end
-    for _, name in ipairs(order) do
+-- Marks what's new in `newOrder`'s modules, afresh.
+local function markNew()
+    wipe(newRows)
+    for _, name in ipairs(newOrder or {}) do
         local module = ns.modules[name]
         if since(module.added) then
             newRows[name] = true -- all of it is new, so its options aren't marked
@@ -241,6 +270,17 @@ local function trackNew(order)
             end
         end
     end
+end
+
+-- Probe: Settings.CategoryChanged and GetCurrentCategory are Mainline's (the `forever` UI source
+-- has them); without them nothing is marked new.
+local function trackNew(order)
+    if not (SettingsPanel and SettingsPanel.GetCurrentCategory and EventRegistry
+        and EventRegistry.RegisterCallback and canLabel()) then
+        return
+    end
+    newOrder = order
+    markNew()
     EventRegistry:RegisterCallback("Settings.CategoryChanged", updateSeen, newRows)
     SettingsPanel:HookScript("OnShow", updateSeen)
     SettingsPanel:HookScript("OnHide", updateSeen)
@@ -421,6 +461,25 @@ local function addDebugOptions(category, layout, module)
     end
 end
 
+-- Show New Tags: every module and option tagged since the last release marked NEW on the Modules
+-- page, and kept marked, to check how they look. Live: the marks are made again and the page
+-- redrawn.
+local function addShowNewTags(category)
+    local setting = Settings.RegisterProxySetting(category, "ForeverPlusPlus_ShowNewTags",
+        Settings.VarType.Boolean, L.SETTINGS_SHOW_NEW, false,
+        function() return ns.db.showNewTags and true or false end,
+        function(value)
+            change(function()
+                ns.db.showNewTags = value or nil
+                markNew()
+                if refreshAll then
+                    refreshAll()
+                end
+            end)
+        end)
+    Settings.CreateCheckbox(category, setting, L.SETTINGS_SHOW_NEW_DESC)
+end
+
 -- A module's debug buttons (`module.debugActions`, the same shape as `actions`), after its
 -- options.
 local function addDebugActions(layout, module)
@@ -500,68 +559,42 @@ local function categoryOf(module)
 end
 
 -- Modules page --------------------------------------------------------------------------------
--- A page we draw ourselves, built the first time it's shown: under the title, a Layout dropdown,
--- a search box and our Defaults button, then the modules in the layout the player picked. Every
--- layout is made of the same pieces (a module's checkbox and name, its rows of options, notice
--- and buttons, category headers and counts) and only arranges them, so how an option looks or
--- works is written once. A layout is built the first time it's picked and kept, so switching is
--- live. Our own frames from Blizzard's templates and art (the Settings panel's minimal checkboxes,
--- sliders, dropdowns, tabs, and sidebar highlight), so nothing of Blizzard's pooled Settings rows
--- is touched. Every change goes through ns.SetEnabled and ns.SetOption, then ns.RefreshSetting,
--- which puts every piece of that module back to what's saved, so /fpp and the page agree.
+-- A page we draw ourselves, built the first time it's shown: under the title, a search box and
+-- our Defaults button; then a compact checklist of every module on the left, grouped under small
+-- gold category labels, and the selected module on the right, each side scrolling on its own.
+-- Our own frames from Blizzard's templates and art (the Settings panel's minimal checkboxes,
+-- sliders and dropdowns, and its sidebar highlight), so nothing of Blizzard's pooled Settings
+-- rows is touched. Every change goes through ns.SetEnabled and ns.SetOption, then
+-- ns.RefreshSetting, which puts that module back to what's saved wherever it shows, so /fpp and
+-- the page agree.
 
+local LIST_LEFT, LIST_WIDTH, LIST_ROW = 7, 186, 20 -- the module list and its rows
+local PANE_LEFT = 234 -- where the details start, right of the list and its scroll bar
 local ROW_HEIGHT = 26 -- an option's row, as in Blizzard's lists
-local INDENT = 15 -- an option under another (`requires`), or a module's rows under it in a list
-local NARROW_CONTROL = 150 -- where an option's control starts in a narrow block, after its name
-
--- The layouts, in the dropdown's order. The first is the default.
-local LAYOUTS = {
-    { "details", L.SETTINGS_LAYOUT_DETAILS },
-    { "list", L.SETTINGS_LAYOUT_LIST },
-    { "tabs", L.SETTINGS_LAYOUT_TABS },
-    { "addons", L.SETTINGS_LAYOUT_ADDONS },
-    { "cards", L.SETTINGS_LAYOUT_CARDS },
-}
-local builders = {} -- layout key -> function(frame) that draws it and returns { relayout, show }
+local INDENT = 15 -- an option under another (`requires`)
+local CONTROL_LEFT = 150 -- where an option's control starts, after its name
+local DESCRIPTION_LINES = 4 -- the room a description always takes, so the options stay put
 
 local listed = {} -- the names of the modules on the page, by category, then title
 local searchText = {} -- module name -> its title and description, lowercased
 local filter, filterText -- the search text, lowercased and as typed, or nil while the box is empty
+local selected -- the module shown on the right
 local page -- the page's frames, once built
-local wanted -- a module ns.OpenSettings asked for before the page was built
 local bound = {} -- module name -> functions that put what shows of it back to what's saved
-local counters = {} -- functions that recount how many modules of a category are on
-local refreshModule -- puts one module back to what's saved everywhere it shows
+local refreshModule -- puts one module back to what's saved wherever it shows
 
 local function matches(name)
     return not filter or (searchText[name] or ""):find(filter, 1, true) ~= nil
 end
 
-local function inGroup(name, group)
-    return categoryOf(ns.modules[name]) == group
-end
-
--- Whether a module of `group` shows, given `shown(name)` for one module.
-local function anyShown(group, shown)
+-- Whether the search shows a module of `group` (any module, without one).
+local function anyMatch(group)
     for _, name in ipairs(listed) do
-        if (not group or inGroup(name, group)) and shown(name) then
+        if (not group or categoryOf(ns.modules[name]) == group) and matches(name) then
             return true
         end
     end
     return false
-end
-
-local function countOn(group)
-    local on, total = 0, 0
-    for _, name in ipairs(listed) do
-        if inGroup(name, group) then
-            total = total + 1
-            if ns.modules[name].db.enabled then
-                on = on + 1
-            end
-        end
-    end
-    return on, total
 end
 
 -- Runs `fn` now and whenever the module changes.
@@ -575,18 +608,6 @@ local function bind(name, fn)
     fn()
 end
 
--- The modules shown in the layout `key`, or details when it's no layout any more.
-local function layoutKey()
-    for _, layout in ipairs(LAYOUTS) do
-        if layout[1] == ns.db.modulesLayout then
-            return layout[1]
-        end
-    end
-    return LAYOUTS[1][1]
-end
-
--- Pieces ----------------------------------------------------------------------------------------
-
 local function showTooltip(owner, title, text)
     GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
     GameTooltip:SetText(title, 1, 1, 1)
@@ -596,21 +617,15 @@ local function showTooltip(owner, title, text)
     GameTooltip:Show()
 end
 
--- The tooltip a row shows over itself and its controls, as Blizzard's settings rows do, and the
--- row's hover highlight, when it has one.
+-- The tooltip a row shows over itself and its controls, as Blizzard's settings rows do.
 local function addTooltip(row, title, text, ...)
+    if not text or text == "" then
+        return
+    end
     local function enter()
-        if row.hover then
-            row.hover:Show()
-        end
-        if text and text ~= "" then
-            showTooltip(row, title, text)
-        end
+        showTooltip(row, title, text)
     end
     local function leave()
-        if row.hover then
-            row.hover:Hide()
-        end
         if GameTooltip:GetOwner() == row then
             GameTooltip:Hide()
         end
@@ -619,14 +634,6 @@ local function addTooltip(row, title, text, ...)
         frame:HookScript("OnEnter", enter)
         frame:HookScript("OnLeave", leave)
     end
-end
-
--- The faint white a row of a wide list gets under the mouse, as Blizzard's settings rows do.
-local function addHover(row)
-    row.hover = row:CreateTexture(nil, "BACKGROUND")
-    row.hover:SetColorTexture(1, 1, 1, 0.1)
-    row.hover:SetAllPoints()
-    row.hover:Hide()
 end
 
 -- A checkbox like the Settings panel's (its minimal art), calling `onClick(checked)`. Probe: the
@@ -679,6 +686,15 @@ local function setOption(module, option, value)
     ns.RefreshSetting(module.name)
 end
 
+-- The module's on/off checkbox, kept in step with its other one.
+local function newModuleCheck(parent, name, size)
+    local box = newCheckbox(parent, size, function(checked) setEnabled(name, checked) end)
+    bind(name, function()
+        box:SetChecked(ns.modules[name].db.enabled and true or false)
+    end)
+    return box
+end
+
 -- Blizzard's slider with steppers for a slider option. Probe: Mainline's.
 local function newSlider(parent, module, option, width)
     if not (MinimalSliderWithSteppersMixin and Settings.CreateSliderOptions) then
@@ -702,9 +718,8 @@ local function newSlider(parent, module, option, width)
     return slider
 end
 
--- Blizzard's menu dropdown, its radio choices from `choices()`, each { value, text }. Probe:
--- Mainline's.
-local function newMenu(parent, width, choices, isSelected, select)
+-- Blizzard's menu dropdown for an option with `choices`. Probe: Mainline's.
+local function newDropdown(parent, module, option, width)
     if not WowStyle1DropdownMixin then
         return
     end
@@ -715,128 +730,18 @@ local function newMenu(parent, width, choices, isSelected, select)
     end
     dropdown:SetWidth(width)
     dropdown:SetupMenu(function(_, root)
-        for _, choice in ipairs(choices) do
-            root:CreateRadio(choice[2], isSelected, select, choice[1])
+        for _, choice in ipairs(option.choices) do
+            root:CreateRadio(choice[2], function(value)
+                return module.db[option.key] == value
+            end, function(value)
+                setOption(module, option, value)
+            end, choice[1])
         end
     end)
     return dropdown
 end
 
--- The gear beside a module's checkbox that shows its options: gold while they're hidden, white
--- while they show (`isOpen()`), like a pressed button.
-local GEAR = "Interface\\WorldMap\\Gear_64" -- the cog Leatrix Maps uses for its option buttons
-
-local function newGear(row, title, isOpen, onClick)
-    local gear = CreateFrame("Button", nil, row)
-    gear:SetSize(18, 18)
-    gear:SetNormalTexture(GEAR)
-    gear:GetNormalTexture():SetTexCoord(0, 0.5, 0, 0.5)
-    gear:SetHighlightTexture(GEAR, "ADD")
-    gear:GetHighlightTexture():SetTexCoord(0, 0.5, 0, 0.5)
-    function gear.tint()
-        if isOpen() then
-            gear:GetNormalTexture():SetVertexColor(1, 1, 1)
-        else
-            gear:GetNormalTexture():SetVertexColor(1, 0.82, 0) -- gold, like the labels
-        end
-    end
-    local function tooltip()
-        GameTooltip:SetOwner(gear, "ANCHOR_RIGHT")
-        GameTooltip:SetText(format(isOpen() and L.SETTINGS_HIDE_OPTIONS or L.SETTINGS_SHOW_OPTIONS,
-            title), 1, 1, 1)
-        GameTooltip:Show()
-    end
-    gear:SetScript("OnClick", function()
-        onClick()
-        gear.tint()
-        tooltip()
-    end)
-    gear:SetScript("OnEnter", function()
-        if row.hover then
-            row.hover:Show()
-        end
-        tooltip()
-    end)
-    gear:SetScript("OnLeave", function()
-        if row.hover then
-            row.hover:Hide()
-        end
-        GameTooltip:Hide()
-    end)
-    gear.tint()
-    return gear
-end
-
--- The module's on/off checkbox, kept in step with its others.
-local function newModuleCheck(parent, name, size)
-    local box = newCheckbox(parent, size, function(checked) setEnabled(name, checked) end)
-    bind(name, function()
-        box:SetChecked(ns.modules[name].db.enabled and true or false)
-    end)
-    return box
-end
-
--- The module's name, at most `room` wide, with a NEW label after it while the module is new.
--- With `fonts` ({ on, off }) it's greyed while the module is off.
-local function newModuleName(parent, name, font, room, fonts)
-    local module = ns.modules[name]
-    local text = parent:CreateFontString(nil, "OVERLAY", font)
-    text:SetJustifyH("LEFT")
-    text:SetWordWrap(false)
-    text:SetText(module.title or name)
-    local isNew = newRows[name] and canLabel()
-    text:SetWidth(min(ns.Text.Width(text) + 2, room - (isNew and 40 or 0)))
-    local new = isNew and newLabel(parent, text)
-    bind(name, function()
-        if fonts then
-            text:SetFontObject(module.db.enabled and fonts[1] or fonts[2])
-        end
-        if new then
-            new:SetShown(newRows[name] and true or false)
-        end
-    end)
-    return text
-end
-
--- How many modules of `group` are on, kept up to date.
-local function newCount(parent, group)
-    local text = parent:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-    local function update()
-        text:SetText(format(L.SETTINGS_ON_COUNT, countOn(group)))
-    end
-    counters[#counters + 1] = update
-    update()
-    return text
-end
-
--- A category's header across a wide list, like Blizzard's section headers, with its count.
-local function newHeader(parent, width, group, counts)
-    local header = CreateFrame("Frame", nil, parent)
-    header:SetSize(width, 45)
-    local text = header:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
-    text:SetPoint("TOPLEFT", 7, -16)
-    text:SetText(CATEGORY_NAMES[group])
-    if counts then
-        newCount(header, group):SetPoint("TOPRIGHT", -24, -20)
-    end
-    return header
-end
-
--- "No modules match" while the search hides them all.
-local function newEmpty(parent, width)
-    local frame = CreateFrame("Frame", nil, parent)
-    frame:SetSize(width, 40)
-    local text = frame:CreateFontString(nil, "OVERLAY", "GameFontDisable")
-    text:SetPoint("TOPLEFT", 12, -14)
-    text:SetWidth(width - 24)
-    text:SetJustifyH("LEFT")
-    return frame, function()
-        text:SetText(format(L.SETTINGS_NO_MATCH, filterText or ""))
-        return not anyShown(nil, matches)
-    end
-end
-
--- Moves `scroll` so `frame`, in its content, is at the top. After a frame, once the new layout's
+-- Moves `scroll` so `frame`, in its `content`, is at the top. After a frame, once the new layout's
 -- sizes are known.
 local function scrollTo(scroll, content, frame)
     if not (C_Timer and frame) then
@@ -853,108 +758,57 @@ end
 
 -- Stacks ----------------------------------------------------------------------------------------
 -- A stack is a frame whose entries ({ frame, shown, gap }) sit one under the other, `top` down
--- from its top, each only while its `shown()` is true. An entry can wait to `make()` its frame
--- until it first shows. A stack inside a stack is laid out first, and left out while nothing in
--- it shows. Lists, the rows of a module's options, and the details all stack this way.
+-- from its top, each only while its `shown()` is true. The module list is one, and so are the
+-- module's rows on the right.
 
 local function newStack(parent, width, gap)
     local stack = CreateFrame("Frame", nil, parent)
     stack:SetWidth(width)
-    stack.entries, stack.gap, stack.top = {}, gap or 0, 0
+    stack.entries, stack.gap, stack.top, stack.bottom = {}, gap, 0, 0
     return stack
 end
 
 local function addEntry(stack, frame, shown, gap)
-    local entry = { frame = frame, shown = shown, gap = gap }
-    stack.entries[#stack.entries + 1] = entry
-    return entry
+    stack.entries[#stack.entries + 1] = { frame = frame, shown = shown, gap = gap }
 end
 
 local function layoutStack(stack)
     local y, any = -stack.top, false
     for _, entry in ipairs(stack.entries) do
-        local shown = not entry.shown or entry.shown()
-        if shown and not entry.frame and entry.make then
-            entry.frame = entry.make()
-        end
-        local frame = entry.frame
-        if frame then
-            if shown and frame.entries then
-                shown = layoutStack(frame)
+        local shown = not entry.shown or entry.shown() and true or false
+        entry.frame:SetShown(shown)
+        if shown then
+            if any then
+                y = y - (entry.gap or stack.gap)
             end
-            frame:SetShown(shown and true or false)
-            if shown then
-                if any then
-                    y = y - (entry.gap or stack.gap)
-                end
-                frame:ClearAllPoints()
-                frame:SetPoint("TOPLEFT", 0, y)
-                y = y - frame:GetHeight()
-                any = true
-            end
+            entry.frame:ClearAllPoints()
+            entry.frame:SetPoint("TOPLEFT", 0, y)
+            y = y - entry.frame:GetHeight()
+            any = true
         end
     end
-    stack:SetHeight(max(-y + (stack.bottom or 0), 1))
-    return any
+    stack:SetHeight(max(-y + stack.bottom, 1))
 end
 
--- A scrolling stack in `scroll`.
-local function scrollStack(scroll, width, gap)
-    local content = newStack(scroll, width, gap)
-    scroll:SetScrollChild(content)
-    return content
-end
-
--- A module's rows -------------------------------------------------------------------------------
--- A block is a stack of a module's rows: a name on the left and its control after, wide (across a
--- list, placed like Blizzard's settings rows, which put the control at the middle) or narrow (the
--- details beside the list, the Cards dialog), moved in by `indent`. Its `updates` put its controls
--- back to what's saved.
-
-local function newBlock(parent, width, wide, indent)
-    local block = newStack(parent, width, wide and 6 or 4)
-    block.updates, block.wide, block.indent = {}, wide, indent or 0
-    if wide then
-        block.labelLeft = 37
-        block.controlLeft = floor(width / 2) - 80
-        block.labelRight = floor(width / 2) - 85
-    else
-        block.labelLeft = 4
-        block.controlLeft = NARROW_CONTROL
-        block.labelRight = NARROW_CONTROL - 4
-    end
-    local room = width - block.controlLeft
-    block.sliderWidth = min(wide and 250 or 200, room - 50)
-    block.dropdownWidth = min(wide and 220 or 180, room - 16)
-    block.buttonWidth = min(wide and 200 or 180, room - 16)
-    return block
-end
-
-local function refreshBlock(block)
-    for _, update in ipairs(block.updates) do
-        update()
-    end
-end
+-- The selected module's rows -------------------------------------------------------------------
+-- A view is a stack of the module's rows: a name on the left and its control after. Its
+-- `updates` put its controls back to what's saved.
 
 -- A row: `text` on the left, gold while `on()` and grey otherwise, and the space after it for a
--- control. Shown only while `shown()` is true, when given. `narrow` keeps room for a NEW label.
-local function addRow(block, text, indent, on, shown, narrow)
-    local row = CreateFrame("Frame", nil, block)
+-- control. Shown only while `shown()` is true, when given.
+local function addRow(view, text, indent, on, shown)
+    local row = CreateFrame("Frame", nil, view)
     row:EnableMouse(true)
-    row:SetWidth(block:GetWidth())
-    if block.wide then
-        addHover(row)
-    end
-    local left = block.labelLeft + block.indent + indent
+    row:SetWidth(view:GetWidth())
     local label = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    label:SetPoint("LEFT", left, 0)
-    label:SetWidth(block.labelRight - left - (narrow or 0))
+    label:SetPoint("LEFT", 4 + indent, 0)
+    label:SetWidth(CONTROL_LEFT - 8 - indent)
     label:SetJustifyH("LEFT")
     label:SetText(text)
     row:SetHeight(max(ROW_HEIGHT, label:GetStringHeight() + 8))
-    addEntry(block, row, shown)
+    addEntry(view, row, shown)
     if on then
-        block.updates[#block.updates + 1] = function()
+        view.updates[#view.updates + 1] = function()
             label:SetFontObject(on() and "GameFontNormal" or "GameFontDisable")
         end
     end
@@ -963,7 +817,7 @@ end
 
 -- One of the module's options, with `byKey` for the option it's under (`requires`) or the slider
 -- in its row (`slider`), and `done` for those already drawn.
-local function addOptionRow(block, module, option, byKey, done)
+local function addOptionRow(view, module, option, byKey, done)
     local parent = option.requires and byKey[option.requires]
     local function on()
         if not module.db.enabled then
@@ -975,23 +829,23 @@ local function addOptionRow(block, module, option, byKey, done)
         end
         return true
     end
-    local isNew = newRows[option] and canLabel()
-    local row, label = addRow(block, option.name, parent and INDENT or 0, on, nil, isNew and 40)
-    local updates = block.updates
-    if isNew then
-        local new = newLabel(row, label)
-        updates[#updates + 1] = function()
-            new:SetShown(newRows[option] and true or false)
-        end
+    local indent = parent and INDENT or 0
+    local row, label = addRow(view, option.name, indent, on)
+    local updates = view.updates
+    -- The name wraps narrower while it's marked NEW, so the row's height follows it.
+    local mark = newMark(row, label, CONTROL_LEFT - 8 - indent, option)
+    updates[#updates + 1] = function()
+        mark()
+        row:SetHeight(max(ROW_HEIGHT, label:GetStringHeight() + 8))
     end
-    local left = block.controlLeft
+    local room = view:GetWidth() - CONTROL_LEFT
     local pair = option.slider and byKey[option.slider]
     if pair and pair.min then
         -- A checkbox and its slider in one row, the slider greyed while the checkbox is off.
         done[pair.key] = true
         local box = newCheckbox(row, 30, function(checked) setOption(module, option, checked) end)
-        box:SetPoint("LEFT", left, 0)
-        local slider = newSlider(row, module, pair, block.sliderWidth - 36)
+        box:SetPoint("LEFT", CONTROL_LEFT, 0)
+        local slider = newSlider(row, module, pair, min(200, room - 50) - 36)
         if slider then
             slider:SetPoint("LEFT", box, "RIGHT", 6, 0)
         end
@@ -1005,26 +859,22 @@ local function addOptionRow(block, module, option, byKey, done)
         end
         addTooltip(row, option.name, option.description, box)
     elseif option.min then
-        local slider = newSlider(row, module, option, block.sliderWidth)
+        local slider = newSlider(row, module, option, min(200, room - 50))
         if not slider then
             return -- leave the option at its default without one
         end
-        slider:SetPoint("LEFT", left + 6, 0)
+        slider:SetPoint("LEFT", CONTROL_LEFT + 6, 0)
         updates[#updates + 1] = function()
             slider:SetValue(module.db[option.key])
             slider:SetEnabled(on())
         end
         addTooltip(row, option.name, option.description, slider.Slider)
     elseif option.choices then
-        local dropdown = newMenu(row, block.dropdownWidth, option.choices, function(value)
-            return module.db[option.key] == value
-        end, function(value)
-            setOption(module, option, value)
-        end)
+        local dropdown = newDropdown(row, module, option, min(180, room - 16))
         if not dropdown then
             return
         end
-        dropdown:SetPoint("LEFT", left + 6, 0)
+        dropdown:SetPoint("LEFT", CONTROL_LEFT + 6, 0)
         updates[#updates + 1] = function()
             dropdown:GenerateMenu()
             dropdown:SetEnabled(on())
@@ -1032,7 +882,7 @@ local function addOptionRow(block, module, option, byKey, done)
         addTooltip(row, option.name, option.description, dropdown)
     else
         local box = newCheckbox(row, 30, function(checked) setOption(module, option, checked) end)
-        box:SetPoint("LEFT", left, 0)
+        box:SetPoint("LEFT", CONTROL_LEFT, 0)
         updates[#updates + 1] = function()
             box:SetChecked(module.db[option.key] and true or false)
             box:SetEnabled(on())
@@ -1043,53 +893,41 @@ end
 
 -- A row with a button: one of `module.actions`, the module's notice, or the way to its own page.
 -- `title` heads its tooltip when `text` isn't plain.
-local function addButtonRow(block, text, on, shown, button, fn, tooltip, title)
-    local row = addRow(block, text, 0, on, shown)
-    local control = newButton(row, button, block.buttonWidth, fn)
-    control:SetPoint("LEFT", block.controlLeft + 6, 0)
+local function addButtonRow(view, text, on, shown, button, fn, tooltip, title)
+    local row = addRow(view, text, 0, on, shown)
+    local control = newButton(row, button, min(180, view:GetWidth() - CONTROL_LEFT - 16), fn)
+    control:SetPoint("LEFT", CONTROL_LEFT + 6, 0)
     if on then
-        block.updates[#block.updates + 1] = function()
+        view.updates[#view.updates + 1] = function()
             control:SetEnabled(on())
         end
     end
     addTooltip(row, title or text, tooltip, control)
 end
 
--- A line of text across a block: the Options header, or "no options".
-local function addLine(block, font, text, gap)
-    local row = CreateFrame("Frame", nil, block)
-    row:SetSize(block:GetWidth(), font == "GameFontHighlightLarge" and 24 or ROW_HEIGHT)
+-- A line of text across the view: the Options header, or "no options".
+local function addLine(view, font, text)
+    local row = CreateFrame("Frame", nil, view)
+    row:SetSize(view:GetWidth(), font == "GameFontHighlightLarge" and 24 or ROW_HEIGHT)
     local line = row:CreateFontString(nil, "OVERLAY", font)
-    line:SetPoint("LEFT", block.labelLeft + block.indent, 0)
+    line:SetPoint("LEFT", 4, 0)
     line:SetText(text)
-    addEntry(block, row, nil, gap)
+    addEntry(view, row, nil, 16)
 end
 
--- Whether a module has anything to show beyond its checkbox: options, buttons, or its own page.
-local function hasDetails(module)
-    return hasOptions(module, false) or module.actions ~= nil
-        or (module.BuildPage and pages[module.name]) ~= nil
-end
-
--- Fills a block with a module's rows: with `parts.enabled` its Enabled checkbox, with
--- `parts.notice` its notice, and with `parts.options` its options and buttons, in the order it
--- lists them (their `section`s only order them here), under an Options header with
--- `parts.heading`, which also says when there are none.
-local function addModuleRows(block, module, parts)
+-- The module's rows, under its title, category and description: its notice, then its options and
+-- buttons in the order it lists them, or a line saying it has none. Each change of `section`
+-- starts a header with its name; options before the first section get an Options header.
+local function addModuleRows(view, module)
     local name = module.name
     local function on()
         return module.db.enabled and true or false
     end
-    if parts.enabled then
-        local row = addRow(block, L.SETTINGS_ENABLED, 0)
-        local box = newModuleCheck(row, name, 30)
-        box:SetPoint("LEFT", block.controlLeft, 0)
-    end
     -- A gray row while `shown()` is true, such as a Blizzard setting the module needs being off,
     -- with a button that fixes it. ns.CVars.OffNotice makes one for a CVar.
     local notice = module.notice
-    if parts.notice and notice then
-        addButtonRow(block, format("|cff999999%s|r", notice.text), nil, notice.shown,
+    if notice then
+        addButtonRow(view, format("|cff999999%s|r", notice.text), nil, notice.shown,
             notice.button, function()
                 notice.fn()
                 refreshModule(name)
@@ -1099,744 +937,210 @@ local function addModuleRows(block, module, parts)
                 end
             end, notice.description, notice.text)
     end
-    if parts.options then
-        local options, byKey, done = {}, {}, {}
-        for _, option in ipairs(module.options or {}) do
-            if not option.debug then
-                options[#options + 1] = option
-                byKey[option.key] = option
-            end
-        end
-        if hasDetails(module) then
-            if parts.heading then
-                addLine(block, "GameFontHighlightLarge", L.SETTINGS_OPTIONS, 16)
-            end
-            for _, option in ipairs(options) do
-                if not done[option.key] then
-                    addOptionRow(block, module, option, byKey, done)
-                end
-            end
-            for i, action in ipairs(module.actions or {}) do
-                addButtonRow(block, action.name, on, nil, action.button,
-                    actionFn(module, action, i), action.description)
-            end
-            local ownPage = module.BuildPage and pages[name]
-            if ownPage then
-                addButtonRow(block, "", nil, nil, format(L.SETTINGS_OPEN_PAGE, module.title or name),
-                    function() open(ownPage) end)
-            end
-        elseif parts.heading then
-            addLine(block, "GameFontDisable", L.SETTINGS_NO_OPTIONS, 16)
-        end
-    end
-    bind(name, function() refreshBlock(block) end)
-    return block
-end
-
--- A module's options, or its notice, under its row in a wide list: a block made when it first
--- shows.
-local function addUnder(stack, width, module, parts, shown)
-    local entry = addEntry(stack, nil, shown)
-    entry.make = function()
-        return addModuleRows(newBlock(stack, width, true, INDENT), module, parts)
-    end
-end
-
--- List, and Category Tabs ------------------------------------------------------------------------
--- Every module one under the other under its category's header, each a row like Blizzard's
--- settings rows: its name, its checkbox at the middle, and a gear that shows its options under it.
--- `inTab(name)` narrows it further, and `counts` puts each category's count in its header.
-
-local function buildWideList(frame, top, inTab, counts)
-    local scroll = newScroll(frame)
-    scroll:SetPoint("TOPLEFT", 0, top)
-    scroll:SetPoint("BOTTOMRIGHT", -28, 8)
-    local width = page.width - 28
-    local content = scrollStack(scroll, width, 6)
-    content.top, content.bottom = 2, 12
-    local expanded, rows = {}, {}
-    local layout = { scroll = scroll }
-    local function shown(name)
-        return matches(name) and (not inTab or inTab(name))
-    end
-    local empty, noMatch = newEmpty(content, width)
-    addEntry(content, empty, noMatch)
-    local group
-    for _, name in ipairs(listed) do
-        local module = ns.modules[name]
-        local title = module.title or name
-        if categoryOf(module) ~= group then
-            group = categoryOf(module)
-            local current = group
-            addEntry(content, newHeader(content, width, current, counts), function()
-                return anyShown(current, shown)
-            end)
-        end
-        local row = CreateFrame("Frame", nil, content)
-        row:SetSize(width, ROW_HEIGHT)
-        row:EnableMouse(true)
-        addHover(row)
-        local center = floor(width / 2)
-        newModuleName(row, name, "GameFontNormal", center - 85 - 37):SetPoint("LEFT", 37, 0)
-        local box = newModuleCheck(row, name, 30)
-        box:SetPoint("LEFT", center - 80, 0)
-        if hasDetails(module) then
-            -- A module with a new option starts with its options open, so it's seen.
-            expanded[name] = hasNewOption(module) or nil
-            row.gear = newGear(row, title, function() return expanded[name] end, function()
-                expanded[name] = not expanded[name] or nil
-                layoutStack(content)
-            end)
-            row.gear:SetPoint("LEFT", box, "RIGHT", 6, 0)
-        end
-        addTooltip(row, title, module.description, box)
-        rows[name] = row
-        local function rowShown()
-            return shown(name)
-        end
-        addEntry(content, row, rowShown)
-        if module.notice then
-            addUnder(content, width, module, { notice = true }, rowShown)
-        end
-        if hasDetails(module) then
-            addUnder(content, width, module, { options = true }, function()
-                return shown(name) and expanded[name]
-            end)
-        end
-    end
-    function layout.relayout()
-        layoutStack(content)
-    end
-    function layout.show(name)
-        local row = rows[name]
-        if row.gear then
-            expanded[name] = true
-            row.gear.tint()
-        end
-        layoutStack(content)
-        scrollTo(scroll, content, row)
-    end
-    return layout
-end
-
-builders.list = function(frame)
-    return buildWideList(frame, -4)
-end
-
--- A tab per category (Blizzard's minimal tabs, as the Settings panel's own) over the same list,
--- showing that category's modules. All shows every one, and so does searching.
-builders.tabs = function(frame)
-    local current = "all"
-    local tabs = {}
-    local layout
-    local function inTab(name)
-        return filter or current == "all" or inGroup(name, current)
-    end
-    local function paint()
-        local selected = filter and "all" or current
-        for key, tab in pairs(tabs) do
-            if tab.SetSelected then
-                tab:SetSelected(key == selected)
-            elseif key == selected then
-                tab:LockHighlight()
-            else
-                tab:UnlockHighlight()
-            end
-        end
-    end
-    -- Probe: MinimalTabTemplate is Mainline's; without it, plain buttons.
-    local minimal = hasTemplate("MinimalTabTemplate")
-    local x = 8
-    local function addTab(key, text, group)
-        local tab = CreateFrame("Button", nil, frame, minimal and "MinimalTabTemplate"
-            or "UIPanelButtonTemplate")
-        local label = tab.Text or tab:GetFontString()
-        if label then
-            label:SetText(text)
-        else
-            tab:SetText(text)
-        end
-        tab:SetSize(ns.Text.Width(label or tab:GetFontString()) + 24, minimal and 37 or 22)
-        tab:SetPoint("TOPLEFT", x, 0)
-        x = x + tab:GetWidth() + 2
-        tab:SetScript("OnClick", function()
-            current = key
-            if layout then
-                paint()
-                layout.relayout()
-                layout.scroll:SetVerticalScroll(0)
-            end
-        end)
-        if group then
-            tab:HookScript("OnEnter", function()
-                showTooltip(tab, text, format(L.SETTINGS_ON_COUNT, countOn(group)))
-            end)
-            tab:HookScript("OnLeave", function() GameTooltip:Hide() end)
-        end
-        tabs[key] = tab
-    end
-    addTab("all", L.SETTINGS_TAB_ALL)
-    for _, group in ipairs(CATEGORIES) do
-        if anyShown(group[1], function() return true end) then
-            addTab(group[1], group[2], group[1])
-        end
-    end
-    local divider = frame:CreateTexture(nil, "ARTWORK")
-    divider:SetAtlas("Options_HorizontalDivider", true)
-    divider:SetPoint("TOP", 0, minimal and -37 or -24)
-    layout = buildWideList(frame, minimal and -42 or -30, inTab, true)
-    local relayout, show = layout.relayout, layout.show
-    function layout.relayout()
-        paint()
-        relayout()
-    end
-    function layout.show(name)
-        current = categoryOf(ns.modules[name])
-        paint()
-        show(name)
-    end
-    return layout
-end
-
--- AddOn List -------------------------------------------------------------------------------------
--- Modeled on Blizzard's AddOn List: a bar per category with an arrow that opens and closes it
--- (all closed at first, opened while searching) and how many are on, and each module's
--- description under its name, so it reads without hovering. The gear shows its options under it.
-
-local function expandArt(texture, open)
-    local atlas = open and "Options_ListExpand_Right_Expanded" or "Options_ListExpand_Right"
-    if hasAtlas(atlas) then
-        texture:SetAtlas(atlas, true)
-    else
-        texture:SetTexture(open and "Interface\\Buttons\\UI-MinusButton-Up"
-            or "Interface\\Buttons\\UI-PlusButton-Up")
-        texture:SetSize(16, 16)
-    end
-end
-
-builders.addons = function(frame)
-    local scroll = newScroll(frame)
-    scroll:SetPoint("TOPLEFT", 0, -4)
-    scroll:SetPoint("BOTTOMRIGHT", -28, 8)
-    local width = page.width - 28
-    local content = scrollStack(scroll, width, 2)
-    content.top, content.bottom = 6, 12
-    local closed, expanded, rows, bars = {}, {}, {}, {}
-    local layout = {}
-    local empty, noMatch = newEmpty(content, width)
-    addEntry(content, empty, noMatch)
-    local group
-    for _, name in ipairs(listed) do
-        local module = ns.modules[name]
-        local title = module.title or name
-        if categoryOf(module) ~= group then
-            group = categoryOf(module)
-            local current = group
-            closed[current] = true
-            local bar = CreateFrame("Button", nil, content)
-            bar:SetSize(width - 8, 30)
-            local highlight = bar:CreateTexture(nil, "BACKGROUND")
-            highlight:SetAllPoints()
-            if hasAtlas("Options_List_Hover") then
-                highlight:SetAtlas("Options_List_Hover")
-            else
-                highlight:SetColorTexture(1, 1, 1, 0.1)
-            end
-            highlight:Hide()
-            local arrow = bar:CreateTexture(nil, "ARTWORK")
-            arrow:SetPoint("LEFT", 10, 0)
-            local label = bar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            label:SetPoint("LEFT", 34, 0)
-            label:SetText(CATEGORY_NAMES[current])
-            newCount(bar, current):SetPoint("RIGHT", -14, 0)
-            function bar.paint()
-                expandArt(arrow, filter or not closed[current])
-            end
-            bar:SetScript("OnClick", function()
-                closed[current] = not closed[current] or nil
-                layout.relayout()
-            end)
-            bar:SetScript("OnEnter", function() highlight:Show() end)
-            bar:SetScript("OnLeave", function() highlight:Hide() end)
-            bars[current] = bar
-            addEntry(content, bar, function()
-                return anyShown(current, matches)
-            end, 6)
-        end
-        local current = group
-        local function rowShown()
-            return matches(name) and (filter or not closed[current]) and true or false
-        end
-        local row = CreateFrame("Frame", nil, content)
-        row:SetSize(width - 8, 42)
-        row:EnableMouse(true)
-        addHover(row)
-        local box = newModuleCheck(row, name, 30)
-        box:SetPoint("TOPLEFT", 6, -6)
-        newModuleName(row, name, "GameFontNormal", width - 110, { "GameFontNormal", "GameFontDisable" })
-            :SetPoint("TOPLEFT", 42, -8)
-        local description = row:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-        description:SetPoint("TOPLEFT", 42, -25)
-        description:SetWidth(width - 100)
-        description:SetJustifyH("LEFT")
-        description:SetWordWrap(false)
-        description:SetText(module.description or "")
-        if hasDetails(module) then
-            if hasNewOption(module) then
-                expanded[name], closed[current] = true, nil
-            end
-            row.gear = newGear(row, title, function() return expanded[name] end, function()
-                expanded[name] = not expanded[name] or nil
-                layoutStack(content)
-            end)
-            row.gear:SetPoint("TOPRIGHT", -16, -12)
-        end
-        addTooltip(row, title, module.description, box)
-        rows[name] = row
-        addEntry(content, row, rowShown)
-        if module.notice then
-            addUnder(content, width, module, { notice = true }, rowShown)
-        end
-        if hasDetails(module) then
-            addUnder(content, width, module, { options = true }, function()
-                return rowShown() and expanded[name]
-            end)
-        end
-    end
-    function layout.relayout()
-        for _, bar in pairs(bars) do
-            bar.paint()
-        end
-        layoutStack(content)
-    end
-    function layout.show(name)
-        closed[categoryOf(ns.modules[name])] = nil
-        local row = rows[name]
-        if row.gear then
-            expanded[name] = true
-            row.gear.tint()
-        end
-        layout.relayout()
-        scrollTo(scroll, content, row)
-    end
-    return layout
-end
-
--- Cards ------------------------------------------------------------------------------------------
--- Two columns of cards under each category's header: a module's checkbox, name, and two lines of
--- its description, with a mark while its notice applies. The gear opens its options in a dialog
--- like Edit Mode's, with Revert to Defaults.
-
-local CARD_HEIGHT = 62
-
--- Puts a module's options back to their defaults (not whether it's on).
-local function revertOptions(module)
+    local options, byKey, done = {}, {}, {}
     for _, option in ipairs(module.options or {}) do
-        if not option.debug and module.db[option.key] ~= module.defaults[option.key] then
-            ns.SetOption(module.name, option.key, module.defaults[option.key])
+        if not option.debug then
+            options[#options + 1] = option
+            byKey[option.key] = option
         end
     end
-    ns.RefreshSetting(module.name)
+    local ownPage = module.BuildPage and pages[name]
+    if #options == 0 and not module.actions and not ownPage then
+        addLine(view, "GameFontDisable", L.SETTINGS_NO_OPTIONS)
+        return
+    end
+    local section
+    if not (options[1] and options[1].section) then
+        addLine(view, "GameFontHighlightLarge", L.SETTINGS_OPTIONS)
+    end
+    for _, option in ipairs(options) do
+        if option.section and option.section ~= section then
+            section = option.section
+            addLine(view, "GameFontHighlightLarge", section)
+        end
+        if not done[option.key] then
+            addOptionRow(view, module, option, byKey, done)
+        end
+    end
+    for i, action in ipairs(module.actions or {}) do
+        addButtonRow(view, action.name, on, nil, action.button, actionFn(module, action, i),
+            action.description)
+    end
+    if ownPage then
+        addButtonRow(view, "", nil, nil, format(L.SETTINGS_OPEN_PAGE, module.title or name),
+            function() open(ownPage) end)
+    end
 end
 
--- The dialog, over the page, with a veil under it so the cards can't be clicked while it's open.
-local function newDialog(frame)
-    local veil = CreateFrame("Frame", nil, frame)
-    veil:SetAllPoints(page.frame)
-    veil:SetFrameLevel(frame:GetFrameLevel() + 40)
-    veil:EnableMouse(true)
-    local shade = veil:CreateTexture(nil, "BACKGROUND")
-    shade:SetAllPoints()
-    shade:SetColorTexture(0, 0, 0, 0.35)
-    -- Probe: as Edit Mode's dialog in Lib/EditMode.lua.
-    local border = hasTemplate("DialogBorderTranslucentTemplate")
-    local dialog = CreateFrame("Frame", nil, veil, border and "DialogBorderTranslucentTemplate"
-        or "BackdropTemplate")
-    if not border and dialog.SetBackdrop and BACKDROP_TOOLTIP_16_16_5555 then
-        dialog:SetBackdrop(BACKDROP_TOOLTIP_16_16_5555)
-        dialog:SetBackdropColor(0, 0, 0, 0.9)
+-- The module on the right: its title with its Enabled checkbox at the right end, its category,
+-- and its description in DESCRIPTION_LINES, over its rows.
+local function buildView(name)
+    local module = ns.modules[name]
+    local title = module.title or name
+    local width = page.paneWidth
+    local view = newStack(page.paneContent, width, 4)
+    view:SetPoint("TOPLEFT")
+    view.updates = {}
+
+    local box = newModuleCheck(view, name, 30)
+    box:SetPoint("TOPRIGHT", -4, -2)
+    local enabled = view:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    enabled:SetPoint("RIGHT", box, "LEFT", -2, 0)
+    enabled:SetText(L.SETTINGS_ENABLED)
+    local heading = view:CreateFontString(nil, "OVERLAY", "GameFontHighlightHuge")
+    heading:SetPoint("TOPLEFT", 4, -4)
+    heading:SetJustifyH("LEFT")
+    heading:SetWordWrap(false)
+    heading:SetText(title)
+    view.updates[#view.updates + 1] = newMark(view, heading,
+        width - 4 - 40 - ns.Text.Width(enabled) - 12, name)
+
+    local group = view:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    group:SetPoint("TOPLEFT", heading, "BOTTOMLEFT", 0, -4)
+    group:SetText(CATEGORY_NAMES[categoryOf(module)])
+    local description = view:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    description:SetPoint("TOPLEFT", group, "BOTTOMLEFT", 0, -10)
+    description:SetWidth(width - 12)
+    description:SetJustifyH("LEFT")
+    description:SetJustifyV("TOP")
+    -- The height of DESCRIPTION_LINES lines of this font, measured.
+    description:SetText(("X\n"):rep(DESCRIPTION_LINES - 1) .. "X")
+    local height = description:GetStringHeight()
+    description:SetHeight(height)
+    if description.SetMaxLines then
+        description:SetMaxLines(DESCRIPTION_LINES) -- longer text ends in "..."
     end
-    local width = min(460, page.width - 40)
-    dialog:SetSize(width, min(470, (page.frame:GetHeight() or 0) > 0 and page.frame:GetHeight() - 30
-        or 470))
-    dialog:SetPoint("CENTER", page.frame, "CENTER")
-    dialog:SetFrameLevel(veil:GetFrameLevel() + 5)
-    dialog:EnableMouse(true)
-    dialog.title = dialog:CreateFontString(nil, "OVERLAY", "GameFontHighlightHuge")
-    dialog.title:SetPoint("TOP", 0, -18)
-    dialog.description = dialog:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    dialog.description:SetPoint("TOP", dialog.title, "BOTTOM", 0, -6)
-    dialog.description:SetWidth(width - 40)
-    local close = CreateFrame("Button", nil, dialog, "UIPanelCloseButton")
-    close:SetPoint("TOPRIGHT", 0, 0)
-    close:SetScript("OnClick", function() veil:Hide() end)
-    dialog.scroll = newScroll(dialog)
-    dialog.scroll:SetPoint("BOTTOMRIGHT", -30, 48)
-    dialog.content = CreateFrame("Frame", nil, dialog.scroll)
-    dialog.content:SetWidth(width - 50)
-    dialog.scroll:SetScrollChild(dialog.content)
-    dialog.blocks = {}
-    dialog.revert = newButton(dialog, L.SETTINGS_REVERT, 160, function()
-        revertOptions(ns.modules[dialog.name])
-    end)
-    dialog.revert:SetPoint("BOTTOMRIGHT", dialog, "BOTTOM", -4, 16)
-    dialog.revert:HookScript("OnEnter", function(self)
-        showTooltip(self, L.SETTINGS_REVERT, L.SETTINGS_REVERT_TIP)
-    end)
-    dialog.revert:HookScript("OnLeave", function() GameTooltip:Hide() end)
-    newButton(dialog, L.SETTINGS_CLOSE, 160, function() veil:Hide() end)
-        :SetPoint("BOTTOMLEFT", dialog, "BOTTOM", 4, 16)
-    veil:Hide()
-    dialog.veil = veil
-    return dialog
-end
-
-builders.cards = function(frame)
-    local scroll = newScroll(frame)
-    scroll:SetPoint("TOPLEFT", 0, -4)
-    scroll:SetPoint("BOTTOMRIGHT", -28, 8)
-    local width = page.width - 28
-    local content = CreateFrame("Frame", nil, scroll)
-    content:SetWidth(width)
-    scroll:SetScrollChild(content)
-    local cardWidth = floor((width - 30) / 2)
-    local cards, headers = {}, {}
-    local layout = {}
-    local dialog
-    local empty, noMatch = newEmpty(content, width)
-
-    -- Shows a module in the dialog: its Enabled checkbox, notice, and options.
-    local function openDialog(name)
-        local module = ns.modules[name]
-        dialog = dialog or newDialog(frame)
-        dialog.name = name
-        dialog.title:SetText(module.title or name)
-        dialog.description:SetText(module.description or "")
-        dialog.scroll:SetPoint("TOPLEFT", 14, -(18 + dialog.title:GetStringHeight() + 6
-            + dialog.description:GetStringHeight() + 14))
-        for other, block in pairs(dialog.blocks) do
-            block:SetShown(other == name)
-        end
-        local block = dialog.blocks[name]
-        if not block then
-            block = newBlock(dialog.content, dialog.content:GetWidth(), false)
-            block:SetPoint("TOPLEFT")
-            addModuleRows(block, module, { enabled = true, notice = true, options = true })
-            dialog.blocks[name] = block
-        end
-        block:Show()
-        refreshBlock(block)
-        layoutStack(block)
-        dialog.content:SetHeight(block:GetHeight())
-        dialog.scroll:SetVerticalScroll(0)
-        dialog.revert:SetEnabled(hasOptions(module, false))
-        dialog.veil:Show()
-    end
-
-    for _, group in ipairs(CATEGORIES) do
-        local header = CreateFrame("Frame", nil, content)
-        header:SetSize(width, 30)
-        local text = header:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
-        text:SetPoint("BOTTOMLEFT", 10, 6)
-        text:SetText(group[2])
-        newCount(header, group[1]):SetPoint("BOTTOMLEFT", text, "BOTTOMRIGHT", 8, 1)
-        headers[group[1]] = header
-    end
-    for _, name in ipairs(listed) do
-        local module = ns.modules[name]
-        local title = module.title or name
-        -- Probe: InsetFrameTemplate is Blizzard's dark inset panel; without it, a tooltip border.
-        local inset = hasTemplate("InsetFrameTemplate")
-        local card = CreateFrame("Frame", nil, content, inset and "InsetFrameTemplate"
-            or "BackdropTemplate")
-        if not inset and card.SetBackdrop and BACKDROP_TOOLTIP_16_16_5555 then
-            card:SetBackdrop(BACKDROP_TOOLTIP_16_16_5555)
-            card:SetBackdropColor(0, 0, 0, 0.6)
-        end
-        card:SetSize(cardWidth, CARD_HEIGHT)
-        card:EnableMouse(true)
-        local box = newModuleCheck(card, name, 30)
-        box:SetPoint("TOPLEFT", 5, -4)
-        newModuleName(card, name, "GameFontNormal", cardWidth - 80,
-            { "GameFontNormal", "GameFontDisable" }):SetPoint("TOPLEFT", 38, -11)
-        local description = card:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-        description:SetPoint("TOPLEFT", 38, -28)
-        description:SetWidth(cardWidth - 50)
-        description:SetJustifyH("LEFT")
-        if description.SetMaxLines then
-            description:SetMaxLines(2)
-        end
-        description:SetText(module.description or "")
-        if hasDetails(module) or module.notice then
-            local gear = newGear(card, title, function() return false end, function()
-                openDialog(name)
-            end)
-            gear:SetPoint("TOPRIGHT", -8, -7)
-        end
-        local notice = module.notice
-        if notice then
-            -- The mark while the notice applies: open the options to fix it.
-            local mark = CreateFrame("Frame", nil, card)
-            mark:SetSize(16, 16)
-            mark:SetPoint("TOPRIGHT", -30, -8)
-            local icon = mark:CreateTexture(nil, "ARTWORK")
-            icon:SetAllPoints()
-            icon:SetTexture("Interface\\DialogFrame\\UI-Dialog-Icon-AlertNew")
-            mark:EnableMouse(true)
-            mark:SetScript("OnEnter", function()
-                showTooltip(mark, notice.text, L.SETTINGS_FIX_NOTICE)
-            end)
-            mark:SetScript("OnLeave", function() GameTooltip:Hide() end)
-            bind(name, function()
-                mark:SetShown(notice.shown() and true or false)
-            end)
-        end
-        addTooltip(card, title, module.description, box)
-        cards[name] = card
-    end
-
-    function layout.relayout()
-        local y, any = -6, false
-        for _, group in ipairs(CATEGORIES) do
-            local header = headers[group[1]]
-            local column = 0
-            header:Hide()
-            for _, name in ipairs(listed) do
-                local card = cards[name]
-                if inGroup(name, group[1]) then
-                    if matches(name) then
-                        if column == 0 then
-                            if not header:IsShown() then
-                                header:ClearAllPoints()
-                                header:SetPoint("TOPLEFT", 0, y)
-                                header:Show()
-                                y = y - header:GetHeight() - 4
-                            end
-                        end
-                        card:ClearAllPoints()
-                        card:SetPoint("TOPLEFT", 10 + column * (cardWidth + 10), y)
-                        card:Show()
-                        column = column + 1
-                        if column == 2 then
-                            column = 0
-                            y = y - CARD_HEIGHT - 8
-                        end
-                        any = true
-                    else
-                        card:Hide()
-                    end
-                end
-            end
-            if column == 1 then
-                y = y - CARD_HEIGHT - 8
-            end
-            if header:IsShown() then
-                y = y - 6
-            end
-        end
-        empty:SetShown(noMatch())
-        empty:ClearAllPoints()
-        empty:SetPoint("TOPLEFT")
-        if not any then
-            y = y - empty:GetHeight()
-        end
-        content:SetHeight(-y + 8)
-    end
-    function layout.show(name)
-        layout.relayout()
-        scrollTo(scroll, content, cards[name])
-        openDialog(name)
-    end
-    return layout
-end
-
--- List and Details -------------------------------------------------------------------------------
--- A compact checklist of every module on the left, grouped under small gold category labels, and
--- the selected module on the right: its title, category and description, its Enabled checkbox,
--- notice, and options, each side scrolling on its own.
-
-local LIST_LEFT, LIST_WIDTH, LIST_ROW = 7, 186, 20 -- the module list and its rows
-local PANE_LEFT = 234 -- where the details start, right of the list and its scroll bar
-
-builders.details = function(frame)
-    local layout = {}
-    local selected
-    local rows, views = {}, {}
-
-    local list = newScroll(frame)
-    list:SetPoint("TOPLEFT", LIST_LEFT, -4)
-    list:SetPoint("BOTTOMLEFT", LIST_LEFT, 8)
-    list:SetWidth(LIST_WIDTH)
-    local content = scrollStack(list, LIST_WIDTH, 2)
-    content.bottom = 8
-
-    local pane = newScroll(frame)
-    pane:SetPoint("TOPLEFT", PANE_LEFT, -4)
-    pane:SetPoint("BOTTOMRIGHT", -32, 8)
-    local width = page.width - PANE_LEFT - 32
-    local paneContent = CreateFrame("Frame", nil, pane)
-    paneContent:SetWidth(width)
-    pane:SetScrollChild(paneContent)
-
-    -- A faint gold line between the list and the details.
-    local line = frame:CreateTexture(nil, "ARTWORK")
-    line:SetColorTexture(1, 0.82, 0, 0.25)
-    line:SetWidth(1)
-    line:SetPoint("TOPLEFT", PANE_LEFT - 12, -10)
-    line:SetPoint("BOTTOMLEFT", PANE_LEFT - 12, 14)
-
-    -- Blizzard's sidebar highlight while a row is selected or under the mouse.
-    local function paint(row)
-        local atlas
-        if selected == row.name then
-            atlas = "Options_List_Active"
-        elseif row.over then
-            atlas = "Options_List_Hover"
-        end
-        if atlas and hasAtlas(atlas) then
-            row.highlight:SetAtlas(atlas)
-            row.highlight:Show()
-        else
-            row.highlight:Hide()
-        end
-    end
-
-    -- The module on the right: a narrow block under its title, category and description.
-    local function buildView(name)
-        local module = ns.modules[name]
-        local view = newBlock(paneContent, width, false)
-        view:SetPoint("TOPLEFT")
-        local title = view:CreateFontString(nil, "OVERLAY", "GameFontHighlightHuge")
-        title:SetPoint("TOPLEFT", 4, -4)
-        title:SetText(module.title or name)
-        if newRows[name] and canLabel() then
-            local new = newLabel(view, title)
-            bind(name, function()
-                new:SetShown(newRows[name] and true or false)
-            end)
-        end
-        local group = view:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        group:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -4)
-        group:SetText(CATEGORY_NAMES[categoryOf(module)])
-        local description = view:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-        description:SetPoint("TOPLEFT", group, "BOTTOMLEFT", 0, -10)
-        description:SetWidth(width - 12)
-        description:SetJustifyH("LEFT")
-        description:SetText(module.description or "")
-        view.top = 4 + title:GetStringHeight() + 4 + group:GetStringHeight() + 10
-            + description:GetStringHeight() + 10
-        view.bottom = 12
-        return addModuleRows(view, module, { enabled = true, notice = true, options = true,
-            heading = true })
-    end
-
-    local function choose(name)
-        selected = name
-        for _, row in pairs(rows) do
-            paint(row)
-        end
-        for other, view in pairs(views) do
-            view:SetShown(other == name)
-        end
-        if not name then
-            return
-        end
-        if not views[name] then
-            views[name] = buildView(name)
-        end
-        layoutStack(views[name])
-        paneContent:SetHeight(views[name]:GetHeight())
-        pane:SetVerticalScroll(0)
-    end
-
-    local empty, noMatch = newEmpty(content, LIST_WIDTH)
-    addEntry(content, empty, noMatch)
-    local group
-    for _, name in ipairs(listed) do
-        local module = ns.modules[name]
-        if categoryOf(module) ~= group then
-            group = categoryOf(module)
-            local current = group
-            local label = CreateFrame("Frame", nil, content)
-            label:SetSize(LIST_WIDTH, 16)
-            local text = label:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-            text:SetPoint("BOTTOMLEFT", 2, 2)
-            text:SetText(CATEGORY_NAMES[current])
-            addEntry(content, label, function()
-                return anyShown(current, matches)
-            end, 12)
-        end
-        local row = CreateFrame("Button", nil, content)
-        row:SetSize(LIST_WIDTH, LIST_ROW)
-        row.name = name
-        row.highlight = row:CreateTexture(nil, "BACKGROUND")
-        row.highlight:SetAllPoints()
-        local function hover(over)
-            row.over = over
-            paint(row)
-        end
-        local box = newModuleCheck(row, name, 22)
-        box:SetPoint("LEFT", 0, 0)
-        -- The checkbox takes the mouse from the row, so it keeps the row's highlight.
-        box:HookScript("OnEnter", function() hover(true) end)
-        box:HookScript("OnLeave", function() hover(false) end)
-        newModuleName(row, name, "GameFontHighlight", LIST_WIDTH - 26,
-            { "GameFontHighlight", "GameFontDisable" }):SetPoint("LEFT", box, "RIGHT", 2, 0)
-        row:SetScript("OnClick", function()
-            if selected ~= name then
-                choose(name)
+    description:SetText(module.description or "")
+    -- The whole description in a tooltip when it's cut short. Probe: IsTruncated is Mainline's.
+    if description.IsTruncated then
+        local hit = CreateFrame("Frame", nil, view)
+        hit:SetAllPoints(description)
+        hit:EnableMouse(true)
+        hit:SetScript("OnEnter", function()
+            if description:IsTruncated() then
+                showTooltip(hit, title, module.description)
             end
         end)
-        row:SetScript("OnEnter", function() hover(true) end)
-        row:SetScript("OnLeave", function() hover(false) end)
-        rows[name] = row
-        addEntry(content, row, function() return matches(name) end)
+        hit:SetScript("OnLeave", function() GameTooltip:Hide() end)
     end
+    view.top = 4 + heading:GetStringHeight() + 4 + group:GetStringHeight() + 10 + height + 10
+    view.bottom = 12
 
-    -- Keeps the selection on a module the search shows, the first one when it hides it.
-    function layout.relayout()
-        layoutStack(content)
-        if not (selected and matches(selected)) then
-            local first
-            for _, name in ipairs(listed) do
-                if matches(name) then
-                    first = name
-                    break
-                end
-            end
-            choose(first)
-        elseif views[selected] then
-            layoutStack(views[selected])
-            paneContent:SetHeight(views[selected]:GetHeight())
+    addModuleRows(view, module)
+    bind(name, function()
+        for _, update in ipairs(view.updates) do
+            update()
         end
-    end
-    function layout.show(name)
-        choose(name)
-        scrollTo(list, content, rows[name])
-    end
-
-    -- Opens on the first module with a new option to see, or else the first.
-    for _, name in ipairs(listed) do
-        if hasNewOption(ns.modules[name]) then
-            choose(name)
-            break
-        end
-    end
-    return layout
+    end)
+    return view
 end
 
--- The page ---------------------------------------------------------------------------------------
+-- The module list ------------------------------------------------------------------------------
+
+-- Blizzard's sidebar highlight while a row is selected or under the mouse.
+local function paint(row)
+    local atlas
+    if selected == row.name then
+        atlas = "Options_List_Active"
+    elseif row.over then
+        atlas = "Options_List_Hover"
+    end
+    if atlas and hasAtlas(atlas) then
+        row.highlight:SetAtlas(atlas)
+        row.highlight:Show()
+    else
+        row.highlight:Hide()
+    end
+end
+
+-- Shows `name` on the right (nil for none).
+local function choose(name)
+    selected = name
+    for _, row in pairs(page.rows) do
+        paint(row)
+    end
+    for other, view in pairs(page.views) do
+        view:SetShown(other == name)
+    end
+    if not name then
+        return
+    end
+    local view = page.views[name]
+    if not view then
+        view = buildView(name)
+        page.views[name] = view
+    end
+    layoutStack(view)
+    page.paneContent:SetHeight(view:GetHeight())
+    page.pane:SetVerticalScroll(0)
+end
+
+-- A row of the list: the module's checkbox and its name, white while it's on and grey while it's
+-- off, with a NEW label while it's new. Clicking it selects the module.
+local function newListRow(name)
+    local module = ns.modules[name]
+    local row = CreateFrame("Button", nil, page.list)
+    row:SetSize(LIST_WIDTH, LIST_ROW)
+    row.name = name
+    row.highlight = row:CreateTexture(nil, "BACKGROUND")
+    row.highlight:SetAllPoints()
+    local function hover(over)
+        row.over = over
+        paint(row)
+    end
+    local box = newModuleCheck(row, name, 22)
+    box:SetPoint("LEFT", 0, 0)
+    -- The checkbox takes the mouse from the row, so it keeps the row's highlight.
+    box:HookScript("OnEnter", function() hover(true) end)
+    box:HookScript("OnLeave", function() hover(false) end)
+    local text = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    text:SetPoint("LEFT", box, "RIGHT", 2, 0)
+    text:SetJustifyH("LEFT")
+    text:SetWordWrap(false)
+    text:SetText(module.title or name)
+    local mark = newMark(row, text, LIST_WIDTH - 26, name)
+    bind(name, function()
+        text:SetFontObject(module.db.enabled and "GameFontHighlight" or "GameFontDisable")
+        mark()
+    end)
+    row:SetScript("OnClick", function()
+        if selected ~= name then
+            choose(name)
+        end
+    end)
+    row:SetScript("OnEnter", function() hover(true) end)
+    row:SetScript("OnLeave", function() hover(false) end)
+    return row
+end
+
+-- Lays out the modules the search shows, keeps the selection on one of them (the first, when it
+-- hides the selected one), and lays out the selected module's rows.
+local function relayout()
+    if not page then
+        return
+    end
+    page.empty.text:SetText(format(L.SETTINGS_NO_MATCH, filterText or ""))
+    layoutStack(page.list)
+    if not (selected and matches(selected)) then
+        local first
+        for _, name in ipairs(listed) do
+            if matches(name) then
+                first = name
+                break
+            end
+        end
+        choose(first)
+    elseif page.views[selected] then
+        layoutStack(page.views[selected])
+        page.paneContent:SetHeight(page.views[selected]:GetHeight())
+    end
+end
 
 function refreshModule(name)
     for _, fn in ipairs(bound[name] or {}) do
         fn()
     end
-    for _, fn in ipairs(counters) do
-        fn()
-    end
-    if page and page.active then
-        page.active.relayout()
-    end
+    relayout()
 end
 
 function refreshAll()
@@ -1845,41 +1149,18 @@ function refreshAll()
             fn()
         end
     end
-    for _, fn in ipairs(counters) do
-        fn()
-    end
-    if page and page.active then
-        page.active.relayout()
-    end
+    relayout()
 end
 
--- Shows the layout `key`, drawing it the first time.
-local function useLayout(key)
-    ns.db.modulesLayout = key
-    local active = page.layouts[key]
-    if not active then
-        local container = CreateFrame("Frame", nil, page.body)
-        container:SetAllPoints()
-        active = builders[key](container)
-        active.frame = container
-        page.layouts[key] = active
-    end
-    for other, layout in pairs(page.layouts) do
-        layout.frame:SetShown(other == key)
-    end
-    page.active = active
-    refreshAll()
-end
-
--- A search box at the top of the page, left of the Defaults button, that narrows the modules to
--- the ones whose title or description has the text. Blizzard's own search, at the top left of the
+-- A search box at the top of the page, left of the Defaults button, that narrows the list to the
+-- modules whose title or description has the text. Blizzard's own search, at the top left of the
 -- panel, finds settings across every addon, not modules. Probe: SearchBoxTemplate is Mainline's.
 local function addSearchBox(frame, anchor)
     if not hasTemplate("SearchBoxTemplate") then
         return
     end
     local box = CreateFrame("EditBox", nil, frame, "SearchBoxTemplate")
-    box:SetSize(160, 20)
+    box:SetSize(200, 20)
     box:SetPoint("RIGHT", anchor, "LEFT", -12, 0)
     box:SetAutoFocus(false)
     if box.Instructions then
@@ -1890,48 +1171,84 @@ local function addSearchBox(frame, anchor)
         local text = self:GetText():match("^%s*(.-)%s*$")
         filter = text ~= "" and strlower(text) or nil
         filterText = text
-        if page.active then
-            page.active.relayout()
-        end
+        relayout()
     end)
     return box
-end
-
--- The Layout dropdown, a standard Blizzard one, left of the search box. Without one, the page
--- stays on the default layout.
-local function addLayoutMenu(frame, anchor)
-    local menu = newMenu(frame, 150, LAYOUTS, function(key)
-        return layoutKey() == key
-    end, useLayout)
-    if not menu then
-        return
-    end
-    menu:SetPoint("RIGHT", anchor, "LEFT", -14, 0)
-    menu:HookScript("OnEnter", function()
-        showTooltip(menu, L.SETTINGS_LAYOUT, L.SETTINGS_LAYOUT_TIP)
-    end)
-    menu:HookScript("OnLeave", function() GameTooltip:Hide() end)
-    return menu
 end
 
 local function buildModules(frame)
     ns.AddPageTitle(frame, L.MODULES)
     local width = frame:GetWidth()
-    page = { frame = frame, layouts = {}, width = width > 0 and width or 615 }
+    page = { rows = {}, views = {}, width = width > 0 and width or 615 }
 
     local defaults = newButton(frame, SETTINGS_DEFAULTS or L.HOME_DEFAULTS, 96, askDefaults)
     defaults:SetPoint("TOPRIGHT", -10, -18)
     page.search = addSearchBox(frame, defaults)
-    local menu = addLayoutMenu(frame, page.search or defaults)
 
-    page.body = CreateFrame("Frame", nil, frame)
-    page.body:SetPoint("TOPLEFT", 0, -56)
-    page.body:SetPoint("BOTTOMRIGHT")
-    useLayout(menu and layoutKey() or LAYOUTS[1][1])
-    if wanted then
-        page.active.show(wanted)
-        wanted = nil
+    local list = newScroll(frame)
+    list:SetPoint("TOPLEFT", LIST_LEFT, -60)
+    list:SetPoint("BOTTOMLEFT", LIST_LEFT, 8)
+    list:SetWidth(LIST_WIDTH)
+    page.listScroll = list
+    page.list = newStack(list, LIST_WIDTH, 2)
+    page.list.bottom = 8
+    list:SetScrollChild(page.list)
+
+    -- "No modules match" while the search hides them all.
+    local empty = CreateFrame("Frame", nil, page.list)
+    empty:SetSize(LIST_WIDTH, 40)
+    empty.text = empty:CreateFontString(nil, "OVERLAY", "GameFontDisable")
+    empty.text:SetPoint("TOPLEFT", 2, -4)
+    empty.text:SetWidth(LIST_WIDTH - 4)
+    empty.text:SetJustifyH("LEFT")
+    page.empty = empty
+    addEntry(page.list, empty, function() return not anyMatch() end)
+    local group
+    for _, name in ipairs(listed) do
+        local current = categoryOf(ns.modules[name])
+        if current ~= group then
+            group = current
+            local label = CreateFrame("Frame", nil, page.list)
+            label:SetSize(LIST_WIDTH, 16)
+            local text = label:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+            text:SetPoint("BOTTOMLEFT", 2, 2)
+            text:SetText(CATEGORY_NAMES[current])
+            addEntry(page.list, label, function() return anyMatch(current) end, 12)
+        end
+        page.rows[name] = newListRow(name)
+        addEntry(page.list, page.rows[name], function() return matches(name) end)
     end
+
+    -- A faint gold line between the list and the details.
+    local line = frame:CreateTexture(nil, "ARTWORK")
+    line:SetColorTexture(1, 0.82, 0, 0.25)
+    line:SetWidth(1)
+    line:SetPoint("TOPLEFT", PANE_LEFT - 12, -66)
+    line:SetPoint("BOTTOMLEFT", PANE_LEFT - 12, 14)
+
+    local pane = newScroll(frame)
+    pane:SetPoint("TOPLEFT", PANE_LEFT, -60)
+    pane:SetPoint("BOTTOMRIGHT", -32, 8)
+    page.pane, page.paneWidth = pane, page.width - PANE_LEFT - 32
+    page.paneContent = CreateFrame("Frame", nil, pane)
+    page.paneContent:SetWidth(page.paneWidth)
+    pane:SetScrollChild(page.paneContent)
+
+    -- Opens on the module ns.OpenSettings asked for, or the first with a new option to see, or
+    -- else the first.
+    if not selected then
+        for _, name in ipairs(listed) do
+            if hasNewOption(ns.modules[name]) then
+                selected = name
+                break
+            end
+        end
+    end
+    if selected then
+        choose(selected)
+        scrollTo(list, page.list, page.rows[selected])
+    end
+    relayout()
     -- After /fpp or a preset changed things while the page was closed, and for notices.
     frame:HookScript("OnShow", refreshAll)
 end
@@ -2233,14 +1550,13 @@ function ns.RegisterSettings()
             end)
         end
     end
-    -- Debug options, grouped by module.
-    local debugPage, debugLayout
+    -- Debug options: Forever++'s own first, then each module's.
+    local debugPage, debugLayout = Settings.RegisterVerticalLayoutSubcategory(category, L.DEBUG)
+    addHeader(debugLayout, ns.title)
+    addShowNewTags(debugPage)
     for _, name in ipairs(order) do
         local module = ns.modules[name]
         if hasOptions(module, true) or module.debugActions then
-            if not debugPage then
-                debugPage, debugLayout = Settings.RegisterVerticalLayoutSubcategory(category, L.DEBUG)
-            end
             addHeader(debugLayout, module.title or name)
             addDebugOptions(debugPage, debugLayout, module)
             addDebugActions(debugLayout, module)
@@ -2249,14 +1565,12 @@ function ns.RegisterSettings()
     changelogCategory = addCanvasPage(category, L.CHANGELOG, buildChangelog)
     Settings.RegisterAddOnCategory(category)
     mainCategory = category
-    if debugPage then
-        ourPages[debugPage] = true
-        addDefaultsButton()
-    end
+    ourPages[debugPage] = true
+    addDefaultsButton()
 end
 
 ---Opens the Forever++ welcome page in Settings, or a module: its own page, or the Modules page
----showing it, in whichever layout the player uses (after combat, if the player is in combat).
+---with it selected (after combat, if the player is in combat).
 ---@param name? string a module
 ---@return boolean opened false when this client's Settings can't open to it
 function ns.OpenSettings(name)
@@ -2264,14 +1578,15 @@ function ns.OpenSettings(name)
         return open(pages[name])
     end
     if name and searchText[name] then
-        if page and page.active then
+        if page then
             -- Searching for something else would hide it.
             if not matches(name) and page.search then
                 page.search:SetText("")
             end
-            page.active.show(name)
+            choose(name)
+            scrollTo(page.listScroll, page.list, page.rows[name])
         else
-            wanted = name -- the page shows it once it's built
+            selected = name -- the page opens on it
         end
         return open(modulesCategory)
     end

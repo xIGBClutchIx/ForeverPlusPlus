@@ -192,6 +192,10 @@ L.CHARACTERFRAME_TITLE_FORMAT = "%s %s"
 
 -- QuestTracker
 L.QUESTTRACKER_TITLE = "Quest Tracker"
+-- Headers over its options in Settings
+L.QUESTTRACKER_SECTION_TEXT = "Text"
+L.QUESTTRACKER_SECTION_BOX = "Background"
+L.QUESTTRACKER_SECTION_COMBAT = "Combat"
 L.QUESTTRACKER_DESC = "Restyle Blizzard's quest tracker: its font, a box behind it that fits "
     .. "what it shows, and fading in combat. Move it and set its height in Edit Mode as before."
 L.QUESTTRACKER_DEFAULT = "Default"

@@ -18,14 +18,15 @@ local module = ns.NewModule("ChatHistory", L.CHATHISTORY_DESC, {
 module.title = L.CHATHISTORY_TITLE
 module.category = "chat"
 
+-- How much is kept, then how it shows.
 module.options = {
-    { key = "divider", name = L.CHATHISTORY_DIVIDER_OPTION, description = L.CHATHISTORY_DIVIDER_DESC },
     {
         key = "lines",
         name = L.CHATHISTORY_LINES,
         description = L.CHATHISTORY_LINES_DESC,
         min = 25, max = 250, step = 25, format = "%d",
     },
+    { key = "divider", name = L.CHATHISTORY_DIVIDER_OPTION, description = L.CHATHISTORY_DIVIDER_DESC },
 }
 
 local function save()

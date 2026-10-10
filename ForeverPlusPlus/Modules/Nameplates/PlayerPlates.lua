@@ -22,13 +22,26 @@ local module = ns.NewModule("PlayerPlates", L.PLAYERPLATES_DESC, ns.FriendlyPlat
 module.title = L.PLAYERPLATES_TITLE
 module.category = "nameplates"
 
+-- General first, then the name, the guild line, and the icons beside the name.
 module.options = {
-    { key = "barWhenHurt", name = L.PLATES_BAR_WHEN_HURT, description = L.PLAYERPLATES_BAR_WHEN_HURT_DESC },
+    {
+        key = "barWhenHurt", name = L.PLATES_BAR_WHEN_HURT, description = L.PLAYERPLATES_BAR_WHEN_HURT_DESC,
+        section = L.PLATES_SECTION_GENERAL,
+    },
+    {
+        key = "level", name = L.PLATES_LEVEL, description = L.PLATES_LEVEL_DESC,
+        choices = ns.PlateLabel.LEVEL_CHOICES, section = L.PLATES_SECTION_GENERAL,
+    },
+    {
+        key = "buffs", name = L.PLATES_BUFFS, description = L.PLATES_BUFFS_DESC,
+        choices = ns.PlateLabel.BUFF_CHOICES, section = L.PLATES_SECTION_GENERAL,
+    },
     {
         key = "nameColor", name = L.PLATES_NAME_COLOR, description = L.PLAYERPLATES_NAME_COLOR_DESC,
         choices = { { "class", L.PLAYERPLATES_NAME_COLOR_CLASS }, { "white", L.PLATES_COLOR_WHITE } },
+        section = L.PLATES_SECTION_NAME,
     },
-    ns.PlateLabel.NameSizeOption(),
+    ns.PlateLabel.NameSizeOption(L.PLATES_SECTION_NAME),
     {
         key = "recentAllies", name = L.PLAYERPLATES_RECENT_ALLIES, description = L.PLAYERPLATES_RECENT_ALLIES_DESC,
         choices = {
@@ -36,32 +49,41 @@ module.options = {
             { "color", L.PLAYERPLATES_RECENT_ALLIES_COLOR },
             { "icon", L.PLAYERPLATES_RECENT_ALLIES_ICON },
         },
+        section = L.PLATES_SECTION_NAME,
     },
-    { key = "level", name = L.PLATES_LEVEL, description = L.PLATES_LEVEL_DESC, choices = ns.PlateLabel.LEVEL_CHOICES },
-    { key = "buffs", name = L.PLATES_BUFFS, description = L.PLATES_BUFFS_DESC, choices = ns.PlateLabel.BUFF_CHOICES },
     {
         key = "guildNames", name = L.PLAYERPLATES_GUILD_NAMES, description = L.PLAYERPLATES_GUILD_NAMES_DESC,
-        choices = ns.PlateLabel.SUBTITLE_CHOICES,
+        choices = ns.PlateLabel.SUBTITLE_CHOICES, section = L.PLAYERPLATES_SECTION_GUILD,
     },
     {
         key = "guildColor", name = L.PLAYERPLATES_GUILD_COLOR, description = L.PLAYERPLATES_GUILD_COLOR_DESC,
         choices = { { "gray", L.PLATES_COLOR_GRAY }, { "green", L.PLATES_COLOR_GREEN } },
+        requires = "guildNames", section = L.PLAYERPLATES_SECTION_GUILD,
     },
-    { key = "guildHighlight", name = L.PLAYERPLATES_GUILD_HIGHLIGHT, description = L.PLAYERPLATES_GUILD_HIGHLIGHT_DESC },
-    { key = "socialIcons", name = L.PLAYERPLATES_SOCIAL_ICONS, description = L.PLAYERPLATES_SOCIAL_ICONS_DESC },
+    {
+        key = "guildHighlight", name = L.PLAYERPLATES_GUILD_HIGHLIGHT, description = L.PLAYERPLATES_GUILD_HIGHLIGHT_DESC,
+        requires = "guildNames", section = L.PLAYERPLATES_SECTION_GUILD,
+    },
+    {
+        key = "socialIcons", name = L.PLAYERPLATES_SOCIAL_ICONS, description = L.PLAYERPLATES_SOCIAL_ICONS_DESC,
+        section = L.PLAYERPLATES_SECTION_ICONS,
+    },
     {
         key = "groupIcon", name = L.PLAYERPLATES_GROUP_ICON, description = L.PLAYERPLATES_GROUP_ICON_DESC,
         choices = {
             { "role", L.PLAYERPLATES_GROUP_ICON_ROLE },
             { "looking", L.PLAYERPLATES_GROUP_ICON_LOOKING },
         },
+        requires = "socialIcons", section = L.PLAYERPLATES_SECTION_ICONS,
     },
     {
+        -- Also the recent ally icon, so not under Group and Friend Icons.
         key = "iconSide", name = L.PLAYERPLATES_ICON_SIDE, description = L.PLAYERPLATES_ICON_SIDE_DESC,
         choices = {
             { "after", L.PLAYERPLATES_ICON_SIDE_AFTER },
             { "before", L.PLAYERPLATES_ICON_SIDE_BEFORE },
         },
+        section = L.PLAYERPLATES_SECTION_ICONS,
     },
     {
         key = "testIcons", name = L.PLAYERPLATES_TEST_ICONS, description = L.PLAYERPLATES_TEST_ICONS_DESC,
