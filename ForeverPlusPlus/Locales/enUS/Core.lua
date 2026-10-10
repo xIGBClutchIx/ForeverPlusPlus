@@ -67,7 +67,7 @@ L.SETTINGS_OPEN_PAGE = "Open %s" -- module title, for a module with a page of it
 L.SETTINGS_TURN_ON = "Turn On" -- the button on a "Blizzard's ... is off" row
 L.SETTINGS_SEARCH = "Search modules" -- gray text in the Modules page's empty search box
 L.SETTINGS_NO_MATCH = "No modules match \"%s\"." -- the search text
--- The Debug page's own dropdown
+-- The Debug page's own dropdown, at the top
 L.SETTINGS_SHOW_TAGS = "Show Tags"
 L.SETTINGS_SHOW_TAGS_DESC = "Mark every module and option added (NEW) or changed (CHANGED) since the "
     .. "last release on the Modules page, even ones not released yet or already seen, and keep them "
@@ -76,6 +76,30 @@ L.SETTINGS_SHOW_TAGS_OFF = "Off"
 L.SETTINGS_SHOW_TAGS_NEW = "New"
 L.SETTINGS_SHOW_TAGS_CHANGED = "Changed"
 L.SETTINGS_SHOW_TAGS_BOTH = "New and Changed"
+-- The Debug page's own buttons, under Show Tags
+L.DEBUG_RESET_SEEN = "Reset Seen Version"
+L.DEBUG_RESET_SEEN_BUTTON = "Reset"
+L.DEBUG_RESET_SEEN_DESC = "Forget that you've seen this version, as if you just updated from the "
+    .. "last release, and open the Modules page the way a player updating would see it. Its tags go "
+    .. "once you leave the page."
+L.DEBUG_INFO = "Copy Debug Info"
+L.DEBUG_INFO_BUTTON = "Copy"
+L.DEBUG_INFO_DESC = "Show one line to copy into a bug report: the Forever++ version, the client "
+    .. "build, and the modules that are on."
+L.DEBUG_INFO_PROMPT = "Press Ctrl+C to copy the debug info."
+-- Forever++ version, game version, build, interface, locale, module count, module names
+L.DEBUG_INFO_LINE = "Forever++ %s | Client %s (%s), interface %s, %s | Modules on (%d): %s"
+L.DEBUG_EVENTS = "Print Module Events"
+L.DEBUG_EVENTS_BUTTON = "Print"
+L.DEBUG_EVENTS_DESC = "Print in chat the events each module listens to and how many hooks it has "
+    .. "made, to check that a module that's off listens to nothing. Hooks stay once made but do "
+    .. "nothing while their module is off."
+L.DEBUG_EVENTS_LINE = "%s (%s): %d events: %s; %d hooks" -- module title, On/Off, count, names, hooks
+L.DEBUG_EVENTS_CLEAN = "No module that's off is listening to events."
+L.DEBUG_EVENTS_LEAKS = "%d modules are off but still listening to events (in red)."
+L.DEBUG_RELOAD = "Reload UI"
+L.DEBUG_RELOAD_BUTTON = "Reload"
+L.DEBUG_RELOAD_DESC = "Reload the interface, like /rl, to load changes to the addon's files."
 
 -- Settings: Changelog page. The notes themselves are in Changelog.lua.
 L.CHANGELOG = "Changelog"

@@ -12,8 +12,9 @@
 --                    since the player last looked (`added`) is marked NEW, and an option
 --                    changed since then (`changed`) CHANGED
 --     <Tool>         a page a module draws itself (`BuildPage`)
---     Debug          Show Tags, then options marked `debug = true` and buttons from
---                    `module.debugActions`, for testing
+--     Debug          Show Tags and Forever++'s own buttons (Reset Seen Version, Copy Debug Info,
+--                    Print Module Events, Reload UI), then options marked `debug = true` and
+--                    buttons from `module.debugActions`, for testing
 --     Changelog      the release notes from Changelog.lua
 --     About          what the addon is, how many modules are on, the version, links, and the /fpp
 --                    commands, with the Defaults button at the top right like Modules
@@ -1511,6 +1512,108 @@ local function byTitle()
     return names
 end
 
+-- Debug page tools ----------------------------------------------------------------------------
+-- Forever++'s own buttons on the Debug page, under Show Tags.
+
+-- Puts the version last seen back to the last release, so the Modules page marks what a player
+-- updating from it would see, and opens it the way it would open for them: on the first module
+-- with a marked option. The marks go once the page is left, as they do after an update.
+local function resetSeen()
+    ns.db.seenVersion = lastRelease()
+    seen = false
+    markNew()
+    if page then
+        selected = nil
+        for _, name in ipairs(listed) do
+            if hasNewOption(ns.modules[name]) then
+                selected = name
+                break
+            end
+        end
+        if refreshAll then
+            refreshAll()
+        end
+        if selected then
+            choose(selected)
+            scrollTo(page.listScroll, page.list, page.rows[selected])
+        end
+    end
+    open(modulesCategory)
+end
+
+-- One line for a bug report: the addon and client, and the modules on.
+local function debugInfo()
+    local gameVersion, build, _, interface = GetBuildInfo()
+    local on = {}
+    for _, name in ipairs(ns.order) do
+        local module = ns.modules[name]
+        if module.enabled and not module.alwaysOn then
+            on[#on + 1] = name
+        end
+    end
+    return format(L.DEBUG_INFO_LINE, ns.version, tostring(gameVersion), tostring(build),
+        tostring(interface), GetLocale(), #on, concat(on, ", "))
+end
+
+-- How many hooks a module has made (`module:Hook`, `module:HookScript`). They stay once made but
+-- do nothing while the module is off.
+local function hookCount(module)
+    local count = 0
+    for _, byMethod in pairs(module.hooked or {}) do
+        for _, byFn in pairs(byMethod) do
+            for _ in pairs(byFn) do
+                count = count + 1
+            end
+        end
+    end
+    return count
+end
+
+-- Prints each module's events (`module:On`) and hooks, to check a module that's off listens to
+-- nothing. A module that's off but still has events is printed in red.
+local function printEvents()
+    local leaks = 0
+    for _, name in ipairs(byTitle()) do
+        local module = ns.modules[name]
+        local list = {}
+        for _, entry in ipairs(module.events or {}) do
+            list[#list + 1] = entry[1]
+        end
+        local hooks = hookCount(module)
+        if #list > 0 or (module.enabled and hooks > 0) then
+            local line = format(L.DEBUG_EVENTS_LINE, module.title or name,
+                ns.StateText(module.enabled), #list, #list > 0 and concat(list, ", ") or "-", hooks)
+            if not module.enabled and #list > 0 then
+                leaks = leaks + 1
+                line = "|cffdd4444" .. line .. "|r"
+            end
+            ns.Print(line)
+        end
+    end
+    ns.Print(leaks > 0 and format(L.DEBUG_EVENTS_LEAKS, leaks) or L.DEBUG_EVENTS_CLEAN)
+end
+
+local DEBUG_TOOLS = {
+    { name = L.DEBUG_RESET_SEEN, button = L.DEBUG_RESET_SEEN_BUTTON,
+        description = L.DEBUG_RESET_SEEN_DESC, fn = resetSeen },
+    { name = L.DEBUG_INFO, button = L.DEBUG_INFO_BUTTON, description = L.DEBUG_INFO_DESC,
+        fn = function() ns.Prompt("DEBUG_INFO", L.DEBUG_INFO_PROMPT, debugInfo()) end },
+    { name = L.DEBUG_EVENTS, button = L.DEBUG_EVENTS_BUTTON, description = L.DEBUG_EVENTS_DESC,
+        fn = printEvents },
+    { name = L.DEBUG_RELOAD, button = L.DEBUG_RELOAD_BUTTON, description = L.DEBUG_RELOAD_DESC,
+        fn = function() ReloadUI() end },
+}
+
+local function addDebugTools(layout)
+    if not (layout and CreateSettingsButtonInitializer) then
+        return -- Probe: the button row is Mainline's Settings.
+    end
+    for _, tool in ipairs(DEBUG_TOOLS) do
+        layout:AddInitializer(CreateSettingsButtonInitializer(tool.name, tool.button, tool.fn,
+            tool.description, true))
+    end
+end
+
 ---Adds the Forever++ pages to Settings > AddOns (called once, after ns.Start).
 function ns.RegisterSettings()
     -- Probe: the Mainline Settings API is on Forever (build 70009), but it's a beta.
@@ -1565,6 +1668,7 @@ function ns.RegisterSettings()
     local debugPage, debugLayout = Settings.RegisterVerticalLayoutSubcategory(category, L.DEBUG)
     addHeader(debugLayout, ns.title)
     addShowTags(debugPage)
+    addDebugTools(debugLayout)
     for _, name in ipairs(order) do
         local module = ns.modules[name]
         if hasOptions(module, true) or module.debugActions then

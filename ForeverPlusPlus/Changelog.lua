@@ -32,6 +32,10 @@ ns.changelog = {
                     .. "page. It opens on the first module with a marked option. Show Tags on the "
                     .. "Debug page marks everything new, changed, or both since the last release, "
                     .. "to check how they look." },
+                { L.CHANGELOG_SETTINGS, "The Debug page has four new buttons: Reset Seen "
+                    .. "Version shows the Modules page as a player updating from the last release "
+                    .. "sees it, Copy Debug Info gives one line for a bug report, Print Module "
+                    .. "Events lists what each module listens to, and Reload UI reloads." },
                 { L.AUTOQUEST_TITLE, "New, off by default, in Automation: accepts quests and "
                     .. "turns in finished ones as you talk to quest givers, one by one down a "
                     .. "quest giver's list. It never picks a reward when there's a choice. "
