@@ -43,6 +43,10 @@ ns.changelog = {
                     .. "straight onto your weapon, without clicking the weapon. Main hand first; "
                     .. "the off hand when only it can take it, or when the main hand already has "
                     .. "a buff and the off hand doesn't (or its buff runs out sooner)." },
+                { L.MINIMAPBUTTON_TITLE, "New, on by default, in Interface: Forever++'s own "
+                    .. "button on the minimap, in the addon compartment, or both. Click it to open "
+                    .. "Forever++ settings; while Error Catcher is on, right-click it to see the "
+                    .. "errors, and it shows how many this session caught." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.AUCTIONPRICES_TITLE, "Crafting Costs shows Estimated Profit, after the "
@@ -57,6 +61,10 @@ ns.changelog = {
                 { L.ERRORCATCHER_TITLE, "New Button option puts its button on the minimap, in "
                     .. "the addon compartment, both, or neither. The minimap is still the "
                     .. "default." },
+                { L.ERRORCATCHER_TITLE, "Its button is now the Minimap Button module, where a "
+                    .. "click opens settings and a right-click shows the errors. Turn that module "
+                    .. "off for no button. The Clear Key option is gone; the window's Clear button "
+                    .. "still clears saved errors." },
                 { L.CHANGELOG_SETTINGS, "Clutch's Default is now Developer's Defaults, and the "
                     .. "welcome page's Defaults button is now Recommended Defaults, matching the "
                     .. "Defaults popup on the Modules and Debug pages." },
