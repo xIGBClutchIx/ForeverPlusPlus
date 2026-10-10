@@ -4,6 +4,7 @@
 local _, ns = ...
 
 local ipairs, pairs = ipairs, pairs
+local sqrt, atan2, pi = math.sqrt, math.atan2, math.pi
 local UnitFactionGroup, CreateFromMixins = UnitFactionGroup, CreateFromMixins
 local FACTION_ALLIANCE, FACTION_HORDE = FACTION_ALLIANCE, FACTION_HORDE
 
@@ -92,6 +93,26 @@ function WorldMap.IsContinent(info, cosmic)
     end
     local kind = info.mapType
     return kind == types.Continent or kind == types.World or (cosmic and kind == types.Cosmic) or false
+end
+
+-- Directions ----------------------------------------------------------------------------------
+
+---How far and which way one spot on a map is from another, for an arrow. Spots are 0 to 1 across
+---and down the map, as C_Map gives them, and `width` and `height` are the map's size in yards
+---(C_Map.GetMapWorldSize). The angle is counter-clockwise from north in radians, 0 to 2 pi, like
+---GetPlayerFacing, so an arrow pointing ahead turns by `angle - facing`.
+---@param width number yards
+---@param height number yards
+---@param fromX number
+---@param fromY number
+---@param toX number
+---@param toY number
+---@return number yards
+---@return number angle
+function WorldMap.Toward(width, height, fromX, fromY, toX, toY)
+    local east = (toX - fromX) * width
+    local south = (toY - fromY) * height
+    return sqrt(east * east + south * south), atan2(-east, -south) % (2 * pi)
 end
 
 -- Sides -----------------------------------------------------------------------------------------

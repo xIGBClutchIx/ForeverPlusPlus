@@ -127,6 +127,23 @@ eq(WorldMap.PlayerSide(), nil, "neutral side")
 eq(WorldMap.SideName("A"), "Alliance", "side name")
 eq(WorldMap.SideName("X"), nil, "unknown side name")
 
+-- Toward: on a 1000 by 500 yard map, from the middle.
+local function near(got, want, what)
+    eq(math.abs(got - want) < 1e-9, true, what .. " (" .. tostring(got) .. ")")
+end
+local yards, angle = WorldMap.Toward(1000, 500, 0.5, 0.5, 0.5, 0.3)
+near(yards, 100, "north distance")
+near(angle, 0, "north is 0")
+yards, angle = WorldMap.Toward(1000, 500, 0.5, 0.5, 0.4, 0.5)
+near(yards, 100, "west distance uses width")
+near(angle, math.pi / 2, "west is a quarter turn left")
+_, angle = WorldMap.Toward(1000, 500, 0.5, 0.5, 0.5, 0.7)
+near(angle, math.pi, "south is half a turn")
+_, angle = WorldMap.Toward(1000, 500, 0.5, 0.5, 0.6, 0.5)
+near(angle, 3 * math.pi / 2, "east is three quarters")
+yards = WorldMap.Toward(1000, 500, 0.2, 0.2, 0.2, 0.2)
+near(yards, 0, "same spot")
+
 -- Instances -------------------------------------------------------------------------------------
 
 local Instances = ns.Instances

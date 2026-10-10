@@ -349,24 +349,11 @@ L.TALENTPLANNER_DELETE_CONFIRM = "Delete this talent plan?"
 
 -- Commands
 L.COMMANDS_TITLE = "Commands"
-L.COMMANDS_DESC = "Add short slash commands: /way for a map waypoint, /rl to reload the UI, and "
-    .. "/clear to empty a chat window."
-L.COMMANDS_WAY = "/way"
-L.COMMANDS_WAY_DESC = "/way [zone] x y puts the game's map pin on a spot and tracks it, in your "
-    .. "zone or the one named. /way clear takes it away. Left to TomTom or another addon that "
-    .. "already has /way."
+L.COMMANDS_DESC = "Add short slash commands: /rl to reload the UI and /clear to empty a chat "
+    .. "window. /way is in Waypoints."
 L.COMMANDS_RELOAD = "/rl"
 L.COMMANDS_RELOAD_DESC = "/rl reloads the UI, like /reload. Left to another addon that already "
     .. "has /rl."
 L.COMMANDS_CLEAR = "/clear"
 L.COMMANDS_CLEAR_DESC = "/clear empties the chat window you type it in. Left to another addon "
     .. "that already has /clear."
-L.COMMANDS_WAY_USAGE = "/way [zone] x y, such as /way 45.2 67.8 or /way Elwynn Forest 45 67. "
-    .. "/way clear takes the pin away."
-L.COMMANDS_WAY_SET = "Waypoint set in %s at %.1f, %.1f." -- zone, x, y
-L.COMMANDS_WAY_CLEARED = "Waypoint cleared."
-L.COMMANDS_WAY_RANGE = "Coordinates go from 0 to 100."
-L.COMMANDS_WAY_NO_ZONE = "No zone called %s." -- what was typed
-L.COMMANDS_WAY_NO_MAP = "There's no map here. Name a zone: /way Elwynn Forest 45 67."
-L.COMMANDS_WAY_NOT_HERE = "Can't put a waypoint on the %s map." -- zone
-L.COMMANDS_WAY_UNAVAILABLE = "This client has no map waypoints."

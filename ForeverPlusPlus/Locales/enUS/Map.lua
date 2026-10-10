@@ -194,3 +194,25 @@ L.FLIGHTTIMER_RESET_TIMES_BUTTON = "Reset"
 L.FLIGHTTIMER_RESET_TIMES_DESC = "Forgets every flight time. They are timed again as you fly."
 L.FLIGHTTIMER_RESET_TIMES_CONFIRM = "Forget every flight time Flight Timer has recorded?"
 L.FLIGHTTIMER_RESET_TIMES_DONE = "Flight times forgotten."
+
+-- Waypoints
+L.WAYPOINTS_TITLE = "Waypoints"
+L.WAYPOINTS_DESC = "Put the game's map pin on a spot with /way, and follow it with an arrow on "
+    .. "screen that turns toward it as you turn."
+L.WAYPOINTS_WAY = "/way"
+L.WAYPOINTS_WAY_DESC = "/way [zone] x y puts the game's map pin on a spot and tracks it, in your "
+    .. "zone or the one named. /way clear takes it away. Left to TomTom or another addon that "
+    .. "already has /way."
+L.WAYPOINTS_ARROW = "Waypoint Arrow"
+L.WAYPOINTS_ARROW_DESC = "An arrow that points to your map pin, from /way or a click on the map, "
+    .. "with how far it is. It goes away when you get there. Move and resize it in Edit Mode."
+L.WAYPOINTS_USAGE = "/way [zone] x y, such as /way 45.2 67.8 or /way Elwynn Forest 45 67. "
+    .. "/way clear takes the pin away."
+L.WAYPOINTS_SET = "Waypoint set in %s at %.1f, %.1f." -- zone, x, y
+L.WAYPOINTS_CLEARED = "Waypoint cleared."
+L.WAYPOINTS_RANGE = "Coordinates go from 0 to 100."
+L.WAYPOINTS_NO_ZONE = "No zone called %s." -- what was typed
+L.WAYPOINTS_NO_MAP = "There's no map here. Name a zone: /way Elwynn Forest 45 67."
+L.WAYPOINTS_NOT_HERE = "Can't put a waypoint on the %s map." -- zone
+L.WAYPOINTS_UNAVAILABLE = "This client has no map waypoints."
+L.WAYPOINTS_YARDS = "%s yds" -- a distance; the game's own words are used when it has them
