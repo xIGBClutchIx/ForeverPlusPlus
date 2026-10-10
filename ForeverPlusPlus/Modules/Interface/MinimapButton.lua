@@ -6,6 +6,7 @@ local _, ns = ...
 local format, type, tremove = string.format, type, table.remove
 local cos, sin, rad, deg, atan2, floor = math.cos, math.sin, math.rad, math.deg, math.atan2, math.floor
 local CreateFrame, GetCursorPosition = CreateFrame, GetCursorPosition
+local IsControlKeyDown, IsShiftKeyDown, IsAltKeyDown = IsControlKeyDown, IsShiftKeyDown, IsAltKeyDown
 
 local L = ns.L
 local Errors = ns.Errors
@@ -13,6 +14,7 @@ local Errors = ns.Errors
 local module = ns.NewModule("MinimapButton", L.MINIMAPBUTTON_DESC, {
     enabled = true,
     where = "minimap", -- minimap, compartment, or both
+    clearModifier = "ctrl", -- held with a right-click to clear this session's errors
     -- Data, not settings: a table, so presets leave it alone.
     saved = {
         angle = 200, -- the button's place around the minimap, in degrees
@@ -25,9 +27,22 @@ module.added = "0.8.0"
 local button
 local compartment -- our entry in the addon compartment, while it's there
 
+-- The keys that, held with a right-click, clear this session's errors.
+local MODIFIERS = {
+    ctrl = { name = L.MINIMAPBUTTON_KEY_CTRL, down = IsControlKeyDown },
+    shift = { name = L.MINIMAPBUTTON_KEY_SHIFT, down = IsShiftKeyDown },
+    alt = { name = L.MINIMAPBUTTON_KEY_ALT, down = IsAltKeyDown },
+}
+
 local function onClick(_, mouse)
     if mouse == "RightButton" and Errors.IsOn() then
-        Errors.Toggle()
+        -- Clearing needs the key held, so it's never an accident.
+        local modifier = MODIFIERS[module.db.clearModifier]
+        if modifier and modifier.down() then
+            Errors.ClearSession()
+        else
+            Errors.Toggle()
+        end
     else
         ns.OpenSettings()
     end
@@ -46,6 +61,10 @@ local function showTooltip(owner, drag)
     GameTooltip:AddLine(L.MINIMAPBUTTON_TIP_SETTINGS, 0.1, 1, 0.1)
     if errors then
         GameTooltip:AddLine(L.MINIMAPBUTTON_TIP_ERRORS, 0.1, 1, 0.1)
+        local modifier = MODIFIERS[module.db.clearModifier]
+        if modifier then
+            GameTooltip:AddLine(format(L.MINIMAPBUTTON_TIP_CLEAR, modifier.name), 0.1, 1, 0.1)
+        end
     end
     if drag then
         GameTooltip:AddLine(L.MINIMAPBUTTON_TIP_DRAG, 0.1, 1, 0.1)
@@ -210,6 +229,17 @@ module.options = {
             { "minimap", L.MINIMAPBUTTON_WHERE_MINIMAP },
             { "compartment", L.MINIMAPBUTTON_WHERE_COMPARTMENT },
             { "both", L.MINIMAPBUTTON_WHERE_BOTH },
+        },
+    },
+    {
+        key = "clearModifier",
+        name = L.MINIMAPBUTTON_CLEAR_KEY,
+        description = L.MINIMAPBUTTON_CLEAR_KEY_DESC,
+        choices = {
+            { "ctrl", L.MINIMAPBUTTON_KEY_CTRL },
+            { "shift", L.MINIMAPBUTTON_KEY_SHIFT },
+            { "alt", L.MINIMAPBUTTON_KEY_ALT },
+            { "none", L.MINIMAPBUTTON_KEY_NONE },
         },
     },
 }

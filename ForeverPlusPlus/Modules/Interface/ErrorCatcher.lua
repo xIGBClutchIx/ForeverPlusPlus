@@ -234,6 +234,22 @@ local function clear()
     end
 end
 
+-- Forgets this session's errors, keeping earlier sessions'.
+local function clearSession()
+    local data = saved()
+    if not data then
+        return
+    end
+    local kept = {}
+    for _, entry in ipairs(data.errors) do
+        if entry.session ~= data.session then
+            kept[#kept + 1] = entry
+        end
+    end
+    data.errors = kept
+    changed()
+end
+
 -- Caught from here on (see the top of the file).
 previous = geterrorhandler()
 seterrorhandler(onError)
@@ -755,6 +771,7 @@ local provider = {
         return data and #data.errors or 0
     end,
     toggle = toggleWindow,
+    clearSession = clearSession,
 }
 
 module.options = {

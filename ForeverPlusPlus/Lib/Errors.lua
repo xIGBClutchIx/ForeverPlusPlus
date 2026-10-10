@@ -10,7 +10,7 @@ local call = ns.Call -- so one listener's error doesn't stop the others
 local Errors = {}
 ns.Errors = Errors
 
-local source -- { session = fn, saved = fn, toggle = fn } while Error Catcher is on
+local source -- { session, saved, toggle, clearSession } functions while Error Catcher is on
 local listeners = {}
 
 ---Tells the listeners that the counts changed, or that Error Catcher came or went.
@@ -21,7 +21,7 @@ function Errors.Changed()
 end
 
 ---Error Catcher's side: its counts and window while it's on, or nil when it turns off.
----@param provider? { session: fun(): number, saved: fun(): number, toggle: fun() }
+---@param provider? { session: fun(): number, saved: fun(): number, toggle: fun(), clearSession: fun() }
 function Errors.Provide(provider)
     source = provider
     Errors.Changed()
@@ -49,6 +49,13 @@ end
 function Errors.Toggle()
     if source then
         source.toggle()
+    end
+end
+
+---Forgets this session's errors, keeping earlier sessions', if Error Catcher is on.
+function Errors.ClearSession()
+    if source then
+        source.clearSession()
     end
 end
 

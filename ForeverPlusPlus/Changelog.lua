@@ -63,8 +63,8 @@ ns.changelog = {
                     .. "default." },
                 { L.ERRORCATCHER_TITLE, "Its button is now the Minimap Button module, where a "
                     .. "click opens settings and a right-click shows the errors. Turn that module "
-                    .. "off for no button. The Clear Key option is gone; the window's Clear button "
-                    .. "still clears saved errors." },
+                    .. "off for no button. Its Clear Key option moved there too: Ctrl-right-click "
+                    .. "still clears this session's errors." },
                 { L.CHANGELOG_SETTINGS, "Clutch's Default is now Developer's Defaults, and the "
                     .. "welcome page's Defaults button is now Recommended Defaults, matching the "
                     .. "Defaults popup on the Modules and Debug pages." },

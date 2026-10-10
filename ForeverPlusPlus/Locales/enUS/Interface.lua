@@ -264,6 +264,14 @@ L.MINIMAPBUTTON_TIP_SAVED = "Saved errors: %d"
 L.MINIMAPBUTTON_TIP_SETTINGS = "Click to open Forever++ settings."
 L.MINIMAPBUTTON_TIP_ERRORS = "Right-click to show the errors."
 L.MINIMAPBUTTON_TIP_DRAG = "Drag to move the button."
+L.MINIMAPBUTTON_TIP_CLEAR = "%s-right-click to clear this session's errors." -- a key, such as Ctrl
+L.MINIMAPBUTTON_CLEAR_KEY = "Clear Key"
+L.MINIMAPBUTTON_CLEAR_KEY_DESC = "The key to hold while right-clicking the button to clear "
+    .. "this session's errors, while Error Catcher is on. A right-click alone shows them."
+L.MINIMAPBUTTON_KEY_CTRL = "Ctrl"
+L.MINIMAPBUTTON_KEY_SHIFT = "Shift"
+L.MINIMAPBUTTON_KEY_ALT = "Alt"
+L.MINIMAPBUTTON_KEY_NONE = "None"
 
 -- QuestIcons
 L.QUESTICONS_TITLE = "Forever Quest Icons"

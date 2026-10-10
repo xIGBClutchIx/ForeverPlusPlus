@@ -285,6 +285,7 @@ Errors.Provide({
     session = function() return 3 end,
     saved = function() return 7 end,
     toggle = function() toggled = toggled + 1 end,
+    clearSession = function() toggled = toggled + 10 end,
 })
 eq(Errors.IsOn(), true, "errors on once provided")
 eq(heard, 1, "providing tells listeners")
@@ -292,6 +293,8 @@ eq(Errors.SessionCount(), 3, "session count")
 eq(Errors.SavedCount(), 7, "saved count")
 Errors.Toggle()
 eq(toggled, 1, "toggle opens the window")
+Errors.ClearSession()
+eq(toggled, 11, "clear session reaches error catcher")
 Errors.Changed()
 eq(heard, 2, "changes tell listeners")
 Errors.Provide(nil)
