@@ -10,7 +10,8 @@
 --                    A module made of parts (`module:NewPart`) has a section for each, headed by
 --                    the part's Enabled checkbox, with the part's options greyed out while it's off.
 --                    `alwaysOn` modules (tools) aren't listed. A search box at the top narrows
---                    the list to modules by title and description. A module or option added
+--                    the list to modules by title and description, or by an option's name or
+--                    description, and highlights those options. A module or option added
 --                    since the player last looked (`added`), or an option changed since then
 --                    (`changed`), is marked NEW
 --     <Tool>         a page a module draws itself (`BuildPage`)
@@ -24,7 +25,7 @@
 local _, ns = ...
 
 local ipairs, pairs, next, format, type, sort = ipairs, pairs, next, string.format, type, table.sort
-local strlower = string.lower
+local strlower, concat = string.lower, table.concat
 local min, max, pcall = math.min, math.max, pcall
 local InCombatLockdown, CreateFrame, GetBuildInfo = InCombatLockdown, CreateFrame, GetBuildInfo
 local wipe = wipe
@@ -612,7 +613,7 @@ local CONTROL_LEFT = 150 -- where an option's control starts, after its name
 local DESCRIPTION_LINES = 4 -- the room a description always takes, so the options stay put
 
 local listed = {} -- the names of the modules on the page, by category, then title
-local searchText = {} -- module name -> its title and description, lowercased
+local searchText = {} -- module name -> its title, description, and options' text, lowercased
 local filter, filterText -- the search text, lowercased and as typed, or nil while the box is empty
 local newOnly -- the New checkbox: only modules marked NEW show, off each time Settings opens
 local page -- the page's frames, once built
@@ -809,6 +810,11 @@ local function scrollTo(scroll, content, frame)
     end)
 end
 
+-- What the search looks for in an option: its name and description (its tooltip), lowercased.
+local function optionText(option)
+    return strlower(format("%s\n%s", option.name or "", option.description or ""))
+end
+
 -- Stacks ----------------------------------------------------------------------------------------
 -- A stack is a frame whose entries ({ frame, shown, gap }) sit one under the other, `top` down
 -- from its top, each only while its `shown()` is true. The module list is one, and so are the
@@ -898,6 +904,17 @@ local function addOptionRow(view, module, option, byKey, done)
     local row, label = addRow(view, option.toggle and L.SETTINGS_ENABLED or option.name, indent, on)
     local updates = view.updates
     local pair = option.slider and byKey[option.slider]
+    -- Highlighted like a selected sidebar entry while the search finds it (or the slider in it).
+    local highlight = row:CreateTexture(nil, "BACKGROUND")
+    highlight:SetAllPoints()
+    if hasAtlas("Options_List_Active") then
+        highlight:SetAtlas("Options_List_Active")
+    else
+        highlight:SetColorTexture(1, 0.82, 0, 0.15)
+    end
+    highlight:Hide()
+    view.found[#view.found + 1] = { row = row, highlight = highlight,
+        text = optionText(option) .. (pair and "\n" .. optionText(pair) or "") }
     -- The name wraps narrower while it's marked NEW, so the row's height follows it. A slider in
     -- the row has no name of its own here, so its mark goes on the row's.
     local mark = newMark(row, label, CONTROL_LEFT - 8 - indent, option, pair)
@@ -1051,7 +1068,7 @@ local function buildView(name)
     local width = page.paneWidth
     local view = newStack(page.paneContent, width, 4)
     view:SetPoint("TOPLEFT")
-    view.updates = {}
+    view.updates, view.found = {}, {}
 
     local heading = view:CreateFontString(nil, "OVERLAY", "GameFontHighlightHuge")
     heading:SetPoint("TOPLEFT", 4, -4)
@@ -1121,6 +1138,28 @@ local function paint(row)
     end
 end
 
+-- Highlights the options of `view` the search finds. With `reveal`, scrolls the first of them into
+-- sight when it's below what shows, after a frame, once the layout's sizes are known.
+local function markFound(view, reveal)
+    local first
+    for _, entry in ipairs(view.found) do
+        local found = filter and entry.text:find(filter, 1, true) ~= nil
+        entry.highlight:SetShown(found)
+        first = first or found and entry.row
+    end
+    if not (reveal and first and C_Timer) then
+        return
+    end
+    local scroll, content = page.pane, page.paneContent
+    C_Timer.After(0, function()
+        local top, bottom = content:GetTop(), first:GetBottom()
+        local height = scroll:GetHeight()
+        if top and bottom and height and top - bottom > scroll:GetVerticalScroll() + height then
+            scrollTo(scroll, content, first)
+        end
+    end)
+end
+
 -- Shows `name` on the right (nil for none).
 local function choose(name)
     selected = name
@@ -1139,6 +1178,7 @@ local function choose(name)
         layoutStack(view)
         page.paneContent:SetHeight(view:GetHeight())
         page.pane:SetVerticalScroll(0)
+        markFound(view, true)
     end
     -- Last, since moving on from a module with labels redraws the page.
     if newOrder and onModulesPage() then
@@ -1208,6 +1248,7 @@ local function relayout()
     elseif page.views[selected] then
         layoutStack(page.views[selected])
         page.paneContent:SetHeight(page.views[selected]:GetHeight())
+        markFound(page.views[selected])
     end
 end
 
@@ -1228,7 +1269,8 @@ function refreshAll()
 end
 
 -- A search box at the top of the page, left of the Defaults button, that narrows the list to the
--- modules whose title or description has the text. Blizzard's own search, at the top left of the
+-- modules whose title or description has the text, or an option's name or description, and
+-- highlights those options on the right. Blizzard's own search, at the top left of the
 -- panel, finds settings across every addon, not modules. Probe: SearchBoxTemplate is Mainline's.
 local function addSearchBox(frame, anchor)
     if not hasTemplate("SearchBoxTemplate") then
@@ -1247,6 +1289,9 @@ local function addSearchBox(frame, anchor)
         filter = text ~= "" and strlower(text) or nil
         filterText = text
         relayout()
+        if selected and page.views[selected] then
+            markFound(page.views[selected], true)
+        end
     end)
     return box
 end
@@ -1703,8 +1748,14 @@ function ns.RegisterSettings()
         local module = ns.modules[name]
         if not module.alwaysOn then
             listed[#listed + 1] = name
-            searchText[name] = strlower(format("%s\n%s", module.title or name,
-                module.description or ""))
+            local text = { strlower(format("%s\n%s", module.title or name,
+                module.description or "")) }
+            for _, option in ipairs(module.options or {}) do
+                if not option.debug then
+                    text[#text + 1] = optionText(option)
+                end
+            end
+            searchText[name] = concat(text, "\n")
         end
     end
 

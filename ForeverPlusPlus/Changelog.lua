@@ -42,6 +42,9 @@ ns.changelog = {
                     .. "Version shows the Modules page as a player updating from the last release "
                     .. "sees it, Copy Debug Info gives one line for a bug report, Print Module "
                     .. "Events lists what each module listens to, and Reload UI reloads." },
+                { L.CHANGELOG_SETTINGS, "The Modules page search also finds options by their "
+                    .. "name or tooltip text, showing their module with those options "
+                    .. "highlighted." },
                 { L.AUTOQUEST_TITLE, "New, off by default, in Automation: accepts quests and "
                     .. "turns in finished ones as you talk to quest givers, one by one down a "
                     .. "quest giver's list. It never picks a reward when there's a choice. "
