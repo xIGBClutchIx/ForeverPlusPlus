@@ -108,7 +108,8 @@ local function onEnter(self)
     showTooltip(self, true)
 end
 
--- The usual round minimap button: Blizzard's tracking border around a small icon.
+-- The usual round minimap button: Blizzard's tracking border around a small icon, laid out as
+-- LibDBIcon does on Mainline clients like Forever's (the Classic offsets sit up and to the left).
 local function newMinimapButton()
     local b = CreateFrame("Button", nil, Minimap)
     b:SetSize(31, 31)
@@ -120,15 +121,16 @@ local function newMinimapButton()
 
     local background = b:CreateTexture(nil, "BACKGROUND")
     background:SetTexture("Interface\\Minimap\\UI-Minimap-Background")
-    background:SetSize(20, 20)
-    background:SetPoint("TOPLEFT", 7, -5)
+    background:SetSize(24, 24)
+    background:SetPoint("CENTER")
     local icon = b:CreateTexture(nil, "ARTWORK")
     icon:SetTexture(ns.icon)
     icon:SetSize(18, 18)
-    icon:SetPoint("TOPLEFT", 7, -6)
+    icon:SetPoint("CENTER")
+    icon:SetTexCoord(0.05, 0.95, 0.05, 0.95)
     local border = b:CreateTexture(nil, "OVERLAY")
     border:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
-    border:SetSize(53, 53)
+    border:SetSize(50, 50)
     border:SetPoint("TOPLEFT")
     b.count = b:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
     b.count:SetPoint("BOTTOMRIGHT", 2, 1)
