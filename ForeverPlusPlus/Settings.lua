@@ -1472,11 +1472,20 @@ local function buildChangelog(frame)
 
     local y = 0
     -- A line of text across the list, wrapping, below the one before it.
-    local function add(font, text, indent, gap)
+    -- With `bullet`, a dash before it and the text's wrapped lines lined up after the dash, so
+    -- each entry's start stands out.
+    local function add(font, text, indent, gap, bullet)
         y = y - (gap or 0)
+        indent = indent or 0
+        if bullet then
+            local dash = content:CreateFontString(nil, "OVERLAY", font)
+            dash:SetPoint("TOPLEFT", indent, y)
+            dash:SetText("-")
+            indent = indent + 10
+        end
         local line = content:CreateFontString(nil, "OVERLAY", font)
-        line:SetPoint("TOPLEFT", indent or 0, y)
-        line:SetWidth(width - (indent or 0))
+        line:SetPoint("TOPLEFT", indent, y)
+        line:SetWidth(width - indent)
         line:SetJustifyH("LEFT")
         line:SetText(text)
         y = y - line:GetStringHeight()
@@ -1494,7 +1503,7 @@ local function buildChangelog(frame)
                 if type(entry) == "table" then
                     text = format("|cffffd100%s|r: %s", entry[1], entry[2]) -- gold, like GameFontNormal
                 end
-                add("GameFontHighlightSmall", format("- %s", text), 8, 6)
+                add("GameFontHighlightSmall", text, 8, 6, true)
             end
         end
     end
