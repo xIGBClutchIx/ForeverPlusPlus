@@ -1,7 +1,7 @@
 -- Error Catcher: catches Lua errors, blocked and forbidden actions, and Lua warnings instead of
 -- Blizzard's error window and popup, saves them with the session they happened in, and shows
--- them in a window (`/fpp errors`, the minimap button, or the addon compartment): a list of
--- errors on the left, the one picked on the right, and a button that selects a bug report with
+-- them in a window (`/fpp errors`, or a right-click on the Minimap Button module's button, through
+-- ns.Errors): a list of errors on the left, the one picked on the right, and a button that selects a bug report with
 -- the client, addon version, and modules on, ready to copy. An error that happens again is counted instead of
 -- kept twice.
 --
@@ -13,10 +13,9 @@
 local _, ns = ...
 
 local format, tostring, pcall, select, ipairs = string.format, tostring, pcall, select, ipairs
-local min, floor = math.min, math.floor
+local min = math.min
 local concat, tremove, wipe, time, date = table.concat, table.remove, wipe, time, date
-local cos, sin, rad, deg, atan2 = math.cos, math.sin, math.rad, math.deg, math.atan2
-local CreateFrame, UIParent, GetTime, GetCursorPosition = CreateFrame, UIParent, GetTime, GetCursorPosition
+local CreateFrame, UIParent, GetTime = CreateFrame, UIParent, GetTime
 local C_Timer, error = C_Timer, error
 local seterrorhandler, geterrorhandler = seterrorhandler, geterrorhandler
 local debugstack, debuglocals = debugstack, debuglocals
@@ -28,14 +27,11 @@ local L = ns.L
 local module = ns.NewModule("ErrorCatcher", L.ERRORCATCHER_DESC, {
     enabled = true,
     chat = false,
-    button = "minimap", -- where its button goes: none, compartment, minimap, or both
-    clearModifier = "ctrl",
     -- Data, not settings: a table, so presets leave it alone.
     saved = {
         session = 0, -- counts logins and reloads
         -- oldest first: { kind, message, stack, locals, count, session, first, time }
         errors = {},
-        angle = 200, -- the minimap button's place around the minimap, in degrees
     },
 })
 module.title = L.ERRORCATCHER_TITLE
@@ -51,8 +47,7 @@ local pending = {} -- errors caught before saved variables loaded
 local busy -- true while catching an error, so an error while catching can't loop
 local allowance, lastCaught = PER_SECOND, 0
 local lastAnnounced = -ANNOUNCE_EVERY
-local button, window
-local compartment -- our entry in the addon compartment, while it's there
+local window
 
 -- Text that's safe to keep: a secret value or nil becomes `fallback`.
 local function readable(value, fallback)
@@ -92,12 +87,10 @@ local function sessionCount()
     return count
 end
 
-local refreshButton, refreshWindow -- set below, once the frames exist
+local refreshWindow -- set below, once the window exists
 
 local function changed()
-    if refreshButton then
-        refreshButton()
-    end
+    ns.Errors.Changed() -- the minimap button's count
     if refreshWindow then
         refreshWindow(true)
     end
@@ -239,22 +232,6 @@ local function clear()
         wipe(data.errors)
         changed()
     end
-end
-
--- Forgets this session's errors, keeping earlier sessions'.
-local function clearSession()
-    local data = saved()
-    if not data then
-        return
-    end
-    local kept = {}
-    for _, entry in ipairs(data.errors) do
-        if entry.session ~= data.session then
-            kept[#kept + 1] = entry
-        end
-    end
-    data.errors = kept
-    changed()
 end
 
 -- Caught from here on (see the top of the file).
@@ -626,6 +603,14 @@ local function newFrame()
     end
     if f.SetPortraitToAsset then
         pcall(f.SetPortraitToAsset, f, ns.icon)
+        -- Blizzard's portrait is 62 pixels square with its round mask inset 2 left and right and
+        -- 4 at the bottom. Fit the icon's emblem (inside its dark square border) to that circle
+        -- so it sits centered in the ring like Blizzard's portraits, with no border showing.
+        if f.SetPortraitTexCoord then
+            local edge, perPixel = 0.07, 0.86 / 58
+            pcall(f.SetPortraitTexCoord, f, edge - 2 * perPixel, 1 - edge + 2 * perPixel, edge,
+                1 - edge + 4 * perPixel)
+        end
     end
     if f.SetTitle then
         f:SetTitle(L.ERRORCATCHER_TITLE)
@@ -760,219 +745,19 @@ local function toggleWindow()
     refreshWindow()
 end
 
--- The minimap button ----------------------------------------------------------------------------
-
-local function place()
-    local angle = rad(module.db.saved.angle)
-    local radius = Minimap:GetWidth() / 2 + 10
-    button:ClearAllPoints()
-    button:SetPoint("CENTER", Minimap, "CENTER", cos(angle) * radius, sin(angle) * radius)
-end
-
--- While dragging: the button follows the cursor around the minimap's edge.
-local function follow()
-    local x, y = Minimap:GetCenter()
-    local scale = Minimap:GetEffectiveScale()
-    local cx, cy = GetCursorPosition()
-    module.db.saved.angle = floor(deg(atan2(cy / scale - y, cx / scale - x)) % 360)
-    place()
-end
-
-function refreshButton()
-    local count = sessionCount()
-    if compartment then
-        -- Read when the compartment's menu opens, so it shows this session's count from then on.
-        compartment.text = count > 0 and format(L.ERRORCATCHER_COMPARTMENT_COUNT, L.ERRORCATCHER_TITLE,
-            count) or L.ERRORCATCHER_TITLE
-    end
-    if not button then
-        return
-    end
-    button.count:SetText(count > 0 and count or "")
-    -- Gray while this session has caught nothing.
-    button.icon:SetDesaturated(count == 0)
-end
-
--- The keys that, held with a right-click on the minimap button, clear this session's errors.
-local MODIFIERS = {
-    ctrl = { name = L.ERRORCATCHER_KEY_CTRL, down = IsControlKeyDown },
-    shift = { name = L.ERRORCATCHER_KEY_SHIFT, down = IsShiftKeyDown },
-    alt = { name = L.ERRORCATCHER_KEY_ALT, down = IsAltKeyDown },
-}
-
-local function onClick(_, mouse)
-    if mouse ~= "RightButton" then
-        toggleWindow()
-        return
-    end
-    -- Clearing needs the key held, so it's never an accident; a right-click alone opens Settings.
-    local modifier = MODIFIERS[module.db.clearModifier]
-    if modifier and modifier.down() then
-        clearSession()
-    else
-        ns.OpenSettings()
-    end
-end
-
--- The button's tooltip. `drag` adds the line about dragging, which only the minimap button does.
-local function showTooltip(owner, drag)
-    GameTooltip:SetOwner(owner, "ANCHOR_LEFT")
-    GameTooltip:SetText(L.ERRORCATCHER_TITLE)
-    GameTooltip:AddLine(format(L.ERRORCATCHER_TIP_SESSION, sessionCount()), 1, 1, 1)
-    GameTooltip:AddLine(format(L.ERRORCATCHER_TIP_SAVED, saved() and #saved().errors or 0), 1, 1, 1)
-    GameTooltip:AddLine(" ")
-    GameTooltip:AddLine(L.ERRORCATCHER_TIP_CLICK, 0.1, 1, 0.1)
-    GameTooltip:AddLine(L.ERRORCATCHER_TIP_SETTINGS, 0.1, 1, 0.1)
-    local modifier = MODIFIERS[module.db.clearModifier]
-    if modifier then
-        GameTooltip:AddLine(format(L.ERRORCATCHER_TIP_CLEAR, modifier.name), 0.1, 1, 0.1)
-    end
-    if drag then
-        GameTooltip:AddLine(L.ERRORCATCHER_TIP_DRAG, 0.1, 1, 0.1)
-    end
-    GameTooltip:Show()
-end
-
-local function onEnter(self)
-    showTooltip(self, true)
-end
-
--- The usual round minimap button: Blizzard's tracking border around a small icon.
-local function newMinimapButton()
-    local b = CreateFrame("Button", nil, Minimap)
-    b:SetSize(31, 31)
-    b:SetFrameStrata("MEDIUM")
-    b:SetFrameLevel(Minimap:GetFrameLevel() + 8)
-    b:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-    b:RegisterForDrag("LeftButton")
-    b:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
-
-    local background = b:CreateTexture(nil, "BACKGROUND")
-    background:SetTexture("Interface\\Minimap\\UI-Minimap-Background")
-    background:SetSize(20, 20)
-    background:SetPoint("TOPLEFT", 7, -5)
-    b.icon = b:CreateTexture(nil, "ARTWORK")
-    b.icon:SetTexture(ns.icon)
-    b.icon:SetSize(18, 18)
-    b.icon:SetPoint("TOPLEFT", 7, -6)
-    local border = b:CreateTexture(nil, "OVERLAY")
-    border:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
-    border:SetSize(53, 53)
-    border:SetPoint("TOPLEFT")
-    b.count = b:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
-    b.count:SetPoint("BOTTOMRIGHT", 2, 1)
-
-    b:SetScript("OnClick", onClick)
-    b:SetScript("OnDragStart", function(self)
-        GameTooltip_Hide()
-        self:SetScript("OnUpdate", follow)
-    end)
-    b:SetScript("OnDragStop", function(self)
-        self:SetScript("OnUpdate", nil)
-    end)
-    b:SetScript("OnEnter", onEnter)
-    b:SetScript("OnLeave", GameTooltip_Hide)
-    return b
-end
-
--- The addon compartment ---------------------------------------------------------------------------
--- The menu under the minimap that lists addons. Forever has it (Manners, an addon for this
--- client, registers there the same way). Registered here rather than with the TOC's
--- AddonCompartmentFunc, so it can come and go with the option.
-
-local function compartmentFrame()
-    local frame = AddonCompartmentFrame
-    if frame and frame.RegisterAddon then
-        return frame
-    end
-end
-
-local function addCompartment()
-    local frame = compartmentFrame()
-    if compartment or not frame then
-        return
-    end
-    compartment = {
-        text = L.ERRORCATCHER_TITLE,
-        icon = ns.icon,
-        notCheckable = true,
-        registerForAnyClick = true,
-        -- The mouse button comes inside the input data; the TOC's way passes it as a string.
-        func = function(_, input)
-            onClick(nil, type(input) == "table" and input.buttonName or input)
-        end,
-        funcOnEnter = function(owner)
-            showTooltip(type(owner) == "table" and owner.IsObjectType and owner or frame, false)
-        end,
-        funcOnLeave = GameTooltip_Hide,
-    }
-    refreshButton()
-    frame:RegisterAddon(compartment)
-end
-
--- Blizzard has no way to unregister, so ours comes out of its list, as LibDBIcon does, and the
--- compartment redraws. The list holds only addons' entries, so this touches nothing secure.
-local function removeCompartment()
-    local frame = compartmentFrame()
-    local entries = frame and frame.registeredAddons
-    if compartment and entries then
-        for i = #entries, 1, -1 do
-            if entries[i] == compartment then
-                tremove(entries, i)
-            end
-        end
-        if frame.UpdateDisplay then
-            frame:UpdateDisplay()
-        end
-    end
-    compartment = nil
-end
-
--- Shows the minimap button and the compartment entry the option asks for, and only those.
-local function updateButtons()
-    local where = module.enabled and module.db.button or "none"
-    if (where == "minimap" or where == "both") and Minimap then
-        button = button or newMinimapButton()
-        place()
-        refreshButton()
-        button:Show()
-    elseif button then
-        button:SetScript("OnUpdate", nil)
-        button:Hide()
-    end
-    if where == "compartment" or where == "both" then
-        addCompartment()
-    else
-        removeCompartment()
-    end
-end
-
 -- The module ----------------------------------------------------------------------------------
 
+-- What the minimap button reads and opens, through ns.Errors, while the module is on.
+local provider = {
+    session = sessionCount,
+    saved = function()
+        local data = saved()
+        return data and #data.errors or 0
+    end,
+    toggle = toggleWindow,
+}
+
 module.options = {
-    {
-        key = "button",
-        name = L.ERRORCATCHER_BUTTON,
-        description = L.ERRORCATCHER_BUTTON_DESC,
-        added = "0.8.0",
-        choices = {
-            { "none", L.ERRORCATCHER_BUTTON_NONE },
-            { "compartment", L.ERRORCATCHER_BUTTON_COMPARTMENT },
-            { "minimap", L.ERRORCATCHER_BUTTON_MINIMAP },
-            { "both", L.ERRORCATCHER_BUTTON_BOTH },
-        },
-    },
-    {
-        key = "clearModifier",
-        name = L.ERRORCATCHER_CLEAR_KEY,
-        description = L.ERRORCATCHER_CLEAR_KEY_DESC,
-        choices = {
-            { "ctrl", L.ERRORCATCHER_KEY_CTRL },
-            { "shift", L.ERRORCATCHER_KEY_SHIFT },
-            { "alt", L.ERRORCATCHER_KEY_ALT },
-            { "none", L.ERRORCATCHER_KEY_NONE },
-        },
-    },
     ns.ChatOption(L.ERRORCATCHER_CHAT_DESC),
 }
 
@@ -1068,22 +853,16 @@ function module:OnEnable()
         pending = {}
         self:Print(format(L.ERRORCATCHER_CAUGHT_LOADING, count))
     end
-    updateButtons()
+    ns.Errors.Provide(provider)
 end
 
 function module:OnDisable()
     if geterrorhandler() == onError then
         seterrorhandler(previous)
     end
-    updateButtons()
+    ns.Errors.Provide(nil)
     if window then
         window:Hide()
-    end
-end
-
-function module:OnOptionChanged(key)
-    if key == "button" then
-        updateButtons()
     end
 end
 

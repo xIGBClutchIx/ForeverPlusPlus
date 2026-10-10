@@ -98,6 +98,19 @@ local function refresh()
     end
     ui.scrollBox:SetDataProvider(CreateDataProvider(rows), ScrollBoxConstants.RetainScrollPosition)
     ui.count:SetText(format(L.CVARBROWSER_COUNT, #rows, #all))
+    -- Say why the list is empty instead of leaving a blank page.
+    local empty
+    if #rows == 0 then
+        if query ~= "" then
+            empty = format(L.CVARBROWSER_NO_MATCH, search)
+        elseif #all == 0 then
+            empty = L.CVARBROWSER_NO_LIST
+        else
+            empty = L.CVARBROWSER_NONE_CHANGED
+        end
+    end
+    ui.empty:SetText(empty or "")
+    ui.empty:SetShown(empty ~= nil)
 end
 
 local function apply(name, value)
@@ -139,7 +152,15 @@ local function showTooltip(row)
     GameTooltip:Show()
 end
 
-local function hideTooltip()
+-- The row and its box and button all highlight the row and show its tooltip: moving onto a child
+-- frame is a leave for the row, which used to drop the highlight over the box and the button.
+local function enterRow(row)
+    row.highlight:Show()
+    showTooltip(row)
+end
+
+local function leaveRow(row)
+    row.highlight:Hide()
     GameTooltip:Hide()
 end
 
@@ -160,6 +181,10 @@ local function buildRow(row)
             apply(row.entry.name, default)
         end
     end)
+    -- It's disabled on most rows (already at the default) and still covers part of the row.
+    row.reset:SetMotionScriptsWhileDisabled(true)
+    row.reset:HookScript("OnEnter", function() enterRow(row) end)
+    row.reset:HookScript("OnLeave", function() leaveRow(row) end)
 
     row.default = row:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
     row.default:SetPoint("RIGHT", DEFAULT_RIGHT, 0)
@@ -186,8 +211,8 @@ local function buildRow(row)
         self:SetText(tostring(read(row.entry.name) or ""))
         self:SetCursorPosition(0)
     end)
-    row.value:HookScript("OnEnter", function() showTooltip(row) end)
-    row.value:HookScript("OnLeave", hideTooltip)
+    row.value:HookScript("OnEnter", function() enterRow(row) end)
+    row.value:HookScript("OnLeave", function() leaveRow(row) end)
 
     row.name = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     row.name:SetPoint("LEFT", 6, 0)
@@ -195,14 +220,8 @@ local function buildRow(row)
     row.name:SetJustifyH("LEFT")
     row.name:SetWordWrap(false)
 
-    row:SetScript("OnEnter", function(self)
-        self.highlight:Show()
-        showTooltip(self)
-    end)
-    row:SetScript("OnLeave", function(self)
-        self.highlight:Hide()
-        hideTooltip()
-    end)
+    row:SetScript("OnEnter", enterRow)
+    row:SetScript("OnLeave", leaveRow)
 end
 
 local function initRow(row, entry)
@@ -322,6 +341,13 @@ function module:BuildPage(frame)
     header(scrollBox, L.CVARBROWSER_NAME, "LEFT", 6)
     header(scrollBox, L.CVARBROWSER_VALUE, "RIGHT", VALUE_RIGHT - VALUE_WIDTH)
     header(scrollBox, L.CVARBROWSER_DEFAULT, "RIGHT", DEFAULT_RIGHT - DEFAULT_WIDTH)
+
+    -- Like the Modules page's "No modules match".
+    ui.empty = scrollBox:CreateFontString(nil, "OVERLAY", "GameFontDisable")
+    ui.empty:SetPoint("TOPLEFT", 6, -6)
+    ui.empty:SetPoint("RIGHT", -6, 0)
+    ui.empty:SetJustifyH("LEFT")
+    ui.empty:Hide()
 
     local view = CreateScrollBoxListLinearView()
     view:SetElementExtent(ROW_HEIGHT)

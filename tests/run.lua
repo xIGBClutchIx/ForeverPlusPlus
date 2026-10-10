@@ -34,6 +34,9 @@ ns.NewLocale = function()
     return ns.L
 end
 ns.L = {}
+ns.Call = function(fn, ...)
+    return fn(...)
+end
 
 local function load(path)
     local chunk, err = loadfile(path)
@@ -45,7 +48,7 @@ for _, file in ipairs({ "Core", "Map" }) do
     load("ForeverPlusPlus/Locales/enUS/" .. file .. ".lua")
 end
 for _, file in ipairs({ "Secret", "Colors", "Text", "WorldMap", "Instances", "Chat",
-    "TalentPlan" }) do
+    "TalentPlan", "Errors" }) do
     load("ForeverPlusPlus/Lib/" .. file .. ".lua")
 end
 
@@ -267,6 +270,34 @@ eq(Plan.FirstLevel(5, 0), 10, "none earned yet: Classic's 10")
 eq(Plan.PointsAt(30, 10), 21, "21 points at 30")
 eq(Plan.PointsAt(9, 10), 0, "none before 10")
 eq(Plan.LevelOf(21, 10), 30, "21st point at 30")
+
+-- Errors ----------------------------------------------------------------------------------------
+
+local Errors = ns.Errors
+local heard, toggled = 0, 0
+Errors.OnChanged(function()
+    heard = heard + 1
+end)
+eq(Errors.IsOn(), false, "errors off at first")
+eq(Errors.SessionCount(), 0, "no count while off")
+Errors.Toggle() -- does nothing while off
+Errors.Provide({
+    session = function() return 3 end,
+    saved = function() return 7 end,
+    toggle = function() toggled = toggled + 1 end,
+})
+eq(Errors.IsOn(), true, "errors on once provided")
+eq(heard, 1, "providing tells listeners")
+eq(Errors.SessionCount(), 3, "session count")
+eq(Errors.SavedCount(), 7, "saved count")
+Errors.Toggle()
+eq(toggled, 1, "toggle opens the window")
+Errors.Changed()
+eq(heard, 2, "changes tell listeners")
+Errors.Provide(nil)
+eq(Errors.IsOn(), false, "errors off again")
+eq(Errors.SavedCount(), 0, "no saved count while off")
+eq(heard, 3, "turning off tells listeners")
 
 -- Done ------------------------------------------------------------------------------------------
 
