@@ -85,6 +85,18 @@ L.ALREADYKNOWN_MAIL_DESC = "Mark mail whose attachments you already know, in the
 L.ALREADYKNOWN_LOOT = "Loot"
 L.ALREADYKNOWN_LOOT_DESC = "Mark known items in the loot window."
 
+L.UNUSABLEITEMS_TITLE = "Unusable Items Tint"
+L.UNUSABLEITEMS_DESC = "Tint red the items you can't use, because of your class, armor or weapon "
+    .. "skill, level, or profession, in your bags, the bank, and at merchants, the way merchants "
+    .. "tint them. It goes by the red lines in the item's tooltip."
+L.UNUSABLEITEMS_BAGS = "Bags"
+L.UNUSABLEITEMS_BAGS_DESC = "Tint items you can't use in your bags."
+L.UNUSABLEITEMS_BANK = "Bank"
+L.UNUSABLEITEMS_BANK_DESC = "Tint items you can't use in the bank."
+L.UNUSABLEITEMS_MERCHANT = "Merchants"
+L.UNUSABLEITEMS_MERCHANT_DESC = "Tint items a merchant sells that you can't use, where the "
+    .. "merchant doesn't already, such as gear above your level."
+
 -- ItemCount
 L.ITEMCOUNT_TITLE = "Item Count"
 L.ITEMCOUNT_DESC = "Show how many of an item you own in its tooltip, and how many are in your "

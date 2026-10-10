@@ -51,6 +51,12 @@ ns.changelog = {
                     .. "your buff and debuff icons as a clock, like 1:23, instead of rounded "
                     .. "minutes like 2 m. Choose under 10 minutes, under an hour, or always. When "
                     .. "the game hides an aura's time in combat, Blizzard's own timer shows." },
+                { L.UNUSABLEITEMS_TITLE, "New, off by default, in Items: tints red the items "
+                    .. "you can't use, because of your class, armor or weapon skill, level, or "
+                    .. "profession, in your bags, the bank, and at merchants, the way merchants "
+                    .. "tint them. At merchants it only adds what the merchant doesn't already "
+                    .. "tint, such as gear above your level. Bags, bank, and merchants each have "
+                    .. "a checkbox." },
                 { L.MINIMAPBUTTON_TITLE, "New, on by default, in Interface: Forever++'s own "
                     .. "button on the minimap, in the addon compartment, or both. Click it to open "
                     .. "Forever++ settings; while Error Catcher is on, right-click it to see the "

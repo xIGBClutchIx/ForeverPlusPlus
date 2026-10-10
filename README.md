@@ -34,6 +34,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Item Count | Shows how many of an item you own in its tooltip, above the prices, and how many are in your bags and your bank, with small bag and bank icons (or words). The bank is counted each time you open it. Off by default. |
 | Profession Tooltips | Shows the skill a herb, ore, skinnable beast, or locked lockbox or chest needs in its tooltip, colored like trainer recipes against your skill, and the skill that gathers herb, ore, and stone items. Gathering for professions you have, or always; Lockpicking only for characters who can pick locks, or blacksmiths with their skeleton keys. |
 | Sell Price | Shows the vendor price of the whole stack in item tooltips. Hold Shift for one item. |
+| Unusable Items Tint | Tints red the icons of items you can't use (class, armor or weapon skill, level, profession), going by the red lines in their tooltip, in your bags, the bank, and at merchants where the merchant doesn't already, each with its own checkbox. Off by default. |
 | **Interface** | |
 | Hide Beta Feedback | Hides the beta's "Press F6 to submit an issue" tooltip line, bug report button, and quest window feedback buttons. Off by default, and only on beta and PTR clients. |
 | AddOns List | Shows the AddOns list without category headers, enabled addons first, each in name order. Options for ungrouping disabled addons and searching notes. On by default. |
