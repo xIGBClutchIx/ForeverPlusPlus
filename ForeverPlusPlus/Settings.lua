@@ -36,6 +36,7 @@ local L = ns.L
 local settings = {} -- module name -> its Blizzard setting objects, to refresh after /fpp changes
 local modulesCategory -- the Modules page, the top Forever++ entry, for /fpp
 local pages = {} -- module name -> the page it draws itself, for ns.OpenSettings(name)
+local aboutCategory -- the About page, for ns.OpenAbout
 
 -- Opens a Forever++ page (after combat, if the player is in combat).
 local function open(category)
@@ -1475,6 +1476,7 @@ end
 
 local function buildAbout(frame)
     ns.AddPageTitle(frame, L.ABOUT)
+    ns.Welcomed() -- the NEW tag on the Minimap Button can go
     local defaults = newButton(frame, SETTINGS_DEFAULTS or L.HOME_DEFAULTS, 96, askDefaults)
     defaults:SetPoint("TOPRIGHT", -10, -18) -- where the Modules page has it
 
@@ -1790,7 +1792,7 @@ function ns.RegisterSettings()
         end
     end
     addCanvasPage(category, L.CHANGELOG, buildChangelog)
-    addCanvasPage(category, L.ABOUT, buildAbout)
+    aboutCategory = addCanvasPage(category, L.ABOUT, buildAbout)
     Settings.RegisterAddOnCategory(category)
     ourPages[debugPage] = true
     addDefaultsButton()
@@ -1817,6 +1819,12 @@ function ns.OpenSettings(name)
         end
     end
     return open(modulesCategory)
+end
+
+---Opens the Forever++ About page in Settings (after combat, if the player is in combat).
+---@return boolean opened false when this client's Settings can't open to it
+function ns.OpenAbout()
+    return open(aboutCategory)
 end
 
 ---Updates a module's controls after it changed somewhere else (/fpp toggle, set, a preset).

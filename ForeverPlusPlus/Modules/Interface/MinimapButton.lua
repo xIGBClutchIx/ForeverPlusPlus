@@ -1,11 +1,14 @@
 -- Minimap Button: Forever++'s button on the minimap, in the addon compartment, or both. A click
 -- opens Forever++ settings; while Error Catcher is on, a right-click shows its errors and the
 -- button shows how many this session caught (through ns.Errors, never Error Catcher itself).
+-- After a fresh install the button wears Blizzard's NEW label, and its first click opens the
+-- About page instead, once; no popup at login.
 local _, ns = ...
 
 local format, type, tremove = string.format, type, table.remove
 local cos, sin, rad, deg, atan2, floor = math.cos, math.sin, math.rad, math.deg, math.atan2, math.floor
 local CreateFrame, GetCursorPosition = CreateFrame, GetCursorPosition
+local C_XMLUtil = C_XMLUtil
 local IsControlKeyDown, IsShiftKeyDown, IsAltKeyDown = IsControlKeyDown, IsShiftKeyDown, IsAltKeyDown
 
 local L = ns.L
@@ -43,7 +46,7 @@ local function onClick(_, mouse)
         else
             Errors.Toggle()
         end
-    else
+    elseif not (ns.WelcomePending() and ns.OpenAbout()) then
         ns.OpenSettings()
     end
 end
@@ -58,7 +61,8 @@ local function showTooltip(owner, drag)
         GameTooltip:AddLine(format(L.MINIMAPBUTTON_TIP_SAVED, Errors.SavedCount()), 1, 1, 1)
         GameTooltip:AddLine(" ")
     end
-    GameTooltip:AddLine(L.MINIMAPBUTTON_TIP_SETTINGS, 0.1, 1, 0.1)
+    GameTooltip:AddLine(ns.WelcomePending() and L.MINIMAPBUTTON_TIP_WELCOME
+        or L.MINIMAPBUTTON_TIP_SETTINGS, 0.1, 1, 0.1)
     if errors then
         GameTooltip:AddLine(L.MINIMAPBUTTON_TIP_ERRORS, 0.1, 1, 0.1)
         local modifier = MODIFIERS[module.db.clearModifier]
@@ -83,6 +87,16 @@ local function refresh()
     end
     if button then
         button.count:SetText(count > 0 and count or "")
+        -- Blizzard's NEW label, as on new things in its own menus, until the About page is seen.
+        local new = ns.WelcomePending()
+        if new and not button.new and C_XMLUtil and C_XMLUtil.GetTemplateInfo
+            and C_XMLUtil.GetTemplateInfo("NewFeatureLabelTemplate") then
+            button.new = CreateFrame("Frame", nil, button, "NewFeatureLabelTemplate")
+            button.new:SetPoint("CENTER", button, "TOP", 0, -2)
+        end
+        if button.new then
+            button.new:SetShown(new)
+        end
     end
 end
 
@@ -246,11 +260,13 @@ module.options = {
     },
 }
 
-Errors.OnChanged(function()
+local function onChanged()
     if module.enabled then
         refresh()
     end
-end)
+end
+Errors.OnChanged(onChanged)
+ns.OnWelcomed(onChanged)
 
 function module:OnEnable()
     update()

@@ -298,6 +298,7 @@ L.MINIMAPBUTTON_COMPARTMENT_COUNT = "%s (%d)" -- Forever++, errors this session
 L.MINIMAPBUTTON_TIP_SESSION = "Errors this session: %d"
 L.MINIMAPBUTTON_TIP_SAVED = "Saved errors: %d"
 L.MINIMAPBUTTON_TIP_SETTINGS = "Click to open Forever++ settings."
+L.MINIMAPBUTTON_TIP_WELCOME = "Click to see what Forever++ is."
 L.MINIMAPBUTTON_TIP_ERRORS = "Right-click to show the errors."
 L.MINIMAPBUTTON_TIP_DRAG = "Drag to move the button."
 L.MINIMAPBUTTON_TIP_CLEAR = "%s-right-click to clear this session's errors." -- a key, such as Ctrl

@@ -69,7 +69,8 @@ ns.changelog = {
                 { L.MINIMAPBUTTON_TITLE, "New, on by default, in Interface: Forever++'s own "
                     .. "button on the minimap, in the addon compartment, or both. Click it to open "
                     .. "Forever++ settings; while Error Catcher is on, right-click it to see the "
-                    .. "errors, and it shows how many this session caught." },
+                    .. "errors, and it shows how many this session caught. After a fresh install "
+                    .. "it wears Blizzard's NEW label, and its first click opens the About page." },
                 { L.XPBARTEXT_TITLE, "New, off by default, in Interface: the experience bar "
                     .. "shows its numbers all the time, with the percent, your rested XP, and the "
                     .. "XP of the quests in your log that are ready to turn in (or all of them), "
