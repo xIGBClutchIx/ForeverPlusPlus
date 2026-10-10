@@ -9,8 +9,8 @@
 --                    greyed out while it's off. An option can sit under another (`requires`).
 --                    `alwaysOn` modules (tools) aren't listed. A search box at the top narrows
 --                    the list to modules by title and description. A module or option added
---                    since the player last looked (`added`) is marked NEW, and an option
---                    changed since then (`changed`) CHANGED
+--                    since the player last looked (`added`), or an option changed since then
+--                    (`changed`), is marked NEW
 --     <Tool>         a page a module draws itself (`BuildPage`)
 --     Debug          Show Tags and Forever++'s own buttons (Reset Seen Version, Copy Debug Info,
 --                    Print Module Events, Reload UI), then options marked `debug = true` and
@@ -168,8 +168,8 @@ end
 -- A module added (`added`) after the version the player last saw the Modules page in gets
 -- Blizzard's NEW label after its name, the one Blizzard's own new settings get. So does an option
 -- added since then, unless its module is new itself, and an option changed (`changed`) since then
--- gets the same label reading CHANGED; the page opens on the first module with one, so the option
--- is seen. A version after this one isn't marked yet: what's
+-- (a longer word like CHANGED squeezes the option's name); the page opens on the first module with
+-- one, so the option is seen. A version after this one isn't marked yet: what's
 -- tagged for the next release shows once the TOC's version reaches it. Seeing the page saves this
 -- version (ns.db.seenVersion); the labels stay while the player is on it and are gone once they
 -- leave. Show Tags on the Debug page (ns.db.showTags: "new", "changed", or "both") marks everything
@@ -217,27 +217,20 @@ end
 
 local TAG_PADDING = 14 -- the room a label takes after its text, besides its own text
 
--- An update that keeps a NEW or CHANGED label just after `text`, a font string, while `key` (a
--- module's name, or one of its options) is marked, or `other` (the slider in an option's row): the
--- text at most `room` wide, less the label's room while it shows. The label is made the first time
--- it's needed, so it can come and go with Show Tags.
+-- An update that keeps a NEW label just after `text`, a font string, while `key` (a module's name,
+-- or one of its options) is marked, or `other` (the slider in an option's row): the text at most
+-- `room` wide, less the label's room while it shows. The label is made the first time it's needed,
+-- so it can come and go with Show Tags.
 local function newMark(parent, text, room, key, other)
-    local label, newText
+    local label
     return function()
         local kind = newRows[key] or (other and newRows[other])
         if kind and not label and canLabel() then
             label = CreateFrame("Frame", nil, parent, "NewFeatureLabelTemplate")
-            newText = label.Label and label.Label:GetText() -- Blizzard's own NEW, in the game's language
         end
         local tag = 0
         if kind and label and label.Label then
-            local word = kind == "changed" and L.SETTINGS_CHANGED_TAG or newText
-            label.Label:SetText(word)
-            -- Inferred from Mainline: BGLabel is a copy of Label drawn behind it as a shadow.
-            if label.BGLabel then
-                label.BGLabel:SetText(word)
-            end
-            tag = ns.Text.Width(label.Label)
+            tag = ns.Text.Width(label.Label) -- Blizzard's own NEW, in the game's language
         elseif kind then
             tag = 26
         end
@@ -489,7 +482,7 @@ local function addDebugOptions(category, layout, module)
     end
 end
 
--- Show Tags: every module and option tagged NEW, CHANGED, or both since the last release marked
+-- Show Tags: every module and option added, changed, or both since the last release marked NEW
 -- on the Modules page, and kept marked, to check how they look. Live: the marks are made again and
 -- the page redrawn.
 local SHOW_TAGS = {

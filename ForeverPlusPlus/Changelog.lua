@@ -88,8 +88,6 @@ ns.changelog = {
                     .. "Durability Bars option instead of a module of its own (always, only when "
                     .. "worn, below 50% or 25%, or off). It still starts on, showing bars always." },
                 { L.AUTOSCREENSHOT_TITLE, "Now listed under Automation instead of Interface." },
-                { L.CHANGELOG_SETTINGS, "Options changed since you last looked are marked "
-                    .. "CHANGED on the Modules page, the way new ones are marked NEW." },
                 { L.CHANGELOG_SETTINGS, "Clearer names and descriptions for a few options: Auto "
                     .. "Quest's Skip Key, Item Count's Bag and Bank Labels, Unexplored Areas' Tint "
                     .. "Strength, and Zone Info's Herbs, Ore, and Skinning." },

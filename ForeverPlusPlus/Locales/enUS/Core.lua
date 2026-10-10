@@ -60,7 +60,6 @@ L.MODULES = "Modules" -- the page with every module's checkbox, the top Forever+
 L.ABOUT = "About" -- the page with the version, links, commands, and presets
 -- The selected module on the Modules page
 L.SETTINGS_ENABLED = "Enabled" -- the module's own on/off checkbox, under its description
-L.SETTINGS_CHANGED_TAG = "CHANGED" -- on an option changed since the last version seen, like Blizzard's NEW
 L.SETTINGS_OPTIONS = "Options" -- the header over its options
 L.SETTINGS_NO_OPTIONS = "This module has no options."
 L.SETTINGS_OPEN_PAGE = "Open %s" -- module title, for a module with a page of its own
@@ -69,8 +68,8 @@ L.SETTINGS_SEARCH = "Search modules" -- gray text in the Modules page's empty se
 L.SETTINGS_NO_MATCH = "No modules match \"%s\"." -- the search text
 -- The Debug page's own dropdown, at the top
 L.SETTINGS_SHOW_TAGS = "Show Tags"
-L.SETTINGS_SHOW_TAGS_DESC = "Mark every module and option added (NEW) or changed (CHANGED) since the "
-    .. "last release on the Modules page, even ones not released yet or already seen, and keep them "
+L.SETTINGS_SHOW_TAGS_DESC = "Mark NEW every module and option added or changed since the last "
+    .. "release on the Modules page, even ones not released yet or already seen, and keep them "
     .. "marked after you leave the page. For checking how the tags look."
 L.SETTINGS_SHOW_TAGS_OFF = "Off"
 L.SETTINGS_SHOW_TAGS_NEW = "New"
