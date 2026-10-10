@@ -50,6 +50,7 @@ Modules\Items\SellPrice.lua
 Modules\Items\AuctionPrices.lua
 Modules\Items\BagSlots.lua
 Modules\Items\AlreadyKnown.lua
+Modules\Items\UnusableItems.lua
 Modules\Items\ItemCount.lua
 Modules\Items\BestReward.lua
 Modules\Items\EasyDelete.lua

@@ -47,6 +47,12 @@ ns.changelog = {
                     .. "straight onto your weapon, without clicking the weapon. Main hand first; "
                     .. "the off hand when only it can take it, or when the main hand already has "
                     .. "a buff and the off hand doesn't (or its buff runs out sooner)." },
+                { L.UNUSABLEITEMS_TITLE, "New, off by default, in Items: tints red the items "
+                    .. "you can't use, because of your class, armor or weapon skill, level, or "
+                    .. "profession, in your bags, the bank, and at merchants, the way merchants "
+                    .. "tint them. At merchants it only adds what the merchant doesn't already "
+                    .. "tint, such as gear above your level. Bags, bank, and merchants each have "
+                    .. "a checkbox." },
                 { L.MINIMAPBUTTON_TITLE, "New, on by default, in Interface: Forever++'s own "
                     .. "button on the minimap, in the addon compartment, or both. Click it to open "
                     .. "Forever++ settings; while Error Catcher is on, right-click it to see the "
