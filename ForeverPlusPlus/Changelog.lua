@@ -88,6 +88,10 @@ ns.changelog = {
                     .. "Durability Bars option instead of a module of its own (always, only when "
                     .. "worn, below 50% or 25%, or off). It still starts on, showing bars always." },
                 { L.AUTOSCREENSHOT_TITLE, "Now listed under Automation instead of Interface." },
+                { L.AUTOSCREENSHOT_TITLE, "New Your Own Screenshots option (off by default), "
+                    .. "under Hide Interface, hides the interface for the screenshots you take with "
+                    .. "the Screenshot key (Print Screen) too, not only Auto Screenshot's. Not in "
+                    .. "combat." },
                 { L.CHANGELOG_SETTINGS, "Clearer names and descriptions for a few options: Auto "
                     .. "Quest's Skip Key, Item Count's Bag and Bank Labels, Unexplored Areas' Tint "
                     .. "Strength, and Zone Info's Herbs, Ore, and Skinning." },

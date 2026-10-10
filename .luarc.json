@@ -16,6 +16,8 @@
     "GetMouseFocus",
     "SetOverrideBindingSpell",
     "ClearOverrideBindings",
+    "SetOverrideBindingClick",
+    "GetBindingKey",
     "WorldFrame",
     "GetInventoryItemID",
     "GetUnitSpeed",
