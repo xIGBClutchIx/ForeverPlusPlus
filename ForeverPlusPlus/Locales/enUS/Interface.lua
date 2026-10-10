@@ -110,6 +110,31 @@ L.FRAMERATE_TITLE = "Movable Framerate"
 L.FRAMERATE_DESC = "Lets you move and resize the framerate text (Ctrl+R) in Edit Mode, like "
     .. "Blizzard's own frames. Until you move it, it stays where Blizzard puts it."
 
+-- XPBarText
+L.XPBARTEXT_TITLE = "XP Bar Text"
+L.XPBARTEXT_DESC = "Show your experience on the experience bar all the time, with the percent, "
+    .. "your rested XP, and the XP the quests in your log will give. Quest XP turns green once "
+    .. "turning them in would level you."
+L.XPBARTEXT_ALWAYS = "Always Show"
+L.XPBARTEXT_ALWAYS_DESC = "Show the text all the time. Turn it off to see it only while the "
+    .. "mouse is over the bar, like Blizzard's."
+L.XPBARTEXT_PERCENT = "Percent"
+L.XPBARTEXT_PERCENT_DESC = "Show how far through the level you are, and what rested and quest XP "
+    .. "come to, as a percent of the level."
+L.XPBARTEXT_RESTED = "Rested XP"
+L.XPBARTEXT_RESTED_DESC = "Show how much rested XP you have left."
+L.XPBARTEXT_QUESTS = "Quest XP"
+L.XPBARTEXT_QUESTS_DESC = "Show the XP the quests in your log give: only the ones ready to turn "
+    .. "in, or all of them."
+L.XPBARTEXT_QUESTS_COMPLETE = "Ready to Turn In"
+L.XPBARTEXT_QUESTS_ALL = "All Quests"
+L.XPBARTEXT_QUESTS_OFF = "Off"
+L.XPBARTEXT_XP = "XP: %s / %s" -- current, needed for the level
+L.XPBARTEXT_WITH_PERCENT = "%s (%d%%)" -- the XP text, its percent
+L.XPBARTEXT_AMOUNT = "%s (%d%%)" -- an amount of XP, as a percent of the level
+L.XPBARTEXT_RESTED_TEXT = "Rested: %s"
+L.XPBARTEXT_QUESTS_TEXT = "Quests: %s"
+
 -- AddOnList
 L.ADDONLIST_TITLE = "AddOns List"
 L.ADDONLIST_DESC = "Show the AddOns list without category headers, with enabled addons first."
