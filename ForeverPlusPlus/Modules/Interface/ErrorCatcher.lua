@@ -1,6 +1,6 @@
 -- Error Catcher: catches Lua errors, blocked and forbidden actions, and Lua warnings instead of
 -- Blizzard's error window and popup, saves them with the session they happened in, and shows
--- them in a window (`/fpp errors`, or a right-click on the Minimap Button module's button, through
+-- them in a window (`/fpp errors`, or a Shift-right-click on the Minimap Button module's button, through
 -- ns.Errors): a list of errors on the left, the one picked on the right, and a button that selects a bug report with
 -- the client, addon version, and modules on, ready to copy. An error that happens again is counted instead of
 -- kept twice.

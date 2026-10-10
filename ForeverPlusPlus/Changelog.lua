@@ -49,8 +49,9 @@ ns.changelog = {
                     .. "a buff and the off hand doesn't (or its buff runs out sooner)." },
                 { L.MINIMAPBUTTON_TITLE, "New, on by default, in Interface: Forever++'s own "
                     .. "button on the minimap, in the addon compartment, or both. Click it to open "
-                    .. "Forever++ settings; while Error Catcher is on, right-click it to see the "
-                    .. "errors, and it shows how many this session caught." },
+                    .. "Forever++ settings, or right-click it for quick toggles of Fast Loot, Auto "
+                    .. "Quest, and Auto Sell Junk. While Error Catcher is on, Shift-right-click it "
+                    .. "to see the errors, and it shows how many this session caught." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.AUCTIONPRICES_TITLE, "Crafting Costs shows Estimated Profit, after the "
@@ -66,9 +67,9 @@ ns.changelog = {
                     .. "the addon compartment, both, or neither. The minimap is still the "
                     .. "default." },
                 { L.ERRORCATCHER_TITLE, "Its button is now the Minimap Button module, where a "
-                    .. "click opens settings and a right-click shows the errors. Turn that module "
-                    .. "off for no button. Its Clear Key option moved there too: Ctrl-right-click "
-                    .. "still clears this session's errors." },
+                    .. "click opens settings and a Shift-right-click shows the errors. Turn that "
+                    .. "module off for no button. Its Clear Key option moved there too: "
+                    .. "Ctrl-right-click still clears this session's errors." },
                 { L.CHANGELOG_SETTINGS, "Clutch's Default is now Developer's Defaults, and the "
                     .. "welcome page's Defaults button is now Recommended Defaults, matching the "
                     .. "Defaults popup on the Modules and Debug pages." },
