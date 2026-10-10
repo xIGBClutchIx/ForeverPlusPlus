@@ -26,7 +26,9 @@ ns.changelog = {
                     .. "/clear empties a chat window. A command another addon already has, like TomTom's /way, is left to it." },
                 { L.CHANGELOG_SETTINGS, "A search box at the top of the Modules page shows "
                     .. "only the modules whose name or description has what you type, under "
-                    .. "their categories. Clear it to see every module again." },
+                    .. "their categories. Clear it to see every module again. The New checkbox "
+                    .. "beside it shows only the modules marked NEW, together with the search; it "
+                    .. "starts off each time Settings opens." },
                 { L.CHANGELOG_SETTINGS, "The Modules page marks new modules, and new or changed "
                     .. "options of other modules and those modules in the list, with Blizzard's "
                     .. "NEW label until you've clicked the module. It opens on the first module "

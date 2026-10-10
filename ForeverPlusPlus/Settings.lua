@@ -612,12 +612,30 @@ local DESCRIPTION_LINES = 4 -- the room a description always takes, so the optio
 local listed = {} -- the names of the modules on the page, by category, then title
 local searchText = {} -- module name -> its title and description, lowercased
 local filter, filterText -- the search text, lowercased and as typed, or nil while the box is empty
+local newOnly -- the New checkbox: only modules marked NEW show, off each time Settings opens
 local page -- the page's frames, once built
 local bound = {} -- module name -> functions that put what shows of it back to what's saved
 local refreshModule -- puts one module back to what's saved wherever it shows
 
+local function isNew(name)
+    return (newRows[name] or newRows[ns.modules[name]]) and true or false
+end
+
 local function matches(name)
+    if newOnly and not isNew(name) then
+        return false
+    end
     return not filter or (searchText[name] or ""):find(filter, 1, true) ~= nil
+end
+
+-- Whether any listed module is marked NEW.
+local function anyNew()
+    for _, name in ipairs(listed) do
+        if isNew(name) then
+            return true
+        end
+    end
+    return false
 end
 
 -- Whether the search shows a module of `group` (any module, without one).
@@ -1153,7 +1171,11 @@ local function relayout()
     if not page then
         return
     end
-    page.empty.text:SetText(format(L.SETTINGS_NO_MATCH, filterText or ""))
+    if newOnly and not anyNew() then
+        page.empty.text:SetText(L.SETTINGS_NOTHING_NEW)
+    else
+        page.empty.text:SetText(format(L.SETTINGS_NO_MATCH, filterText or ""))
+    end
     layoutStack(page.list)
     if not (selected and matches(selected)) then
         local first
@@ -1210,6 +1232,33 @@ local function addSearchBox(frame, anchor)
     return box
 end
 
+-- A New checkbox left of the search box that narrows the list to the modules marked NEW, with the
+-- search on top. It's off each time Settings opens, so the whole list is what the page opens on.
+-- Without NEW labels on this client (trackNew didn't run), there's nothing to show, so no checkbox.
+local function addNewOnly(frame, anchor)
+    if not newOrder then
+        return
+    end
+    local box = newCheckbox(frame, 22, function(checked)
+        newOnly = checked or nil
+        relayout()
+    end)
+    local text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    text:SetText(L.SETTINGS_NEW_ONLY)
+    text:SetPoint("RIGHT", anchor, "LEFT", -12, 0)
+    box:SetPoint("RIGHT", text, "LEFT", -2, 0)
+    -- Clicking the word clicks the box, like Blizzard's checkboxes with a label.
+    box:SetHitRectInsets(0, -(ns.Text.Width(text) + 2), 0, 0)
+    SettingsPanel:HookScript("OnShow", function()
+        box:SetChecked(false)
+        if newOnly then
+            newOnly = nil
+            relayout()
+        end
+    end)
+    return box
+end
+
 local function buildModules(frame)
     ns.AddPageTitle(frame, L.MODULES)
     local width = frame:GetWidth()
@@ -1218,6 +1267,7 @@ local function buildModules(frame)
     local defaults = newButton(frame, SETTINGS_DEFAULTS or L.HOME_DEFAULTS, 96, askDefaults)
     defaults:SetPoint("TOPRIGHT", -10, -18)
     page.search = addSearchBox(frame, defaults)
+    page.newOnly = addNewOnly(frame, page.search or defaults)
 
     local list = newScroll(frame)
     list:SetPoint("TOPLEFT", LIST_LEFT, -60)
@@ -1228,7 +1278,8 @@ local function buildModules(frame)
     page.list.bottom = 8
     list:SetScrollChild(page.list)
 
-    -- "No modules match" while the search hides them all.
+    -- "No modules match" while the search hides them all, or "Nothing new" while the New checkbox
+    -- is on and nothing is marked.
     local empty = CreateFrame("Frame", nil, page.list)
     empty:SetSize(LIST_WIDTH, 40)
     empty.text = empty:CreateFontString(nil, "OVERLAY", "GameFontDisable")
