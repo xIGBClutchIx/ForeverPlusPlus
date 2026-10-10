@@ -16,6 +16,10 @@ L.CVARBROWSER_AFTER_COMBAT = "%s changes after combat." -- CVar name
 L.CVARBROWSER_REFUSED = "%s can't be changed." -- CVar name
 L.CVARBROWSER_COUNT = "%d of %d" -- shown, total
 L.CVARBROWSER_CHANGED_ONLY = "Changed Only"
+L.CVARBROWSER_NO_MATCH = "No console variables match \"%s\"." -- the search text
+L.CVARBROWSER_NONE_CHANGED = "Every console variable is at its default."
+L.CVARBROWSER_NO_LIST = "This client doesn't list its console variables. Search for one's full "
+    .. "name to find it."
 L.CVARBROWSER_NAME = "Name"
 L.CVARBROWSER_VALUE = "Value"
 L.CVARBROWSER_DEFAULT = "Default"

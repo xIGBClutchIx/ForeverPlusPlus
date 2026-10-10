@@ -82,6 +82,9 @@ ns.changelog = {
                     .. "can't use yet (no titles, no pet) says why when you point at it. The side "
                     .. "tabs sit as close together as Blizzard's, and get a little smaller when "
                     .. "needed, so the last one stays on the window." },
+                { L.CVARBROWSER_TITLE, "An empty list says why (nothing matches the search, or "
+                    .. "nothing is changed), and a row stays highlighted with its tooltip while "
+                    .. "you point at its value box or Default button." },
             } },
         },
     },
