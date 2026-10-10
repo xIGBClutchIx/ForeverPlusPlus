@@ -92,7 +92,7 @@ L.ITEMCOUNT_DESC = "Show how many of an item you own in its tooltip, and how man
 L.ITEMCOUNT_BANK = "Count the Bank"
 L.ITEMCOUNT_BANK_DESC = "Add what's in your bank. It's counted each time you open the bank, so "
     .. "open it once on each character."
-L.ITEMCOUNT_LABELS = "Bags and Bank As"
+L.ITEMCOUNT_LABELS = "Bag and Bank Labels"
 L.ITEMCOUNT_LABELS_DESC = "Show where your items are with Blizzard's bag and bank icons, or in words."
 L.ITEMCOUNT_LABELS_ICONS = "Icons"
 L.ITEMCOUNT_LABELS_WORDS = "Words"
@@ -140,17 +140,6 @@ L.PRICE_LINE = "%s %s:" -- line name, quantity
 L.PRICE_QUANTITY = "x%d" -- how many items the price is for
 L.PRICE_INLINE = "%s  %s" -- padded label, coins
 L.PRICE_INFO_LINE = "%s:" -- line name, on a price-style line with text instead of coins
-
--- DurabilityBars
-L.DURABILITYBARS_TITLE = "Durability Bars"
-L.DURABILITYBARS_DESC = "Show a small bar beside each item on the character window with how "
-    .. "worn it is, from green to red."
-L.DURABILITYBARS_SHOW = "Show Bars"
-L.DURABILITYBARS_SHOW_DESC = "Which items get a bar. Items without durability never do."
-L.DURABILITYBARS_SHOW_ALWAYS = "Always"
-L.DURABILITYBARS_SHOW_WORN = "Only When Worn"
-L.DURABILITYBARS_SHOW_HALF = "Below 50%"
-L.DURABILITYBARS_SHOW_QUARTER = "Below 25%"
 
 -- BagSlots
 L.BAGSLOTS_TITLE = "Bag Slot Counter"
@@ -221,7 +210,7 @@ L.PROFTOOLTIPS_ITEMS_DESC = "Show in herb, ore, stone, and lockbox tooltips the 
     .. "gather or open them."
 L.PROFTOOLTIPS_REQUIRES = "Requires %s (%d)" -- profession, skill
 L.PROFTOOLTIPS_YOURS = "Your %s skill: %d" -- profession, the player's skill
-L.PROFTOOLTIPS_GATHERED ="Gathered with %s (%d)" -- profession, skill
+L.PROFTOOLTIPS_GATHERED = "Gathered with %s (%d)" -- profession, skill
 L.PROFTOOLTIPS_HERBALISM_NAME = "Herbalism" -- until the client gives its own name
 L.PROFTOOLTIPS_MINING_NAME = "Mining"
 L.PROFTOOLTIPS_SKINNING_NAME = "Skinning"

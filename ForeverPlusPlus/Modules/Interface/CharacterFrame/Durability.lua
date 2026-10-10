@@ -1,36 +1,19 @@
--- Durability Bars: a thin bar beside each equipped item on the character frame that shows how
--- worn it is, green when whole through yellow to red when broken. Left column items get it on
--- their right side and right column items on their left, so it faces the character model; the
--- weapons along the bottom get a flat bar under them, since the gap between them is too narrow.
--- Items without durability get no bar.
+-- Character Window's durability bars: a thin bar beside each equipped item on the character frame
+-- that shows how worn it is, green when whole through yellow to red when broken. Left column items
+-- get it on their right side and right column items on their left, so it faces the character
+-- model; the weapons along the bottom get a flat bar under them, since the gap between them is too
+-- narrow. Items without durability get no bar. CharacterFrame.lua turns them on and off.
 local _, ns = ...
 
 local _G, pairs, CreateFrame = _G, pairs, CreateFrame
 local pcall, GetInventorySlotInfo, GetInventoryItemDurability = pcall, GetInventorySlotInfo, GetInventoryItemDurability
 
-local L = ns.L
+local module = ns.modules.CharacterFrame
+local internal = module.internal
 
-local module = ns.NewModule("DurabilityBars", L.DURABILITYBARS_DESC, {
-    enabled = true,
-    show = "always", -- a key of SHOW_BELOW
-})
-module.title = L.DURABILITYBARS_TITLE
-module.category = "items"
-
--- Show a bar only below this much durability (a bar at exactly 1 is whole).
+-- Show a bar only below this much durability (a bar at exactly 1 is whole), by the `durability`
+-- option's choices.
 local SHOW_BELOW = { always = 2, worn = 1, half = 0.5, quarter = 0.25 }
-
-module.options = {
-    {
-        key = "show", name = L.DURABILITYBARS_SHOW, description = L.DURABILITYBARS_SHOW_DESC,
-        choices = {
-            { "always", L.DURABILITYBARS_SHOW_ALWAYS },
-            { "worn", L.DURABILITYBARS_SHOW_WORN },
-            { "half", L.DURABILITYBARS_SHOW_HALF },
-            { "quarter", L.DURABILITYBARS_SHOW_QUARTER },
-        },
-    },
-}
 
 local THICKNESS = 3 -- bar width, in pixels
 local GAP = 2 -- space between the bar and the item button
@@ -87,7 +70,10 @@ local function build()
 end
 
 local function update()
-    local below = SHOW_BELOW[module.db.show] or SHOW_BELOW.always
+    if not (container and container:IsShown()) then
+        return
+    end
+    local below = SHOW_BELOW[module.db.durability] or SHOW_BELOW.always
     for slot, bar in pairs(bars) do
         local current, maximum = GetInventoryItemDurability(slot)
         local fraction = current and maximum and maximum > 0 and current / maximum
@@ -106,40 +92,21 @@ local function update()
     end
 end
 
-local function start()
-    if not _G.PaperDollItemsFrame then
-        return
-    end
-    if not container then
+---Shows or hides the bars to match the module and its `durability` option. Once the character
+---frame has loaded.
+function internal.updateDurability()
+    local on = module.enabled and module.db.durability ~= "off"
+    if on and not container and _G.PaperDollItemsFrame then
         build()
     end
-    container:Show()
-    update()
-end
-
--- The character frame is in Blizzard_UIPanels_Game on Mainline, which loads before addons; wait
--- for it anyway in case Forever makes it load on demand.
-local ADDON = "Blizzard_UIPanels_Game"
-
-function module:OnEnable()
-    self:On("UPDATE_INVENTORY_DURABILITY", update)
-    self:On("PLAYER_EQUIPMENT_CHANGED", update)
-    if _G.PaperDollItemsFrame then
-        start()
-    else
-        ns.AddOns.WhenLoaded(ADDON, start)
-    end
-end
-
-function module:OnDisable()
-    ns.AddOns.Cancel(ADDON, start)
     if container then
-        container:Hide()
-    end
-end
-
-function module:OnOptionChanged()
-    if self.enabled and container then
+        container:SetShown(on and true or false)
         update()
     end
+end
+
+-- The events update() wants while the module is on; it does nothing while the bars are hidden.
+function internal.enableDurability()
+    module:On("UPDATE_INVENTORY_DURABILITY", update)
+    module:On("PLAYER_EQUIPMENT_CHANGED", update)
 end

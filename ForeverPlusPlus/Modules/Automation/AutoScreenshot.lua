@@ -27,7 +27,7 @@ local module = ns.NewModule("AutoScreenshot", L.AUTOSCREENSHOT_DESC, {
     chat = true,
 })
 module.title = L.AUTOSCREENSHOT_TITLE
-module.category = "interface"
+module.category = "automation"
 
 local GENERAL, EVENTS = L.AUTOSCREENSHOT_SECTION_GENERAL, L.AUTOSCREENSHOT_SECTION_EVENTS
 

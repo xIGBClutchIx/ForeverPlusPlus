@@ -61,12 +61,22 @@ ns.changelog = {
                     .. "welcome page's Defaults button is now Recommended Defaults, matching the "
                     .. "Defaults popup on the Modules and Debug pages." },
                 { L.CHANGELOG_SETTINGS, "The Modules page lists every module on the left, each "
-                    .. "with its checkbox, and shows the one you click on the right: its title "
-                    .. "with an Enabled checkbox, what it does, and its options and buttons. No "
+                    .. "with its checkbox, and shows the one you click on the right: its title, "
+                    .. "what it does, an Enabled checkbox, and its options and buttons. No "
                     .. "more gears or options opening inside the list. Modules with many options "
                     .. "group them under headers, and options that only matter while another is "
                     .. "on sit under it: Player Nameplates, NPC Nameplates, Zone Info, Points of "
                     .. "Interest, Quest Tracker, Profession Tooltips, and Auction Prices." },
+                { L.CHARACTERFRAME_TITLE, "Character Frame Enhancements is now Character "
+                    .. "Window, so its name fits the Modules list, and Durability Bars is now its "
+                    .. "Durability Bars option instead of a module of its own (always, only when "
+                    .. "worn, below 50% or 25%, or off). It still starts on, showing bars always." },
+                { L.AUTOSCREENSHOT_TITLE, "Now listed under Automation instead of Interface." },
+                { L.CHANGELOG_SETTINGS, "Options changed since you last looked are marked "
+                    .. "CHANGED on the Modules page, the way new ones are marked NEW." },
+                { L.CHANGELOG_SETTINGS, "Clearer names and descriptions for a few options: Auto "
+                    .. "Quest's Skip Key, Item Count's Bag and Bank Labels, Unexplored Areas' Tint "
+                    .. "Strength, and Zone Info's Herbs, Ore, and Skinning." },
                 { L.POI_TITLE, "New Ley Lines option shows Skyborne ley lines and elemental "
                     .. "convergences on the map. A spot is saved when a Skyborne gets the "
                     .. "15-minute buff from Read Ley Line or Skysight there, and every character "
@@ -138,7 +148,7 @@ ns.changelog = {
                     .. "session, and shows them in a window you can copy from (/fpp errors or the "
                     .. "minimap button). Ctrl-right-click the minimap button to clear this "
                     .. "session's errors." },
-                { L.CHARACTERFRAME_TITLE, "New, on by default, in Interface: moves the Character "
+                { "Character Frame Enhancements", "New, on by default, in Interface: moves the Character "
                     .. "window's Equipment and Pet tabs to the side with the others, removes the "
                     .. "portrait and level line so the stats start at the top, and shows your "
                     .. "level and name in your class color as the title." },
@@ -393,7 +403,7 @@ ns.changelog = {
                 { L.CVARBROWSER_TITLE, "A Settings page to browse, search, and change the game's "
                     .. "console variables (CVars). Includes a Changed Only filter and "
                     .. "/fpp cvar [search]." },
-                { L.DURABILITYBARS_TITLE, "A bar beside each item on the character window with how "
+                { "Durability Bars", "A bar beside each item on the character window with how "
                     .. "worn it is. Includes showing bars always, only when worn, below 50%, or "
                     .. "below 25%." },
                 { L.FASTLOOT_TITLE, "With auto loot on, takes everything at once. Includes a warning "

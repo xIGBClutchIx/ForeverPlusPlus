@@ -47,7 +47,6 @@ Modules\Automation\AutoRepair.lua
 Modules\Automation\AutoSellJunk.lua
 Modules\Items\SellPrice.lua
 Modules\Items\AuctionPrices.lua
-Modules\Items\DurabilityBars.lua
 Modules\Items\BagSlots.lua
 Modules\Items\AlreadyKnown.lua
 Modules\Items\ItemCount.lua
@@ -66,14 +65,15 @@ Modules\Automation\SkipCinematics.lua
 Modules\Automation\AutoDismount.lua
 Modules\Automation\FishingCast.lua
 Modules\Automation\AutoWeaponBuff.lua
-Modules\Interface\AutoScreenshot.lua
+Modules\Automation\AutoScreenshot.lua
 Modules\Interface\SpellRanks.lua
 Modules\Interface\RecipeColors.lua
 Modules\Interface\CombatAlert.lua
 Modules\Interface\Framerate.lua
 Modules\Interface\AddOnList.lua
 Modules\Interface\CurrencyBar.lua
-Modules\Interface\CharacterFrame.lua
+Modules\Interface\CharacterFrame\CharacterFrame.lua
+Modules\Interface\CharacterFrame\Durability.lua
 Modules\Interface\QuestIcons.lua
 Modules\Interface\QuestTracker.lua
 Modules\Interface\TalentPlanner.lua

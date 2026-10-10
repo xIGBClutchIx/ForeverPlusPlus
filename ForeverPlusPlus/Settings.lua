@@ -4,13 +4,14 @@
 --                    Modules and Changelog pages, the version, links, and the /fpp commands
 --     Modules        every module (the only place modules turn on and off) in a list on the left,
 --                    with a checkbox each, under a label per `module.category`. Clicking one shows
---                    it on the right: its title with its Enabled checkbox, its category and
---                    description, its `notice` (a warning) while that applies, then its options
+--                    it on the right: its title, category and description, its Enabled
+--                    checkbox, its `notice` (a warning) while that applies, then its options
 --                    (checkboxes, dropdowns and sliders) and buttons (from `module.actions`),
 --                    greyed out while it's off. An option can sit under another (`requires`).
 --                    `alwaysOn` modules (tools) aren't listed. A search box at the top narrows
 --                    the list to modules by title and description. A module or option added
---                    since the player last looked (`added`) is marked NEW
+--                    since the player last looked (`added`) is marked NEW, and an option
+--                    changed since then (`changed`) CHANGED
 --     <Tool>         a page a module draws itself (`BuildPage`)
 --     Debug          options marked `debug = true`, for testing
 --     Changelog      the release notes from Changelog.lua
@@ -165,13 +166,14 @@ end
 -- NEW labels ----------------------------------------------------------------------------------
 -- A module added (`added`) after the version the player last saw the Modules page in gets
 -- Blizzard's NEW label after its name, the one Blizzard's own new settings get. So does an option
--- added or changed (`changed`) since then, unless its module is new itself; the page opens on the
--- first module with one, so the option is seen. A version after this one isn't marked yet: what's
+-- added since then, unless its module is new itself, and an option changed (`changed`) since then
+-- gets the same label reading CHANGED; the page opens on the first module with one, so the option
+-- is seen. A version after this one isn't marked yet: what's
 -- tagged for the next release shows once the TOC's version reaches it. Seeing the page saves this
 -- version (ns.db.seenVersion); the labels stay while the player is on it and are gone once they
 -- leave. Show New Tags on the Debug page (ns.db.showNewTags) marks everything tagged after the
 -- last release in Changelog.lua instead, whatever was seen, and keeps it marked, to check them.
-local newRows = {} -- module name, or option table -> true while it's marked new
+local newRows = {} -- module name, or option table -> "new" or "changed" while it's marked
 local newOrder -- the modules to mark, once trackNew has run
 local seen -- true once the Modules page has been shown this session
 local refreshAll -- redraws the Modules page, once it's built
@@ -205,26 +207,40 @@ local function since(version)
         and true or false
 end
 
-local NEW_ROOM = 40 -- the room a NEW label takes after its text
+local TAG_PADDING = 14 -- the room a label takes after its text, besides its own text
 
--- An update that keeps a NEW label just after `text`, a font string, while `key` (a module's name,
--- or one of its options) is new: the text at most `room` wide, less the label's room while it
--- shows. The label is made the first time it's needed, so it can come and go with Show New Tags.
+-- An update that keeps a NEW or CHANGED label just after `text`, a font string, while `key` (a
+-- module's name, or one of its options) is marked: the text at most `room` wide, less the label's
+-- room while it shows. The label is made the first time it's needed, so it can come and go with
+-- Show New Tags.
 local function newMark(parent, text, room, key)
-    local label
+    local label, newText
     return function()
-        local new = newRows[key] and true or false
-        text:SetWidth(min(ns.Text.Width(text) + 2, room - (new and NEW_ROOM or 0)))
-        if new and not label and canLabel() then
+        local kind = newRows[key]
+        if kind and not label and canLabel() then
             label = CreateFrame("Frame", nil, parent, "NewFeatureLabelTemplate")
+            newText = label.Label and label.Label:GetText() -- Blizzard's own NEW, in the game's language
+        end
+        local tag = 0
+        if kind and label and label.Label then
+            local word = kind == "changed" and L.SETTINGS_CHANGED_TAG or newText
+            label.Label:SetText(word)
+            -- Inferred from Mainline: BGLabel is a copy of Label drawn behind it as a shadow.
+            if label.BGLabel then
+                label.BGLabel:SetText(word)
+            end
+            tag = ns.Text.Width(label.Label)
+        elseif kind then
+            tag = 26
+        end
+        text:SetWidth(min(ns.Text.Width(text) + 2, room - (kind and tag + TAG_PADDING or 0)))
+        if label then
             -- The text's width, unless it's cut short, then half the label's text: the template
             -- centers its text on the frame.
             local width = min(ns.Text.Width(text), text:GetWidth())
-            local half = label.Label and ns.Text.Width(label.Label) / 2 or 16
-            label:SetPoint("CENTER", text, "LEFT", width + 6 + half, 0)
-        end
-        if label then
-            label:SetShown(new)
+            label:ClearAllPoints()
+            label:SetPoint("CENTER", text, "LEFT", width + 6 + tag / 2, 0)
+            label:SetShown(kind and true or false)
         end
     end
 end
@@ -261,11 +277,15 @@ local function markNew()
     for _, name in ipairs(newOrder or {}) do
         local module = ns.modules[name]
         if since(module.added) then
-            newRows[name] = true -- all of it is new, so its options aren't marked
+            newRows[name] = "new" -- all of it is new, so its options aren't marked
         else
             for _, option in ipairs(module.options or {}) do
-                if not option.debug and (since(option.added) or since(option.changed)) then
-                    newRows[option] = true
+                if not option.debug then
+                    if since(option.added) then
+                        newRows[option] = "new"
+                    elseif since(option.changed) then
+                        newRows[option] = "changed"
+                    end
                 end
             end
         end
@@ -972,8 +992,8 @@ local function addModuleRows(view, module)
     end
 end
 
--- The module on the right: its title with its Enabled checkbox at the right end, its category,
--- and its description in DESCRIPTION_LINES, over its rows.
+-- The module on the right: its title, its category, its description in DESCRIPTION_LINES, and its
+-- Enabled checkbox in a row like its options', over its rows.
 local function buildView(name)
     local module = ns.modules[name]
     local title = module.title or name
@@ -982,18 +1002,12 @@ local function buildView(name)
     view:SetPoint("TOPLEFT")
     view.updates = {}
 
-    local box = newModuleCheck(view, name, 30)
-    box:SetPoint("TOPRIGHT", -4, -2)
-    local enabled = view:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    enabled:SetPoint("RIGHT", box, "LEFT", -2, 0)
-    enabled:SetText(L.SETTINGS_ENABLED)
     local heading = view:CreateFontString(nil, "OVERLAY", "GameFontHighlightHuge")
     heading:SetPoint("TOPLEFT", 4, -4)
     heading:SetJustifyH("LEFT")
     heading:SetWordWrap(false)
     heading:SetText(title)
-    view.updates[#view.updates + 1] = newMark(view, heading,
-        width - 4 - 40 - ns.Text.Width(enabled) - 12, name)
+    view.updates[#view.updates + 1] = newMark(view, heading, width - 12, name)
 
     local group = view:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     group:SetPoint("TOPLEFT", heading, "BOTTOMLEFT", 0, -4)
@@ -1023,9 +1037,12 @@ local function buildView(name)
         end)
         hit:SetScript("OnLeave", function() GameTooltip:Hide() end)
     end
-    view.top = 4 + heading:GetStringHeight() + 4 + group:GetStringHeight() + 10 + height + 10
+    view.top = 4 + heading:GetStringHeight() + 4 + group:GetStringHeight() + 10 + height + 6
     view.bottom = 12
 
+    local row = addRow(view, L.SETTINGS_ENABLED, 0)
+    local box = newModuleCheck(row, name, 30)
+    box:SetPoint("LEFT", CONTROL_LEFT, 0)
     addModuleRows(view, module)
     bind(name, function()
         for _, update in ipairs(view.updates) do

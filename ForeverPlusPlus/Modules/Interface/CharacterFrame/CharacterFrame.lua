@@ -1,8 +1,8 @@
--- Character Frame Enhancements: tidies the Character window. The Equipment Manager, Titles, and
--- Pet tabs that sit across the top of the stats pane move to the side, under the Character,
--- Reputation, and other tabs, and the pane's header (the portrait tab and the "Level 60 Class"
--- line) goes, so the stats start at the top. The window's title becomes your level and name in
--- your class color.
+-- Character Window: tidies the Character window. The Equipment Manager, Titles, and Pet tabs that
+-- sit across the top of the stats pane move to the side, under the Character, Reputation, and
+-- other tabs, and the pane's header (the portrait tab and the "Level 60 Class" line) goes, so the
+-- stats start at the top. The window's title becomes your level and name in your class color, and
+-- each item gets a durability bar (Durability.lua).
 local _, ns = ...
 
 local _G, ipairs, pairs, type, CreateFrame = _G, ipairs, pairs, type, CreateFrame
@@ -16,13 +16,27 @@ local module = ns.NewModule("CharacterFrame", L.CHARACTERFRAME_DESC, {
     enabled = true,
     sideTabs = true,
     colorTitle = true,
+    durability = "always", -- "off", or which items get a bar (Durability.lua)
 })
 module.title = L.CHARACTERFRAME_TITLE
 module.category = "interface"
+module.internal = {}
+local internal = module.internal
 
 module.options = {
     { key = "sideTabs", name = L.CHARACTERFRAME_SIDETABS, description = L.CHARACTERFRAME_SIDETABS_DESC },
     { key = "colorTitle", name = L.CHARACTERFRAME_COLORTITLE, description = L.CHARACTERFRAME_COLORTITLE_DESC },
+    {
+        key = "durability", name = L.CHARACTERFRAME_DURABILITY,
+        description = L.CHARACTERFRAME_DURABILITY_DESC, added = "0.8.0",
+        choices = {
+            { "always", L.CHARACTERFRAME_DURABILITY_ALWAYS },
+            { "worn", L.CHARACTERFRAME_DURABILITY_WORN },
+            { "half", L.CHARACTERFRAME_DURABILITY_HALF },
+            { "quarter", L.CHARACTERFRAME_DURABILITY_QUARTER },
+            { "off", L.CHARACTERFRAME_DURABILITY_OFF },
+        },
+    },
 }
 
 local ADDON = "Blizzard_UIPanels_Game"
@@ -364,7 +378,14 @@ local function onLevel(_, unit)
     end
 end
 
+-- Once the character frame has loaded: the tabs and title, and the durability bars.
+local function load()
+    start()
+    internal.updateDurability()
+end
+
 function module:OnEnable()
+    internal.enableDurability()
     self:On("UNIT_LEVEL", onLevel)
     self:On("UNIT_PET", onPet)
     self:On("UNIT_PORTRAIT_UPDATE", onPortrait)
@@ -378,13 +399,15 @@ function module:OnEnable()
         applyHeader()
         refreshTabs()
         updateTitle()
+        internal.updateDurability()
     else
-        ns.AddOns.WhenLoaded(ADDON, start)
+        ns.AddOns.WhenLoaded(ADDON, load)
     end
 end
 
 function module:OnDisable()
-    ns.AddOns.Cancel(ADDON, start)
+    ns.AddOns.Cancel(ADDON, load)
+    internal.updateDurability()
     if not started then
         return
     end
@@ -397,6 +420,10 @@ function module:OnDisable()
 end
 
 function module:OnOptionChanged(key)
+    if key == "durability" then
+        internal.updateDurability()
+        return
+    end
     if not (self.enabled and started) then
         return
     end

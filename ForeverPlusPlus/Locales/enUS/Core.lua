@@ -58,7 +58,8 @@ L.DEBUG = "Debug"
 L.SETTINGS_AFTER_COMBAT = "Settings open after combat."
 L.MODULES = "Modules" -- the page with every module's checkbox, and a button to it
 -- The selected module on the Modules page
-L.SETTINGS_ENABLED = "Enabled" -- the module's own on/off checkbox, beside its title
+L.SETTINGS_ENABLED = "Enabled" -- the module's own on/off checkbox, under its description
+L.SETTINGS_CHANGED_TAG = "CHANGED" -- on an option changed since the last version seen, like Blizzard's NEW
 L.SETTINGS_OPTIONS = "Options" -- the header over its options
 L.SETTINGS_NO_OPTIONS = "This module has no options."
 L.SETTINGS_OPEN_PAGE = "Open %s" -- module title, for a module with a page of its own
@@ -68,7 +69,7 @@ L.SETTINGS_NO_MATCH = "No modules match \"%s\"." -- the search text
 -- The Debug page's own checkbox
 L.SETTINGS_SHOW_NEW = "Show New Tags"
 L.SETTINGS_SHOW_NEW_DESC = "Mark every module and option added or changed since the last release "
-    .. "as NEW on the Modules page, even ones not released yet or already seen, and keep them "
+    .. "as NEW or CHANGED on the Modules page, even ones not released yet or already seen, and keep them "
     .. "marked after you leave the page. For checking how the tags look."
 
 -- Settings: Changelog page. The notes themselves are in Changelog.lua.
