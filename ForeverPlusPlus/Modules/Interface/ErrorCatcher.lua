@@ -793,6 +793,7 @@ module.debugActions = {
         button = L.ERRORCATCHER_TEST_BUTTON,
         description = L.ERRORCATCHER_TEST_DESC,
         fn = testError,
+        whileOff = true,
     },
 }
 

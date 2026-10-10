@@ -690,7 +690,7 @@ function module.Run()
     return #lines
 end
 
--- Shown on the Debug page (Settings.lua), which has no other buttons.
+-- Shown on the Debug page (Settings.lua).
 module.debugActions = {
     {
         name = L.SELFTEST_TITLE,
