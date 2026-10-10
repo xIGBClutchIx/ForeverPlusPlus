@@ -103,6 +103,8 @@ ns.changelog = {
                 { L.CVARBROWSER_TITLE, "An empty list says why (nothing matches the search, or "
                     .. "nothing is changed), and a row stays highlighted with its tooltip while "
                     .. "you point at its value box or Default button." },
+                { L.ERRORCATCHER_TITLE, "The Test Error button on the Debug page works with "
+                    .. "Error Catcher off too, to check Blizzard's error window." },
             } },
         },
     },

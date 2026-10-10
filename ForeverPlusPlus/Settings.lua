@@ -13,7 +13,8 @@
 --                    since the player last looked (`added`) is marked NEW, and an option
 --                    changed since then (`changed`) CHANGED
 --     <Tool>         a page a module draws itself (`BuildPage`)
---     Debug          options marked `debug = true`, for testing
+--     Debug          Show New Tags, then options marked `debug = true` and buttons from
+--                    `module.debugActions`, for testing
 --     Changelog      the release notes from Changelog.lua
 -- Without subpages (an older Settings API), the Modules page is the only page.
 local _, ns = ...
@@ -501,7 +502,7 @@ local function addShowNewTags(category)
 end
 
 -- A module's debug buttons (`module.debugActions`, the same shape as `actions`), after its
--- options.
+-- options. Greyed out while the module is off, unless the button is for that too (`whileOff`).
 local function addDebugActions(layout, module)
     if not (layout and CreateSettingsButtonInitializer) then
         return -- Probe: the button row is Mainline's Settings.
@@ -509,7 +510,9 @@ local function addDebugActions(layout, module)
     for i, action in ipairs(module.debugActions or {}) do
         local initializer = CreateSettingsButtonInitializer(action.name, action.button,
             actionFn(module, action, i), action.description, true)
-        greyWhenOff(initializer, module)
+        if not action.whileOff then
+            greyWhenOff(initializer, module)
+        end
         layout:AddInitializer(initializer)
     end
 end
