@@ -88,6 +88,9 @@ ns.changelog = {
                     .. "Durability Bars option instead of a module of its own (always, only when "
                     .. "worn, below 50% or 25%, or off). It still starts on, showing bars always." },
                 { L.AUTOSCREENSHOT_TITLE, "Now listed under Automation instead of Interface." },
+                { L.AUTOSCREENSHOT_TITLE, "New Played Time on Level Up option (off by default) "
+                    .. "shows your /played time in chat when you level up, so it's in the "
+                    .. "screenshot." },
                 { L.CHANGELOG_SETTINGS, "Clearer names and descriptions for a few options: Auto "
                     .. "Quest's Skip Key, Item Count's Bag and Bank Labels, Unexplored Areas' Tint "
                     .. "Strength, and Zone Info's Herbs, Ore, and Skinning." },

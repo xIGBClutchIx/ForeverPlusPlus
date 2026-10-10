@@ -196,6 +196,7 @@
     "C_EventUtils",
     "GetFileIDFromPath",
     "Screenshot",
+    "RequestTimePlayed",
     "GetNumTitles",
     "IsTitleKnown",
     "LOOT_ITEM_SELF",
