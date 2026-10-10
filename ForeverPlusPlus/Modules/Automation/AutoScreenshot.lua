@@ -89,11 +89,13 @@ local PVP_RANK_FACTION = 2800
 local timer -- the pending shot, or nil
 local reason -- what the last shot was for, for chat; nil for the player's own
 local hidden = false -- the interface is hidden for a shot and must come back
+local busy = false -- a shot is on its way, until the game says it's taken or failed
 local showUI
 
 local function onShot(event)
     ns.Off("SCREENSHOT_SUCCEEDED", onShot)
     ns.Off("SCREENSHOT_FAILED", onShot)
+    busy = false
     showUI()
     -- Said now rather than when asked, so the chat line isn't in the picture.
     if event == "SCREENSHOT_SUCCEEDED" and reason then
@@ -116,8 +118,13 @@ function showUI()
     UIParent:Show()
 end
 
--- Takes a shot now, for `why` (nil for one the player took themselves).
+-- Takes a shot now, for `why` (nil for one the player took themselves). One already on its way
+-- (the interface hidden, the shot a moment off) covers it, so the two don't undo each other.
 local function take(why)
+    if busy then
+        return
+    end
+    busy = true
     reason = why
     ns.On("SCREENSHOT_SUCCEEDED", onShot)
     ns.On("SCREENSHOT_FAILED", onShot)
@@ -377,6 +384,7 @@ function module:OnDisable()
     end
     ns.Off("SCREENSHOT_SUCCEEDED", onShot)
     ns.Off("SCREENSHOT_FAILED", onShot)
+    busy = false
     showUI()
     bindKeys()
 end
