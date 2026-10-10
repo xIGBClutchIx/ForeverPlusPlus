@@ -8,13 +8,12 @@ end
 
 -- AuctionPrices
 L.AUCTIONPRICES_TITLE = "Auction Prices"
-L.AUCTIONPRICES_DESC = "Scan the auction house when you open it, and show the lowest buyout in "
-    .. "item tooltips, under the sell price."
+L.AUCTIONPRICES_DESC = "Scan the auction house when you open it, and show the lowest buyout "
+    .. "under the sell price."
 L.AUCTIONPRICES_SCAN_ON_OPEN = "Scan When Opened"
 L.AUCTIONPRICES_SCAN_ON_OPEN_DESC = "Scan the whole auction house when you open it, at most "
     .. "every 15 minutes. When off, prices still update from your own searches, and /fpp scan "
     .. "scans now."
-L.AUCTIONPRICES_SECTION_TOOLTIP = "Tooltip"
 L.AUCTIONPRICES_SCAN_AGE = "Scan Age"
 L.AUCTIONPRICES_SCAN_AGE_DESC = "A line under the auction price with how long ago that item's "
     .. "price was last seen at the auction house, and where its text goes."
@@ -27,7 +26,6 @@ L.AUCTIONPRICES_SCAN_AGE_RED = "Red After"
 L.AUCTIONPRICES_SCAN_AGE_RED_DESC = "With Scan Age Color on By Age, how old a scan is when its age "
     .. "turns fully red. It's yellow at half that."
 L.AUCTIONPRICES_SCAN_AGE_LINE = "Scanned"
-L.AUCTIONPRICES_SECTION_CRAFTING = "Crafting"
 L.AUCTIONPRICES_CRAFTING = "Crafting Costs"
 L.AUCTIONPRICES_CRAFTING_DESC = "Show Total Cost, Value, and Estimated Profit (after the auction "
     .. "house's 5% cut) for the selected recipe in the professions window, with the age of the "
@@ -41,7 +39,6 @@ L.AUCTIONPRICES_CRAFT_RANGE = "%d-%d" -- fewest and most the recipe makes
 L.AUCTIONPRICES_CRAFT_VENDOR = "Vendor"
 L.AUCTIONPRICES_CRAFT_PROFIT = "Estimated Profit"
 L.AUCTIONPRICES_CRAFT_AGE = "Oldest Price"
-L.AUCTIONPRICES_SECTION_SCANNING = "Scanning"
 L.AUCTIONPRICES_CHAT_DESC = "Say in chat when a scan finishes after the auction house closed."
 L.AUCTIONPRICES_SCANNING = "Scanning prices... %d items" -- count so far
 L.AUCTIONPRICES_SCANNED = "Prices updated for %d items" -- count
@@ -49,7 +46,7 @@ L.AUCTIONPRICES_PAUSED = "Scan paused while you sell... %d items" -- count so fa
 L.AUCTIONPRICES_STOPPED = "Scan stopped by a search at %d items" -- count
 L.AUCTIONPRICES_AGE = "Prices scanned %d min ago" -- minutes
 L.AUCTIONPRICES_COMMAND = "scan the open auction house now"
-L.AUCTIONPRICES_IS_OFF = "Auction Prices is off (/fpp toggle AuctionPrices)."
+L.AUCTIONPRICES_IS_OFF = "Auction prices are off. Turn on Item Tooltips and its Auction Prices option."
 L.AUCTIONPRICES_NOT_OPEN = "Open the auction house first."
 L.AUCTIONPRICES_LINE = "Auction"
 L.AUCTIONPRICES_RESET = "Saved Prices"
@@ -87,8 +84,7 @@ L.ALREADYKNOWN_LOOT_DESC = "Mark known items in the loot window."
 
 -- ItemCount
 L.ITEMCOUNT_TITLE = "Item Count"
-L.ITEMCOUNT_DESC = "Show how many of an item you own in its tooltip, and how many are in your "
-    .. "bags and your bank."
+L.ITEMCOUNT_DESC = "Show how many of an item you own, and how many are in your bags and your bank."
 L.ITEMCOUNT_BANK = "Count the Bank"
 L.ITEMCOUNT_BANK_DESC = "Add what's in your bank. It's counted each time you open the bank, so "
     .. "open it once on each character."
@@ -96,8 +92,6 @@ L.ITEMCOUNT_LABELS = "Bag and Bank Labels"
 L.ITEMCOUNT_LABELS_DESC = "Show where your items are with Blizzard's bag and bank icons, or in words."
 L.ITEMCOUNT_LABELS_ICONS = "Icons"
 L.ITEMCOUNT_LABELS_WORDS = "Words"
-L.ITEMCOUNT_ALIGN = "Count Alignment"
-L.ITEMCOUNT_ALIGN_DESC = "Where the count goes, like the price lines' alignment."
 L.ITEMCOUNT_LINE = "Owned"
 L.ITEMCOUNT_TOTAL = "%d %s" -- total, where they are (in parentheses)
 L.ITEMCOUNT_WHERE = "(%s)" -- the bag and bank counts
@@ -115,20 +109,27 @@ L.BESTREWARD_DESC = "Mark the quest reward choice that sells to a vendor for the
 L.EASYDELETE_TITLE = "Easy Delete"
 L.EASYDELETE_DESC = "Type DELETE for you when destroying a good item, so Yes is a single click."
 
--- SellPrice
+-- ItemTooltips (its parts' sections use SELLPRICE_TITLE, ITEMCOUNT_TITLE, and AUCTIONPRICES_TITLE)
+L.ITEMTOOLTIPS_TITLE = "Item Tooltips"
+L.ITEMTOOLTIPS_DESC = "Add to item tooltips: the sell price of the whole stack, how many you own, "
+    .. "and the lowest auction house buyout, scanned when you open the auction house. Each has "
+    .. "its own checkbox."
+L.ITEMTOOLTIPS_SECTION_GENERAL = "Price Lines"
+L.ITEMTOOLTIPS_SELLPRICE = "Show Sell Price"
+L.ITEMTOOLTIPS_ITEMCOUNT = "Show Item Count"
+L.ITEMTOOLTIPS_AUCTION = "Show Auction Prices"
 L.SELLPRICE_TITLE = "Sell Price"
-L.SELLPRICE_DESC = "Show the vendor price of the whole stack in item tooltips. Hold Shift to see "
-    .. "one item."
+L.SELLPRICE_DESC = "Show the vendor price of the whole stack. Hold Shift to see one item."
 
--- Price lines in item tooltips (SellPrice and AuctionPrices each have these options)
+-- Price lines in item tooltips
 L.PRICE_MODE = "Price For"
-L.PRICE_MODE_DESC = "Whether this price counts the whole stack or one item, and what holding "
-    .. "Shift shows."
+L.PRICE_MODE_DESC = "Whether prices count the whole stack or one item, and what holding Shift "
+    .. "shows."
 L.PRICE_MODE_STACK = "Whole Stack, Shift for One"
 L.PRICE_MODE_ONE = "One Item, Shift for Stack"
-L.PRICE_ALIGN = "Price Alignment"
-L.PRICE_ALIGN_DESC = "Where this line's coins go. Price lines set to the same alignment line up "
-    .. "with each other."
+L.PRICE_ALIGN = "Alignment"
+L.PRICE_ALIGN_DESC = "Where the coins and the item count go: at the tooltip's right edge, or "
+    .. "right after the label."
 L.PRICE_ALIGN_RIGHT = "Right Edge"
 L.PRICE_ALIGN_INLINE = "After the Label"
 L.PRICE_COLOR = "Quantity Color"

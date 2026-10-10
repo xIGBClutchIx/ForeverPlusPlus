@@ -53,7 +53,13 @@ ns.changelog = {
                     .. "errors, and it shows how many this session caught." },
             } },
             { L.CHANGELOG_CHANGED, {
-                { L.AUCTIONPRICES_TITLE, "Crafting Costs shows Estimated Profit, after the "
+                { L.ITEMTOOLTIPS_TITLE, "Sell Price, Auction Prices, and Item Count are now one "
+                    .. "module, Item Tooltips, in Items, with a checkbox for each. Price For and "
+                    .. "Alignment are shared by all its lines, so they always line up. Sell Price "
+                    .. "and Auction Prices still start on and Item Count off. Its settings start "
+                    .. "from their defaults, the auction house is scanned again on your next "
+                    .. "visit, and each character's bank is counted again when you open it." },
+                { L.ITEMTOOLTIPS_TITLE, "Crafting Costs shows Estimated Profit, after the "
                     .. "auction house's 5% cut, and, at the top, how old the oldest auction "
                     .. "price in the totals is." },
                 { L.CLASSCOLORS_TITLE, "New Friends and Who List option (on by default) shows "
@@ -82,14 +88,14 @@ ns.changelog = {
                     .. "more gears or options opening inside the list. Modules with many options "
                     .. "group them under headers, and options that only matter while another is "
                     .. "on sit under it: Player Nameplates, NPC Nameplates, Zone Info, Points of "
-                    .. "Interest, Quest Tracker, Profession Tooltips, and Auction Prices." },
+                    .. "Interest, Quest Tracker, Profession Tooltips, and Item Tooltips." },
                 { L.CHARACTERFRAME_TITLE, "Character Frame Enhancements is now Character "
                     .. "Window, so its name fits the Modules list, and Durability Bars is now its "
                     .. "Durability Bars option instead of a module of its own (always, only when "
                     .. "worn, below 50% or 25%, or off). It still starts on, showing bars always." },
                 { L.AUTOSCREENSHOT_TITLE, "Now listed under Automation instead of Interface." },
                 { L.CHANGELOG_SETTINGS, "Clearer names and descriptions for a few options: Auto "
-                    .. "Quest's Skip Key, Item Count's Bag and Bank Labels, Unexplored Areas' Tint "
+                    .. "Quest's Skip Key, Item Tooltips' Bag and Bank Labels, Unexplored Areas' Tint "
                     .. "Strength, and Zone Info's Herbs, Ore, and Skinning." },
                 { L.POI_TITLE, "New Ley Lines option shows Skyborne ley lines and elemental "
                     .. "convergences on the map. A spot is saved when a Skyborne gets the "

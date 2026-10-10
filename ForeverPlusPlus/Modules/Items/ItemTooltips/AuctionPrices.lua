@@ -1,5 +1,5 @@
--- Auction Prices: scans the auction house when it opens and shows the lowest buyout in item
--- tooltips, under the sell price. Like the sell price, it counts the stack (Shift for one), or
+-- Item Tooltips' auction prices: scans the auction house when it opens and shows the lowest
+-- buyout in item tooltips, under the sell price. Like the sell price, it counts the stack (Shift for one), or
 -- the other way round. In the professions window, it adds up what a recipe's reagents cost
 -- against what the crafted items are worth.
 --
@@ -8,7 +8,7 @@
 -- and Auctionator leaves it off by default. Browse results give the lowest unit price per item.
 local _, ns = ...
 
-local ipairs, format, time, floor = ipairs, string.format, time, math.floor
+local ipairs, pairs, format, time, floor = ipairs, pairs, string.format, time, math.floor
 local C_AuctionHouse, C_Timer, GetTime = C_AuctionHouse, C_Timer, GetTime
 local GetRealmName, UnitFactionGroup = GetRealmName, UnitFactionGroup
 local CreateFrame, pcall, type, hooksecurefunc = CreateFrame, pcall, type, hooksecurefunc
@@ -19,77 +19,8 @@ local ItemTooltip = ns.ItemTooltip
 
 local SCAN_INTERVAL = 15 * 60 -- seconds between automatic scans, as Auctionator waits
 
-local module = ns.NewModule("AuctionPrices", L.AUCTIONPRICES_DESC, ItemTooltip.PriceDefaults({
-    enabled = true,
-    scanOnOpen = true,
-    scanAge = "right", -- "right", "inline" (like the price line's alignment), or "off"
-    scanAgeColor = "age", -- "age" (green when fresh to red when old), "gray", "white", or "gold"
-    scanAgeRedHours = 12, -- hours old at which "age" is fully red
-    chat = true,
-    crafting = true, -- costs, value, and profit under a recipe's reagents
-    -- What merchants charge for one of an item: { [itemID] = copper }, learned at each visit.
-    -- Data, not a setting, like houses.
-    vendor = {},
-    -- Per auction house ("Realm-Faction"): { scannedAt = time(), items = { [itemID] = { price =
-    -- copper, seenAt = time() } } }. scannedAt is the last full scan and decides when to scan
-    -- again; seenAt is when that item's price was last seen, which the tooltip's age shows, since
-    -- an item missing from a scan keeps its older price. Data, not a setting: it isn't in
-    -- module.options.
-    houses = {},
-}, "gold"))
-module.title = L.AUCTIONPRICES_TITLE
-module.category = "items"
-
--- The price line first, then crafting, then scanning, with the Reset button (module.actions) under it.
-module.options = ItemTooltip.PriceOptions({
-    {
-        key = "scanAge",
-        name = L.AUCTIONPRICES_SCAN_AGE,
-        description = L.AUCTIONPRICES_SCAN_AGE_DESC,
-        section = L.AUCTIONPRICES_SECTION_TOOLTIP,
-        choices = {
-            { "right", L.PRICE_ALIGN_RIGHT },
-            { "inline", L.PRICE_ALIGN_INLINE },
-            { "off", L.AUCTIONPRICES_SCAN_AGE_OFF },
-        },
-    },
-    {
-        key = "scanAgeColor",
-        name = L.AUCTIONPRICES_SCAN_AGE_COLOR,
-        description = L.AUCTIONPRICES_SCAN_AGE_COLOR_DESC,
-        section = L.AUCTIONPRICES_SECTION_TOOLTIP,
-        requires = "scanAge",
-        choices = {
-            { "age", L.AUCTIONPRICES_SCAN_AGE_COLOR_AGE },
-            { "gray", L.PRICE_COLOR_GRAY },
-            { "white", L.PRICE_COLOR_WHITE },
-            { "gold", L.PRICE_COLOR_GOLD },
-        },
-    },
-    {
-        key = "scanAgeRedHours",
-        name = L.AUCTIONPRICES_SCAN_AGE_RED,
-        description = L.AUCTIONPRICES_SCAN_AGE_RED_DESC,
-        section = L.AUCTIONPRICES_SECTION_TOOLTIP,
-        requires = "scanAge",
-        min = 1, max = 48, step = 1,
-        format = ns.Text.Hours,
-    },
-    {
-        key = "crafting",
-        name = L.AUCTIONPRICES_CRAFTING,
-        description = L.AUCTIONPRICES_CRAFTING_DESC,
-        changed = "0.8.0", -- Estimated Profit, and the age of the oldest price
-        section = L.AUCTIONPRICES_SECTION_CRAFTING,
-    },
-    {
-        key = "scanOnOpen",
-        name = L.AUCTIONPRICES_SCAN_ON_OPEN,
-        description = L.AUCTIONPRICES_SCAN_ON_OPEN_DESC,
-        section = L.AUCTIONPRICES_SECTION_SCANNING,
-    },
-    ns.ChatOption(L.AUCTIONPRICES_CHAT_DESC, L.AUCTIONPRICES_SECTION_SCANNING),
-}, L.AUCTIONPRICES_SECTION_TOOLTIP)
+local module = ns.modules.ItemTooltips
+local internal = module.internal
 
 -- The auction house this character sees. Realms share one per faction. Kept once found, since
 -- every item tooltip asks and neither changes while logged in.
@@ -340,7 +271,7 @@ end
 -- Blizzard sent a query of its own (the sell list, an item's listings, your auctions, a post,
 -- a purchase): hold the next page back for a moment so those go first.
 local function onBlizzardQuery()
-    if module.enabled and scanning then
+    if internal.Active("auction") and scanning then
         lastQuery = GetTime()
     end
 end
@@ -349,7 +280,7 @@ end
 -- was paging through, so stop, keeping the prices seen so far. Also stops a scan still waiting
 -- to start, which would otherwise replace the player's results.
 local function onOtherSearch()
-    if module.enabled and scanning and not ownQuery then
+    if internal.Active("auction") and scanning and not ownQuery then
         local count = seenCount
         stopScan()
         showIndicator(format(L.AUCTIONPRICES_STOPPED, count), false)
@@ -365,7 +296,7 @@ local QUERIES = {
     "ConfirmCommoditiesPurchase",
 }
 
--- Hooks can't be removed; the functions above check module.enabled. Probed per name, since the
+-- Hooks can't be removed; the functions above check the part is on. Probed per name, since the
 -- client may not have them all.
 local hookedQueries = false
 
@@ -417,7 +348,7 @@ end
 
 -- /fpp scan: scan now, whenever the last one was.
 local function scanCommand()
-    if not module.enabled then
+    if not internal.Active("auction") then
         ns.Print(L.AUCTIONPRICES_IS_OFF)
     elseif not open then
         ns.Print(L.AUCTIONPRICES_NOT_OPEN)
@@ -472,13 +403,13 @@ local function ageColor(seconds)
 end
 
 local function addAuctionPrice(tooltip, data)
-    local itemID = module.enabled and ItemTooltip.ItemID(data)
+    local itemID = internal.Active("auction") and ItemTooltip.ItemID(data)
     local item = itemID and house().items[itemID]
     if not item then
         return
     end
     local db = module.db
-    ItemTooltip.AddPrice(tooltip, data, L.AUCTIONPRICES_LINE, item.price, db)
+    ItemTooltip.AddPrice(tooltip, data, L.AUCTIONPRICES_LINE, item.price, db.mode, db.align, db.auctionColor)
     -- When this item's price was last seen, by a scan or the player's own search: an item
     -- missing from the last scan keeps its older price and age.
     if db.scanAge ~= "off" then
@@ -700,7 +631,7 @@ local function refreshCrafting(recipeInfo)
         return
     end
     recipeInfo = recipeInfo or (form.GetRecipeInfo and form:GetRecipeInfo())
-    local recipeID = module.enabled and module.db.crafting and recipeInfo and recipeInfo.recipeID
+    local recipeID = internal.Active("auction") and module.db.crafting and recipeInfo and recipeInfo.recipeID
     local schematic = recipeID and C_TradeSkillUI and C_TradeSkillUI.GetRecipeSchematic
         and C_TradeSkillUI.GetRecipeSchematic(recipeID, false)
     local reagents = schematic and basicReagents(schematic)
@@ -821,36 +752,43 @@ local function hookProfessions()
     end
 end
 
-function module:OnEnable()
-    self:On("AUCTION_HOUSE_SHOW", onShow)
-    self:On("AUCTION_HOUSE_CLOSED", onClosed)
-    self:On("AUCTION_HOUSE_BROWSE_RESULTS_UPDATED", onResultsUpdated)
-    self:On("AUCTION_HOUSE_BROWSE_RESULTS_ADDED", onResultsAdded)
-    -- The hook can't be removed; addAuctionPrice checks module.enabled instead.
-    ItemTooltip.OnPrices(addAuctionPrice)
-    ItemTooltip.RedrawOnShift(self, true)
-    self:On("MERCHANT_SHOW", recordMerchant)
-    self:On("MERCHANT_UPDATE", recordMerchant)
-    ns.AddOns.WhenLoaded("Blizzard_Professions", hookProfessions)
-end
+local events = {
+    AUCTION_HOUSE_SHOW = onShow,
+    AUCTION_HOUSE_CLOSED = onClosed,
+    AUCTION_HOUSE_BROWSE_RESULTS_UPDATED = onResultsUpdated,
+    AUCTION_HOUSE_BROWSE_RESULTS_ADDED = onResultsAdded,
+    MERCHANT_SHOW = recordMerchant,
+    MERCHANT_UPDATE = recordMerchant,
+}
 
-function module:OnDisable()
-    ItemTooltip.RedrawOnShift(self, false)
-    stopScan()
-    hideIndicator()
-    open = false
-    ns.AddOns.Cancel("Blizzard_Professions", hookProfessions)
-    if panel then
-        panel:Hide()
-    end
-    local form = craftForm()
-    if form then
-        restoreReagents(form)
-    end
-end
-
-function module:OnOptionChanged(key)
-    if key == "crafting" then
-        refreshCrafting()
-    end
-end
+internal.AddPart("auction", {
+    enable = function()
+        for event, fn in pairs(events) do
+            ns.On(event, fn)
+        end
+        -- The hook can't be removed; addAuctionPrice checks the part is on instead.
+        ItemTooltip.OnPrices(addAuctionPrice)
+        ns.AddOns.WhenLoaded("Blizzard_Professions", hookProfessions)
+    end,
+    disable = function()
+        for event, fn in pairs(events) do
+            ns.Off(event, fn)
+        end
+        stopScan()
+        hideIndicator()
+        open = false
+        ns.AddOns.Cancel("Blizzard_Professions", hookProfessions)
+        if panel then
+            panel:Hide()
+        end
+        local form = craftForm()
+        if form then
+            restoreReagents(form)
+        end
+    end,
+    optionChanged = function(key)
+        if key == "crafting" then
+            refreshCrafting()
+        end
+    end,
+})

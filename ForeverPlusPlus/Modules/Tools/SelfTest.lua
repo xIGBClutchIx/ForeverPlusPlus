@@ -531,8 +531,8 @@ local MANUAL = {
     "MANUAL repair: at a vendor with Auto Repair on, with and without guild funds; the recorder logs "
         .. "UI_ERROR_MESSAGE lines.",
     "MANUAL cinematic: trigger a cinematic with Skip Cinematics on and its Debug option on.",
-    "MANUAL auction: open the Auction House, let Auction Prices scan, then post an item; watch that the "
-        .. "Sell tab list fills.",
+    "MANUAL auction: open the Auction House, let Item Tooltips scan auction prices, then post an "
+        .. "item; watch that the Sell tab list fills.",
     "MANUAL combat: run this test in combat (a dummy is enough): secret.curve, ui.mouse-enabled, cvar changes.",
     "MANUAL stand and shapeshift: sit, then /cast a spell that needs standing; note whether autoStand "
         .. "stands you, and the cvar.autoStand default logged above.",
