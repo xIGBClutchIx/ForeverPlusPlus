@@ -31,6 +31,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Character Window**: Character Frame Enhancements is now Character Window, so its name fits the Modules list, and Durability Bars is now its Durability Bars option instead of a module of its own (always, only when worn, below 50% or 25%, or off). It still starts on, showing bars always.
 - **Auto Screenshot**: now listed under Automation instead of Interface.
 - **Auto Screenshot**: new Played Time on Level Up option (off by default) shows your `/played` time in chat when you level up, so it's in the screenshot.
+- **Auto Screenshot**: new Your Own Screenshots option (off by default), under Hide Interface, hides the interface for the screenshots you take with the Screenshot key (Print Screen) too, not only Auto Screenshot's. Not in combat.
 - **Settings**: clearer names and descriptions for a few options: Auto Quest's Skip Key, Item Count's Bag and Bank Labels, Unexplored Areas' Tint Strength, and Zone Info's Herbs, Ore, and Skinning.
 - **Points of Interest**: new Ley Lines option shows Skyborne ley lines and elemental convergences on the map. A spot is saved when a Skyborne gets the 15-minute buff from Read Ley Line or Skysight there, and every character on the account sees it. Shown to Skyborne for their own kind by default, or to everyone, or to no one.
 

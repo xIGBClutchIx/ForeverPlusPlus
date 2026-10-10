@@ -102,6 +102,10 @@ ns.changelog = {
                 { L.AUTOSCREENSHOT_TITLE, "New Played Time on Level Up option (off by default) "
                     .. "shows your /played time in chat when you level up, so it's in the "
                     .. "screenshot." },
+                { L.AUTOSCREENSHOT_TITLE, "New Your Own Screenshots option (off by default), "
+                    .. "under Hide Interface, hides the interface for the screenshots you take with "
+                    .. "the Screenshot key (Print Screen) too, not only Auto Screenshot's. Not in "
+                    .. "combat." },
                 { L.CHANGELOG_SETTINGS, "Clearer names and descriptions for a few options: Auto "
                     .. "Quest's Skip Key, Item Count's Bag and Bank Labels, Unexplored Areas' Tint "
                     .. "Strength, and Zone Info's Herbs, Ore, and Skinning." },

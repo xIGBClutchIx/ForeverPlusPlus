@@ -1,12 +1,16 @@
 -- Auto Screenshot: takes a screenshot when something worth keeping happens: a level up, an
 -- achievement, good loot, a boss kill, and more, each with its own checkbox. The shot waits a
--- moment so Blizzard's toast is on screen, and can leave the interface out. It can also ask for
--- /played on a level up, so the time is in chat (and in the shot).
+-- moment so Blizzard's toast is on screen, and can leave the interface out, also from the shots
+-- the player takes with the Screenshot key. It can also ask for /played on a level up, so the
+-- time is in chat (and in the shot).
 local _, ns = ...
 
 local ipairs, pairs, format, tonumber, type = ipairs, pairs, string.format, tonumber, type
+local concat = table.concat
 local C_Timer, C_Item, C_EventUtils = C_Timer, C_Item, C_EventUtils
 local Screenshot, InCombatLockdown, UIParent = Screenshot, InCombatLockdown, UIParent
+local CreateFrame, GetBindingKey = CreateFrame, GetBindingKey
+local SetOverrideBindingClick, ClearOverrideBindings = SetOverrideBindingClick, ClearOverrideBindings
 local GetNumTitles, IsTitleKnown, GetTime = GetNumTitles, IsTitleKnown, GetTime
 local RequestTimePlayed = RequestTimePlayed
 
@@ -27,6 +31,7 @@ local module = ns.NewModule("AutoScreenshot", L.AUTOSCREENSHOT_DESC, {
     death = false,
     hideUI = false,
     playedTime = false,
+    hideOwn = false,
     chat = true,
 })
 module.title = L.AUTOSCREENSHOT_TITLE
@@ -37,6 +42,8 @@ local GENERAL, EVENTS = L.AUTOSCREENSHOT_SECTION_GENERAL, L.AUTOSCREENSHOT_SECTI
 module.options = {
     { key = "hideUI", name = L.AUTOSCREENSHOT_HIDE_UI, description = L.AUTOSCREENSHOT_HIDE_UI_DESC,
         section = GENERAL },
+    { key = "hideOwn", name = L.AUTOSCREENSHOT_HIDE_OWN, description = L.AUTOSCREENSHOT_HIDE_OWN_DESC,
+        section = GENERAL, requires = "hideUI", added = "0.8.0" },
     { key = "playedTime", name = L.AUTOSCREENSHOT_PLAYED_TIME,
         description = L.AUTOSCREENSHOT_PLAYED_TIME_DESC, section = GENERAL, added = "0.8.0" },
     ns.ChatOption(L.AUTOSCREENSHOT_CHAT_DESC, GENERAL),
@@ -80,7 +87,7 @@ local PVP_RANK_FACTION = 2800
 -- Taking a picture ----------------------------------------------------------------------------
 
 local timer -- the pending shot, or nil
-local reason -- what the pending or last shot is for, for chat
+local reason -- what the last shot was for, for chat; nil for the player's own
 local hidden = false -- the interface is hidden for a shot and must come back
 local showUI
 
@@ -109,8 +116,9 @@ function showUI()
     UIParent:Show()
 end
 
-local function take()
-    timer = nil
+-- Takes a shot now, for `why` (nil for one the player took themselves).
+local function take(why)
+    reason = why
     ns.On("SCREENSHOT_SUCCEEDED", onShot)
     ns.On("SCREENSHOT_FAILED", onShot)
     -- Hiding the interface in combat can be blocked, and so can showing it again, so only out of
@@ -132,8 +140,60 @@ local function request(why)
     if timer or not module.enabled then
         return
     end
-    reason = why
-    timer = C_Timer.NewTimer(DELAY, take)
+    timer = C_Timer.NewTimer(DELAY, function()
+        timer = nil
+        take(why)
+    end)
+end
+
+-- The player's own shots ----------------------------------------------------------------------
+-- The Screenshot key takes its shot straight away, before anything could hide the interface. So
+-- while Hide Interface and Your Own Screenshots are on, that key is bound to our button instead,
+-- which takes the shot the same way as ours. Bindings can't change in combat, so the keys stay as
+-- they were when combat started; in combat the button just takes the shot with the interface.
+
+-- A click binding needs a button with a global name.
+local BUTTON_NAME = "ForeverPlusPlusScreenshotButton"
+local button -- made the first time it's needed (a frame can't be removed)
+local boundKeys = "" -- the keys bound to the button now, to notice when the player changes them
+local bindPending = false
+
+local function bindKeys()
+    if InCombatLockdown() then
+        if not bindPending then
+            bindPending = true
+            ns.AfterCombat(function()
+                bindPending = false
+                bindKeys()
+            end)
+        end
+        return
+    end
+    local keys = {}
+    if module.enabled and module.db.hideUI and module.db.hideOwn then
+        keys = { GetBindingKey("SCREENSHOT") }
+    end
+    local list = concat(keys, " ")
+    -- Binding keys fires UPDATE_BINDINGS, which calls this again; only rebind on a real change.
+    if list == boundKeys then
+        return
+    end
+    boundKeys = list
+    if button then
+        ClearOverrideBindings(button)
+    end
+    if #keys == 0 then
+        return
+    end
+    if not button then
+        button = CreateFrame("Button", BUTTON_NAME)
+        button:SetScript("OnClick", function()
+            take(nil)
+        end)
+    end
+    for _, key in ipairs(keys) do
+        SetOverrideBindingClick(button, false, key, BUTTON_NAME)
+    end
 end
 
 -- Reading chat lines --------------------------------------------------------------------------
@@ -306,6 +366,8 @@ end
 
 function module:OnEnable()
     sync()
+    bindKeys()
+    self:On("UPDATE_BINDINGS", bindKeys)
 end
 
 function module:OnDisable()
@@ -316,8 +378,10 @@ function module:OnDisable()
     ns.Off("SCREENSHOT_SUCCEEDED", onShot)
     ns.Off("SCREENSHOT_FAILED", onShot)
     showUI()
+    bindKeys()
 end
 
 function module:OnOptionChanged()
     sync()
+    bindKeys()
 end

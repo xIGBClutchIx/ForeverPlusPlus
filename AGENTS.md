@@ -81,7 +81,7 @@ When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or f
 
 - Lua 5.1. ASCII only in `.lua` and `.toc` files. Four-space indents, LF endings (`.editorconfig`).
 - Start every file with `local addonName, ns = ...` (or `local _, ns = ...`). Modules share state through `ns`, never `_G`.
-- The only globals are `ForeverPlusPlusDB`, the `SLASH_FOREVERPLUSPLUS*` names, and `SlashCmdList.FOREVERPLUSPLUS*` (`/fpp`, and the Commands module's `FOREVERPLUSPLUS_WAY` and the like, set only while their option is on). Add any new client global you use to `.luarc.json`.
+- The only globals are `ForeverPlusPlusDB`, the `SLASH_FOREVERPLUSPLUS*` names, and `SlashCmdList.FOREVERPLUSPLUS*` (`/fpp`, and the Commands module's `FOREVERPLUSPLUS_WAY` and the like, set only while their option is on), and `ForeverPlusPlusScreenshotButton` (Auto Screenshot's button for the Screenshot key, since a click binding needs a named button). Add any new client global you use to `.luarc.json`.
 - Cache hot globals as file-level locals: `local pairs, CreateFrame = pairs, CreateFrame`.
 - Use `ns.On` / `ns.Off` for events, not a new frame per module. For events a module listens to while it's on, use `self:On(event, fn)`; they stop by themselves when it turns off.
 - A module that is off costs nothing: no frames, hooks, events, or `OnUpdate` until `OnEnable`. Every module turns on and off live, with no `/reload`: `OnDisable` undoes what `OnEnable` did (a module that only adds events with `self:On` and hooks with `self:Hook` needs none, since those stop by themselves). A hook can't be removed, so add it with `self:Hook` / `self:HookScript` (Core), which hook once and do nothing while the module is off; a hook made another way checks `module.enabled` itself.
