@@ -483,7 +483,7 @@ function ns.ApplyPreset(enable, options)
     end
 end
 
----Puts every module back to its defaults (the Recommended Defaults button on the welcome page).
+---Puts every module back to its defaults (the Recommended Defaults button on the About page).
 function ns.ApplyDefaults()
     ns.ApplyPreset()
 end

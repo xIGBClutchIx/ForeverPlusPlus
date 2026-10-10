@@ -56,7 +56,8 @@ L.CATEGORY_CHAT = "Chat"
 L.CATEGORY_OTHER = "Other"
 L.DEBUG = "Debug"
 L.SETTINGS_AFTER_COMBAT = "Settings open after combat."
-L.MODULES = "Modules" -- the page with every module's checkbox, and a button to it
+L.MODULES = "Modules" -- the page with every module's checkbox, the top Forever++ entry
+L.ABOUT = "About" -- the page with the version, links, commands, and presets
 -- The selected module on the Modules page
 L.SETTINGS_ENABLED = "Enabled" -- the module's own on/off checkbox, under its description
 L.SETTINGS_CHANGED_TAG = "CHANGED" -- on an option changed since the last version seen, like Blizzard's NEW
@@ -86,7 +87,7 @@ L.CHANGELOG_FIXED = "Fixed"
 L.CHANGELOG_SETTINGS = "Settings"
 L.CHANGELOG_COMMANDS = "Commands"
 
--- Settings: the welcome page (the top Forever++ page)
+-- Settings: the About page
 L.HOME_WELCOME = "Welcome to %s" -- addon title
 L.HOME_TAGLINE = "Small additions and changes to the default UI for WoW Forever."
 L.HOME_VERSION = "Version %s by %s" -- version, author

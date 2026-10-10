@@ -1,8 +1,7 @@
 -- The "Forever++" pages in the game's Settings > AddOns list, built from Blizzard's own settings
 -- templates so they look like any other options page. Few entries, so the sidebar stays short:
---   Forever++        a welcome page: what the addon is, how many modules are on, buttons to the
---                    Modules and Changelog pages, the version, links, and the /fpp commands
---     Modules        every module (the only place modules turn on and off) in a list on the left,
+--   Forever++        the Modules page: every module (the only place modules turn on and off) in
+--                    a list on the left,
 --                    with a checkbox each, under a label per `module.category`. Clicking one shows
 --                    it on the right: its title, category and description, its Enabled
 --                    checkbox, its `notice` (a warning) while that applies, then its options
@@ -16,6 +15,8 @@
 --     Debug          Show Tags, then options marked `debug = true` and buttons from
 --                    `module.debugActions`, for testing
 --     Changelog      the release notes from Changelog.lua
+--     About          what the addon is, how many modules are on, a button to the Changelog, the
+--                    Recommended and Developer's Defaults, the version, links, and /fpp commands
 -- Without subpages (an older Settings API), the Modules page is the only page.
 local _, ns = ...
 
@@ -29,9 +30,8 @@ local C_XMLUtil, C_Texture, C_Timer = C_XMLUtil, C_Texture, C_Timer
 local L = ns.L
 
 local settings = {} -- module name -> its Blizzard setting objects, to refresh after /fpp changes
-local mainCategory -- the Forever++ page, for /fpp
-local modulesCategory -- the Modules page
-local changelogCategory -- the Changelog page, for the welcome page's button
+local modulesCategory -- the Modules page, the top Forever++ entry, for /fpp
+local changelogCategory -- the Changelog page, for the About page's button
 local pages = {} -- module name -> the page it draws itself, for ns.OpenSettings(name)
 
 -- Opens a Forever++ page (after combat, if the player is in combat).
@@ -120,7 +120,7 @@ end
 -- every Forever++ choice. While Blizzard is setting defaults our setters hold their change back,
 -- and the event the panel fires after says which button it was: Settings.CategoryDefaulted (These
 -- Settings, on one of our pages) applies them, Settings.Defaulted (All Settings) drops them. The
--- welcome page's Defaults button is the way to reset everything of ours.
+-- About page's Recommended Defaults button is the way to reset everything of ours.
 local held -- changes held back while Blizzard sets defaults, to apply or drop after
 
 -- Probe: CheckIsSettingDefaults is Mainline's (the `forever` UI source has it); without it,
@@ -1296,10 +1296,9 @@ local function buildModules(frame)
     frame:HookScript("OnShow", refreshAll)
 end
 
--- Welcome page --------------------------------------------------------------------------------
--- The top Forever++ page: what the addon is, how many modules are on, the way to the Modules and
--- Changelog pages, links, and the /fpp commands. Built the first time it's shown; the module count
--- updates each time.
+-- About page ----------------------------------------------------------------------------------
+-- What the addon is, how many modules are on, the way to the Changelog page, the presets, links,
+-- and the /fpp commands. Built the first time it's shown; the module count updates each time.
 
 local WEBSITE = "https://github.com/xIGBClutchIx/ForeverPlusPlus"
 local ISSUES = WEBSITE .. "/issues"
@@ -1375,8 +1374,8 @@ local function countModules()
     return on, total
 end
 
-local function buildWelcome(frame)
-    ns.AddPageTitle(frame, ns.title)
+local function buildAbout(frame)
+    ns.AddPageTitle(frame, L.ABOUT)
 
     local icon = frame:CreateTexture(nil, "ARTWORK")
     icon:SetSize(64, 64)
@@ -1418,13 +1417,8 @@ local function buildWelcome(frame)
     frame:HookScript("OnShow", update) -- after /fpp or the Modules page changed some
     y = y - 22
 
-    local modules = addButton(frame, L.MODULES, modulesCategory)
-    modules:SetPoint("TOPLEFT", 16, y)
-    local last = modules
-    if changelogCategory then
-        last = addButton(frame, L.CHANGELOG, changelogCategory)
-        last:SetPoint("LEFT", modules, "RIGHT", 8, 0)
-    end
+    local changelog = addButton(frame, L.CHANGELOG, changelogCategory)
+    changelog:SetPoint("TOPLEFT", 16, y)
 
     -- Two presets on the same row, each asking first since they overwrite the player's settings.
     local function addPreset(text, tooltip, key, question, fn, anchor)
@@ -1443,7 +1437,7 @@ local function buildWelcome(frame)
         return button
     end
     local defaults = addPreset(L.DEFAULTS_RECOMMENDED, L.HOME_DEFAULTS_TIP, "DEFAULTS",
-        L.HOME_DEFAULTS_ASK, ns.ApplyDefaults, last)
+        L.HOME_DEFAULTS_ASK, ns.ApplyDefaults, changelog)
     local developerTip = format(L.HOME_DEVELOPER_TIP,
         concat(ns.DeveloperModules(), L.HOME_LIST_SEPARATOR))
     addPreset(L.DEFAULTS_DEVELOPER, developerTip, "DEVELOPER", L.HOME_DEVELOPER_ASK,
@@ -1583,16 +1577,14 @@ function ns.RegisterSettings()
         end
     end
 
-    -- Without subpages, the Modules page is the only one.
+    -- The top Forever++ entry is the Modules page; without subpages it's the only one.
+    local category = Settings.RegisterCanvasLayoutCategory(canvasFrame(buildModules), ns.title)
+    modulesCategory = category
     if not subpages then
-        local category = Settings.RegisterCanvasLayoutCategory(canvasFrame(buildModules), ns.title)
         Settings.RegisterAddOnCategory(category)
-        mainCategory, modulesCategory = category, category
         return
     end
 
-    local category = Settings.RegisterCanvasLayoutCategory(canvasFrame(buildWelcome), ns.title)
-    modulesCategory = addCanvasPage(category, L.MODULES, buildModules)
     -- Pages modules draw themselves (tools such as Console Variables).
     for _, name in ipairs(grouped) do
         local module = ns.modules[name]
@@ -1615,13 +1607,13 @@ function ns.RegisterSettings()
         end
     end
     changelogCategory = addCanvasPage(category, L.CHANGELOG, buildChangelog)
+    addCanvasPage(category, L.ABOUT, buildAbout)
     Settings.RegisterAddOnCategory(category)
-    mainCategory = category
     ourPages[debugPage] = true
     addDefaultsButton()
 end
 
----Opens the Forever++ welcome page in Settings, or a module: its own page, or the Modules page
+---Opens the Forever++ Modules page in Settings, or a module: its own page, or the Modules page
 ---with it selected (after combat, if the player is in combat).
 ---@param name? string a module
 ---@return boolean opened false when this client's Settings can't open to it
@@ -1640,9 +1632,8 @@ function ns.OpenSettings(name)
         else
             selected = name -- the page opens on it
         end
-        return open(modulesCategory)
     end
-    return open(mainCategory)
+    return open(modulesCategory)
 end
 
 ---Updates a module's controls after it changed somewhere else (/fpp toggle, set, a preset).

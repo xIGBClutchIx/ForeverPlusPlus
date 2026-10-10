@@ -68,6 +68,10 @@ ns.changelog = {
                 { L.CHANGELOG_SETTINGS, "Clutch's Default is now Developer's Defaults, and the "
                     .. "welcome page's Defaults button is now Recommended Defaults, matching the "
                     .. "Defaults popup on the Modules and Debug pages." },
+                { L.CHANGELOG_SETTINGS, "Forever++ in the AddOns list, /fpp, and the minimap "
+                    .. "button open the Modules page. The welcome page is now the About page, "
+                    .. "at the bottom of the list, with the version, links, commands, and the "
+                    .. "two Defaults buttons." },
                 { L.CHANGELOG_SETTINGS, "The Modules page lists every module on the left, each "
                     .. "with its checkbox, and shows the one you click on the right: its title, "
                     .. "what it does, an Enabled checkbox, and its options and buttons. No "
