@@ -1,13 +1,13 @@
 -- Minimap Button: Forever++'s button on the minimap, in the addon compartment, or both. A click
--- opens Forever++ settings; while Error Catcher is on, a right-click shows its errors and the
--- button shows how many this session caught (through ns.Errors, never Error Catcher itself).
--- After a fresh install the button wears Blizzard's NEW label, and its first click opens the
--- About page instead, once; no popup at login.
+-- opens Forever++ settings and a right-click a menu of quick module toggles; while Error Catcher
+-- is on, a Shift-right-click shows its errors and the button shows how many this session caught
+-- (through ns.Errors, never Error Catcher itself). After a fresh install the button wears
+-- Blizzard's NEW label, and its first click opens the About page instead, once; no popup at login.
 local _, ns = ...
 
 local format, type, tremove = string.format, type, table.remove
 local cos, sin, rad, deg, atan2, floor = math.cos, math.sin, math.rad, math.deg, math.atan2, math.floor
-local CreateFrame, GetCursorPosition = CreateFrame, GetCursorPosition
+local ipairs, CreateFrame, GetCursorPosition = ipairs, CreateFrame, GetCursorPosition
 local C_XMLUtil = C_XMLUtil
 local IsControlKeyDown, IsShiftKeyDown, IsAltKeyDown = IsControlKeyDown, IsShiftKeyDown, IsAltKeyDown
 
@@ -30,25 +30,56 @@ module.added = "0.8.0"
 local button
 local compartment -- our entry in the addon compartment, while it's there
 
--- The keys that, held with a right-click, clear this session's errors.
+-- The keys that, held with a right-click, clear this session's errors. Not Shift: a
+-- Shift-right-click shows them.
 local MODIFIERS = {
     ctrl = { name = L.MINIMAPBUTTON_KEY_CTRL, down = IsControlKeyDown },
-    shift = { name = L.MINIMAPBUTTON_KEY_SHIFT, down = IsShiftKeyDown },
     alt = { name = L.MINIMAPBUTTON_KEY_ALT, down = IsAltKeyDown },
 }
 
-local function onClick(_, mouse)
-    if mouse == "RightButton" and Errors.IsOn() then
+-- The modules the right-click menu turns on and off, in this order.
+local QUICK_TOGGLES = { "FastLoot", "AutoQuest", "AutoSellJunk" }
+
+-- Turned on and off through Core, as the Modules page does, so Settings and /fpp follow along.
+local function quickMenu(owner)
+    if not (MenuUtil and MenuUtil.CreateContextMenu) then
+        return
+    end
+    MenuUtil.CreateContextMenu(owner, function(_, root)
+        root:CreateTitle(ns.title)
+        for _, name in ipairs(QUICK_TOGGLES) do
+            local other = ns.modules[name]
+            if other and not other.unavailable then
+                root:CreateCheckbox(other.title or name,
+                    function() return other.db.enabled end,
+                    function()
+                        ns.SetEnabled(name, not other.db.enabled)
+                        ns.RefreshSetting(name)
+                    end)
+            end
+        end
+    end)
+end
+
+local function onClick(owner, mouse)
+    if mouse ~= "RightButton" then
+        if not (ns.WelcomePending() and ns.OpenAbout()) then
+            ns.OpenSettings()
+        end
+        return
+    end
+    if Errors.IsOn() then
         -- Clearing needs the key held, so it's never an accident.
         local modifier = MODIFIERS[module.db.clearModifier]
         if modifier and modifier.down() then
             Errors.ClearSession()
-        else
+            return
+        elseif IsShiftKeyDown() then
             Errors.Toggle()
+            return
         end
-    elseif not (ns.WelcomePending() and ns.OpenAbout()) then
-        ns.OpenSettings()
     end
+    quickMenu(owner)
 end
 
 -- The tooltip. `drag` adds the line about dragging, which only the minimap button does.
@@ -63,6 +94,7 @@ local function showTooltip(owner, drag)
     end
     GameTooltip:AddLine(ns.WelcomePending() and L.MINIMAPBUTTON_TIP_WELCOME
         or L.MINIMAPBUTTON_TIP_SETTINGS, 0.1, 1, 0.1)
+    GameTooltip:AddLine(L.MINIMAPBUTTON_TIP_TOGGLES, 0.1, 1, 0.1)
     if errors then
         GameTooltip:AddLine(L.MINIMAPBUTTON_TIP_ERRORS, 0.1, 1, 0.1)
         local modifier = MODIFIERS[module.db.clearModifier]
@@ -186,7 +218,7 @@ local function addCompartment()
         registerForAnyClick = true,
         -- The mouse button comes inside the input data; the TOC's way passes it as a string.
         func = function(_, input)
-            onClick(nil, type(input) == "table" and input.buttonName or input)
+            onClick(frame, type(input) == "table" and input.buttonName or input)
         end,
         funcOnEnter = function(owner)
             showTooltip(type(owner) == "table" and owner.IsObjectType and owner or frame, false)
@@ -253,7 +285,6 @@ module.options = {
         description = L.MINIMAPBUTTON_CLEAR_KEY_DESC,
         choices = {
             { "ctrl", L.MINIMAPBUTTON_KEY_CTRL },
-            { "shift", L.MINIMAPBUTTON_KEY_SHIFT },
             { "alt", L.MINIMAPBUTTON_KEY_ALT },
             { "none", L.MINIMAPBUTTON_KEY_NONE },
         },

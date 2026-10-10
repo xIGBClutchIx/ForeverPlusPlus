@@ -68,9 +68,11 @@ ns.changelog = {
                     .. "a checkbox." },
                 { L.MINIMAPBUTTON_TITLE, "New, on by default, in Interface: Forever++'s own "
                     .. "button on the minimap, in the addon compartment, or both. Click it to open "
-                    .. "Forever++ settings; while Error Catcher is on, right-click it to see the "
-                    .. "errors, and it shows how many this session caught. After a fresh install "
-                    .. "it wears Blizzard's NEW label, and its first click opens the About page." },
+                    .. "Forever++ settings, or right-click it for quick toggles of Fast Loot, Auto "
+                    .. "Quest, and Auto Sell Junk. While Error Catcher is on, Shift-right-click it "
+                    .. "to see the errors, and it shows how many this session caught. After a "
+                    .. "fresh install it wears Blizzard's NEW label, and its first click opens the "
+                    .. "About page." },
                 { L.XPBARTEXT_TITLE, "New, off by default, in Interface: the experience bar "
                     .. "shows its numbers all the time, with the percent, your rested XP, and the "
                     .. "XP of the quests in your log that are ready to turn in (or all of them), "
@@ -103,9 +105,9 @@ ns.changelog = {
                     .. "the addon compartment, both, or neither. The minimap is still the "
                     .. "default." },
                 { L.ERRORCATCHER_TITLE, "Its button is now the Minimap Button module, where a "
-                    .. "click opens settings and a right-click shows the errors. Turn that module "
-                    .. "off for no button. Its Clear Key option moved there too: Ctrl-right-click "
-                    .. "still clears this session's errors." },
+                    .. "click opens settings and a Shift-right-click shows the errors. Turn that "
+                    .. "module off for no button. Its Clear Key option moved there too: "
+                    .. "Ctrl-right-click still clears this session's errors." },
                 { L.CHANGELOG_SETTINGS, "Clutch's Default is now Developer's Defaults, and the "
                     .. "welcome page's Defaults button is now Recommended Defaults, matching the "
                     .. "Defaults popup on the Modules and Debug pages." },
