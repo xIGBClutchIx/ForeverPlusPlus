@@ -240,16 +240,21 @@ local function refresh()
     end
 end
 
-local refreshTimer
+local refreshTimer, forget
 
 -- Item data arrives a little after a window opens, and what you can use changes as you level
--- and train: look again shortly, once for a burst of events.
+-- and train: look again shortly, once for a burst of events. The answers are forgotten then
+-- too, not at the event, since the tooltip can still say the old level for a moment.
 local function refreshSoon()
     if refreshTimer then
         return
     end
     refreshTimer = C_Timer.NewTimer(0.5, function()
         refreshTimer = nil
+        if forget then
+            forget = false
+            wipe(results)
+        end
         if module.enabled then
             refresh()
         end
@@ -257,7 +262,7 @@ local function refreshSoon()
 end
 
 local function onPlayerChanged()
-    wipe(results)
+    forget = true
     refreshSoon()
 end
 
@@ -284,6 +289,7 @@ function module:OnDisable()
         refreshTimer:Cancel()
         refreshTimer = nil
     end
+    wipe(results) -- you may level while it's off
     clearTints()
 end
 
