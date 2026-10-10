@@ -6,7 +6,7 @@
 -- from those tables after a patch that changes the maps.
 local _, ns = ...
 
-ns.modules.UnexploredAreas.internal.overlays = {
+ns.modules.WorldMap.internal.unexploredAreas.overlays = {
     [2133] = { -- Alterac Mountains (1416)
         { 288, 256, 276, 0, 7975737, 7975738 },
         { 256, 256, 462, 77, 7975758 },

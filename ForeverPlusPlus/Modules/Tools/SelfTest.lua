@@ -494,10 +494,10 @@ end
 
 local function checkSaved()
     section("this addon's saved data")
-    local poi = ns.modules.PointsOfInterest
-    if poi and poi.db then
+    local map = ns.modules.WorldMap
+    if map and map.db then
         local count = 0
-        for _ in pairs(poi.db.learnedNodes or {}) do
+        for _ in pairs(map.db.learnedNodes or {}) do
             count = count + 1
         end
         info("saved.learned-nodes", count .. " characters with learned flight points saved")
@@ -510,7 +510,7 @@ local function checkSaved()
         end
         info("saved.flight-times", count .. " flight times saved")
     end
-    info("saved.zone-info", "corner " .. text(ns.modules.ZoneInfo and ns.modules.ZoneInfo.db.corner))
+    info("saved.zone-info", "corner " .. text(map and map.db and map.db.corner))
 end
 
 -- Things only the player can do -----------------------------------------------------------------
@@ -523,7 +523,7 @@ local MANUAL = {
         .. "and whether the recorder saw it.",
     "MANUAL learned flight nodes: at a flight master, compare taxi.node-states in the log with which "
         .. "points show learned on the world map (Points of Interest); screenshot both.",
-    "MANUAL zone info corners: /fpp set ZoneInfo corner TOPRIGHT (then TOPLEFT, BOTTOMRIGHT) with the world map open "
+    "MANUAL zone info corners: /fpp set WorldMap corner TOPRIGHT (then TOPLEFT, BOTTOMRIGHT) with the world map open "
         .. "on a zone and on a continent; screenshot each corner, and the tooltip on a dungeon row.",
     "MANUAL tracking mounted: mounted, run /run C_Minimap.SetTracking(1, true) and check the tracking icon and "
         .. "that you didn't dismount; unmounted, turn on Find Herbs then Find Minerals and see that one replaces the other.",

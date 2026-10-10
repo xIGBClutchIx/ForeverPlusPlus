@@ -1,8 +1,9 @@
--- Points of Interest: icons on the world map for dungeons, raids, capital cities, flight
--- masters, boats, zeppelins, and spirit healers, each with a tooltip saying what and where it is.
--- Every kind has its own checkbox, icon size, and whether it also shows on the continent and
--- world maps, not just zone maps. Travel points of the other faction are off unless asked for.
--- Where the points are is in Data.lua, except Skyborne ley lines, saved as they're found.
+-- Points of Interest, a part of World Map: icons on the world map for dungeons, raids, capital
+-- cities, flight masters, boats, zeppelins, and spirit healers, each with a tooltip saying what and
+-- where it is. Every kind has its own checkbox, icon size, and whether it also shows on the
+-- continent and world maps, not just zone maps. Travel points of the other faction are off unless
+-- asked for. Where the points are is in Data.lua, except Skyborne ley lines, saved as they're
+-- found.
 local _, ns = ...
 
 local ipairs, pairs, format, rawget, unpack, abs = ipairs, pairs, string.format, rawget, unpack,
@@ -14,8 +15,9 @@ local UnitName, UnitRace, GetRealmName = UnitName, UnitRace, GetRealmName
 
 local L = ns.L
 
-local module = ns.NewModule("PointsOfInterest", L.POI_DESC, {
-    enabled = true,
+local module = ns.modules.WorldMap:NewPart({
+    key = "pointsOfInterest", name = L.POI_TITLE, description = L.POI_DESC, section = L.POI_TITLE,
+}, {
     -- For each kind: shown, its size in percent of normal, and shown on continent maps too.
     dungeons = true,
     dungeonSize = 90,
@@ -50,12 +52,9 @@ local module = ns.NewModule("PointsOfInterest", L.POI_DESC, {
     -- whole account, so every character sees what one found. Data, not a setting.
     leyLineSpots = {},
 })
-module.title = L.POI_TITLE
-module.category = "map"
-
 -- Shared with Data.lua: `points` (by map ID), `instances` (by key), and `cities` (by map ID).
-module.internal = {}
-local internal = module.internal
+local internal = {}
+ns.modules.WorldMap.internal.pointsOfInterest = internal
 
 -- A checkbox for a kind with the slider for its size in the same row, and under it whether it
 -- shows on continents.
@@ -68,8 +67,8 @@ local function kind(key, sizeKey, name, description)
         { key = key .. "World", name = L.POI_WORLD, description = L.POI_WORLD_DESC, requires = key }
 end
 
--- Each row's options go under its `section` in Settings.
-module.options = {}
+-- Each row's options go under its `section`, a smaller header in the part's section in Settings.
+local options = {}
 local INSTANCES, TRAVEL, OTHER = L.POI_SECTION_INSTANCES, L.POI_SECTION_TRAVEL, L.POI_SECTION_OTHER
 for _, rows in ipairs({
     { section = INSTANCES, kind("dungeons", "dungeonSize", L.POI_DUNGEONS, L.POI_DUNGEONS_DESC) },
@@ -104,11 +103,13 @@ for _, rows in ipairs({
 }) do
     for _, option in ipairs(rows) do
         option.section = rows.section
-        module.options[#module.options + 1] = option
+        options[#options + 1] = option
     end
 end
+module:AddOptions(options)
 
-module.actions = {
+-- The module's only button. This is the last part in the TOC, so it sits right under the ley lines.
+ns.modules.WorldMap.actions = {
     {
         name = L.POI_LEYLINES_FORGET,
         button = L.POI_LEYLINES_FORGET_BUTTON,
@@ -117,7 +118,7 @@ module.actions = {
         fn = function()
             module.db.leyLineSpots = {}
             if module.enabled then
-                module.internal.refresh()
+                internal.refresh()
             end
             ns.Print(L.POI_LEYLINES_FORGET_DONE)
         end,

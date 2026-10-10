@@ -1,8 +1,8 @@
--- Unexplored Areas: the parts of zone maps you haven't explored yet, drawn in the same art as the
--- ones you have, on the world map and the zone map. They're tinted by default so the two stand
--- apart. The game only knows the explored areas, so the art of the rest is in Data.lua.
--- Blizzard's own explored areas are left alone: these are our own textures on our own frame,
--- under a data provider of our own, on each map's canvas.
+-- Unexplored Areas, a part of World Map: the parts of zone maps you haven't explored yet, drawn in
+-- the same art as the ones you have, on the world map and the zone map. They're tinted by default
+-- so the two stand apart. The game only knows the explored areas, so the art of the rest is in
+-- Data.lua. Blizzard's own explored areas are left alone: these are our own textures on our own
+-- frame, under a data provider of our own, on each map's canvas.
 local _, ns = ...
 
 local ceil, ipairs, pairs, setmetatable = math.ceil, ipairs, pairs, setmetatable
@@ -11,14 +11,14 @@ local CreateFrame, C_AddOns, C_Map, C_MapExplorationInfo =
 
 local L = ns.L
 
-local module = ns.NewModule("UnexploredAreas", L.UNEXPLORED_DESC, {
-    enabled = true,
+local module = ns.modules.WorldMap:NewPart({
+    key = "unexploredAreas", name = L.UNEXPLORED_TITLE, description = L.UNEXPLORED_DESC,
+    section = L.UNEXPLORED_TITLE,
+}, {
     tint = true,
     tintStrength = 70, -- percent of the full color
     tintColor = "gray",
 })
-module.title = L.UNEXPLORED_TITLE
-module.category = "map"
 
 -- The tint colors at full strength. Gray by default: unexplored areas read as faded, not colored.
 local COLORS = {
@@ -30,7 +30,7 @@ local COLORS = {
     purple = { 0.75, 0.45, 1 },
 }
 
-module.options = {
+module:AddOptions({
     { key = "tint", name = L.UNEXPLORED_TINT, description = L.UNEXPLORED_TINT_DESC,
         slider = "tintStrength" },
     {
@@ -50,11 +50,11 @@ module.options = {
             { "purple", L.UNEXPLORED_PURPLE },
         },
     },
-}
+})
 
 -- Shared with Data.lua: `overlays`, by map art ID.
-module.internal = {}
-local internal = module.internal
+local internal = {}
+ns.modules.WorldMap.internal.unexploredAreas = internal
 
 -- The vertex color for unexplored areas: white untinted, or the tint color mixed with white by
 -- its strength.

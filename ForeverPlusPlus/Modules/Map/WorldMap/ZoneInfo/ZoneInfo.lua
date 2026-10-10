@@ -1,7 +1,8 @@
--- Zone Info: a small panel in a corner of the world map about the zone it shows, or on a
--- continent map the zone under the cursor: its level range colored against yours, the Fishing
--- skill its waters need, and the herbs, ore, and skinning it has for the gathering professions
--- you have. Ideas from Leatrix Maps' zone levels; none of its code. The zones are in Data.lua.
+-- Zone Info, a part of World Map: a small panel in a corner of the world map about the zone it
+-- shows, or on a continent map the zone under the cursor: its level range colored against yours,
+-- the Fishing skill its waters need, and the herbs, ore, and skinning it has for the gathering
+-- professions you have. Ideas from Leatrix Maps' zone levels; none of its code. The zones are in
+-- Data.lua.
 local _, ns = ...
 
 local pairs, ipairs, tostring, format, concat = pairs, ipairs, tostring, string.format, table.concat
@@ -14,14 +15,16 @@ local L = ns.L
 local Professions = ns.Professions
 local NoBreak = ns.MapTooltip.NoBreak
 
-local module = ns.NewModule("ZoneInfo", L.ZONEINFO_DESC, {
-    enabled = true,
+local module = ns.modules.WorldMap:NewPart({
+    key = "zoneInfo", name = L.ZONEINFO_TITLE, description = L.ZONEINFO_DESC,
+    section = L.ZONEINFO_TITLE,
+}, {
     corner = "BOTTOMLEFT",
     hover = true, -- on continent maps, the zone under the cursor
     hideLabel = true, -- and then the map's own zone name at the top, which says the same
     levels = true,
     faction = "name", -- who holds the zone: "off", "name" (the name's color), or "line"
-    dungeons = "always", -- "off", "always", or "key" (while holding the detail key)
+    zoneDungeons = "always", -- "off", "always", or "key" (while holding the detail key)
     detailKey = "shift", -- "shift", "alt", or "ctrl"
     fishing = "always",
     -- Herbs, ore, and skinning: "off", "known" (only with the profession), or "always".
@@ -30,8 +33,6 @@ local module = ns.NewModule("ZoneInfo", L.ZONEINFO_DESC, {
     skinning = "known",
     scale = 100, -- percent of the panel's normal size
 })
-module.title = L.ZONEINFO_TITLE
-module.category = "map"
 
 -- What a line can be: never, always, or only while holding the detail key, and for professions
 -- also only with the profession.
@@ -51,7 +52,7 @@ local SHOW_KNOWN = {
 -- lines, then the profession ones.
 local GENERAL, ZONE, PROFESSIONS = L.ZONEINFO_SECTION_GENERAL, L.ZONEINFO_SECTION_ZONE,
     L.ZONEINFO_SECTION_PROFESSIONS
-module.options = {
+module:AddOptions({
     {
         key = "corner", name = L.ZONEINFO_CORNER, description = L.ZONEINFO_CORNER_DESC,
         choices = {
@@ -91,7 +92,7 @@ module.options = {
         section = ZONE,
     },
     {
-        key = "dungeons", name = L.ZONEINFO_DUNGEONS, description = L.ZONEINFO_DUNGEONS_DESC,
+        key = "zoneDungeons", name = L.ZONEINFO_DUNGEONS, description = L.ZONEINFO_DUNGEONS_DESC,
         choices = SHOW_ALWAYS, section = ZONE,
     },
     {
@@ -110,11 +111,11 @@ module.options = {
         key = "fishing", name = L.ZONEINFO_FISHING, description = L.ZONEINFO_FISHING_DESC,
         choices = SHOW_ALWAYS, section = PROFESSIONS,
     },
-}
+})
 
 -- Shared with Data.lua: `zones` (by map ID), `herbs` and `ores` (by item ID).
-module.internal = {}
-local internal = module.internal
+local internal = {}
+ns.modules.WorldMap.internal.zoneInfo = internal
 
 local MAX_WIDTH = 300 -- the widest the text gets; longer lines wrap
 local PADDING = 8
@@ -323,7 +324,7 @@ local function rows(zone)
             add(row, i > 1)
         end
     end
-    if visible(module.db.dungeons) then
+    if visible(module.db.zoneDungeons) then
         for i, instance in ipairs(zone.dungeons or {}) do
             add(instanceLine(instance), false, i == 1 and #list > 0 and SECTION_GAP or nil)
         end

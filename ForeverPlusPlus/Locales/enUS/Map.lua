@@ -11,9 +11,15 @@ L.INSTANCES_LEVEL = "Level %d"
 L.INSTANCES_LEVELS = "Level %d-%d" -- lowest, highest
 L.INSTANCES_RANGE = "%d-%d" -- lowest, highest
 
+-- WorldMap: one module, a part each for Points of Interest, Zone Info, Unexplored Areas, and
+-- Coordinates. Each part's title heads its section in Settings, over its Enabled checkbox.
+L.WORLDMAP_TITLE = "World Map"
+L.WORLDMAP_DESC = "Add to the world map: points of interest, a zone info panel, unexplored areas, "
+    .. "and coordinates. Each has its own Enabled checkbox below."
+
 -- PointsOfInterest. Place names on the map come from the game, or from Data.lua.
 L.POI_TITLE = "Points of Interest"
--- Headers over its options in Settings
+-- Smaller headers over its options in Settings
 L.POI_SECTION_INSTANCES = "Dungeons and Raids"
 L.POI_SECTION_TRAVEL = "Cities and Travel"
 L.POI_SECTION_OTHER = "Other"
@@ -81,7 +87,7 @@ L.POI_LEYLINE_CAST = "Cast %s here" -- a spell
 
 -- ZoneInfo
 L.ZONEINFO_TITLE = "Zone Info"
--- Headers over its options in Settings
+-- Smaller headers over its options in Settings
 L.ZONEINFO_SECTION_GENERAL = "General"
 L.ZONEINFO_SECTION_ZONE = "Zone"
 L.ZONEINFO_SECTION_PROFESSIONS = "Professions"

@@ -1,8 +1,8 @@
--- Coordinates: the player's and the cursor's coordinates on the world map. Forever's map already
--- has them (Blizzard's coordinates panel, off until its Settings checkboxes are on), so this turns
--- those settings on from here, one toggle each, and moves Blizzard's text into the map's title
--- bar: the player's on the left, the cursor's on the right, either side of the title. Ideas from
--- Leatrix Maps' coordinates; none of its code.
+-- Coordinates, a part of World Map: the player's and the cursor's coordinates on the world map.
+-- Forever's map already has them (Blizzard's coordinates panel, off until its Settings checkboxes
+-- are on), so this turns those settings on from here, one toggle each, and moves Blizzard's text
+-- into the map's title bar: the player's on the left, the cursor's on the right, either side of
+-- the title. Ideas from Leatrix Maps' coordinates; none of its code.
 local _, ns = ...
 
 local max, min = math.max, math.min
@@ -10,26 +10,26 @@ local CreateFrame = CreateFrame
 
 local L = ns.L
 
-local module = ns.NewModule("Coordinates", L.COORDS_DESC, {
-    enabled = true,
+local module = ns.modules.WorldMap:NewPart({
+    key = "coordinates", name = L.COORDS_TITLE, description = L.COORDS_DESC,
+    section = L.COORDS_TITLE,
+}, {
     player = true,
     cursor = true,
     tenths = true,
     minimap = true,
     titleBar = true,
-    saved = {}, -- CVar -> the player's own value, put back when the module turns off
+    saved = {}, -- CVar -> the player's own value, put back when the part turns off
 })
-module.title = L.COORDS_TITLE
-module.category = "map"
 
 -- Whose coordinates, then where they show, then how precise.
-module.options = {
+module:AddOptions({
     { key = "player", name = L.COORDS_PLAYER, description = L.COORDS_PLAYER_DESC },
     { key = "cursor", name = L.COORDS_CURSOR, description = L.COORDS_CURSOR_DESC },
     { key = "titleBar", name = L.COORDS_TITLEBAR, description = L.COORDS_TITLEBAR_DESC },
     { key = "minimap", name = L.COORDS_MINIMAP, description = L.COORDS_MINIMAP_DESC },
     { key = "tenths", name = L.COORDS_TENTHS, description = L.COORDS_TENTHS_DESC },
-}
+})
 
 -- The client's own setting behind each option: the checkboxes under Settings > Gameplay >
 -- Interface > Coordinates. Forever only; see docs/forever-api.md.

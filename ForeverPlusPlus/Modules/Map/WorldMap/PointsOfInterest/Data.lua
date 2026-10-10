@@ -17,7 +17,7 @@ local setmetatable = setmetatable
 
 local L = ns.L
 
-local internal = ns.modules.PointsOfInterest.internal
+local internal = ns.modules.WorldMap.internal.pointsOfInterest
 
 local Instances = ns.Instances.byKey
 

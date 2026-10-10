@@ -7,6 +7,8 @@
 --                    checkbox, its `notice` (a warning) while that applies, then its options
 --                    (checkboxes, dropdowns and sliders) and buttons (from `module.actions`),
 --                    greyed out while it's off. An option can sit under another (`requires`).
+--                    A module made of parts (`module:NewPart`) has a section for each, headed by
+--                    the part's Enabled checkbox, with the part's options greyed out while it's off.
 --                    `alwaysOn` modules (tools) aren't listed. A search box at the top narrows
 --                    the list to modules by title and description. A module or option added
 --                    since the player last looked (`added`), or an option changed since then
@@ -854,7 +856,8 @@ local function addOptionRow(view, module, option, byKey, done)
     local parent = option.requires and byKey[option.requires]
     -- Under an option that is itself under another, it's on only while all of them are.
     local function on()
-        if not module.db.enabled then
+        -- Off with the module, and with its part's checkbox (`part`) when it's one of a part's.
+        if not module.db.enabled or option.part and not module.db[option.part] then
             return false
         end
         local up = parent
@@ -873,7 +876,8 @@ local function addOptionRow(view, module, option, byKey, done)
         up = up.requires and byKey[up.requires]
     end
     local indent = depth * INDENT
-    local row, label = addRow(view, option.name, indent, on)
+    -- A part's checkbox (`toggle`) is right under its section's header, which names it.
+    local row, label = addRow(view, option.toggle and L.SETTINGS_ENABLED or option.name, indent, on)
     local updates = view.updates
     local pair = option.slider and byKey[option.slider]
     -- The name wraps narrower while it's marked NEW, so the row's height follows it. A slider in
@@ -949,19 +953,20 @@ local function addButtonRow(view, text, on, shown, button, fn, tooltip, title)
     addTooltip(row, title or text, tooltip, control)
 end
 
--- A line of text across the view: the Options header, or "no options".
-local function addLine(view, font, text)
+-- A line of text across the view: a section's header, a smaller one inside it, or "no options".
+local function addLine(view, font, text, gap)
     local row = CreateFrame("Frame", nil, view)
     row:SetSize(view:GetWidth(), font == "GameFontHighlightLarge" and 24 or ROW_HEIGHT)
     local line = row:CreateFontString(nil, "OVERLAY", font)
     line:SetPoint("LEFT", 4, 0)
     line:SetText(text)
-    addEntry(view, row, nil, 16)
+    addEntry(view, row, nil, gap or 16)
 end
 
 -- The module's rows, under its title, category and description: its notice, then its options and
 -- buttons in the order it lists them, or a line saying it has none. Each change of `section`
--- starts a header with its name; options before the first section get an Options header.
+-- starts a header with its name; options before the first section get an Options header. Inside a
+-- section, each change of `subsection` (a part's own sections) starts a smaller one.
 local function addModuleRows(view, module)
     local name = module.name
     local function on()
@@ -993,14 +998,18 @@ local function addModuleRows(view, module)
         addLine(view, "GameFontDisable", L.SETTINGS_NO_OPTIONS)
         return
     end
-    local section
+    local section, subsection
     if not (options[1] and options[1].section) then
         addLine(view, "GameFontHighlightLarge", L.SETTINGS_OPTIONS)
     end
     for _, option in ipairs(options) do
         if option.section and option.section ~= section then
-            section = option.section
+            section, subsection = option.section, nil
             addLine(view, "GameFontHighlightLarge", section)
+        end
+        if option.subsection and option.subsection ~= subsection then
+            subsection = option.subsection
+            addLine(view, "GameFontHighlight", subsection, 8)
         end
         if not done[option.key] then
             addOptionRow(view, module, option, byKey, done)
