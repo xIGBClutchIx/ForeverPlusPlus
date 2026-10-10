@@ -37,6 +37,7 @@ Lib\MapPins.lua
 Lib\EditMode.lua
 Lib\Chat.lua
 Lib\TalentPlan.lua
+Lib\Slash.lua
 Modules\Interface\ErrorCatcher.lua
 Modules\Nameplates\PlayerPlates.lua
 Modules\Nameplates\NpcPlates.lua
@@ -99,6 +100,7 @@ Modules\Map\UnexploredAreas\Data.lua
 Modules\Map\Coordinates.lua
 Modules\Map\FlightTimer.lua
 Modules\Map\HideFilterReset.lua
+Modules\Map\Waypoints.lua
 Changelog.lua
 Settings.lua
 Init.lua

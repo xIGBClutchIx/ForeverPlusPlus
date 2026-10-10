@@ -21,9 +21,13 @@ ns.changelog = {
                     .. "in order. A dropdown keeps several named plans, and shares or imports one "
                     .. "as a line of text." },
                 { L.COMMANDS_TITLE, "New, on by default, in Interface: short slash commands, "
-                    .. "each with its own checkbox. /way [zone] x y puts the game's map pin on a "
-                    .. "spot and tracks it (/way clear takes it away), /rl reloads the UI, and "
-                    .. "/clear empties a chat window. A command another addon already has, like TomTom's /way, is left to it." },
+                    .. "each with its own checkbox. /rl reloads the UI, and /clear empties a chat "
+                    .. "window. A command another addon already has is left to it." },
+                { L.WAYPOINTS_TITLE, "New, on by default, in Map: /way [zone] x y puts the "
+                    .. "game's map pin on a spot and tracks it (/way clear takes it away), unless "
+                    .. "TomTom or another addon already has /way. The new Waypoint Arrow option "
+                    .. "(off by default) shows an arrow on screen that turns toward the pin, from "
+                    .. "/way or a click on the map, with how far it is. Move and resize it in Edit Mode." },
                 { L.CHANGELOG_SETTINGS, "A search box at the top of the Modules page shows "
                     .. "only the modules whose name or description has what you type, under "
                     .. "their categories. Clear it to see every module again." },
