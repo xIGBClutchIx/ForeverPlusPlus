@@ -17,6 +17,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Changed
 
+- **World Map**: Points of Interest, Zone Info, Unexplored Areas, and Coordinates are now one World Map module, with a section for each in its options and an Enabled checkbox at the top of each section. Their settings start over at their defaults.
 - **Auction Prices**: Crafting Costs shows Estimated Profit, after the auction house's 5% cut, and, at the top, how old the oldest auction price in the totals is.
 - **Class Colors**: new Friends and Who List option (on by default) shows online friends' names in the friends list and names in the who list in their class color.
 - **Chat Copy**: the window shows chat lines in their chat colors, with names in their class colors and links in theirs, the way they look in chat. Copying still gives plain text.
@@ -24,7 +25,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Error Catcher**: its button is now the Minimap Button module, where a click opens settings and a right-click shows the errors. Turn that module off for no button. Its Clear Key option moved there too: Ctrl-right-click still clears this session's errors.
 - **Settings**: Clutch's Default is now Developer's Defaults, and the welcome page's Defaults button is now Recommended Defaults, matching the Defaults popup on the Modules and Debug pages.
 - **Settings**: Forever++ in the AddOns list, `/fpp`, and the minimap button open the Modules page. The welcome page is now the About page, at the bottom of the list, with the version, links, and commands, and the same Defaults button at the top right as the Modules page.
-- **Settings**: the Modules page lists every module on the left, each with its checkbox, and shows the one you click on the right: its title, what it does, an Enabled checkbox, and its options and buttons. No more gears or options opening inside the list. Modules with many options group them under headers, and options that only matter while another is on sit under it: Player Nameplates, NPC Nameplates, Zone Info, Points of Interest, Quest Tracker, Profession Tooltips, and Auction Prices.
+- **Settings**: the Modules page lists every module on the left, each with its checkbox, and shows the one you click on the right: its title, what it does, an Enabled checkbox, and its options and buttons. No more gears or options opening inside the list. Modules with many options group them under headers, and options that only matter while another is on sit under it: Player Nameplates, NPC Nameplates, World Map, Quest Tracker, Profession Tooltips, and Auction Prices.
 - **Character Window**: Character Frame Enhancements is now Character Window, so its name fits the Modules list, and Durability Bars is now its Durability Bars option instead of a module of its own (always, only when worn, below 50% or 25%, or off). It still starts on, showing bars always.
 - **Auto Screenshot**: now listed under Automation instead of Interface.
 - **Settings**: clearer names and descriptions for a few options: Auto Quest's Skip Key, Item Count's Bag and Bank Labels, Unexplored Areas' Tint Strength, and Zone Info's Herbs, Ore, and Skinning.

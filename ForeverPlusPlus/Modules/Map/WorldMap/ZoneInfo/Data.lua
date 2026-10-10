@@ -9,7 +9,7 @@ local _, ns = ...
 
 local pairs, ipairs = pairs, ipairs
 
-local internal = ns.modules.ZoneInfo.internal
+local internal = ns.modules.WorldMap.internal.zoneInfo
 
 -- Herbs and ores: item ID -> { skill needed to gather, short English name }. Other languages
 -- use the game's item name.

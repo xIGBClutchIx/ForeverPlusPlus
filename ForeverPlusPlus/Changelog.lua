@@ -53,6 +53,10 @@ ns.changelog = {
                     .. "errors, and it shows how many this session caught." },
             } },
             { L.CHANGELOG_CHANGED, {
+                { L.WORLDMAP_TITLE, "Points of Interest, Zone Info, Unexplored Areas, and "
+                    .. "Coordinates are now one World Map module, with a section for each in its "
+                    .. "options and an Enabled checkbox at the top of each section. Their settings "
+                    .. "start over at their defaults." },
                 { L.AUCTIONPRICES_TITLE, "Crafting Costs shows Estimated Profit, after the "
                     .. "auction house's 5% cut, and, at the top, how old the oldest auction "
                     .. "price in the totals is." },
@@ -81,8 +85,8 @@ ns.changelog = {
                     .. "what it does, an Enabled checkbox, and its options and buttons. No "
                     .. "more gears or options opening inside the list. Modules with many options "
                     .. "group them under headers, and options that only matter while another is "
-                    .. "on sit under it: Player Nameplates, NPC Nameplates, Zone Info, Points of "
-                    .. "Interest, Quest Tracker, Profession Tooltips, and Auction Prices." },
+                    .. "on sit under it: Player Nameplates, NPC Nameplates, World Map, Quest "
+                    .. "Tracker, Profession Tooltips, and Auction Prices." },
                 { L.CHARACTERFRAME_TITLE, "Character Frame Enhancements is now Character "
                     .. "Window, so its name fits the Modules list, and Durability Bars is now its "
                     .. "Durability Bars option instead of a module of its own (always, only when "

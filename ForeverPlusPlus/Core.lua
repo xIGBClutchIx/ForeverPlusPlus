@@ -342,6 +342,54 @@ function ns.NewModule(name, description, defaults)
     return module
 end
 
+-- Parts -----------------------------------------------------------------------------------------
+-- A module can be made of parts that the player turns on and off one by one inside it, like the
+-- World Map module's layers. Each part is written like a module of its own, in its own file.
+
+---Adds a part to a module: a piece of it with its own checkbox, the option `toggle.key`, that heads
+---its section in Settings. A part is written like a module: `OnEnable`, an `OnDisable` that undoes
+---it, `OnOptionChanged`, `part:On`, `part:Hook` and `part:Print` all work the same, and it is on
+---while both the module and its checkbox are. Its settings go in `defaults` and its options in
+---`part:AddOptions`; both join the module's, so their keys must differ from the other parts'.
+---Its `db` is the module's.
+---@param toggle table the checkbox option: `key`, `name`, `description`, and `section`, the header its options go under
+---@param defaults? table its settings; its checkbox defaults to on
+---@return table part
+function Module:NewPart(toggle, defaults)
+    local part = setmetatable({ name = self.name, module = self, key = toggle.key,
+        section = toggle.section, own = {} }, Module)
+    toggle.toggle = true
+    if defaults and defaults[toggle.key] == nil then
+        defaults[toggle.key] = true
+    end
+    for key, value in pairs(defaults or { [toggle.key] = true }) do
+        if self.defaults[key] ~= nil then
+            error("Forever++: " .. self.name .. " already has a setting called " .. key, 2)
+        end
+        self.defaults[key] = value
+    end
+    self.parts = self.parts or {}
+    self.parts[#self.parts + 1] = part
+    self.options = self.options or {}
+    self.options[#self.options + 1] = toggle
+    return part
+end
+
+---Adds a part's options to its module's, under the part's section and greyed out in Settings while
+---its checkbox is off. An option's own `section` becomes a smaller header inside the part's. The
+---part hears about them in its `OnOptionChanged`.
+---@param options table[] options, as in `module.options`
+function Module:AddOptions(options)
+    local module = self.module
+    for _, option in ipairs(options) do
+        option.subsection = option.section
+        option.section = self.section
+        option.part = self.key
+        self.own[option.key] = true
+        module.options[#module.options + 1] = option
+    end
+end
+
 local function enable(module)
     if module.enabled then
         return
@@ -350,17 +398,44 @@ local function enable(module)
     if module.OnEnable then
         call(module.OnEnable, module) -- an error here must not stop the modules after it
     end
+    for _, part in ipairs(module.parts or {}) do
+        if module.db[part.key] then
+            enable(part)
+        end
+    end
 end
 
 local function disable(module)
     if not module.enabled then
         return
     end
+    for _, part in ipairs(module.parts or {}) do
+        disable(part)
+    end
     module.enabled = false
     if module.OnDisable then
         call(module.OnDisable, module)
     end
     offAll(module)
+end
+
+-- Tells a module one of its options changed. A part's checkbox turns it on or off, and a part
+-- hears about its own options while it's on.
+local function optionChanged(module, key)
+    if module.OnOptionChanged then
+        module:OnOptionChanged(key)
+    end
+    for _, part in ipairs(module.parts or {}) do
+        if key == part.key then
+            if module.enabled and module.db[key] then
+                enable(part)
+            else
+                disable(part)
+            end
+        elseif part.own[key] and part.enabled and part.OnOptionChanged then
+            call(part.OnOptionChanged, part, key)
+        end
+    end
 end
 
 ---Loads the saved settings and enables every module that is on (called once, at PLAYER_LOGIN).
@@ -391,6 +466,9 @@ function ns.Start()
         prune(ns.db.modules[name], module.defaults)
         fill(ns.db.modules[name], module.defaults)
         module.db = ns.db.modules[name]
+        for _, part in ipairs(module.parts or {}) do
+            part.db = module.db
+        end
         checkValues(module)
         if module.OnLoad then
             call(module.OnLoad, module)
@@ -429,9 +507,7 @@ end
 function ns.SetOption(name, key, value)
     local module = ns.modules[name]
     module.db[key] = value
-    if module.OnOptionChanged then
-        module:OnOptionChanged(key)
-    end
+    optionChanged(module, key)
 end
 
 -- Presets -------------------------------------------------------------------------------------
@@ -442,7 +518,7 @@ local developerEnables = { "FishingCast", "SkipCinematics", "AutoScreenshot", "C
 
 -- Options the Developer's Defaults preset sets differently from the module's default.
 local developerOptions = {
-    ZoneInfo = { dungeons = "key", fishing = "key" },
+    WorldMap = { zoneDungeons = "key", fishing = "key" },
 }
 
 ---Puts every module's settings back to their defaults, then turns on the modules in `enable`.
@@ -478,8 +554,8 @@ function ns.ApplyPreset(enable, options)
     end
     for _, entry in ipairs(changed) do
         local module, key = entry[1], entry[2]
-        if module.enabled and module.OnOptionChanged then
-            module:OnOptionChanged(key)
+        if module.enabled then
+            optionChanged(module, key)
         end
     end
     for _, name in ipairs(ns.order) do
