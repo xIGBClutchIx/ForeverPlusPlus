@@ -66,15 +66,11 @@ L.SETTINGS_OPEN_PAGE = "Open %s" -- module title, for a module with a page of it
 L.SETTINGS_TURN_ON = "Turn On" -- the button on a "Blizzard's ... is off" row
 L.SETTINGS_SEARCH = "Search modules" -- gray text in the Modules page's empty search box
 L.SETTINGS_NO_MATCH = "No modules match \"%s\"." -- the search text
--- The Debug page's own dropdown, at the top
+-- The Debug page's own checkbox, at the top
 L.SETTINGS_SHOW_TAGS = "Show Tags"
 L.SETTINGS_SHOW_TAGS_DESC = "Mark NEW every module and option added or changed since the last "
     .. "release on the Modules page, even ones not released yet or already seen, and keep them "
-    .. "marked after you leave the page. For checking how the tags look."
-L.SETTINGS_SHOW_TAGS_OFF = "Off"
-L.SETTINGS_SHOW_TAGS_NEW = "New"
-L.SETTINGS_SHOW_TAGS_CHANGED = "Changed"
-L.SETTINGS_SHOW_TAGS_BOTH = "New and Changed"
+    .. "marked after you click them. For checking how the tags look."
 -- The Debug page's own buttons, under Show Tags
 L.DEBUG_RESET_SEEN = "Reset Seen Version"
 L.DEBUG_RESET_SEEN_BUTTON = "Reset"

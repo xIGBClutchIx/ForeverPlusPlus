@@ -165,19 +165,22 @@ local function askDefaults()
 end
 
 -- NEW labels ----------------------------------------------------------------------------------
--- A module added (`added`) after the version the player last saw the Modules page in gets
--- Blizzard's NEW label after its name, the one Blizzard's own new settings get. So does an option
--- added since then, unless its module is new itself, and an option changed (`changed`) since then
--- (a longer word like CHANGED squeezes the option's name); the page opens on the first module with
--- one, so the option is seen. A version after this one isn't marked yet: what's
--- tagged for the next release shows once the TOC's version reaches it. Seeing the page saves this
--- version (ns.db.seenVersion); the labels stay while the player is on it and are gone once they
--- leave. Show Tags on the Debug page (ns.db.showTags: "new", "changed", or "both") marks everything
--- tagged that way after the last release in Changelog.lua instead, whatever was seen, and keeps it
--- marked, to check them.
-local newRows = {} -- module name, or option table -> "new" or "changed" while it's marked
+-- A module added (`added`) after the version the player last saw it in gets Blizzard's NEW label
+-- after its name, the one Blizzard's own new settings get. So does an option added or changed
+-- (`changed`) since then, unless its module is new itself (a longer word like CHANGED squeezes the
+-- option's name), and the module's name in the list with it. A version after this one isn't marked
+-- yet: what's tagged for the next release shows once the TOC's version reaches it.
+-- A module is seen once the player has clicked it and moved on (to another module, or off the
+-- page): its labels stay while it shows. The page opens on the first module with a marked option.
+-- What's saved stays small: the version everything was seen in (ns.db.seenVersion), and the version
+-- each module was seen in since (ns.db.seenModules), dropped once nothing is marked any more.
+-- Show Tags on the Debug page (ns.db.showTags) marks everything tagged after the last release in
+-- Changelog.lua instead, whatever was seen, and keeps it marked, to check them.
+local newRows = {} -- module name (a new module), module table (one with a marked option), or
+                   -- option table -> true while it's marked
 local newOrder -- the modules to mark, once trackNew has run
-local seen -- true once the Modules page has been shown this session
+local selected -- the module shown on the right of the Modules page
+local viewing -- the module the player is looking at, to call seen once they move on
 local refreshAll -- redraws the Modules page, once it's built
 
 -- Probe: NewFeatureLabelTemplate is Mainline's (LibUIDropDownMenu uses it on Forever).
@@ -195,32 +198,31 @@ local function lastRelease()
     return "0"
 end
 
--- Whether Show Tags marks every `kind` ("new" or "changed") tag since the last release.
-local function forced(kind)
-    local tags = ns.db.showTags
-    return tags == "both" or tags == kind
-end
-
--- A version after the one last seen, and not after this one (still unreleased). With Show Tags
--- on for `kind`, any version after the last release.
-local function since(version, kind)
+-- A version after the one module `name` was last seen in, and not after this one (still
+-- unreleased). With Show Tags on, any version after the last release.
+local function since(version, name)
     local Text = ns.Text
     if type(version) ~= "string" then
         return false
     end
-    if forced(kind) then
+    if ns.db.showTags then
         return Text.NewerVersion(version, lastRelease()) and true or false
     end
-    return Text.NewerVersion(version, ns.db.seenVersion) and not Text.NewerVersion(version, ns.version)
+    local seenIn = ns.db.seenVersion
+    local module = ns.db.seenModules[name]
+    if type(module) == "string" and Text.NewerVersion(module, seenIn) then
+        seenIn = module
+    end
+    return Text.NewerVersion(version, seenIn) and not Text.NewerVersion(version, ns.version)
         and true or false
 end
 
 local TAG_PADDING = 14 -- the room a label takes after its text, besides its own text
 
 -- An update that keeps a NEW label just after `text`, a font string, while `key` (a module's name,
--- or one of its options) is marked, or `other` (the slider in an option's row): the text at most
--- `room` wide, less the label's room while it shows. The label is made the first time it's needed,
--- so it can come and go with Show Tags.
+-- or one of its options) is marked, or `other` (the slider in an option's row, or the module in the
+-- list): the text at most `room` wide, less the label's room while it shows. The label is made the
+-- first time it's needed, so it can come and go with Show Tags.
 local function newMark(parent, text, room, key, other)
     local label
     return function()
@@ -248,49 +250,58 @@ end
 
 -- Whether a module has an option the player hasn't seen yet.
 local function hasNewOption(module)
-    for _, option in ipairs(module.options or {}) do
-        if newRows[option] then
-            return true
-        end
-    end
-    return false
+    return newRows[module] and true or false
 end
 
--- Saves the version once the Modules page shows, and drops the labels once the player leaves it.
-local function updateSeen()
-    local current = SettingsPanel:IsShown() and SettingsPanel:GetCurrentCategory()
-    if current == modulesCategory then
-        if not seen and ns.Text.NewerVersion(ns.version, ns.db.seenVersion) then
+-- Marks what's new in `newOrder`'s modules, afresh. With nothing marked, everything up to this
+-- version has been seen, so that's saved instead of each module.
+local function markNew()
+    wipe(newRows)
+    for _, name in ipairs(newOrder or {}) do
+        local module = ns.modules[name]
+        if since(module.added, name) then
+            newRows[name] = true -- all of it is new, so its options aren't marked
+        else
+            for _, option in ipairs(module.options or {}) do
+                if not option.debug and (since(option.added, name) or since(option.changed, name)) then
+                    newRows[option] = true
+                    newRows[module] = true
+                end
+            end
+        end
+    end
+    if not next(newRows) and not ns.db.showTags and newOrder then
+        if ns.Text.NewerVersion(ns.version, ns.db.seenVersion) then
             ns.db.seenVersion = ns.version
         end
-        seen = true
-    elseif seen and next(newRows) and not ns.db.showTags then
-        wipe(newRows)
+        wipe(ns.db.seenModules)
+    end
+end
+
+-- Saves that the player has seen the module they were looking at, once they move on from it, and
+-- drops its labels.
+local function moveOn(name)
+    local left = viewing
+    viewing = name
+    local module = left and left ~= name and ns.modules[left]
+    if module and (newRows[left] or newRows[module]) and not ns.db.showTags then
+        ns.db.seenModules[left] = ns.version
+        markNew()
         if refreshAll then
             refreshAll()
         end
     end
 end
 
--- Marks what's new in `newOrder`'s modules, afresh.
-local function markNew()
-    wipe(newRows)
-    for _, name in ipairs(newOrder or {}) do
-        local module = ns.modules[name]
-        if since(module.added, "new") then
-            newRows[name] = "new" -- all of it is new, so its options aren't marked
-        else
-            for _, option in ipairs(module.options or {}) do
-                if not option.debug then
-                    if since(option.added, "new") then
-                        newRows[option] = "new"
-                    elseif since(option.changed, "changed") then
-                        newRows[option] = "changed"
-                    end
-                end
-            end
-        end
-    end
+-- Whether the Modules page is the one showing.
+local function onModulesPage()
+    return SettingsPanel:IsShown() and SettingsPanel:GetCurrentCategory() == modulesCategory
+end
+
+-- The module on the right is being looked at while the Modules page shows; leaving the page moves
+-- on from it.
+local function updateSeen()
+    moveOn(onModulesPage() and selected or nil)
 end
 
 -- Probe: Settings.CategoryChanged and GetCurrentCategory are Mainline's (the `forever` UI source
@@ -482,39 +493,23 @@ local function addDebugOptions(category, layout, module)
     end
 end
 
--- Show Tags: every module and option added, changed, or both since the last release marked NEW
--- on the Modules page, and kept marked, to check how they look. Live: the marks are made again and
--- the page redrawn.
-local SHOW_TAGS = {
-    { "off", L.SETTINGS_SHOW_TAGS_OFF },
-    { "new", L.SETTINGS_SHOW_TAGS_NEW },
-    { "changed", L.SETTINGS_SHOW_TAGS_CHANGED },
-    { "both", L.SETTINGS_SHOW_TAGS_BOTH },
-}
-
+-- Show Tags: every module and option added or changed since the last release marked NEW on the
+-- Modules page, and kept marked, to check how they look. Live: the marks are made again and the
+-- page redrawn.
 local function addShowTags(category)
-    if not (Settings.CreateDropdown and Settings.CreateControlTextContainer) then
-        return -- Probe: dropdowns are Mainline's.
-    end
     local setting = Settings.RegisterProxySetting(category, "ForeverPlusPlus_ShowTags",
-        Settings.VarType.String, L.SETTINGS_SHOW_TAGS, "off",
-        function() return ns.db.showTags or "off" end,
+        Settings.VarType.Boolean, L.SETTINGS_SHOW_TAGS, false,
+        function() return ns.db.showTags and true or false end,
         function(value)
             change(function()
-                ns.db.showTags = value ~= "off" and value or nil
+                ns.db.showTags = value or nil
                 markNew()
                 if refreshAll then
                     refreshAll()
                 end
             end)
         end)
-    Settings.CreateDropdown(category, setting, function()
-        local container = Settings.CreateControlTextContainer()
-        for _, choice in ipairs(SHOW_TAGS) do
-            container:Add(choice[1], choice[2])
-        end
-        return container:GetData()
-    end, L.SETTINGS_SHOW_TAGS_DESC)
+    Settings.CreateCheckbox(category, setting, L.SETTINGS_SHOW_TAGS_DESC)
 end
 
 -- A module's debug buttons (`module.debugActions`, the same shape as `actions`), after its
@@ -617,7 +612,6 @@ local DESCRIPTION_LINES = 4 -- the room a description always takes, so the optio
 local listed = {} -- the names of the modules on the page, by category, then title
 local searchText = {} -- module name -> its title and description, lowercased
 local filter, filterText -- the search text, lowercased and as typed, or nil while the box is empty
-local selected -- the module shown on the right
 local page -- the page's frames, once built
 local bound = {} -- module name -> functions that put what shows of it back to what's saved
 local refreshModule -- puts one module back to what's saved wherever it shows
@@ -1099,17 +1093,20 @@ local function choose(name)
     for other, view in pairs(page.views) do
         view:SetShown(other == name)
     end
-    if not name then
-        return
+    if name then
+        local view = page.views[name]
+        if not view then
+            view = buildView(name)
+            page.views[name] = view
+        end
+        layoutStack(view)
+        page.paneContent:SetHeight(view:GetHeight())
+        page.pane:SetVerticalScroll(0)
     end
-    local view = page.views[name]
-    if not view then
-        view = buildView(name)
-        page.views[name] = view
+    -- Last, since moving on from a module with labels redraws the page.
+    if newOrder and onModulesPage() then
+        moveOn(name)
     end
-    layoutStack(view)
-    page.paneContent:SetHeight(view:GetHeight())
-    page.pane:SetVerticalScroll(0)
 end
 
 -- A row of the list: the module's checkbox and its name, white while it's on and grey while it's
@@ -1135,7 +1132,7 @@ local function newListRow(name)
     text:SetJustifyH("LEFT")
     text:SetWordWrap(false)
     text:SetText(module.title or name)
-    local mark = newMark(row, text, LIST_WIDTH - 26, name)
+    local mark = newMark(row, text, LIST_WIDTH - 26, name, module)
     bind(name, function()
         text:SetFontObject(module.db.enabled and "GameFontHighlight" or "GameFontDisable")
         mark()
@@ -1511,10 +1508,10 @@ end
 
 -- Puts the version last seen back to the last release, so the Modules page marks what a player
 -- updating from it would see, and opens it the way it would open for them: on the first module
--- with a marked option. The marks go once the page is left, as they do after an update.
+-- with a marked option. A module's marks go once it's been clicked, as they do after an update.
 local function resetSeen()
     ns.db.seenVersion = lastRelease()
-    seen = false
+    wipe(ns.db.seenModules)
     markNew()
     if page then
         selected = nil

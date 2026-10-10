@@ -28,10 +28,10 @@ ns.changelog = {
                     .. "only the modules whose name or description has what you type, under "
                     .. "their categories. Clear it to see every module again." },
                 { L.CHANGELOG_SETTINGS, "The Modules page marks new modules, and new or changed "
-                    .. "options of other modules, with Blizzard's NEW label until you've seen the "
-                    .. "page. It opens on the first module with a marked option. Show Tags on the "
-                    .. "Debug page marks everything new, changed, or both since the last release, "
-                    .. "to check how they look." },
+                    .. "options of other modules and those modules in the list, with Blizzard's "
+                    .. "NEW label until you've clicked the module. It opens on the first module "
+                    .. "with a marked option. Show Tags on the Debug page marks everything new or "
+                    .. "changed since the last release, to check how they look." },
                 { L.CHANGELOG_SETTINGS, "The Debug page has four new buttons: Reset Seen "
                     .. "Version shows the Modules page as a player updating from the last release "
                     .. "sees it, Copy Debug Info gives one line for a bug report, Print Module "

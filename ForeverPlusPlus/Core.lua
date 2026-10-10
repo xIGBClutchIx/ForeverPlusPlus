@@ -368,13 +368,17 @@ function ns.Start()
     ForeverPlusPlusDB = type(ForeverPlusPlusDB) == "table" and ForeverPlusPlusDB or {}
     ns.db = ForeverPlusPlusDB
     ns.db.modules = ns.db.modules or {}
-    -- The last version whose Modules page the player has seen; Settings.lua marks modules added
-    -- after it as new. A fresh install has nothing to catch up on; saved settings from before this
-    -- was kept have seen none of them.
+    -- The last version whose Modules page the player has seen all of, and the version each module
+    -- clicked since was seen in; Settings.lua marks what's added or changed after them as new. A
+    -- fresh install has nothing to catch up on; saved settings from before this was kept have
+    -- seen none of them.
     local get = (C_AddOns and C_AddOns.GetAddOnMetadata) or GetAddOnMetadata
     ns.version = get and get(addonName, "Version") or ""
     if type(ns.db.seenVersion) ~= "string" then
         ns.db.seenVersion = next(ns.db.modules) == nil and ns.version or "0"
+    end
+    if type(ns.db.seenModules) ~= "table" then
+        ns.db.seenModules = {}
     end
     for name in pairs(ns.db.modules) do
         if not ns.modules[name] then
