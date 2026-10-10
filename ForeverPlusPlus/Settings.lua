@@ -1227,7 +1227,8 @@ end
 
 -- Lays out the modules the search shows, keeps the selection on one of them (the first, when it
 -- hides the selected one), and lays out the selected module's rows.
-local function relayout()
+-- `reveal` scrolls the first option the search finds into sight (see markFound).
+local function relayout(reveal)
     if not page then
         return
     end
@@ -1249,7 +1250,7 @@ local function relayout()
     elseif page.views[selected] then
         layoutStack(page.views[selected])
         page.paneContent:SetHeight(page.views[selected]:GetHeight())
-        markFound(page.views[selected])
+        markFound(page.views[selected], reveal)
     end
 end
 
@@ -1289,10 +1290,7 @@ local function addSearchBox(frame, anchor)
         local text = self:GetText():match("^%s*(.-)%s*$")
         filter = text ~= "" and strlower(text) or nil
         filterText = text
-        relayout()
-        if selected and page.views[selected] then
-            markFound(page.views[selected], true)
-        end
+        relayout(true)
     end)
     return box
 end
