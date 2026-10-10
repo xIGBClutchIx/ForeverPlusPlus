@@ -80,7 +80,8 @@ ns.changelog = {
                     .. "and the pet pane keeps your pet's level and loyalty. Your pet's tab also "
                     .. "comes and goes with your pet while another tab is open, and a tab you "
                     .. "can't use yet (no titles, no pet) says why when you point at it. The side "
-                    .. "tabs close up when all three show, so the last one stays on the window." },
+                    .. "tabs sit as close together as Blizzard's, and get a little smaller when "
+                    .. "needed, so the last one stays on the window." },
             } },
         },
     },

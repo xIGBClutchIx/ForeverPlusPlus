@@ -27,9 +27,8 @@ module.options = {
 
 local ADDON = "Blizzard_UIPanels_Game"
 local STATS = 1 -- Blizzard's PAPERDOLL_SIDEBARS index for the stats; every other one gets a side tab
-local GAP = 10 -- between Blizzard's tabs and ours, when there's room
-local SPACING = 2 -- between side tabs, as Blizzard spaces its own
-local BOTTOM = 4 -- kept clear above the bottom of the window
+local SPACING = 2 -- between side tabs, ours included, as Blizzard spaces its own
+local BOTTOM = 6 -- kept clear above the bottom of the window
 local LEVEL_TOP = 8 -- from the top of the right pane to the pet's level line
 
 local started
@@ -165,22 +164,15 @@ local function tooltipFor(info, tab)
     end
 end
 
--- The gap above our tabs and their scale, so the last one ends inside the window. Blizzard's own
--- six tabs fill most of its 484 high side, so with all three of ours (a pet) the full gap may not
--- fit: it shrinks to Blizzard's spacing first, and only then do our tabs get smaller.
+-- The scale for our tabs, so the last one ends inside the window. Blizzard's own six tabs fill
+-- most of its 484 high side, so ours get smaller when they wouldn't fit at full size.
 local function fit(frame, last, count, height)
     local bottom, lastBottom = frame:GetBottom(), last and last:GetBottom()
     if count == 0 or height <= 0 or not (bottom and lastBottom) then
-        return GAP, 1
-    end
-    local room = lastBottom - bottom - BOTTOM - count * height - (count - 1) * SPACING
-    if room >= GAP then
-        return GAP, 1
-    elseif room >= SPACING then
-        return room, 1
+        return 1
     end
     local scale = (lastBottom - bottom - BOTTOM - count * SPACING) / (count * height)
-    return SPACING, scale > 0 and scale or 1
+    return scale < 1 and scale > 0 and scale or 1
 end
 
 local function refreshTabs()
@@ -204,7 +196,7 @@ local function refreshTabs()
             count, height = count + 1, tab:GetHeight()
         end
     end
-    local gap, scale = fit(frame, last, count, height)
+    local scale = fit(frame, last, count, height)
 
     local above = last
     local ownSelected
@@ -215,8 +207,8 @@ local function refreshTabs()
             -- A tab's offsets are in its own scale, so they're divided by it to stay the same gap.
             tab:SetScale(scale)
             tab:ClearAllPoints()
-            tab:SetPoint("TOPLEFT", above, "BOTTOMLEFT", 0, -gap / scale)
-            above, gap = tab, SPACING
+            tab:SetPoint("TOPLEFT", above, "BOTTOMLEFT", 0, -SPACING / scale)
+            above = tab
             local bar = frameOf(index)
             local checked = onPaperDoll and bar and bar:IsShown() or false
             ownSelected = ownSelected or checked
