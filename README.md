@@ -51,7 +51,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Commands | Adds short slash commands, each with its own checkbox: `/way [zone] x y` puts the game's own map pin on a spot and tracks it (`/way 45.2 67.8` in your zone, `/way Elwynn Forest 45 67`, or `/way clear`), `/rl` reloads the UI, and `/clear` empties the chat window you type it in. A command another addon already has, like TomTom's `/way`, is left to that addon. `/fpp` is always there. On by default. |
 | Tooltips | Colors unit and item tooltips by class, reaction, or quality, colors the Horde or Alliance line red or blue, and adds player titles and who a unit is targeting. |
 | **Chat** | |
-| Chat Copy | Adds a button beside the chat window that opens the chat in its colors, already selected, so you can copy it as plain text with Ctrl+C. A slider sets how many lines. |
+| Chat Copy | Adds a button beside the chat window that opens the chat in its colors, already selected, so you can copy it as plain text with Ctrl+C. A slider sets how many lines. Its Click Timestamps option (off by default) lets you click a chat line's timestamp to copy that line. |
 | Short Channel Names | Shows chat channels as [1], [G], or [1. G] instead of [1. General], as number and letter ([3. T]) by default. Off by default. |
 | Chat Font | Draws the chat windows in another of the game's fonts (Friz Quadrata, Arial Narrow, Skurri, or Morpheus), keeping their size, and optionally the chat input box too. Unavailable on Korean, Chinese, and Russian clients, whose chat font needs fallbacks. |
 | Persistent Chat | Keeps chat text on screen instead of fading it out after a while. |

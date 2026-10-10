@@ -113,6 +113,8 @@
     "UIErrorsFrame",
     "NUM_CHAT_WINDOWS",
     "SELECTED_CHAT_FRAME",
+    "ChatFrameUtil",
+    "CHAT_TIMESTAMP_FORMAT",
     "ChatFrame1",
     "ITEM_QUALITY_COLORS",
     "ChatFrameMenuButton",

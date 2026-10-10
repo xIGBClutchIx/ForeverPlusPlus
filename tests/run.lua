@@ -197,6 +197,17 @@ eq(Chat.ColoredOffset(colored, 3), 20, "colored offset after a code")
 eq(Chat.ColoredOffset(colored, 5), 25, "colored offset after an escaped pipe")
 eq(Chat.ColoredOffset(colored, 6), 26, "colored offset end, before the last code")
 
+-- Chat.TimestampPattern
+local function stamp(format, line)
+    local _, finish = line:find(Chat.TimestampPattern(format))
+    return finish and line:sub(1, finish)
+end
+eq(stamp("%I:%M ", "09:41 [Bob]: hi"), "09:41 ", "timestamp hours and minutes")
+eq(stamp("[%H:%M:%S] ", "[21:05:09] hi"), "[21:05:09] ", "timestamp in brackets")
+eq(stamp("%I:%M %p ", "9:41 PM hi"), "9:41 PM ", "timestamp with AM or PM")
+eq(stamp("%I:%M ", "|Haddon:x|h09:41 |h hi"), nil, "timestamp not inside a link")
+eq(stamp("%H:%M ", "[Bob]: 12:30 tonight"), nil, "timestamp only at the start")
+
 -- TalentPlan ------------------------------------------------------------------------------------
 
 local Plan = ns.TalentPlan
