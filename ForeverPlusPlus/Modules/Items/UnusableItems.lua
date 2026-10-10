@@ -76,6 +76,7 @@ local function tooltipUnusable(link)
 end
 
 local results = {} -- itemID -> true (can't use) or false, until the player changes
+local waiting = {} -- itemID -> true while the game has no tooltip for it yet
 
 ---Whether an item link is one the player can't use. False for no item, or one not loaded yet.
 local function unusable(link)
@@ -90,6 +91,9 @@ local function unusable(link)
     if result == nil then
         result = tooltipUnusable(link)
         results[itemID] = result
+        if result == nil then
+            waiting[itemID] = true
+        end
     end
     return result or false
 end
@@ -266,6 +270,14 @@ local function onPlayerChanged()
     refreshSoon()
 end
 
+-- Only items we couldn't answer for yet are worth another look; this fires for every item.
+local function onItemInfo(_, itemID)
+    if itemID and waiting[itemID] then
+        waiting[itemID] = nil
+        refreshSoon()
+    end
+end
+
 local function hookGlobal(name, fn)
     if type(_G[name]) == "function" then
         module:Hook(name, fn)
@@ -277,7 +289,7 @@ function module:OnEnable()
     hookGlobal("MerchantFrame_UpdateBuybackInfo", clearMerchant)
     hookBags()
     hookBank()
-    self:On("GET_ITEM_INFO_RECEIVED", refreshSoon) -- items without a tooltip yet weren't kept
+    self:On("GET_ITEM_INFO_RECEIVED", onItemInfo) -- items without a tooltip yet weren't kept
     self:On("PLAYER_LEVEL_UP", onPlayerChanged)
     self:On("SKILL_LINES_CHANGED", onPlayerChanged)
     self:On("LEARNED_SPELL_IN_SKILL_LINE", onPlayerChanged)
@@ -290,6 +302,7 @@ function module:OnDisable()
         refreshTimer = nil
     end
     wipe(results) -- you may level while it's off
+    wipe(waiting)
     clearTints()
 end
 
