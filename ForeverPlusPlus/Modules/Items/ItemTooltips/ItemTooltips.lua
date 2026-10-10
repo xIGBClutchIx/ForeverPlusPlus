@@ -43,6 +43,37 @@ local module = ns.NewModule("ItemTooltips", L.ITEMTOOLTIPS_DESC, {
 })
 module.title = L.ITEMTOOLTIPS_TITLE
 module.category = "items"
+
+-- Before 0.8.0, Sell Price, Item Count, and Auction Prices were modules of their own. Item
+-- Tooltips is on if any of them was, and each keeps its own checkbox, options, and data.
+ns.Migrate(function(saved)
+    local sell, count, auction = saved.SellPrice, saved.ItemCount, saved.AuctionPrices
+    if not (sell or count or auction) then
+        return
+    end
+    local db = saved.ItemTooltips or {}
+    saved.ItemTooltips = db
+    db.enabled = false
+    -- The price options are shared now; Sell Price's win, since it's the line most players see.
+    for _, name in ipairs({ "AuctionPrices", "ItemCount", "SellPrice" }) do
+        local old = saved[name]
+        if old then
+            ns.MoveSettings(old, db, { "mode", "align" })
+            db.enabled = db.enabled or old.enabled ~= false
+        end
+    end
+    if sell then
+        ns.MoveSettings(sell, db, { sellPrice = "enabled", sellPriceColor = "color" })
+    end
+    if count then
+        ns.MoveSettings(count, db, { itemCount = "enabled", "bank", "labels", "banks" })
+    end
+    if auction then
+        ns.MoveSettings(auction, db, { auction = "enabled", auctionColor = "color", "scanAge",
+            "scanAgeColor", "scanAgeRedHours", "crafting", "scanOnOpen", "chat", "vendor", "houses" })
+    end
+    saved.SellPrice, saved.ItemCount, saved.AuctionPrices = nil, nil, nil
+end)
 module.internal = {}
 local internal = module.internal
 

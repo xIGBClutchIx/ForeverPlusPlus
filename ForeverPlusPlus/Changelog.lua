@@ -81,17 +81,16 @@ ns.changelog = {
             { L.CHANGELOG_CHANGED, {
                 { L.ITEMTOOLTIPS_TITLE, "Sell Price, Auction Prices, and Item Count are now one "
                     .. "module, Item Tooltips, in Items, with a checkbox for each. Price For and "
-                    .. "Alignment are shared by all its lines, so they always line up. Sell Price "
-                    .. "and Auction Prices still start on and Item Count off. Its settings start "
-                    .. "from their defaults, the auction house is scanned again on your next "
-                    .. "visit, and each character's bank is counted again when you open it." },
+                    .. "Alignment are shared by all its lines, so they always line up. Your "
+                    .. "choices, auction prices, and bank counts come along; Sell Price's Price "
+                    .. "For and Alignment win if they differed." },
                 { L.ITEMTOOLTIPS_TITLE, "Crafting Costs shows Estimated Profit, after the "
                     .. "auction house's 5% cut, and, at the top, how old the oldest auction "
                     .. "price in the totals is." },
                 { L.WORLDMAP_TITLE, "Points of Interest, Zone Info, Unexplored Areas, and "
                     .. "Coordinates are now one World Map module, with a section for each in its "
-                    .. "options and an Enabled checkbox at the top of each section. Their settings "
-                    .. "start over at their defaults." },
+                    .. "options and an Enabled checkbox at the top of each section. Your choices, "
+                    .. "learned flight points, and ley lines come along." },
                 { L.CLASSCOLORS_TITLE, "New Friends and Who List option (on by default) shows "
                     .. "online friends' names in the friends list and names in the who list in "
                     .. "their class color." },
@@ -107,7 +106,9 @@ ns.changelog = {
                 { L.ERRORCATCHER_TITLE, "Its button is now the Minimap Button module, where a "
                     .. "click opens settings and a Shift-right-click shows the errors. Turn that "
                     .. "module off for no button. Its Clear Key option moved there too: "
-                    .. "Ctrl-right-click still clears this session's errors." },
+                    .. "Ctrl-right-click still clears this session's errors. If you had turned "
+                    .. "Error Catcher's button off, the Minimap Button goes in the addon "
+                    .. "compartment instead." },
                 { L.CHANGELOG_SETTINGS, "Clutch's Default is now Developer's Defaults, and the "
                     .. "welcome page's Defaults button is now Recommended Defaults, matching the "
                     .. "Defaults popup on the Modules and Debug pages." },
@@ -125,7 +126,7 @@ ns.changelog = {
                 { L.CHARACTERFRAME_TITLE, "Character Frame Enhancements is now Character "
                     .. "Window, so its name fits the Modules list, and Durability Bars is now its "
                     .. "Durability Bars option instead of a module of its own (always, only when "
-                    .. "worn, below 50% or 25%, or off). It still starts on, showing bars always." },
+                    .. "worn, below 50% or 25%, or off), set to what you had." },
                 { L.AUTOSCREENSHOT_TITLE, "Now listed under Automation instead of Interface." },
                 { L.AUTOSCREENSHOT_TITLE, "New Played Time on Level Up option (off by default) "
                     .. "shows your /played time in chat when you level up, so it's in the "

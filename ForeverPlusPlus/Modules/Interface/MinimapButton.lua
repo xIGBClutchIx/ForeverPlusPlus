@@ -27,6 +27,27 @@ module.title = L.MINIMAPBUTTON_TITLE
 module.category = "interface"
 module.added = "0.8.0"
 
+-- Before 0.8.0 the button was Error Catcher's, with its Minimap Button checkbox, Clear Key, and the
+-- button's place. A player who had turned that button off keeps it off the minimap.
+ns.Migrate(function(saved)
+    local old = saved.ErrorCatcher
+    if not (old and (old.minimap ~= nil or old.clearModifier ~= nil)) then
+        return
+    end
+    local db = saved.MinimapButton or {}
+    saved.MinimapButton = db
+    ns.MoveSettings(old, db, { "clearModifier" })
+    if old.minimap == false then
+        db.where = "compartment"
+    end
+    if type(old.saved) == "table" and old.saved.angle then
+        db.saved = db.saved or {}
+        db.saved.angle = old.saved.angle
+        old.saved.angle = nil
+    end
+    old.minimap, old.clearModifier = nil, nil
+end)
+
 local button
 local compartment -- our entry in the addon compartment, while it's there
 

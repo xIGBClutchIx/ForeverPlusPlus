@@ -23,6 +23,18 @@ module.category = "interface"
 module.internal = {}
 local internal = module.internal
 
+-- Before 0.8.0, Durability Bars was a module of its own, with a Show dropdown.
+ns.Migrate(function(saved)
+    local old = saved.DurabilityBars
+    if not old then
+        return
+    end
+    local db = saved.CharacterFrame or {}
+    saved.CharacterFrame = db
+    db.durability = old.enabled == false and "off" or old.show
+    saved.DurabilityBars = nil
+end)
+
 module.options = {
     {
         key = "sideTabs", name = L.CHARACTERFRAME_SIDETABS, description = L.CHARACTERFRAME_SIDETABS_DESC,
