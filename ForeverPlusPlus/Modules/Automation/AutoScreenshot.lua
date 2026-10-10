@@ -1,12 +1,14 @@
 -- Auto Screenshot: takes a screenshot when something worth keeping happens: a level up, an
 -- achievement, good loot, a boss kill, and more, each with its own checkbox. The shot waits a
--- moment so Blizzard's toast is on screen, and can leave the interface out.
+-- moment so Blizzard's toast is on screen, and can leave the interface out. It can also ask for
+-- /played on a level up, so the time is in chat (and in the shot).
 local _, ns = ...
 
 local ipairs, pairs, format, tonumber, type = ipairs, pairs, string.format, tonumber, type
 local C_Timer, C_Item, C_EventUtils = C_Timer, C_Item, C_EventUtils
 local Screenshot, InCombatLockdown, UIParent = Screenshot, InCombatLockdown, UIParent
 local GetNumTitles, IsTitleKnown, GetTime = GetNumTitles, IsTitleKnown, GetTime
+local RequestTimePlayed = RequestTimePlayed
 
 local L = ns.L
 local readable = ns.IsReadable
@@ -24,6 +26,7 @@ local module = ns.NewModule("AutoScreenshot", L.AUTOSCREENSHOT_DESC, {
     battleground = false,
     death = false,
     hideUI = false,
+    playedTime = false,
     chat = true,
 })
 module.title = L.AUTOSCREENSHOT_TITLE
@@ -34,6 +37,8 @@ local GENERAL, EVENTS = L.AUTOSCREENSHOT_SECTION_GENERAL, L.AUTOSCREENSHOT_SECTI
 module.options = {
     { key = "hideUI", name = L.AUTOSCREENSHOT_HIDE_UI, description = L.AUTOSCREENSHOT_HIDE_UI_DESC,
         section = GENERAL },
+    { key = "playedTime", name = L.AUTOSCREENSHOT_PLAYED_TIME,
+        description = L.AUTOSCREENSHOT_PLAYED_TIME_DESC, section = GENERAL, added = "0.8.0" },
     ns.ChatOption(L.AUTOSCREENSHOT_CHAT_DESC, GENERAL),
     { key = "levelUp", name = L.AUTOSCREENSHOT_LEVEL_UP, description = L.AUTOSCREENSHOT_LEVEL_UP_DESC,
         section = EVENTS },
@@ -264,6 +269,12 @@ local HANDLERS = {
     end },
     death = { PLAYER_DEAD = function()
         request(L.AUTOSCREENSHOT_DEATH)
+    end },
+    -- Blizzard's chat prints the answer (TIME_PLAYED_MSG), well before the shot is taken.
+    playedTime = { PLAYER_LEVEL_UP = function()
+        if RequestTimePlayed then
+            RequestTimePlayed()
+        end
     end },
 }
 
