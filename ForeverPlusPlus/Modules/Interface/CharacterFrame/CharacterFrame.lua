@@ -24,7 +24,10 @@ module.internal = {}
 local internal = module.internal
 
 module.options = {
-    { key = "sideTabs", name = L.CHARACTERFRAME_SIDETABS, description = L.CHARACTERFRAME_SIDETABS_DESC },
+    {
+        key = "sideTabs", name = L.CHARACTERFRAME_SIDETABS, description = L.CHARACTERFRAME_SIDETABS_DESC,
+        changed = "0.8.0", -- the Titles tab
+    },
     { key = "colorTitle", name = L.CHARACTERFRAME_COLORTITLE, description = L.CHARACTERFRAME_COLORTITLE_DESC },
     {
         key = "durability", name = L.CHARACTERFRAME_DURABILITY,

@@ -36,6 +36,7 @@ module.options = {
     {
         key = "tintStrength", name = L.UNEXPLORED_STRENGTH,
         description = L.UNEXPLORED_STRENGTH_DESC, requires = "tint", min = 10, max = 100, step = 10, format = "%d%%",
+        changed = "0.8.0", -- named Tint Strength
     },
     {
         key = "tintColor", name = L.UNEXPLORED_COLOR, description = L.UNEXPLORED_COLOR_DESC,

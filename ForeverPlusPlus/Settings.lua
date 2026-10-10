@@ -218,13 +218,13 @@ end
 local TAG_PADDING = 14 -- the room a label takes after its text, besides its own text
 
 -- An update that keeps a NEW or CHANGED label just after `text`, a font string, while `key` (a
--- module's name, or one of its options) is marked: the text at most `room` wide, less the label's
--- room while it shows. The label is made the first time it's needed, so it can come and go with
--- Show Tags.
-local function newMark(parent, text, room, key)
+-- module's name, or one of its options) is marked, or `other` (the slider in an option's row): the
+-- text at most `room` wide, less the label's room while it shows. The label is made the first time
+-- it's needed, so it can come and go with Show Tags.
+local function newMark(parent, text, room, key, other)
     local label, newText
     return function()
-        local kind = newRows[key]
+        local kind = newRows[key] or (other and newRows[other])
         if kind and not label and canLabel() then
             label = CreateFrame("Frame", nil, parent, "NewFeatureLabelTemplate")
             newText = label.Label and label.Label:GetText() -- Blizzard's own NEW, in the game's language
@@ -878,14 +878,15 @@ local function addOptionRow(view, module, option, byKey, done)
     local indent = parent and INDENT or 0
     local row, label = addRow(view, option.name, indent, on)
     local updates = view.updates
-    -- The name wraps narrower while it's marked NEW, so the row's height follows it.
-    local mark = newMark(row, label, CONTROL_LEFT - 8 - indent, option)
+    local pair = option.slider and byKey[option.slider]
+    -- The name wraps narrower while it's marked NEW, so the row's height follows it. A slider in
+    -- the row has no name of its own here, so its mark goes on the row's.
+    local mark = newMark(row, label, CONTROL_LEFT - 8 - indent, option, pair)
     updates[#updates + 1] = function()
         mark()
         row:SetHeight(max(ROW_HEIGHT, label:GetStringHeight() + 8))
     end
     local room = view:GetWidth() - CONTROL_LEFT
-    local pair = option.slider and byKey[option.slider]
     if pair and pair.min then
         -- A checkbox and its slider in one row, the slider greyed while the checkbox is off.
         done[pair.key] = true

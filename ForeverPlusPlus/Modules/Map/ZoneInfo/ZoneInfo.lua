@@ -96,15 +96,15 @@ module.options = {
     },
     {
         key = "herbs", name = L.ZONEINFO_HERBS, description = L.ZONEINFO_HERBS_DESC,
-        choices = SHOW_KNOWN, section = PROFESSIONS,
+        choices = SHOW_KNOWN, section = PROFESSIONS, changed = "0.8.0", -- clearer description
     },
     {
         key = "ore", name = L.ZONEINFO_ORE, description = L.ZONEINFO_ORE_DESC,
-        choices = SHOW_KNOWN, section = PROFESSIONS,
+        choices = SHOW_KNOWN, section = PROFESSIONS, changed = "0.8.0", -- clearer description
     },
     {
         key = "skinning", name = L.ZONEINFO_SKINNING, description = L.ZONEINFO_SKINNING_DESC,
-        choices = SHOW_KNOWN, section = PROFESSIONS,
+        choices = SHOW_KNOWN, section = PROFESSIONS, changed = "0.8.0", -- clearer description
     },
     {
         key = "fishing", name = L.ZONEINFO_FISHING, description = L.ZONEINFO_FISHING_DESC,

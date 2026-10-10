@@ -33,6 +33,7 @@ module.options = {
     { key = "bank", name = L.ITEMCOUNT_BANK, description = L.ITEMCOUNT_BANK_DESC },
     {
         key = "labels", name = L.ITEMCOUNT_LABELS, description = L.ITEMCOUNT_LABELS_DESC,
+        changed = "0.8.0", -- named Bag and Bank Labels
         choices = { { "icons", L.ITEMCOUNT_LABELS_ICONS }, { "words", L.ITEMCOUNT_LABELS_WORDS } },
     },
     {
