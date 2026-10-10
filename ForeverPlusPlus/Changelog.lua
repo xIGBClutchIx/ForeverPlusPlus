@@ -55,6 +55,10 @@ ns.changelog = {
                     .. "button on the minimap, in the addon compartment, or both. Click it to open "
                     .. "Forever++ settings; while Error Catcher is on, right-click it to see the "
                     .. "errors, and it shows how many this session caught." },
+                { L.XPBARTEXT_TITLE, "New, off by default, in Interface: the experience bar "
+                    .. "shows its numbers all the time, with the percent, your rested XP, and the "
+                    .. "XP of the quests in your log that are ready to turn in (or all of them), "
+                    .. "in green once turning them in would level you." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.AUCTIONPRICES_TITLE, "Crafting Costs shows Estimated Profit, after the "
