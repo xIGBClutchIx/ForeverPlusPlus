@@ -12,6 +12,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Settings**: the Modules page marks new modules, and new or changed options of other modules, with Blizzard's NEW label until you've seen the page. It opens on the first module with a marked option. Show New Tags on the Debug page marks everything new since the last release, to check how they look.
 - **Auto Quest** (new, off by default, in Automation): accepts quests and turns in finished ones as you talk to quest givers, one by one down a quest giver's list. It never picks a reward when there's a choice. Accepting and turning in have their own checkboxes, repeatable and shared quests can be left out, and holding Shift (or Ctrl, Alt, or no key) lets you do it yourself.
 - **Auto Weapon Buff** (new, off by default, in Automation): using a sharpening stone, weightstone, oil, poison, or fishing lure puts it straight onto your weapon, without clicking the weapon. Main hand first; the off hand when only it can take it, or when the main hand already has a buff and the off hand doesn't (or its buff runs out sooner).
+- **Minimap Button** (new, on by default, in Interface): Forever++'s own button on the minimap, in the addon compartment, or both. Click it to open Forever++ settings; while Error Catcher is on, right-click it to see the errors, and it shows how many this session caught.
 
 ### Changed
 
@@ -19,6 +20,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Class Colors**: new Friends and Who List option (on by default) shows online friends' names in the friends list and names in the who list in their class color.
 - **Chat Copy**: the window shows chat lines in their chat colors, with names in their class colors and links in theirs, the way they look in chat. Copying still gives plain text.
 - **Error Catcher**: new Button option puts its button on the minimap, in the addon compartment, both, or neither. The minimap is still the default.
+- **Error Catcher**: its button is now the Minimap Button module, where a click opens settings and a right-click shows the errors. Turn that module off for no button. The Clear Key option is gone; the window's Clear button still clears saved errors.
 - **Settings**: Clutch's Default is now Developer's Defaults, and the welcome page's Defaults button is now Recommended Defaults, matching the Defaults popup on the Modules and Debug pages.
 - **Settings**: the Modules page lists every module on the left, each with its checkbox, and shows the one you click on the right: its title with an Enabled checkbox, what it does, and its options and buttons. No more gears or options opening inside the list. Modules with many options group them under headers, and options that only matter while another is on sit under it: Player Nameplates, NPC Nameplates, Zone Info, Points of Interest, Quest Tracker, Profession Tooltips, and Auction Prices.
 - **Points of Interest**: new Ley Lines option shows Skyborne ley lines and elemental convergences on the map. A spot is saved when a Skyborne gets the 15-minute buff from Read Ley Line or Skysight there, and every character on the account sees it. Shown to Skyborne for their own kind by default, or to everyone, or to no one.
@@ -26,6 +28,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Fixed
 
 - **Character Frame Enhancements**: works with Forever's new Titles tab. Titles gets its own side tab, the Pet tab opens your pet's stats again instead of Titles, the titles list starts at the top and runs further down like the stats, and the pet pane keeps your pet's level and loyalty. Your pet's tab also comes and goes with your pet while another tab is open, and a tab you can't use yet (no titles, no pet) says why when you point at it. The side tabs sit as close together as Blizzard's, and get a little smaller when needed, so the last one stays on the window.
+- **Console Variables**: an empty list says why (nothing matches the search, or nothing is changed), and a row stays highlighted with its tooltip while you point at its value box or Default button.
 - **Error Catcher**: the Test Error button on the Debug page works with Error Catcher off too, to check Blizzard's error window.
 
 ## 0.7.0 (2026-10-02)
