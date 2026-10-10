@@ -82,6 +82,8 @@ ns.changelog = {
                     .. "can't use yet (no titles, no pet) says why when you point at it. The side "
                     .. "tabs sit as close together as Blizzard's, and get a little smaller when "
                     .. "needed, so the last one stays on the window." },
+                { L.ERRORCATCHER_TITLE, "The Test Error button on the Debug page works with "
+                    .. "Error Catcher off too, to check Blizzard's error window." },
             } },
         },
     },

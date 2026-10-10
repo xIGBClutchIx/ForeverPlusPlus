@@ -26,6 +26,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Fixed
 
 - **Character Frame Enhancements**: works with Forever's new Titles tab. Titles gets its own side tab, the Pet tab opens your pet's stats again instead of Titles, the titles list starts at the top and runs further down like the stats, and the pet pane keeps your pet's level and loyalty. Your pet's tab also comes and goes with your pet while another tab is open, and a tab you can't use yet (no titles, no pet) says why when you point at it. The side tabs sit as close together as Blizzard's, and get a little smaller when needed, so the last one stays on the window.
+- **Error Catcher**: the Test Error button on the Debug page works with Error Catcher off too, to check Blizzard's error window.
 
 ## 0.7.0 (2026-10-02)
 
