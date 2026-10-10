@@ -37,6 +37,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | **Interface** | |
 | Hide Beta Feedback | Hides the beta's "Press F6 to submit an issue" tooltip line, bug report button, and quest window feedback buttons. Off by default, and only on beta and PTR clients. |
 | AddOns List | Shows the AddOns list without category headers, enabled addons first, each in name order. Options for ungrouping disabled addons and searching notes. On by default. |
+| Buff Timers | Shows the time left under your buff and debuff icons as a clock, like 1:23, instead of rounded minutes like 2 m: under 10 minutes, under an hour (the default), or always. When the game hides an aura's time in combat, Blizzard's own timer shows. Off by default. |
 | Spell Ranks | Marks the spells on your action bars that have a higher rank you already know, with a warning badge or a red tint over the button, and says the best rank in the spell's tooltip. `/fpp ranks` lists them. |
 | Recipe Colors | Colors recipes in the professions window by your chance of a skill-up: orange, yellow, green, or gray, with the row's highlight to match. |
 | Combat Alert | Floats a red "Entering Combat" or green "Leaving Combat" line up and away from the middle of the screen, each with its own checkbox, plus how long it stays (move and resize it in Edit Mode). Off by default. |

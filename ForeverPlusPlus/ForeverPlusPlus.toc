@@ -68,6 +68,7 @@ Modules\Automation\FishingCast.lua
 Modules\Automation\AutoWeaponBuff.lua
 Modules\Automation\AutoScreenshot.lua
 Modules\Interface\SpellRanks.lua
+Modules\Interface\BuffTimers.lua
 Modules\Interface\RecipeColors.lua
 Modules\Interface\CombatAlert.lua
 Modules\Interface\Framerate.lua

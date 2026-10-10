@@ -71,6 +71,17 @@ L.HIDEFEEDBACK_BUTTON_DESC = "Hide the floating bug report button."
 L.HIDEFEEDBACK_QUEST = "Hide Quest Feedback"
 L.HIDEFEEDBACK_QUEST_DESC = "Hide the feedback buttons on quest windows."
 
+-- BuffTimers
+L.BUFFTIMERS_TITLE = "Buff Timers"
+L.BUFFTIMERS_DESC = "Show the time left on your buffs and debuffs as a clock, like 1:23, instead "
+    .. "of rounded minutes like 2 m. In combat the game may hide aura times from addons; then "
+    .. "Blizzard's own timer shows."
+L.BUFFTIMERS_LIMIT = "Show Clock"
+L.BUFFTIMERS_LIMIT_DESC = "Which auras get a clock. Longer ones keep Blizzard's timer."
+L.BUFFTIMERS_LIMIT_10M = "Under 10 Minutes"
+L.BUFFTIMERS_LIMIT_1H = "Under 1 Hour"
+L.BUFFTIMERS_LIMIT_ALL = "Always"
+
 -- SpellRanks
 L.SPELLRANKS_TITLE = "Spell Ranks"
 L.SPELLRANKS_DESC = "Mark the spells on your action bars that have a higher rank you already "
