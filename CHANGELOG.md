@@ -21,7 +21,8 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Changed
 
-- **Auction Prices**: Crafting Costs shows Estimated Profit, after the auction house's 5% cut, and, at the top, how old the oldest auction price in the totals is.
+- **Item Tooltips**: Sell Price, Auction Prices, and Item Count are now one module, Item Tooltips, in Items, with a checkbox for each. Price For and Alignment are shared by all its lines, so they always line up. Sell Price and Auction Prices still start on and Item Count off. Its settings start from their defaults, the auction house is scanned again on your next visit, and each character's bank is counted again when you open it.
+- **Item Tooltips**: Crafting Costs shows Estimated Profit, after the auction house's 5% cut, and, at the top, how old the oldest auction price in the totals is.
 - **Class Colors**: new Friends and Who List option (on by default) shows online friends' names in the friends list and names in the who list in their class color.
 - **Chat Copy**: the window shows chat lines in their chat colors, with names in their class colors and links in theirs, the way they look in chat. Copying still gives plain text.
 - **Chat Copy**: new Click Timestamps option (off by default): click a chat line's timestamp to copy that line. Needs the game's chat timestamps turned on.
@@ -29,12 +30,12 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Error Catcher**: its button is now the Minimap Button module, where a click opens settings and a right-click shows the errors. Turn that module off for no button. Its Clear Key option moved there too: Ctrl-right-click still clears this session's errors.
 - **Settings**: Clutch's Default is now Developer's Defaults, and the welcome page's Defaults button is now Recommended Defaults, matching the Defaults popup on the Modules and Debug pages.
 - **Settings**: Forever++ in the AddOns list, `/fpp`, and the minimap button open the Modules page. The welcome page is now the About page, at the bottom of the list, with the version, links, and commands, and the same Defaults button at the top right as the Modules page.
-- **Settings**: the Modules page lists every module on the left, each with its checkbox, and shows the one you click on the right: its title, what it does, an Enabled checkbox, and its options and buttons. No more gears or options opening inside the list. Modules with many options group them under headers, and options that only matter while another is on sit under it: Player Nameplates, NPC Nameplates, Zone Info, Points of Interest, Quest Tracker, Profession Tooltips, and Auction Prices.
+- **Settings**: the Modules page lists every module on the left, each with its checkbox, and shows the one you click on the right: its title, what it does, an Enabled checkbox, and its options and buttons. No more gears or options opening inside the list. Modules with many options group them under headers, and options that only matter while another is on sit under it: Player Nameplates, NPC Nameplates, Zone Info, Points of Interest, Quest Tracker, Profession Tooltips, and Item Tooltips.
 - **Character Window**: Character Frame Enhancements is now Character Window, so its name fits the Modules list, and Durability Bars is now its Durability Bars option instead of a module of its own (always, only when worn, below 50% or 25%, or off). It still starts on, showing bars always.
 - **Auto Screenshot**: now listed under Automation instead of Interface.
 - **Auto Screenshot**: new Played Time on Level Up option (off by default) shows your `/played` time in chat when you level up, so it's in the screenshot.
 - **Auto Screenshot**: new Your Own Screenshots option (off by default), under Hide Interface, hides the interface for the screenshots you take with the Screenshot key (Print Screen) too, not only Auto Screenshot's. Not in combat.
-- **Settings**: clearer names and descriptions for a few options: Auto Quest's Skip Key, Item Count's Bag and Bank Labels, Unexplored Areas' Tint Strength, and Zone Info's Herbs, Ore, and Skinning.
+- **Settings**: clearer names and descriptions for a few options: Auto Quest's Skip Key, Item Tooltips' Bag and Bank Labels, Unexplored Areas' Tint Strength, and Zone Info's Herbs, Ore, and Skinning.
 - **Points of Interest**: new Ley Lines option shows Skyborne ley lines and elemental convergences on the map. A spot is saved when a Skyborne gets the 15-minute buff from Read Ley Line or Skysight there, and every character on the account sees it. Shown to Skyborne for their own kind by default, or to everyone, or to no one.
 
 ### Fixed

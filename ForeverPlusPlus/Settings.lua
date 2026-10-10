@@ -852,17 +852,27 @@ end
 -- in its row (`slider`), and `done` for those already drawn.
 local function addOptionRow(view, module, option, byKey, done)
     local parent = option.requires and byKey[option.requires]
+    -- Under an option that is itself under another, it's on only while all of them are.
     local function on()
         if not module.db.enabled then
             return false
         end
-        if parent then
-            local value = module.db[parent.key]
-            return value and value ~= "off" and true or false -- a checkbox, or a dropdown
+        local up = parent
+        while up do
+            local value = module.db[up.key]
+            if not value or value == "off" then -- a checkbox, or a dropdown
+                return false
+            end
+            up = up.requires and byKey[up.requires]
         end
         return true
     end
-    local indent = parent and INDENT or 0
+    local depth, up = 0, parent
+    while up do
+        depth = depth + 1
+        up = up.requires and byKey[up.requires]
+    end
+    local indent = depth * INDENT
     local row, label = addRow(view, option.name, indent, on)
     local updates = view.updates
     local pair = option.slider and byKey[option.slider]
