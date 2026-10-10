@@ -620,12 +620,14 @@ local function newFrame()
     if f.SetPortraitToAsset then
         pcall(f.SetPortraitToAsset, f, ns.icon)
         -- Blizzard's portrait is 62 pixels square with its round mask inset 2 left and right and
-        -- 4 at the bottom. Fit the icon's emblem (inside its dark square border) to that circle
-        -- so it sits centered in the ring like Blizzard's portraits, with no border showing.
+        -- 4 at the bottom, so the circle's center is 31 across and 29 down. The icon's emblem is
+        -- about 52 of its 64 pixels wide, centered 32 across and 30 down. Show it 54 pixels wide
+        -- with its center half a pixel left of the circle's, where the ring's opening sits, and
+        -- the icon's dark square border falls outside the circle.
         if f.SetPortraitTexCoord then
-            local edge, perPixel = 0.07, 0.86 / 58
-            pcall(f.SetPortraitTexCoord, f, edge - 2 * perPixel, 1 - edge + 2 * perPixel, edge,
-                1 - edge + 4 * perPixel)
+            local perPixel = 52 / 64 / 54
+            local left, top = 32 / 64 - 30.5 * perPixel, 30.25 / 64 - 29 * perPixel
+            pcall(f.SetPortraitTexCoord, f, left, left + 62 * perPixel, top, top + 62 * perPixel)
         end
     end
     if f.SetTitle then
