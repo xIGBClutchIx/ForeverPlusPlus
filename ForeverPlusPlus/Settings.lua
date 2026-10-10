@@ -13,7 +13,7 @@
 --                    since the player last looked (`added`) is marked NEW, and an option
 --                    changed since then (`changed`) CHANGED
 --     <Tool>         a page a module draws itself (`BuildPage`)
---     Debug          Show New Tags, then options marked `debug = true` and buttons from
+--     Debug          Show Tags, then options marked `debug = true` and buttons from
 --                    `module.debugActions`, for testing
 --     Changelog      the release notes from Changelog.lua
 -- Without subpages (an older Settings API), the Modules page is the only page.
@@ -172,8 +172,9 @@ end
 -- is seen. A version after this one isn't marked yet: what's
 -- tagged for the next release shows once the TOC's version reaches it. Seeing the page saves this
 -- version (ns.db.seenVersion); the labels stay while the player is on it and are gone once they
--- leave. Show New Tags on the Debug page (ns.db.showNewTags) marks everything tagged after the
--- last release in Changelog.lua instead, whatever was seen, and keeps it marked, to check them.
+-- leave. Show Tags on the Debug page (ns.db.showTags: "new", "changed", or "both") marks everything
+-- tagged that way after the last release in Changelog.lua instead, whatever was seen, and keeps it
+-- marked, to check them.
 local newRows = {} -- module name, or option table -> "new" or "changed" while it's marked
 local newOrder -- the modules to mark, once trackNew has run
 local seen -- true once the Modules page has been shown this session
@@ -194,14 +195,20 @@ local function lastRelease()
     return "0"
 end
 
--- A version after the one last seen, and not after this one (still unreleased). With Show New
--- Tags, any version after the last release.
-local function since(version)
+-- Whether Show Tags marks every `kind` ("new" or "changed") tag since the last release.
+local function forced(kind)
+    local tags = ns.db.showTags
+    return tags == "both" or tags == kind
+end
+
+-- A version after the one last seen, and not after this one (still unreleased). With Show Tags
+-- on for `kind`, any version after the last release.
+local function since(version, kind)
     local Text = ns.Text
     if type(version) ~= "string" then
         return false
     end
-    if ns.db.showNewTags then
+    if forced(kind) then
         return Text.NewerVersion(version, lastRelease()) and true or false
     end
     return Text.NewerVersion(version, ns.db.seenVersion) and not Text.NewerVersion(version, ns.version)
@@ -213,7 +220,7 @@ local TAG_PADDING = 14 -- the room a label takes after its text, besides its own
 -- An update that keeps a NEW or CHANGED label just after `text`, a font string, while `key` (a
 -- module's name, or one of its options) is marked: the text at most `room` wide, less the label's
 -- room while it shows. The label is made the first time it's needed, so it can come and go with
--- Show New Tags.
+-- Show Tags.
 local function newMark(parent, text, room, key)
     local label, newText
     return function()
@@ -264,7 +271,7 @@ local function updateSeen()
             ns.db.seenVersion = ns.version
         end
         seen = true
-    elseif seen and next(newRows) and not ns.db.showNewTags then
+    elseif seen and next(newRows) and not ns.db.showTags then
         wipe(newRows)
         if refreshAll then
             refreshAll()
@@ -277,14 +284,14 @@ local function markNew()
     wipe(newRows)
     for _, name in ipairs(newOrder or {}) do
         local module = ns.modules[name]
-        if since(module.added) then
+        if since(module.added, "new") then
             newRows[name] = "new" -- all of it is new, so its options aren't marked
         else
             for _, option in ipairs(module.options or {}) do
                 if not option.debug then
-                    if since(option.added) then
+                    if since(option.added, "new") then
                         newRows[option] = "new"
-                    elseif since(option.changed) then
+                    elseif since(option.changed, "changed") then
                         newRows[option] = "changed"
                     end
                 end
@@ -482,23 +489,39 @@ local function addDebugOptions(category, layout, module)
     end
 end
 
--- Show New Tags: every module and option tagged since the last release marked NEW on the Modules
--- page, and kept marked, to check how they look. Live: the marks are made again and the page
--- redrawn.
-local function addShowNewTags(category)
-    local setting = Settings.RegisterProxySetting(category, "ForeverPlusPlus_ShowNewTags",
-        Settings.VarType.Boolean, L.SETTINGS_SHOW_NEW, false,
-        function() return ns.db.showNewTags and true or false end,
+-- Show Tags: every module and option tagged NEW, CHANGED, or both since the last release marked
+-- on the Modules page, and kept marked, to check how they look. Live: the marks are made again and
+-- the page redrawn.
+local SHOW_TAGS = {
+    { "off", L.SETTINGS_SHOW_TAGS_OFF },
+    { "new", L.SETTINGS_SHOW_TAGS_NEW },
+    { "changed", L.SETTINGS_SHOW_TAGS_CHANGED },
+    { "both", L.SETTINGS_SHOW_TAGS_BOTH },
+}
+
+local function addShowTags(category)
+    if not (Settings.CreateDropdown and Settings.CreateControlTextContainer) then
+        return -- Probe: dropdowns are Mainline's.
+    end
+    local setting = Settings.RegisterProxySetting(category, "ForeverPlusPlus_ShowTags",
+        Settings.VarType.String, L.SETTINGS_SHOW_TAGS, "off",
+        function() return ns.db.showTags or "off" end,
         function(value)
             change(function()
-                ns.db.showNewTags = value or nil
+                ns.db.showTags = value ~= "off" and value or nil
                 markNew()
                 if refreshAll then
                     refreshAll()
                 end
             end)
         end)
-    Settings.CreateCheckbox(category, setting, L.SETTINGS_SHOW_NEW_DESC)
+    Settings.CreateDropdown(category, setting, function()
+        local container = Settings.CreateControlTextContainer()
+        for _, choice in ipairs(SHOW_TAGS) do
+            container:Add(choice[1], choice[2])
+        end
+        return container:GetData()
+    end, L.SETTINGS_SHOW_TAGS_DESC)
 end
 
 -- A module's debug buttons (`module.debugActions`, the same shape as `actions`), after its
@@ -1582,7 +1605,7 @@ function ns.RegisterSettings()
     -- Debug options: Forever++'s own first, then each module's.
     local debugPage, debugLayout = Settings.RegisterVerticalLayoutSubcategory(category, L.DEBUG)
     addHeader(debugLayout, ns.title)
-    addShowNewTags(debugPage)
+    addShowTags(debugPage)
     for _, name in ipairs(order) do
         local module = ns.modules[name]
         if hasOptions(module, true) or module.debugActions then
