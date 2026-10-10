@@ -46,7 +46,7 @@ end
 -- down. It shows its Duration text only with the "buffDurations" CVar on, so we do too.
 local function update(button, timeLeft)
     local limit = LIMITS[module.db.limit]
-    if not (timeLeft and readable(timeLeft) and GetCVarBool("buffDurations")
+    if not (readable(timeLeft) and timeLeft and GetCVarBool("buffDurations")
         and (not limit or timeLeft < limit)) then
         restore(button)
         return
@@ -69,8 +69,10 @@ local function update(button, timeLeft)
 end
 
 -- An aura with no end hides Blizzard's text and stops counting without UpdateDuration.
+-- A secret time left (in combat) leaves Blizzard's own text, as `update` does.
 local function expiration(button)
-    if not button.timeLeft then
+    local timeLeft = button.timeLeft
+    if not readable(timeLeft) or not timeLeft then
         restore(button)
     end
 end
