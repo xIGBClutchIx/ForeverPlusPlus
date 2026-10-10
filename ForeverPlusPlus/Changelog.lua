@@ -47,6 +47,10 @@ ns.changelog = {
                     .. "straight onto your weapon, without clicking the weapon. Main hand first; "
                     .. "the off hand when only it can take it, or when the main hand already has "
                     .. "a buff and the off hand doesn't (or its buff runs out sooner)." },
+                { L.BUFFTIMERS_TITLE, "New, off by default, in Interface: the time left under "
+                    .. "your buff and debuff icons as a clock, like 1:23, instead of rounded "
+                    .. "minutes like 2 m. Choose under 10 minutes, under an hour, or always. When "
+                    .. "the game hides an aura's time in combat, Blizzard's own timer shows." },
                 { L.MINIMAPBUTTON_TITLE, "New, on by default, in Interface: Forever++'s own "
                     .. "button on the minimap, in the addon compartment, or both. Click it to open "
                     .. "Forever++ settings; while Error Catcher is on, right-click it to see the "

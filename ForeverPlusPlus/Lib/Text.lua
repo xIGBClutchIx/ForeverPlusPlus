@@ -40,11 +40,14 @@ function Text.Hours(hours)
     return hours == 1 and L.TEXT_ONE_HOUR or format(L.TEXT_HOURS, hours)
 end
 
----A length of time as a clock: "0:42", "12:05".
+---A length of time as a clock: "0:42", "12:05", and from an hour "1:02:05".
 ---@param seconds number
 ---@return string
 function Text.Clock(seconds)
     seconds = floor(seconds + 0.5)
+    if seconds >= 3600 then
+        return format("%d:%02d:%02d", floor(seconds / 3600), floor(seconds / 60) % 60, seconds % 60)
+    end
     return format("%d:%02d", floor(seconds / 60), seconds % 60)
 end
 
