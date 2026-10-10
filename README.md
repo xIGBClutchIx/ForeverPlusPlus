@@ -123,4 +123,4 @@ mklink /J "<WoW folder>\_classic_beta_\Interface\AddOns\ForeverPlusPlus" "<this 
 7. To add to a module that is made of parts, like World Map, make a part instead: `local part = ns.modules.WorldMap:NewPart({ key, name, description, section }, defaults)` in a file of the module's folder, its options in `part:AddOptions({ ... })`. The part is written like a module (`OnEnable`, `OnDisable`, `OnOptionChanged`, `part:On`, `part:Hook`) and is on while the module and its own checkbox are; its settings share the module's `db`, so their keys must differ from the other parts'.
 8. For a page the module draws itself, give it `module:BuildPage(frame)`; `ns.OpenSettings(module.name)` opens it. `ns.AddCommand(name, usage, description, fn)` adds `/fpp <name>`.
 
-Settings aren't migrated: renaming or dropping an option is fine, and stale saved values are cleared when the addon loads.
+Renaming or dropping an option is fine: stale saved values are cleared when the addon loads. When a release renames or merges a module or setting players chose, move their saved values with `ns.Migrate` (see `AGENTS.md`).

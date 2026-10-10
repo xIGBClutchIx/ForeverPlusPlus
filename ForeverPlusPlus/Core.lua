@@ -203,6 +203,37 @@ local function prune(target, defaults)
     end
 end
 
+-- Moving settings -----------------------------------------------------------------------------
+-- When a release renames or merges a module or setting, a migration moves what the player saved
+-- under the old name to the new one at login, before settings no module has are cleared.
+
+local migrations = {} -- functions run at login, in the order added
+
+---Adds a step that moves saved settings from where an older version kept them. At login, before
+---settings of modules and options that no longer exist are cleared, `fn` gets every module's saved
+---table by module name. It runs at every login, so it must do nothing once there's nothing left
+---to move: clear the old values it moved.
+---@param fn fun(saved: table<string, table>)
+function ns.Migrate(fn)
+    migrations[#migrations + 1] = fn
+end
+
+---Copies saved values from `from` to `to`. `keys` lists them: a plain entry keeps its name, and
+---`new = "old"` renames one. Values `from` doesn't have leave `to` as it is.
+---@param from table
+---@param to table
+---@param keys table
+function ns.MoveSettings(from, to, keys)
+    for new, old in pairs(keys) do
+        if type(new) == "number" then
+            new = old
+        end
+        if from[old] ~= nil then
+            to[new] = from[old]
+        end
+    end
+end
+
 -- Modules -------------------------------------------------------------------------------------
 
 -- Methods every module has.
@@ -483,6 +514,9 @@ function ns.Start()
     -- A fresh install has the About page to see, which the Minimap Button offers once.
     if next(ns.db.modules) == nil then
         ns.db.welcome = true
+    end
+    for _, fn in ipairs(migrations) do
+        call(fn, ns.db.modules)
     end
     for name in pairs(ns.db.modules) do
         if not ns.modules[name] then
