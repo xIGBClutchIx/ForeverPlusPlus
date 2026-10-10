@@ -626,6 +626,14 @@ local function newFrame()
     end
     if f.SetPortraitToAsset then
         pcall(f.SetPortraitToAsset, f, ns.icon)
+        -- Blizzard's portrait is 62 pixels square with its round mask inset 2 left and right and
+        -- 4 at the bottom. Fit the icon's emblem (inside its dark square border) to that circle
+        -- so it sits centered in the ring like Blizzard's portraits, with no border showing.
+        if f.SetPortraitTexCoord then
+            local edge, perPixel = 0.07, 0.86 / 58
+            pcall(f.SetPortraitTexCoord, f, edge - 2 * perPixel, 1 - edge + 2 * perPixel, edge,
+                1 - edge + 4 * perPixel)
+        end
     end
     if f.SetTitle then
         f:SetTitle(L.ERRORCATCHER_TITLE)
