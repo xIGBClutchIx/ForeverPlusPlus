@@ -10,7 +10,8 @@ local L = ns.L
 
 ns.changelog = {
     {
-        version = L.CHANGELOG_UNRELEASED,
+        version = "0.8.0",
+        date = "2026-10-10",
         sections = {
             { L.CHANGELOG_ADDED, {
                 { L.TALENTPLANNER_TITLE, "New, on by default, in Interface: a Plan Talents "
