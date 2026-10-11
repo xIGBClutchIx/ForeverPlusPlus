@@ -158,6 +158,8 @@ end
 
 -- Overlays ------------------------------------------------------------------------------------
 
+local ABOVE = { BACKGROUND = "LOW", LOW = "MEDIUM", MEDIUM = "HIGH", HIGH = "DIALOG" }
+
 local active, spare = {}, {}
 local info = {} -- overlay -> { bag, slot, button, kind, handled }
 
@@ -244,8 +246,9 @@ local function place(button, bag, slot, kind)
     data.bag, data.slot, data.button, data.kind, data.handled = bag, slot, button, kind, false
     overlay:SetAttribute("item", bag .. " " .. slot)
     overlay:SetAttribute("type2", "item")
-    overlay:SetFrameStrata(button:GetFrameStrata())
-    overlay:SetFrameLevel(button:GetFrameLevel() + 5)
+    -- A strata above the bag's: bags are top-level frames, and raising one when it's clicked or
+    -- opened lifts its buttons over anything at their own strata.
+    overlay:SetFrameStrata(ABOVE[button:GetFrameStrata()] or "DIALOG")
     overlay:SetAllPoints(button)
     overlay:Show()
     active[#active + 1] = overlay
