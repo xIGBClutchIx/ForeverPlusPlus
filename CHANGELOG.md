@@ -2,6 +2,13 @@
 
 What changed in each release of Forever++. The same notes show in game under Settings > AddOns > Forever++ > Changelog, from [`ForeverPlusPlus/Changelog.lua`](ForeverPlusPlus/Changelog.lua); change both together.
 
+## 0.8.1 (2026-10-10)
+
+### Fixed
+
+- **Auto Weapon Buff**: puts the buff on your weapon again, since Forever blocks the way it did before. Right-click a sharpening stone, weightstone, oil, poison, or fishing lure in your bags and it goes straight onto your weapon, main hand first as before. Not in combat, when the bags work as usual.
+- **Settings**: Reset Seen Version on the Debug page goes back to the release before the one you have, so it marks what changed in this release instead of nothing.
+
 ## 0.8.0 (2026-10-10)
 
 ### Added

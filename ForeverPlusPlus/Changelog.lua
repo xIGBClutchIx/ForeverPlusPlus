@@ -10,6 +10,21 @@ local L = ns.L
 
 ns.changelog = {
     {
+        version = "0.8.1",
+        date = "2026-10-10",
+        sections = {
+            { L.CHANGELOG_FIXED, {
+                { L.AUTOWEAPONBUFF_TITLE, "Puts the buff on your weapon again, since Forever "
+                    .. "blocks the way it did before. Right-click a sharpening stone, weightstone, "
+                    .. "oil, poison, or fishing lure in your bags and it goes straight onto your "
+                    .. "weapon, main hand first as before. Not in combat, when the bags work as usual." },
+                { L.CHANGELOG_SETTINGS, "Reset Seen Version on the Debug page goes back to the "
+                    .. "release before the one you have, so it marks what changed in this release "
+                    .. "instead of nothing." },
+            } },
+        },
+    },
+    {
         version = "0.8.0",
         date = "2026-10-10",
         sections = {
