@@ -438,6 +438,10 @@ local USE = _G.ITEM_SPELL_TRIGGER_ONUSE or "Use:" -- Blizzard's "Use:", in the p
 -- (|cnHIGHLIGHT_FONT_COLOR:), and end at |r.
 local HEX_CODE, NAMED_CODE = "|c%x%x%x%x%x%x%x%x", "|cn[%w_]+:"
 
+-- Each line of a text, for gmatch on the text with "\n" added. The crate's text breaks lines
+-- with "\r\n", and a "\r" left on a line we draw shows as an empty line after it.
+local LINES = "(.-)\r?\n"
+
 local function stripCodes(text)
     return (text:gsub(NAMED_CODE, ""):gsub(HEX_CODE, ""):gsub("|r", ""))
 end
@@ -483,7 +487,7 @@ end
 -- Whether any of the text's lines is a bundle. The list may be part of the Use line's text, or
 -- lines of their own after it.
 local function hasBundle(text)
-    for part in (text .. "\n"):gmatch("(.-)\n") do
+    for part in (text .. "\n"):gmatch(LINES) do
         if bundleOf(part) then
             return true
         end
@@ -546,7 +550,7 @@ local function replaceBundleLine(tooltip, data, lineData)
     -- white), and a code can run on past a line break. Each piece is drawn with the codes it
     -- had, reopening a color still running from the piece before and closing it at its end.
     local open -- the color code still running at the start of the next piece
-    for piece in (lineData.leftText .. "\n"):gmatch("(.-)\n") do
+    for piece in (lineData.leftText .. "\n"):gmatch(LINES) do
         local shown = (open or "") .. piece
         local running = runningColor(piece)
         if running ~= nil then
@@ -582,7 +586,7 @@ local function addBundlePrices(tooltip, data)
     for _, line in ipairs(data.lines or {}) do
         local text = plainText(line)
         if text and hasBundle(text) and inList(data, line) then
-            for part in (text .. "\n"):gmatch("(.-)\n") do
+            for part in (text .. "\n"):gmatch(LINES) do
                 local count, name = bundleOf(part)
                 if count then
                     local label = format(L.PRICE_INFO_LINE, format(L.AUCTIONPRICES_BUNDLE, count, name))
