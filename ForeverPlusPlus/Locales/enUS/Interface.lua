@@ -78,6 +78,7 @@ L.BUFFTIMERS_DESC = "Show the time left on your buffs and debuffs as a clock, li
     .. "Blizzard's own timer shows."
 L.BUFFTIMERS_LIMIT = "Show Clock"
 L.BUFFTIMERS_LIMIT_DESC = "Which auras get a clock. Longer ones keep Blizzard's timer."
+L.BUFFTIMERS_LIMIT_1M = "Under 1 Minute"
 L.BUFFTIMERS_LIMIT_10M = "Under 10 Minutes"
 L.BUFFTIMERS_LIMIT_1H = "Under 1 Hour"
 L.BUFFTIMERS_LIMIT_ALL = "Always"

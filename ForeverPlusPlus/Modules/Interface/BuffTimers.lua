@@ -12,7 +12,7 @@ local clock = ns.Text.Clock
 
 local module = ns.NewModule("BuffTimers", L.BUFFTIMERS_DESC, {
     enabled = true,
-    limit = "10m", -- "10m", "hour", or "all": which auras get a clock
+    limit = "10m", -- "1m", "10m", "hour", or "all": which auras get a clock
 })
 module.title = L.BUFFTIMERS_TITLE
 module.category = "interface"
@@ -21,7 +21,9 @@ module.added = "0.8.0"
 module.options = {
     {
         key = "limit", name = L.BUFFTIMERS_LIMIT, description = L.BUFFTIMERS_LIMIT_DESC,
+        changed = "0.8.2",
         choices = {
+            { "1m", L.BUFFTIMERS_LIMIT_1M },
             { "10m", L.BUFFTIMERS_LIMIT_10M },
             { "hour", L.BUFFTIMERS_LIMIT_1H },
             { "all", L.BUFFTIMERS_LIMIT_ALL },
@@ -29,7 +31,7 @@ module.options = {
     },
 }
 
-local LIMITS = { ["10m"] = 600, hour = 3600 }
+local LIMITS = { ["1m"] = 60, ["10m"] = 600, hour = 3600 }
 local WARNING = 31 -- Blizzard's BUFF_DURATION_WARNING_TIME, if it's missing
 
 local texts = setmetatable({}, { __mode = "k" }) -- aura button -> our FontString

@@ -10,6 +10,15 @@ local L = ns.L
 
 ns.changelog = {
     {
+        version = L.CHANGELOG_UNRELEASED,
+        sections = {
+            { L.CHANGELOG_CHANGED, {
+                { L.BUFFTIMERS_TITLE, "Show Clock has an Under 1 Minute choice, for a clock only "
+                    .. "on auras about to run out." },
+            } },
+        },
+    },
+    {
         version = "0.8.1",
         date = "2026-10-10",
         sections = {

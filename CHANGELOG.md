@@ -2,6 +2,12 @@
 
 What changed in each release of Forever++. The same notes show in game under Settings > AddOns > Forever++ > Changelog, from [`ForeverPlusPlus/Changelog.lua`](ForeverPlusPlus/Changelog.lua); change both together.
 
+## Unreleased
+
+### Changed
+
+- **Buff Timers**: Show Clock has an Under 1 Minute choice, for a clock only on auras about to run out.
+
 ## 0.8.1 (2026-10-10)
 
 ### Fixed
