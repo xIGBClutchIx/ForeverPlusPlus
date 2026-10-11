@@ -213,14 +213,14 @@ L.FISHINGCAST_COMBAT_TEXT = "You have a fishing pole equipped."
 
 -- AutoWeaponBuff
 L.AUTOWEAPONBUFF_TITLE = "Auto Weapon Buff"
-L.AUTOWEAPONBUFF_DESC = "Put a sharpening stone, weightstone, oil, poison, or fishing lure straight "
-    .. "onto your weapon when you use it, without clicking the weapon. Main hand first, or the off "
-    .. "hand when only it can take it or the main hand already has a buff."
+L.AUTOWEAPONBUFF_DESC = "Right-click a sharpening stone, weightstone, oil, poison, or fishing lure in "
+    .. "your bags to put it straight onto your weapon, without clicking the weapon. Main hand first, "
+    .. "or the off hand when only it can take it or the main hand already has a buff. Not in combat."
 L.AUTOWEAPONBUFF_PRINT = "Print Weapon Checks"
-L.AUTOWEAPONBUFF_PRINT_DESC = "Print in chat, each time an item waits for a target, which weapons "
-    .. "the game says it can go on and which one was picked."
--- debug codes: enchanting spell, item condition, main hand fits, off hand fits, slot picked
-L.AUTOWEAPONBUFF_PRINT_LINE = "Weapon buff: enchanting=%s condition=%s main=%s off=%s -> slot %s"
+L.AUTOWEAPONBUFF_PRINT_DESC = "Print in chat, each time you right-click a weapon buff in your bags, "
+    .. "which kind of item it is and which weapon slot was picked."
+-- debug codes: item link, item kind (sharp, blunt, melee, pole), slot picked (16, 17, or nil)
+L.AUTOWEAPONBUFF_PRINT_LINE = "Weapon buff: %s kind=%s -> slot %s"
 
 -- AutoScreenshot
 L.AUTOSCREENSHOT_TITLE = "Auto Screenshot"

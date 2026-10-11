@@ -1,20 +1,25 @@
--- Auto Weapon Buff: when you use a sharpening stone, weightstone, oil, poison, or fishing lure, it
--- goes straight onto your weapon instead of waiting for you to click the weapon on the character
--- window. Using the item still takes your own click (from bags, an action button, or /use); this
--- only answers the targeting cursor that follows, with the same PickupInventoryItem call the
--- character window's weapon slot makes when clicked, inside that same click.
+-- Auto Weapon Buff: right-clicking a sharpening stone, weightstone, oil, poison, or fishing lure in
+-- your bags puts it straight onto your weapon instead of waiting for you to click the weapon.
 --
--- The game decides which weapons the item can go on (C_Item.DoesItemMatch*), so armor kits,
--- scopes, and anything else that can't go on a weapon are left to the cursor as before. Main hand
--- first; the off hand when only it can take the item, when the main hand already has a buff and
--- the off hand doesn't, or when the off hand's buff runs out sooner. A modifier key can't choose
--- the hand: any modified click on a bag item does something else (link, split) and never uses it.
+-- Forever forbids addons from answering the targeting cursor themselves (PickupInventoryItem is
+-- ADDON_ACTION_FORBIDDEN there), so this lays an invisible secure item button over each such
+-- item in Blizzard's bags. Its right-click uses the item and then the weapon slot through
+-- Blizzard's own `target-slot` attribute; every other click, drag, and the tooltip go through to
+-- the bag slot as before. Secure buttons can't be placed in combat, so the overlays leave when
+-- combat starts and the bags work as Blizzard's until it ends. Bag addons that replace Blizzard's
+-- bags get no overlays.
+--
+-- Which items count, and which weapons they go on, comes from the table below, since the game only
+-- says what an item fits once its cursor is up. Main hand first; the off hand when only it can
+-- take the item, when the main hand already has a buff and the off hand doesn't, or when the off
+-- hand's buff runs out sooner.
 local _, ns = ...
 
-local C_Item, C_Spell, C_Container, C_PaperDollInfo = C_Item, C_Spell, C_Container, C_PaperDollInfo
-local GetInventoryItemID, GetActionInfo, GetWeaponEnchantInfo = GetInventoryItemID, GetActionInfo, GetWeaponEnchantInfo
-local SpellIsTargeting, CursorHasItem, PickupInventoryItem = SpellIsTargeting, CursorHasItem, PickupInventoryItem
-local ItemLocation, pairs, tostring = ItemLocation, pairs, tostring
+local C_Item, C_Container, C_PaperDollInfo, C_Timer = C_Item, C_Container, C_PaperDollInfo, C_Timer
+local GetInventoryItemID, GetWeaponEnchantInfo = GetInventoryItemID, GetWeaponEnchantInfo
+local CreateFrame, InCombatLockdown, IsModifierKeyDown = CreateFrame, InCombatLockdown, IsModifierKeyDown
+local GameTooltip, UIParent, pairs, select, tostring, _G = GameTooltip, UIParent, pairs, select, tostring, _G
+local tremove = table.remove
 
 local L = ns.L
 
@@ -36,40 +41,60 @@ module.options = {
 }
 
 local MAINHAND, OFFHAND = 16, 17
+local WEAPON, FISHING_POLE = 2, 20 -- Enum.ItemClass.Weapon, Enum.ItemWeaponSubclass.Fishingpole
 
--- The two ways the client says which items a targeting spell can go on, as Blizzard's bags use
--- them to dim the rest: enchanting spells, and spells with an item condition. Which one a weapon
--- buff counts as on Forever is Unverified (the Debug option prints both).
-local function canCheck()
-    return C_Spell and C_Item and ItemLocation
-        and ((C_Spell.TargetSpellIsEnchanting and C_Item.DoesItemMatchTargetEnchantingSpell)
-            or (C_Spell.TargetSpellChecksItemCondition and C_Item.DoesItemMatchSpellItemCondition))
+-- Weapon subclasses a sharpening stone ("sharp") or weightstone ("blunt") goes on. Fist weapons
+-- are in neither: which stone they take is Unverified, so they're left to the cursor.
+local SHARP = { [0] = true, [1] = true, [6] = true, [7] = true, [8] = true, [15] = true }
+local BLUNT = { [4] = true, [5] = true, [10] = true }
+
+-- Item ID to the weapons it goes on: "sharp", "blunt", "melee" (oils and poisons, any weapon but
+-- a fishing pole), or "pole" (fishing lures).
+local KINDS = {}
+local function add(kind, ...)
+    for i = 1, select("#", ...) do
+        KINDS[select(i, ...)] = kind
+    end
 end
+-- Sharpening stones: Rough, Coarse, Heavy, Solid, Dense, Elemental, Consecrated.
+add("sharp", 2862, 2863, 2871, 7964, 12404, 18262, 23122)
+-- Weightstones: Rough, Coarse, Heavy, Solid, Dense.
+add("blunt", 3239, 3240, 3241, 7965, 12643)
+-- Wizard and mana oils, Blessed Wizard Oil, Shadow Oil, Frost Oil.
+add("melee", 20744, 20746, 20750, 20749, 20745, 20747, 20748, 23123, 3824, 3829)
+-- Poisons: Instant I-VI, Deadly I-V, Crippling I-II, Mind-numbing I-III, Wound I-IV.
+add("melee", 6947, 6949, 6950, 8926, 8927, 8928, 2892, 2893, 8984, 8985, 20844, 3775, 3776,
+    5237, 6951, 9186, 10918, 10920, 10921, 10922)
+-- Lures: Shiny Bauble, Nightcrawlers, Bright Baubles, Aquadynamic Fish Attractor, Flesh Eating
+-- Worm, Aquadynamic Fish Lens.
+add("pole", 6529, 6530, 6532, 6533, 7307, 6811)
 
 function module:IsAvailable()
-    return canCheck() and SpellIsTargeting and PickupInventoryItem and GetInventoryItemID and true or false
+    return C_Container and C_Container.GetContainerItemID and C_Container.PickupContainerItem
+        and C_Item and C_Item.GetItemInfoInstant and GetInventoryItemID and _G.ContainerFrame1
+        and true or false
 end
 
-local function isEnchanting()
-    return C_Spell.TargetSpellIsEnchanting and C_Spell.TargetSpellIsEnchanting() or false
-end
-
-local function checksCondition()
-    return C_Spell.TargetSpellChecksItemCondition and C_Spell.TargetSpellChecksItemCondition() or false
-end
-
--- Whether the item waiting on the cursor can go on the weapon in this slot.
-local function fits(slot)
-    if not GetInventoryItemID("player", slot) then
+-- Whether an item of this kind can go on the weapon in this slot.
+local function fits(kind, slot)
+    local itemID = GetInventoryItemID("player", slot)
+    if not itemID then
         return false
     end
-    local location = ItemLocation:CreateFromEquipmentSlot(slot)
-    if isEnchanting() and C_Item.DoesItemMatchTargetEnchantingSpell then
-        return C_Item.DoesItemMatchTargetEnchantingSpell(location) and true or false
-    elseif checksCondition() and C_Item.DoesItemMatchSpellItemCondition then
-        return C_Item.DoesItemMatchSpellItemCondition(location) and true or false
+    local _, _, _, _, _, classID, subclassID = C_Item.GetItemInfoInstant(itemID)
+    if classID ~= WEAPON then
+        return false
     end
-    return false
+    if kind == "pole" then
+        return slot == MAINHAND and subclassID == FISHING_POLE
+    elseif subclassID == FISHING_POLE then
+        return false
+    elseif kind == "sharp" then
+        return SHARP[subclassID] or false
+    elseif kind == "blunt" then
+        return BLUNT[subclassID] or false
+    end
+    return true
 end
 
 -- Milliseconds left on the slot's temporary buff, or nil when it has none.
@@ -106,8 +131,9 @@ local function buffLeft(slot)
     return left
 end
 
--- The slot to put the item on, or nil when neither weapon can take it.
-local function pickSlot(main, off)
+-- The slot to put an item of this kind on, or nil when neither weapon can take it.
+local function pickSlot(kind)
+    local main, off = fits(kind, MAINHAND), fits(kind, OFFHAND)
     if main and off then
         local mainLeft, offLeft = buffLeft(MAINHAND), buffLeft(OFFHAND)
         if mainLeft and (not offLeft or offLeft < mainLeft) then
@@ -118,47 +144,175 @@ local function pickSlot(main, off)
     return main and MAINHAND or off and OFFHAND or nil
 end
 
--- Runs right after an item is used, still inside the player's click.
-local function afterUse()
-    if not SpellIsTargeting() or (CursorHasItem and CursorHasItem()) then
-        return
+-- A right-click in the bags means something else while one of these is open (sell, deposit,
+-- attach, trade, auction), so it goes to Blizzard's button then.
+local function busy()
+    local frames = { _G.MerchantFrame, _G.BankFrame, _G.SendMailFrame, _G.TradeFrame, _G.AuctionHouseFrame }
+    for i = 1, 5 do
+        if frames[i] and frames[i]:IsShown() then
+            return true
+        end
     end
-    local main, off = fits(MAINHAND), fits(OFFHAND)
-    local slot = pickSlot(main, off)
-    if module.db.printSteps then
-        ns.Print(L.AUTOWEAPONBUFF_PRINT_LINE:format(tostring(isEnchanting()), tostring(checksCondition()),
-            tostring(main), tostring(off), tostring(slot)))
+    return false
+end
+
+-- Overlays ------------------------------------------------------------------------------------
+
+local active, spare = {}, {}
+local info = {} -- overlay -> { bag, slot, button, kind, handled }
+
+local function onPreClick(self, mouseButton)
+    local data = info[self]
+    local slot
+    if not InCombatLockdown() and mouseButton == "RightButton" and not IsModifierKeyDown() and not busy() then
+        slot = pickSlot(data.kind)
     end
-    if slot then
-        -- The same call the character window's weapon slot makes when clicked while targeting.
-        -- If the weapon already has a buff, the game asks before replacing it.
-        PickupInventoryItem(slot)
+    data.handled = slot ~= nil
+    if not InCombatLockdown() then
+        self:SetAttribute("type2", slot and "item" or nil)
+        self:SetAttribute("target-slot", slot)
+    end
+    if mouseButton == "RightButton" and module.db.printSteps then
+        ns.Print(L.AUTOWEAPONBUFF_PRINT_LINE:format(tostring(C_Container.GetContainerItemLink(data.bag, data.slot)),
+            data.kind, tostring(slot)))
     end
 end
 
--- An action button only counts when it holds an item, so a spell put there (an enchanter's
--- Enchant Weapon) is never placed for the player.
-local function afterAction(action)
-    if GetActionInfo(action) == "item" then
-        afterUse()
+-- Anything the secure click didn't do goes to Blizzard's bag button, as if it had been clicked.
+local function onPostClick(self, mouseButton)
+    local data = info[self]
+    if not data.handled then
+        data.button:Click(mouseButton)
     end
+end
+
+local function onDrag(self)
+    local data = info[self]
+    C_Container.PickupContainerItem(data.bag, data.slot)
+end
+
+local function onEnter(self)
+    local data = info[self]
+    GameTooltip:SetOwner(self, "ANCHOR_NONE")
+    if ContainerFrameItemButton_CalculateItemTooltipAnchors then
+        ContainerFrameItemButton_CalculateItemTooltipAnchors(self, GameTooltip)
+    else
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+    end
+    GameTooltip:SetBagItem(data.bag, data.slot)
+    GameTooltip:Show()
+end
+
+local function onLeave(self)
+    if GameTooltip:IsOwned(self) then
+        GameTooltip:Hide()
+    end
+end
+
+local function newOverlay()
+    local overlay = CreateFrame("Button", nil, UIParent, "SecureActionButtonTemplate")
+    overlay:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+    overlay:RegisterForDrag("LeftButton")
+    overlay:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square", "ADD")
+    overlay:SetScript("PreClick", onPreClick)
+    overlay:SetScript("PostClick", onPostClick)
+    overlay:SetScript("OnDragStart", onDrag)
+    overlay:SetScript("OnReceiveDrag", onDrag)
+    overlay:SetScript("OnEnter", onEnter)
+    overlay:SetScript("OnLeave", onLeave)
+    info[overlay] = {}
+    return overlay
+end
+
+-- Takes every overlay away. Only out of combat (or at PLAYER_REGEN_DISABLED, just before it).
+local function clear()
+    for i = #active, 1, -1 do
+        local overlay = active[i]
+        overlay:Hide()
+        overlay:ClearAllPoints()
+        active[i] = nil
+        spare[#spare + 1] = overlay
+    end
+end
+
+local function place(button, bag, slot, kind)
+    local overlay = tremove(spare) or newOverlay()
+    local data = info[overlay]
+    data.bag, data.slot, data.button, data.kind, data.handled = bag, slot, button, kind, false
+    overlay:SetAttribute("item", bag .. " " .. slot)
+    overlay:SetAttribute("type2", "item")
+    overlay:SetFrameStrata(button:GetFrameStrata())
+    overlay:SetFrameLevel(button:GetFrameLevel() + 5)
+    overlay:SetAllPoints(button)
+    overlay:Show()
+    active[#active + 1] = overlay
+end
+
+local function containerFrames()
+    local frames = {}
+    if ContainerFrameCombinedBags then
+        frames[1] = ContainerFrameCombinedBags
+    end
+    for i = 1, NUM_CONTAINER_FRAMES or 13 do
+        local frame = _G["ContainerFrame" .. i]
+        if frame then
+            frames[#frames + 1] = frame
+        end
+    end
+    return frames
+end
+
+local function refresh()
+    if InCombatLockdown() then
+        return
+    end
+    clear()
+    if not module.enabled then
+        return
+    end
+    for _, frame in pairs(containerFrames()) do
+        if frame:IsShown() and frame.EnumerateValidItems then
+            for _, button in frame:EnumerateValidItems() do
+                if button:IsShown() then
+                    local bag, slot = button:GetBagID(), button:GetID()
+                    local kind = KINDS[C_Container.GetContainerItemID(bag, slot)]
+                    if kind and (fits(kind, MAINHAND) or fits(kind, OFFHAND)) then
+                        place(button, bag, slot, kind)
+                    end
+                end
+            end
+        end
+    end
+end
+
+-- Bags call UpdateItems once per bag, so many changes in one frame refresh once.
+local pending = false
+local function schedule()
+    if pending then
+        return
+    end
+    pending = true
+    C_Timer.After(0, function()
+        pending = false
+        refresh()
+    end)
 end
 
 function module:OnEnable()
-    -- From bags, and from bag addons that use the same call.
-    if C_Container and C_Container.UseContainerItem then
-        self:Hook(C_Container, "UseContainerItem", afterUse)
+    for _, frame in pairs(containerFrames()) do
+        if frame.UpdateItems then
+            self:Hook(frame, "UpdateItems", schedule)
+        end
+        self:HookScript(frame, "OnHide", schedule)
     end
-    -- From /use, which uses an item by name when no bag slot is given.
-    if C_Item and C_Item.UseItemByName then
-        self:Hook(C_Item, "UseItemByName", afterUse)
-    elseif UseItemByName then
-        self:Hook("UseItemByName", afterUse)
-    end
-    -- From an action button.
-    if UseAction and GetActionInfo then
-        self:Hook("UseAction", afterAction)
-    end
+    self:On("BAG_UPDATE_DELAYED", schedule)
+    self:On("PLAYER_EQUIPMENT_CHANGED", schedule)
+    self:On("PLAYER_REGEN_ENABLED", schedule)
+    -- Fires just before combat lockdown starts, the last moment secure buttons can move.
+    self:On("PLAYER_REGEN_DISABLED", clear)
+    schedule()
 end
 
--- The hooks stop by themselves (module:Hook).
+function module:OnDisable()
+    ns.AfterCombat(clear)
+end

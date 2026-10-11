@@ -331,11 +331,14 @@
     "DEFAULT_CHAT_FRAME",
     "C_PaperDollInfo",
     "GetWeaponEnchantInfo",
-    "SpellIsTargeting",
-    "CursorHasItem",
-    "PickupInventoryItem",
-    "ItemLocation",
-    "UseAction",
-    "UseItemByName"
+    "IsModifierKeyDown",
+    "NUM_CONTAINER_FRAMES",
+    "ContainerFrameCombinedBags",
+    "ContainerFrameItemButton_CalculateItemTooltipAnchors",
+    "MerchantFrame",
+    "BankFrame",
+    "SendMailFrame",
+    "TradeFrame",
+    "AuctionHouseFrame"
   ]
 }
