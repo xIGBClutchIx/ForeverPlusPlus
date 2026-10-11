@@ -7,7 +7,7 @@
 -- lists have no skill-ups, and are left alone.
 local _, ns = ...
 
-local setmetatable, ipairs, pcall = setmetatable, ipairs, pcall
+local setmetatable, ipairs, pairs, pcall = setmetatable, ipairs, pairs, pcall
 local C_TradeSkillUI = C_TradeSkillUI
 
 local L = ns.L
@@ -67,8 +67,10 @@ end
 -- Blizzard's gold highlight art turned gray, then colored, so the tint is clean instead of gold
 -- times the color. Rows are reused, so a row without a color gets Blizzard's gold back.
 local HIGHLIGHTS = { "SelectedOverlay", "HighlightOverlay" }
+local tinted = setmetatable({}, { __mode = "k" }) -- rows with a tint now, shown or pooled
 
 local function tint(row, r, g, b)
+    tinted[row] = r and true or nil
     for _, key in ipairs(HIGHLIGHTS) do
         local texture = row[key]
         if texture and texture.SetVertexColor then
@@ -186,16 +188,20 @@ function module:OnEnable()
     catchUp()
 end
 
--- Blizzard draws the row's colors itself when it's built again; ours go back by painting the
--- rows as they are now, which, with the module off, only clears the highlight tint, and by
--- building each visible row again.
+-- Blizzard draws the row's colors itself when it's built again; ours go back by clearing the
+-- highlight tint of every row that has one (pooled rows too, since Blizzard never resets it), and
+-- by building each visible row again, with the list's own second argument as Blizzard does.
 function module:OnDisable()
+    for row in pairs(tinted) do
+        tint(row)
+    end
+    local page = ProfessionsFrame and ProfessionsFrame.CraftingPage
+    local hideCount = page and page.RecipeList and page.RecipeList.hideCraftableCount
     recipeRows(function(row)
-        paint(row)
         if row.Init and row.GetElementData then
             local node = row:GetElementData()
             if node then
-                pcall(row.Init, row, node)
+                pcall(row.Init, row, node, hideCount)
             end
         end
     end)

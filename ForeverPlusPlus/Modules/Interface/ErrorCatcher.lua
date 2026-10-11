@@ -37,8 +37,8 @@ local module = ns.NewModule("ErrorCatcher", L.ERRORCATCHER_DESC, {
 module.title = L.ERRORCATCHER_TITLE
 module.category = "interface"
 
-local MAX_ERRORS = 200 -- the oldest go first
-local MAX_TEXT = 4000 -- letters kept of a stack or the locals, so the saved file stays small
+local MAX_ERRORS = 100 -- the oldest go first
+local MAX_TEXT = 2000 -- letters kept of a stack or the locals, so the saved file stays small
 local PER_SECOND = 10 -- errors caught a second at most; an error in OnUpdate repeats every frame
 local ANNOUNCE_EVERY = 10 -- seconds between chat messages about new errors
 
@@ -136,7 +136,8 @@ local function store(entry, announce)
     end
     if announce and GetTime() - lastAnnounced >= ANNOUNCE_EVERY then
         lastAnnounced = GetTime()
-        module:Print(format(L.ERRORCATCHER_CAUGHT, short(entry.message)))
+        -- Doubled bars, so a link or color code in the error shows as text instead of breaking the line.
+        module:Print(format(L.ERRORCATCHER_CAUGHT, (short(entry.message):gsub("|", "||"))))
     end
     changed()
 end

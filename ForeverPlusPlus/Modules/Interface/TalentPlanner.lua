@@ -786,6 +786,11 @@ local function setupMenu(_, root)
 end
 
 local function applyLevel(box)
+    -- Hiding the bar while the box has focus lands here too, with no tree to read levels from.
+    if not tree then
+        box:ClearFocus()
+        return
+    end
     local plan = getPlan(true)
     local value = tonumber(box:GetText())
     if plan and value then

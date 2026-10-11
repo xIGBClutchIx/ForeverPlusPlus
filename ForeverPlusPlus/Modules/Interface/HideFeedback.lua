@@ -183,7 +183,7 @@ end
 local QUEST_FRAMES = { "QuestFrame", "GossipFrame", "QuestLogPopupDetailFrame", "QuestMapFrame" }
 local QUEST_EVENTS = { "QUEST_DETAIL", "QUEST_PROGRESS", "QUEST_COMPLETE", "GOSSIP_SHOW" }
 local MAX_DEPTH = 4
-local questHidden = setmetatable({}, { __mode = "k" }) -- widget -> alpha it had
+local questHidden = setmetatable({}, { __mode = "k" }) -- widget -> { alpha, mouse, shown } it had
 
 local function isFeedbackName(name)
     if type(name) ~= "string" then
@@ -195,7 +195,10 @@ end
 
 local function hideQuestWidget(widget)
     if questHidden[widget] == nil and widget.GetAlpha and widget.SetAlpha then
-        questHidden[widget] = widget:GetAlpha()
+        questHidden[widget] = {
+            alpha = widget:GetAlpha(),
+            mouse = widget.IsMouseEnabled and widget:IsMouseEnabled(),
+        }
     end
     if widget.SetAlpha then
         widget:SetAlpha(0)
@@ -241,6 +244,10 @@ local function hideAlert(widget)
     if module.enabled and module.db.quest then
         hideQuestWidget(widget)
         if widget.Hide and not widget:IsForbidden() then
+            local state = questHidden[widget]
+            if state and state.shown == nil then
+                state.shown = widget:IsShown()
+            end
             widget:Hide()
         end
     end
@@ -291,10 +298,13 @@ end
 
 -- Puts back what was hidden.
 local function showQuestFeedback()
-    for widget, alpha in pairs(questHidden) do
-        widget:SetAlpha(alpha)
-        if widget.EnableMouse then
-            widget:EnableMouse(true)
+    for widget, state in pairs(questHidden) do
+        widget:SetAlpha(state.alpha)
+        if widget.EnableMouse and state.mouse ~= nil then
+            widget:EnableMouse(state.mouse)
+        end
+        if state.shown and widget.Show then
+            widget:Show()
         end
         questHidden[widget] = nil
     end

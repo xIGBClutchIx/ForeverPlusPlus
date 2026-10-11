@@ -19,7 +19,7 @@ local module = ns.NewModule("CurrencyBar", L.CURRENCYBAR_DESC, {
     session = true,
     vertical = false,
     scale = 120, -- percent
-    x = 977, -- the box's offset from the center of the screen
+    x = 977, -- the box's offset from the center of the screen (kept on screen on smaller ones)
     y = -462,
 })
 module.title = L.CURRENCYBAR_TITLE
@@ -37,7 +37,7 @@ module.options = {
     },
 }
 
-local DEFAULT_X, DEFAULT_Y = 0, -300
+local DEFAULT_X, DEFAULT_Y = 977, -462 -- the same as the defaults above
 local PAD = 10 -- between the text and the box's edge
 local ICON = 14 -- a currency's icon, about the size of the text
 local MAX_CURRENCIES = 10 -- far more than the Backpack's three, in case Forever allows more
@@ -185,6 +185,8 @@ local function newFrame()
     box.text = box.inner:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     box.text:SetPoint("CENTER")
     box.text:SetJustifyH("CENTER")
+    -- The default spot is far from center, so on a smaller screen the box would sit off its edge.
+    box:SetClampedToScreen(true)
     box:EnableMouse(true)
     box:SetScript("OnEnter", function(self)
         if module.db.tooltip then

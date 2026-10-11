@@ -90,13 +90,23 @@ local timer -- the pending shot, or nil
 local reason -- what the last shot was for, for chat; nil for the player's own
 local hidden = false -- the interface is hidden for a shot and must come back
 local busy = false -- a shot is on its way, until the game says it's taken or failed
-local showUI
+local fallback -- ends the shot if the game never reports it, so the next one isn't blocked
+local showUI, onShot
 
-local function onShot(event)
+-- The shot is over (taken, failed, or never reported): the next one may start.
+local function finish()
     ns.Off("SCREENSHOT_SUCCEEDED", onShot)
     ns.Off("SCREENSHOT_FAILED", onShot)
+    if fallback then
+        fallback:Cancel()
+        fallback = nil
+    end
     busy = false
     showUI()
+end
+
+function onShot(event)
+    finish()
     -- Said now rather than when asked, so the chat line isn't in the picture.
     if event == "SCREENSHOT_SUCCEEDED" and reason then
         module:Print(format(L.AUTOSCREENSHOT_TAKEN, reason))
@@ -128,6 +138,11 @@ local function take(why)
     reason = why
     ns.On("SCREENSHOT_SUCCEEDED", onShot)
     ns.On("SCREENSHOT_FAILED", onShot)
+    -- A handle, not C_Timer.After, so a later shot isn't shown the interface by this one's timer.
+    fallback = C_Timer.NewTimer(UI_BACK, function()
+        fallback = nil
+        finish()
+    end)
     -- Hiding the interface in combat can be blocked, and so can showing it again, so only out of
     -- combat. If the player hid it themselves (Alt-Z), it's already out of the way.
     if module.db.hideUI and not InCombatLockdown() and UIParent:IsShown() then
@@ -135,7 +150,6 @@ local function take(why)
         ns.On("PLAYER_REGEN_DISABLED", showUI)
         UIParent:Hide()
         C_Timer.After(HIDE_WAIT, Screenshot)
-        C_Timer.After(UI_BACK, showUI)
     else
         Screenshot()
     end
@@ -382,10 +396,7 @@ function module:OnDisable()
         timer:Cancel()
         timer = nil
     end
-    ns.Off("SCREENSHOT_SUCCEEDED", onShot)
-    ns.Off("SCREENSHOT_FAILED", onShot)
-    busy = false
-    showUI()
+    finish()
     bindKeys()
 end
 

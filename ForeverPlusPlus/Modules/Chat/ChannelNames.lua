@@ -4,7 +4,7 @@
 -- the game marks secret can't be read and are left alone.
 local _, ns = ...
 
-local ipairs, gsub = ipairs, string.gsub
+local ipairs, gsub, tonumber = ipairs, string.gsub, tonumber
 
 local L = ns.L
 local Chat = ns.Chat
@@ -81,4 +81,39 @@ function module:OnEnable()
     -- A chat window added later.
     self:On("UPDATE_CHAT_WINDOWS", attach)
     self:On("UPDATE_FLOATING_CHAT_WINDOWS", attach)
+end
+
+-- A shortened link, to put the name back: |Hchannel:channel:5|h[5. G]|h.
+local SHORT_LINK = "(|Hchannel:channel:(%d+)|h%[)([^%]]-)(%]|h)"
+
+---A chat line with its shortened channel link given its full name again, as the channel is named
+---now. Only an inner text that is one of our short forms for that channel is replaced.
+---@param text string
+---@return string
+local function restore(text)
+    return (gsub(text, SHORT_LINK, function(open, number, inner, close)
+        local _, name = GetChannelName(tonumber(number))
+        if type(name) ~= "string" or name == "" then
+            return nil
+        end
+        local letter = name:match(FIRST_CHARACTER)
+        if inner == number or inner == letter or (letter and inner == number .. ". " .. letter) then
+            return open .. number .. ". " .. name .. close
+        end
+        return nil
+    end))
+end
+
+-- Lines already shortened get their names back, so turning the module off undoes it.
+function module:OnDisable()
+    for _, frame in ipairs(Chat.Frames()) do
+        if frame.TransformMessages then
+            frame:TransformMessages(function(message)
+                return ns.IsReadable(message) and type(message) == "string"
+                    and message:find("|Hchannel:channel:", 1, true) ~= nil and restore(message) ~= message
+            end, function(message, ...)
+                return restore(message), ...
+            end)
+        end
+    end
 end

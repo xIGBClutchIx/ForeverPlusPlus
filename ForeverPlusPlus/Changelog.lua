@@ -47,25 +47,41 @@ ns.changelog = {
                 { L.AUTODECLINE_TITLE, "A friend or guildmate you let through gets Blizzard's "
                     .. "usual invite popup again instead of one showing only their name, and a "
                     .. "declined group finder invite closes its popup too." },
+                { L.AUTOSCREENSHOT_TITLE, "A second shot right after another no longer shows the "
+                    .. "interface with Hide Interface on, and a shot the game never reports no "
+                    .. "longer stops the ones after it." },
                 { L.AUTOWEAPONBUFF_TITLE, "A window over your bags no longer has its clicks taken "
                     .. "by a stone, oil, poison, or lure under it." },
                 { L.BUFFTIMERS_TITLE, "Never shows a negative time, like -1:59, on an aura about to "
                     .. "go away." },
                 { L.COMMANDS_TITLE, "/rl and /clear are left to another addon that has them even "
                     .. "after you've typed a slash command, and turning one on says so in chat." },
+                { L.CURRENCYBAR_TITLE, "Stays on screen on smaller screens, and Reset Position puts "
+                    .. "it back where it starts." },
+                { L.ERRORCATCHER_TITLE, "A link or color in an error shows as plain text in its "
+                    .. "chat message, and it keeps the last 100 errors with shorter stacks, so "
+                    .. "its saved file stays small." },
                 { L.FLIGHTTIMER_TITLE, "Turning Bar on during a flight shows the bar for the rest "
                     .. "of it." },
-                { L.PLAYERPLATES_TITLE, "Puts your game settings back at login if it was turned "
-                    .. "off in combat just before a reload. So do NPC Nameplates, Auto Dismount, and "
-                    .. "World Map's Coordinates." },
+                { L.HIDEFEEDBACK_TITLE, "Turning it off puts the quest windows' feedback alert back "
+                    .. "as it was." },
                 { L.PLAYERPLATES_TITLE, "A player who turns hostile, like in a duel, gets "
                     .. "Blizzard's own nameplate back, health bar and all. So does an NPC that turns "
                     .. "hostile with NPC Nameplates on." },
+                { L.PLAYERPLATES_TITLE, "Puts your game settings back at login if it was turned "
+                    .. "off in combat just before a reload. So do NPC Nameplates, Auto Dismount, and "
+                    .. "World Map's Coordinates." },
                 { L.QUESTPLATES_TITLE, "An objective that needs 100 of something shows as 37/100, "
                     .. "not 37%. Creatures that showed up during a fight get their quest icon once "
                     .. "it's over." },
+                { L.RECIPECOLORS_TITLE, "Turning it off clears the tint from every recipe row, not "
+                    .. "only the ones on screen." },
                 { L.CHANGELOG_SETTINGS, "Recommended Defaults and Developer's Defaults keep where you "
                     .. "moved things and their size in Edit Mode, and reset only the options." },
+                { L.CHANNELNAMES_TITLE, "Turning it off gives channels already in chat their full "
+                    .. "names again." },
+                { L.SOCIALBUTTON_TITLE, "Turning it off no longer leaves Chat Copy's button above "
+                    .. "the chat window." },
                 { L.TALENTPLANNER_TITLE, "Refuses a shared plan with more than 51 points, which could "
                     .. "freeze the game." },
                 { L.ITEMTOOLTIPS_TITLE, "Your own auction house searches keep an item's lowest "

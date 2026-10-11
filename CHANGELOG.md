@@ -19,14 +19,21 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 - **Already Known**: the Tint look no longer turns white the red icons of merchant items you can't use, and the bags only look up items that can be known, like recipes, mounts, and pets.
 - **Auto Decline**: a friend or guildmate you let through gets Blizzard's usual invite popup again instead of one showing only their name, and a declined group finder invite closes its popup too.
+- **Auto Screenshot**: a second shot right after another no longer shows the interface with Hide Interface on, and a shot the game never reports no longer stops the ones after it.
 - **Auto Weapon Buff**: a window over your bags no longer has its clicks taken by a stone, oil, poison, or lure under it.
 - **Buff Timers**: never shows a negative time, like -1:59, on an aura about to go away.
 - **Commands**: `/rl` and `/clear` are left to another addon that has them even after you've typed a slash command, and turning one on says so in chat.
+- **Currency Bar**: stays on screen on smaller screens, and Reset Position puts it back where it starts.
+- **Error Catcher**: a link or color in an error shows as plain text in its chat message, and it keeps the last 100 errors with shorter stacks, so its saved file stays small.
 - **Flight Timer**: turning Bar on during a flight shows the bar for the rest of it.
-- **Player Nameplates**: puts your game settings back at login if it was turned off in combat just before a reload. So do NPC Nameplates, Auto Dismount, and World Map's Coordinates.
+- **Hide Beta Feedback**: turning it off puts the quest windows' feedback alert back as it was.
 - **Player Nameplates**: a player who turns hostile, like in a duel, gets Blizzard's own nameplate back, health bar and all. So does an NPC that turns hostile with NPC Nameplates on.
+- **Player Nameplates**: puts your game settings back at login if it was turned off in combat just before a reload. So do NPC Nameplates, Auto Dismount, and World Map's Coordinates.
 - **Quest Nameplates**: an objective that needs 100 of something shows as 37/100, not 37%. Creatures that showed up during a fight get their quest icon once it's over.
+- **Recipe Colors**: turning it off clears the tint from every recipe row, not only the ones on screen.
 - **Settings**: Recommended Defaults and Developer's Defaults keep where you moved things and their size in Edit Mode, and reset only the options.
+- **Short Channel Names**: turning it off gives channels already in chat their full names again.
+- **Social Button**: turning it off no longer leaves Chat Copy's button above the chat window.
 - **Talent Planner**: refuses a shared plan with more than 51 points, which could freeze the game.
 - **Item Tooltips**: your own auction house searches keep an item's lowest price instead of the last one listed.
 - **Unusable Items Tint**: no longer tints recipes you can learn because of the item they make, such as plans for mail armor or for gear above your level.

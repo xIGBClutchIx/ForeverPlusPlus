@@ -56,4 +56,6 @@ end
 function module:OnDisable()
     Chat.RemoveButton(self.name, true)
     restore(QuickJoinToastButton)
+    -- The buttons below it (Chat Copy's) were anchored to it, so lay them out again now it's back.
+    Chat.Layout()
 end

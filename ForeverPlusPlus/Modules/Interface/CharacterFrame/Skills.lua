@@ -85,8 +85,11 @@ local function repaint()
         return
     end
     local frame = _G.SkillsFrame
+    -- Straight to paintBar, not paintEntry: turning the module off has to paint the rows blue again.
     frame.ScrollBox:ForEachFrame(function(entry, info)
-        paintEntry(nil, entry, info)
+        if info and not info.isHeader and entry.Content then
+            paintBar(entry.Content.SkillsBar, info)
+        end
     end)
     local detail = frame.SkillDetailFrame
     if detail and detail.GetSelectedSkillInfo then

@@ -288,6 +288,7 @@
     "debugstack",
     "debuglocals",
     "GetCallstackHeight",
+    "GetChannelName",
     "GetErrorCallstackHeight",
     "Minimap",
     "ScriptErrorsFrame",
