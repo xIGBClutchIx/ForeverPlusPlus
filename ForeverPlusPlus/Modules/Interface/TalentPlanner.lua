@@ -78,9 +78,23 @@ local function currency()
     return points.spent or 0, points.quantity or 0
 end
 
+-- Ranks learned in Forever's Legacy perk Talented, which starts talent points at level 5 instead
+-- of 10 at 5/5; taken as a level earlier per rank. Its node is in the Adventure tree, named by
+-- Constants.LegacyConsts (Blizzard_LegacySystem). Forever only.
+local function talentedRanks()
+    local consts = Constants and Constants.LegacyConsts
+    local treeID = consts and consts.LEGACY_TREE_ADVENTURE_ID
+    local nodeID = consts and consts.LEGACY_TREE_ADVENTURE_TALENTED_NODE_ID
+    local configID = treeID and nodeID and C_Traits.GetConfigIDByTreeID
+        and C_Traits.GetConfigIDByTreeID(treeID)
+    local info = configID and C_Traits.GetNodeInfo(configID, nodeID)
+    local ranks = info and info.activeRank
+    return ranks and readable(ranks) and ranks or 0
+end
+
 local function firstLevel()
     local spent, unspent = currency()
-    return Plan.FirstLevel(UnitLevel("player"), spent + unspent)
+    return Plan.FirstLevel(UnitLevel("player"), spent + unspent, talentedRanks())
 end
 
 -- A new plan starts from the talents already learned.

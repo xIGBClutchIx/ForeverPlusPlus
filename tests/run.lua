@@ -300,6 +300,12 @@ eq(Plan.FirstLevel(5, 0), 10, "none earned yet: Classic's 10")
 eq(Plan.PointsAt(30, 10), 21, "21 points at 30")
 eq(Plan.PointsAt(9, 10), 0, "none before 10")
 eq(Plan.LevelOf(21, 10), 30, "21st point at 30")
+eq(Plan.FirstLevel(30, 26, 5), 5, "talented: counted from points earned")
+eq(Plan.FirstLevel(4, 0, 5), 5, "talented, none earned yet: level 5")
+eq(Plan.FirstLevel(60, 51, 5), 5, "talented, all 51 earned: level 5")
+eq(Plan.FirstLevel(60, 51), 10, "all 51 earned: level 10")
+eq(Plan.PointsAt(60, 5), 51, "never more than 51")
+eq(Plan.PointsAt(30, 5), 26, "talented: 26 points at 30")
 
 -- Errors ----------------------------------------------------------------------------------------
 

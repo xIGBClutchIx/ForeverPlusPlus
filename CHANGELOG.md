@@ -10,6 +10,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Buff Timers**: Show Clock has an Under 1 Minute choice, for a clock only on auras about to run out.
 - **Character Window**: the new Equipped Weapon Skills option (on by default) colors the Skills tab's bars green for the weapons you have equipped, instead of blue.
 - **Quest Tracker**: the new Sort by Level option (off by default) lists tracked quests by level, lowest or highest first, instead of in the order you tracked them. It waits for combat to end.
+- **Talent Planner**: counts the Legacy perk Talented: with it, plans get talent points from level 5 instead of 10, still 51 at most.
 
 ## 0.8.1 (2026-10-10)
 

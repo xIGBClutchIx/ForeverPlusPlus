@@ -78,6 +78,7 @@
     "CreateScrollBoxListLinearView",
     "ScrollUtil",
     "ScrollBoxConstants",
+    "Constants",
     "CreateTreeDataProvider",
     "geterrorhandler",
     "AddonCompartmentFrame",

@@ -8,15 +8,17 @@
 -- of the ones without it, any one maxed is enough (C_Traits' Required and Sufficient edges).
 local _, ns = ...
 
-local ipairs, max, remove, concat = ipairs, math.max, table.remove, table.concat
+local ipairs, max, min, remove, concat = ipairs, math.max, math.min, table.remove, table.concat
 local tostring, tonumber = tostring, tonumber
 local gsub, strmatch, gmatch = string.gsub, string.match, string.gmatch
 
 local TalentPlan = {}
 ns.TalentPlan = TalentPlan
 
--- Classic gives the first talent point at level 10, then one each level.
+-- Classic gives the first talent point at level 10, then one each level, 51 in all. Forever's
+-- Legacy perk Talented starts them earlier but keeps the 51.
 TalentPlan.FIRST_LEVEL = 10
+TalentPlan.MAX_POINTS = 51
 
 ---Whether one more point can go into a node, after the points counted so far.
 ---@param tree table
@@ -172,16 +174,17 @@ function TalentPlan.Next(picks, ranks)
 end
 
 ---The level of the first talent point, from the player's level and the points they have earned,
----so a server that gives points differently is still counted right. With none earned yet, it's
----Classic's level 10.
+---so a server that gives points differently is still counted right. With none earned yet, or all
+---51 (which a level past the last point also has), it's Classic's level 10 less `earlier`.
 ---@param level number the player's level
 ---@param earned? number points earned (spent and unspent)
+---@param earlier? number levels the first point comes early (Forever's Talented, a level a rank)
 ---@return number
-function TalentPlan.FirstLevel(level, earned)
-    if earned and earned > 0 then
+function TalentPlan.FirstLevel(level, earned, earlier)
+    if earned and earned > 0 and earned < TalentPlan.MAX_POINTS then
         return level - earned + 1
     end
-    return TalentPlan.FIRST_LEVEL
+    return TalentPlan.FIRST_LEVEL - (earlier or 0)
 end
 
 -- Share strings: "FPP:1:<treeID>:<level>:<name>:<points>", the points in order as nodeIDs with
@@ -227,12 +230,12 @@ function TalentPlan.Decode(text)
     return { treeID = tonumber(treeID), level = tonumber(level), name = name, picks = picks }
 end
 
----How many talent points a character has at a level.
+---How many talent points a character has at a level, never more than 51.
 ---@param level number
 ---@param first number the level of the first point
 ---@return number
 function TalentPlan.PointsAt(level, first)
-    return max(0, level - first + 1)
+    return min(TalentPlan.MAX_POINTS, max(0, level - first + 1))
 end
 
 ---The level a plan's point comes at.

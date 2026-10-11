@@ -108,6 +108,8 @@ From the dumps **[dump]**: `C_AddOns`, `C_Item`, `C_Spell`, `C_Container`, `C_Un
 ## Talents and specs
 
 - Classic-style talent trees with points per tree, on Retail's trait system (`C_Traits`). A separate "Legacy" tree panel opens with `ToggleLegacySystemUI` and unlocks at level 25. **[web]** (forever-addon-kit)
+  - Its trees are trait trees: `Constants.LegacyConsts` names Professions 1187, Adventure 1188, and Progression 1189, the Legacy points currency 4225, and `LEGACY_TREE_ADVENTURE_TALENTED_NODE_ID` 110298. Blizzard's Legacy panel reads a tree with `C_Traits.GetConfigIDByTreeID(treeID)`. **[web]** (Gethe/wow-ui-source `forever` branch, Blizzard_LegacySystem and LegacyConstantsDocumentation, 2026-10-11) Unverified in game.
+  - Talented (that node, 5 ranks) gives talent points from level 5 instead of 10, still 51 at most, by its 5/5 tooltip. **[in-game]** (2026-10-11) What fewer ranks do is **Unverified**; Talent Planner takes a level earlier per rank, and counts from the points earned whenever it can.
 - `C_SpecializationInfo.GetSpecializationInfo(index, ...)` returns `specId, name, description, icon, role, primaryStat, pointsSpent, background, previewPointsSpent, isUnlocked`. **[dump]** (Atraeau api.json)
   - On a Warrior, `GetSpecializationInfo(1)` returned `1491, "Warrior", "", 626008, "DAMAGER", 4, 0, nil, 0, true`, and `C_SpecializationInfo.GetSpecialization()` returned `1`. **[in-game]** (2026-09-25)
   - So the "spec" is the whole class: the name is the class name, the description is empty, and `pointsSpent` was 0 with 6 points spent in Arms. It doesn't count talent points, so it can't find a talent tree.
