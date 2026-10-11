@@ -28,7 +28,7 @@ local module = ns.NewModule("ItemTooltips", L.ITEMTOOLTIPS_DESC, {
     scanAgeColor = "age", -- "age" (green when fresh to red when old), "gray", "white", or "gold"
     scanAgeRedHours = 12, -- hours old at which "age" is fully red
     crafting = true, -- costs, value, and profit under a recipe's reagents
-    crates = "off", -- a Waylaid Crate's bundle costs: "off", "below" the prices, or "beside" each
+    crates = "beside", -- a Waylaid Crate's bundle costs: "off", "below" the prices, or "beside" each
     scanOnOpen = true,
     chat = true,
     -- Data, not settings: they aren't in module.options.

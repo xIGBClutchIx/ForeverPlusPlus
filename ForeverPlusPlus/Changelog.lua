@@ -22,10 +22,10 @@ ns.changelog = {
                 { L.CHARACTERFRAME_TITLE, "The new Equipped Weapon Skills option (on by "
                     .. "default) colors the Skills tab's bars green for the weapons you have "
                     .. "equipped, instead of blue." },
-                { L.ITEMTOOLTIPS_TITLE, "The new Waylaid Crate Costs option (off by default) "
-                    .. "shows what buying each bundle a Waylaid Crate takes costs at the auction "
-                    .. "house, from your scanned prices, under the auction price or beside each "
-                    .. "bundle." },
+                { L.ITEMTOOLTIPS_TITLE, "The new Waylaid Crate Costs option shows beside each "
+                    .. "bundle a Waylaid Crate takes what buying it costs at the auction house, "
+                    .. "from your scanned prices. It can go under the auction price instead, or "
+                    .. "be turned off." },
                 { L.QUESTTRACKER_TITLE, "The new Sort by Level option (off by default) lists "
                     .. "tracked quests by level, lowest or highest first, instead of in the "
                     .. "order you tracked them. It waits for combat to end." },

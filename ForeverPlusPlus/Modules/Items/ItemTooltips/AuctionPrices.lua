@@ -512,18 +512,39 @@ local function replaceBundleLine(tooltip, data, lineData)
             pending = nil
         end
     end
-    for part in (text .. "\n"):gmatch("(.-)\n") do
-        local count, name = bundleOf(part)
+    -- Blizzard colors parts of the line with color codes (the Use text green, the bundles
+    -- white), and a code can run on past a line break. Each piece is drawn with the codes it
+    -- had, reopening a color still running from the piece before and closing it at its end.
+    local open -- the color code still running at the start of the next piece
+    for piece in (lineData.leftText .. "\n"):gmatch("(.-)\n") do
+        local shown = (open or "") .. piece
+        local lastOpen, code = 0, nil
+        for at, found in piece:gmatch("()(|c%x%x%x%x%x%x%x%x)") do
+            lastOpen, code = at, found
+        end
+        local lastClose = 0
+        for at in piece:gmatch("()|r") do
+            lastClose = at
+        end
+        if lastOpen > lastClose then
+            open = code
+        elseif lastClose > 0 then
+            open = nil
+        end
+        if open then
+            shown = shown .. "|r"
+        end
+        local count, name = bundleOf((piece:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")))
         if count then
             flush()
             local cost = bundleCost(count, name)
             if inline then
-                tooltip:AddLine(format(L.PRICE_INLINE, part, cost), r, g, b)
+                tooltip:AddLine(format(L.PRICE_INLINE, shown, cost), r, g, b)
             else
-                tooltip:AddDoubleLine(part, cost, r, g, b, wr, wg, wb)
+                tooltip:AddDoubleLine(shown, cost, r, g, b, wr, wg, wb)
             end
         else
-            pending = pending and (pending .. "\n" .. part) or part
+            pending = pending and (pending .. "\n" .. shown) or shown
         end
     end
     flush()
