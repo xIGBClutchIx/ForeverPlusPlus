@@ -146,27 +146,6 @@ near(angle, 3 * math.pi / 2, "east is three quarters")
 yards = WorldMap.Toward(1000, 500, 0.2, 0.2, 0.2, 0.2)
 near(yards, 0, "same spot")
 
--- Size: map 1 spans 1000 yards west to east and 500 north to south; map 2 has no world position.
-local function vector(x, y)
-    return { GetXY = function() return x, y end }
-end
-CreateVector2D = vector
-C_Map = {
-    GetWorldPosFromMapPos = function(mapID, pos)
-        if mapID ~= 1 then
-            return nil
-        end
-        local x, y = pos:GetXY()
-        return 0, vector(2000 - 500 * y, 3000 - 1000 * x) -- north falls going down, west going right
-    end,
-}
-local width, height = WorldMap.Size(1)
-eq(width, 1000, "size width runs west to east")
-eq(height, 500, "size height runs north to south")
-eq(WorldMap.Size(2), nil, "size without a world position")
-C_Map, CreateVector2D = nil, nil
-eq(WorldMap.Size(1), 1000, "size is remembered")
-
 -- Instances -------------------------------------------------------------------------------------
 
 local Instances = ns.Instances

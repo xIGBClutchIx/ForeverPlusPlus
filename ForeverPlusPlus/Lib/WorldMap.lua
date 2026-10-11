@@ -4,7 +4,7 @@
 local _, ns = ...
 
 local ipairs, pairs = ipairs, pairs
-local sqrt, atan2, pi, abs = math.sqrt, math.atan2, math.pi, math.abs
+local sqrt, atan2, pi = math.sqrt, math.atan2, math.pi
 local UnitFactionGroup, CreateFromMixins = UnitFactionGroup, CreateFromMixins
 local FACTION_ALLIANCE, FACTION_HORDE = FACTION_ALLIANCE, FACTION_HORDE
 
@@ -97,45 +97,9 @@ end
 
 -- Directions ----------------------------------------------------------------------------------
 
-local sizes = {} -- mapID -> { width, height }
-
----A map's size in yards, across and down, or nil when the game can't say (no world position for
----it, like an instance's map). Forever has no C_Map.GetMapWorldSize, so this measures between the
----world positions of two opposite corners. World positions are north (x) and west (y), so the
----map's width runs along y and its height along x.
----@param mapID number
----@return number? width
----@return number? height
-function WorldMap.Size(mapID)
-    local size = sizes[mapID]
-    if size then
-        return size[1], size[2]
-    end
-    if not (C_Map and C_Map.GetWorldPosFromMapPos and CreateVector2D) then
-        return nil
-    end
-    local _, topLeft = C_Map.GetWorldPosFromMapPos(mapID, CreateVector2D(0, 0))
-    local _, bottomRight = C_Map.GetWorldPosFromMapPos(mapID, CreateVector2D(1, 1))
-    if not (topLeft and bottomRight) then
-        return nil
-    end
-    local north1, west1 = topLeft:GetXY()
-    local north2, west2 = bottomRight:GetXY()
-    if not (ns.IsReadable(north1) and ns.IsReadable(north2) and ns.IsReadable(west1)
-        and ns.IsReadable(west2)) then
-        return nil
-    end
-    local width, height = abs(west1 - west2), abs(north1 - north2)
-    if width == 0 or height == 0 then
-        return nil
-    end
-    sizes[mapID] = { width, height }
-    return width, height
-end
-
 ---How far and which way one spot on a map is from another, for an arrow. Spots are 0 to 1 across
 ---and down the map, as C_Map gives them, and `width` and `height` are the map's size in yards
----(WorldMap.Size). The angle is counter-clockwise from north in radians, 0 to 2 pi, like
+---(C_Map.GetMapWorldSize). The angle is counter-clockwise from north in radians, 0 to 2 pi, like
 ---GetPlayerFacing, so an arrow pointing ahead turns by `angle - facing`.
 ---@param width number yards
 ---@param height number yards

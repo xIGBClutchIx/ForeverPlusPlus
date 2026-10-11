@@ -211,10 +211,12 @@ local function locate()
                     target = pos
                 end
             end
-            local width, height = WorldMap.Size(mapID)
-            local px, py = here:GetXY()
-            if target and width and ns.IsReadable(px) and not (px == 0 and py == 0) then
-                local tx, ty = target:GetXY()
+            local width, height = C_Map.GetMapWorldSize(mapID)
+            local px, py = here.x, here.y
+            if target and ns.IsReadable(px) and ns.IsReadable(width) and width > 0 and height > 0
+                and not (px == 0 and py == 0) then
+                -- Read x and y, not GetXY: on Forever the waypoint's position is a plain table.
+                local tx, ty = target.x, target.y
                 return WorldMap.Toward(width, height, px, py, tx, ty)
             end
         end
