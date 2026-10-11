@@ -139,8 +139,9 @@ local KINDS = {
         atlases = { "FlightMasterFerry", "Vehicle-TempleofKotmogu-CyanBall" } },
     zeppelin = { show = "zeppelins", size = "zeppelinSize", pixels = 24,
         atlases = { "Vehicle-Air-Horde", "Vehicle-TempleofKotmogu-CyanBall" } },
-    spirit = { show = "spiritHealers", size = "spiritSize", pixels = 20,
-        atlases = { "poi-graveyard-neutral", "Vehicle-TempleofKotmogu-GreenBall" } },
+    -- A glowing spirit, so it isn't mistaken for the corpse marker; the tombstone if it's missing.
+    spirit = { show = "spiritHealers", size = "spiritSize", pixels = 22,
+        atlases = { "poi-soulspiritghost", "poi-graveyard-neutral", "Vehicle-TempleofKotmogu-GreenBall" } },
     -- Skyborne spots: ley lines purple, like the game's own ley line icon, convergences orange.
     -- Both are Kotmogu balls like the cyan and green ones, but Unverified on Forever.
     leyline = { show = "leyLines", size = "leyLineSize", pixels = 18,

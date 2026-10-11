@@ -319,7 +319,7 @@ local function checkMap()
     for _, atlas in ipairs({ "Dungeon", "Raid", "TaxiNode_Alliance", "TaxiNode_Horde",
         "TaxiNode_Neutral", "FlightMaster", "FlightMasterFerry", "Vehicle-Air-Horde",
         "Vehicle-TempleofKotmogu-CyanBall", "Vehicle-TempleofKotmogu-GreenBall",
-        "poi-graveyard-neutral" }) do
+        "poi-graveyard-neutral", "poi-soulspiritghost" }) do
         local found = C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(atlas)
         local list = found and have or missing
         list[#list + 1] = atlas
