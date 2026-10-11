@@ -28,23 +28,6 @@ ns.changelog = {
                     .. "TomTom or another addon already has /way. The new Waypoint Arrow option "
                     .. "(on by default) shows an arrow on screen that turns toward the pin, from "
                     .. "/way or a click on the map, with how far it is. Move and resize it in Edit Mode." },
-                { L.CHANGELOG_SETTINGS, "A search box at the top of the Modules page shows "
-                    .. "only the modules whose name or description has what you type, under "
-                    .. "their categories. Clear it to see every module again. The New checkbox "
-                    .. "beside it shows only the modules marked NEW, together with the search; it "
-                    .. "starts off each time Settings opens." },
-                { L.CHANGELOG_SETTINGS, "The Modules page marks new modules, and new or changed "
-                    .. "options of other modules and those modules in the list, with Blizzard's "
-                    .. "NEW label until you've clicked the module. It opens on the first module "
-                    .. "with a marked option. Show Tags on the Debug page marks everything new or "
-                    .. "changed since the last release, to check how they look." },
-                { L.CHANGELOG_SETTINGS, "The Debug page has four new buttons: Reset Seen "
-                    .. "Version shows the Modules page as a player updating from the last release "
-                    .. "sees it, Copy Debug Info gives one line for a bug report, Print Module "
-                    .. "Events lists what each module listens to, and Reload UI reloads." },
-                { L.CHANGELOG_SETTINGS, "The Modules page search also finds options by their "
-                    .. "name or tooltip text, showing their module with those options "
-                    .. "highlighted." },
                 { L.AUTOQUEST_TITLE, "New, off by default, in Automation: accepts quests and "
                     .. "turns in finished ones as you talk to quest givers, one by one down a "
                     .. "quest giver's list. It never picks a reward when there's a choice. "
@@ -67,6 +50,10 @@ ns.changelog = {
                     .. "tint them. At merchants it only adds what the merchant doesn't already "
                     .. "tint, such as gear above your level. Bags, bank, and merchants each have "
                     .. "a checkbox." },
+                { L.XPBARTEXT_TITLE, "New, on by default, in Interface: the experience bar "
+                    .. "shows its numbers all the time, with the percent, your rested XP, and the "
+                    .. "XP of the quests in your log that are ready to turn in (or all of them), "
+                    .. "in green once turning them in would level you." },
                 { L.MINIMAPBUTTON_TITLE, "New, on by default, in Interface: Forever++'s own "
                     .. "button on the minimap, in the addon compartment, or both. Click it to open "
                     .. "Forever++ settings, or right-click it for quick toggles of Fast Loot, Auto "
@@ -75,10 +62,13 @@ ns.changelog = {
                     .. "to see the errors, and it shows how many this session caught. After a "
                     .. "fresh install it wears Blizzard's NEW label, and its first click opens the "
                     .. "About page." },
-                { L.XPBARTEXT_TITLE, "New, on by default, in Interface: the experience bar "
-                    .. "shows its numbers all the time, with the percent, your rested XP, and the "
-                    .. "XP of the quests in your log that are ready to turn in (or all of them), "
-                    .. "in green once turning them in would level you." },
+                { L.CHANGELOG_SETTINGS, "A search box at the top of the Modules page shows only "
+                    .. "the modules whose name, description, or options have what you type, with "
+                    .. "those options highlighted. The New checkbox beside it shows only the "
+                    .. "modules marked NEW." },
+                { L.CHANGELOG_SETTINGS, "The Modules page marks new modules, and new or changed "
+                    .. "options, with Blizzard's NEW label until you've clicked the module, and "
+                    .. "opens on the first module with a marked option." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.ITEMTOOLTIPS_TITLE, "Sell Price, Auction Prices, and Item Count are now one "
@@ -102,9 +92,6 @@ ns.changelog = {
                 { L.CHATCOPY_TITLE, "New Click Timestamps option (off by default): click a chat "
                     .. "line's timestamp to copy that line. Needs the game's chat timestamps "
                     .. "turned on." },
-                { L.ERRORCATCHER_TITLE, "New Button option puts its button on the minimap, in "
-                    .. "the addon compartment, both, or neither. The minimap is still the "
-                    .. "default." },
                 { L.ERRORCATCHER_TITLE, "Its button is now the Minimap Button module, where a "
                     .. "click opens settings and a Shift-right-click shows the errors. Turn that "
                     .. "module off for no button. Its Clear Key option moved there too: "
@@ -125,6 +112,9 @@ ns.changelog = {
                     .. "group them under headers, and options that only matter while another is "
                     .. "on sit under it: Player Nameplates, NPC Nameplates, World Map, Quest "
                     .. "Tracker, Profession Tooltips, and Item Tooltips." },
+                { L.CHANGELOG_SETTINGS, "Clearer names and descriptions for a few options: Auto "
+                    .. "Quest's Skip Key, Item Tooltips' Bag and Bank Labels, Unexplored Areas' Tint "
+                    .. "Strength, and Zone Info's Herbs, Ore, and Skinning." },
                 { L.CHARACTERFRAME_TITLE, "Character Frame Enhancements is now Character "
                     .. "Window, so its name fits the Modules list, and Durability Bars is now its "
                     .. "Durability Bars option instead of a module of its own (always, only when "
@@ -137,9 +127,6 @@ ns.changelog = {
                     .. "under Hide Interface, hides the interface for the screenshots you take with "
                     .. "the Screenshot key (Print Screen) too, not only Auto Screenshot's. Not in "
                     .. "combat." },
-                { L.CHANGELOG_SETTINGS, "Clearer names and descriptions for a few options: Auto "
-                    .. "Quest's Skip Key, Item Tooltips' Bag and Bank Labels, Unexplored Areas' Tint "
-                    .. "Strength, and Zone Info's Herbs, Ore, and Skinning." },
                 { L.POI_TITLE, "New Ley Lines option shows Skyborne ley lines and elemental "
                     .. "convergences on the map. A spot is saved when a Skyborne gets the "
                     .. "15-minute buff from Read Ley Line or Skysight there, and every character "
@@ -158,8 +145,6 @@ ns.changelog = {
                 { L.CVARBROWSER_TITLE, "An empty list says why (nothing matches the search, or "
                     .. "nothing is changed), and a row stays highlighted with its tooltip while "
                     .. "you point at its value box or Default button." },
-                { L.ERRORCATCHER_TITLE, "The Test Error button on the Debug page works with "
-                    .. "Error Catcher off too, to check Blizzard's error window." },
             } },
         },
     },
