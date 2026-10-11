@@ -41,12 +41,11 @@ L.AUCTIONPRICES_CRAFT_PROFIT = "Estimated Profit"
 L.AUCTIONPRICES_CRAFT_AGE = "Oldest Price"
 L.AUCTIONPRICES_CRATES = "Waylaid Crate Costs"
 L.AUCTIONPRICES_CRATES_DESC = "On a Waylaid Crate, show what buying each bundle it takes costs "
-    .. "at the auction house (the count times the item's lowest buyout), under the auction price "
-    .. "or beside each bundle."
+    .. "at the auction house (the count times the item's lowest buyout), beside or under each "
+    .. "bundle."
 L.AUCTIONPRICES_CRATES_OFF = "Off"
-L.AUCTIONPRICES_CRATES_BELOW = "Under the Prices"
+L.AUCTIONPRICES_CRATES_BELOW = "Under Each Bundle"
 L.AUCTIONPRICES_CRATES_BESIDE = "Beside Each Bundle"
-L.AUCTIONPRICES_BUNDLE = "%d %s" -- how many, then the item's nameL.AUCTIONPRICES_CHAT_DESC = "Say in chat when a scan finishes after the auction house closed."
 L.AUCTIONPRICES_SCANNING = "Scanning prices... %d items" -- count so far
 L.AUCTIONPRICES_SCANNED = "Prices updated for %d items" -- count
 L.AUCTIONPRICES_PAUSED = "Scan paused while you sell... %d items" -- count so far

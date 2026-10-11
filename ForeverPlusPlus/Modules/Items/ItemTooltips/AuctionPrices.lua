@@ -406,9 +406,9 @@ end
 -- Waylaid Crates -------------------------------------------------------------------------------
 -- A Waylaid Crate's Use line lists the bundles that fill it, one per line ("- 6 Bolt of Woolen
 -- Cloth"). Waylaid Crate Costs shows what buying each bundle at auction costs: the count times
--- the item's lowest buyout. "below": a line per bundle under the auction price. "beside": on the
--- bundle's own line, which Blizzard skips and we draw again, the same text in the same color
--- with the price on the right (or after it, with inline price lines). The tooltip gives names,
+-- the item's lowest buyout. Blizzard's line is skipped and we draw it again, the same text in
+-- the same color, with each price beside its bundle ("beside": on the right, or after it with
+-- inline price lines) or on a line of its own under it ("below"). The tooltip gives names,
 -- not IDs, so items are found by name: in the client's item cache, or else among the names of
 -- items with a saved price.
 
@@ -522,12 +522,17 @@ local function bundleCost(count, name)
     return GRAY_FONT_COLOR:WrapTextInColorCode(L.AUCTIONPRICES_CRAFT_NO_PRICE)
 end
 
+-- A cost under its bundle, with inline price lines: indented, as Blizzard's blank texture.
+local UNDER_INDENT = "|TInterface\\Common\\spacer:1:12|t"
+
 -- Draws a line that lists bundles again with their costs, and returns true so Blizzard's is
 -- skipped. Text around the bundles keeps its own line, wrapped as Blizzard wraps it.
 local function replaceBundleLine(tooltip, data, lineData)
-    if not (internal.Active("auction") and module.db.crates == "beside") then
+    local mode = internal.Active("auction") and module.db.crates
+    if mode ~= "beside" and mode ~= "below" then
         return
     end
+    local below = mode == "below"
     local text = plainText(lineData)
     if not (text and hasBundle(text) and inList(data, lineData)) then
         return
@@ -563,7 +568,15 @@ local function replaceBundleLine(tooltip, data, lineData)
         if count then
             flush()
             local cost = bundleCost(count, name)
-            if inline then
+            if below then
+                -- The bundle's line as it was, then its cost on a line of its own under it.
+                tooltip:AddLine(shown, r, g, b)
+                if inline then
+                    tooltip:AddLine(UNDER_INDENT .. cost, wr, wg, wb)
+                else
+                    tooltip:AddDoubleLine(" ", cost, wr, wg, wb, wr, wg, wb)
+                end
+            elseif inline then
                 tooltip:AddLine(format(L.PRICE_INLINE, shown, cost), r, g, b)
             else
                 tooltip:AddDoubleLine(shown, cost, r, g, b, wr, wg, wb)
@@ -574,32 +587,6 @@ local function replaceBundleLine(tooltip, data, lineData)
     end
     flush()
     return true
-end
-
--- A line per bundle under the auction price: "6 Bolt of Woolen Cloth:" and its cost.
-local function addBundlePrices(tooltip, data)
-    if not (internal.Active("auction") and module.db.crates == "below") then
-        return
-    end
-    local inline = module.db.align == "inline"
-    local r, g, b = HIGHLIGHT_FONT_COLOR:GetRGB()
-    for _, line in ipairs(data.lines or {}) do
-        local text = plainText(line)
-        if text and hasBundle(text) and inList(data, line) then
-            for part in (text .. "\n"):gmatch(LINES) do
-                local count, name = bundleOf(part)
-                if count then
-                    local label = format(L.PRICE_INFO_LINE, format(L.AUCTIONPRICES_BUNDLE, count, name))
-                    local cost = bundleCost(count, name)
-                    if inline then
-                        tooltip:AddLine(format(L.PRICE_INLINE, label, cost), r, g, b)
-                    else
-                        tooltip:AddDoubleLine(label, cost, r, g, b, r, g, b)
-                    end
-                end
-            end
-        end
-    end
 end
 
 local function addAuctionPrice(tooltip, data)
@@ -971,7 +958,6 @@ internal.AddPart("auction", {
         end
         -- The hook can't be removed; addAuctionPrice checks the part is on instead.
         ItemTooltip.OnPrices(addAuctionPrice)
-        ItemTooltip.OnPrices(addBundlePrices)
         ItemTooltip.ReplaceLine(replaceBundleLine)
         ns.AddOns.WhenLoaded("Blizzard_Professions", hookProfessions)
     end,
