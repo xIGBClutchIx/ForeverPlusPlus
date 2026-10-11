@@ -193,6 +193,20 @@ function FriendlyPlates.New(module, spec)
             self:Fade(unit)
         end
     end
+    -- A unit turned hostile (a duel, a quest NPC) or friendly without its plate being added again:
+    -- give the plate back to Blizzard, or take it over. Unknown (secret) changes nothing.
+    self.onFaction = function(_, unit)
+        local frame = Nameplates.FrameFor(unit)
+        local ours = frame and self:IsOurs(unit)
+        if ours == nil then
+            return
+        end
+        if ours and not self.records[unit] then
+            self:Add(unit, frame)
+        elseif not ours and self.records[unit] then
+            self:Remove(unit)
+        end
+    end
     -- Group or friends changed: the icons may need to come or go.
     self.onSocialChange = function()
         for unit in pairs(self.records) do
@@ -232,13 +246,13 @@ function FriendlyPlates.Defaults(extra)
     return extra
 end
 
--- Whether this is one of ours: a friendly player (or NPC) we can read. The personal resource
--- display is a friendly player too, so leave out ourselves.
+-- Whether this is one of ours: a friendly player (or NPC). The personal resource display is a
+-- friendly player too, so leave out ourselves. Nil when the game won't say (secret values).
 function Plates:IsOurs(unit)
     local isPlayer, isFriend, isSelf = UnitIsPlayer(unit), UnitIsFriend("player", unit),
         UnitIsUnit(unit, "player")
     if not (readable(isPlayer) and readable(isFriend) and readable(isSelf)) then
-        return false
+        return nil
     end
     return isFriend and not isSelf and (isPlayer and true or false) == self.spec.players
 end
@@ -389,6 +403,7 @@ function Plates:Enable()
             module:On(event, self.onSocialChange)
         end
     end
+    module:On("UNIT_FACTION", self.onFaction)
     -- UNIT_FLAGS covers other units' combat; these cover the fallback to our own.
     module:On("PLAYER_REGEN_DISABLED", self.onPlayerCombat)
     module:On("PLAYER_REGEN_ENABLED", self.onPlayerCombat)

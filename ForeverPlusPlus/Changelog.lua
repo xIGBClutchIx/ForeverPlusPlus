@@ -45,9 +45,17 @@ ns.changelog = {
                     .. "go away." },
                 { L.COMMANDS_TITLE, "/rl and /clear are left to another addon that has them even "
                     .. "after you've typed a slash command, and turning one on says so in chat." },
+                { L.FLIGHTTIMER_TITLE, "Turning Bar on during a flight shows the bar for the rest "
+                    .. "of it." },
                 { L.PLAYERPLATES_TITLE, "Puts your game settings back at login if it was turned "
                     .. "off in combat just before a reload. So do NPC Nameplates, Auto Dismount, and "
                     .. "World Map's Coordinates." },
+                { L.PLAYERPLATES_TITLE, "A player who turns hostile, like in a duel, gets "
+                    .. "Blizzard's own nameplate back, health bar and all. So does an NPC that turns "
+                    .. "hostile with NPC Nameplates on." },
+                { L.QUESTPLATES_TITLE, "An objective that needs 100 of something shows as 37/100, "
+                    .. "not 37%. Creatures that showed up during a fight get their quest icon once "
+                    .. "it's over." },
                 { L.CHANGELOG_SETTINGS, "Recommended Defaults and Developer's Defaults keep where you "
                     .. "moved things and their size in Edit Mode, and reset only the options." },
                 { L.TALENTPLANNER_TITLE, "Refuses a shared plan with more than 51 points, which could "
@@ -57,6 +65,8 @@ ns.changelog = {
                 { L.WAYPOINTS_TITLE, "/way is left to TomTom or another addon that has it even "
                     .. "after you've typed a slash command, and turning Waypoints on says so in "
                     .. "chat." },
+                { L.WORLDMAP_TITLE, "Zone Info shows herb and ore names in your language the first "
+                    .. "time, instead of in English until the map changed." },
             } },
         },
     },

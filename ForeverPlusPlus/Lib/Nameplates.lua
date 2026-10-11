@@ -172,6 +172,13 @@ function Nameplates.ForEach(fn)
     end
 end
 
+---The UnitFrame of a plate on screen, by its unit, or nil (only while something is registered).
+---@param unit string
+---@return table?
+function Nameplates.FrameFor(unit)
+    return frames[unit]
+end
+
 ---Whether Blizzard is drawing a cast bar on this plate right now, fading out included. Friendly
 ---plates can hide cast bars, so casting alone doesn't mean one is there. `castBar` is
 ---Parts(frame).castBar, a container whose children are the bars; a visibility we can't read counts

@@ -176,10 +176,10 @@ local function tally(objective, party)
     return worst[1], worst[2]
 end
 
--- The first objective of this unit's quests that isn't done, as `current, needed, kind` (a
--- percentage objective has `needed` of 100; `kind` is the quest log's objective type, or false
--- when it can't be matched), or `current, needed, "done"` when all it lists are done, `false`
--- when it has none, or nil when the game won't
+-- The first objective of this unit's quests that isn't done, as `current, needed, kind, percent`
+-- (`kind` is the quest log's objective type, or false when it can't be matched; `percent` when it's
+-- a percentage, out of 100), or `current, needed, "done", percent` when all it lists are done,
+-- `false` when it has none, or nil when the game won't
 -- say (secret values in combat or an instance), so the plate keeps what it shows.
 -- In a group the tooltip puts a QuestPlayer line with a name (the player's own too) before each
 -- member's objectives; lines before any name are the player's.
@@ -234,19 +234,19 @@ local function scan(unit)
     if unknown then
         return nil
     end
-    local doneCurrent, doneNeeded
+    local doneCurrent, doneNeeded, donePercent
     for _, objective in ipairs(order) do
         local current, needed = tally(objective, party)
         if current < needed then
-            return current, needed, objectiveKind(objective.text)
+            return current, needed, objectiveKind(objective.text), objective.percent
         end
         if not doneCurrent then
-            doneCurrent, doneNeeded = current, needed
+            doneCurrent, doneNeeded, donePercent = current, needed, objective.percent
         end
     end
     -- Every objective listed is done: show the check and the final count.
     if doneCurrent then
-        return doneCurrent, doneNeeded, "done"
+        return doneCurrent, doneNeeded, "done", donePercent
     end
     return false
 end
@@ -262,7 +262,7 @@ local function create(frame)
     return box
 end
 
-local function place(box, frame, current, needed, kind)
+local function place(box, frame, current, needed, kind, percent)
     local db = module.db
     local scale = db.size / 100
     local parts = Nameplates.Parts(frame)
@@ -296,12 +296,9 @@ local function place(box, frame, current, needed, kind)
     end
     -- A finished objective has nothing remaining, so it shows its count either way.
     if db.progress == "count" or (done and db.progress == "remaining") then
-        label = current .. "/" .. needed
-        if needed == 100 then
-            label = current .. "%"
-        end
+        label = percent and current .. "%" or current .. "/" .. needed
     elseif db.progress == "remaining" then
-        label = max(needed - current, 0) .. (needed == 100 and "%" or "")
+        label = max(needed - current, 0) .. (percent and "%" or "")
     end
     if done and not db.completedCount then
         label = nil -- just the check
@@ -327,7 +324,7 @@ end
 
 local function update(unit, frame)
     local box = indicators[frame]
-    local current, needed, kind = scan(unit)
+    local current, needed, kind, percent = scan(unit)
     if current == nil then
         return
     end
@@ -344,7 +341,7 @@ local function update(unit, frame)
         box = create(frame)
         indicators[frame] = box
     end
-    place(box, frame, current, needed, kind)
+    place(box, frame, current, needed, kind, percent)
 end
 
 local pending = false
@@ -379,6 +376,8 @@ function module:OnEnable()
     self:On("UNIT_QUEST_LOG_CHANGED", refreshSoon)
     self:On("QUEST_WATCH_UPDATE", refreshSoon)
     self:On("GROUP_ROSTER_UPDATE", refreshSoon) -- party members' lines come and go
+    -- A plate whose tooltip was secret in combat kept what it showed; look again now it's readable.
+    self:On("PLAYER_REGEN_ENABLED", refreshSoon)
 end
 
 function module:OnDisable()

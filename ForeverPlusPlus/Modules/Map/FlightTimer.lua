@@ -337,7 +337,8 @@ function module:OnOptionChanged(option)
     if option == "scale" and bar then
         place()
     end
-    if option == "bar" and bar and not self.db.bar and not ns.EditMode.IsActive() then
-        bar:Hide()
+    if option == "bar" and bar and not ns.EditMode.IsActive() then
+        -- Turned on mid-flight, the bar shows for the rest of it.
+        bar:SetShown(self.db.bar and flight and flight.started and true or false)
     end
 end

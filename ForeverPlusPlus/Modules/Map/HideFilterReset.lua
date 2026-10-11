@@ -18,14 +18,19 @@ module.category = "map"
 local PARTS = { "ResetButton", "FilterCounter", "FilterCounterBanner" }
 
 local parts -- the ones found, once the map has loaded
+local tookMouse = {} -- part -> whether it took the mouse before we changed it
 
 -- The filter dropdown is one of the map's overlay frames, with no name, so it's found by its parts.
 local function findParts(map)
     local found = {}
     for _, frame in ipairs(map.overlayFrames or {}) do
         for _, key in ipairs(PARTS) do
-            if frame[key] then
-                found[#found + 1] = frame[key]
+            local part = frame[key]
+            if part then
+                found[#found + 1] = part
+                if part.IsMouseEnabled then
+                    tookMouse[part] = part:IsMouseEnabled()
+                end
             end
         end
     end
@@ -33,13 +38,14 @@ local function findParts(map)
 end
 
 -- Blizzard shows and hides the button as the filters change, so it's faded out and made
--- unclickable instead of hidden, and stays that way whatever Blizzard does.
+-- unclickable instead of hidden, and stays that way whatever Blizzard does. Turned off, each part
+-- takes the mouse again only if it did before.
 local function apply()
     local on = module.enabled
     for _, part in ipairs(parts) do
         part:SetAlpha(on and 0 or 1)
-        if part.EnableMouse then
-            part:EnableMouse(not on)
+        if tookMouse[part] ~= nil then
+            part:EnableMouse(not on and tookMouse[part])
         end
     end
 end

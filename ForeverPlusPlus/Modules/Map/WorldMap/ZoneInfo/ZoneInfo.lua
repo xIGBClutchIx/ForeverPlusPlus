@@ -622,6 +622,10 @@ function module:OnEnable()
     self:On("PLAYER_LEVEL_UP", redraw)
     self:On("SKILL_LINES_CHANGED", redraw)
     self:On("CHAT_MSG_SKILL", redraw)
+    -- Herb and ore names the game hadn't loaded yet came out in English; draw them again.
+    if not english then
+        self:On("ITEM_DATA_LOAD_RESULT", redraw)
+    end
 end
 
 function module:OnDisable()
