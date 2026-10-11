@@ -374,14 +374,18 @@ end
 -- The tracker lists quests in watch list order (after callings and quests that set their own
 -- place) and has no sort of its own, and the comparison is a local in its code. So Sort by Level
 -- reorders the watch list: it untracks the quests out of place and tracks them again in level
--- order, each going to the end. These are plain C_QuestLog calls, not the tracker's code; the
--- tracker only marks itself dirty on QUEST_WATCH_LIST_CHANGED and redraws on its own next frame,
--- and since the blocks still exist then, it plays no "quest added" fanfare. Out of combat only,
--- to keep well away from the quest item buttons.
+-- order. These are plain C_QuestLog calls, not the tracker's code; the tracker only marks itself
+-- dirty on QUEST_WATCH_LIST_CHANGED and redraws on its own next frame, and since the blocks still
+-- exist then, it plays no "quest added" fanfare. Out of combat only, to keep well away from the
+-- quest item buttons.
+-- Tracking a quest again put it at the top of the list on Forever, not the end as assumed (Lowest
+-- First came out highest first), so the first sort checks which end it goes to and learns.
 
 local SORT_DELAY = 0.2 -- seconds; one sort after a burst of quest log events
 local sortPending, sortAfterCombat = false, false
-local sortGaveUp = false -- the client didn't keep our order, so stop trying until turned on again
+local sortGaveUp = false -- the client kept neither order, so stop trying until turned on again
+local addsToTop = true -- AddQuestWatch puts the quest first rather than last
+local addEndKnown = false -- a sort has shown which end it goes to
 
 ---The quest's level, or nil while the quest log doesn't know it yet.
 ---@param questID number
@@ -395,15 +399,20 @@ local function questLevel(questID)
     end
 end
 
--- Whether the watch list holds `ids` from position `first` on, in that order.
-local function watchesMatch(ids, first)
-    for i = first, #ids do
+-- Whether the watch list holds exactly `ids`, in that order.
+local function watchesMatch(ids)
+    if C_QuestLog.GetNumQuestWatches() ~= #ids then
+        return false
+    end
+    for i = 1, #ids do
         if C_QuestLog.GetQuestIDForQuestWatchIndex(i) ~= ids[i] then
             return false
         end
     end
     return true
 end
+
+local requestSort
 
 local function sortWatches()
     local order = module.db.sort
@@ -438,14 +447,25 @@ local function sortWatches()
         end
         return a.index < b.index
     end)
-    local first
-    for i = 1, #sorted do
-        if sorted[i] ~= watched[i] then
-            first = i
-            break
+    -- The quests already in place at the end they're added at stay; the rest are tracked again.
+    -- Adding to the top, they go in from the last out of place to the first.
+    local from, to, step
+    if addsToTop then
+        for i = #sorted, 1, -1 do
+            if sorted[i] ~= watched[i] then
+                from, to, step = i, 1, -1
+                break
+            end
+        end
+    else
+        for i = 1, #sorted do
+            if sorted[i] ~= watched[i] then
+                from, to, step = i, #sorted, 1
+                break
+            end
         end
     end
-    if not first then
+    if not from then
         return
     end
     local ids = {}
@@ -455,25 +475,32 @@ local function sortWatches()
     -- Untracking a quest can drop it as the quest the map and arrow follow, so put that back.
     local super = C_SuperTrack and C_SuperTrack.GetSuperTrackedQuestID
         and C_SuperTrack.GetSuperTrackedQuestID()
-    for i = first, #ids do
+    for i = from, to, step do
         C_QuestLog.RemoveQuestWatch(ids[i])
     end
-    for i = first, #ids do
+    for i = from, to, step do
         C_QuestLog.AddQuestWatch(ids[i])
     end
     if super and super ~= 0 and C_SuperTrack.SetSuperTrackedQuestID
         and C_SuperTrack.GetSuperTrackedQuestID() ~= super then
         C_SuperTrack.SetSuperTrackedQuestID(super)
     end
-    -- If tracking again doesn't add to the end on this client, don't keep reshuffling.
+    -- Check the order once the client has it. Wrong the first time means quests go to the other
+    -- end, so sort again that way; wrong after that, and this client keeps its own order.
     C_Timer.After(0, function()
-        if not watchesMatch(ids, first) then
+        if watchesMatch(ids) then
+            addEndKnown = true
+        elseif not addEndKnown then
+            addEndKnown = true
+            addsToTop = not addsToTop
+            requestSort()
+        else
             sortGaveUp = true
         end
     end)
 end
 
-local function requestSort()
+function requestSort()
     if sortPending then
         return
     end
