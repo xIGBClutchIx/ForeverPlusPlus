@@ -1747,6 +1747,11 @@ local function buildChangelog(frame)
     if releases[1] then
         show(1)
     end
+    -- Again a frame later: on the first visit the release with a NEW label stayed blank until the
+    -- page was shown again, as if its text wasn't measured yet while the page was being built.
+    if C_Timer then
+        C_Timer.After(0, refresh)
+    end
     frame:HookScript("OnShow", refresh)
 end
 
