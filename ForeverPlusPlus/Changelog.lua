@@ -26,7 +26,7 @@ ns.changelog = {
                 { L.WAYPOINTS_TITLE, "New, on by default, in Map: /way [zone] x y puts the "
                     .. "game's map pin on a spot and tracks it (/way clear takes it away), unless "
                     .. "TomTom or another addon already has /way. The new Waypoint Arrow option "
-                    .. "(off by default) shows an arrow on screen that turns toward the pin, from "
+                    .. "(on by default) shows an arrow on screen that turns toward the pin, from "
                     .. "/way or a click on the map, with how far it is. Move and resize it in Edit Mode." },
                 { L.CHANGELOG_SETTINGS, "A search box at the top of the Modules page shows "
                     .. "only the modules whose name or description has what you type, under "

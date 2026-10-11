@@ -16,7 +16,7 @@ local WorldMap = ns.WorldMap
 local module = ns.NewModule("Waypoints", L.WAYPOINTS_DESC, {
     enabled = true,
     way = true,
-    arrow = false,
+    arrow = true,
     scale = 100, -- percent
     x = 0, -- the arrow's offset from the center of the screen
     y = 180,
@@ -211,10 +211,9 @@ local function locate()
                     target = pos
                 end
             end
-            local width, height = C_Map.GetMapWorldSize(mapID)
+            local width, height = WorldMap.Size(mapID)
             local px, py = here:GetXY()
-            if target and ns.IsReadable(px) and ns.IsReadable(width) and width > 0 and height > 0
-                and not (px == 0 and py == 0) then
+            if target and width and ns.IsReadable(px) and not (px == 0 and py == 0) then
                 local tx, ty = target:GetXY()
                 return WorldMap.Toward(width, height, px, py, tx, ty)
             end
