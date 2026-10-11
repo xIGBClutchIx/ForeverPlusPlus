@@ -1,15 +1,15 @@
 -- Quest Tracker: restyles Blizzard's own objective tracker instead of replacing it, so it keeps
 -- its Edit Mode place, height and opacity, its menus, quest items and clicks. It changes the
 -- tracker's font objects (face, size, outline), draws a tooltip-style box that fits what the
--- tracker shows, and can fade the tracker in combat.
+-- tracker shows, can fade the tracker in combat, and can sort tracked quests by level.
 -- It never calls the tracker's update or layout itself: that would run Blizzard's layout as
 -- addon code and could taint the quest item buttons. A font change the tracker has already laid
 -- out settles at its next update (any quest progress, or collapsing and expanding it).
 local _, ns = ...
 
 local pairs, ipairs, type, floor, min, max = pairs, ipairs, type, math.floor, math.min, math.max
-local setmetatable, GetLocale, CreateFrame = setmetatable, GetLocale, CreateFrame
-local InCombatLockdown, C_Timer = InCombatLockdown, C_Timer
+local setmetatable, GetLocale, CreateFrame, sort = setmetatable, GetLocale, CreateFrame, table.sort
+local InCombatLockdown, C_Timer, C_QuestLog = InCombatLockdown, C_Timer, C_QuestLog
 
 local L = ns.L
 
@@ -23,14 +23,22 @@ local module = ns.NewModule("QuestTracker", L.QUESTTRACKER_DESC, {
     border = false,
     padding = 10,
     fade = false,
+    sort = false,
 })
 module.title = L.QUESTTRACKER_TITLE
 module.category = "interface"
 
--- The text first, then the box behind it, then combat.
-local TEXT, BOX, COMBAT = L.QUESTTRACKER_SECTION_TEXT, L.QUESTTRACKER_SECTION_BOX,
-    L.QUESTTRACKER_SECTION_COMBAT
+-- Which quests and in what order, then the text, the box behind it, and combat.
+local QUESTS, TEXT, BOX, COMBAT = L.QUESTTRACKER_SECTION_QUESTS, L.QUESTTRACKER_SECTION_TEXT,
+    L.QUESTTRACKER_SECTION_BOX, L.QUESTTRACKER_SECTION_COMBAT
 module.options = {
+    {
+        key = "sort",
+        name = L.QUESTTRACKER_SORT,
+        description = L.QUESTTRACKER_SORT_DESC,
+        section = QUESTS,
+        added = "0.8.2",
+    },
     {
         key = "font",
         name = L.QUESTTRACKER_FONT,
@@ -357,6 +365,138 @@ local function setFaded(on)
     tracker():SetAlpha(on and FADED or 1)
 end
 
+-- Sorting -----------------------------------------------------------------------------------------
+-- The tracker lists quests in watch list order (after callings and quests that set their own
+-- place) and has no sort of its own, and the comparison is a local in its code. So Sort by Level
+-- reorders the watch list: it untracks the quests out of place and tracks them again in level
+-- order, each going to the end. These are plain C_QuestLog calls, not the tracker's code; the
+-- tracker only marks itself dirty on QUEST_WATCH_LIST_CHANGED and redraws on its own next frame,
+-- and since the blocks still exist then, it plays no "quest added" fanfare. Out of combat only,
+-- to keep well away from the quest item buttons.
+
+local SORT_DELAY = 0.2 -- seconds; one sort after a burst of quest log events
+local sortPending, sortAfterCombat = false, false
+local sortGaveUp = false -- the client didn't keep our order, so stop trying until turned on again
+
+---The quest's level, or nil while the quest log doesn't know it yet.
+---@param questID number
+---@return number?
+local function questLevel(questID)
+    local index = C_QuestLog.GetLogIndexForQuestID(questID)
+    local info = index and C_QuestLog.GetInfo(index)
+    local level = info and info.level
+    if type(level) == "number" and level > 0 then
+        return level
+    end
+end
+
+-- Whether the watch list holds `ids` from position `first` on, in that order.
+local function watchesMatch(ids, first)
+    for i = first, #ids do
+        if C_QuestLog.GetQuestIDForQuestWatchIndex(i) ~= ids[i] then
+            return false
+        end
+    end
+    return true
+end
+
+local function sortWatches()
+    if not (module.enabled and module.db.sort) or sortGaveUp then
+        return
+    end
+    if InCombatLockdown() then
+        sortAfterCombat = true
+        return
+    end
+    local watched = {}
+    for i = 1, C_QuestLog.GetNumQuestWatches() do
+        local questID = C_QuestLog.GetQuestIDForQuestWatchIndex(i)
+        local level = questID and questLevel(questID)
+        if not level then
+            return -- the quest log isn't ready; its next update sorts again
+        end
+        watched[i] = { id = questID, level = level, index = i }
+    end
+    local sorted = {}
+    for i, quest in ipairs(watched) do
+        sorted[i] = quest
+    end
+    -- Same level keeps the order they were tracked in.
+    sort(sorted, function(a, b)
+        if a.level ~= b.level then
+            return a.level < b.level
+        end
+        return a.index < b.index
+    end)
+    local first
+    for i = 1, #sorted do
+        if sorted[i] ~= watched[i] then
+            first = i
+            break
+        end
+    end
+    if not first then
+        return
+    end
+    local ids = {}
+    for i, quest in ipairs(sorted) do
+        ids[i] = quest.id
+    end
+    -- Untracking a quest can drop it as the quest the map and arrow follow, so put that back.
+    local super = C_SuperTrack and C_SuperTrack.GetSuperTrackedQuestID
+        and C_SuperTrack.GetSuperTrackedQuestID()
+    for i = first, #ids do
+        C_QuestLog.RemoveQuestWatch(ids[i])
+    end
+    for i = first, #ids do
+        C_QuestLog.AddQuestWatch(ids[i])
+    end
+    if super and super ~= 0 and C_SuperTrack.SetSuperTrackedQuestID
+        and C_SuperTrack.GetSuperTrackedQuestID() ~= super then
+        C_SuperTrack.SetSuperTrackedQuestID(super)
+    end
+    -- If tracking again doesn't add to the end on this client, don't keep reshuffling.
+    C_Timer.After(0, function()
+        if not watchesMatch(ids, first) then
+            sortGaveUp = true
+        end
+    end)
+end
+
+local function requestSort()
+    if sortPending then
+        return
+    end
+    sortPending = true
+    C_Timer.After(SORT_DELAY, function()
+        sortPending = false
+        sortWatches()
+    end)
+end
+
+local function onCombatEnd()
+    if sortAfterCombat then
+        sortAfterCombat = false
+        requestSort()
+    end
+end
+
+-- Listens for new quests and tracking only while Sort by Level is on.
+local function setSorting(on)
+    if on then
+        sortGaveUp = false
+        module:On("QUEST_WATCH_LIST_CHANGED", requestSort)
+        module:On("QUEST_LOG_UPDATE", requestSort)
+        module:On("PLAYER_REGEN_ENABLED", onCombatEnd)
+        requestSort()
+    else
+        module:Off("QUEST_WATCH_LIST_CHANGED", requestSort)
+        module:Off("QUEST_LOG_UPDATE", requestSort)
+        module:Off("PLAYER_REGEN_ENABLED", onCombatEnd)
+        sortAfterCombat = false
+    end
+end
+
 -- Module ------------------------------------------------------------------------------------------
 
 function module:IsAvailable()
@@ -382,6 +522,7 @@ function module:OnEnable()
     self:On("PLAYER_REGEN_DISABLED", function() setFaded(true) end)
     self:On("PLAYER_REGEN_ENABLED", function() setFaded(false) end)
     setFaded(InCombatLockdown())
+    setSorting(self.db.sort)
     onUpdate()
 end
 
@@ -405,6 +546,8 @@ function module:OnOptionChanged(key)
         fitBox()
     elseif key == "fade" then
         setFaded(InCombatLockdown())
+    elseif key == "sort" then
+        setSorting(self.db.sort)
     else
         fitBox()
     end

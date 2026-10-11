@@ -7,6 +7,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Changed
 
 - **Buff Timers**: Show Clock has an Under 1 Minute choice, for a clock only on auras about to run out.
+- **Quest Tracker**: the new Sort by Level option (off by default) lists tracked quests from the lowest level to the highest instead of in the order you tracked them. It waits for combat to end.
 
 ## 0.8.1 (2026-10-10)
 
