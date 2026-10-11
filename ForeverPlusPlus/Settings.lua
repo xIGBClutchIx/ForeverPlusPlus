@@ -886,13 +886,15 @@ local function layoutStack(stack)
 end
 
 -- Split pages ------------------------------------------------------------------------------------
--- The Modules and Changelog pages: under the title, a narrow list on the left with rows like the
--- Settings sidebar's, a faint gold line, and a pane on the right for what's selected, each side
--- scrolling on its own.
+-- The Modules and Changelog pages (and Console Variables, through ns.Split): under the title, a
+-- narrow list on the left with rows like the Settings sidebar's, a faint gold line, and a pane on
+-- the right for what's selected, each side scrolling on its own.
 
 -- A list `listWidth` wide and a pane right of it and its scroll bar, as `split.listScroll` and
--- `split.list` (a stack), and `split.pane` and `split.paneContent` (`split.paneWidth` wide).
-local function newSplit(frame, listWidth)
+-- `split.list` (a stack), and `split.pane` and `split.paneContent` (`split.paneWidth` wide). With
+-- `scrollBox`, the pane is a WowScrollBoxList instead, with `split.scrollBar` and no paneContent,
+-- for a page with too many rows to make a frame for each.
+local function newSplit(frame, listWidth, scrollBox)
     local width = frame:GetWidth()
     width = width > 0 and width or 615
     local paneLeft = LIST_LEFT + listWidth + 41
@@ -913,13 +915,23 @@ local function newSplit(frame, listWidth)
     line:SetPoint("TOPLEFT", paneLeft - 12, -66)
     line:SetPoint("BOTTOMLEFT", paneLeft - 12, 14)
 
-    local pane = newScroll(frame)
+    local pane
+    if scrollBox then
+        pane = CreateFrame("Frame", nil, frame, "WowScrollBoxList")
+        split.scrollBar = CreateFrame("EventFrame", nil, frame, "MinimalScrollBar")
+        split.scrollBar:SetPoint("TOPLEFT", pane, "TOPRIGHT", 8, 0)
+        split.scrollBar:SetPoint("BOTTOMLEFT", pane, "BOTTOMRIGHT", 8, 0)
+    else
+        pane = newScroll(frame)
+    end
     pane:SetPoint("TOPLEFT", paneLeft, -60)
     pane:SetPoint("BOTTOMRIGHT", -32, 8)
     split.pane, split.paneWidth = pane, width - paneLeft - 32
-    split.paneContent = CreateFrame("Frame", nil, pane)
-    split.paneContent:SetWidth(split.paneWidth)
-    pane:SetScrollChild(split.paneContent)
+    if not scrollBox then
+        split.paneContent = CreateFrame("Frame", nil, pane)
+        split.paneContent:SetWidth(split.paneWidth)
+        pane:SetScrollChild(split.paneContent)
+    end
     return split
 end
 
@@ -1350,9 +1362,9 @@ function refreshAll()
     relayout()
 end
 
--- A search box at the top of a page we draw, left of `anchor` (its Defaults button), with
--- `instructions` in gray while it's empty. It calls `onChange(text)` with the text, trimmed, as
--- it's typed. Blizzard's own search, at the top left of the panel, finds settings across every
+-- A search box at the top of a page we draw, left of `anchor` (its Defaults button) or at the top
+-- right without one, with `instructions` in gray while it's empty. It calls `onChange(text)` with
+-- the text, trimmed, as it's typed. Blizzard's own search, at the top left of the panel, finds settings across every
 -- addon, not what our pages list. Probe: SearchBoxTemplate is Mainline's.
 local function addSearchBox(frame, anchor, instructions, onChange)
     if not hasTemplate("SearchBoxTemplate") then
@@ -1360,7 +1372,11 @@ local function addSearchBox(frame, anchor, instructions, onChange)
     end
     local box = CreateFrame("EditBox", nil, frame, "SearchBoxTemplate")
     box:SetSize(200, 20)
-    box:SetPoint("RIGHT", anchor, "LEFT", -12, 0)
+    if anchor then
+        box:SetPoint("RIGHT", anchor, "LEFT", -12, 0)
+    else
+        box:SetPoint("TOPRIGHT", -12, -19) -- where the Defaults button would be
+    end
     box:SetAutoFocus(false)
     if box.Instructions then
         box.Instructions:SetText(instructions)
@@ -1371,6 +1387,19 @@ local function addSearchBox(frame, anchor, instructions, onChange)
     end)
     return box
 end
+
+-- For a tool page (`BuildPage`) to look like the split pages: `New(frame, listWidth, scrollBox)`,
+-- `ListButton(list, isSelected)` and `Paint(row)` after the selection changes, `AddEntry(stack,
+-- frame, shown, gap)` and `Layout(stack)` for the list, and `AddSearchBox(frame, nil,
+-- instructions, onChange)` for the search box at the top right (nil without the template).
+ns.Split = {
+    New = newSplit,
+    ListButton = newListButton,
+    Paint = paint,
+    AddEntry = addEntry,
+    Layout = layoutStack,
+    AddSearchBox = addSearchBox,
+}
 
 -- The Modules page's search: the list narrows to the modules whose title or description has the
 -- text, or an option's name or description, and those options are highlighted on the right.

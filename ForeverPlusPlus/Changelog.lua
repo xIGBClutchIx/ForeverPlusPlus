@@ -22,6 +22,10 @@ ns.changelog = {
                 { L.CHARACTERFRAME_TITLE, "The new Equipped Weapon Skills option (on by "
                     .. "default) colors the Skills tab's bars green for the weapons you have "
                     .. "equipped, instead of blue." },
+                { L.CVARBROWSER_TITLE, "Laid out like the Modules page: Changed, All, and the "
+                    .. "game's own categories on the left, each with how many match the search, "
+                    .. "and their console variables beside it with each one's help text under its "
+                    .. "name. The Changed group replaces the Changed Only checkbox." },
                 { L.ITEMTOOLTIPS_TITLE, "The new Waylaid Crate Costs option shows beside each "
                     .. "bundle a Waylaid Crate takes what buying it costs at the auction house, "
                     .. "from your scanned prices. It can go under each bundle instead, or be "

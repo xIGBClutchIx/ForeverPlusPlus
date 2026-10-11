@@ -1,11 +1,14 @@
 -- Console Variables: a page under Forever++ in Settings that lists the game's console variables
--- (CVars) the player can change with a search, shows each one's value and default, and lets the
--- player change one or put it back to its default. Read-only CVars are left out. Changes made in
--- combat wait for it to end (ns.CVars.Apply).
+-- (CVars) the player can change, laid out like the Modules page: a list of groups on the left
+-- (Changed, All, and the client's own categories), each with how many match the search box at the
+-- top right, and the selected group's CVars beside it. Each shows its name (gold while changed)
+-- over its help text, a box for its value, and a Default button. Read-only CVars are left out.
+-- Changes made in combat wait for it to end (ns.CVars.Apply).
 -- Nothing is built until the page is first shown; `/fpp cvar <search>` opens it.
 local _, ns = ...
 
-local ipairs, type, sort, format, tostring = ipairs, type, table.sort, string.format, tostring
+local ipairs, pairs, type, sort = ipairs, pairs, type, table.sort
+local format, tostring = string.format, tostring
 local strlower, strfind, strtrim, tinsert = string.lower, string.find, strtrim, table.insert
 local CreateFrame, InCombatLockdown = CreateFrame, InCombatLockdown
 local C_CVar, C_Timer = C_CVar, C_Timer
@@ -18,15 +21,33 @@ local module = ns.NewModule("CVarBrowser", L.CVARBROWSER_DESC, { enabled = true 
 module.title = L.CVARBROWSER_TITLE
 module.alwaysOn = true -- a tool page, not a change to the game; it costs nothing until opened
 
-local ROW_HEIGHT = 26
--- Columns, measured from the list's right edge so the name gets whatever width is left.
-local RESET_WIDTH, DEFAULT_WIDTH, VALUE_WIDTH, GAP = 80, 110, 150, 10
-local DEFAULT_RIGHT = -(4 + RESET_WIDTH + GAP)
-local VALUE_RIGHT = DEFAULT_RIGHT - DEFAULT_WIDTH - GAP
+local LIST_WIDTH = 160 -- the group list, a little narrower than the module list
+local ROW_HEIGHT = 40 -- a CVar's row: its name over its help text
+local RESET_WIDTH, VALUE_WIDTH, GAP = 78, 112, 10
 
-local all -- every listed CVar, sorted: { name, key (lowercase name), text (lowercase name and help), help }
+-- Names for the client's categories (Enum.ConsoleCategory keys). Some read badly to players, so
+-- they get plainer ones (see the locale file). A key the client adds later shows as it is.
+local CATEGORY_NAMES = {
+    Debug = L.CVARBROWSER_CATEGORY_DEBUG,
+    Graphics = L.CVARBROWSER_CATEGORY_GRAPHICS,
+    Console = L.CVARBROWSER_CATEGORY_CONSOLE,
+    Combat = L.CVARBROWSER_CATEGORY_COMBAT,
+    Game = L.CVARBROWSER_CATEGORY_GAME,
+    Default = L.CVARBROWSER_CATEGORY_DEFAULT,
+    Net = L.CVARBROWSER_CATEGORY_NET,
+    Sound = L.CVARBROWSER_CATEGORY_SOUND,
+    Gm = L.CVARBROWSER_CATEGORY_GM,
+    Reveal = L.CVARBROWSER_CATEGORY_REVEAL,
+    None = L.CVARBROWSER_CATEGORY_NONE,
+}
+
+-- every listed CVar, sorted: { name, key (lowercase name), text (lowercase name and help), help,
+-- category (an Enum.ConsoleCategory value) }
+local all
 local byKey = {} -- lowercase name -> entry in `all`
-local search, changedOnly = "", false
+-- the list's groups in order, Changed and All first: { key, label, has(entry, changed) }
+local groups
+local search, selected = "", nil -- the search text, and the selected group's key
 local listening = false
 local ui -- the page's parts, once built
 
@@ -49,56 +70,128 @@ local function isReadOnly(name)
     return flags.readOnly
 end
 
--- Every CVar this client lists that the player can change (read-only ones are left out). Without
--- the list, typing an exact name still finds a CVar.
-local function loadAll()
-    all = {}
-    if not getAllCommands then
-        return
-    end
-    local cvarType = Enum.ConsoleCommandType and Enum.ConsoleCommandType.Cvar or 0
-    for _, info in ipairs(getAllCommands() or {}) do
-        local name = info.command
-        if info.commandType == cvarType and type(name) == "string" and name ~= ""
-            and not isReadOnly(name) then
-            local key = strlower(name)
-            if not byKey[key] then
-                local help = info.help or ""
-                local entry = { name = name, key = key, help = help, text = key .. " " .. strlower(help) }
-                byKey[key] = entry
-                all[#all + 1] = entry
-            end
-        end
-    end
-    sort(all, function(a, b) return a.key < b.key end)
-end
-
 local function isChanged(name)
     local value, default = read(name)
     return default ~= nil and value ~= default
 end
 
--- Lists the CVars that match the search (and "Changed Only"), keeping the scroll position.
-local function refresh()
+-- Changed, All, then a group for each of the client's categories that has a CVar, by name.
+local function loadGroups(present)
+    local keys = {}
+    for key, value in pairs(Enum.ConsoleCategory or {}) do
+        keys[value] = key
+    end
+    local categories = {}
+    for value in pairs(present) do
+        local key = keys[value]
+        local label = key and (CATEGORY_NAMES[key] or key) or tostring(value)
+        categories[#categories + 1] = {
+            key = value,
+            label = label,
+            has = function(entry) return entry.category == value end,
+        }
+    end
+    sort(categories, function(a, b) return a.label < b.label end)
+    groups = {
+        {
+            key = "changed",
+            label = L.CVARBROWSER_CHANGED,
+            has = function(_, changed) return changed end,
+        },
+        { key = "all", label = L.CVARBROWSER_ALL, has = function() return true end },
+    }
+    for _, group in ipairs(categories) do
+        groups[#groups + 1] = group
+    end
+end
+
+-- Every CVar this client lists that the player can change (read-only ones are left out), and the
+-- groups they make. Without the list, typing an exact name still finds a CVar.
+local function loadAll()
+    all = {}
+    local present = {}
+    if getAllCommands then
+        local cvarType = Enum.ConsoleCommandType and Enum.ConsoleCommandType.Cvar or 0
+        for _, info in ipairs(getAllCommands() or {}) do
+            local name = info.command
+            if info.commandType == cvarType and type(name) == "string" and name ~= ""
+                and not isReadOnly(name) then
+                local key = strlower(name)
+                if not byKey[key] then
+                    local help = info.help or ""
+                    local entry = {
+                        name = name,
+                        key = key,
+                        help = help,
+                        text = key .. " " .. strlower(help),
+                        category = info.category,
+                    }
+                    byKey[key] = entry
+                    all[#all + 1] = entry
+                    if info.category ~= nil then
+                        present[info.category] = true
+                    end
+                end
+            end
+        end
+    end
+    sort(all, function(a, b) return a.key < b.key end)
+    loadGroups(present)
+end
+
+local function groupOf(key)
+    for _, group in ipairs(groups) do
+        if group.key == key then
+            return group
+        end
+    end
+end
+
+-- Lists the selected group's CVars that match the search and counts each group's matches.
+-- `top` scrolls back to the top (a new group); otherwise the scroll position stays.
+local function refresh(top)
     if not ui then
         return
     end
     local query = strlower(search)
-    local rows = {}
-    for _, entry in ipairs(all) do
-        if (query == "" or strfind(entry.text, query, 1, true)) and not (changedOnly and not isChanged(entry.name)) then
+    local group = groupOf(selected) or groups[1]
+    local counts, rows = {}, {}
+    local function add(entry, changed)
+        for _, other in ipairs(groups) do
+            if other.has(entry, changed) then
+                counts[other.key] = (counts[other.key] or 0) + 1
+            end
+        end
+        if group.has(entry, changed) then
             rows[#rows + 1] = entry
         end
     end
-    -- An exact name the list doesn't have (a hidden CVar, or no command list) still shows, first,
-    -- unless it's read-only.
-    if query ~= "" and not byKey[query] and C_CVar.GetCVar(search) ~= nil and not isReadOnly(search)
-        and not (changedOnly and not isChanged(search)) then
-        tinsert(rows, 1, { name = search, key = query, help = "", text = query })
+    for _, entry in ipairs(all) do
+        if query == "" or strfind(entry.text, query, 1, true) then
+            add(entry, isChanged(entry.name))
+        end
     end
-    ui.scrollBox:SetDataProvider(CreateDataProvider(rows), ScrollBoxConstants.RetainScrollPosition)
-    ui.count:SetText(format(L.CVARBROWSER_COUNT, #rows, #all))
-    -- Say why the list is empty instead of leaving a blank page.
+    -- An exact name the list doesn't have (a hidden CVar, or no command list) still shows, first,
+    -- in Changed and All, unless it's read-only.
+    if query ~= "" and not byKey[query] and C_CVar.GetCVar(search) ~= nil
+        and not isReadOnly(search) then
+        local before = #rows
+        add({ name = search, key = query, help = "", text = query }, isChanged(search))
+        if #rows > before then
+            tinsert(rows, 1, rows[#rows])
+            rows[#rows] = nil
+        end
+    end
+    ui.scrollBox:SetDataProvider(CreateDataProvider(rows), top
+        and ScrollBoxConstants.DiscardScrollPosition or ScrollBoxConstants.RetainScrollPosition)
+    for _, row in ipairs(ui.groupRows) do
+        local count = counts[row.group.key] or 0
+        row.count:SetText(count)
+        -- Changed in gold while there's something in it, like a changed CVar's name.
+        row.text:SetFontObject(row.group.key == "changed" and count > 0 and "GameFontNormal"
+            or "GameFontHighlight")
+    end
+    -- Say why the list is empty instead of leaving a blank pane.
     local empty
     if #rows == 0 then
         if query ~= "" then
@@ -123,6 +216,37 @@ local function apply(name, value)
         end
         refresh()
     end)
+end
+
+-- Groups ---------------------------------------------------------------------------------------
+
+local function choose(key)
+    selected = key
+    for _, row in ipairs(ui.groupRows) do
+        ns.Split.Paint(row)
+    end
+    refresh(true)
+end
+
+-- A group's row in the list: its name, and how many of its CVars match the search in gray at the
+-- right.
+local function newGroupRow(list, group)
+    local row = ns.Split.ListButton(list, function() return selected == group.key end)
+    row.group = group
+    row.count = row:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    row.count:SetPoint("RIGHT", -6, 0)
+    row.text = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    row.text:SetPoint("LEFT", 8, 0)
+    row.text:SetPoint("RIGHT", row.count, "LEFT", -4, 0)
+    row.text:SetJustifyH("LEFT")
+    row.text:SetWordWrap(false)
+    row.text:SetText(group.label)
+    row:SetScript("OnClick", function()
+        if selected ~= group.key then
+            choose(group.key)
+        end
+    end)
+    return row
 end
 
 -- Rows -----------------------------------------------------------------------------------------
@@ -186,15 +310,9 @@ local function buildRow(row)
     row.reset:HookScript("OnEnter", function() enterRow(row) end)
     row.reset:HookScript("OnLeave", function() leaveRow(row) end)
 
-    row.default = row:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-    row.default:SetPoint("RIGHT", DEFAULT_RIGHT, 0)
-    row.default:SetWidth(DEFAULT_WIDTH)
-    row.default:SetJustifyH("LEFT")
-    row.default:SetWordWrap(false)
-
     row.value = CreateFrame("EditBox", nil, row, "InputBoxTemplate")
     row.value:SetSize(VALUE_WIDTH, 20)
-    row.value:SetPoint("RIGHT", VALUE_RIGHT, 0)
+    row.value:SetPoint("RIGHT", row.reset, "LEFT", -GAP, 0)
     row.value:SetAutoFocus(false)
     -- Our own box, so its Enter script is ours to set. Read the text before clearing focus: losing
     -- focus puts the current value back in the box, which used to undo every edit.
@@ -214,11 +332,18 @@ local function buildRow(row)
     row.value:HookScript("OnEnter", function() enterRow(row) end)
     row.value:HookScript("OnLeave", function() leaveRow(row) end)
 
+    -- The box's art reaches a few pixels left of it, so the text stops short of that.
     row.name = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    row.name:SetPoint("LEFT", 6, 0)
+    row.name:SetPoint("TOPLEFT", 6, -6)
     row.name:SetPoint("RIGHT", row.value, "LEFT", -GAP - 6, 0)
     row.name:SetJustifyH("LEFT")
     row.name:SetWordWrap(false)
+
+    row.help = row:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    row.help:SetPoint("TOPLEFT", 6, -23)
+    row.help:SetPoint("RIGHT", row.value, "LEFT", -GAP - 6, 0)
+    row.help:SetJustifyH("LEFT")
+    row.help:SetWordWrap(false)
 
     row:SetScript("OnEnter", enterRow)
     row:SetScript("OnLeave", leaveRow)
@@ -239,6 +364,7 @@ local function initRow(row, entry)
     else
         row.name:SetTextColor(HIGHLIGHT_FONT_COLOR:GetRGB())
     end
+    row.help:SetText(entry.help)
     if not row.value:HasFocus() then
         row.value:SetText(tostring(value or ""))
         row.value:SetCursorPosition(0)
@@ -246,7 +372,6 @@ local function initRow(row, entry)
     if row.value.SetEnabled then
         row.value:SetEnabled(not flags.readOnly)
     end
-    row.default:SetText(default or "")
     row.reset:SetEnabled(changed and not flags.readOnly)
 end
 
@@ -281,66 +406,33 @@ local function listen(on)
     end
 end
 
--- A column title above the list, `x` from its left or right edge (`side`), like the rows.
-local function header(parent, text, side, x)
-    local label = parent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    label:SetPoint("BOTTOMLEFT", parent, "TOP" .. side, x, 4)
-    label:SetText(text)
-    return label
-end
-
 ---Draws the page the first time it's shown (called by Settings.lua).
 ---@param frame table the empty page
 function module:BuildPage(frame)
     loadAll()
-    ui = {}
+    ui = { groupRows = {} }
 
     ns.AddPageTitle(frame, module.title)
+    local split = ns.Split.New(frame, LIST_WIDTH, true)
 
-    local list = CreateFrame("Frame", nil, frame)
-    list:SetPoint("TOPLEFT", 0, -58)
-    list:SetPoint("BOTTOMRIGHT")
-    ui.list = list
-
-    local searchBox = CreateFrame("EditBox", nil, list, "SearchBoxTemplate")
-    searchBox:SetSize(240, 20)
-    searchBox:SetPoint("TOPLEFT", 16, -6)
-    searchBox:SetText(search)
-    searchBox:HookScript("OnTextChanged", function(self)
-        search = strtrim(self:GetText() or "")
+    -- In the title row at the top right, like the Modules page's.
+    ui.search = ns.Split.AddSearchBox(frame, nil, L.CVARBROWSER_SEARCH, function(text)
+        search = text
         refresh()
     end)
-    ui.search = searchBox
-
-    local changed = CreateFrame("CheckButton", nil, list, "UICheckButtonTemplate")
-    changed:SetSize(26, 26)
-    changed:SetPoint("LEFT", searchBox, "RIGHT", 12, 0)
-    changed:SetChecked(changedOnly)
-    changed:SetScript("OnClick", function(self)
-        changedOnly = self:GetChecked()
-        refresh()
-    end)
-    local changedLabel = changed.text or changed.Text
-    if changedLabel then
-        changedLabel:SetFontObject("GameFontHighlight")
-        changedLabel:SetText(L.CVARBROWSER_CHANGED_ONLY)
+    if ui.search then
+        ui.search:SetText(search)
     end
 
-    ui.count = list:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-    ui.count:SetPoint("TOPRIGHT", -28, -10)
+    for _, group in ipairs(groups) do
+        local row = newGroupRow(split.list, group)
+        ui.groupRows[#ui.groupRows + 1] = row
+        ns.Split.AddEntry(split.list, row)
+    end
+    ns.Split.Layout(split.list)
 
-    local scrollBox = CreateFrame("Frame", nil, list, "WowScrollBoxList")
-    scrollBox:SetPoint("TOPLEFT", 8, -52)
-    scrollBox:SetPoint("BOTTOMRIGHT", -28, 8)
+    local scrollBox = split.pane
     ui.scrollBox = scrollBox
-
-    local scrollBar = CreateFrame("EventFrame", nil, list, "MinimalScrollBar")
-    scrollBar:SetPoint("TOPLEFT", scrollBox, "TOPRIGHT", 8, 0)
-    scrollBar:SetPoint("BOTTOMLEFT", scrollBox, "BOTTOMRIGHT", 8, 0)
-
-    header(scrollBox, L.CVARBROWSER_NAME, "LEFT", 6)
-    header(scrollBox, L.CVARBROWSER_VALUE, "RIGHT", VALUE_RIGHT - VALUE_WIDTH)
-    header(scrollBox, L.CVARBROWSER_DEFAULT, "RIGHT", DEFAULT_RIGHT - DEFAULT_WIDTH)
 
     -- Like the Modules page's "No modules match".
     ui.empty = scrollBox:CreateFontString(nil, "OVERLAY", "GameFontDisable")
@@ -352,20 +444,39 @@ function module:BuildPage(frame)
     local view = CreateScrollBoxListLinearView()
     view:SetElementExtent(ROW_HEIGHT)
     view:SetElementInitializer("Frame", initRow)
-    ScrollUtil.InitScrollBoxListWithScrollBar(scrollBox, scrollBar, view)
+    ScrollUtil.InitScrollBoxListWithScrollBar(scrollBox, split.scrollBar, view)
+
+    -- Opens on Changed while something is, otherwise All (or All for `/fpp cvar <search>`).
+    if not selected then
+        selected = "all"
+        if search == "" then
+            for _, entry in ipairs(all) do
+                if isChanged(entry.name) then
+                    selected = "changed"
+                    break
+                end
+            end
+        end
+    end
 
     frame:HookScript("OnShow", function() listen(true); refresh() end)
     frame:HookScript("OnHide", function() listen(false) end)
     listen(frame:IsShown())
-    refresh()
+    choose(selected)
 end
 
----Shows the page with `text` in the search box.
+---Shows the page with `text` in the search box, in All so nothing it finds is hidden.
 ---@param text string
 local function openWith(text)
     search = text
+    if text ~= "" then
+        selected = "all"
+    end
     if ui then
-        ui.search:SetText(text) -- runs refresh() through OnTextChanged
+        if ui.search then
+            ui.search:SetText(text)
+        end
+        choose(selected)
     end
     if not ns.OpenSettings(module.name) then
         ns.Print(L.CVARBROWSER_NO_PAGE)
