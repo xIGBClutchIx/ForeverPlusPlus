@@ -56,11 +56,12 @@ ns.changelog = {
                     .. "straight onto your weapon, without clicking the weapon. Main hand first; "
                     .. "the off hand when only it can take it, or when the main hand already has "
                     .. "a buff and the off hand doesn't (or its buff runs out sooner)." },
-                { L.BUFFTIMERS_TITLE, "New, off by default, in Interface: the time left under "
+                { L.BUFFTIMERS_TITLE, "New, on by default, in Interface: the time left under "
                     .. "your buff and debuff icons as a clock, like 1:23, instead of rounded "
-                    .. "minutes like 2 m. Choose under 10 minutes, under an hour, or always. When "
+                    .. "minutes like 2 m. Choose under 10 minutes (the default), under an hour, "
+                    .. "or always. When "
                     .. "the game hides an aura's time in combat, Blizzard's own timer shows." },
-                { L.UNUSABLEITEMS_TITLE, "New, off by default, in Items: tints red the items "
+                { L.UNUSABLEITEMS_TITLE, "New, on by default, in Items: tints red the items "
                     .. "you can't use, because of your class, armor or weapon skill, level, or "
                     .. "profession, in your bags, the bank, and at merchants, the way merchants "
                     .. "tint them. At merchants it only adds what the merchant doesn't already "
@@ -73,7 +74,7 @@ ns.changelog = {
                     .. "to see the errors, and it shows how many this session caught. After a "
                     .. "fresh install it wears Blizzard's NEW label, and its first click opens the "
                     .. "About page." },
-                { L.XPBARTEXT_TITLE, "New, off by default, in Interface: the experience bar "
+                { L.XPBARTEXT_TITLE, "New, on by default, in Interface: the experience bar "
                     .. "shows its numbers all the time, with the percent, your rested XP, and the "
                     .. "XP of the quests in your log that are ready to turn in (or all of them), "
                     .. "in green once turning them in would level you." },

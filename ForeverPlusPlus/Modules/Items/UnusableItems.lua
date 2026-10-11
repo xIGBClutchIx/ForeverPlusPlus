@@ -18,7 +18,7 @@ local C_Item, C_TooltipInfo, C_Container, C_Timer = C_Item, C_TooltipInfo, C_Con
 local L = ns.L
 
 local module = ns.NewModule("UnusableItems", L.UNUSABLEITEMS_DESC, {
-    enabled = false,
+    enabled = true,
     bags = true,
     bank = true,
     merchant = true,

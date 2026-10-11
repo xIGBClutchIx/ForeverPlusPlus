@@ -11,8 +11,8 @@ local readable = ns.IsReadable
 local clock = ns.Text.Clock
 
 local module = ns.NewModule("BuffTimers", L.BUFFTIMERS_DESC, {
-    enabled = false,
-    limit = "hour", -- "10m", "hour", or "all": which auras get a clock
+    enabled = true,
+    limit = "10m", -- "10m", "hour", or "all": which auras get a clock
 })
 module.title = L.BUFFTIMERS_TITLE
 module.category = "interface"

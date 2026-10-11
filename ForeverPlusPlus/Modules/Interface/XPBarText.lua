@@ -13,7 +13,7 @@ local L = ns.L
 local readable = ns.IsReadable
 
 local module = ns.NewModule("XPBarText", L.XPBARTEXT_DESC, {
-    enabled = false,
+    enabled = true,
     always = true, -- false: only while the mouse is over the bar, like Blizzard's
     percent = true,
     rested = true,
