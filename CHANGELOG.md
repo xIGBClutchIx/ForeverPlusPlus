@@ -15,6 +15,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Quest Tracker**: the new Sort by Level option (off by default) lists tracked quests by level, lowest or highest first, instead of in the order you tracked them. It waits for combat to end.
 - **Settings**: the Changelog page lists the releases on the left, like the Modules page, with the selected one's notes beside it in larger text. Releases since the version you last saw are marked NEW, and a search box shows only the changes that mention what you type.
 - **Talent Planner**: counts the Legacy perk Talented: with it, plans get talent points from level 5 instead of 10, still 51 at most.
+- **World Map**: Points of Interest draws spirit healers as a glowing spirit instead of a tombstone, so they aren't mistaken for your corpse.
 
 ### Fixed
 
@@ -28,15 +29,17 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Error Catcher**: a link or color in an error shows as plain text in its chat message, and it keeps the last 100 errors with shorter stacks, so its saved file stays small.
 - **Flight Timer**: turning Bar on during a flight shows the bar for the rest of it.
 - **Hide Beta Feedback**: turning it off puts the quest windows' feedback alert back as it was.
+- **Hide Filter Reset**: turning it off gives the mouse back only to the parts that had it before.
+- **Item Tooltips**: your own auction house searches keep an item's lowest price instead of the last one listed.
 - **Player Nameplates**: a player who turns hostile, like in a duel, gets Blizzard's own nameplate back, health bar and all. So does an NPC that turns hostile with NPC Nameplates on.
 - **Player Nameplates**: puts your game settings back at login if it was turned off in combat just before a reload. So do NPC Nameplates, Auto Dismount, and World Map's Coordinates.
 - **Quest Nameplates**: an objective that needs 100 of something shows as 37/100, not 37%. Creatures that showed up during a fight get their quest icon once it's over.
 - **Recipe Colors**: turning it off clears the tint from every recipe row, not only the ones on screen.
+- **Settings**: the Modules page no longer errors when it opens on a module marked NEW.
 - **Settings**: Recommended Defaults and Developer's Defaults keep where you moved things and their size in Edit Mode, and reset only the options.
 - **Short Channel Names**: turning it off gives channels already in chat their full names again.
 - **Social Button**: turning it off no longer leaves Chat Copy's button above the chat window.
 - **Talent Planner**: refuses a shared plan with more than 51 points, which could freeze the game, and a shared plan's name can't carry colors, icons, or links.
-- **Item Tooltips**: your own auction house searches keep an item's lowest price instead of the last one listed.
 - **Unusable Items Tint**: no longer tints recipes you can learn because of the item they make, such as plans for mail armor or for gear above your level.
 - **Waypoints**: `/way` is left to TomTom or another addon that has it even after you've typed a slash command, and turning Waypoints on says so in chat.
 - **World Map**: Zone Info shows herb and ore names in your language the first time, instead of in English until the map changed.

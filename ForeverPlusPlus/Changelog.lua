@@ -41,6 +41,8 @@ ns.changelog = {
                     .. "search box shows only the changes that mention what you type." },
                 { L.TALENTPLANNER_TITLE, "Counts the Legacy perk Talented: with it, plans get "
                     .. "talent points from level 5 instead of 10, still 51 at most." },
+                { L.WORLDMAP_TITLE, "Points of Interest draws spirit healers as a glowing spirit "
+                    .. "instead of a tombstone, so they aren't mistaken for your corpse." },
             } },
             { L.CHANGELOG_FIXED, {
                 { L.ALREADYKNOWN_TITLE, "The Tint look no longer turns white the red icons of "
@@ -67,6 +69,10 @@ ns.changelog = {
                     .. "of it." },
                 { L.HIDEFEEDBACK_TITLE, "Turning it off puts the quest windows' feedback alert back "
                     .. "as it was." },
+                { L.HIDEFILTERRESET_TITLE, "Turning it off gives the mouse back only to the parts "
+                    .. "that had it before." },
+                { L.ITEMTOOLTIPS_TITLE, "Your own auction house searches keep an item's lowest "
+                    .. "price instead of the last one listed." },
                 { L.PLAYERPLATES_TITLE, "A player who turns hostile, like in a duel, gets "
                     .. "Blizzard's own nameplate back, health bar and all. So does an NPC that turns "
                     .. "hostile with NPC Nameplates on." },
@@ -78,6 +84,8 @@ ns.changelog = {
                     .. "it's over." },
                 { L.RECIPECOLORS_TITLE, "Turning it off clears the tint from every recipe row, not "
                     .. "only the ones on screen." },
+                { L.CHANGELOG_SETTINGS, "The Modules page no longer errors when it opens on a "
+                    .. "module marked NEW." },
                 { L.CHANGELOG_SETTINGS, "Recommended Defaults and Developer's Defaults keep where you "
                     .. "moved things and their size in Edit Mode, and reset only the options." },
                 { L.CHANNELNAMES_TITLE, "Turning it off gives channels already in chat their full "
@@ -87,8 +95,6 @@ ns.changelog = {
                 { L.TALENTPLANNER_TITLE, "Refuses a shared plan with more than 51 points, which could "
                     .. "freeze the game, and a shared plan's name can't carry colors, icons, or "
                     .. "links." },
-                { L.ITEMTOOLTIPS_TITLE, "Your own auction house searches keep an item's lowest "
-                    .. "price instead of the last one listed." },
                 { L.UNUSABLEITEMS_TITLE, "No longer tints recipes you can learn because of the "
                     .. "item they make, such as plans for mail armor or for gear above your level." },
                 { L.WAYPOINTS_TITLE, "/way is left to TomTom or another addon that has it even "
