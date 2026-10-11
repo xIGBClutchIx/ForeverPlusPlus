@@ -58,19 +58,17 @@ end
 
 local RECIPE = 9 -- Enum.ItemClass.Recipe
 
--- Where a recipe's own lines end: its "Use: Teaches you how to make" line, or the blank line
--- before the item it makes. That item's lines follow in the same tooltip, and its armor type or
--- level in red says nothing about whether you can learn the recipe.
-local function recipeEnd(line)
-    local text = line.leftText
-    if not ns.IsReadable(text) then
-        return false
-    end
-    if text == "" then
-        return true
-    end
+-- A recipe's tooltip has the item it makes inside it, from a blank line after the recipe's name
+-- to its "Use: Teaches you how to craft" line; the recipe's reagents and "Requires
+-- Blacksmithing (85)" come after. That item's armor type or level in red says nothing about
+-- whether you can learn the recipe, so those lines are skipped.
+local function isBlank(text)
+    return ns.IsReadable(text) and text == ""
+end
+
+local function isUse(text)
     local use = _G.ITEM_SPELL_TRIGGER_ONUSE
-    return use and text:sub(1, #use) == use or false
+    return use and ns.IsReadable(text) and type(text) == "string" and text:sub(1, #use) == use or false
 end
 
 -- True when a line is red, false when none is, nil while the game has no tooltip for the item
@@ -83,14 +81,19 @@ local function tooltipUnusable(link)
     end
     local _, _, _, _, _, classID = C_Item.GetItemInfoInstant(link)
     local recipe = classID == RECIPE
+    local crafted = false -- inside a recipe's crafted item
     local alreadyKnown = _G.ITEM_SPELL_KNOWN
     for i = 2, #lines do -- line 1 is the name, in its quality color
         local line = lines[i]
-        if recipe and recipeEnd(line) then
-            return false
-        end
         local text = line.leftText
-        if not (alreadyKnown and ns.IsReadable(text) and text == alreadyKnown)
+        if recipe then
+            if isUse(text) then
+                crafted = false
+            elseif isBlank(text) then
+                crafted = true
+            end
+        end
+        if not crafted and not (alreadyKnown and ns.IsReadable(text) and text == alreadyKnown)
             and (isRed(line.leftColor) or (line.rightText and isRed(line.rightColor))) then
             return true
         end
