@@ -161,7 +161,9 @@ end
 local active, spare = {}, {}
 local info = {} -- overlay -> { bag, slot, button, kind, handled }
 
-local function onPreClick(self, mouseButton)
+-- Clicks come on both press and release (the secure template acts on whichever the client's
+-- ActionButtonUseKeyDown setting says); everything is worked out again for each.
+local function onPreClick(self, mouseButton, down)
     local data = info[self]
     local slot
     if not InCombatLockdown() and mouseButton == "RightButton" and not IsModifierKeyDown() and not busy() then
@@ -172,16 +174,17 @@ local function onPreClick(self, mouseButton)
         self:SetAttribute("type2", slot and "item" or nil)
         self:SetAttribute("target-slot", slot)
     end
-    if mouseButton == "RightButton" and module.db.printSteps then
+    if mouseButton == "RightButton" and not down and module.db.printSteps then
         ns.Print(L.AUTOWEAPONBUFF_PRINT_LINE:format(tostring(C_Container.GetContainerItemLink(data.bag, data.slot)),
             data.kind, tostring(slot)))
     end
 end
 
--- Anything the secure click didn't do goes to Blizzard's bag button, as if it had been clicked.
-local function onPostClick(self, mouseButton)
+-- Anything the secure click didn't do goes to Blizzard's bag button, as if it had been clicked,
+-- once, on release like Blizzard's.
+local function onPostClick(self, mouseButton, down)
     local data = info[self]
-    if not data.handled then
+    if not down and not data.handled then
         data.button:Click(mouseButton)
     end
 end
@@ -211,7 +214,7 @@ end
 
 local function newOverlay()
     local overlay = CreateFrame("Button", nil, UIParent, "SecureActionButtonTemplate")
-    overlay:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+    overlay:RegisterForClicks("AnyUp", "AnyDown")
     overlay:RegisterForDrag("LeftButton")
     overlay:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square", "ADD")
     overlay:SetScript("PreClick", onPreClick)
@@ -303,6 +306,7 @@ function module:OnEnable()
         if frame.UpdateItems then
             self:Hook(frame, "UpdateItems", schedule)
         end
+        self:HookScript(frame, "OnShow", schedule)
         self:HookScript(frame, "OnHide", schedule)
     end
     self:On("BAG_UPDATE_DELAYED", schedule)
