@@ -10,7 +10,8 @@ local L = ns.L
 
 ns.changelog = {
     {
-        version = L.CHANGELOG_UNRELEASED,
+        version = "0.8.2",
+        date = "2026-10-11",
         sections = {
             { L.CHANGELOG_CHANGED, {
                 { L.AUTOWEAPONBUFF_TITLE, "When no equipped weapon can take the item, like a "
