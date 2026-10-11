@@ -699,6 +699,7 @@ module.debugActions = {
         button = L.SELFTEST_BUTTON,
         description = L.SELFTEST_BUTTON_DESC,
         fn = module.Run,
+        section = L.DEBUG_SECTION_TESTING,
     },
 }
 

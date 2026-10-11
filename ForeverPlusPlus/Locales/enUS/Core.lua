@@ -68,12 +68,19 @@ L.SETTINGS_SEARCH = "Search modules" -- gray text in the Modules page's empty se
 L.SETTINGS_NO_MATCH = "No modules match \"%s\"." -- the search text
 L.SETTINGS_NEW_ONLY = "New" -- the checkbox beside the search box that lists only modules marked NEW
 L.SETTINGS_NOTHING_NEW = "Nothing new." -- the Modules list while that checkbox is on and nothing is new
--- The Debug page's own checkbox, at the top
+-- The Debug page's section headers, in the order they show. Modules put their debug options and
+-- buttons in one with `section`.
+L.DEBUG_SECTION_NEW = "What's New"
+L.DEBUG_SECTION_DIAGNOSTICS = "Diagnostics"
+L.DEBUG_SECTION_TESTING = "Testing"
+L.DEBUG_SECTION_LOGGING = "Logging"
+-- The Debug page's own checkbox, at the top of What's New
 L.SETTINGS_SHOW_TAGS = "Show Tags"
 L.SETTINGS_SHOW_TAGS_DESC = "Mark NEW every module and option added or changed since the last "
     .. "release on the Modules page, even ones not released yet or already seen, and keep them "
     .. "marked after you click them. For checking how the tags look."
--- The Debug page's own buttons, under Show Tags
+-- The Debug page's own buttons: Reset Seen Version and Reset Welcome under Show Tags, the rest in
+-- Diagnostics
 L.DEBUG_RESET_SEEN = "Reset Seen Version"
 L.DEBUG_RESET_SEEN_BUTTON = "Reset"
 L.DEBUG_RESET_SEEN_DESC = "Forget that you've seen this version, as if you just updated from the "

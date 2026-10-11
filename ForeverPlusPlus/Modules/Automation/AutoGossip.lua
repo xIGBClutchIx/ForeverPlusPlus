@@ -39,6 +39,7 @@ module.options = {
         name = L.AUTOGOSSIP_PRINT,
         description = L.AUTOGOSSIP_PRINT_DESC,
         debug = true,
+        section = L.DEBUG_SECTION_LOGGING,
     },
 }
 

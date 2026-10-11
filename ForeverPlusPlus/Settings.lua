@@ -15,9 +15,10 @@
 --                    since the player last looked (`added`), or an option changed since then
 --                    (`changed`), is marked NEW
 --     <Tool>         a page a module draws itself (`BuildPage`)
---     Debug          Show Tags and Forever++'s own buttons (Reset Seen Version, Reset Welcome, Copy Debug Info,
---                    Print Module Events, Reload UI), then options marked `debug = true` and
---                    buttons from `module.debugActions`, for testing
+--     Debug          sections of Forever++'s own rows and modules' options marked `debug = true`
+--                    and buttons from `module.debugActions`, each placed by its `section`: What's
+--                    New (Show Tags, Reset Seen Version, Reset Welcome), Diagnostics (Copy Debug
+--                    Info, Print Module Events, Reload UI), Testing, and Logging
 --     Changelog      the release notes from Changelog.lua
 --     About          what the addon is, how many modules are on, the version, links, and the /fpp
 --                    commands, with the Defaults button at the top right like Modules
@@ -341,16 +342,6 @@ local function sliderOptions(option)
     return options
 end
 
--- Whether a module's options are shown on the Debug page (`debug`) or the Modules page.
-local function hasOptions(module, debug)
-    for _, option in ipairs(module.options or {}) do
-        if (option.debug or false) == debug then
-            return true
-        end
-    end
-    return false
-end
-
 -- A module's button `action` (`{ name, button, description, fn }`, and `confirm`, a question to
 -- ask before `fn` runs, with `key` naming its popup) as the function its button calls.
 local function actionFn(module, action, i)
@@ -365,7 +356,7 @@ local function actionFn(module, action, i)
 end
 
 -- Debug page ----------------------------------------------------------------------------------
--- Options marked `debug = true`, as Blizzard settings rows, grouped under a header per module.
+-- Options marked `debug = true`, as Blizzard settings rows, under the section headers they name.
 
 -- Greys a row out while the module is off, so it shows nothing on it applies. Probe:
 -- AddModifyPredicate is Mainline's; ManiaTip uses it on Forever.
@@ -481,17 +472,40 @@ local function addHeader(layout, text)
     end
 end
 
--- A module's debug options, in the order it lists them. An option whose `section` differs from
--- the one before it starts a section header.
-local function addDebugOptions(category, layout, module)
-    local section
-    local added = {}
+-- The Debug page's sections, in order. Forever++'s own rows and modules' debug options and buttons
+-- name one with `section`; a module's rows that name none of these go under its title, after them.
+local DEBUG_SECTIONS = {
+    L.DEBUG_SECTION_NEW, L.DEBUG_SECTION_DIAGNOSTICS, L.DEBUG_SECTION_TESTING, L.DEBUG_SECTION_LOGGING,
+}
+
+local function debugSection(row)
+    for _, section in ipairs(DEBUG_SECTIONS) do
+        if row.section == section then
+            return section
+        end
+    end
+end
+
+-- Whether a module has debug options or buttons in `section` (nil: in none of the Debug page's).
+local function hasDebugRows(module, section)
     for _, option in ipairs(module.options or {}) do
-        if option.debug then
-            if option.section and option.section ~= section then
-                addHeader(layout, option.section)
-            end
-            section = option.section
+        if option.debug and debugSection(option) == section then
+            return true
+        end
+    end
+    for _, action in ipairs(module.debugActions or {}) do
+        if debugSection(action) == section then
+            return true
+        end
+    end
+    return false
+end
+
+-- A module's debug options in `section` (nil: in none of the Debug page's), in the order it lists
+-- them. `added` maps its option keys to their rows across sections, for `requires`.
+local function addDebugOptions(category, layout, module, section, added)
+    for _, option in ipairs(module.options or {}) do
+        if option.debug and debugSection(option) == section then
             addOption(category, layout, module, option, added)
         end
     end
@@ -516,19 +530,22 @@ local function addShowTags(category)
     Settings.CreateCheckbox(category, setting, L.SETTINGS_SHOW_TAGS_DESC)
 end
 
--- A module's debug buttons (`module.debugActions`, the same shape as `actions`), after its
--- options. Greyed out while the module is off, unless the button is for that too (`whileOff`).
-local function addDebugActions(layout, module)
+-- A module's debug buttons in `section` (`module.debugActions`, the same shape as `actions`), after
+-- its options there. Greyed out while the module is off, unless the button is for that too
+-- (`whileOff`).
+local function addDebugActions(layout, module, section)
     if not (layout and CreateSettingsButtonInitializer) then
         return -- Probe: the button row is Mainline's Settings.
     end
     for i, action in ipairs(module.debugActions or {}) do
-        local initializer = CreateSettingsButtonInitializer(action.name, action.button,
-            actionFn(module, action, i), action.description, true)
-        if not action.whileOff then
-            greyWhenOff(initializer, module)
+        if debugSection(action) == section then
+            local initializer = CreateSettingsButtonInitializer(action.name, action.button,
+                actionFn(module, action, i), action.description, true)
+            if not action.whileOff then
+                greyWhenOff(initializer, module)
+            end
+            layout:AddInitializer(initializer)
         end
-        layout:AddInitializer(initializer)
     end
 end
 
@@ -1619,7 +1636,7 @@ local function byTitle()
 end
 
 -- Debug page tools ----------------------------------------------------------------------------
--- Forever++'s own buttons on the Debug page, under Show Tags.
+-- Forever++'s own rows on the Debug page, and the page itself.
 
 -- Puts the version last seen back to the release before this one, so the Modules page marks what a
 -- player updating from it would see, and opens it the way it would open for them: on the first
@@ -1702,28 +1719,62 @@ end
 
 local DEBUG_TOOLS = {
     { name = L.DEBUG_RESET_SEEN, button = L.DEBUG_RESET_SEEN_BUTTON,
-        description = L.DEBUG_RESET_SEEN_DESC, fn = resetSeen },
+        description = L.DEBUG_RESET_SEEN_DESC, fn = resetSeen, section = L.DEBUG_SECTION_NEW },
     { name = L.DEBUG_RESET_WELCOME, button = L.DEBUG_RESET_WELCOME_BUTTON,
-        description = L.DEBUG_RESET_WELCOME_DESC,
+        description = L.DEBUG_RESET_WELCOME_DESC, section = L.DEBUG_SECTION_NEW,
         fn = function()
             ns.ResetWelcome()
             ns.Print(L.DEBUG_RESET_WELCOME_DONE)
         end },
     { name = L.DEBUG_INFO, button = L.DEBUG_INFO_BUTTON, description = L.DEBUG_INFO_DESC,
+        section = L.DEBUG_SECTION_DIAGNOSTICS,
         fn = function() ns.Prompt("DEBUG_INFO", L.DEBUG_INFO_PROMPT, debugInfo()) end },
     { name = L.DEBUG_EVENTS, button = L.DEBUG_EVENTS_BUTTON, description = L.DEBUG_EVENTS_DESC,
-        fn = printEvents },
+        fn = printEvents, section = L.DEBUG_SECTION_DIAGNOSTICS },
     { name = L.DEBUG_RELOAD, button = L.DEBUG_RELOAD_BUTTON, description = L.DEBUG_RELOAD_DESC,
-        fn = function() ReloadUI() end },
+        fn = function() ReloadUI() end, section = L.DEBUG_SECTION_DIAGNOSTICS },
 }
 
-local function addDebugTools(layout)
+-- Forever++'s own rows in `section`: Show Tags first in What's New, then its buttons there.
+local function addDebugTools(category, layout, section)
+    if section == L.DEBUG_SECTION_NEW then
+        addShowTags(category)
+    end
     if not (layout and CreateSettingsButtonInitializer) then
         return -- Probe: the button row is Mainline's Settings.
     end
     for _, tool in ipairs(DEBUG_TOOLS) do
-        layout:AddInitializer(CreateSettingsButtonInitializer(tool.name, tool.button, tool.fn,
-            tool.description, true))
+        if tool.section == section then
+            layout:AddInitializer(CreateSettingsButtonInitializer(tool.name, tool.button, tool.fn,
+                tool.description, true))
+        end
+    end
+end
+
+-- The Debug page: a header for each section, with Forever++'s own rows and then each module's
+-- (by title) under it, and after them a header for each module with rows in no section.
+local function buildDebug(category, layout, order)
+    local added = {}
+    local function addRows(module, section)
+        added[module] = added[module] or {}
+        addDebugOptions(category, layout, module, section, added[module])
+        addDebugActions(layout, module, section)
+    end
+    for _, section in ipairs(DEBUG_SECTIONS) do
+        addHeader(layout, section)
+        addDebugTools(category, layout, section)
+        for _, name in ipairs(order) do
+            if hasDebugRows(ns.modules[name], section) then
+                addRows(ns.modules[name], section)
+            end
+        end
+    end
+    for _, name in ipairs(order) do
+        local module = ns.modules[name]
+        if hasDebugRows(module, nil) then
+            addHeader(layout, module.title or name)
+            addRows(module, nil)
+        end
     end
 end
 
@@ -1783,19 +1834,8 @@ function ns.RegisterSettings()
             end)
         end
     end
-    -- Debug options: Forever++'s own first, then each module's.
     local debugPage, debugLayout = Settings.RegisterVerticalLayoutSubcategory(category, L.DEBUG)
-    addHeader(debugLayout, ns.title)
-    addShowTags(debugPage)
-    addDebugTools(debugLayout)
-    for _, name in ipairs(order) do
-        local module = ns.modules[name]
-        if hasOptions(module, true) or module.debugActions then
-            addHeader(debugLayout, module.title or name)
-            addDebugOptions(debugPage, debugLayout, module)
-            addDebugActions(debugLayout, module)
-        end
-    end
+    buildDebug(debugPage, debugLayout, order)
     addCanvasPage(category, L.CHANGELOG, buildChangelog)
     aboutCategory = addCanvasPage(category, L.ABOUT, buildAbout)
     Settings.RegisterAddOnCategory(category)

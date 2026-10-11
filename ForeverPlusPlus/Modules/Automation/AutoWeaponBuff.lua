@@ -47,6 +47,7 @@ module.options = {
         name = L.AUTOWEAPONBUFF_PRINT,
         description = L.AUTOWEAPONBUFF_PRINT_DESC,
         debug = true,
+        section = L.DEBUG_SECTION_LOGGING,
     },
 }
 

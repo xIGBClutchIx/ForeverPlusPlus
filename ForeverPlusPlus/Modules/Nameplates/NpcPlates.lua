@@ -47,7 +47,10 @@ module.options = {
         },
         requires = "titles", section = L.NPCPLATES_SECTION_TITLE,
     },
-    { key = "centerLine", name = L.PLATES_CENTER_LINE, description = L.PLATES_CENTER_LINE_DESC, debug = true },
+    {
+        key = "centerLine", name = L.PLATES_CENTER_LINE_NPC, description = L.PLATES_CENTER_LINE_DESC,
+        debug = true, section = L.DEBUG_SECTION_TESTING,
+    },
 }
 
 local NAME_COLORS = {

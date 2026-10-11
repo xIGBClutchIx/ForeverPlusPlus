@@ -92,9 +92,12 @@ module.options = {
             { "group", L.PLAYERPLATES_TEST_ICONS_GROUP },
             { "friend", L.PLAYERPLATES_TEST_ICONS_FRIEND },
         },
-        debug = true,
+        debug = true, section = L.DEBUG_SECTION_TESTING,
     },
-    { key = "centerLine", name = L.PLATES_CENTER_LINE, description = L.PLATES_CENTER_LINE_DESC, debug = true },
+    {
+        key = "centerLine", name = L.PLATES_CENTER_LINE_PLAYER, description = L.PLATES_CENTER_LINE_DESC,
+        debug = true, section = L.DEBUG_SECTION_TESTING,
+    },
 }
 
 -- Guild Name Color choices. Highlighted guildmates get guild chat's green, or white when every
