@@ -209,7 +209,8 @@ function TalentPlan.Encode(treeID, plan)
     return PREFIX .. treeID .. ":" .. plan.level .. ":" .. name .. ":" .. concat(runs, ",")
 end
 
----Reads a share string, or nil when it isn't one.
+---Reads a share string, or nil when it isn't one. A string with more points than a character
+---ever has isn't one either: a pasted run like `1*999999999` would otherwise hang the game.
 ---@param text string
 ---@return table? plan { treeID, name, level, picks }
 function TalentPlan.Decode(text)
@@ -223,7 +224,11 @@ function TalentPlan.Decode(text)
         if not id then
             return nil
         end
-        for _ = 1, tonumber(n) or 1 do
+        n = tonumber(n) or 1
+        if #picks + n > TalentPlan.MAX_POINTS then
+            return nil
+        end
+        for _ = 1, n do
             picks[#picks + 1] = tonumber(id)
         end
     end

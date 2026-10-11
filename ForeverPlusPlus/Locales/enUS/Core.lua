@@ -32,6 +32,7 @@ L.SLASH_TOGGLE = "turn a module, or one of its checkboxes, on or off"
 L.SLASH_RESET = "all settings back to defaults (reloads)"
 L.SLASH_OPTIONS = "list its options and their values"
 L.SLASH_SET = "change one (on/off, a choice, or a number)"
+L.SLASH_TAKEN = "%s already belongs to another addon, so Forever++ leaves it to that addon."
 
 -- Core: /fpp options and /fpp set. The values typed (on, off, choice keys) stay as they are.
 L.OPTIONS_HEADER = "%s is %s. Options (/fpp set %s <option> <value>):" -- module, on/off, module

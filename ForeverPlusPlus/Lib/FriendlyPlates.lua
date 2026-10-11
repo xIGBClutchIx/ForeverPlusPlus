@@ -177,6 +177,7 @@ end
 ---@return table plates
 function FriendlyPlates.New(module, spec)
     local self = setmetatable({ module = module, spec = spec, style = spec.style, records = {} }, Plates)
+    ns.CVars.Track(module) -- its CVars come back at login if it was turned off in combat
     self.onAdded = function(unit, frame) self:Add(unit, frame) end
     self.onRemoved = function(unit) self:Remove(unit) end
     self.onUnitEvent = function(event, unit)

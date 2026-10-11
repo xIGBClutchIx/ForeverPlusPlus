@@ -4,16 +4,28 @@
 -- (hash_SlashCmdList), so taking one away clears that too, like AceConsole does.
 local _, ns = ...
 
-local pairs, type, _G = pairs, type, _G
+local pairs, type, format, _G = pairs, type, string.format, _G
 
 local Slash = {}
 ns.Slash = Slash
 
 local added = {} -- key -> true while our command is registered
+local warned = {} -- slash -> true once the player has been told another addon has it
+local ready = false -- true after login: commands added then are the player's own doing
 
--- Whether a command other than `key` already answers to `slash`.
+ns.On("PLAYER_ENTERING_WORLD", function()
+    ready = true
+end)
+
+-- Whether a command other than `key` already answers to `slash`. Chat moves every command it has
+-- seen out of SlashCmdList (into its proxy, where pairs can't see them) and into
+-- hash_SlashCmdList the first time any command is typed, so that's checked too.
 local function taken(slash, key)
     slash = slash:upper()
+    local hash = _G.hash_SlashCmdList
+    if type(hash) == "table" and hash[slash] ~= nil then
+        return true
+    end
     for name in pairs(SlashCmdList) do
         if name ~= key then
             local i = 1
@@ -30,12 +42,21 @@ local function taken(slash, key)
     return false
 end
 
----Adds `slash` as command `key`, unless another addon already has that slash.
+---Adds `slash` as command `key`, unless another addon already has that slash (then it says so in
+---chat, once, if the player turned it on after login).
 ---@param key string the SlashCmdList key, FOREVERPLUSPLUS_<NAME>
 ---@param slash string like "/way"
 ---@param fn fun(message: string, editBox: table?)
 function Slash.Add(key, slash, fn)
-    if added[key] or taken(slash, key) then
+    if added[key] then
+        return
+    end
+    if taken(slash, key) then
+        -- Said once, when the player turns it on: at login it would repeat every session.
+        if ready and not warned[slash] then
+            warned[slash] = true
+            ns.Print(format(ns.L.SLASH_TAKEN, slash))
+        end
         return
     end
     _G["SLASH_" .. key .. "1"] = slash

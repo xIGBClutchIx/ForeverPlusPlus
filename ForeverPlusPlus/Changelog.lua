@@ -41,8 +41,22 @@ ns.changelog = {
                     .. "talent points from level 5 instead of 10, still 51 at most." },
             } },
             { L.CHANGELOG_FIXED, {
+                { L.BUFFTIMERS_TITLE, "Never shows a negative time, like -1:59, on an aura about to "
+                    .. "go away." },
+                { L.COMMANDS_TITLE, "/rl and /clear are left to another addon that has them even "
+                    .. "after you've typed a slash command, and turning one on says so in chat." },
+                { L.PLAYERPLATES_TITLE, "Puts your game settings back at login if it was turned "
+                    .. "off in combat just before a reload. So do NPC Nameplates, Auto Dismount, and "
+                    .. "World Map's Coordinates." },
+                { L.CHANGELOG_SETTINGS, "Recommended Defaults and Developer's Defaults keep where you "
+                    .. "moved things and their size in Edit Mode, and reset only the options." },
+                { L.TALENTPLANNER_TITLE, "Refuses a shared plan with more than 51 points, which could "
+                    .. "freeze the game." },
                 { L.UNUSABLEITEMS_TITLE, "No longer tints recipes you can learn because of the "
                     .. "item they make, such as plans for mail armor or for gear above your level." },
+                { L.WAYPOINTS_TITLE, "/way is left to TomTom or another addon that has it even "
+                    .. "after you've typed a slash command, and turning Waypoints on says so in "
+                    .. "chat." },
             } },
         },
     },

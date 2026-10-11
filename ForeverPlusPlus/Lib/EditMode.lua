@@ -9,7 +9,8 @@
 -- a module registers a frame.
 local _, ns = ...
 
-local pairs, type, pcall, abs, min, max = pairs, type, pcall, math.abs, math.min, math.max
+local pairs, type, pcall, setmetatable = pairs, type, pcall, setmetatable
+local abs, min, max = math.abs, math.min, math.max
 local format = string.format
 local CreateFrame, UIParent, hooksecurefunc = CreateFrame, UIParent, hooksecurefunc
 local GetCursorPosition, Screenshot, wipe = GetCursorPosition, Screenshot, wipe
@@ -24,6 +25,9 @@ local SNAP = 10 -- how close, in pixels, before a frame snaps to a line
 local GOLD = { 1, 0.82, 0 }
 
 local registered = {} -- frame -> { label, onMove, onChange, scale, reset, selection }
+-- Frames taken off (Unregister) -> their info, so registering one again reuses its selection box
+-- instead of making another each time its module turns on.
+local unregistered = setmetatable({}, { __mode = "k" })
 local hooked = false
 local selected -- the frame of ours that is selected, if any
 
@@ -578,12 +582,19 @@ function EditMode.Register(frame, label, onMove, options)
         info.scale, info.reset = options.scale, options.reset
         return
     end
-    info = {
-        label = label, onMove = onMove, onChange = options.onChange,
-        scale = options.scale, reset = options.reset,
-    }
+    info = unregistered[frame]
+    if info then
+        unregistered[frame] = nil
+        info.label, info.onMove, info.onChange = label, onMove, options.onChange
+        info.scale, info.reset = options.scale, options.reset
+    else
+        info = {
+            label = label, onMove = onMove, onChange = options.onChange,
+            scale = options.scale, reset = options.reset,
+        }
+        info.selection = newSelection(frame, info)
+    end
     registered[frame] = info
-    info.selection = newSelection(frame, info)
     install()
     if EditMode.IsActive() then
         info.selection:Show()
@@ -604,6 +615,7 @@ function EditMode.Unregister(frame)
         deselect()
     end
     registered[frame] = nil
+    unregistered[frame] = info
     info.selection:Hide()
     if info.onChange then
         call(info.onChange, false)

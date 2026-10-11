@@ -596,8 +596,9 @@ local developerOptions = {
     QuestTracker = { sort = "low" },
 }
 
----Puts every module's settings back to their defaults, then turns on the modules in `enable`.
----Saved data (prices, seen cinematics, chat history, positions) stays: only plain settings reset.
+---Puts every module's options (`module.options`) back to their defaults, then turns on the
+---modules in `enable`. Everything else a module saves stays: data (prices, seen cinematics, chat
+---history) and what's set in Edit Mode (positions and scale).
 ---Modules that are always on have nothing to reset. Applies live, like the checkboxes do.
 ---@param enable? string[] module names to turn on whatever their default is
 ---@param options? table<string, table<string, any>> per module, option values used instead of its defaults
@@ -611,12 +612,13 @@ function ns.ApplyPreset(enable, options)
         local module = ns.modules[name]
         if not (module.alwaysOn or module.unavailable) then
             local overrides = options and options[name]
-            for key, default in pairs(module.defaults) do
-                local value = default
+            for _, option in ipairs(module.options or {}) do
+                local key = option.key
+                local value = module.defaults[key]
                 if overrides and overrides[key] ~= nil then
                     value = overrides[key]
                 end
-                if key ~= "enabled" and type(value) ~= "table" and module.db[key] ~= value then
+                if type(value) ~= "table" and module.db[key] ~= value then
                     module.db[key] = value
                     changed[#changed + 1] = { module, key }
                 end

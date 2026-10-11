@@ -150,7 +150,8 @@ end
 -- Lists the selected group's CVars that match the search and counts each group's matches.
 -- `top` scrolls back to the top (a new group); otherwise the scroll position stays.
 local function refresh(top)
-    if not ui then
+    -- Not before the list is made: filling the search box while the page is built calls this.
+    if not (ui and ui.scrollBox) then
         return
     end
     local query = strlower(search)

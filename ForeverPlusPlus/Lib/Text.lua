@@ -44,7 +44,7 @@ end
 ---@param seconds number
 ---@return string
 function Text.Clock(seconds)
-    seconds = floor(seconds + 0.5)
+    seconds = max(0, floor(seconds + 0.5)) -- an aura a moment past its end still reads 0:00
     if seconds >= 3600 then
         return format("%d:%02d:%02d", floor(seconds / 3600), floor(seconds / 60) % 60, seconds % 60)
     end

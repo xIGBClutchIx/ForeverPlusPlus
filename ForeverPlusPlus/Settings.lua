@@ -1483,7 +1483,7 @@ local function buildModules(frame)
     end
     if selected then
         choose(selected)
-        scrollTo(list, page.list, page.rows[selected])
+        scrollTo(page.listScroll, page.list, page.rows[selected])
     end
     relayout()
     -- After /fpp or a preset changed things while the page was closed, and for notices.

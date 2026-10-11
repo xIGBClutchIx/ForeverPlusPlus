@@ -17,7 +17,13 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Fixed
 
+- **Buff Timers**: never shows a negative time, like -1:59, on an aura about to go away.
+- **Commands**: `/rl` and `/clear` are left to another addon that has them even after you've typed a slash command, and turning one on says so in chat.
+- **Player Nameplates**: puts your game settings back at login if it was turned off in combat just before a reload. So do NPC Nameplates, Auto Dismount, and World Map's Coordinates.
+- **Settings**: Recommended Defaults and Developer's Defaults keep where you moved things and their size in Edit Mode, and reset only the options.
+- **Talent Planner**: refuses a shared plan with more than 51 points, which could freeze the game.
 - **Unusable Items Tint**: no longer tints recipes you can learn because of the item they make, such as plans for mail armor or for gear above your level.
+- **Waypoints**: `/way` is left to TomTom or another addon that has it even after you've typed a slash command, and turning Waypoints on says so in chat.
 
 ## 0.8.1 (2026-10-10)
 

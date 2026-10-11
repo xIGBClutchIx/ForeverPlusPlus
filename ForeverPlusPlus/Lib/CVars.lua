@@ -4,7 +4,7 @@
 -- can't change in combat, so changes made then wait for it to end, in order (ns.AfterCombat).
 local _, ns = ...
 
-local type, pairs, C_CVar = type, pairs, C_CVar
+local type, pairs, next, C_CVar = type, pairs, next, C_CVar
 
 local CVars = {}
 ns.CVars = CVars
@@ -103,6 +103,7 @@ end
 ---@param restoreOff? boolean
 ---@return table bound Apply(key), ApplyAll(), Restore()
 function CVars.Bind(module, map, restoreOff)
+    CVars.Track(module)
     local bound = {}
     ---Applies one option, if it's one of the mapped ones.
     function bound.Apply(key)
@@ -153,3 +154,32 @@ function CVars.RestoreAll(saved)
         end
     end)
 end
+
+-- Putting values back after a /reload in combat ----------------------------------------------------
+-- A module turned off in combat waits for combat to end to put the player's values back (RestoreAll
+-- through ns.AfterCombat). A /reload before then forgets that, and the module, off at the next
+-- login, never runs OnDisable again. So once the player is in the world, a tracked module that's off
+-- but still holds saved values puts them back.
+
+local tracked = {} -- modules (or parts) whose `db.saved` holds the player's CVar values
+
+---Puts `module.db.saved` back at login whenever the module is off then, in case it was turned off
+---in combat just before a /reload. Bind does this itself; call it for a module that uses Set and
+---RestoreAll directly.
+---@param module table a module or a part
+function CVars.Track(module)
+    tracked[#tracked + 1] = module
+end
+
+local function restoreLeftovers()
+    ns.Off("PLAYER_ENTERING_WORLD", restoreLeftovers)
+    for _, module in pairs(tracked) do
+        local saved = module.db and module.db.saved
+        if not module.enabled and type(saved) == "table" and next(saved) ~= nil then
+            CVars.RestoreAll(saved)
+        end
+    end
+end
+
+-- After PLAYER_LOGIN, when ns.Start has turned the modules on.
+ns.On("PLAYER_ENTERING_WORLD", restoreLeftovers)
