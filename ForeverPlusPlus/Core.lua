@@ -582,6 +582,7 @@ local developerEnables = { "FishingCast", "SkipCinematics", "AutoScreenshot", "C
 -- Options the Developer's Defaults preset sets differently from the module's default.
 local developerOptions = {
     WorldMap = { zoneDungeons = "key", fishing = "key" },
+    ChatHistory = { divider = true },
 }
 
 ---Puts every module's settings back to their defaults, then turns on the modules in `enable`.
