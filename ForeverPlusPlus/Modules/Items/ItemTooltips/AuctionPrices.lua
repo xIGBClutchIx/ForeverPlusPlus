@@ -408,7 +408,7 @@ end
 -- Cloth"). Waylaid Crate Costs shows what buying each bundle at auction costs: the count times
 -- the item's lowest buyout. Blizzard's line is skipped and we draw it again, the same text in
 -- the same color, with each price beside its bundle ("beside": on the right, or after it with
--- inline price lines) or on a line of its own under it ("below"). The tooltip gives names,
+-- inline price lines) or indented on a line of its own under it ("below"). The tooltip gives names,
 -- not IDs, so items are found by name: in the client's item cache, or else among the names of
 -- items with a saved price.
 
@@ -522,7 +522,7 @@ local function bundleCost(count, name)
     return GRAY_FONT_COLOR:WrapTextInColorCode(L.AUCTIONPRICES_CRAFT_NO_PRICE)
 end
 
--- A cost under its bundle, with inline price lines: indented, as Blizzard's blank texture.
+-- The indent of a cost under its bundle: Blizzard's blank texture.
 local UNDER_INDENT = "|TInterface\\Common\\spacer:1:12|t"
 
 -- Draws a line that lists bundles again with their costs, and returns true so Blizzard's is
@@ -569,13 +569,9 @@ local function replaceBundleLine(tooltip, data, lineData)
             flush()
             local cost = bundleCost(count, name)
             if below then
-                -- The bundle's line as it was, then its cost on a line of its own under it.
+                -- The bundle's line as it was, then its cost under it, indented at the left.
                 tooltip:AddLine(shown, r, g, b)
-                if inline then
-                    tooltip:AddLine(UNDER_INDENT .. cost, wr, wg, wb)
-                else
-                    tooltip:AddDoubleLine(" ", cost, wr, wg, wb, wr, wg, wb)
-                end
+                tooltip:AddLine(UNDER_INDENT .. cost, wr, wg, wb)
             elseif inline then
                 tooltip:AddLine(format(L.PRICE_INLINE, shown, cost), r, g, b)
             else
