@@ -12,19 +12,23 @@
 -- Which items count, and which weapons they go on, comes from the table below, since the game only
 -- says what an item fits once its cursor is up. Main hand first; the off hand when only it can
 -- take the item, when the main hand already has a buff and the off hand doesn't, or when the off
--- hand's buff runs out sooner.
+-- hand's buff runs out sooner. When no equipped weapon can take the item (a weightstone with only
+-- blades), the right-click says so in red at the top of the screen, like Blizzard's own errors,
+-- instead of bringing up a cursor nothing will take.
 local _, ns = ...
 
 local C_Item, C_Container, C_PaperDollInfo, C_Timer = C_Item, C_Container, C_PaperDollInfo, C_Timer
 local GetInventoryItemID, GetWeaponEnchantInfo = GetInventoryItemID, GetWeaponEnchantInfo
 local CreateFrame, InCombatLockdown, IsModifierKeyDown = CreateFrame, InCombatLockdown, IsModifierKeyDown
-local GameTooltip, UIParent, pairs, select, tostring, _G = GameTooltip, UIParent, pairs, select, tostring, _G
+local GameTooltip, UIParent, UIErrorsFrame = GameTooltip, UIParent, UIErrorsFrame
+local pairs, select, tostring, _G = pairs, select, tostring, _G
 local tremove = table.remove
 
 local L = ns.L
 
 local module = ns.NewModule("AutoWeaponBuff", L.AUTOWEAPONBUFF_DESC, {
     enabled = false,
+    warnNoFit = true,
     printSteps = false,
 })
 module.title = L.AUTOWEAPONBUFF_TITLE
@@ -32,6 +36,12 @@ module.category = "automation"
 module.added = "0.8.0"
 
 module.options = {
+    {
+        key = "warnNoFit",
+        name = L.AUTOWEAPONBUFF_WARN,
+        description = L.AUTOWEAPONBUFF_WARN_DESC,
+        added = "0.8.2",
+    },
     {
         key = "printSteps",
         name = L.AUTOWEAPONBUFF_PRINT,
@@ -42,6 +52,7 @@ module.options = {
 
 local MAINHAND, OFFHAND = 16, 17
 local WEAPON, FISHING_POLE = 2, 20 -- Enum.ItemClass.Weapon, Enum.ItemWeaponSubclass.Fishingpole
+local FIST = 13 -- Enum.ItemWeaponSubclass.Unarmed
 
 -- Weapon subclasses a sharpening stone ("sharp") or weightstone ("blunt") goes on. Fist weapons
 -- are in neither: which stone they take is Unverified, so they're left to the cursor.
@@ -75,7 +86,8 @@ function module:IsAvailable()
         and true or false
 end
 
--- Whether an item of this kind can go on the weapon in this slot.
+-- Whether an item of this kind can go on the weapon in this slot: true, false, or nil when we
+-- don't know (a stone on a fist weapon).
 local function fits(kind, slot)
     local itemID = GetInventoryItemID("player", slot)
     if not itemID then
@@ -89,6 +101,8 @@ local function fits(kind, slot)
         return slot == MAINHAND and subclassID == FISHING_POLE
     elseif subclassID == FISHING_POLE then
         return false
+    elseif subclassID == FIST and (kind == "sharp" or kind == "blunt") then
+        return nil
     elseif kind == "sharp" then
         return SHARP[subclassID] or false
     elseif kind == "blunt" then
@@ -144,6 +158,25 @@ local function pickSlot(kind)
     return main and MAINHAND or off and OFFHAND or nil
 end
 
+-- Whether we know neither weapon can take an item of this kind.
+local function noneFits(kind)
+    return fits(kind, MAINHAND) == false and fits(kind, OFFHAND) == false
+end
+
+local function warnNoFit(bag, slot)
+    if not UIErrorsFrame then
+        return
+    end
+    local itemID = C_Container.GetContainerItemID(bag, slot)
+    local name = itemID and C_Item.GetItemNameByID and C_Item.GetItemNameByID(itemID)
+    local text = name and L.AUTOWEAPONBUFF_WARN_TEXT:format(name) or L.AUTOWEAPONBUFF_WARN_TEXT_ANY
+    if UIErrorsFrame.AddExternalErrorMessage then
+        UIErrorsFrame:AddExternalErrorMessage(text)
+    else
+        UIErrorsFrame:AddMessage(text, 1, 0.1, 0.1)
+    end
+end
+
 -- A right-click in the bags means something else while one of these is open (sell, deposit,
 -- attach, trade, auction), so it goes to Blizzard's button then.
 local function busy()
@@ -167,11 +200,16 @@ local info = {} -- overlay -> { bag, slot, button, kind, handled }
 -- ActionButtonUseKeyDown setting says); everything is worked out again for each.
 local function onPreClick(self, mouseButton, down)
     local data = info[self]
-    local slot
+    local slot, warn
     if not InCombatLockdown() and mouseButton == "RightButton" and not IsModifierKeyDown() and not busy() then
         slot = pickSlot(data.kind)
+        warn = not slot and module.db.warnNoFit and noneFits(data.kind)
     end
-    data.handled = slot ~= nil
+    -- A warning takes the click: nothing goes to the bag button, so no cursor comes up.
+    data.handled = slot ~= nil or warn
+    if warn and not down then
+        warnNoFit(data.bag, data.slot)
+    end
     if not InCombatLockdown() then
         self:SetAttribute("type2", slot and "item" or nil)
         self:SetAttribute("target-slot", slot)
@@ -282,7 +320,8 @@ local function refresh()
                 if button:IsShown() then
                     local bag, slot = button:GetBagID(), button:GetID()
                     local kind = KINDS[C_Container.GetContainerItemID(bag, slot)]
-                    if kind and (fits(kind, MAINHAND) or fits(kind, OFFHAND)) then
+                    if kind and (fits(kind, MAINHAND) or fits(kind, OFFHAND)
+                        or module.db.warnNoFit and noneFits(kind)) then
                         place(button, bag, slot, kind)
                     end
                 end
@@ -318,6 +357,12 @@ function module:OnEnable()
     -- Fires just before combat lockdown starts, the last moment secure buttons can move.
     self:On("PLAYER_REGEN_DISABLED", clear)
     schedule()
+end
+
+function module:OnOptionChanged(key)
+    if key == "warnNoFit" then
+        schedule()
+    end
 end
 
 function module:OnDisable()

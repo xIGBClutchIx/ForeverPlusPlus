@@ -13,6 +13,10 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_CHANGED, {
+                { L.AUTOWEAPONBUFF_TITLE, "When no equipped weapon can take the item, like a "
+                    .. "weightstone with only blades, it says so in red at the top of the screen "
+                    .. "instead of bringing up a cursor. On by default; turn it off with Warn When "
+                    .. "No Weapon Fits." },
                 { L.BUFFTIMERS_TITLE, "Show Clock has an Under 1 Minute choice, for a clock only "
                     .. "on auras about to run out." },
                 { L.CHARACTERFRAME_TITLE, "The new Equipped Weapon Skills option (on by "
