@@ -18,7 +18,7 @@ local module = ns.NewModule("CharacterFrame", L.CHARACTERFRAME_DESC, {
     sideTabs = true,
     colorTitle = true,
     durability = "always", -- "off", or which items get a bar (Durability.lua)
-    weaponSkills = false, -- green skill bars for the weapons worn (Skills.lua)
+    weaponSkills = true, -- green skill bars for the weapons worn (Skills.lua)
 })
 module.title = L.CHARACTERFRAME_TITLE
 module.category = "interface"

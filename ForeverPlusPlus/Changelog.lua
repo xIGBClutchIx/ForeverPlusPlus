@@ -15,7 +15,7 @@ ns.changelog = {
             { L.CHANGELOG_CHANGED, {
                 { L.BUFFTIMERS_TITLE, "Show Clock has an Under 1 Minute choice, for a clock only "
                     .. "on auras about to run out." },
-                { L.CHARACTERFRAME_TITLE, "The new Equipped Weapon Skills option (off by "
+                { L.CHARACTERFRAME_TITLE, "The new Equipped Weapon Skills option (on by "
                     .. "default) colors the Skills tab's bars green for the weapons you have "
                     .. "equipped, instead of blue." },
                 { L.QUESTTRACKER_TITLE, "The new Sort by Level option (off by default) lists "
