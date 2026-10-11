@@ -9,6 +9,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Auto Weapon Buff**: when no equipped weapon can take the item, like a weightstone with only blades, it says so in red at the top of the screen instead of bringing up a cursor. On by default; turn it off with Warn When No Weapon Fits.
 - **Buff Timers**: Show Clock has an Under 1 Minute choice, for a clock only on auras about to run out.
 - **Character Window**: the new Equipped Weapon Skills option (on by default) colors the Skills tab's bars green for the weapons you have equipped, instead of blue.
+- **Chat History**: no longer saves whispers, so they aren't written to your saved settings file.
 - **Console Variables**: laid out like the Modules page: Changed, All, and the game's own categories on the left, each with how many match the search, and their console variables beside it with each one's help text under its name. The Changed group replaces the Changed Only checkbox.
 - **Item Tooltips**: the new Waylaid Crate Costs option shows beside each bundle a Waylaid Crate takes what buying it costs at the auction house, from your scanned prices. It can go under each bundle instead, or be turned off.
 - **Quest Tracker**: the new Sort by Level option (off by default) lists tracked quests by level, lowest or highest first, instead of in the order you tracked them. It waits for combat to end.

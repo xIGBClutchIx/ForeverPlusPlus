@@ -33,7 +33,7 @@ L.CHANNELNAMES_BOTH = "Number and Letter"
 -- ChatHistory
 L.CHATHISTORY_TITLE = "Chat History"
 L.CHATHISTORY_DESC = "Keep the chat windows' latest lines when you log out or reload, and "
-    .. "show them again when you log in."
+    .. "show them again when you log in. Whispers aren't kept."
 L.CHATHISTORY_LINES = "Lines Saved"
 L.CHATHISTORY_LINES_DESC = "How many of each chat window's latest lines are kept."
 L.CHATHISTORY_DIVIDER = "-- Earlier chat --"

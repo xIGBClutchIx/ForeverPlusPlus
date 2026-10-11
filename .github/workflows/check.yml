@@ -1,8 +1,9 @@
 name: Check
 
+# Push only: a pull request's commits already ran here when its branch was pushed, so a
+# pull_request trigger would run every check twice.
 on:
   push:
-  pull_request:
 
 permissions:
   contents: read
@@ -11,7 +12,7 @@ jobs:
   lua:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Lua 5.1
         run: sudo apt-get update && sudo apt-get install -y lua5.1
@@ -49,67 +50,135 @@ jobs:
           exit $status
 
   # The addon folder, ready to drop into Interface\AddOns. Every run uploads it as an artifact
-  # (the download is a zip holding ForeverPlusPlus/); a pushed v* tag also attaches the zip to a
-  # GitHub release.
+  # (the download is a zip holding ForeverPlusPlus/); a pushed v* tag also makes the release zip
+  # that the release and curseforge jobs ship.
   package:
     needs: lua
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    outputs:
+      name: ${{ steps.name.outputs.name }}
+      version: ${{ steps.name.outputs.version }}
+      prerelease: ${{ steps.name.outputs.prerelease }}
     steps:
-      # All tags, so a release can link the compare view from the previous one.
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v6
 
+      # A tag must be a version (v1.2.3, or v1.2.3-beta.1 for a pre-release) that matches the
+      # TOC's ## Version and has notes in CHANGELOG.md and Changelog.lua, so a release never
+      # ships a zip that says another version.
       - name: Name the build
         id: name
         run: |
           version=$(grep -m1 '^## Version:' ForeverPlusPlus/ForeverPlusPlus.toc | sed 's/^## Version: *//' | tr -d '\r')
           if [ "$GITHUB_REF_TYPE" = tag ]; then
+            if ! printf '%s' "$GITHUB_REF_NAME" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$'; then
+              echo "Tag $GITHUB_REF_NAME isn't a version like v1.2.3."
+              exit 1
+            fi
+            if [ "${GITHUB_REF_NAME#v}" != "$version" ]; then
+              echo "Tag $GITHUB_REF_NAME doesn't match the TOC's ## Version: $version."
+              exit 1
+            fi
+            awk -v v="$version" '/^## /{f=($2==v);next} f' CHANGELOG.md | grep -q . \
+              || { echo "No $version section in CHANGELOG.md."; exit 1; }
+            grep -qF "version = \"$version\"" ForeverPlusPlus/Changelog.lua \
+              || { echo "No $version entry in Changelog.lua."; exit 1; }
             name="ForeverPlusPlus-$GITHUB_REF_NAME"
           else
             name="ForeverPlusPlus-$version-${GITHUB_SHA::7}"
           fi
-          echo "name=$name" >> "$GITHUB_OUTPUT"
+          case "$version" in *-*) prerelease=true ;; *) prerelease=false ;; esac
+          {
+            echo "name=$name"
+            echo "version=$version"
+            echo "prerelease=$prerelease"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Zip the addon folder
+        env:
+          NAME: ${{ steps.name.outputs.name }}
         run: |
           mkdir -p dist
-          zip -rq "dist/${{ steps.name.outputs.name }}.zip" ForeverPlusPlus
+          zip -rq "dist/$NAME.zip" ForeverPlusPlus
           mkdir -p package
           cp -r ForeverPlusPlus package/
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.name.outputs.name }}
           path: package/
 
-      - name: Release on a version tag
-        if: startsWith(github.ref, 'refs/tags/v')
+      # The zip itself, for the release jobs (and their re-runs) to download.
+      - uses: actions/upload-artifact@v7
+        if: github.ref_type == 'tag'
+        with:
+          name: release-zip
+          path: dist/${{ steps.name.outputs.name }}.zip
+
+  # The GitHub release: this version's section of CHANGELOG.md plus a compare link, and the zip.
+  # Safe to re-run: when the release already exists it replaces the zip and the notes.
+  release:
+    needs: package
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      # All tags, so the notes can link the compare view from the previous one.
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: release-zip
+          path: dist
+
+      - name: Release
         env:
           GH_TOKEN: ${{ github.token }}
+          NAME: ${{ needs.package.outputs.name }}
+          VERSION: ${{ needs.package.outputs.version }}
+          PRERELEASE: ${{ needs.package.outputs.prerelease }}
         run: |
-          # The notes are this version's section of CHANGELOG.md, plus a compare link.
-          version=${GITHUB_REF_NAME#v}
-          awk -v v="$version" '/^## /{f=($2==v);next} f' CHANGELOG.md | sed '/./,$!d' > notes.md
-          [ -s notes.md ] || { echo "No $version section in CHANGELOG.md"; exit 1; }
+          awk -v v="$VERSION" '/^## /{f=($2==v);next} f' CHANGELOG.md | sed '/./,$!d' > notes.md
           prev=$(git tag --list 'v*' --sort=-v:refname | grep -vxF "$GITHUB_REF_NAME" | head -1)
           if [ -n "$prev" ]; then
             printf '\n---\n**Full Changelog**: %s/%s/compare/%s...%s\n' "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$prev" "$GITHUB_REF_NAME" >> notes.md
           fi
-          gh release create "$GITHUB_REF_NAME" "dist/${{ steps.name.outputs.name }}.zip" --title "$version" --notes-file notes.md
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "dist/$NAME.zip" --clobber
+            gh release edit "$GITHUB_REF_NAME" --title "$VERSION" --notes-file notes.md
+          else
+            flags=()
+            [ "$PRERELEASE" = true ] && flags+=(--prerelease)
+            gh release create "$GITHUB_REF_NAME" "dist/$NAME.zip" --title "$VERSION" --notes-file notes.md "${flags[@]}"
+          fi
 
-      # Same zip and the same CHANGELOG.md section as the GitHub release (without the compare link).
-      # Needs the CF_API_KEY secret and the CF_PROJECT_ID and CF_GAME_VERSION_IDS variables (comma
-      # separated CurseForge game version ids); with any missing it says so and the job fails after
-      # the GitHub release is already out.
-      - name: Upload to CurseForge on a version tag
-        if: startsWith(github.ref, 'refs/tags/v')
+  # The same zip and CHANGELOG.md section (without the compare link) on CurseForge, as its own job
+  # so a failed upload can be re-run alone. Re-run it only when it failed: CurseForge has no
+  # "already uploaded" check, so a second run uploads a second file. Needs the CF_API_KEY secret
+  # and the CF_PROJECT_ID and CF_GAME_VERSION_IDS variables (comma separated CurseForge game
+  # version ids); with any missing it says so and fails.
+  curseforge:
+    needs: package
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: release-zip
+          path: dist
+
+      - name: Upload to CurseForge
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
           CF_PROJECT_ID: ${{ vars.CF_PROJECT_ID }}
           CF_GAME_VERSION_IDS: ${{ vars.CF_GAME_VERSION_IDS }}
+          NAME: ${{ needs.package.outputs.name }}
+          VERSION: ${{ needs.package.outputs.version }}
+          PRERELEASE: ${{ needs.package.outputs.prerelease }}
         run: |
           missing=0
           [ -n "$CF_API_KEY" ] || { echo "Secret CF_API_KEY is not set."; missing=1; }
@@ -120,14 +189,19 @@ jobs:
             missing=1
           fi
           [ "$missing" = 0 ] || exit 1
-          version=${GITHUB_REF_NAME#v}
-          awk -v v="$version" '/^## /{f=($2==v);next} f' CHANGELOG.md | sed '/./,$!d' > cf-notes.md
+          releaseType=release
+          [ "$PRERELEASE" = true ] && releaseType=beta
+          awk -v v="$VERSION" '/^## /{f=($2==v);next} f' CHANGELOG.md | sed '/./,$!d' > cf-notes.md
           metadata=$(jq -n \
             --rawfile changelog cf-notes.md \
-            --arg name "$version" \
+            --arg name "$VERSION" \
+            --arg type "$releaseType" \
             --arg ids "$CF_GAME_VERSION_IDS" \
-            '{changelog: $changelog, changelogType: "markdown", displayName: $name, releaseType: "release", gameVersions: ($ids | split(",") | map(gsub(" "; "") | tonumber))}')
-          curl -fsS -X POST "https://wow.curseforge.com/api/projects/$CF_PROJECT_ID/upload-file" \
+            '{changelog: $changelog, changelogType: "markdown", displayName: $name, releaseType: $type, gameVersions: ($ids | split(",") | map(gsub(" "; "") | tonumber))}')
+          # --form-string sends the JSON as is: -F reads a ";" in a value as the start of a field
+          # option and cuts the rest off, which broke 0.8.0's upload. --fail-with-body prints
+          # CurseForge's reason when it refuses one.
+          curl -sS --fail-with-body -X POST "https://wow.curseforge.com/api/projects/$CF_PROJECT_ID/upload-file" \
             -H "X-Api-Token: $CF_API_KEY" \
-            -F "metadata=$metadata" \
-            -F "file=@dist/${{ steps.name.outputs.name }}.zip"
+            --form-string "metadata=$metadata" \
+            -F "file=@dist/$NAME.zip"

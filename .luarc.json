@@ -142,6 +142,7 @@
     "GetInventoryItemDurability",
     "PaperDollItemsFrame",
     "GetBuildInfo",
+    "GetChatTypeIndex",
     "C_AddOns",
     "GetAddOnMetadata",
     "PTR_IssueReporter",

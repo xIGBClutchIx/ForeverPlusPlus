@@ -22,6 +22,8 @@ ns.changelog = {
                 { L.CHARACTERFRAME_TITLE, "The new Equipped Weapon Skills option (on by "
                     .. "default) colors the Skills tab's bars green for the weapons you have "
                     .. "equipped, instead of blue." },
+                { L.CHATHISTORY_TITLE, "No longer saves whispers, so they aren't written to your "
+                    .. "saved settings file." },
                 { L.CVARBROWSER_TITLE, "Laid out like the Modules page: Changed, All, and the "
                     .. "game's own categories on the left, each with how many match the search, "
                     .. "and their console variables beside it with each one's help text under its "

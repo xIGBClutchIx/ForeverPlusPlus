@@ -298,6 +298,7 @@ eq(Plan.Decode("FPP:1:5:10:x:1**2"), nil, "decode bad run")
 eq(Plan.Decode("FPP:1:5:60::1*999999999"), nil, "decode refuses a huge run")
 eq(Plan.Decode("FPP:1:5:60::1*50,2*2"), nil, "decode refuses more than 51 points")
 eq(#Plan.Decode("FPP:1:5:60::1*50,2").picks, 51, "decode takes 51 points")
+eq(Plan.Decode("FPP:1:5:60:|cffff0000Red|r:1").name, "cffff0000Redr", "decode drops | from names")
 
 eq(Plan.FirstLevel(30, 21), 10, "first point at 10")
 eq(Plan.FirstLevel(5, 0), 10, "none earned yet: Classic's 10")
