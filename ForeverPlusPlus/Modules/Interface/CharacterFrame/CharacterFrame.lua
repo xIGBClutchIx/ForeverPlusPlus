@@ -1,8 +1,9 @@
 -- Character Window: tidies the Character window. The Equipment Manager, Titles, and Pet tabs that
 -- sit across the top of the stats pane move to the side, under the Character, Reputation, and
 -- other tabs, and the pane's header (the portrait tab and the "Level 60 Class" line) goes, so the
--- stats start at the top. The window's title becomes your level and name in your class color, and
--- each item gets a durability bar (Durability.lua).
+-- stats start at the top. The window's title becomes your level and name in your class color,
+-- each item gets a durability bar (Durability.lua), and the Skills tab can show the skills of the
+-- weapons you wear in green (Skills.lua).
 local _, ns = ...
 
 local _G, ipairs, pairs, type, CreateFrame = _G, ipairs, pairs, type, CreateFrame
@@ -17,6 +18,7 @@ local module = ns.NewModule("CharacterFrame", L.CHARACTERFRAME_DESC, {
     sideTabs = true,
     colorTitle = true,
     durability = "always", -- "off", or which items get a bar (Durability.lua)
+    weaponSkills = false, -- green skill bars for the weapons worn (Skills.lua)
 })
 module.title = L.CHARACTERFRAME_TITLE
 module.category = "interface"
@@ -51,6 +53,10 @@ module.options = {
             { "quarter", L.CHARACTERFRAME_DURABILITY_QUARTER },
             { "off", L.CHARACTERFRAME_DURABILITY_OFF },
         },
+    },
+    {
+        key = "weaponSkills", name = L.CHARACTERFRAME_WEAPONSKILLS,
+        description = L.CHARACTERFRAME_WEAPONSKILLS_DESC, added = "0.8.2",
     },
 }
 
@@ -393,14 +399,16 @@ local function onLevel(_, unit)
     end
 end
 
--- Once the character frame has loaded: the tabs and title, and the durability bars.
+-- Once the character frame has loaded: the tabs and title, the durability bars, and the skills.
 local function load()
     start()
     internal.updateDurability()
+    internal.updateWeaponSkills()
 end
 
 function module:OnEnable()
     internal.enableDurability()
+    internal.enableWeaponSkills()
     self:On("UNIT_LEVEL", onLevel)
     self:On("UNIT_PET", onPet)
     self:On("UNIT_PORTRAIT_UPDATE", onPortrait)
@@ -415,6 +423,7 @@ function module:OnEnable()
         refreshTabs()
         updateTitle()
         internal.updateDurability()
+        internal.updateWeaponSkills()
     else
         ns.AddOns.WhenLoaded(ADDON, load)
     end
@@ -423,6 +432,7 @@ end
 function module:OnDisable()
     ns.AddOns.Cancel(ADDON, load)
     internal.updateDurability()
+    internal.updateWeaponSkills()
     if not started then
         return
     end
@@ -437,6 +447,9 @@ end
 function module:OnOptionChanged(key)
     if key == "durability" then
         internal.updateDurability()
+        return
+    elseif key == "weaponSkills" then
+        internal.updateWeaponSkills()
         return
     end
     if not (self.enabled and started) then

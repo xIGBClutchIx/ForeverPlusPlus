@@ -80,6 +80,7 @@ Modules\Interface\AddOnList.lua
 Modules\Interface\CurrencyBar.lua
 Modules\Interface\CharacterFrame\CharacterFrame.lua
 Modules\Interface\CharacterFrame\Durability.lua
+Modules\Interface\CharacterFrame\Skills.lua
 Modules\Interface\QuestIcons.lua
 Modules\Interface\QuestTracker.lua
 Modules\Interface\TalentPlanner.lua

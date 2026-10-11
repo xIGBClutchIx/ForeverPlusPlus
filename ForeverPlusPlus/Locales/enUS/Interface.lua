@@ -197,6 +197,9 @@ L.CHARACTERFRAME_DURABILITY_WORN = "Only When Worn"
 L.CHARACTERFRAME_DURABILITY_HALF = "Below 50%"
 L.CHARACTERFRAME_DURABILITY_QUARTER = "Below 25%"
 L.CHARACTERFRAME_DURABILITY_OFF = "Off"
+L.CHARACTERFRAME_WEAPONSKILLS = "Equipped Weapon Skills"
+L.CHARACTERFRAME_WEAPONSKILLS_DESC = "On the Skills tab, color the bars of the weapon skills for "
+    .. "the weapons you have equipped green instead of blue."
 
 -- QuestTracker
 L.QUESTTRACKER_TITLE = "Quest Tracker"
