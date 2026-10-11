@@ -85,7 +85,8 @@ ns.changelog = {
                 { L.SOCIALBUTTON_TITLE, "Turning it off no longer leaves Chat Copy's button above "
                     .. "the chat window." },
                 { L.TALENTPLANNER_TITLE, "Refuses a shared plan with more than 51 points, which could "
-                    .. "freeze the game." },
+                    .. "freeze the game, and a shared plan's name can't carry colors, icons, or "
+                    .. "links." },
                 { L.ITEMTOOLTIPS_TITLE, "Your own auction house searches keep an item's lowest "
                     .. "price instead of the last one listed." },
                 { L.UNUSABLEITEMS_TITLE, "No longer tints recipes you can learn because of the "

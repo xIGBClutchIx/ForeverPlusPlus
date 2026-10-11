@@ -35,7 +35,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Settings**: Recommended Defaults and Developer's Defaults keep where you moved things and their size in Edit Mode, and reset only the options.
 - **Short Channel Names**: turning it off gives channels already in chat their full names again.
 - **Social Button**: turning it off no longer leaves Chat Copy's button above the chat window.
-- **Talent Planner**: refuses a shared plan with more than 51 points, which could freeze the game.
+- **Talent Planner**: refuses a shared plan with more than 51 points, which could freeze the game, and a shared plan's name can't carry colors, icons, or links.
 - **Item Tooltips**: your own auction house searches keep an item's lowest price instead of the last one listed.
 - **Unusable Items Tint**: no longer tints recipes you can learn because of the item they make, such as plans for mail armor or for gear above your level.
 - **Waypoints**: `/way` is left to TomTom or another addon that has it even after you've typed a slash command, and turning Waypoints on says so in chat.
