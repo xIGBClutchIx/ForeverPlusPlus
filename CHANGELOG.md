@@ -13,6 +13,10 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Quest Tracker**: the new Sort by Level option (off by default) lists tracked quests by level, lowest or highest first, instead of in the order you tracked them. It waits for combat to end.
 - **Talent Planner**: counts the Legacy perk Talented: with it, plans get talent points from level 5 instead of 10, still 51 at most.
 
+### Fixed
+
+- **Unusable Items Tint**: no longer tints recipes you can learn because of the item they make, such as plans for mail armor or for gear above your level.
+
 ## 0.8.1 (2026-10-10)
 
 ### Fixed

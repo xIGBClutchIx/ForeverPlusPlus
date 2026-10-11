@@ -32,6 +32,10 @@ ns.changelog = {
                 { L.TALENTPLANNER_TITLE, "Counts the Legacy perk Talented: with it, plans get "
                     .. "talent points from level 5 instead of 10, still 51 at most." },
             } },
+            { L.CHANGELOG_FIXED, {
+                { L.UNUSABLEITEMS_TITLE, "No longer tints recipes you can learn because of the "
+                    .. "item they make, such as plans for mail armor or for gear above your level." },
+            } },
         },
     },
     {

@@ -4,7 +4,8 @@
 -- "Can't use" is what the game's own item tooltip says: any line in Blizzard's red, such as a
 -- class, armor or weapon type, level, profession skill, or reputation you don't have. That
 -- covers more than C_PlayerInfo.CanUseItem, which doesn't say whether it checks level. "Already
--- known" is red too but left out: that's Already Known's mark, not "can't use".
+-- known" is red too but left out: that's Already Known's mark, not "can't use". A recipe is
+-- judged by its own lines only, not those of the item it makes.
 --
 -- The tint is our own texture over the icon, multiplying it (MOD blend), so it looks like
 -- Blizzard's red vertex color without touching the icon: bags set the icon's color themselves
@@ -55,6 +56,23 @@ local function isRed(color)
     return r > rr - 0.05 and g < rg + 0.05 and b < rb + 0.05
 end
 
+local RECIPE = 9 -- Enum.ItemClass.Recipe
+
+-- Where a recipe's own lines end: its "Use: Teaches you how to make" line, or the blank line
+-- before the item it makes. That item's lines follow in the same tooltip, and its armor type or
+-- level in red says nothing about whether you can learn the recipe.
+local function recipeEnd(line)
+    local text = line.leftText
+    if not ns.IsReadable(text) then
+        return false
+    end
+    if text == "" then
+        return true
+    end
+    local use = _G.ITEM_SPELL_TRIGGER_ONUSE
+    return use and text:sub(1, #use) == use or false
+end
+
 -- True when a line is red, false when none is, nil while the game has no tooltip for the item
 -- yet (not cached), so that isn't taken for "usable".
 local function tooltipUnusable(link)
@@ -63,9 +81,14 @@ local function tooltipUnusable(link)
     if not lines or #lines == 0 then
         return nil
     end
+    local _, _, _, _, _, classID = C_Item.GetItemInfoInstant(link)
+    local recipe = classID == RECIPE
     local alreadyKnown = _G.ITEM_SPELL_KNOWN
     for i = 2, #lines do -- line 1 is the name, in its quality color
         local line = lines[i]
+        if recipe and recipeEnd(line) then
+            return false
+        end
         local text = line.leftText
         if not (alreadyKnown and ns.IsReadable(text) and text == alreadyKnown)
             and (isRed(line.leftColor) or (line.rightText and isRed(line.rightColor))) then
