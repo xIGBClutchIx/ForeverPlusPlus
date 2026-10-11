@@ -434,11 +434,41 @@ end
 
 local USE = _G.ITEM_SPELL_TRIGGER_ONUSE or "Use:" -- Blizzard's "Use:", in the player's language
 
+-- Color codes come as |cAARRGGBB or as |cnNAME: with one of Blizzard's named colors
+-- (|cnHIGHLIGHT_FONT_COLOR:), and end at |r.
+local HEX_CODE, NAMED_CODE = "|c%x%x%x%x%x%x%x%x", "|cn[%w_]+:"
+
+local function stripCodes(text)
+    return (text:gsub(NAMED_CODE, ""):gsub(HEX_CODE, ""):gsub("|r", ""))
+end
+
 -- A line's text without color codes, or nil when it can't be read.
 local function plainText(line)
     local text = line.leftText
     if type(text) == "string" and ns.IsReadable(text) then
-        return (text:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""))
+        return stripCodes(text)
+    end
+end
+
+-- The color code still running at the end of `piece`: the code, false when the piece ends its
+-- color with |r, or nil when it has neither and the color before it runs on.
+local function runningColor(piece)
+    local lastOpen, code = 0, nil
+    for _, pattern in ipairs({ HEX_CODE, NAMED_CODE }) do
+        for at, found in piece:gmatch("()(" .. pattern .. ")") do
+            if at > lastOpen then
+                lastOpen, code = at, found
+            end
+        end
+    end
+    local lastClose = 0
+    for at in piece:gmatch("()|r") do
+        lastClose = at
+    end
+    if lastOpen > lastClose then
+        return code
+    elseif lastClose > 0 then
+        return false
     end
 end
 
@@ -518,23 +548,14 @@ local function replaceBundleLine(tooltip, data, lineData)
     local open -- the color code still running at the start of the next piece
     for piece in (lineData.leftText .. "\n"):gmatch("(.-)\n") do
         local shown = (open or "") .. piece
-        local lastOpen, code = 0, nil
-        for at, found in piece:gmatch("()(|c%x%x%x%x%x%x%x%x)") do
-            lastOpen, code = at, found
-        end
-        local lastClose = 0
-        for at in piece:gmatch("()|r") do
-            lastClose = at
-        end
-        if lastOpen > lastClose then
-            open = code
-        elseif lastClose > 0 then
-            open = nil
+        local running = runningColor(piece)
+        if running ~= nil then
+            open = running or nil
         end
         if open then
             shown = shown .. "|r"
         end
-        local count, name = bundleOf((piece:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")))
+        local count, name = bundleOf(stripCodes(piece))
         if count then
             flush()
             local cost = bundleCost(count, name)
