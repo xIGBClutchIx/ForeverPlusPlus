@@ -469,7 +469,7 @@ local function optionChanged(module, key)
     end
 end
 
-local welcomed = {} -- functions to call once the player has seen the About page
+local welcomed = {} -- functions to call when the welcome is seen, or reset to show again
 
 ---True from a fresh install until the player first sees the About page.
 ---@return boolean
@@ -477,21 +477,31 @@ function ns.WelcomePending()
     return ns.db and ns.db.welcome == true or false
 end
 
----Calls fn once the player has seen the About page after a fresh install.
+---Calls fn once the player has seen the About page after a fresh install, and again whenever the
+---welcome is reset (the Debug page), so it can show and hide what offers it.
 ---@param fn function
 function ns.OnWelcomed(fn)
     welcomed[#welcomed + 1] = fn
 end
 
----Marks the About page seen (Settings.lua, when it's first shown).
-function ns.Welcomed()
-    if not ns.WelcomePending() then
+local function setWelcome(pending)
+    if ns.WelcomePending() == pending then
         return
     end
-    ns.db.welcome = nil
+    ns.db.welcome = pending or nil
     for _, fn in ipairs(welcomed) do
         call(fn)
     end
+end
+
+---Marks the About page seen (Settings.lua, when it's first shown).
+function ns.Welcomed()
+    setWelcome(false)
+end
+
+---Offers the About page again as on a fresh install, keeping every setting (the Debug page).
+function ns.ResetWelcome()
+    setWelcome(true)
 end
 
 ---Loads the saved settings and enables every module that is on (called once, at PLAYER_LOGIN).

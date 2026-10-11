@@ -15,7 +15,7 @@
 --                    since the player last looked (`added`), or an option changed since then
 --                    (`changed`), is marked NEW
 --     <Tool>         a page a module draws itself (`BuildPage`)
---     Debug          Show Tags and Forever++'s own buttons (Reset Seen Version, Copy Debug Info,
+--     Debug          Show Tags and Forever++'s own buttons (Reset Seen Version, Reset Welcome, Copy Debug Info,
 --                    Print Module Events, Reload UI), then options marked `debug = true` and
 --                    buttons from `module.debugActions`, for testing
 --     Changelog      the release notes from Changelog.lua
@@ -1703,6 +1703,12 @@ end
 local DEBUG_TOOLS = {
     { name = L.DEBUG_RESET_SEEN, button = L.DEBUG_RESET_SEEN_BUTTON,
         description = L.DEBUG_RESET_SEEN_DESC, fn = resetSeen },
+    { name = L.DEBUG_RESET_WELCOME, button = L.DEBUG_RESET_WELCOME_BUTTON,
+        description = L.DEBUG_RESET_WELCOME_DESC,
+        fn = function()
+            ns.ResetWelcome()
+            ns.Print(L.DEBUG_RESET_WELCOME_DONE)
+        end },
     { name = L.DEBUG_INFO, button = L.DEBUG_INFO_BUTTON, description = L.DEBUG_INFO_DESC,
         fn = function() ns.Prompt("DEBUG_INFO", L.DEBUG_INFO_PROMPT, debugInfo()) end },
     { name = L.DEBUG_EVENTS, button = L.DEBUG_EVENTS_BUTTON, description = L.DEBUG_EVENTS_DESC,
