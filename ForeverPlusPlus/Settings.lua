@@ -19,7 +19,8 @@
 --                    and buttons from `module.debugActions`, each placed by its `section`: What's
 --                    New (Show Tags, Reset Seen Version, Reset Welcome), Diagnostics (Copy Debug
 --                    Info, Print Module Events, Reload UI), Testing, and Logging
---     Changelog      the release notes from Changelog.lua
+--     Changelog      the releases in Changelog.lua in a list like the Modules page's, with the
+--                    selected one's notes beside it
 --     About          what the addon is, how many modules are on, the version, links, and the /fpp
 --                    commands, with the Defaults button at the top right like Modules
 -- Without subpages (an older Settings API), the Modules page is the only page.
@@ -224,32 +225,41 @@ end
 
 local TAG_PADDING = 14 -- the room a label takes after its text, besides its own text
 
--- An update that keeps a NEW label just after `text`, a font string, while `key` (a module's name,
--- or one of its options) is marked, or `other` (the slider in an option's row, or the module in the
--- list): the text at most `room` wide, less the label's room while it shows. The label is made the
--- first time it's needed, so it can come and go with Show Tags.
-local function newMark(parent, text, room, key, other)
+-- A function that shows a NEW label just after `text`, a font string, or hides it: the text at most
+-- `room` wide, less the label's room while it shows. It returns how far past the text's end the
+-- label reaches (0 while hidden), for something after it. The label is made the first time it's
+-- needed, so it can come and go with Show Tags.
+local function newLabel(parent, text, room)
     local label
-    return function()
-        local kind = newRows[key] or (other and newRows[other])
-        if kind and not label and canLabel() then
+    return function(shown)
+        if shown and not label and canLabel() then
             label = CreateFrame("Frame", nil, parent, "NewFeatureLabelTemplate")
         end
         local tag = 0
-        if kind and label and label.Label then
+        if shown and label and label.Label then
             tag = ns.Text.Width(label.Label) -- Blizzard's own NEW, in the game's language
-        elseif kind then
+        elseif shown then
             tag = 26
         end
-        text:SetWidth(min(ns.Text.Width(text) + 2, room - (kind and tag + TAG_PADDING or 0)))
+        text:SetWidth(min(ns.Text.Width(text) + 2, room - (shown and tag + TAG_PADDING or 0)))
         if label then
             -- The text's width, unless it's cut short, then half the label's text: the template
             -- centers its text on the frame.
             local width = min(ns.Text.Width(text), text:GetWidth())
             label:ClearAllPoints()
             label:SetPoint("CENTER", text, "LEFT", width + 6 + tag / 2, 0)
-            label:SetShown(kind and true or false)
+            label:SetShown(shown and true or false)
         end
+        return shown and 6 + tag or 0
+    end
+end
+
+-- An update that keeps a NEW label just after `text` while `key` (a module's name, or one of its
+-- options) is marked, or `other` (the slider in an option's row, or the module in the list).
+local function newMark(parent, text, room, key, other)
+    local show = newLabel(parent, text, room)
+    return function()
+        show(newRows[key] or (other and newRows[other]))
     end
 end
 
@@ -623,8 +633,8 @@ end
 -- ns.RefreshSetting, which puts that module back to what's saved wherever it shows, so /fpp and
 -- the page agree.
 
-local LIST_LEFT, LIST_WIDTH, LIST_ROW = 7, 186, 20 -- the module list and its rows
-local PANE_LEFT = 234 -- where the details start, right of the list and its scroll bar
+local LIST_LEFT, LIST_WIDTH, LIST_ROW = 7, 186, 20 -- the module list and its rows (and the
+                                                    -- Changelog page's)
 local ROW_HEIGHT = 26 -- an option's row, as in Blizzard's lists
 local INDENT = 15 -- an option under another (`requires`)
 local CONTROL_LEFT = 150 -- where an option's control starts, after its name
@@ -865,6 +875,77 @@ local function layoutStack(stack)
         end
     end
     stack:SetHeight(max(-y + stack.bottom, 1))
+end
+
+-- Split pages ------------------------------------------------------------------------------------
+-- The Modules and Changelog pages: under the title, a narrow list on the left with rows like the
+-- Settings sidebar's, a faint gold line, and a pane on the right for what's selected, each side
+-- scrolling on its own.
+
+-- A list `listWidth` wide and a pane right of it and its scroll bar, as `split.listScroll` and
+-- `split.list` (a stack), and `split.pane` and `split.paneContent` (`split.paneWidth` wide).
+local function newSplit(frame, listWidth)
+    local width = frame:GetWidth()
+    width = width > 0 and width or 615
+    local paneLeft = LIST_LEFT + listWidth + 41
+    local split = {}
+
+    local list = newScroll(frame)
+    list:SetPoint("TOPLEFT", LIST_LEFT, -60)
+    list:SetPoint("BOTTOMLEFT", LIST_LEFT, 8)
+    list:SetWidth(listWidth)
+    split.listScroll = list
+    split.list = newStack(list, listWidth, 2)
+    split.list.bottom = 8
+    list:SetScrollChild(split.list)
+
+    local line = frame:CreateTexture(nil, "ARTWORK")
+    line:SetColorTexture(1, 0.82, 0, 0.25)
+    line:SetWidth(1)
+    line:SetPoint("TOPLEFT", paneLeft - 12, -66)
+    line:SetPoint("BOTTOMLEFT", paneLeft - 12, 14)
+
+    local pane = newScroll(frame)
+    pane:SetPoint("TOPLEFT", paneLeft, -60)
+    pane:SetPoint("BOTTOMRIGHT", -32, 8)
+    split.pane, split.paneWidth = pane, width - paneLeft - 32
+    split.paneContent = CreateFrame("Frame", nil, pane)
+    split.paneContent:SetWidth(split.paneWidth)
+    pane:SetScrollChild(split.paneContent)
+    return split
+end
+
+-- Blizzard's sidebar highlight while a list row is selected or under the mouse.
+local function paint(row)
+    local atlas
+    if row.isSelected() then
+        atlas = "Options_List_Active"
+    elseif row.over then
+        atlas = "Options_List_Hover"
+    end
+    if atlas and hasAtlas(atlas) then
+        row.highlight:SetAtlas(atlas)
+        row.highlight:Show()
+    else
+        row.highlight:Hide()
+    end
+end
+
+local function hover(row, over)
+    row.over = over
+    paint(row)
+end
+
+-- A row of a split page's list, lit while `isSelected()` is true and under the mouse.
+local function newListButton(list, isSelected)
+    local row = CreateFrame("Button", nil, list)
+    row:SetSize(list:GetWidth(), LIST_ROW)
+    row.isSelected = isSelected
+    row.highlight = row:CreateTexture(nil, "BACKGROUND")
+    row.highlight:SetAllPoints()
+    row:SetScript("OnEnter", function() hover(row, true) end)
+    row:SetScript("OnLeave", function() hover(row, false) end)
+    return row
 end
 
 -- The selected module's rows -------------------------------------------------------------------
@@ -1140,22 +1221,6 @@ end
 
 -- The module list ------------------------------------------------------------------------------
 
--- Blizzard's sidebar highlight while a row is selected or under the mouse.
-local function paint(row)
-    local atlas
-    if selected == row.name then
-        atlas = "Options_List_Active"
-    elseif row.over then
-        atlas = "Options_List_Hover"
-    end
-    if atlas and hasAtlas(atlas) then
-        row.highlight:SetAtlas(atlas)
-        row.highlight:Show()
-    else
-        row.highlight:Hide()
-    end
-end
-
 -- Highlights the options of `view` the search finds. With `reveal`, scrolls the first of them into
 -- sight when it's below what shows, after a frame, once the layout's sizes are known.
 local function markFound(view, reveal)
@@ -1208,20 +1273,12 @@ end
 -- off, with a NEW label while it's new. Clicking it selects the module.
 local function newListRow(name)
     local module = ns.modules[name]
-    local row = CreateFrame("Button", nil, page.list)
-    row:SetSize(LIST_WIDTH, LIST_ROW)
-    row.name = name
-    row.highlight = row:CreateTexture(nil, "BACKGROUND")
-    row.highlight:SetAllPoints()
-    local function hover(over)
-        row.over = over
-        paint(row)
-    end
+    local row = newListButton(page.list, function() return selected == name end)
     local box = newModuleCheck(row, name, 22)
     box:SetPoint("LEFT", 0, 0)
     -- The checkbox takes the mouse from the row, so it keeps the row's highlight.
-    box:HookScript("OnEnter", function() hover(true) end)
-    box:HookScript("OnLeave", function() hover(false) end)
+    box:HookScript("OnEnter", function() hover(row, true) end)
+    box:HookScript("OnLeave", function() hover(row, false) end)
     local text = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     text:SetPoint("LEFT", box, "RIGHT", 2, 0)
     text:SetJustifyH("LEFT")
@@ -1237,8 +1294,6 @@ local function newListRow(name)
             choose(name)
         end
     end)
-    row:SetScript("OnEnter", function() hover(true) end)
-    row:SetScript("OnLeave", function() hover(false) end)
     return row
 end
 
@@ -1341,22 +1396,13 @@ end
 
 local function buildModules(frame)
     ns.AddPageTitle(frame, L.MODULES)
-    local width = frame:GetWidth()
-    page = { rows = {}, views = {}, width = width > 0 and width or 615 }
+    page = newSplit(frame, LIST_WIDTH)
+    page.rows, page.views = {}, {}
 
     local defaults = newButton(frame, SETTINGS_DEFAULTS or L.HOME_DEFAULTS, 96, askDefaults)
     defaults:SetPoint("TOPRIGHT", -10, -18)
     page.search = addSearchBox(frame, defaults)
     page.newOnly = addNewOnly(frame, page.search or defaults)
-
-    local list = newScroll(frame)
-    list:SetPoint("TOPLEFT", LIST_LEFT, -60)
-    list:SetPoint("BOTTOMLEFT", LIST_LEFT, 8)
-    list:SetWidth(LIST_WIDTH)
-    page.listScroll = list
-    page.list = newStack(list, LIST_WIDTH, 2)
-    page.list.bottom = 8
-    list:SetScrollChild(page.list)
 
     -- "No modules match" while the search hides them all, or "Nothing new" while the New checkbox
     -- is on and nothing is marked.
@@ -1383,21 +1429,6 @@ local function buildModules(frame)
         page.rows[name] = newListRow(name)
         addEntry(page.list, page.rows[name], function() return matches(name) end)
     end
-
-    -- A faint gold line between the list and the details.
-    local line = frame:CreateTexture(nil, "ARTWORK")
-    line:SetColorTexture(1, 0.82, 0, 0.25)
-    line:SetWidth(1)
-    line:SetPoint("TOPLEFT", PANE_LEFT - 12, -66)
-    line:SetPoint("BOTTOMLEFT", PANE_LEFT - 12, 14)
-
-    local pane = newScroll(frame)
-    pane:SetPoint("TOPLEFT", PANE_LEFT, -60)
-    pane:SetPoint("BOTTOMRIGHT", -32, 8)
-    page.pane, page.paneWidth = pane, page.width - PANE_LEFT - 32
-    page.paneContent = CreateFrame("Frame", nil, pane)
-    page.paneContent:SetWidth(page.paneWidth)
-    pane:SetScrollChild(page.paneContent)
 
     -- Opens on the module ns.OpenSettings asked for, or the first with a new option to see, or
     -- else the first.
@@ -1560,62 +1591,163 @@ local function buildAbout(frame)
 end
 
 -- Changelog page ------------------------------------------------------------------------------
--- The release notes from Changelog.lua, newest first, in a scrolling list. Built the first time
--- it's shown.
+-- The release notes from Changelog.lua as a split page, like the Modules page: the releases on the
+-- left (Unreleased first, then newest first) with their dates, and the selected one's notes on the
+-- right. A release newer than the version the player last saw on the Modules page gets the NEW
+-- label. Built the first time it's shown, on the newest.
+
+local CHANGELOG_LIST_WIDTH = 140 -- the release list, narrower than the module list
+local RULE_WIDTH = 260 -- the gold line under a section's heading
+
+-- Whether a release is newer than the version the player last saw. Unreleased notes always are.
+local function isNewRelease(release)
+    return not release.date or ns.Text.NewerVersion(release.version, ns.db.seenVersion) and true
+        or false
+end
+
+-- "N changes" for a release's notes.
+local function countText(release)
+    local count = 0
+    for _, section in ipairs(release.sections) do
+        count = count + #section[2]
+    end
+    return count == 1 and L.CHANGELOG_ONE_CHANGE or format(L.CHANGELOG_CHANGES, count)
+end
+
+-- Gold fading out to the right. Probe: SetGradient with colors is Mainline's; without it, a faint
+-- gold line like the one between the list and the pane.
+local function fadeGold(texture)
+    texture:SetColorTexture(1, 1, 1, 1)
+    if not (CreateColor and texture.SetGradient and pcall(texture.SetGradient, texture,
+        "HORIZONTAL", CreateColor(1, 0.82, 0, 0.45), CreateColor(1, 0.82, 0, 0))) then
+        texture:SetColorTexture(1, 0.82, 0, 0.25)
+    end
+end
+
+-- A release's row in the list: its version, the NEW label while it's new, and its date (MM-DD) in
+-- gray at the right. Returns the row and an update for its label.
+local function newReleaseRow(list, release, isSelected)
+    local row = newListButton(list, isSelected)
+    local date = row:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    date:SetPoint("RIGHT", -6, 0)
+    date:SetText(release.date and release.date:sub(6) or "")
+    local text = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    text:SetPoint("LEFT", 8, 0)
+    text:SetJustifyH("LEFT")
+    text:SetWordWrap(false)
+    text:SetText(release.version)
+    local mark = newLabel(row, text, row:GetWidth() - 18 - ns.Text.Width(date))
+    return row, function() mark(isNewRelease(release)) end
+end
+
+-- A release's notes: its title, the NEW label while it's new, and how many changes, then each
+-- section's heading in gold over a fading gold line, and its entries after a dash, their wrapped
+-- lines lined up after it and a module's name in gold. Returns the view and an update for its
+-- label.
+local function buildNotes(content, width, release)
+    local view = CreateFrame("Frame", nil, content)
+    view:SetPoint("TOPLEFT")
+    view:SetWidth(width)
+
+    local title = view:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
+    title:SetPoint("TOPLEFT", 4, -4)
+    title:SetJustifyH("LEFT")
+    title:SetWordWrap(false)
+    -- Unreleased notes have no date.
+    title:SetText(release.date and format(L.CHANGELOG_RELEASE, release.version, release.date)
+        or release.version)
+    local count = view:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    count:SetText(countText(release))
+    local mark = newLabel(view, title, width - 18 - ns.Text.Width(count))
+    local function update()
+        local after = mark(isNewRelease(release))
+        local x = min(ns.Text.Width(title), title:GetWidth()) + after + 10
+        count:ClearAllPoints()
+        count:SetPoint("LEFT", title, "LEFT", x, 0)
+    end
+
+    local y = -4 - title:GetStringHeight()
+    for _, section in ipairs(release.sections) do
+        local heading = view:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+        heading:SetPoint("TOPLEFT", 4, y - 18)
+        heading:SetText(section[1])
+        y = y - 18 - heading:GetStringHeight() - 6
+        local rule = view:CreateTexture(nil, "ARTWORK")
+        rule:SetPoint("TOPLEFT", 4, y)
+        rule:SetSize(min(RULE_WIDTH, width - 8), 1)
+        fadeGold(rule)
+        y = y - 5
+        for _, entry in ipairs(section[2]) do
+            local text = entry
+            if type(entry) == "table" then
+                text = format("|cffffd100%s|r: %s", entry[1], entry[2]) -- gold, like GameFontNormal
+            end
+            local dash = view:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+            dash:SetPoint("TOPLEFT", 12, y - 8)
+            dash:SetText("-")
+            local line = view:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+            line:SetPoint("TOPLEFT", 24, y - 8)
+            line:SetWidth(width - 28)
+            line:SetJustifyH("LEFT")
+            line:SetText(text)
+            y = y - 8 - line:GetStringHeight()
+        end
+    end
+    view:SetHeight(-y + 12)
+    return view, update
+end
 
 local function buildChangelog(frame)
     ns.AddPageTitle(frame, L.CHANGELOG)
+    local split = newSplit(frame, CHANGELOG_LIST_WIDTH)
+    local releases = ns.changelog or {}
+    local rows, views, updates = {}, {}, {}
+    local shown -- the release on the right
 
-    local scroll = newScroll(frame)
-    scroll:SetPoint("TOPLEFT", 16, -64)
-    scroll:SetPoint("BOTTOMRIGHT", -32, 8)
-
-    local width = scroll:GetWidth()
-    if width <= 0 then
-        width = 560 -- about the width of the Settings page, if its size isn't known yet
-    end
-    local content = CreateFrame("Frame", nil, scroll)
-    content:SetWidth(width)
-    scroll:SetScrollChild(content)
-
-    local y = 0
-    -- A line of text across the list, wrapping, below the one before it.
-    -- With `bullet`, a dash before it and the text's wrapped lines lined up after the dash, so
-    -- each entry's start stands out.
-    local function add(font, text, indent, gap, bullet)
-        y = y - (gap or 0)
-        indent = indent or 0
-        if bullet then
-            local dash = content:CreateFontString(nil, "OVERLAY", font)
-            dash:SetPoint("TOPLEFT", indent, y)
-            dash:SetText("-")
-            indent = indent + 10
+    local function show(i)
+        shown = i
+        for _, row in ipairs(rows) do
+            paint(row)
         end
-        local line = content:CreateFontString(nil, "OVERLAY", font)
-        line:SetPoint("TOPLEFT", indent, y)
-        line:SetWidth(width - indent)
-        line:SetJustifyH("LEFT")
-        line:SetText(text)
-        y = y - line:GetStringHeight()
+        for other, view in pairs(views) do
+            view:SetShown(other == i)
+        end
+        local view = views[i]
+        if not view then
+            local update
+            view, update = buildNotes(split.paneContent, split.paneWidth, releases[i])
+            views[i] = view
+            updates[#updates + 1] = update
+            update()
+        end
+        split.paneContent:SetHeight(view:GetHeight())
+        split.pane:SetVerticalScroll(0)
     end
 
-    for i, release in ipairs(ns.changelog or {}) do
-        -- Unreleased notes have no date.
-        local title = release.date and format(L.CHANGELOG_RELEASE, release.version, release.date)
-            or release.version
-        add("GameFontHighlightLarge", title, 0, i > 1 and 24 or 0)
-        for _, section in ipairs(release.sections) do
-            add("GameFontNormal", section[1], 0, 14)
-            for _, entry in ipairs(section[2]) do
-                local text = entry
-                if type(entry) == "table" then
-                    text = format("|cffffd100%s|r: %s", entry[1], entry[2]) -- gold, like GameFontNormal
-                end
-                add("GameFontHighlightSmall", text, 8, 6, true)
+    for i, release in ipairs(releases) do
+        local row, update = newReleaseRow(split.list, release, function() return shown == i end)
+        row:SetScript("OnClick", function()
+            if shown ~= i then
+                show(i)
             end
+        end)
+        rows[i] = row
+        updates[#updates + 1] = update
+        addEntry(split.list, row)
+    end
+    layoutStack(split.list)
+
+    -- The NEW labels follow the version last seen, which the Modules page moves on.
+    local function refresh()
+        for _, update in ipairs(updates) do
+            update()
         end
     end
-    content:SetHeight(-y + 8)
+    refresh()
+    if releases[1] then
+        show(1)
+    end
+    frame:HookScript("OnShow", refresh)
 end
 
 -- Module names in the order their titles sort in the player's language, so the list and pages

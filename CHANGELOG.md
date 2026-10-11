@@ -11,6 +11,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Character Window**: the new Equipped Weapon Skills option (on by default) colors the Skills tab's bars green for the weapons you have equipped, instead of blue.
 - **Item Tooltips**: the new Waylaid Crate Costs option shows beside each bundle a Waylaid Crate takes what buying it costs at the auction house, from your scanned prices. It can go under each bundle instead, or be turned off.
 - **Quest Tracker**: the new Sort by Level option (off by default) lists tracked quests by level, lowest or highest first, instead of in the order you tracked them. It waits for combat to end.
+- **Settings**: the Changelog page lists the releases on the left, like the Modules page, with the selected one's notes beside it in larger text. Releases since the version you last saw are marked NEW.
 - **Talent Planner**: counts the Legacy perk Talented: with it, plans get talent points from level 5 instead of 10, still 51 at most.
 
 ### Fixed
