@@ -19,7 +19,7 @@ local module = ns.NewModule("Waypoints", L.WAYPOINTS_DESC, {
     arrow = true,
     scale = 100, -- percent
     x = 0, -- the arrow's offset from the center of the screen
-    y = 180,
+    y = 530,
 })
 module.title = L.WAYPOINTS_TITLE
 module.category = "map"

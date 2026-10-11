@@ -19,8 +19,8 @@ local module = ns.NewModule("CurrencyBar", L.CURRENCYBAR_DESC, {
     session = true,
     vertical = false,
     scale = 120, -- percent
-    x = 0, -- the box's offset from the center of the screen
-    y = -300,
+    x = 977, -- the box's offset from the center of the screen
+    y = -462,
 })
 module.title = L.CURRENCYBAR_TITLE
 module.category = "interface"
