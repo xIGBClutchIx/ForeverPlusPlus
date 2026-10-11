@@ -31,7 +31,8 @@ ns.changelog = {
                     .. "order you tracked them. It waits for combat to end." },
                 { L.CHANGELOG_SETTINGS, "The Changelog page lists the releases on the left, "
                     .. "like the Modules page, with the selected one's notes beside it in larger "
-                    .. "text. Releases since the version you last saw are marked NEW." },
+                    .. "text. Releases since the version you last saw are marked NEW, and a "
+                    .. "search box shows only the changes that mention what you type." },
                 { L.TALENTPLANNER_TITLE, "Counts the Legacy perk Talented: with it, plans get "
                     .. "talent points from level 5 instead of 10, still 51 at most." },
             } },

@@ -20,7 +20,8 @@
 --                    New (Show Tags, Reset Seen Version, Reset Welcome), Diagnostics (Copy Debug
 --                    Info, Print Module Events, Reload UI), Testing, and Logging
 --     Changelog      the releases in Changelog.lua in a list like the Modules page's, with the
---                    selected one's notes beside it
+--                    selected one's notes beside it, and a search box and the Defaults button
+--                    at the top like Modules
 --     About          what the addon is, how many modules are on, the version, links, and the /fpp
 --                    commands, with the Defaults button at the top right like Modules
 -- Without subpages (an older Settings API), the Modules page is the only page.
@@ -758,6 +759,13 @@ local function newButton(parent, text, width, fn)
     return button
 end
 
+-- Our Defaults button (askDefaults) at the top right of a page we draw: Modules, Changelog, About.
+local function addPageDefaults(frame)
+    local button = newButton(frame, SETTINGS_DEFAULTS or L.HOME_DEFAULTS, 96, askDefaults)
+    button:SetPoint("TOPRIGHT", -10, -18)
+    return button
+end
+
 local function setEnabled(name, on)
     ns.SetEnabled(name, on)
     ns.RefreshSetting(name)
@@ -1342,11 +1350,11 @@ function refreshAll()
     relayout()
 end
 
--- A search box at the top of the page, left of the Defaults button, that narrows the list to the
--- modules whose title or description has the text, or an option's name or description, and
--- highlights those options on the right. Blizzard's own search, at the top left of the
--- panel, finds settings across every addon, not modules. Probe: SearchBoxTemplate is Mainline's.
-local function addSearchBox(frame, anchor)
+-- A search box at the top of a page we draw, left of `anchor` (its Defaults button), with
+-- `instructions` in gray while it's empty. It calls `onChange(text)` with the text, trimmed, as
+-- it's typed. Blizzard's own search, at the top left of the panel, finds settings across every
+-- addon, not what our pages list. Probe: SearchBoxTemplate is Mainline's.
+local function addSearchBox(frame, anchor, instructions, onChange)
     if not hasTemplate("SearchBoxTemplate") then
         return
     end
@@ -1355,16 +1363,21 @@ local function addSearchBox(frame, anchor)
     box:SetPoint("RIGHT", anchor, "LEFT", -12, 0)
     box:SetAutoFocus(false)
     if box.Instructions then
-        box.Instructions:SetText(L.SETTINGS_SEARCH)
+        box.Instructions:SetText(instructions)
     end
     -- After the template's own OnTextChanged, which shows the clear button and the gray text.
     box:HookScript("OnTextChanged", function(self)
-        local text = self:GetText():match("^%s*(.-)%s*$")
-        filter = text ~= "" and strlower(text) or nil
-        filterText = text
-        relayout(true)
+        onChange((self:GetText():match("^%s*(.-)%s*$")))
     end)
     return box
+end
+
+-- The Modules page's search: the list narrows to the modules whose title or description has the
+-- text, or an option's name or description, and those options are highlighted on the right.
+local function searchModules(text)
+    filter = text ~= "" and strlower(text) or nil
+    filterText = text
+    relayout(true)
 end
 
 -- A New checkbox left of the search box that narrows the list to the modules marked NEW, with the
@@ -1399,9 +1412,8 @@ local function buildModules(frame)
     page = newSplit(frame, LIST_WIDTH)
     page.rows, page.views = {}, {}
 
-    local defaults = newButton(frame, SETTINGS_DEFAULTS or L.HOME_DEFAULTS, 96, askDefaults)
-    defaults:SetPoint("TOPRIGHT", -10, -18)
-    page.search = addSearchBox(frame, defaults)
+    local defaults = addPageDefaults(frame)
+    page.search = addSearchBox(frame, defaults, L.SETTINGS_SEARCH, searchModules)
     page.newOnly = addNewOnly(frame, page.search or defaults)
 
     -- "No modules match" while the search hides them all, or "Nothing new" while the New checkbox
@@ -1523,8 +1535,7 @@ end
 local function buildAbout(frame)
     ns.AddPageTitle(frame, L.ABOUT)
     ns.Welcomed() -- the NEW tag on the Minimap Button can go
-    local defaults = newButton(frame, SETTINGS_DEFAULTS or L.HOME_DEFAULTS, 96, askDefaults)
-    defaults:SetPoint("TOPRIGHT", -10, -18) -- where the Modules page has it
+    addPageDefaults(frame)
 
     local icon = frame:CreateTexture(nil, "ARTWORK")
     icon:SetSize(64, 64)
@@ -1605,12 +1616,38 @@ local function isNewRelease(release)
         or false
 end
 
--- "N changes" for a release's notes.
-local function countText(release)
+-- An entry as it shows: its text, after its module's name in gold when it has one.
+local function entryText(entry)
+    if type(entry) == "table" then
+        return format("|cffffd100%s|r: %s", entry[1], entry[2]) -- gold, like GameFontNormal
+    end
+    return entry
+end
+
+-- Whether the search (lowercased, nil for none) finds an entry, by its module's name or its text.
+local function entryMatches(entry, search)
+    if not search then
+        return true
+    end
+    local text = type(entry) == "table" and format("%s: %s", entry[1], entry[2]) or entry
+    return strlower(text):find(search, 1, true) ~= nil
+end
+
+-- How many of a release's entries the search finds (all of them without one).
+local function countMatches(release, search)
     local count = 0
     for _, section in ipairs(release.sections) do
-        count = count + #section[2]
+        for _, entry in ipairs(section[2]) do
+            if entryMatches(entry, search) then
+                count = count + 1
+            end
+        end
     end
+    return count
+end
+
+-- "N changes" for a release's notes.
+local function countText(count)
     return count == 1 and L.CHANGELOG_ONE_CHANGE or format(L.CHANGELOG_CHANGES, count)
 end
 
@@ -1640,61 +1677,80 @@ local function newReleaseRow(list, release, isSelected)
     return row, function() mark(isNewRelease(release)) end
 end
 
--- A release's notes: its title, the NEW label while it's new, and how many changes, then each
--- section's heading in gold over a fading gold line, and its entries after a dash, their wrapped
--- lines lined up after it and a module's name in gold. Returns the view and an update for its
--- label.
+-- A release's notes, a stack: its title, the NEW label while it's new, and how many changes the
+-- search finds, then each section's heading in gold over a fading gold line, and its entries after
+-- a dash, their wrapped lines lined up after it and a module's name in gold. Only the entries the
+-- search finds show, under their sections' headings. `view.search(text)` lays it out for a search
+-- (lowercased, nil for none), and `view.update` keeps its NEW label.
 local function buildNotes(content, width, release)
-    local view = CreateFrame("Frame", nil, content)
+    local view = newStack(content, width, 0)
     view:SetPoint("TOPLEFT")
-    view:SetWidth(width)
+    view.top, view.bottom = 4, 12
+    local search
 
-    local title = view:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
-    title:SetPoint("TOPLEFT", 4, -4)
+    local header = CreateFrame("Frame", nil, view)
+    header:SetWidth(width)
+    local title = header:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
+    title:SetPoint("TOPLEFT", 4, 0)
     title:SetJustifyH("LEFT")
     title:SetWordWrap(false)
     -- Unreleased notes have no date.
     title:SetText(release.date and format(L.CHANGELOG_RELEASE, release.version, release.date)
         or release.version)
-    local count = view:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-    count:SetText(countText(release))
-    local mark = newLabel(view, title, width - 18 - ns.Text.Width(count))
-    local function update()
+    header:SetHeight(title:GetStringHeight())
+    addEntry(view, header)
+    local count = header:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    count:SetText(countText(countMatches(release)))
+    local mark = newLabel(header, title, width - 18 - ns.Text.Width(count))
+    function view.update()
         local after = mark(isNewRelease(release))
         local x = min(ns.Text.Width(title), title:GetWidth()) + after + 10
         count:ClearAllPoints()
         count:SetPoint("LEFT", title, "LEFT", x, 0)
     end
 
-    local y = -4 - title:GetStringHeight()
     for _, section in ipairs(release.sections) do
-        local heading = view:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-        heading:SetPoint("TOPLEFT", 4, y - 18)
+        local entries = section[2]
+        local top = CreateFrame("Frame", nil, view)
+        top:SetWidth(width)
+        local heading = top:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+        heading:SetPoint("TOPLEFT", 4, 0)
         heading:SetText(section[1])
-        y = y - 18 - heading:GetStringHeight() - 6
-        local rule = view:CreateTexture(nil, "ARTWORK")
-        rule:SetPoint("TOPLEFT", 4, y)
+        local rule = top:CreateTexture(nil, "ARTWORK")
+        rule:SetPoint("TOPLEFT", 4, -heading:GetStringHeight() - 6)
         rule:SetSize(min(RULE_WIDTH, width - 8), 1)
         fadeGold(rule)
-        y = y - 5
-        for _, entry in ipairs(section[2]) do
-            local text = entry
-            if type(entry) == "table" then
-                text = format("|cffffd100%s|r: %s", entry[1], entry[2]) -- gold, like GameFontNormal
+        top:SetHeight(heading:GetStringHeight() + 6 + 1 + 5)
+        addEntry(view, top, function()
+            for _, entry in ipairs(entries) do
+                if entryMatches(entry, search) then
+                    return true
+                end
             end
-            local dash = view:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-            dash:SetPoint("TOPLEFT", 12, y - 8)
+            return false
+        end, 18)
+        for _, entry in ipairs(entries) do
+            local row = CreateFrame("Frame", nil, view)
+            row:SetWidth(width)
+            local dash = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+            dash:SetPoint("TOPLEFT", 12, 0)
             dash:SetText("-")
-            local line = view:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-            line:SetPoint("TOPLEFT", 24, y - 8)
+            local line = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+            line:SetPoint("TOPLEFT", 24, 0)
             line:SetWidth(width - 28)
             line:SetJustifyH("LEFT")
-            line:SetText(text)
-            y = y - 8 - line:GetStringHeight()
+            line:SetText(entryText(entry))
+            row:SetHeight(line:GetStringHeight())
+            addEntry(view, row, function() return entryMatches(entry, search) end, 8)
         end
     end
-    view:SetHeight(-y + 12)
-    return view, update
+
+    function view.search(text)
+        search = text
+        count:SetText(countText(countMatches(release, search)))
+        layoutStack(view)
+    end
+    return view
 end
 
 local function buildChangelog(frame)
@@ -1703,7 +1759,13 @@ local function buildChangelog(frame)
     local releases = ns.changelog or {}
     local rows, views, updates = {}, {}, {}
     local shown -- the release on the right
+    local search -- the search, lowercased, or nil while the box is empty
 
+    local function matches(i)
+        return countMatches(releases[i], search) > 0
+    end
+
+    -- Shows release `i` on the right (nil for none), laid out for the search.
     local function show(i)
         shown = i
         for _, row in ipairs(rows) do
@@ -1712,17 +1774,37 @@ local function buildChangelog(frame)
         for other, view in pairs(views) do
             view:SetShown(other == i)
         end
+        if not i then
+            split.paneContent:SetHeight(1)
+            return
+        end
         local view = views[i]
         if not view then
-            local update
-            view, update = buildNotes(split.paneContent, split.paneWidth, releases[i])
+            view = buildNotes(split.paneContent, split.paneWidth, releases[i])
             views[i] = view
-            updates[#updates + 1] = update
-            update()
+            updates[#updates + 1] = view.update
+            view.update()
         end
+        view.search(search)
         split.paneContent:SetHeight(view:GetHeight())
         split.pane:SetVerticalScroll(0)
     end
+
+    -- "No changes match" while the search finds nothing.
+    local empty = CreateFrame("Frame", nil, split.list)
+    empty:SetSize(CHANGELOG_LIST_WIDTH, 40)
+    empty.text = empty:CreateFontString(nil, "OVERLAY", "GameFontDisable")
+    empty.text:SetPoint("TOPLEFT", 2, -4)
+    empty.text:SetWidth(CHANGELOG_LIST_WIDTH - 4)
+    empty.text:SetJustifyH("LEFT")
+    addEntry(split.list, empty, function()
+        for i in ipairs(releases) do
+            if matches(i) then
+                return false
+            end
+        end
+        return true
+    end)
 
     for i, release in ipairs(releases) do
         local row, update = newReleaseRow(split.list, release, function() return shown == i end)
@@ -1733,9 +1815,31 @@ local function buildChangelog(frame)
         end)
         rows[i] = row
         updates[#updates + 1] = update
-        addEntry(split.list, row)
+        addEntry(split.list, row, function() return matches(i) end)
     end
     layoutStack(split.list)
+
+    -- Defaults and the search box at the top, as on the Modules page. The list keeps the releases
+    -- the search finds something in, and stays on the one shown while it's one of them, or else
+    -- shows the first.
+    local defaults = addPageDefaults(frame)
+    addSearchBox(frame, defaults, L.CHANGELOG_SEARCH, function(text)
+        search = text ~= "" and strlower(text) or nil
+        empty.text:SetText(format(L.CHANGELOG_NO_MATCH, text))
+        layoutStack(split.list)
+        if shown and matches(shown) then
+            show(shown)
+            return
+        end
+        local first
+        for i in ipairs(releases) do
+            if matches(i) then
+                first = i
+                break
+            end
+        end
+        show(first)
+    end)
 
     -- The NEW labels follow the version last seen, which the Modules page moves on.
     local function refresh()
