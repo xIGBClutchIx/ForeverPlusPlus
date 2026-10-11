@@ -192,10 +192,10 @@ local function canLabel()
     return hasTemplate("NewFeatureLabelTemplate")
 end
 
--- The newest version in Changelog.lua with a date, so released.
-local function lastRelease()
+-- The newest version in Changelog.lua with a date, so released, and older than `before` if given.
+local function lastRelease(before)
     for _, release in ipairs(ns.changelog or {}) do
-        if release.date then
+        if release.date and (not before or ns.Text.NewerVersion(before, release.version)) then
             return release.version
         end
     end
@@ -1621,11 +1621,12 @@ end
 -- Debug page tools ----------------------------------------------------------------------------
 -- Forever++'s own buttons on the Debug page, under Show Tags.
 
--- Puts the version last seen back to the last release, so the Modules page marks what a player
--- updating from it would see, and opens it the way it would open for them: on the first module
--- with a marked option. A module's marks go once it's been clicked, as they do after an update.
+-- Puts the version last seen back to the release before this one, so the Modules page marks what a
+-- player updating from it would see, and opens it the way it would open for them: on the first
+-- module with a marked option. A module's marks go once it's been clicked, as they do after an
+-- update. Once this version is released it's the last release itself, so it can't be the one.
 local function resetSeen()
-    ns.db.seenVersion = lastRelease()
+    ns.db.seenVersion = lastRelease(ns.version)
     wipe(ns.db.seenModules)
     markNew()
     if page then

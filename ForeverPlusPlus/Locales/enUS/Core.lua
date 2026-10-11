@@ -77,7 +77,7 @@ L.SETTINGS_SHOW_TAGS_DESC = "Mark NEW every module and option added or changed s
 L.DEBUG_RESET_SEEN = "Reset Seen Version"
 L.DEBUG_RESET_SEEN_BUTTON = "Reset"
 L.DEBUG_RESET_SEEN_DESC = "Forget that you've seen this version, as if you just updated from the "
-    .. "last release, and open the Modules page the way a player updating would see it. Its tags go "
+    .. "release before it, and open the Modules page the way a player updating would see it. Its tags go "
     .. "once you leave the page."
 L.DEBUG_INFO = "Copy Debug Info"
 L.DEBUG_INFO_BUTTON = "Copy"
