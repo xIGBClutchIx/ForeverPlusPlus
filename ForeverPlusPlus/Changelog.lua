@@ -16,7 +16,7 @@ ns.changelog = {
                 { L.BUFFTIMERS_TITLE, "Show Clock has an Under 1 Minute choice, for a clock only "
                     .. "on auras about to run out." },
                 { L.QUESTTRACKER_TITLE, "The new Sort by Level option (off by default) lists "
-                    .. "tracked quests from the lowest level to the highest instead of in the "
+                    .. "tracked quests by level, lowest or highest first, instead of in the "
                     .. "order you tracked them. It waits for combat to end." },
             } },
         },

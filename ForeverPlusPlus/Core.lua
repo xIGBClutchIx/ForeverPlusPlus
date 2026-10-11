@@ -583,7 +583,7 @@ local developerEnables = { "FishingCast", "SkipCinematics", "AutoScreenshot", "C
 local developerOptions = {
     WorldMap = { zoneDungeons = "key", fishing = "key" },
     ChatHistory = { divider = true },
-    QuestTracker = { sort = true },
+    QuestTracker = { sort = "low" },
 }
 
 ---Puts every module's settings back to their defaults, then turns on the modules in `enable`.

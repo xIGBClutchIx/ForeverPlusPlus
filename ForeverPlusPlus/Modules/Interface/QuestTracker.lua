@@ -23,7 +23,7 @@ local module = ns.NewModule("QuestTracker", L.QUESTTRACKER_DESC, {
     border = false,
     padding = 10,
     fade = false,
-    sort = false,
+    sort = "off", -- or "low" / "high": which level comes first
 })
 module.title = L.QUESTTRACKER_TITLE
 module.category = "interface"
@@ -38,6 +38,11 @@ module.options = {
         description = L.QUESTTRACKER_SORT_DESC,
         section = QUESTS,
         added = "0.8.2",
+        choices = {
+            { "off", L.QUESTTRACKER_SORT_OFF },
+            { "low", L.QUESTTRACKER_SORT_LOW },
+            { "high", L.QUESTTRACKER_SORT_HIGH },
+        },
     },
     {
         key = "font",
@@ -401,7 +406,8 @@ local function watchesMatch(ids, first)
 end
 
 local function sortWatches()
-    if not (module.enabled and module.db.sort) or sortGaveUp then
+    local order = module.db.sort
+    if not module.enabled or order == "off" or sortGaveUp then
         return
     end
     if InCombatLockdown() then
@@ -422,8 +428,12 @@ local function sortWatches()
         sorted[i] = quest
     end
     -- Same level keeps the order they were tracked in.
+    local highFirst = order == "high"
     sort(sorted, function(a, b)
         if a.level ~= b.level then
+            if highFirst then
+                return a.level > b.level
+            end
             return a.level < b.level
         end
         return a.index < b.index
@@ -522,7 +532,7 @@ function module:OnEnable()
     self:On("PLAYER_REGEN_DISABLED", function() setFaded(true) end)
     self:On("PLAYER_REGEN_ENABLED", function() setFaded(false) end)
     setFaded(InCombatLockdown())
-    setSorting(self.db.sort)
+    setSorting(self.db.sort ~= "off")
     onUpdate()
 end
 
@@ -547,7 +557,7 @@ function module:OnOptionChanged(key)
     elseif key == "fade" then
         setFaded(InCombatLockdown())
     elseif key == "sort" then
-        setSorting(self.db.sort)
+        setSorting(self.db.sort ~= "off")
     else
         fitBox()
     end
