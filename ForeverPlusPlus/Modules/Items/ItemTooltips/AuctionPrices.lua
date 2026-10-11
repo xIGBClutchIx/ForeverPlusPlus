@@ -14,6 +14,7 @@ local GetRealmName, UnitFactionGroup = GetRealmName, UnitFactionGroup
 local CreateFrame, pcall, type, hooksecurefunc = CreateFrame, pcall, type, hooksecurefunc
 local select, tostring, C_Item, C_TradeSkillUI, Enum = select, tostring, C_Item, C_TradeSkillUI, Enum
 local tonumber, GRAY_FONT_COLOR, HIGHLIGHT_FONT_COLOR = tonumber, GRAY_FONT_COLOR, HIGHLIGHT_FONT_COLOR
+local wipe = wipe
 
 local L = ns.L
 local ItemTooltip = ns.ItemTooltip
@@ -118,6 +119,7 @@ end
 
 local scanning = false
 local seen, seenCount -- itemIDs priced in this scan, and how many
+local listed = {} -- itemIDs priced in the browse results shown now (any browse, not just a scan)
 
 -- Keeps the lowest price from browse results. Any browse (the player's own searches too) updates
 -- the prices, so they stay fresh between full scans.
@@ -130,22 +132,23 @@ local function addResults(results)
         if itemID and result.totalQuantity and result.totalQuantity > 0 and price
             and price > 0 then
             local item = items[itemID]
-            if scanning and seen[itemID] then
+            if listed[itemID] then
                 -- One item can come back once per item level or suffix: keep the lowest.
                 if price < item.price then
                     item.price = price
                 end
             else
-                -- The first price this scan, or from any other browse, replaces the old one.
-                if scanning then
-                    seen[itemID] = true
-                    seenCount = seenCount + 1
-                end
+                -- The first price in these results replaces the old one.
+                listed[itemID] = true
                 if item then
                     item.price, item.seenAt = price, now
                 else
                     items[itemID] = { price = price, seenAt = now }
                 end
+            end
+            if scanning and not seen[itemID] then
+                seen[itemID] = true
+                seenCount = seenCount + 1
             end
         end
     end
@@ -259,7 +262,9 @@ local function onResults()
     end
 end
 
+-- The whole list again: a new search, or more pages of the same one.
 local function onResultsUpdated()
+    wipe(listed)
     addResults(C_AuctionHouse.GetBrowseResults())
     onResults()
 end
@@ -414,12 +419,21 @@ end
 
 local nameIDs = {} -- item name -> itemID
 local named = {} -- itemIDs already in nameIDs, so each is only asked once
+local looked = {} -- item name -> GetTime() it was last looked for among the saved prices
+local LOOK_AGAIN = 60 -- seconds before a name not found is looked for again
 
+-- The saved prices can hold thousands of items, and a tooltip draws many times while it's up:
+-- a name that isn't there is looked for again only after a while, as more items get cached.
 local function itemByName(name)
     local id = nameIDs[name] or (C_Item.GetItemInfoInstant and C_Item.GetItemInfoInstant(name))
     if id or not C_Item.GetItemNameByID then
         return id
     end
+    local now = GetTime()
+    if looked[name] and now - looked[name] < LOOK_AGAIN then
+        return nil
+    end
+    looked[name] = now
     for itemID in pairs(house().items) do
         if not named[itemID] then
             local itemName = C_Item.GetItemNameByID(itemID) -- nil until the client has the item

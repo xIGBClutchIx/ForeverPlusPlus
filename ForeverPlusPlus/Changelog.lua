@@ -41,6 +41,14 @@ ns.changelog = {
                     .. "talent points from level 5 instead of 10, still 51 at most." },
             } },
             { L.CHANGELOG_FIXED, {
+                { L.ALREADYKNOWN_TITLE, "The Tint look no longer turns white the red icons of "
+                    .. "merchant items you can't use, and the bags only look up items that can be "
+                    .. "known, like recipes, mounts, and pets." },
+                { L.AUTODECLINE_TITLE, "A friend or guildmate you let through gets Blizzard's "
+                    .. "usual invite popup again instead of one showing only their name, and a "
+                    .. "declined group finder invite closes its popup too." },
+                { L.AUTOWEAPONBUFF_TITLE, "A window over your bags no longer has its clicks taken "
+                    .. "by a stone, oil, poison, or lure under it." },
                 { L.BUFFTIMERS_TITLE, "Never shows a negative time, like -1:59, on an aura about to "
                     .. "go away." },
                 { L.COMMANDS_TITLE, "/rl and /clear are left to another addon that has them even "
@@ -60,6 +68,8 @@ ns.changelog = {
                     .. "moved things and their size in Edit Mode, and reset only the options." },
                 { L.TALENTPLANNER_TITLE, "Refuses a shared plan with more than 51 points, which could "
                     .. "freeze the game." },
+                { L.ITEMTOOLTIPS_TITLE, "Your own auction house searches keep an item's lowest "
+                    .. "price instead of the last one listed." },
                 { L.UNUSABLEITEMS_TITLE, "No longer tints recipes you can learn because of the "
                     .. "item they make, such as plans for mail armor or for gear above your level." },
                 { L.WAYPOINTS_TITLE, "/way is left to TomTom or another addon that has it even "

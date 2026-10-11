@@ -11,7 +11,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Module | What it does |
 |---|---|
 | **Automation** | |
-| Auto Decline | Turns down duel requests, and optionally party invites without the invite sound, and says in chat who asked. Can let friends and guildmates through. Off by default. |
+| Auto Decline | Turns down duel requests, and optionally party invites, and says in chat who asked. Can let friends and guildmates through. Off by default. |
 | Auto Dismount | Gets you off your mount or stands you up when a spell, flight, loot, or attack fails because you're mounted or sitting. Can also leave shapeshift forms (off by default). |
 | Auto Gossip | When an NPC has only one thing to say and no quests, picks it for you, so the bank, shop, or flight map opens straight away. Hold Shift to choose yourself. |
 | Auto Quest | Accepts quests and turns in finished ones as you talk to quest givers, going through a quest giver's list one by one. Never picks a reward when there's a choice, skips shared quests unless you allow them, and pauses while you hold Shift (or another key). Off by default. |

@@ -5,13 +5,14 @@
 --
 -- "Known" is what the game's own item tooltip says: its "Already known" line, or the pet
 -- line's "Collected (1/3)". A pet in the auction house is asked of the pet journal by species.
--- Nothing is written onto Blizzard's frames: our own textures sit on the icons, and the icon's
--- color is put back when the mark goes.
+-- Nothing is written onto Blizzard's frames: our own textures sit on the icons, a check mark and
+-- a green tint that multiplies the icon, and the icon's own color is never touched.
 local _, ns = ...
 
 local _G, ipairs, type, strfind, gsub = _G, ipairs, type, strfind, gsub
 local setmetatable, pairs = setmetatable, pairs
 local C_Item, C_TooltipInfo, C_PetJournal, C_Container = C_Item, C_TooltipInfo, C_PetJournal, C_Container
+local C_ToyBox = C_ToyBox
 local C_Timer, GetTime = C_Timer, GetTime
 
 local L = ns.L
@@ -92,6 +93,22 @@ local function tooltipKnown(link)
     return false
 end
 
+-- Only these kinds of item can be known, so only they are worth a tooltip lookup: recipes (and
+-- class books), companion pets and mounts, glyphs, caged pets, and toys. Enum.ItemClass and
+-- Enum.ItemMiscellaneousSubclass values.
+local RECIPE, MISC, GLYPH, BATTLE_PET = 9, 15, 16, 17
+local PET, MOUNT = 2, 5
+
+local function canBeKnown(link, itemID)
+    local _, _, _, _, _, classID, subclassID = C_Item.GetItemInfoInstant(link)
+    if classID == RECIPE or classID == GLYPH or classID == BATTLE_PET then
+        return true
+    elseif classID == MISC and (subclassID == PET or subclassID == MOUNT) then
+        return true
+    end
+    return C_ToyBox and C_ToyBox.GetToyInfo and C_ToyBox.GetToyInfo(itemID) ~= nil or false
+end
+
 local known = {} -- key -> true, once known (you don't forget a recipe)
 local checked = {} -- key -> GetTime() it was last found not known
 
@@ -126,7 +143,7 @@ local function itemKnown(link)
         return false
     end
     local itemID = C_Item.GetItemInfoInstant(link)
-    if not itemID then
+    if not itemID or not canBeKnown(link, itemID) then
         return false
     end
     return check(itemID, tooltipKnown, link)
@@ -138,7 +155,13 @@ end
 
 -- Marks -----------------------------------------------------------------------------------------
 
-local marks = setmetatable({}, { __mode = "k" }) -- icon texture -> { check = texture, tinted = bool }
+local marks = setmetatable({}, { __mode = "k" }) -- icon texture -> { check = texture, tint = texture }
+
+-- Our own textures over the icon, never its color: Blizzard colors icons itself (red for an item
+-- you can't use), and putting a color back would wipe Blizzard's.
+local function overlay(icon, layer, sublevel)
+    return icon:GetParent():CreateTexture(nil, layer, nil, sublevel)
+end
 
 -- Shows or clears our mark on an icon, as the Look option says. Does nothing for an icon that
 -- was never marked. `size` is the mark's size, chosen per place since the icons differ.
@@ -155,18 +178,26 @@ local function setMark(icon, on, size)
         marks[icon] = state
     end
     local style = module.db.style
-    local tint = on and style ~= "check"
-    if tint then
-        icon:SetVertexColor(TINT[1], TINT[2], TINT[3])
-        state.tinted = true
-    elseif state.tinted then
-        icon:SetVertexColor(1, 1, 1)
-        state.tinted = false
+    if on and style ~= "check" then
+        local tint = state.tint
+        if not tint then
+            -- Multiplies the icon (MOD blend), like a green vertex color, just above it.
+            local layer, sublevel = icon:GetDrawLayer()
+            sublevel = sublevel or 0
+            tint = overlay(icon, layer, sublevel < 7 and sublevel + 1 or 7)
+            tint:SetColorTexture(TINT[1], TINT[2], TINT[3])
+            tint:SetBlendMode("MOD")
+            tint:SetAllPoints(icon)
+            state.tint = tint
+        end
+        tint:Show()
+    elseif state.tint then
+        state.tint:Hide()
     end
     if on and style ~= "tint" then
         local check = state.check
         if not check then
-            check = icon:GetParent():CreateTexture(nil, "OVERLAY", nil, 7)
+            check = overlay(icon, "OVERLAY", 7)
             check:SetTexture(CHECK_TEXTURE)
             check:SetPoint("BOTTOMLEFT", icon, "BOTTOMLEFT", 1, 1)
             state.check = check

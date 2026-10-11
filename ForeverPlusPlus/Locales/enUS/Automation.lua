@@ -153,7 +153,7 @@ L.AUTODECLINE_DESC = "Turn down duel requests, and optionally party invites, as 
 L.AUTODECLINE_DUELS = "Duels"
 L.AUTODECLINE_DUELS_DESC = "Turn down duel requests."
 L.AUTODECLINE_PARTY_INVITES = "Party Invites"
-L.AUTODECLINE_PARTY_INVITES_DESC = "Also turn down party invites, without the invite sound."
+L.AUTODECLINE_PARTY_INVITES_DESC = "Also turn down party invites."
 L.AUTODECLINE_ALLOW_FRIENDS = "Allow Friends and Guild"
 L.AUTODECLINE_ALLOW_FRIENDS_DESC = "Let duels and party invites from your friends, Battle.net "
     .. "friends, and guildmates through."

@@ -192,7 +192,9 @@ end
 
 -- Overlays ------------------------------------------------------------------------------------
 
-local ABOVE = { BACKGROUND = "LOW", LOW = "MEDIUM", MEDIUM = "HIGH", HIGH = "DIALOG" }
+-- Frame levels the overlay sits above its bag button, so it's over the button's own children
+-- (cooldown, highlight) but under any window drawn over the bag.
+local ABOVE = 2
 
 local active, spare = {}, {}
 local info = {} -- overlay -> { bag, slot, button, kind, handled }
@@ -268,6 +270,25 @@ local function newOverlay()
     return overlay
 end
 
+-- Bags are top-level frames: clicking or opening one raises it, with its buttons, over the
+-- other windows at its strata. The overlays follow each frame while they're up, so they stay
+-- just above their button and never over a window that covers the bag. Only out of combat,
+-- since the overlays are gone then.
+local follower
+
+local function follow()
+    if InCombatLockdown() then
+        return
+    end
+    for i = 1, #active do
+        local overlay = active[i]
+        local level = info[overlay].button:GetFrameLevel() + ABOVE
+        if overlay:GetFrameLevel() ~= level then
+            overlay:SetFrameLevel(level)
+        end
+    end
+end
+
 -- Takes every overlay away. Only out of combat (or at PLAYER_REGEN_DISABLED, just before it).
 local function clear()
     for i = #active, 1, -1 do
@@ -277,6 +298,9 @@ local function clear()
         active[i] = nil
         spare[#spare + 1] = overlay
     end
+    if follower then
+        follower:SetScript("OnUpdate", nil)
+    end
 end
 
 local function place(button, bag, slot, kind)
@@ -285,12 +309,15 @@ local function place(button, bag, slot, kind)
     data.bag, data.slot, data.button, data.kind, data.handled = bag, slot, button, kind, false
     overlay:SetAttribute("item", bag .. " " .. slot)
     overlay:SetAttribute("type2", "item")
-    -- A strata above the bag's: bags are top-level frames, and raising one when it's clicked or
-    -- opened lifts its buttons over anything at their own strata.
-    overlay:SetFrameStrata(ABOVE[button:GetFrameStrata()] or "DIALOG")
+    overlay:SetFrameStrata(button:GetFrameStrata())
+    overlay:SetFrameLevel(button:GetFrameLevel() + ABOVE)
     overlay:SetAllPoints(button)
     overlay:Show()
     active[#active + 1] = overlay
+    if not follower then
+        follower = CreateFrame("Frame")
+    end
+    follower:SetScript("OnUpdate", follow)
 end
 
 local function containerFrames()

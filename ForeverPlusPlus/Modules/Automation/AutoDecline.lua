@@ -3,8 +3,7 @@
 local _, ns = ...
 
 local format, type = string.format, type
-local CancelDuel, DeclineGroup, StaticPopup_Hide, StaticPopup_Show =
-    CancelDuel, DeclineGroup, StaticPopup_Hide, StaticPopup_Show
+local CancelDuel, DeclineGroup, StaticPopup_Hide = CancelDuel, DeclineGroup, StaticPopup_Hide
 
 local L = ns.L
 local Units = ns.Units
@@ -34,12 +33,12 @@ local function who(name)
     return L.AUTODECLINE_SOMEONE
 end
 
--- Blizzard's UIParent shows the popup on the same event, before ours runs (it registered first).
 local function isAllowed(name)
     return module.db.allowFriends and ns.IsReadable(name) and type(name) == "string"
         and (Units.IsFriendName(name) or Units.IsGuildmateName(name))
 end
 
+-- Blizzard shows the duel popup on the same event, before ours runs (it registered first).
 local function onDuel(_, name)
     if not module.db.duels or isAllowed(name) then
         return
@@ -51,44 +50,31 @@ local function onDuel(_, name)
     module:Print(format(L.AUTODECLINE_DECLINED, who(name)))
 end
 
--- The invite popup plays its sound as it opens, so a declined invite must never reach Blizzard's
--- UIParent. While the option is on, UIParent stops hearing the event and we answer it instead: a
--- decline, or for an allowed inviter the same popup Blizzard would have shown.
+-- Blizzard_Game shows the invite popup (a group finder invite: LFGInvitePopup) on the same event,
+-- before ours runs, so a declined invite's popup is up for an instant and is closed here. An
+-- allowed inviter keeps Blizzard's popup as it is.
 local function onInvite(_, name)
     if isAllowed(name) then
-        if StaticPopup_Show then
-            StaticPopup_Show("PARTY_INVITE", name)
-        end
         return
     end
     DeclineGroup()
     if StaticPopup_Hide then
         StaticPopup_Hide("PARTY_INVITE")
     end
-    module:Print(format(L.AUTODECLINE_DECLINED_INVITE, who(name)))
-end
-
-local function holdInvites(hold)
-    if hold then
-        UIParent:UnregisterEvent("PARTY_INVITE_REQUEST")
-    else
-        UIParent:RegisterEvent("PARTY_INVITE_REQUEST")
+    if StaticPopupSpecial_Hide and LFGInvitePopup then
+        StaticPopupSpecial_Hide(LFGInvitePopup)
     end
+    module:Print(format(L.AUTODECLINE_DECLINED_INVITE, who(name)))
 end
 
 function module:OnEnable()
     self:On("DUEL_REQUESTED", onDuel)
     if self.db.partyInvites then
-        holdInvites(true)
         self:On("PARTY_INVITE_REQUEST", onInvite)
     end
     if self.db.allowFriends then
         Units.RequestGuildRoster()
     end
-end
-
-function module:OnDisable()
-    holdInvites(false)
 end
 
 function module:OnOptionChanged(key)
@@ -97,10 +83,8 @@ function module:OnOptionChanged(key)
     end
     if key == "partyInvites" then
         if self.db.partyInvites then
-            holdInvites(true)
             self:On("PARTY_INVITE_REQUEST", onInvite)
         else
-            holdInvites(false)
             self:Off("PARTY_INVITE_REQUEST", onInvite)
         end
     end

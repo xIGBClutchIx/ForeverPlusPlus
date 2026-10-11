@@ -17,6 +17,9 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Fixed
 
+- **Already Known**: the Tint look no longer turns white the red icons of merchant items you can't use, and the bags only look up items that can be known, like recipes, mounts, and pets.
+- **Auto Decline**: a friend or guildmate you let through gets Blizzard's usual invite popup again instead of one showing only their name, and a declined group finder invite closes its popup too.
+- **Auto Weapon Buff**: a window over your bags no longer has its clicks taken by a stone, oil, poison, or lure under it.
 - **Buff Timers**: never shows a negative time, like -1:59, on an aura about to go away.
 - **Commands**: `/rl` and `/clear` are left to another addon that has them even after you've typed a slash command, and turning one on says so in chat.
 - **Flight Timer**: turning Bar on during a flight shows the bar for the rest of it.
@@ -25,6 +28,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Quest Nameplates**: an objective that needs 100 of something shows as 37/100, not 37%. Creatures that showed up during a fight get their quest icon once it's over.
 - **Settings**: Recommended Defaults and Developer's Defaults keep where you moved things and their size in Edit Mode, and reset only the options.
 - **Talent Planner**: refuses a shared plan with more than 51 points, which could freeze the game.
+- **Item Tooltips**: your own auction house searches keep an item's lowest price instead of the last one listed.
 - **Unusable Items Tint**: no longer tints recipes you can learn because of the item they make, such as plans for mail armor or for gear above your level.
 - **Waypoints**: `/way` is left to TomTom or another addon that has it even after you've typed a slash command, and turning Waypoints on says so in chat.
 - **World Map**: Zone Info shows herb and ore names in your language the first time, instead of in English until the map changed.
