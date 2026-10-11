@@ -39,6 +39,10 @@ L.AUCTIONPRICES_CRAFT_RANGE = "%d-%d" -- fewest and most the recipe makes
 L.AUCTIONPRICES_CRAFT_VENDOR = "Vendor"
 L.AUCTIONPRICES_CRAFT_PROFIT = "Estimated Profit"
 L.AUCTIONPRICES_CRAFT_AGE = "Oldest Price"
+L.AUCTIONPRICES_CRATES = "Waylaid Crate Costs"
+L.AUCTIONPRICES_CRATES_DESC = "On a Waylaid Crate, show what buying each bundle it takes costs "
+    .. "at the auction house: the count times the item's lowest buyout."
+L.AUCTIONPRICES_BUNDLE = "%d %s" -- how many, then the item's name
 L.AUCTIONPRICES_CHAT_DESC = "Say in chat when a scan finishes after the auction house closed."
 L.AUCTIONPRICES_SCANNING = "Scanning prices... %d items" -- count so far
 L.AUCTIONPRICES_SCANNED = "Prices updated for %d items" -- count

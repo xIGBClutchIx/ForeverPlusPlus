@@ -28,6 +28,7 @@ local module = ns.NewModule("ItemTooltips", L.ITEMTOOLTIPS_DESC, {
     scanAgeColor = "age", -- "age" (green when fresh to red when old), "gray", "white", or "gold"
     scanAgeRedHours = 12, -- hours old at which "age" is fully red
     crafting = true, -- costs, value, and profit under a recipe's reagents
+    crates = false, -- what each bundle a Waylaid Crate takes costs at auction
     scanOnOpen = true,
     chat = true,
     -- Data, not settings: they aren't in module.options.
@@ -145,6 +146,10 @@ module.options = {
     {
         key = "crafting", name = L.AUCTIONPRICES_CRAFTING, description = L.AUCTIONPRICES_CRAFTING_DESC,
         section = AUCTION, requires = "auction",
+    },
+    {
+        key = "crates", name = L.AUCTIONPRICES_CRATES, description = L.AUCTIONPRICES_CRATES_DESC,
+        section = AUCTION, requires = "auction", added = "0.8.2",
     },
     {
         key = "scanOnOpen", name = L.AUCTIONPRICES_SCAN_ON_OPEN, description = L.AUCTIONPRICES_SCAN_ON_OPEN_DESC,

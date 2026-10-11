@@ -13,6 +13,7 @@ local C_AuctionHouse, C_Timer, GetTime = C_AuctionHouse, C_Timer, GetTime
 local GetRealmName, UnitFactionGroup = GetRealmName, UnitFactionGroup
 local CreateFrame, pcall, type, hooksecurefunc = CreateFrame, pcall, type, hooksecurefunc
 local select, tostring, C_Item, C_TradeSkillUI, Enum = select, tostring, C_Item, C_TradeSkillUI, Enum
+local tonumber, GRAY_FONT_COLOR, HIGHLIGHT_FONT_COLOR = tonumber, GRAY_FONT_COLOR, HIGHLIGHT_FONT_COLOR
 
 local L = ns.L
 local ItemTooltip = ns.ItemTooltip
@@ -402,20 +403,99 @@ local function ageColor(seconds)
     return { 1, (1 - t) * 2, 0 }
 end
 
+-- Waylaid Crates -------------------------------------------------------------------------------
+-- A Waylaid Crate's Use line lists the bundles that fill it, one per line ("- 6 Bolt of Woolen
+-- Cloth"). Each gets a line with what buying that bundle at auction costs: the count times the
+-- item's lowest buyout. The tooltip gives names, not IDs, so items are found by name: in the
+-- client's item cache, or else among the names of items with a saved price.
+
+local nameIDs = {} -- item name -> itemID
+local named = {} -- itemIDs already in nameIDs, so each is only asked once
+
+local function itemByName(name)
+    local id = nameIDs[name] or (C_Item.GetItemInfoInstant and C_Item.GetItemInfoInstant(name))
+    if id or not C_Item.GetItemNameByID then
+        return id
+    end
+    for itemID in pairs(house().items) do
+        if not named[itemID] then
+            local itemName = C_Item.GetItemNameByID(itemID) -- nil until the client has the item
+            if itemName then
+                named[itemID] = true
+                nameIDs[itemName] = itemID
+            end
+        end
+    end
+    return nameIDs[name]
+end
+
+local USE = _G.ITEM_SPELL_TRIGGER_ONUSE or "Use:" -- Blizzard's "Use:", in the player's language
+
+-- The bundles listed in the tooltip's Use line: { count, name } each. The list may be part of the
+-- Use line's text or lines of its own after it; it ends at the first line with no bundle.
+local function bundles(data)
+    local list, inUse = {}, false
+    for _, line in ipairs(data.lines or {}) do
+        local text = line.leftText
+        if type(text) == "string" and ns.IsReadable(text) then
+            text = text:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
+            if not inUse and text:find(USE, 1, true) == 1 then
+                inUse = true
+            end
+            if inUse then
+                local found = false
+                for part in (text .. "\n"):gmatch("(.-)\n") do
+                    local count, name = part:match("^%s*%-%s*(%d+)%s+(.-)%s*$")
+                    if count and name ~= "" then
+                        list[#list + 1] = { tonumber(count), name }
+                        found = true
+                    end
+                end
+                if not found and #list > 0 then
+                    break
+                end
+            end
+        end
+    end
+    return list
+end
+
+local function addBundlePrices(tooltip, data)
+    local align = module.db.align
+    local r, g, b = HIGHLIGHT_FONT_COLOR:GetRGB()
+    for _, bundle in ipairs(bundles(data)) do
+        local itemID = itemByName(bundle[2])
+        local item = itemID and house().items[itemID]
+        local value = item and ns.Money(item.price * bundle[1])
+            or GRAY_FONT_COLOR:WrapTextInColorCode(L.AUCTIONPRICES_CRAFT_NO_PRICE)
+        local label = format(L.PRICE_INFO_LINE, format(L.AUCTIONPRICES_BUNDLE, bundle[1], bundle[2]))
+        if align == "inline" then
+            tooltip:AddLine(format(L.PRICE_INLINE, label, value), r, g, b)
+        else
+            tooltip:AddDoubleLine(label, value, r, g, b, r, g, b)
+        end
+    end
+end
+
 local function addAuctionPrice(tooltip, data)
     local itemID = internal.Active("auction") and ItemTooltip.ItemID(data)
-    local item = itemID and house().items[itemID]
-    if not item then
+    if not itemID then
         return
     end
     local db = module.db
-    ItemTooltip.AddPrice(tooltip, data, L.AUCTIONPRICES_LINE, item.price, db.mode, db.align, db.auctionColor)
-    -- When this item's price was last seen, by a scan or the player's own search: an item
-    -- missing from the last scan keeps its older price and age.
-    if db.scanAge ~= "off" then
-        local age = time() - item.seenAt
-        local color = db.scanAgeColor == "age" and ageColor(age) or db.scanAgeColor
-        ItemTooltip.AddInfo(tooltip, L.AUCTIONPRICES_SCAN_AGE_LINE, ns.Text.Ago(age), db.scanAge, color)
+    local item = house().items[itemID]
+    if item then
+        ItemTooltip.AddPrice(tooltip, data, L.AUCTIONPRICES_LINE, item.price, db.mode, db.align, db.auctionColor)
+        -- When this item's price was last seen, by a scan or the player's own search: an item
+        -- missing from the last scan keeps its older price and age.
+        if db.scanAge ~= "off" then
+            local age = time() - item.seenAt
+            local color = db.scanAgeColor == "age" and ageColor(age) or db.scanAgeColor
+            ItemTooltip.AddInfo(tooltip, L.AUCTIONPRICES_SCAN_AGE_LINE, ns.Text.Ago(age), db.scanAge, color)
+        end
+    end
+    if db.crates then
+        addBundlePrices(tooltip, data)
     end
 end
 
