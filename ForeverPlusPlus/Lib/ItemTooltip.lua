@@ -1,8 +1,8 @@
 -- Price lines in item tooltips, kept together where Blizzard puts the sell price. Modules add a
 -- line with `OnPrices`, and one module may redraw the sell price line itself with
--- `ReplaceSellPrice`. Lines go right after the sell price, or at the end when the item has none.
--- Other lines about the item (`OnInfo`) go just above them. Nothing is hooked until a module
--- first calls in.
+-- `ReplaceSellPrice`, and any other line with `ReplaceLine`. Lines go right after the sell
+-- price, or at the end when the item has none. Other lines about the item (`OnInfo`) go just
+-- above them. Nothing is hooked until a module first calls in.
 local _, ns = ...
 
 local ipairs, next, setmetatable, format, type = ipairs, next, setmetatable, string.format, type
@@ -20,6 +20,7 @@ local ItemTooltip = {}
 ns.ItemTooltip = ItemTooltip
 
 local providers = {} -- fn(tooltip, data), in the order added
+local lineReplacers = {} -- fn(tooltip, data, lineData) -> true when it drew the line itself
 local infoProviders = {} -- fn(tooltip, data) for lines above the prices, in the order added
 local replacer -- fn(tooltip, data, lineData) -> true when it drew the sell price line
 local done = setmetatable({}, { __mode = "k" }) -- tooltip -> price lines already added
@@ -84,6 +85,19 @@ local function onAnyLinePost(tooltip, lineData)
     end
 end
 
+-- Before each line of an item tooltip: a module may draw it instead of Blizzard.
+local function onAnyLinePre(tooltip, lineData)
+    local data = lineReplacers[1] and current[tooltip]
+    if not data then
+        return
+    end
+    for _, fn in ipairs(lineReplacers) do
+        if fn(tooltip, data, lineData) then
+            return true -- Blizzard's line is skipped; the module drew its own
+        end
+    end
+end
+
 local function onItemPre(tooltip, data)
     current[tooltip] = data
     done[tooltip] = nil
@@ -135,6 +149,9 @@ local function hook()
         if TooltipDataProcessor.AllTypes and TooltipDataProcessor.AddLinePostCall then
             TooltipDataProcessor.AddLinePostCall(TooltipDataProcessor.AllTypes, onAnyLinePost)
         end
+        if TooltipDataProcessor.AllTypes and TooltipDataProcessor.AddLinePreCall then
+            TooltipDataProcessor.AddLinePreCall(TooltipDataProcessor.AllTypes, onAnyLinePre)
+        end
     end
     TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, onItem)
 end
@@ -180,6 +197,16 @@ end
 function ItemTooltip.OnInfo(fn)
     hook()
     addProvider(infoProviders, fn)
+end
+
+---Calls `fn(tooltip, data, lineData)` before each line of an item tooltip; when it returns true,
+---it drew that line itself and Blizzard's is skipped. For adding to one of Blizzard's lines, such
+---as a price beside it. Hooks can't be removed, so `fn` checks whether its module is on; asking
+---again with the same `fn` changes nothing.
+---@param fn fun(tooltip: table, data: table, lineData: table): boolean?
+function ItemTooltip.ReplaceLine(fn)
+    hook()
+    addProvider(lineReplacers, fn)
 end
 
 ---Lets `fn(tooltip, data, lineData)` draw the sell price line instead of Blizzard. It returns

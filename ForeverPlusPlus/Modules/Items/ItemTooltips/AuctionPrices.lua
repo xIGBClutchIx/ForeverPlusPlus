@@ -405,9 +405,11 @@ end
 
 -- Waylaid Crates -------------------------------------------------------------------------------
 -- A Waylaid Crate's Use line lists the bundles that fill it, one per line ("- 6 Bolt of Woolen
--- Cloth"). Each gets a line with what buying that bundle at auction costs: the count times the
--- item's lowest buyout. The tooltip gives names, not IDs, so items are found by name: in the
--- client's item cache, or else among the names of items with a saved price.
+-- Cloth"). Each bundle's line gets what buying it at auction costs beside it: the count times
+-- the item's lowest buyout. Blizzard's line is skipped and drawn again by us, the same text in
+-- the same color with the price on the right (or after it, with inline price lines). The
+-- tooltip gives names, not IDs, so items are found by name: in the client's item cache, or else
+-- among the names of items with a saved price.
 
 local nameIDs = {} -- item name -> itemID
 local named = {} -- itemIDs already in nameIDs, so each is only asked once
@@ -431,50 +433,100 @@ end
 
 local USE = _G.ITEM_SPELL_TRIGGER_ONUSE or "Use:" -- Blizzard's "Use:", in the player's language
 
--- The bundles listed in the tooltip's Use line: { count, name } each. The list may be part of the
--- Use line's text or lines of its own after it; it ends at the first line with no bundle.
-local function bundles(data)
-    local list, inUse = {}, false
-    for _, line in ipairs(data.lines or {}) do
-        local text = line.leftText
-        if type(text) == "string" and ns.IsReadable(text) then
-            text = text:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
-            if not inUse and text:find(USE, 1, true) == 1 then
-                inUse = true
-            end
-            if inUse then
-                local found = false
-                for part in (text .. "\n"):gmatch("(.-)\n") do
-                    local count, name = part:match("^%s*%-%s*(%d+)%s+(.-)%s*$")
-                    if count and name ~= "" then
-                        list[#list + 1] = { tonumber(count), name }
-                        found = true
-                    end
-                end
-                if not found and #list > 0 then
-                    break
-                end
-            end
-        end
+-- A line's text without color codes, or nil when it can't be read.
+local function plainText(line)
+    local text = line.leftText
+    if type(text) == "string" and ns.IsReadable(text) then
+        return (text:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""))
     end
-    return list
 end
 
-local function addBundlePrices(tooltip, data)
-    local align = module.db.align
-    local r, g, b = HIGHLIGHT_FONT_COLOR:GetRGB()
-    for _, bundle in ipairs(bundles(data)) do
-        local itemID = itemByName(bundle[2])
-        local item = itemID and house().items[itemID]
-        local value = item and ns.Money(item.price * bundle[1])
-            or GRAY_FONT_COLOR:WrapTextInColorCode(L.AUCTIONPRICES_CRAFT_NO_PRICE)
-        local label = format(L.PRICE_INFO_LINE, format(L.AUCTIONPRICES_BUNDLE, bundle[1], bundle[2]))
-        if align == "inline" then
-            tooltip:AddLine(format(L.PRICE_INLINE, label, value), r, g, b)
-        else
-            tooltip:AddDoubleLine(label, value, r, g, b, r, g, b)
+-- A bundle in the list ("- 6 Bolt of Woolen Cloth"): its count and item name, or nil.
+local function bundleOf(part)
+    local count, name = part:match("^%s*%-%s*(%d+)%s+(.-)%s*$")
+    if count and name ~= "" then
+        return tonumber(count), name
+    end
+end
+
+-- Whether any of the text's lines is a bundle. The list may be part of the Use line's text, or
+-- lines of their own after it.
+local function hasBundle(text)
+    for part in (text .. "\n"):gmatch("(.-)\n") do
+        if bundleOf(part) then
+            return true
         end
     end
+    return false
+end
+
+-- Whether `lineData` is the Use line or one of the bundle lines right after it.
+local function inList(data, lineData)
+    local found, chain = false, false
+    for _, line in ipairs(data.lines or {}) do
+        local text = plainText(line) or ""
+        if not found and text:find(USE, 1, true) == 1 then
+            found, chain = true, true
+        elseif found then
+            chain = chain and hasBundle(text)
+        end
+        if line == lineData then
+            return found and chain
+        end
+    end
+    return false
+end
+
+-- What buying a bundle costs at auction, or a gray "No price".
+local function bundleCost(count, name)
+    local itemID = itemByName(name)
+    local item = itemID and house().items[itemID]
+    if item then
+        return ns.Money(item.price * count)
+    end
+    return GRAY_FONT_COLOR:WrapTextInColorCode(L.AUCTIONPRICES_CRAFT_NO_PRICE)
+end
+
+-- Draws a line that lists bundles again with their costs, and returns true so Blizzard's is
+-- skipped. Text around the bundles keeps its own line, wrapped as Blizzard wraps it.
+local function replaceBundleLine(tooltip, data, lineData)
+    if not (internal.Active("auction") and module.db.crates) then
+        return
+    end
+    local text = plainText(lineData)
+    if not (text and hasBundle(text) and inList(data, lineData)) then
+        return
+    end
+    local r, g, b = 1, 1, 1
+    local color = lineData.leftColor
+    if color and color.GetRGB then
+        r, g, b = color:GetRGB()
+    end
+    local wr, wg, wb = HIGHLIGHT_FONT_COLOR:GetRGB()
+    local inline = module.db.align == "inline"
+    local pending -- text lines before the next bundle, drawn together
+    local function flush()
+        if pending then
+            tooltip:AddLine(pending, r, g, b, true)
+            pending = nil
+        end
+    end
+    for part in (text .. "\n"):gmatch("(.-)\n") do
+        local count, name = bundleOf(part)
+        if count then
+            flush()
+            local cost = bundleCost(count, name)
+            if inline then
+                tooltip:AddLine(format(L.PRICE_INLINE, part, cost), r, g, b)
+            else
+                tooltip:AddDoubleLine(part, cost, r, g, b, wr, wg, wb)
+            end
+        else
+            pending = pending and (pending .. "\n" .. part) or part
+        end
+    end
+    flush()
+    return true
 end
 
 local function addAuctionPrice(tooltip, data)
@@ -482,20 +534,18 @@ local function addAuctionPrice(tooltip, data)
     if not itemID then
         return
     end
-    local db = module.db
     local item = house().items[itemID]
-    if item then
-        ItemTooltip.AddPrice(tooltip, data, L.AUCTIONPRICES_LINE, item.price, db.mode, db.align, db.auctionColor)
-        -- When this item's price was last seen, by a scan or the player's own search: an item
-        -- missing from the last scan keeps its older price and age.
-        if db.scanAge ~= "off" then
-            local age = time() - item.seenAt
-            local color = db.scanAgeColor == "age" and ageColor(age) or db.scanAgeColor
-            ItemTooltip.AddInfo(tooltip, L.AUCTIONPRICES_SCAN_AGE_LINE, ns.Text.Ago(age), db.scanAge, color)
-        end
+    if not item then
+        return
     end
-    if db.crates then
-        addBundlePrices(tooltip, data)
+    local db = module.db
+    ItemTooltip.AddPrice(tooltip, data, L.AUCTIONPRICES_LINE, item.price, db.mode, db.align, db.auctionColor)
+    -- When this item's price was last seen, by a scan or the player's own search: an item
+    -- missing from the last scan keeps its older price and age.
+    if db.scanAge ~= "off" then
+        local age = time() - item.seenAt
+        local color = db.scanAgeColor == "age" and ageColor(age) or db.scanAgeColor
+        ItemTooltip.AddInfo(tooltip, L.AUCTIONPRICES_SCAN_AGE_LINE, ns.Text.Ago(age), db.scanAge, color)
     end
 end
 
@@ -848,6 +898,7 @@ internal.AddPart("auction", {
         end
         -- The hook can't be removed; addAuctionPrice checks the part is on instead.
         ItemTooltip.OnPrices(addAuctionPrice)
+        ItemTooltip.ReplaceLine(replaceBundleLine)
         ns.AddOns.WhenLoaded("Blizzard_Professions", hookProfessions)
     end,
     disable = function()
