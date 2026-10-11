@@ -58,8 +58,12 @@ local MODIFIERS = {
     alt = { name = L.MINIMAPBUTTON_KEY_ALT, down = IsAltKeyDown },
 }
 
--- The modules the right-click menu turns on and off, in this order.
-local QUICK_TOGGLES = { "FastLoot", "AutoQuest", "AutoSellJunk" }
+-- The modules the right-click menu turns on and off, in this order. One that isn't available on
+-- this client (Hide Beta Feedback off the beta) is left out.
+local QUICK_TOGGLES = {
+    "FastLoot", "AutoQuest", "AutoSellJunk", "AutoStow", "FishingCast", "GatherTracking",
+    "HideFeedback",
+}
 
 -- Turned on and off through Core, as the Modules page does, so Settings and /fpp follow along.
 local function quickMenu(owner)

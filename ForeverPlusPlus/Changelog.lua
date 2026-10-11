@@ -70,7 +70,8 @@ ns.changelog = {
                 { L.MINIMAPBUTTON_TITLE, "New, on by default, in Interface: Forever++'s own "
                     .. "button on the minimap, in the addon compartment, or both. Click it to open "
                     .. "Forever++ settings, or right-click it for quick toggles of Fast Loot, Auto "
-                    .. "Quest, and Auto Sell Junk. While Error Catcher is on, Shift-right-click it "
+                    .. "Quest, Auto Sell Junk, Auto Stow, Fishing Cast, Gathering Tracking, and "
+                    .. "Hide Beta Feedback. While Error Catcher is on, Shift-right-click it "
                     .. "to see the errors, and it shows how many this session caught. After a "
                     .. "fresh install it wears Blizzard's NEW label, and its first click opens the "
                     .. "About page." },
