@@ -2,6 +2,12 @@
 
 What changed in each release of Forever++. The same notes show in game under Settings > AddOns > Forever++ > Changelog, from [`ForeverPlusPlus/Changelog.lua`](ForeverPlusPlus/Changelog.lua); change both together.
 
+## Unreleased
+
+### Fixed
+
+- **Item Tooltips**: Waylaid Crate Costs shows each bundle's price again, instead of No price, which 0.8.2 broke.
+
 ## 0.8.3 (2026-10-11)
 
 ### Fixed

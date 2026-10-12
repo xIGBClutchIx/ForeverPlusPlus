@@ -132,7 +132,7 @@ local function addResults(results)
         if itemID and result.totalQuantity and result.totalQuantity > 0 and price
             and price > 0 then
             local item = items[itemID]
-            if listed[itemID] then
+            if listed[itemID] and item then -- no item when the prices were reset since
                 -- One item can come back once per item level or suffix: keep the lowest.
                 if price < item.price then
                     item.price = price
@@ -419,30 +419,36 @@ end
 
 local nameIDs = {} -- item name -> itemID
 local named = {} -- itemIDs already in nameIDs, so each is only asked once
-local looked = {} -- item name -> GetTime() it was last looked for among the saved prices
-local LOOK_AGAIN = 60 -- seconds before a name not found is looked for again
+local lookAt = {} -- item name -> GetTime() it may next be looked for among the saved prices
+local LOADING_AGAIN = 0.5 -- seconds, while some saved items' names are still loading
+local LOOK_AGAIN = 60 -- seconds, once every saved item has its name and this one isn't there
 
--- The saved prices can hold thousands of items, and a tooltip draws many times while it's up:
--- a name that isn't there is looked for again only after a while, as more items get cached.
+-- The saved prices can hold thousands of items, and a tooltip draws many times while it's up,
+-- so a name not found waits before it's looked for again. Asking for a name the client doesn't
+-- have yet loads it, and the first look at a crate is usually before they've come in: look again
+-- soon while any are loading, or the bundles show No price until the long wait is over.
 local function itemByName(name)
     local id = nameIDs[name] or (C_Item.GetItemInfoInstant and C_Item.GetItemInfoInstant(name))
     if id or not C_Item.GetItemNameByID then
         return id
     end
     local now = GetTime()
-    if looked[name] and now - looked[name] < LOOK_AGAIN then
+    if lookAt[name] and now < lookAt[name] then
         return nil
     end
-    looked[name] = now
+    local loading = false
     for itemID in pairs(house().items) do
         if not named[itemID] then
             local itemName = C_Item.GetItemNameByID(itemID) -- nil until the client has the item
             if itemName then
                 named[itemID] = true
                 nameIDs[itemName] = itemID
+            else
+                loading = true
             end
         end
     end
+    lookAt[name] = now + (loading and LOADING_AGAIN or LOOK_AGAIN)
     return nameIDs[name]
 end
 
