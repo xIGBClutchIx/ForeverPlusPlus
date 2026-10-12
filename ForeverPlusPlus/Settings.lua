@@ -943,12 +943,12 @@ local function controlWidth(room)
     return min(180, room - 16)
 end
 
--- How far past a dropdown's end a slider's value label may reach, so the slider isn't cramped.
-local SLIDER_REACH = 40
+-- How wide every slider is, its arrows included, so they all look alike whatever their values.
+local SLIDER_WIDTH = 150
 
--- How wide a slider is, so its value label (drawn after it) ends a little past where a dropdown
--- would: that width less the room its widest label takes.
-local function sliderWidth(row, option, room)
+-- How wide a slider starting `left` into a row with `room` is: SLIDER_WIDTH, or less where its
+-- value label (drawn after it) wouldn't fit.
+local function sliderWidth(row, option, room, left)
     local measure = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     local widest = 0
     for _, value in ipairs({ option.min, option.max }) do
@@ -958,7 +958,7 @@ local function sliderWidth(row, option, room)
         widest = max(widest, ns.Text.Width(measure))
     end
     measure:Hide()
-    return max(60, min(controlWidth(room) + SLIDER_REACH, room - 16) - widest - 12)
+    return max(60, min(SLIDER_WIDTH, room - 16 - left - widest - 12))
 end
 
 -- One of the module's options, with `byKey` for the option it's under (`requires`) or the slider
@@ -1024,7 +1024,7 @@ local function addOptionRow(view, module, option, byKey, done)
         end
         -- Its slider in the same row, greyed while the checkbox is off.
         done[pair.key] = true
-        local slider = newSlider(row, module, pair, sliderWidth(row, pair, room) - 36)
+        local slider = newSlider(row, module, pair, sliderWidth(row, pair, room, 36))
         if slider then
             slider:SetPoint("LEFT", box, "RIGHT", 6, 0)
             updates[#updates + 1] = function()
@@ -1033,7 +1033,7 @@ local function addOptionRow(view, module, option, byKey, done)
             end
         end
     elseif option.min then
-        local slider = newSlider(row, module, option, sliderWidth(row, option, room))
+        local slider = newSlider(row, module, option, sliderWidth(row, option, room, 6))
         if not slider then
             return -- leave the option at its default without one
         end
