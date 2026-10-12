@@ -768,6 +768,10 @@ local function set(rest, flip)
     end
     value = value and strtrim(value):lower()
     if key:lower() == "enabled" then
+        if module.alwaysOn then
+            ns.Print(format(L.MODULE_ALWAYS_ON, module.title or module.name))
+            return
+        end
         local on = booleans[value or ""]
         if on == nil and flip and not value then
             on = not module.db.enabled
@@ -834,8 +838,11 @@ SlashCmdList.FOREVERPLUSPLUS = function(message)
             ns.Print(format(L.NO_MODULE, rest))
         end
     elseif command == "reset" then
-        ForeverPlusPlusDB = nil
-        ReloadUI()
+        -- It throws away saved data too (prices, flight times, chat history), so it asks first.
+        ns.Confirm("RESET_ALL", L.RESET_CONFIRM, function()
+            ForeverPlusPlusDB = nil
+            ReloadUI()
+        end)
     elseif command == "list" or command == "help" or not ns.OpenSettings() then
         list()
         for _, line in ipairs(ns.Commands()) do

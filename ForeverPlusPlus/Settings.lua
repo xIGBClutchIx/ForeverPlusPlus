@@ -14,7 +14,8 @@
 --                    description, and highlights those options. A module or option added
 --                    since the player last looked (`added`), or an option changed since then
 --                    (`changed`), is marked NEW
---     <Tool>         a page a module draws itself (`BuildPage`)
+--     <Tool>         a page a module draws itself (`BuildPage`), with the Defaults button at the
+--                    top right like every other page
 --     Debug          sections of Forever++'s own rows and modules' options marked `debug = true`
 --                    and buttons from `module.debugActions`, each placed by its `section`: What's
 --                    New (Show Tags, Reset Seen Version, Reset Welcome), Diagnostics (Copy Debug
@@ -1335,10 +1336,12 @@ end
 
 -- For a tool page (`BuildPage`) to look like the split pages: `New(frame, listWidth, scrollBox)`,
 -- `ListButton(list, isSelected)` and `Paint(row)` after the selection changes, `AddEntry(stack,
--- frame, shown, gap)` and `Layout(stack)` for the list, and `AddSearchBox(frame, nil,
--- instructions, onChange)` for the search box at the top right (nil without the template).
+-- frame, shown, gap)` and `Layout(stack)` for the list, `AddDefaults(frame)` for the Defaults button
+-- at the top right, and `AddSearchBox(frame, defaults, instructions, onChange)` for the search box
+-- left of it (nil without the template).
 ns.Split = {
     New = newSplit,
+    AddDefaults = addPageDefaults,
     ListButton = newListButton,
     Paint = paint,
     AddEntry = addEntry,

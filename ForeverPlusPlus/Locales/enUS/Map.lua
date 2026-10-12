@@ -56,13 +56,13 @@ L.POI_LEYLINES_DESC = "Ley lines (High Order Skyborne) and elemental convergence
     .. "Line or Skysight. Shown to a Skyborne for their own kind, to every character, or to none."
 L.POI_LEYLINES_SKYBORNE = "Skyborne"
 L.POI_LEYLINES_EVERYONE = "Everyone"
-L.POI_LEYLINES_OFF = "None"
+L.POI_LEYLINES_OFF = "Off"
 L.POI_CHAT_DESC = "Say in chat when a new ley line is saved."
 L.POI_LEYLINES_FORGET = "Saved Ley Lines"
-L.POI_LEYLINES_FORGET_BUTTON = "Forget"
+L.POI_LEYLINES_FORGET_BUTTON = "Clear"
 L.POI_LEYLINES_FORGET_DESC = "Forget every ley line and elemental convergence saved on this account."
 L.POI_LEYLINES_FORGET_CONFIRM = "Forget every saved ley line and elemental convergence?"
-L.POI_LEYLINES_FORGET_DONE = "Saved ley lines forgotten."
+L.POI_LEYLINES_FORGET_DONE = "Saved ley lines cleared."
 L.POI_LEYLINE_SAVED = "Ley line saved on the map in %s." -- a zone
 L.POI_CONVERGENCE_SAVED = "Elemental convergence saved on the map in %s." -- a zone
 -- Tooltips
@@ -122,9 +122,6 @@ L.ZONEINFO_SHOW_ALWAYS = "Always"
 L.ZONEINFO_SHOW_KEY = "Hold Detail Key"
 L.ZONEINFO_DETAIL_KEY = "Detail Key"
 L.ZONEINFO_DETAIL_KEY_DESC = "The key that shows the rows set to Hold Detail Key while you hold it. Herbs, ore, and skinning still need the profession."
-L.ZONEINFO_KEY_SHIFT = "Shift"
-L.ZONEINFO_KEY_ALT = "Alt"
-L.ZONEINFO_KEY_CTRL = "Ctrl"
 L.ZONEINFO_FACTION = "Territory"
 L.ZONEINFO_FACTION_DESC = "Who holds the zone, in the colors the game uses when you enter it: green "
     .. "for your faction, red for the other, orange for contested. On the zone's name, or on a "
@@ -165,18 +162,13 @@ L.UNEXPLORED_PURPLE = "Purple"
 
 -- Coordinates
 L.COORDS_TITLE = "Coordinates"
-L.COORDS_DESC = "Show your coordinates and the cursor's in the world map's title bar."
-L.COORDS_PLAYER = "Player"
-L.COORDS_PLAYER_DESC = "Your coordinates, with your zone's name when the map shows another."
-L.COORDS_CURSOR = "Cursor"
-L.COORDS_CURSOR_DESC = "The coordinates under the cursor, while it's on the map."
-L.COORDS_TENTHS = "Tenths"
-L.COORDS_TENTHS_DESC = "Coordinates to a tenth, like 45.2, instead of whole numbers."
-L.COORDS_MINIMAP = "On the Minimap"
-L.COORDS_MINIMAP_DESC = "Your coordinates on the minimap too."
-L.COORDS_TITLEBAR = "In the Title Bar"
-L.COORDS_TITLEBAR_DESC = "Your coordinates on the left of the map's title bar and the cursor's "
-    .. "on the right. Off shows them in the map's bottom left corner, as the game does."
+L.COORDS_DESC = "Show the world map's coordinates in its title bar instead of the bottom left "
+    .. "corner: yours on the left, the cursor's on the right. Which ones show, and tenths, follow "
+    .. "Blizzard's checkboxes under Settings > Gameplay > Interface."
+L.COORDS_BLIZZARD_OFF = "Blizzard's map coordinates are off" -- a gray row atop World Map, with a button
+L.COORDS_BLIZZARD_OFF_DESC = "Blizzard's player and cursor coordinates on the world map are both "
+    .. "off, so Coordinates has nothing to show. Turn them on here or under Settings > Gameplay > "
+    .. "Interface."
 
 -- HideFilterReset
 L.HIDEFILTERRESET_TITLE = "Hide Filter Reset"
@@ -196,10 +188,10 @@ L.FLIGHTTIMER_TOOLTIP_DESC = "How long the flight takes, on a flight point's too
     .. "map, once you have flown it. Each route is timed on its own."
 L.FLIGHTTIMER_TIME = "Flight time: %s" -- a time like 2:05
 L.FLIGHTTIMER_RESET_TIMES = "Flight Times"
-L.FLIGHTTIMER_RESET_TIMES_BUTTON = "Reset"
-L.FLIGHTTIMER_RESET_TIMES_DESC = "Forgets every flight time. They are timed again as you fly."
+L.FLIGHTTIMER_RESET_TIMES_BUTTON = "Clear"
+L.FLIGHTTIMER_RESET_TIMES_DESC = "Forget every flight time. They're timed again as you fly."
 L.FLIGHTTIMER_RESET_TIMES_CONFIRM = "Forget every flight time Flight Timer has recorded?"
-L.FLIGHTTIMER_RESET_TIMES_DONE = "Flight times forgotten."
+L.FLIGHTTIMER_RESET_TIMES_DONE = "Flight times cleared."
 
 -- Waypoints
 L.WAYPOINTS_TITLE = "Waypoints"

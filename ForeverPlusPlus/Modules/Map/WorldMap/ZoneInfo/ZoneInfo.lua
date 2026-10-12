@@ -75,9 +75,9 @@ module:AddOptions({
     {
         key = "detailKey", name = L.ZONEINFO_DETAIL_KEY, description = L.ZONEINFO_DETAIL_KEY_DESC,
         choices = {
-            { "shift", L.ZONEINFO_KEY_SHIFT },
-            { "alt", L.ZONEINFO_KEY_ALT },
-            { "ctrl", L.ZONEINFO_KEY_CTRL },
+            { "shift", L.KEY_SHIFT },
+            { "alt", L.KEY_ALT },
+            { "ctrl", L.KEY_CTRL },
         },
         section = GENERAL,
     },

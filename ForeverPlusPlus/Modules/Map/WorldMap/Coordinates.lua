@@ -1,44 +1,45 @@
 -- Coordinates, a part of World Map: the player's and the cursor's coordinates on the world map.
--- Forever's map already has them (Blizzard's coordinates panel, off until its Settings checkboxes
--- are on), so this turns those settings on from here, one toggle each, and moves Blizzard's text
--- into the map's title bar: the player's on the left, the cursor's on the right, either side of
--- the title. Ideas from Leatrix Maps' coordinates; none of its code.
+-- Forever's map already has them (Blizzard's coordinates panel, shown by its own checkboxes under
+-- Settings > Gameplay > Interface > Coordinates), so this leaves which ones show, and tenths, to
+-- those, and moves Blizzard's text into the map's title bar: the player's on the left, the
+-- cursor's on the right, either side of the title. Ideas from Leatrix Maps' coordinates; none of
+-- its code.
 local _, ns = ...
 
-local max, min = math.max, math.min
+local ipairs, max, min = ipairs, math.max, math.min
 local CreateFrame = CreateFrame
 
 local L = ns.L
+local CVars = ns.CVars
 
 local module = ns.modules.WorldMap:NewPart({
     key = "coordinates", name = L.COORDS_TITLE, description = L.COORDS_DESC,
     section = L.COORDS_TITLE,
-}, {
-    player = true,
-    cursor = true,
-    tenths = true,
-    minimap = true,
-    titleBar = true,
-    saved = {}, -- CVar -> the player's own value, put back when the part turns off
 })
 
--- Whose coordinates, then where they show, then how precise.
-module:AddOptions({
-    { key = "player", name = L.COORDS_PLAYER, description = L.COORDS_PLAYER_DESC },
-    { key = "cursor", name = L.COORDS_CURSOR, description = L.COORDS_CURSOR_DESC },
-    { key = "titleBar", name = L.COORDS_TITLEBAR, description = L.COORDS_TITLEBAR_DESC },
-    { key = "minimap", name = L.COORDS_MINIMAP, description = L.COORDS_MINIMAP_DESC },
-    { key = "tenths", name = L.COORDS_TENTHS, description = L.COORDS_TENTHS_DESC },
-})
+-- Blizzard's checkboxes for the player's and the cursor's coordinates on the map. Forever only;
+-- see docs/forever-api.md.
+local MAP_CVARS = { "worldMapShowPlayerCoords", "worldMapShowCursorCoords" }
 
--- The client's own setting behind each option: the checkboxes under Settings > Gameplay >
--- Interface > Coordinates. Forever only; see docs/forever-api.md.
-local cvars = ns.CVars.Bind(module, {
-    player = "worldMapShowPlayerCoords",
-    cursor = "worldMapShowCursorCoords",
-    tenths = "coordsByTenths",
-    minimap = "minimapShowPlayerCoords",
-})
+local function anyShown()
+    return CVars.IsOn(MAP_CVARS[1]) or CVars.IsOn(MAP_CVARS[2])
+end
+
+-- With both of Blizzard's checkboxes off there's nothing to move, so World Map says so, with a
+-- button that turns both on.
+module.module.notice = {
+    text = L.COORDS_BLIZZARD_OFF,
+    description = L.COORDS_BLIZZARD_OFF_DESC,
+    button = L.SETTINGS_TURN_ON,
+    fn = function()
+        for _, name in ipairs(MAP_CVARS) do
+            CVars.Apply(name, "1")
+        end
+    end,
+    shown = function()
+        return module.module.db.enabled and module.db.coordinates and not anyShown()
+    end,
+}
 
 local INSET = 8 -- from the title bar's ends
 local GAP = 12 -- the least room kept either side of the title
@@ -106,7 +107,7 @@ local onUpdate = ns.WorldMap.Throttled(THROTTLE, update)
 -- Ours in the title bar, or Blizzard's panel as it comes. Blizzard's text is only faded out, so
 -- it keeps updating for ours to copy. Ours is the border frame's child, so it stops with the map.
 local function restyle()
-    local on = module.enabled and module.db.titleBar
+    local on = module.enabled and true or false
     coords:SetAlpha(on and 0 or 1)
     bar:SetShown(on)
     bar:SetScript("OnUpdate", on and onUpdate or nil)
@@ -120,7 +121,7 @@ local function attach(map)
         local border = map.BorderFrame
         coords = ns.WorldMap.CoordsPanel()
         if not (coords and border and border.TitleContainer) then
-            return -- a client without Blizzard's panel; the settings still apply
+            return -- a client without Blizzard's panel; its coordinates stay where they are
         end
         bar = newBar(border)
     end
@@ -128,23 +129,11 @@ local function attach(map)
 end
 
 function module:OnEnable()
-    cvars.ApplyAll()
     ns.WorldMap.WhenLoaded(attach)
 end
 
 function module:OnDisable()
-    cvars.Restore()
     ns.WorldMap.Cancel(attach)
-    if bar then
-        restyle()
-    end
-end
-
-function module:OnOptionChanged(key)
-    if not self.enabled then
-        return
-    end
-    cvars.Apply(key)
     if bar then
         restyle()
     end

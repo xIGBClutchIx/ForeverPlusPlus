@@ -1,11 +1,11 @@
 -- Auto Gossip: when an NPC's gossip has exactly one option and no quests, pick it, so a banker,
 -- vendor, trainer, flight master and the rest open straight away. Each kind of NPC has its own
--- checkbox. Hold Shift while talking to the NPC to skip it (unless Shift Skips is off).
+-- checkbox. Hold the Skip Key (Shift by default) while talking to the NPC to skip it.
 local _, ns = ...
 
 local ipairs, format, tostring = ipairs, string.format, tostring
 local C_GossipInfo, Enum = C_GossipInfo, Enum
-local IsShiftKeyDown, GetTime = IsShiftKeyDown, GetTime
+local GetTime = GetTime
 
 local L = ns.L
 
@@ -17,16 +17,21 @@ local module = ns.NewModule("AutoGossip", L.AUTOGOSSIP_DESC, {
     taxi = true,
     stable = true,
     other = true,
-    shiftSkips = true,
+    skipKey = "shift",
     printOptions = false,
 })
 module.title = L.AUTOGOSSIP_TITLE
 module.category = "automation"
 
+-- Hold Shift to Skip was a checkbox, 0.8.4 and before.
+ns.Migrate(function(saved)
+    ns.Keys.MigrateShift(saved, "AutoGossip", "shiftSkips", "skipKey")
+end)
+
 local GENERAL, NPCS = L.AUTOGOSSIP_SECTION_GENERAL, L.AUTOGOSSIP_SECTION_NPCS
 
 module.options = {
-    { key = "shiftSkips", name = L.AUTOGOSSIP_SHIFT, description = L.AUTOGOSSIP_SHIFT_DESC, section = GENERAL },
+    ns.Keys.Option("skipKey", L.SKIP_KEY, L.AUTOGOSSIP_KEY_DESC, GENERAL, "0.8.5"),
     -- Alphabetical, with the catch-all last.
     { key = "banker", name = L.AUTOGOSSIP_BANKER, description = L.AUTOGOSSIP_BANKER_DESC, section = NPCS },
     { key = "taxi", name = L.AUTOGOSSIP_TAXI, description = L.AUTOGOSSIP_TAXI_DESC, section = NPCS },
@@ -102,8 +107,8 @@ local lastPick = 0
 local function skipReason(options)
     if GetTime() - lastPick < REPICK_DELAY then
         return "just picked"
-    elseif module.db.shiftSkips and IsShiftKeyDown() then
-        return "Shift"
+    elseif ns.Keys.IsDown(module.db.skipKey) then
+        return "skip key"
     elseif #options ~= 1 then
         return "options"
     end

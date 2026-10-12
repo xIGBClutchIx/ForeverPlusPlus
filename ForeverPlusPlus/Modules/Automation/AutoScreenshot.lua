@@ -58,6 +58,7 @@ module.options = {
         name = L.AUTOSCREENSHOT_LOOT_QUALITY,
         description = L.AUTOSCREENSHOT_LOOT_QUALITY_DESC,
         section = EVENTS,
+        requires = "loot",
         choices = {
             { "3", L.AUTOSCREENSHOT_QUALITY_RARE },
             { "4", L.AUTOSCREENSHOT_QUALITY_EPIC },

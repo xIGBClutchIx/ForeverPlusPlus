@@ -391,8 +391,9 @@ function module:BuildPage(frame)
     ns.AddPageTitle(frame, module.title)
     local split = ns.Split.New(frame, LIST_WIDTH, true)
 
-    -- In the title row at the top right, like the Modules page's.
-    ui.search = ns.Split.AddSearchBox(frame, nil, L.CVARBROWSER_SEARCH, function(text)
+    -- In the title row at the top right, left of the Defaults button, like the Modules page's.
+    local defaults = ns.Split.AddDefaults(frame)
+    ui.search = ns.Split.AddSearchBox(frame, defaults, L.CVARBROWSER_SEARCH, function(text)
         search = text
         refresh()
     end)

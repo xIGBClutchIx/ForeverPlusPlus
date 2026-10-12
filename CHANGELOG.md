@@ -13,9 +13,19 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 - **Waylaid Crates**: Item Tooltips' Waylaid Crate Costs option moved here as Bundle Costs, keeping your choice. It still takes its prices from Item Tooltips' Auction Prices.
 - **Item Tooltips**: Sell Price, Item Count, and Auction Prices are each turned on with an Enabled checkbox under their heading, like World Map's parts. Your settings stay as they were.
+- **World Map**: Coordinates no longer has its own Player, Cursor, Tenths, and On the Minimap checkboxes, which turned Blizzard's coordinate settings back on at every login. It moves whichever coordinates Blizzard's settings under Gameplay > Interface show into the title bar, and World Map says when they're all off, with a button to turn them on.
+- **Settings**: Auto Gossip's, Auto Repair's, and Auto Sell Junk's Hold Shift to Skip and Skip Cinematics' Hold Shift to Watch are now Skip Key and Watch Key dropdowns (Shift, Ctrl, Alt, or None), like Auto Quest's. Your choice carries over.
+- **Gathering Tracking**: Swap is a checkbox with its slider beside it, instead of a slider whose first step meant Never. Your choice carries over.
+- **Auto Screenshot**: Loot Quality sits under Loot and is greyed out while Loot is off.
+- **Buff Timers**: says when Blizzard's buff durations are off, since then no time shows, with a button to turn them on.
+- **Quest Tracker**: Font Size is gone: Edit Mode's Text Size sets the tracker's size.
+- **Settings**: every Forever++ page has the Defaults button at the top right, Console Variables included.
+- **Settings**: buttons that throw away saved data all say Clear (Seen Cinematics, Saved Ley Lines, Saved Prices, and Flight Times), and dropdowns say Off where they turn something off (Scan Age, Reagent Bag, the nameplates' Level, and Ley Lines).
+- **Commands**: `/fpp reset` asks before it puts every setting back and clears what Forever++ saved.
 
 ### Fixed
 
+- **Commands**: `/fpp toggle` on a tool, such as Self Test, says it's always on, instead of that it's off.
 - **Profession Tooltips**: recolors the "Requires" line on nodes and creatures in languages that number its parts (such as "%1$s"), which it missed before.
 
 ## 0.8.4 (2026-10-11)

@@ -9,8 +9,8 @@ end
 -- ClassColors
 L.CLASSCOLORS_TITLE = "Class Colors"
 L.CLASSCOLORS_DESC = "Show players' health bars and names in their class color on the player, "
-    .. "target, focus, party, and target-of-target frames, and hostile and neutral NPCs' health "
-    .. "bars in red and yellow. Names in the friends and who lists get class colors too."
+    .. "target, focus, party, and target-of-target frames, NPCs' bars by reaction, and names in "
+    .. "the friends and who lists."
 L.CLASSCOLORS_SECTION_PARTS = "Color"
 L.CLASSCOLORS_SECTION_FRAMES = "Frames"
 L.CLASSCOLORS_BARS = "Health Bars"

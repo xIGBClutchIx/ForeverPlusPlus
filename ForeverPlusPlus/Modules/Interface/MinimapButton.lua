@@ -54,8 +54,8 @@ local compartment -- our entry in the addon compartment, while it's there
 -- The keys that, held with a right-click, clear this session's errors. Not Shift: a
 -- Shift-right-click shows them.
 local MODIFIERS = {
-    ctrl = { name = L.MINIMAPBUTTON_KEY_CTRL, down = IsControlKeyDown },
-    alt = { name = L.MINIMAPBUTTON_KEY_ALT, down = IsAltKeyDown },
+    ctrl = { name = L.KEY_CTRL, down = IsControlKeyDown },
+    alt = { name = L.KEY_ALT, down = IsAltKeyDown },
 }
 
 -- The modules the right-click menu turns on and off, in this order. One that isn't available on
@@ -309,9 +309,9 @@ module.options = {
         name = L.MINIMAPBUTTON_CLEAR_KEY,
         description = L.MINIMAPBUTTON_CLEAR_KEY_DESC,
         choices = {
-            { "ctrl", L.MINIMAPBUTTON_KEY_CTRL },
-            { "alt", L.MINIMAPBUTTON_KEY_ALT },
-            { "none", L.MINIMAPBUTTON_KEY_NONE },
+            { "ctrl", L.KEY_CTRL },
+            { "alt", L.KEY_ALT },
+            { "none", L.KEY_NONE },
         },
     },
 }

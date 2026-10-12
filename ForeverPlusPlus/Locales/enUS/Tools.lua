@@ -47,6 +47,6 @@ L.SELFTEST_TITLE = "Self Test"
 L.SELFTEST_DESC = "Probe the client APIs Forever++ depends on and save what they do, for debugging."
 L.SELFTEST_COMMAND = "run the self test, then /reload to save its log"
 L.SELFTEST_BUTTON = "Run"
-L.SELFTEST_BUTTON_DESC = "Probes the client APIs Forever++ relies on, then records flights, deaths and "
+L.SELFTEST_BUTTON_DESC = "Probe the client APIs Forever++ relies on, then record flights, deaths and "
     .. "other events until you /reload. The results are saved to Forever++'s SavedVariables file."
 L.SELFTEST_DONE = "Self test wrote %d lines. Type /reload to save them." -- number of lines

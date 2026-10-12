@@ -17,7 +17,7 @@ L.AUCTIONPRICES_SCAN_ON_OPEN_DESC = "Scan the whole auction house when you open 
 L.AUCTIONPRICES_SCAN_AGE = "Scan Age"
 L.AUCTIONPRICES_SCAN_AGE_DESC = "A line under the auction price with how long ago that item's "
     .. "price was last seen at the auction house, and where its text goes."
-L.AUCTIONPRICES_SCAN_AGE_OFF = "Hidden"
+L.AUCTIONPRICES_SCAN_AGE_OFF = "Off"
 L.AUCTIONPRICES_SCAN_AGE_COLOR = "Scan Age Color"
 L.AUCTIONPRICES_SCAN_AGE_COLOR_DESC = "The color of the scan age. By Age goes from green when "
     .. "just scanned, through yellow, to red at the Red After age."
@@ -39,7 +39,8 @@ L.AUCTIONPRICES_CRAFT_RANGE = "%d-%d" -- fewest and most the recipe makes
 L.AUCTIONPRICES_CRAFT_VENDOR = "Vendor"
 L.AUCTIONPRICES_CRAFT_PROFIT = "Estimated Profit"
 L.AUCTIONPRICES_CRAFT_AGE = "Oldest Price"
-L.AUCTIONPRICES_SCANNING = "Scanning prices... %d items" -- count so far
+L.AUCTIONPRICES_CHAT_DESC = "Say in chat when a scan finishes after the auction house closed."
+L.AUCTIONPRICES_SCANNING ="Scanning prices... %d items" -- count so far
 L.AUCTIONPRICES_SCANNED = "Prices updated for %d items" -- count
 L.AUCTIONPRICES_PAUSED = "Scan paused while you sell... %d items" -- count so far
 L.AUCTIONPRICES_STOPPED = "Scan stopped by a search at %d items" -- count
@@ -49,11 +50,11 @@ L.AUCTIONPRICES_IS_OFF = "Auction prices are off. Turn on Item Tooltips and its 
 L.AUCTIONPRICES_NOT_OPEN = "Open the auction house first."
 L.AUCTIONPRICES_LINE = "Auction"
 L.AUCTIONPRICES_RESET = "Saved Prices"
-L.AUCTIONPRICES_RESET_BUTTON = "Reset"
+L.AUCTIONPRICES_RESET_BUTTON = "Clear"
 L.AUCTIONPRICES_RESET_DESC = "Forget every auction price saved for this realm and faction. The "
     .. "next visit to the auction house scans again."
 L.AUCTIONPRICES_RESET_CONFIRM = "Forget all saved auction prices for this realm and faction?"
-L.AUCTIONPRICES_RESET_DONE = "Auction prices reset."
+L.AUCTIONPRICES_RESET_DONE = "Auction prices cleared."
 L.AUCTIONPRICES_RESET_COMMAND = "forget the saved auction prices"
 
 -- AlreadyKnown
@@ -170,7 +171,7 @@ L.BAGSLOTS_REAGENT_DESC = "Where the reagent bag's free slots show: on its own b
     .. "the backpack's count, or not at all."
 L.BAGSLOTS_REAGENT_OWN = "On Its Own Button"
 L.BAGSLOTS_REAGENT_TOTAL = "Added to the Backpack"
-L.BAGSLOTS_REAGENT_OFF = "Hidden"
+L.BAGSLOTS_REAGENT_OFF = "Off"
 L.BAGSLOTS_SIZE = "Text Size"
 L.BAGSLOTS_SIZE_DESC = "How big the count is, in the game's own number fonts."
 L.BAGSLOTS_SIZE_SMALL = "Small"

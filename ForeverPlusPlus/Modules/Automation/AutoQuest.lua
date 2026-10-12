@@ -5,7 +5,6 @@ local _, ns = ...
 
 local ipairs = ipairs
 local C_GossipInfo = C_GossipInfo
-local IsShiftKeyDown, IsControlKeyDown, IsAltKeyDown = IsShiftKeyDown, IsControlKeyDown, IsAltKeyDown
 local UnitIsPlayer = UnitIsPlayer
 
 local L = ns.L
@@ -30,23 +29,12 @@ module.options = {
     },
     { key = "shared", name = L.AUTOQUEST_SHARED, description = L.AUTOQUEST_SHARED_DESC, requires = "accept" },
     { key = "turnIn", name = L.AUTOQUEST_TURN_IN, description = L.AUTOQUEST_TURN_IN_DESC },
-    {
-        key = "pauseKey", name = L.AUTOQUEST_KEY, description = L.AUTOQUEST_KEY_DESC,
-        choices = {
-            { "shift", L.AUTOQUEST_KEY_SHIFT },
-            { "ctrl", L.AUTOQUEST_KEY_CTRL },
-            { "alt", L.AUTOQUEST_KEY_ALT },
-            { "none", L.AUTOQUEST_KEY_NONE },
-        },
-    },
+    ns.Keys.Option("pauseKey", L.SKIP_KEY, L.AUTOQUEST_KEY_DESC),
 }
-
-local KEYS = { shift = IsShiftKeyDown, ctrl = IsControlKeyDown, alt = IsAltKeyDown }
 
 -- Whether the player is holding the pause key, to do this quest themselves.
 local function paused()
-    local down = KEYS[module.db.pauseKey]
-    return down ~= nil and down()
+    return ns.Keys.IsDown(module.db.pauseKey)
 end
 
 -- Whether the quest window was opened by another player sharing a quest, not by an NPC. Unknown

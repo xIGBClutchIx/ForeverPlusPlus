@@ -1,12 +1,12 @@
 -- Auto Repair: repairs all gear when a merchant who can repair opens, from the guild bank, the
--- player's own money, or the guild bank first, and says in chat what it cost. Hold Shift while
--- opening the merchant to skip it.
+-- player's own money, or the guild bank first, and says in chat what it cost. Hold the Skip Key
+-- (Shift by default) while opening the merchant to skip it.
 local _, ns = ...
 
 local format, tonumber = string.format, tonumber
 local CanMerchantRepair, GetRepairAllCost, RepairAllItems = CanMerchantRepair, GetRepairAllCost, RepairAllItems
 local IsInGuild, CanGuildBankRepair, GetGuildBankWithdrawMoney = IsInGuild, CanGuildBankRepair, GetGuildBankWithdrawMoney
-local GetMoney, IsShiftKeyDown, C_Timer = GetMoney, IsShiftKeyDown, C_Timer
+local GetMoney, C_Timer = GetMoney, C_Timer
 
 local L = ns.L
 local money = ns.Money
@@ -15,11 +15,16 @@ local module = ns.NewModule("AutoRepair", L.AUTOREPAIR_DESC, {
     enabled = true,
     funds = "guildFirst", -- "guildFirst", "guild", or "own"
     minCost = "0", -- copper; repairs cheaper than this are left alone
-    shiftSkips = true,
+    skipKey = "shift",
     chat = true,
 })
 module.title = L.AUTOREPAIR_TITLE
 module.category = "automation"
+
+-- Hold Shift to Skip was a checkbox, 0.8.4 and before.
+ns.Migrate(function(saved)
+    ns.Keys.MigrateShift(saved, "AutoRepair", "shiftSkips", "skipKey")
+end)
 
 module.options = {
     {
@@ -43,7 +48,7 @@ module.options = {
             { "10000", money(10000) },
         },
     },
-    { key = "shiftSkips", name = L.AUTOREPAIR_SHIFT, description = L.AUTOREPAIR_SHIFT_DESC },
+    ns.Keys.Option("skipKey", L.SKIP_KEY, L.AUTOREPAIR_KEY_DESC, nil, "0.8.5"),
     ns.ChatOption(L.AUTOREPAIR_CHAT_DESC),
 }
 
@@ -117,7 +122,7 @@ local function repairGuild(cost)
 end
 
 local function onMerchantShow()
-    if (module.db.shiftSkips and IsShiftKeyDown()) or not CanMerchantRepair() then
+    if ns.Keys.IsDown(module.db.skipKey) or not CanMerchantRepair() then
         return
     end
     local cost, canRepair = GetRepairAllCost()

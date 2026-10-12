@@ -1,6 +1,6 @@
 -- Quest Tracker: restyles Blizzard's own objective tracker instead of replacing it, so it keeps
--- its Edit Mode place, height and opacity, its menus, quest items and clicks. It changes the
--- tracker's font objects (face, size, outline), draws a tooltip-style box that fits what the
+-- its Edit Mode place, height, opacity and text size, its menus, quest items and clicks. It
+-- changes the tracker's font objects (face, outline), draws a tooltip-style box that fits what the
 -- tracker shows, can fade the tracker in combat, can sort tracked quests by level, and can show
 -- only the tracked quests of the current zone.
 -- It never calls the tracker's update or layout itself: that would run Blizzard's layout as
@@ -8,7 +8,7 @@
 -- out settles at its next update (any quest progress, or collapsing and expanding it).
 local _, ns = ...
 
-local pairs, ipairs, next, type, floor, min, max = pairs, ipairs, next, type, math.floor, math.min, math.max
+local pairs, ipairs, next, type, min, max = pairs, ipairs, next, type, math.min, math.max
 local setmetatable, sort = setmetatable, table.sort
 local InCombatLockdown, C_Timer, C_QuestLog, C_Map = InCombatLockdown, C_Timer, C_QuestLog, C_Map
 local GetRealZoneText, GetRealmName, UnitName, format = GetRealZoneText, GetRealmName, UnitName, string.format
@@ -19,7 +19,6 @@ local L = ns.L
 local module = ns.NewModule("QuestTracker", L.QUESTTRACKER_DESC, {
     enabled = true,
     font = "default",
-    size = 100, -- percent of Blizzard's size
     outline = "default",
     background = true,
     opacity = 30, -- percent
@@ -62,13 +61,6 @@ module.options = {
         description = L.QUESTTRACKER_FONT_DESC,
         section = TEXT,
         choices = ns.Fonts.ChoicesAfter({ "default", L.QUESTTRACKER_DEFAULT }),
-    },
-    {
-        key = "size",
-        name = L.QUESTTRACKER_SIZE,
-        description = L.QUESTTRACKER_SIZE_DESC,
-        section = TEXT,
-        min = 80, max = 150, step = 5, format = "%d%%",
     },
     {
         key = "outline",
@@ -137,7 +129,8 @@ end
 
 -- Fonts -------------------------------------------------------------------------------------------
 
----Sets one of the tracker's font objects to the chosen face, size and outline, from its own.
+---Sets one of the tracker's font objects to the chosen face and outline, from its own. Its size
+---stays Blizzard's, which Edit Mode's Text Size sets.
 ---@param font table
 local function applyFont(font)
     local saved = original[font]
@@ -152,7 +145,7 @@ local function applyFont(font)
     local db = module.db
     local file = saved[1]
     -- Clients whose alphabets need the game's fallbacks keep Blizzard's face (ns.Fonts.CanChange)
-    -- and only get size and outline.
+    -- and only get the outline.
     if db.font ~= "default" and ns.Fonts.CanChange() then
         file = db.font
     end
@@ -160,7 +153,7 @@ local function applyFont(font)
     if db.outline ~= "default" then
         flags = db.outline
     end
-    font:SetFont(file, floor(saved[2] * db.size / 100 + 0.5), flags)
+    font:SetFont(file, saved[2], flags)
 end
 
 ---Whether a font object is one of the tracker's own, not a shared one like GameFontNormal.
@@ -778,7 +771,7 @@ function module:OnOptionChanged(key)
     if not self.enabled then
         return
     end
-    if key == "font" or key == "size" or key == "outline" then
+    if key == "font" or key == "outline" then
         applyFonts()
         fitBox()
     elseif key == "fade" then

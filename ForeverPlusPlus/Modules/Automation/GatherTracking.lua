@@ -24,19 +24,32 @@ local SPELLS = {
 
 local RETRY = 2 -- seconds between tries while the player can't cast it yet
 
--- The Swap slider's first stop, which reads Never. Real swaps start a stop later, at 3 seconds,
--- since each swap is a cast on the global cooldown and a faster one would keep taking it.
-local NEVER = 2
+-- The fewest seconds between swaps: each swap is a cast on the global cooldown, and a faster one
+-- would keep taking it.
+local FASTEST = 3
 
 local module = ns.NewModule("GatherTracking", L.GATHERTRACKING_DESC, {
     enabled = true,
     track = "both", -- a key of SPELLS
     reapply = true,
-    swap = NEVER, -- NEVER, or seconds between swaps
+    swap = false,
+    swapEvery = 10, -- seconds between swaps
     chat = true,
 })
 module.title = L.GATHERTRACKING_TITLE
 module.category = "automation"
+
+-- Swap was one slider, 0.8.4 and before, whose first stop (2) meant never.
+ns.Migrate(function(saved)
+    local db = saved.GatherTracking
+    if not (db and type(db.swap) == "number") then
+        return
+    end
+    if db.swap >= FASTEST then
+        db.swapEvery = db.swap
+    end
+    db.swap = db.swap >= FASTEST
+end)
 
 module.options = {
     {
@@ -53,11 +66,16 @@ module.options = {
         key = "swap",
         name = L.GATHERTRACKING_SWAP,
         description = L.GATHERTRACKING_SWAP_DESC,
-        min = NEVER, max = 30, step = 1,
-        format = function(seconds)
-            return seconds == NEVER and L.GATHERTRACKING_SWAP_OFF
-                or format(L.GATHERTRACKING_SWAP_EVERY, seconds)
-        end,
+        slider = "swapEvery",
+        changed = "0.8.5", -- a checkbox and its slider
+    },
+    {
+        key = "swapEvery",
+        name = L.GATHERTRACKING_SWAP_EVERY_NAME,
+        description = L.GATHERTRACKING_SWAP_EVERY_DESC,
+        requires = "swap",
+        min = FASTEST, max = 30, step = 1,
+        format = function(seconds) return format(L.GATHERTRACKING_SWAP_EVERY, seconds) end,
     },
     {
         key = "reapply",
@@ -183,9 +201,8 @@ end
 
 local function startSwapping()
     stopSwapping()
-    local seconds = module.db.swap
-    if seconds > NEVER and not blocked then
-        ticker = C_Timer.NewTicker(seconds, swap)
+    if module.db.swap and not blocked then
+        ticker = C_Timer.NewTicker(module.db.swapEvery, swap)
     end
 end
 
@@ -229,7 +246,7 @@ function module:OnOptionChanged(key)
     if not self.enabled then
         return
     end
-    if key == "swap" then
+    if key == "swap" or key == "swapEvery" then
         startSwapping()
     elseif key == "reapply" and self.db.reapply then
         request()

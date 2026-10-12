@@ -26,16 +26,26 @@ L.FONT_ARIALN = "Arial Narrow"
 L.FONT_SKURRI = "Skurri"
 L.FONT_MORPHEUS = "Morpheus"
 
+-- Lib/Keys.lua: modifier keys, in every key dropdown
+L.KEY_SHIFT = "Shift"
+L.KEY_CTRL = "Ctrl"
+L.KEY_ALT = "Alt"
+L.KEY_NONE = "None"
+L.SKIP_KEY = "Skip Key" -- the option of every module that a held key skips
+
 -- Core: /fpp and chat
 L.ON = "on"
 L.OFF = "off"
 L.MODULE_STATE = "%s is %s." -- module name, on/off
+L.MODULE_ALWAYS_ON = "%s is a tool and is always on." -- module title, such as Self Test
 L.NO_MODULE = "no module called %s"
 L.SLASH_MODULES = "modules (/fpp toggle <name>, /fpp list):"
 L.SLASH_OPEN = "open the settings"
 L.SLASH_LIST = "list the modules and whether each is on"
 L.SLASH_TOGGLE = "turn a module, or one of its checkboxes, on or off"
 L.SLASH_RESET = "all settings back to defaults (reloads)"
+L.RESET_CONFIRM = "Put every Forever++ setting back to its default and clear everything it saved, "
+    .. "such as auction prices and flight times? This reloads the UI."
 L.SLASH_OPTIONS = "list its options and their values"
 L.SLASH_SET = "change one (on/off, a choice, or a number)"
 L.SLASH_TAKEN = "%s already belongs to another addon, so Forever++ leaves it to that addon."
@@ -140,7 +150,7 @@ L.HOME_INTRO = "Each module is one small change to Blizzard's interface, made to
     .. "see what it does and its options. Settings are saved for your whole account."
 L.HOME_MODULES_ON = "%d of %d modules on" -- on, total
 L.HOME_DEFAULTS = "Defaults"
--- The popup of the Defaults button at the top right of the Modules, Debug, and About pages
+-- The popup of the Defaults button at the top right of every Forever++ page
 L.DEFAULTS_ASK = "Put all Forever++ settings back to defaults? This replaces your current "
     .. "Forever++ settings. The rest of the game's settings stay as they are."
 L.DEFAULTS_DEVELOPER = "Developer's Defaults"

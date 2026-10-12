@@ -1,10 +1,10 @@
 -- Skip Cinematics: skips the game's in-world cinematics (CinematicFrame) and movies (MovieFrame),
--- either every one or only ones already seen on any character of the account. Hold Shift as one
--- starts to watch it anyway (unless Shift Watches is off).
+-- either every one or only ones already seen on any character of the account. Hold the Watch Key
+-- (Shift by default) as one starts to watch it anyway.
 local _, ns = ...
 
 local format, tostring, select = string.format, tostring, select
-local IsShiftKeyDown, StopCinematic = IsShiftKeyDown, StopCinematic
+local StopCinematic = StopCinematic
 local C_Map, C_Timer, GetSubZoneText, GetInstanceInfo = C_Map, C_Timer, GetSubZoneText, GetInstanceInfo
 
 local L = ns.L
@@ -12,7 +12,7 @@ local L = ns.L
 local module = ns.NewModule("SkipCinematics", L.SKIPCINEMATICS_DESC, {
     enabled = false,
     skip = "seen", -- "seen" or "all"
-    shiftWatches = true,
+    watchKey = "shift",
     chat = true,
     printKeys = false,
     -- What has played before, for the whole account: movies by movie ID, cinematics by where they
@@ -21,6 +21,11 @@ local module = ns.NewModule("SkipCinematics", L.SKIPCINEMATICS_DESC, {
 })
 module.title = L.SKIPCINEMATICS_TITLE
 module.category = "automation"
+
+-- Hold Shift to Watch was a checkbox, 0.8.4 and before.
+ns.Migrate(function(saved)
+    ns.Keys.MigrateShift(saved, "SkipCinematics", "shiftWatches", "watchKey")
+end)
 
 module.options = {
     {
@@ -32,7 +37,7 @@ module.options = {
             { "all", L.SKIPCINEMATICS_SKIP_ALL },
         },
     },
-    { key = "shiftWatches", name = L.SKIPCINEMATICS_SHIFT, description = L.SKIPCINEMATICS_SHIFT_DESC },
+    ns.Keys.Option("watchKey", L.SKIPCINEMATICS_KEY, L.SKIPCINEMATICS_KEY_DESC, nil, "0.8.5"),
     ns.ChatOption(L.SKIPCINEMATICS_CHAT_DESC),
     {
         key = "printKeys",
@@ -70,7 +75,7 @@ end
 -- Whether to skip one that is starting. One that plays is remembered as seen.
 local function shouldSkip(list, key)
     local skip
-    if module.db.shiftWatches and IsShiftKeyDown() then
+    if ns.Keys.IsDown(module.db.watchKey) then
         skip = false
     else
         skip = module.db.skip == "all" or list[key] == true
