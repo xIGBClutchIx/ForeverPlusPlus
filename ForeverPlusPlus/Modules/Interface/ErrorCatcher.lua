@@ -277,23 +277,6 @@ local function when(stamp)
     return date("%Y-%m-%d %H:%M", stamp)
 end
 
-local function metadata(field)
-    local get = C_AddOns and C_AddOns.GetAddOnMetadata
-    return get and get(ns.name, field) or ""
-end
-
--- The modules that are on, by their internal names (what the code and issues call them).
-local function modulesOn()
-    local names = {}
-    for _, name in ipairs(ns.order) do
-        local m = ns.modules[name]
-        if m.enabled and not m.alwaysOn then
-            names[#names + 1] = name
-        end
-    end
-    return names
-end
-
 -- The other addons loaded now: an error is often theirs, or theirs and ours together.
 local function otherAddOns()
     local names = {}
@@ -355,9 +338,9 @@ end
 ---on, and the error itself.
 local function reportText(entry)
     local gameVersion, build, _, interface = GetBuildInfo()
-    local on, others = modulesOn(), otherAddOns()
+    local on, others = ns.ModulesOn(), otherAddOns()
     local lines = {
-        format(L.ERRORCATCHER_REPORT_HEADER, metadata("Version")),
+        format(L.ERRORCATCHER_REPORT_HEADER, ns.Metadata("Version")),
         format(L.ERRORCATCHER_REPORT_CLIENT, tostring(gameVersion), tostring(build),
             tostring(interface), GetLocale()),
         format(L.ERRORCATCHER_REPORT_DATE, date("%Y-%m-%d %H:%M:%S")),
@@ -557,7 +540,7 @@ end
 local function rowTexture(row, layer, atlas, r, g, b, a)
     local texture = row:CreateTexture(nil, layer)
     texture:SetAllPoints()
-    if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(atlas) then
+    if ns.Frames.HasAtlas(atlas) then
         texture:SetAtlas(atlas)
     else
         texture:SetColorTexture(r, g, b, a)

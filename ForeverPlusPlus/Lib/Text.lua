@@ -1,9 +1,10 @@
 -- Small text helpers modules share: measuring a font string, lines of a tooltip, and how long as
--- words ("3 Seconds", "12m ago"), and comparing version strings.
+-- words ("3 Seconds", "12m ago"), comparing version strings, text without its escape codes, and
+-- the client's format strings as patterns.
 local _, ns = ...
 
 local format, floor, max, type, _G = string.format, math.floor, math.max, type, _G
-local gmatch, tonumber = string.gmatch, tonumber
+local gmatch, gsub, tonumber = string.gmatch, string.gsub, tonumber
 
 local L = ns.L
 
@@ -84,4 +85,34 @@ function Text.NewerVersion(a, b)
         end
     end
     return false
+end
+
+---Text without its escape codes: colors, links (their text stays), textures, and atlases.
+---Nothing here may be given a secret value; test with `ns.IsReadable` first.
+---@param text string
+---@return string
+function Text.Plain(text)
+    text = gsub(text, "|c%x%x%x%x%x%x%x%x", "")
+    text = gsub(text, "|cn[^:|]*:", "")
+    text = gsub(text, "|r", "")
+    text = gsub(text, "|H[^|]*|h(.-)|h", "%1")
+    text = gsub(text, "|T[^|]*|t", "")
+    text = gsub(text, "|A[^|]*|a", "")
+    text = gsub(text, "||", "|")
+    return text
+end
+
+local CAPTURES = { s = "(.+)", d = "(%d+)" }
+local MATCHES = { s = ".-", d = "%d+" }
+
+---A Lua pattern for one of the client's format strings, such as ITEM_MIN_SKILL ("Requires %s
+---(%d)"), so it matches in any language. Each %s and %d is captured, or only matched without
+---`capture`. "%1$s" (reordered, in some languages) counts as "%s". Not anchored.
+---@param formatString string
+---@param capture? boolean
+---@return string
+function Text.FormatPattern(formatString, capture)
+    local pattern = gsub(formatString, "%%%d+%$", "%%")
+    pattern = gsub(pattern, "[%^%$%(%)%.%[%]%*%+%-%?]", "%%%0")
+    return (gsub(pattern, "%%([sd])", capture and CAPTURES or MATCHES))
 end

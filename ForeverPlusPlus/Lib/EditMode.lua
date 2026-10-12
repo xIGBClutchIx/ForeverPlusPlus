@@ -193,9 +193,7 @@ local function dragStop(frame, info)
     info.grab = nil
     info.selection:SetScript("OnUpdate", nil)
     hideGuides()
-    if EditMode.Refresh then
-        EditMode.Refresh()
-    end
+    EditMode.Refresh()
 end
 
 -- The selection box --------------------------------------------------------------------------------
@@ -266,7 +264,6 @@ local function newSelection(frame, info)
     selection.hint:SetPoint("CENTER")
     selection.tint = selection:CreateTexture(nil, "BACKGROUND")
     selection.tint:SetAllPoints()
-    selection.tint:SetColorTexture(GOLD[1], GOLD[2], GOLD[3], 0.2)
     selection.tint:Hide()
     look(selection, false)
     -- Blizzard's Edit Mode loads after us, so its art isn't there yet when a module turns on: draw
@@ -351,8 +348,7 @@ local function newSlider(parent)
 end
 
 local function newDialog()
-    local hasBorder = C_XMLUtil and C_XMLUtil.GetTemplateInfo
-        and C_XMLUtil.GetTemplateInfo("DialogBorderTranslucentTemplate")
+    local hasBorder = ns.Frames.HasTemplate("DialogBorderTranslucentTemplate")
     local frame = CreateFrame("Frame", nil, UIParent, hasBorder and "DialogBorderTranslucentTemplate"
         or "BackdropTemplate")
     if not hasBorder and frame.SetBackdrop and BACKDROP_TOOLTIP_16_16_5555 then
@@ -408,9 +404,7 @@ local function newDialog()
                 if info and info.scale and not frame.refreshing then
                     call(info.scale.set, value)
                     -- A frame that changes size changes what it snaps against.
-                    if EditMode.Refresh then
-                        EditMode.Refresh()
-                    end
+                    EditMode.Refresh()
                 end
             end, frame)
     end
@@ -576,24 +570,15 @@ end
 --- dialog a scale slider; reset gives it a Reset To Default Position button.
 function EditMode.Register(frame, label, onMove, options)
     options = options or {}
-    local info = registered[frame]
-    if info then
-        info.label, info.onMove, info.onChange = label, onMove, options.onChange
-        info.scale, info.reset = options.scale, options.reset
+    local wasRegistered = registered[frame] ~= nil
+    local info = registered[frame] or unregistered[frame] or {}
+    info.label, info.onMove, info.onChange = label, onMove, options.onChange
+    info.scale, info.reset = options.scale, options.reset
+    if wasRegistered then
         return
     end
-    info = unregistered[frame]
-    if info then
-        unregistered[frame] = nil
-        info.label, info.onMove, info.onChange = label, onMove, options.onChange
-        info.scale, info.reset = options.scale, options.reset
-    else
-        info = {
-            label = label, onMove = onMove, onChange = options.onChange,
-            scale = options.scale, reset = options.reset,
-        }
-        info.selection = newSelection(frame, info)
-    end
+    unregistered[frame] = nil
+    info.selection = info.selection or newSelection(frame, info)
     registered[frame] = info
     install()
     if EditMode.IsActive() then
@@ -602,6 +587,34 @@ function EditMode.Register(frame, label, onMove, options)
             call(info.onChange, true)
         end
     end
+end
+
+---`EditMode.Register` for a module's frame placed from its own settings: the offset in
+---`module.db.x` and `y`, Reset To Default Position back to the module's defaults, and a 50% to 200%
+---scale slider for `module.db.scale`. `apply` puts the frame where the settings now say.
+---@param module table
+---@param frame table
+---@param label string
+---@param apply fun()
+---@param onChange? fun(active: boolean)
+function EditMode.RegisterModule(module, frame, label, apply, onChange)
+    EditMode.Register(frame, label, function(x, y)
+        module.db.x, module.db.y = x, y
+    end, {
+        onChange = onChange,
+        reset = function()
+            module.db.x, module.db.y = module.defaults.x, module.defaults.y
+            apply()
+        end,
+        scale = {
+            min = 50, max = 200, step = 10, format = "%d%%",
+            get = function() return module.db.scale end,
+            set = function(value)
+                module.db.scale = value
+                apply()
+            end,
+        },
+    })
 end
 
 ---Takes the selection box off a frame, for a module turning off.

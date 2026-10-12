@@ -5,8 +5,8 @@
 -- lists members' progress, which the Party Progress option can add up or take the lowest of.
 local _, ns = ...
 
-local ipairs, pairs, setmetatable, tonumber, floor, max = ipairs, pairs, setmetatable, tonumber, math.floor,
-    math.max
+local ipairs, pairs, setmetatable, tonumber, unpack, floor, max = ipairs, pairs, setmetatable, tonumber,
+    unpack, math.floor, math.max
 local CreateFrame, C_Timer, C_TooltipInfo, C_QuestLog, UnitName = CreateFrame, C_Timer, C_TooltipInfo,
     C_QuestLog, UnitName
 
@@ -82,13 +82,7 @@ local function findAtlas(kind)
     kind = ATLASES[kind] and kind or "default"
     local found = atlases[kind]
     if found == nil then
-        found = false
-        for _, name in ipairs(ATLASES[kind]) do
-            if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) then
-                found = name
-                break
-            end
-        end
+        found = ns.Frames.FirstAtlas(unpack(ATLASES[kind])) or false
         atlases[kind] = found
     end
     return found or (kind ~= "default" and findAtlas("default"))

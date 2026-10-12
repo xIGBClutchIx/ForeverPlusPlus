@@ -32,7 +32,6 @@ module.options = {
     },
 }
 
-local DEFAULT_X, DEFAULT_Y = 0, 120
 local WIDTH, HEIGHT = 400, 50
 local RISE = 40 -- how far the text floats up, in pixels
 
@@ -116,37 +115,12 @@ local function sample(active)
     end
 end
 
-local function moved(x, y)
-    module.db.x, module.db.y = x, y
-end
-
-local function resetPosition()
-    module.db.x, module.db.y = DEFAULT_X, DEFAULT_Y
-    if frame then
-        place()
-    end
-end
-
--- What Edit Mode's dialog for the alert offers.
-local editModeOptions = {
-    onChange = sample,
-    reset = resetPosition,
-    scale = {
-        min = 50, max = 200, step = 10, format = "%d%%",
-        get = function() return module.db.scale end,
-        set = function(value)
-            module.db.scale = value
-            place()
-        end,
-    },
-}
-
 function module:OnEnable()
     frame = frame or newFrame()
     place()
     self:On("PLAYER_REGEN_DISABLED", entering)
     self:On("PLAYER_REGEN_ENABLED", leaving)
-    ns.EditMode.Register(frame, L.COMBATALERT_TITLE, moved, editModeOptions)
+    ns.EditMode.RegisterModule(self, frame, L.COMBATALERT_TITLE, place, sample)
 end
 
 function module:OnDisable()
@@ -154,11 +128,5 @@ function module:OnDisable()
         ns.EditMode.Unregister(frame)
         frame.group:Stop()
         frame:Hide()
-    end
-end
-
-function module:OnOptionChanged(option)
-    if frame and (option == "scale") then
-        place()
     end
 end

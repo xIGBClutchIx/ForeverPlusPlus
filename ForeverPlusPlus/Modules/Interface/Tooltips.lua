@@ -10,7 +10,7 @@ local _, ns = ...
 
 local type, setmetatable = type, setmetatable
 local find, sub, gsub = string.find, string.sub, string.gsub
-local TooltipDataProcessor, Enum, C_Item = TooltipDataProcessor, Enum, C_Item
+local Enum, C_Item = Enum, C_Item
 local UnitExists, UnitClass, UnitLevel, UnitName = UnitExists, UnitClass, UnitLevel, UnitName
 local UnitPVPName, UnitIsUnit, UnitReaction, UnitSelectionColor = UnitPVPName, UnitIsUnit, UnitReaction, UnitSelectionColor
 local GetGuildInfo, GetCreatureDifficultyColor = GetGuildInfo, GetCreatureDifficultyColor
@@ -313,11 +313,11 @@ end
 
 local function onUnit(tooltip, data)
     -- Hide in Combat: the mouseover tooltip only; tooltips the player opens stay.
-    if module.enabled and module.db.hideInCombat and tooltip == GameTooltip and InCombatLockdown() then
+    if module.db.hideInCombat and tooltip == GameTooltip and InCombatLockdown() then
         tooltip:Hide()
         return
     end
-    local unit = module.enabled and data and tooltipUnit(tooltip)
+    local unit = data and tooltipUnit(tooltip)
     if not unit then
         return
     end
@@ -353,7 +353,7 @@ end
 -- Item tooltips ------------------------------------------------------------------------------
 
 local function onItem(tooltip, data)
-    if not (module.enabled and module.db.itemBorder and data and C_Item.GetItemQualityByID) then
+    if not (module.db.itemBorder and data and C_Item.GetItemQualityByID) then
         return
     end
     local item = ns.ItemTooltip.ItemID(data)
@@ -377,17 +377,9 @@ local function onDefaultAnchor(tooltip, parent)
     end
 end
 
-local hooked = false
-
 function module:OnEnable()
-    -- Tooltip data calls can't be removed; each one checks module.enabled.
-    if not hooked then
-        hooked = true
-        TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Unit, onUnit)
-        TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, onItem)
-    end
-    -- Probe: GameTooltip_SetDefaultAnchor is Blizzard's for every default-placed tooltip.
-    if GameTooltip_SetDefaultAnchor then
-        self:Hook("GameTooltip_SetDefaultAnchor", onDefaultAnchor)
-    end
+    self:TooltipPostCall(Enum.TooltipDataType.Unit, onUnit)
+    self:TooltipPostCall(Enum.TooltipDataType.Item, onItem)
+    -- GameTooltip_SetDefaultAnchor is Blizzard's for every default-placed tooltip.
+    self:Hook("GameTooltip_SetDefaultAnchor", onDefaultAnchor)
 end

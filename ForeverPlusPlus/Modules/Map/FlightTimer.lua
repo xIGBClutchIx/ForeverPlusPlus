@@ -30,7 +30,6 @@ module.options = {
     { key = "tooltip", name = L.FLIGHTTIMER_TOOLTIP, description = L.FLIGHTTIMER_TOOLTIP_DESC },
 }
 
-local DEFAULT_X, DEFAULT_Y = 0, 250
 local WIDTH, HEIGHT = 208, 16 -- about Blizzard's cast bar
 local TOO_SHORT = 3 -- seconds; anything shorter wasn't a flight
 local WAIT = 10 -- seconds to wait for a flight to start after asking for it
@@ -83,17 +82,10 @@ local flight -- { from, to, total, name, asked, started, aborted } from asking a
 local bar, watcher
 
 local function newBar()
-    local hasTemplate = C_XMLUtil and C_XMLUtil.GetTemplateInfo
-        and C_XMLUtil.GetTemplateInfo("TooltipBackdropTemplate")
     -- The same box Blizzard draws tooltips in, with the fill inside it.
-    local frame = CreateFrame("Frame", nil, UIParent,
-        hasTemplate and "TooltipBackdropTemplate" or "BackdropTemplate")
+    local frame = ns.Frames.TooltipBox(UIParent)
     frame:SetSize(WIDTH, HEIGHT)
     -- No strata of its own: MEDIUM like Blizzard's cast bar, so windows draw over it.
-    if not hasTemplate and frame.SetBackdrop and BACKDROP_TOOLTIP_16_16_5555 then
-        frame:SetBackdrop(BACKDROP_TOOLTIP_16_16_5555)
-        frame:SetBackdropColor(0, 0, 0, 0.8)
-    end
     local fill = CreateFrame("StatusBar", nil, frame)
     fill:SetPoint("TOPLEFT", 4, -4)
     fill:SetPoint("BOTTOMRIGHT", -4, 4)
@@ -260,31 +252,6 @@ local function sample(active)
     end
 end
 
-local function moved(x, y)
-    module.db.x, module.db.y = x, y
-end
-
-local function resetPosition()
-    module.db.x, module.db.y = DEFAULT_X, DEFAULT_Y
-    if bar then
-        place()
-    end
-end
-
--- What Edit Mode's dialog for the bar offers.
-local editModeOptions = {
-    onChange = sample,
-    reset = resetPosition,
-    scale = {
-        min = 50, max = 200, step = 10, format = "%d%%",
-        get = function() return module.db.scale end,
-        set = function(value)
-            module.db.scale = value
-            place()
-        end,
-    },
-}
-
 module.actions = {
     {
         name = L.FLIGHTTIMER_RESET_TIMES,
@@ -303,26 +270,15 @@ function module:OnEnable()
         bar = newBar()
         watcher = CreateFrame("Frame", nil, UIParent)
         watcher:Hide()
-        local elapsed = 0
-        watcher:SetScript("OnUpdate", function(_, dt)
-            elapsed = elapsed + dt
-            if elapsed >= 0.1 then
-                elapsed = 0
-                tick()
-            end
-        end)
+        watcher:SetScript("OnUpdate", ns.WorldMap.Throttled(0.1, tick))
     end
     place()
     self:On("TAXIMAP_OPENED", readNodes)
-    if TakeTaxiNode then
-        self:Hook("TakeTaxiNode", onTake)
-    end
-    if TaxiRequestEarlyLanding then
-        self:Hook("TaxiRequestEarlyLanding", onEarlyLanding)
-    end
+    self:Hook("TakeTaxiNode", onTake)
+    self:Hook("TaxiRequestEarlyLanding", onEarlyLanding)
     self:Hook(GameTooltip, "Show", onTooltipShow)
     self:On("PLAYER_ENTERING_WORLD", cancel) -- a loading screen ends any timing
-    ns.EditMode.Register(bar, L.FLIGHTTIMER_TITLE, moved, editModeOptions)
+    ns.EditMode.RegisterModule(self, bar, L.FLIGHTTIMER_TITLE, place, sample)
 end
 
 function module:OnDisable()
@@ -334,9 +290,6 @@ function module:OnDisable()
 end
 
 function module:OnOptionChanged(option)
-    if option == "scale" and bar then
-        place()
-    end
     if option == "bar" and bar and not ns.EditMode.IsActive() then
         -- Turned on mid-flight, the bar shows for the rest of it.
         bar:SetShown(self.db.bar and flight and flight.started and true or false)

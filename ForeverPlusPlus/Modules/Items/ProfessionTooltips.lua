@@ -41,8 +41,8 @@ module.title = L.PROFTOOLTIPS_TITLE
 module.category = "items"
 
 -- Gathering in the world, then locks, then the same skills on items in your bags.
-local GATHERING, LOCKS, ITEMS = L.PROFTOOLTIPS_SECTION_GATHERING, L.PROFTOOLTIPS_SECTION_LOCKS,
-    L.PROFTOOLTIPS_SECTION_ITEMS
+local GATHERING, LOCKS = L.PROFTOOLTIPS_SECTION_GATHERING, L.PROFTOOLTIPS_SECTION_LOCKS
+local ITEMS_SECTION = L.PROFTOOLTIPS_SECTION_ITEMS
 module.options = {
     {
         key = "show", name = L.PROFTOOLTIPS_SHOW, description = L.PROFTOOLTIPS_SHOW_DESC,
@@ -74,7 +74,7 @@ module.options = {
     },
     {
         key = "items", name = L.PROFTOOLTIPS_ITEMS, description = L.PROFTOOLTIPS_ITEMS_DESC,
-        section = ITEMS,
+        section = ITEMS_SECTION,
     },
 }
 
@@ -288,19 +288,13 @@ end
 
 -- Blizzard's own "Requires Mining (1)" line on a node or creature: it's recolored in place
 -- instead of adding ours. The pattern comes from its string, so it works in any language.
-local REQUIRES = gsub(ITEM_MIN_SKILL or L.PROFTOOLTIPS_REQUIRES, "([%(%)%.%-%+%[%]%*%?%^%$])", "%%%1")
-REQUIRES = gsub(REQUIRES, "%%s", "(.+)")
-REQUIRES = "^" .. gsub(REQUIRES, "%%d", "(%%d+)") .. "$"
+local REQUIRES = "^" .. ns.Text.FormatPattern(ITEM_MIN_SKILL or L.PROFTOOLTIPS_REQUIRES, true) .. "$"
 
 -- World objects and minimap pins -------------------------------------------------------------
 
 -- An object's name without the color codes, icons, and spaces a tooltip may wrap it in.
 local function clean(text)
-    text = gsub(text, "|c%x%x%x%x%x%x%x%x", "")
-    text = gsub(text, "|r", "")
-    text = gsub(text, "|T.-|t", "")
-    text = gsub(text, "|A.-|a", "")
-    return match(text, "^%s*(.-)%s*$")
+    return match(ns.Text.Plain(text), "^%s*(.-)%s*$")
 end
 
 local leftLine = ns.Text.LeftLine
@@ -516,7 +510,7 @@ local function onObject(tooltip, data)
     end
     local job = restyling[tooltip]
     restyling[tooltip] = nil
-    if job and module.enabled then
+    if job then
         restyle(tooltip, job)
     end
 end
@@ -598,7 +592,7 @@ local function onUnit(tooltip, data)
     local job = restyling[tooltip]
     restyling[tooltip] = nil
     unitData[tooltip] = nil
-    if job and module.enabled then
+    if job then
         restyle(tooltip, job)
     end
 end
@@ -626,33 +620,33 @@ local function onItem(tooltip, data)
     end
 end
 
-local hooked = false
+local preHooked = false
 
 function module:OnEnable()
-    -- Hooks can't be removed; each one checks module.enabled.
-    if hooked then
-        return
-    end
-    hooked = true
     local types = Enum.TooltipDataType
     -- Probe: MinimapMouseover is Mainline's type for minimap pins.
-    for _, key in ipairs({ "Object", "MinimapMouseover" }) do
-        local kind = types[key]
-        if kind and TooltipDataProcessor.AddTooltipPreCall then
-            TooltipDataProcessor.AddTooltipPreCall(kind, onObjectPre)
+    self:TooltipPostCall(types.Object, onObject)
+    self:TooltipPostCall(types.MinimapMouseover, onObject)
+    self:TooltipPostCall(types.Unit, onUnit)
+    ItemTooltip.OnInfo(onItem)
+    -- Pre and line calls can't be removed and have no hook-once helper: hooked once here, they
+    -- only keep state for the post calls, and what they add checks module.enabled.
+    if preHooked then
+        return
+    end
+    preHooked = true
+    if TooltipDataProcessor.AddTooltipPreCall then
+        for _, key in ipairs({ "Object", "MinimapMouseover" }) do
+            if types[key] then
+                TooltipDataProcessor.AddTooltipPreCall(types[key], onObjectPre)
+            end
         end
-        if kind then
-            TooltipDataProcessor.AddTooltipPostCall(kind, onObject)
-        end
+        TooltipDataProcessor.AddTooltipPreCall(types.Unit, onUnitPre)
     end
     -- Probe: AllTypes (every line type) and line calls are Mainline's.
     if TooltipDataProcessor.AllTypes and TooltipDataProcessor.AddLinePostCall then
         TooltipDataProcessor.AddLinePostCall(TooltipDataProcessor.AllTypes, onLinePost)
     end
-    if TooltipDataProcessor.AddTooltipPreCall then
-        TooltipDataProcessor.AddTooltipPreCall(types.Unit, onUnitPre)
-    end
-    TooltipDataProcessor.AddTooltipPostCall(types.Unit, onUnit)
     -- Probe: quest line types and line pre calls are Mainline's.
     local lineTypes = Enum.TooltipDataLineType
     if lineTypes and TooltipDataProcessor.AddLinePreCall then
@@ -662,5 +656,4 @@ function module:OnEnable()
             end
         end
     end
-    ItemTooltip.OnInfo(onItem)
 end

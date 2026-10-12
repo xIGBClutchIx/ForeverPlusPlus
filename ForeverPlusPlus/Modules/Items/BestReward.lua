@@ -142,9 +142,7 @@ local function onItemInfo()
 end
 
 function module:OnEnable()
-    if type(_G.QuestInfo_Display) == "function" then
-        self:Hook("QuestInfo_Display", onDisplay)
-    end
+    self:Hook("QuestInfo_Display", onDisplay)
     self:On("GET_ITEM_INFO_RECEIVED", onItemInfo)
     local info = _G.QuestInfoFrame
     if info and info.rewardsFrame and info.rewardsFrame:IsVisible() then

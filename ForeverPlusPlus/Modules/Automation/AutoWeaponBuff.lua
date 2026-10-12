@@ -20,7 +20,7 @@ local _, ns = ...
 local C_Item, C_Container, C_PaperDollInfo, C_Timer = C_Item, C_Container, C_PaperDollInfo, C_Timer
 local GetInventoryItemID, GetWeaponEnchantInfo = GetInventoryItemID, GetWeaponEnchantInfo
 local CreateFrame, InCombatLockdown, IsModifierKeyDown = CreateFrame, InCombatLockdown, IsModifierKeyDown
-local GameTooltip, UIParent, UIErrorsFrame = GameTooltip, UIParent, UIErrorsFrame
+local GameTooltip, UIParent = GameTooltip, UIParent
 local pairs, select, tostring, _G = pairs, select, tostring, _G
 local tremove = table.remove
 
@@ -165,17 +165,9 @@ local function noneFits(kind)
 end
 
 local function warnNoFit(bag, slot)
-    if not UIErrorsFrame then
-        return
-    end
     local itemID = C_Container.GetContainerItemID(bag, slot)
     local name = itemID and C_Item.GetItemNameByID and C_Item.GetItemNameByID(itemID)
-    local text = name and L.AUTOWEAPONBUFF_WARN_TEXT:format(name) or L.AUTOWEAPONBUFF_WARN_TEXT_ANY
-    if UIErrorsFrame.AddExternalErrorMessage then
-        UIErrorsFrame:AddExternalErrorMessage(text)
-    else
-        UIErrorsFrame:AddMessage(text, 1, 0.1, 0.1)
-    end
+    ns.Frames.ErrorMessage(name and L.AUTOWEAPONBUFF_WARN_TEXT:format(name) or L.AUTOWEAPONBUFF_WARN_TEXT_ANY)
 end
 
 -- A right-click in the bags means something else while one of these is open (sell, deposit,
@@ -293,20 +285,6 @@ local function place(button, bag, slot, kind)
     active[#active + 1] = overlay
 end
 
-local function containerFrames()
-    local frames = {}
-    if ContainerFrameCombinedBags then
-        frames[1] = ContainerFrameCombinedBags
-    end
-    for i = 1, NUM_CONTAINER_FRAMES or 13 do
-        local frame = _G["ContainerFrame" .. i]
-        if frame then
-            frames[#frames + 1] = frame
-        end
-    end
-    return frames
-end
-
 local function refresh()
     if InCombatLockdown() then
         return
@@ -315,7 +293,7 @@ local function refresh()
     if not module.enabled then
         return
     end
-    for _, frame in pairs(containerFrames()) do
+    for _, frame in pairs(ns.ItemButtons.Frames()) do
         if frame:IsShown() and frame.EnumerateValidItems then
             for _, button in frame:EnumerateValidItems() do
                 if button:IsShown() then
@@ -345,10 +323,8 @@ local function schedule()
 end
 
 function module:OnEnable()
-    for _, frame in pairs(containerFrames()) do
-        if frame.UpdateItems then
-            self:Hook(frame, "UpdateItems", schedule)
-        end
+    for _, frame in pairs(ns.ItemButtons.Frames()) do
+        self:Hook(frame, "UpdateItems", schedule)
         self:HookScript(frame, "OnShow", schedule)
         self:HookScript(frame, "OnHide", schedule)
     end

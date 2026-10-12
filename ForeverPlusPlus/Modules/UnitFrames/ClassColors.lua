@@ -14,13 +14,14 @@ local _, ns = ...
 
 local _G, setmetatable, hooksecurefunc = _G, setmetatable, hooksecurefunc
 local pairs, ipairs, format, wipe = pairs, ipairs, string.format, wipe
-local C_ClassColor, C_FriendList, GetPlayerInfoByGUID = C_ClassColor, C_FriendList, GetPlayerInfoByGUID
+local C_FriendList, GetPlayerInfoByGUID = C_FriendList, GetPlayerInfoByGUID
 local UnitIsPlayer, UnitIsConnected, UnitReaction = UnitIsPlayer, UnitIsConnected, UnitReaction
 local UnitIsTapDenied, UnitPlayerControlled, CreateColor = UnitIsTapDenied, UnitPlayerControlled, CreateColor
 
 local L = ns.L
 local readable = ns.IsReadable
 local classColor = ns.Colors.Class
+local classColorOf = ns.Colors.ClassToken
 
 local module = ns.NewModule("ClassColors", L.CLASSCOLORS_DESC, {
     enabled = true,
@@ -318,10 +319,6 @@ local function socialOn()
     return module.enabled and module.db.socialNames
 end
 
-local function classColorOf(class)
-    return class and C_ClassColor and C_ClassColor.GetClassColor(class)
-end
-
 -- A friend's class token: from their GUID when the client knows it, else from the localized
 -- class name the friend info carries.
 local function friendClass(info)
@@ -408,9 +405,7 @@ local function repaintLists()
 end
 
 function module:OnEnable()
-    if _G.UnitFrame_Update then
-        self:Hook("UnitFrame_Update", update)
-    end
+    self:Hook("UnitFrame_Update", update)
     -- A reaction or tap can change without a new unit (a mob turns hostile, someone tags it).
     self:On("UNIT_FACTION", updateAll)
     updateAll()

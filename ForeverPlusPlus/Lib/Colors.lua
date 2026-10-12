@@ -81,8 +81,17 @@ end
 ---@return table?
 function Colors.Class(unit)
     local _, class = UnitClass(unit)
-    if readable(class) and class and C_ClassColor then
-        return C_ClassColor.GetClassColor(class)
+    if readable(class) then
+        return Colors.ClassToken(class)
+    end
+end
+
+---A class token's color (a ColorMixin), such as "MAGE"'s, or nil without one.
+---@param token string?
+---@return table?
+function Colors.ClassToken(token)
+    if token and C_ClassColor then
+        return C_ClassColor.GetClassColor(token)
     end
 end
 

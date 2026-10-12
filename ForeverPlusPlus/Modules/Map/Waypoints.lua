@@ -7,7 +7,7 @@ local _, ns = ...
 
 local ipairs, tonumber, format, floor = ipairs, tonumber, string.format, math.floor
 local tconcat = table.concat
-local CreateFrame, UIParent, C_Map, C_Texture = CreateFrame, UIParent, C_Map, C_Texture
+local CreateFrame, UIParent, C_Map = CreateFrame, UIParent, C_Map
 local GetPlayerFacing = GetPlayerFacing
 
 local L = ns.L
@@ -234,10 +234,6 @@ local INTERVAL = 0.03 -- seconds between turns, smooth enough to follow the came
 
 local frame, watcher
 
-local function hasAtlas(name)
-    return C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) ~= nil
-end
-
 -- "120 yds", like Blizzard's own marker (IN_GAME_NAVIGATION_RANGE), with big numbers shortened.
 local function distanceText(yards)
     yards = floor(yards + 0.5)
@@ -251,13 +247,12 @@ local function newFrame()
     f:SetSize(SIZE, SIZE)
     f.arrow = f:CreateTexture(nil, "ARTWORK")
     f.arrow:SetPoint("CENTER")
-    if hasAtlas(ARROW_ATLAS) then
+    if ns.Frames.HasAtlas(ARROW_ATLAS) then
         f.arrow:SetAtlas(ARROW_ATLAS)
-        f.arrow:SetSize(SIZE * 0.6, SIZE * 0.6)
     else
         f.arrow:SetTexture(ARROW_TEXTURE)
-        f.arrow:SetSize(SIZE * 0.6, SIZE * 0.6)
     end
+    f.arrow:SetSize(SIZE * 0.6, SIZE * 0.6)
     f.distance = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     f.distance:SetPoint("TOP", f, "BOTTOM", 0, 4)
     f:Hide()
@@ -320,28 +315,6 @@ local function sample(active)
     end
 end
 
-local function moved(x, y)
-    module.db.x, module.db.y = x, y
-end
-
-local editModeOptions = {
-    onChange = sample,
-    reset = function()
-        module.db.x, module.db.y = module.defaults.x, module.defaults.y
-        if frame then
-            place()
-        end
-    end,
-    scale = {
-        min = 50, max = 200, step = 10, format = "%d%%",
-        get = function() return module.db.scale end,
-        set = function(value)
-            module.db.scale = value
-            place()
-        end,
-    },
-}
-
 local function syncArrow()
     if module.enabled and module.db.arrow then
         if not frame then
@@ -353,7 +326,7 @@ local function syncArrow()
         place()
         module:On("USER_WAYPOINT_UPDATED", refresh)
         module:On("PLAYER_ENTERING_WORLD", refresh)
-        ns.EditMode.Register(frame, L.WAYPOINTS_ARROW, moved, editModeOptions)
+        ns.EditMode.RegisterModule(module, frame, L.WAYPOINTS_ARROW, place, sample)
     elseif frame then
         module:Off("USER_WAYPOINT_UPDATED", refresh)
         module:Off("PLAYER_ENTERING_WORLD", refresh)
@@ -377,7 +350,5 @@ function module:OnOptionChanged(option)
         syncWay()
     elseif option == "arrow" then
         syncArrow()
-    elseif option == "scale" and frame then
-        place()
     end
 end

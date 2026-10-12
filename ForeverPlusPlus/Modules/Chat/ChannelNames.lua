@@ -59,10 +59,10 @@ local function onMessage(frame, text)
     if short == text then
         return
     end
-    frame:TransformMessages(function(message)
-        return ns.IsReadable(message) and message == text
-    end, function(_, ...)
-        return short, ...
+    Chat.Transform(frame, function(message)
+        return message == text
+    end, function()
+        return short
     end)
 end
 
@@ -70,17 +70,11 @@ function module:IsAvailable()
     return ChatFrame1 ~= nil and ChatFrame1.TransformMessages ~= nil
 end
 
-local function attach()
-    for _, frame in ipairs(Chat.Frames()) do
-        module:Hook(frame, "AddMessage", onMessage)
-    end
-end
-
 function module:OnEnable()
-    attach()
-    -- A chat window added later.
-    self:On("UPDATE_CHAT_WINDOWS", attach)
-    self:On("UPDATE_FLOATING_CHAT_WINDOWS", attach)
+    -- Every window, and one added later.
+    Chat.EachWindow(self, function(frame)
+        module:Hook(frame, "AddMessage", onMessage)
+    end)
 end
 
 -- A shortened link, to put the name back: |Hchannel:channel:5|h[5. G]|h.
@@ -107,13 +101,8 @@ end
 -- Lines already shortened get their names back, so turning the module off undoes it.
 function module:OnDisable()
     for _, frame in ipairs(Chat.Frames()) do
-        if frame.TransformMessages then
-            frame:TransformMessages(function(message)
-                return ns.IsReadable(message) and type(message) == "string"
-                    and message:find("|Hchannel:channel:", 1, true) ~= nil and restore(message) ~= message
-            end, function(message, ...)
-                return restore(message), ...
-            end)
-        end
+        Chat.Transform(frame, function(message)
+            return message:find("|Hchannel:channel:", 1, true) ~= nil and restore(message) ~= message
+        end, restore)
     end
 end

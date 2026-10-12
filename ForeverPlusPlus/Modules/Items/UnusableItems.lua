@@ -14,9 +14,10 @@ local _, ns = ...
 
 local _G, ipairs, pairs, type, wipe = _G, ipairs, pairs, type, wipe
 local setmetatable = setmetatable
-local C_Item, C_TooltipInfo, C_Container, C_Timer = C_Item, C_TooltipInfo, C_Container, C_Timer
+local C_Item, C_Container, C_Timer = C_Item, C_Container, C_Timer
 
 local L = ns.L
+local ItemButtons = ns.ItemButtons
 
 local module = ns.NewModule("UnusableItems", L.UNUSABLEITEMS_DESC, {
     enabled = true,
@@ -74,9 +75,8 @@ end
 -- True when a line is red, false when none is, nil while the game has no tooltip for the item
 -- yet (not cached), so that isn't taken for "usable".
 local function tooltipUnusable(link)
-    local data = C_TooltipInfo and C_TooltipInfo.GetHyperlink(link)
-    local lines = data and data.lines
-    if not lines or #lines == 0 then
+    local lines = ItemButtons.TooltipLines(link)
+    if not lines then
         return nil
     end
     local _, _, _, _, _, classID = C_Item.GetItemInfoInstant(link)
@@ -141,11 +141,7 @@ local function setTint(icon, on)
         return
     end
     if not tint then
-        local layer, sublevel = icon:GetDrawLayer()
-        tint = icon:GetParent():CreateTexture(nil, layer, nil, (sublevel or 0) < 7 and (sublevel or 0) + 1 or 7)
-        tint:SetColorTexture(TINT[1], TINT[2], TINT[3])
-        tint:SetBlendMode("MOD")
-        tint:SetAllPoints(icon)
+        tint = ItemButtons.Tint(icon, TINT)
         tints[icon] = tint
     end
     tint:Show()
@@ -159,31 +155,17 @@ end
 
 -- Bags ------------------------------------------------------------------------------------------
 
-local function bagFrames()
-    local list = { _G.ContainerFrameCombinedBags }
-    for i = 1, _G.NUM_CONTAINER_FRAMES or 13 do
-        list[#list + 1] = _G["ContainerFrame" .. i]
-    end
-    return list
-end
-
 local function updateBag(frame)
-    if not frame.EnumerateValidItems then
-        return
-    end
     local on = module.db.bags
-    for _, button in frame:EnumerateValidItems() do
-        local bag = button.GetBagID and button:GetBagID() or button:GetParent():GetID()
-        local link = on and C_Container.GetContainerItemLink(bag, button:GetID())
-        setTint(button.icon or button.Icon, link and unusable(link))
-    end
+    ItemButtons.EachBagButton(frame, function(_, icon, bag, slot)
+        local link = on and C_Container.GetContainerItemLink(bag, slot)
+        setTint(icon, link and unusable(link))
+    end)
 end
 
 local function hookBags()
-    for _, frame in ipairs(bagFrames()) do
-        if type(frame.UpdateItems) == "function" then
-            module:Hook(frame, "UpdateItems", updateBag)
-        end
+    for _, frame in ipairs(ItemButtons.Frames()) do
+        module:Hook(frame, "UpdateItems", updateBag)
     end
 end
 
@@ -206,23 +188,11 @@ local function updateBank()
 end
 
 local function hookBank()
-    local panel = _G.BankPanel
-    if not panel then
-        return
-    end
-    for _, method in ipairs({ "RefreshAllItemsForSelectedTab", "GenerateItemSlotsForSelectedTab" }) do
-        if type(panel[method]) == "function" then
-            module:Hook(panel, method, updateBank)
-        end
-    end
+    module:Hook(_G.BankPanel, "RefreshAllItemsForSelectedTab", updateBank)
+    module:Hook(_G.BankPanel, "GenerateItemSlotsForSelectedTab", updateBank)
 end
 
 -- Merchants -------------------------------------------------------------------------------------
-
-local function merchantIcon(i)
-    local button = _G["MerchantItem" .. i .. "ItemButton"]
-    return button and (button.icon or _G["MerchantItem" .. i .. "ItemButtonIconTexture"])
-end
 
 -- Whether Blizzard already tints this merchant item red, so ours isn't laid on top of it.
 local function blizzardTinted(index)
@@ -232,30 +202,24 @@ local function blizzardTinted(index)
 end
 
 local function updateMerchant()
-    local frame = _G.MerchantFrame
-    if not (frame and _G.GetMerchantItemLink) then
-        return
-    end
-    local perPage = _G.MERCHANT_ITEMS_PER_PAGE or 10
     local on = module.db.merchant
-    for i = 1, perPage do
-        local index = ((frame.page or 1) - 1) * perPage + i
+    ItemButtons.EachMerchantItem(function(icon, index)
         local link = on and _G.GetMerchantItemLink(index)
-        setTint(merchantIcon(i), link and not blizzardTinted(index) and unusable(link))
-    end
+        setTint(icon, link and not blizzardTinted(index) and unusable(link))
+    end)
 end
 
 -- The buyback tab reuses the same buttons, and Blizzard tints those itself.
 local function clearMerchant()
     for i = 1, _G.MERCHANT_ITEMS_PER_PAGE or 10 do
-        setTint(merchantIcon(i), false)
+        setTint(ItemButtons.MerchantIcon(i), false)
     end
 end
 
 -- Module ----------------------------------------------------------------------------------------
 
 local function refresh()
-    for _, frame in ipairs(bagFrames()) do
+    for _, frame in ipairs(ItemButtons.Frames()) do
         if frame:IsShown() then
             updateBag(frame)
         end
@@ -304,15 +268,9 @@ local function onItemInfo(_, itemID)
     end
 end
 
-local function hookGlobal(name, fn)
-    if type(_G[name]) == "function" then
-        module:Hook(name, fn)
-    end
-end
-
 function module:OnEnable()
-    hookGlobal("MerchantFrame_UpdateMerchantInfo", updateMerchant)
-    hookGlobal("MerchantFrame_UpdateBuybackInfo", clearMerchant)
+    self:Hook("MerchantFrame_UpdateMerchantInfo", updateMerchant)
+    self:Hook("MerchantFrame_UpdateBuybackInfo", clearMerchant)
     hookBags()
     hookBank()
     self:On("GET_ITEM_INFO_RECEIVED", onItemInfo) -- items without a tooltip yet weren't kept

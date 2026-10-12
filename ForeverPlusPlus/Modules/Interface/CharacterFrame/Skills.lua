@@ -3,7 +3,7 @@
 -- in the list and in the selected skill's details. CharacterFrame.lua turns them on and off.
 local _, ns = ...
 
-local _G, pairs, type = _G, pairs, type
+local _G, type = _G, type
 local GetInventoryItemID, GetInventorySlotInfo, pcall = GetInventoryItemID, GetInventorySlotInfo, pcall
 
 local module = ns.modules.CharacterFrame
@@ -115,9 +115,7 @@ local function start()
         end
     end
     frame.ScrollBox:RegisterCallback(_G.ScrollBoxListMixin.Event.OnInitializedFrame, paintEntry, module)
-    if frame.SkillDetailFrame and frame.SkillDetailFrame.RefreshRankBar then
-        module:Hook(frame.SkillDetailFrame, "RefreshRankBar", paintDetail)
-    end
+    module:Hook(frame.SkillDetailFrame, "RefreshRankBar", paintDetail)
 end
 
 local function onEquipment()

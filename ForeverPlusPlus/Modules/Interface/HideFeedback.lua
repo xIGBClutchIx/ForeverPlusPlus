@@ -4,7 +4,7 @@
 local _, ns = ...
 
 local _G, type, pairs, ipairs, setmetatable = _G, type, pairs, ipairs, setmetatable
-local find, gsub = string.find, string.gsub
+local find = string.find
 local hooksecurefunc, C_Timer = hooksecurefunc, C_Timer
 
 local L = ns.L
@@ -40,15 +40,8 @@ local REPORTER_STRINGS = { "BugTooltipString", "BugTooltipPartialString", "Missi
 
 local reporter -- PTR_IssueReporter, once it exists
 local patterns = {}
-local hooked = setmetatable({}, { __mode = "k" }) -- tooltip -> true
 local buttonWasShown = false
 local busy = false
-
--- "Press %s to submit an issue for this %s" -> a Lua pattern where each %s matches anything.
-local function toPattern(formatString)
-    local pattern = gsub(formatString, "[%^%$%(%)%.%[%]%*%+%-%?%%]", "%%%0")
-    return (gsub(pattern, "%%%%[sd]", ".-"))
-end
 
 local function isReminder(text)
     -- Unit tooltip lines can be secret in combat; those are never the reminder.
@@ -114,12 +107,10 @@ local function scrub(tooltip)
 end
 
 local function hookTooltip(tooltip)
-    if type(tooltip) ~= "table" or not tooltip.NumLines or hooked[tooltip] then
-        return
+    if type(tooltip) == "table" and tooltip.NumLines then
+        -- After the reporter's own Show hook, if it has one, since it was added first.
+        module:Hook(tooltip, "Show", scrub)
     end
-    hooked[tooltip] = true
-    -- After the reporter's own Show hook, if it has one, since it was added first.
-    hooksecurefunc(tooltip, "Show", scrub)
 end
 
 local function keepHidden(frame)
@@ -137,7 +128,8 @@ local function setupReporter()
     for _, key in ipairs(REPORTER_STRINGS) do
         local value = reporter[key]
         if type(value) == "string" and value ~= "" then
-            patterns[#patterns + 1] = toPattern(value)
+            -- "Press %s to submit an issue for this %s": each %s matches anything.
+            patterns[#patterns + 1] = ns.Text.FormatPattern(value)
         end
     end
     hookTooltip(_G.GameTooltip)
@@ -236,8 +228,6 @@ local function scanQuest(frame, depth)
     end
 end
 
-local alertHooked = setmetatable({}, { __mode = "k" }) -- widget -> true
-
 -- Fading it out isn't enough: the alert plays an animation that sets its alpha back, so it is
 -- also hidden, and hidden again whenever the reporter shows it.
 local function hideAlert(widget)
@@ -278,10 +268,7 @@ local function hideAlertFrames()
     for _, widget in ipairs(found) do
         if type(widget) == "table" and widget.HookScript then
             hideAlert(widget)
-            if not alertHooked[widget] then
-                alertHooked[widget] = true
-                module:HookScript(widget, "OnShow", hideAlert)
-            end
+            module:HookScript(widget, "OnShow", hideAlert)
         end
     end
 end
@@ -315,22 +302,19 @@ local function onQuestEvent()
     C_Timer.After(0, hideQuestFeedback)
 end
 
+local function hookQuestMap()
+    module:HookScript(_G.QuestMapFrame, "OnShow", onQuestEvent)
+end
+
 local function setupQuest()
     for _, name in ipairs(QUEST_FRAMES) do
-        local frame = _G[name]
-        if frame and frame.HookScript then
-            module:HookScript(frame, "OnShow", onQuestEvent)
-        end
+        module:HookScript(_G[name], "OnShow", onQuestEvent)
     end
     for _, event in ipairs(QUEST_EVENTS) do
         module:On(event, onQuestEvent)
     end
     -- The quest log lives in the world map, which loads on demand.
-    ns.AddOns.WhenLoaded("Blizzard_WorldMap", function()
-        if module.enabled and _G.QuestMapFrame and _G.QuestMapFrame.HookScript then
-            module:HookScript(_G.QuestMapFrame, "OnShow", onQuestEvent)
-        end
-    end)
+    ns.AddOns.WhenLoaded("Blizzard_WorldMap", hookQuestMap)
     hideQuestFeedback()
 end
 

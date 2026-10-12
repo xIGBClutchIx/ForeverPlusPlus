@@ -97,9 +97,7 @@ function module:OnEnable()
     for _, button in ipairs(buttons()) do
         if type(button.UpdateDuration) == "function" and button.Duration then
             self:Hook(button, "UpdateDuration", update)
-            if type(button.UpdateExpirationTime) == "function" then
-                self:Hook(button, "UpdateExpirationTime", expiration)
-            end
+            self:Hook(button, "UpdateExpirationTime", expiration)
         end
     end
 end

@@ -8,14 +8,14 @@ local _, ns = ...
 
 local _G, ipairs, pairs, tonumber, strmatch, format = _G, ipairs, pairs, tonumber, string.match,
     string.format
-local CreateFrame, C_Timer, C_Spell, C_SpellBook, C_Texture = CreateFrame, C_Timer, C_Spell,
-    C_SpellBook, C_Texture
+local CreateFrame, C_Spell, C_SpellBook = CreateFrame, C_Spell, C_SpellBook
 local GetActionInfo, InCombatLockdown = GetActionInfo, InCombatLockdown
 local GetMacroSpell = GetMacroSpell or (_G.C_Macro and _G.C_Macro.GetMacroSpell)
-local TooltipDataProcessor, Enum, GameTooltip = TooltipDataProcessor, Enum, GameTooltip
+local Enum, GameTooltip = Enum, GameTooltip
 
 local L = ns.L
 local readable = ns.IsReadable
+local Frames = ns.Frames
 
 local module = ns.NewModule("SpellRanks", L.SPELLRANKS_DESC, {
     enabled = true,
@@ -55,7 +55,6 @@ local known -- spell name -> the highest rank known, or nil until scanned
 local marks = setmetatable({}, { __mode = "k" }) -- button -> our overlay frame
 local lowSlots = {} -- { bar, slot, spellID, rank, best } for every marked button, in bar order
 local lastCount = 0
-local timer
 
 local function rankNumber(spellID)
     local text = C_Spell.GetSpellSubtext(spellID)
@@ -129,7 +128,7 @@ local function overlay(button)
     frame.badge = frame:CreateTexture(nil, "OVERLAY", nil, 2)
     frame.badge:SetSize(BADGE_SIZE, BADGE_SIZE)
     frame.badge:SetPoint("TOPRIGHT", 2, 2)
-    if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(ALERT_ATLAS) then
+    if Frames.HasAtlas(ALERT_ATLAS) then
         frame.badge:SetAtlas(ALERT_ATLAS)
     else
         frame.badge:SetTexture(ALERT_FILE)
@@ -150,7 +149,6 @@ local function mark(button, on)
 end
 
 local function refresh()
-    timer = nil
     if not module.enabled then
         return
     end
@@ -189,9 +187,11 @@ local function refresh()
     module.announce = false
 end
 
+local schedule, cancel = Frames.Coalesce(refresh, DELAY)
+
 local function queue()
-    if module.enabled and not timer then
-        timer = C_Timer.NewTimer(DELAY, refresh)
+    if module.enabled then
+        schedule()
     end
 end
 
@@ -212,7 +212,7 @@ end
 -- known, shaped like our item tooltip lines (white label, value at the right edge) so it doesn't
 -- read as part of the gold spell description.
 local function onTooltip(tooltip, data)
-    if not (module.enabled and module.db.tooltip and known and tooltip == GameTooltip
+    if not (module.db.tooltip and known and tooltip == GameTooltip
         and data and readable(data.id) and data.id) then
         return
     end
@@ -222,8 +222,6 @@ local function onTooltip(tooltip, data)
         tooltip:AddDoubleLine(L.SPELLRANKS_BEST, format(L.SPELLRANKS_BEST_RANK, best), 1, 1, 1, 1, 1, 1)
     end
 end
-
-local hooked = false
 
 function module:OnEnable()
     if not (C_Spell and C_Spell.GetSpellSubtext and C_SpellBook
@@ -239,21 +237,14 @@ function module:OnEnable()
     self:On("UPDATE_SHAPESHIFT_FORM", queue)
     self:On("PLAYER_REGEN_ENABLED", queue) -- buttons created late, when we were in combat
     self:On("SPELL_DATA_LOAD_RESULT", onLoaded)
-    if not hooked and TooltipDataProcessor and Enum.TooltipDataType.Spell then
-        -- Post calls can't be removed; onTooltip checks module.enabled.
-        hooked = true
-        TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Spell, onTooltip)
-    end
+    self:TooltipPostCall(Enum.TooltipDataType and Enum.TooltipDataType.Spell, onTooltip)
     known = nil
     lastCount = 0
     queue()
 end
 
 function module:OnDisable()
-    if timer then
-        timer:Cancel()
-        timer = nil
-    end
+    cancel()
     for _, frame in pairs(marks) do
         frame:Hide()
     end

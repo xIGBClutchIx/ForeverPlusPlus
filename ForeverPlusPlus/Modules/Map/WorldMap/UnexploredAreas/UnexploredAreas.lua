@@ -6,8 +6,7 @@
 local _, ns = ...
 
 local ceil, ipairs, pairs, setmetatable = math.ceil, ipairs, pairs, setmetatable
-local CreateFrame, C_AddOns, C_Map, C_MapExplorationInfo =
-    CreateFrame, C_AddOns, C_Map, C_MapExplorationInfo
+local CreateFrame, C_Map, C_MapExplorationInfo = CreateFrame, C_Map, C_MapExplorationInfo
 
 local L = ns.L
 
@@ -69,19 +68,12 @@ local function tintColor()
         1 - (1 - color[3]) * strength
 end
 
--- The maps it draws on, with the load-on-demand Blizzard addon each comes with.
+-- The maps it draws on, with the load-on-demand Blizzard addon each comes with. `frame` is only
+-- asked once that addon has loaded.
 local MAPS = {
     { addon = "Blizzard_WorldMap", frame = function() return WorldMapFrame end },
     { addon = "Blizzard_BattlefieldMap", frame = function() return BattlefieldMapFrame end },
 }
-
--- The map frame, once its addon has loaded.
-local function mapFrame(entry)
-    if C_AddOns and not C_AddOns.IsAddOnLoaded(entry.addon) then
-        return nil
-    end
-    return entry.frame()
-end
 
 -- One area as a number, to match the game's explored areas against Data.lua's. Sizes and
 -- offsets are under 2048 map pixels.
@@ -224,20 +216,9 @@ local overlays = {}
 -- The overlays on their maps now.
 local attached = {}
 
-local attach
-
--- One map's attach, kept so a wait for its addon can be cancelled.
-local attachers = {}
-
-local function attacher(entry)
-    attachers[entry] = attachers[entry] or function()
-        attach(entry)
-    end
-    return attachers[entry]
-end
-
-function attach(entry)
-    local map = mapFrame(entry)
+-- Only called once the map's addon has loaded (from ns.AddOns.WhenLoaded).
+local function attach(entry)
+    local map = entry.frame()
     if not map or attached[entry] then
         return
     end
@@ -249,6 +230,16 @@ function attach(entry)
     if map:IsShown() then
         overlay:Draw()
     end
+end
+
+-- One map's attach, kept so a wait for its addon can be cancelled.
+local attachers = {}
+
+local function attacher(entry)
+    attachers[entry] = attachers[entry] or function()
+        attach(entry)
+    end
+    return attachers[entry]
 end
 
 local function redraw()

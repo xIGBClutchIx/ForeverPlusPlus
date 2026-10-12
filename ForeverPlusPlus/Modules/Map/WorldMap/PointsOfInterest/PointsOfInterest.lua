@@ -163,7 +163,7 @@ local TAXI = { A = "TaxiNode_Alliance", H = "TaxiNode_Horde", N = "TaxiNode_Neut
 local learnedIcon
 local function learnedAtlas(faction)
     if learnedIcon == nil then
-        learnedIcon = ns.MapPins.Atlas("FlightMaster", "") ~= "" and "FlightMaster" or false
+        learnedIcon = ns.Frames.HasAtlas("FlightMaster") and "FlightMaster" or false
     end
     return learnedIcon or TAXI[faction]
 end
@@ -377,6 +377,10 @@ local function listedNear(listed, x, y)
     return false
 end
 
+local function isInstance(point)
+    return point[1] == "dungeon" or point[1] == "raid"
+end
+
 -- The instances Data.lua places somewhere, by their entry in Lib/Instances.lua, once asked. The
 -- rest (Forever dungeons whose entrance isn't known) are left to the game's own icons.
 local placed
@@ -386,7 +390,7 @@ local function placedByUs(name)
         placed = {}
         for _, points in pairs(internal.points) do
             for _, point in ipairs(points) do
-                if point[1] == "dungeon" or point[1] == "raid" then
+                if isInstance(point) then
                     local instance = internal.instances[point[4]]
                     for _, key in ipairs(instance.parts or { point[4] }) do
                         local found = ns.Instances.ByName(internal.instances[key][2])
@@ -466,10 +470,6 @@ local function addFrom(fromMap, mapID, point, world, add)
     if x then
         add(x, y, info)
     end
-end
-
-local function isInstance(point)
-    return point[1] == "dungeon" or point[1] == "raid"
 end
 
 -- How close (in percent of the map) a city's dungeon is to the city's own icon for the dungeon to
@@ -581,7 +581,7 @@ local function fillZone(mapID, add)
     readTaxiNodes(mapID)
     local listed = {} -- this map's dungeons and raids in Data.lua, shown or not
     for _, point in ipairs(internal.points[mapID] or {}) do
-        if point[1] == "dungeon" or point[1] == "raid" then
+        if isInstance(point) then
             listed[#listed + 1] = point
         end
         local info = pinFor(point, mapID)

@@ -28,21 +28,13 @@ local function apply(frame)
     frame:SetFading(false)
 end
 
-local function applyAll()
-    for _, frame in ipairs(Chat.Frames()) do
-        apply(frame)
-    end
-end
-
 function module:IsAvailable()
     return ChatFrame1 ~= nil
 end
 
 function module:OnEnable()
-    applyAll()
     -- A window that was reset or added later starts with Blizzard's fading.
-    self:On("UPDATE_CHAT_WINDOWS", applyAll)
-    self:On("UPDATE_FLOATING_CHAT_WINDOWS", applyAll)
+    Chat.EachWindow(self, apply)
 end
 
 function module:OnDisable()

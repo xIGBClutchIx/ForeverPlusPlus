@@ -14,6 +14,7 @@
 -- New gives the module its OnEnable, OnDisable and OnOptionChanged (unless it has its own
 -- OnDisable or OnOptionChanged). The module's settings come from FriendlyPlates.Defaults: they
 -- need barWhenHurt, level, buffs, nameSize, centerLine, and `saved = {}` for the CVars.
+-- FriendlyPlates.Options puts the options for the first three at the top of the module's list.
 local _, ns = ...
 
 local pairs, ipairs, setmetatable, hooksecurefunc = pairs, ipairs, setmetatable, hooksecurefunc
@@ -245,6 +246,33 @@ function FriendlyPlates.Defaults(extra)
     extra.saved = {} -- CVar -> the player's own value, put back when the module turns off
     return extra
 end
+
+---A module's options with the General ones for the settings in Defaults put first.
+---@param barDescription string the Bar When Hurt description, which names the kind of unit
+---@param options table the module's own options, after General
+---@return table options
+function FriendlyPlates.Options(barDescription, options)
+    local L = ns.L
+    table.insert(options, 1, {
+        key = "barWhenHurt", name = L.PLATES_BAR_WHEN_HURT, description = barDescription,
+        section = L.PLATES_SECTION_GENERAL,
+    })
+    table.insert(options, 2, {
+        key = "level", name = L.PLATES_LEVEL, description = L.PLATES_LEVEL_DESC,
+        choices = PlateLabel.LEVEL_CHOICES, section = L.PLATES_SECTION_GENERAL,
+    })
+    table.insert(options, 3, {
+        key = "buffs", name = L.PLATES_BUFFS, description = L.PLATES_BUFFS_DESC,
+        choices = PlateLabel.BUFF_CHOICES, section = L.PLATES_SECTION_GENERAL,
+    })
+    return options
+end
+
+-- Colors for the line under the name (an NPC's title, a player's guild).
+FriendlyPlates.SUBTITLE_COLORS = {
+    gray = ns.Colors.GRAY,
+    green = ns.Colors.GUILD_GREEN,
+}
 
 -- Whether this is one of ours: a friendly player (or NPC). The personal resource display is a
 -- friendly player too, so leave out ourselves. Nil when the game won't say (secret values).

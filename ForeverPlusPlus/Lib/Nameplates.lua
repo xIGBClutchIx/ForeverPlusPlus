@@ -50,16 +50,17 @@ end
 
 -- The bars are the cast bar container's children (a cast bar and, on some builds, others such as
 -- an empowered one), or the container itself if it has none.
-local function castBarsOf(frame)
-    local container = frame.CastBarsContainer
-    if not container then
-        return nil
-    end
+local function barsIn(container)
     local bars = { container:GetChildren() }
     if #bars == 0 then
         bars[1] = container
     end
     return bars
+end
+
+local function castBarsOf(frame)
+    local container = frame.CastBarsContainer
+    return container and barsIn(container) or nil
 end
 
 local function watchCastBars(unit, frame)
@@ -189,13 +190,9 @@ function Nameplates.IsCastBarShown(castBar)
     if not castBar then
         return false
     end
-    local children = { castBar:GetChildren() }
-    if #children == 0 then
-        local shown = castBar:IsVisible()
-        return ns.IsReadable(shown) and shown or false
-    end
-    for i = 1, #children do
-        local shown = children[i]:IsVisible()
+    local bars = barsIn(castBar)
+    for i = 1, #bars do
+        local shown = bars[i]:IsVisible()
         if ns.IsReadable(shown) and shown then
             return true
         end

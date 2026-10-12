@@ -33,7 +33,7 @@ local function restore(button)
 end
 
 function module:IsAvailable()
-    return QuickJoinToastButton ~= nil and (ChatFrameChannelButton or ChatFrameMenuButton) ~= nil
+    return QuickJoinToastButton ~= nil and Chat.Anchor() ~= nil
 end
 
 function module:OnEnable()
@@ -41,7 +41,7 @@ function module:OnEnable()
     if not original then
         remember(button)
     end
-    local host = (ChatFrameChannelButton or ChatFrameMenuButton):GetParent()
+    local host = Chat.Anchor():GetParent()
     if host then
         button:SetParent(host)
     end

@@ -103,12 +103,10 @@ function module:IsAvailable()
 end
 
 function module:OnEnable()
-    applyAll()
     -- Blizzard changes a window's size with SetFont on the file it reads back, which is ours by now;
     -- this covers a window that was reset or added later.
+    Chat.EachWindow(self, apply)
     self:Hook("FCF_SetChatWindowFontSize", applyAll)
-    self:On("UPDATE_CHAT_WINDOWS", applyAll)
-    self:On("UPDATE_FLOATING_CHAT_WINDOWS", applyAll)
 end
 
 function module:OnDisable()

@@ -1,11 +1,11 @@
--- Chat helpers the Chat modules share: the chat frames, chat lines as plain text, and the column
+-- Chat helpers the Chat modules share: the chat windows, rewriting their lines, chat lines in their
+-- colors for an edit box, and the column
 -- of small buttons beside the main chat window (Blizzard's menu and channel buttons, then ours).
 local _, ns = ...
 
 local _G, ipairs, type, tonumber, gsub = _G, ipairs, type, tonumber, string.gsub
-local byte, find, format, match, sub = string.byte, string.find, string.format, string.match,
-    string.sub
-local floor, min, concat = math.floor, math.min, table.concat
+local byte, find, match, sub = string.byte, string.find, string.match, string.sub
+local min, concat = math.min, table.concat
 
 local Chat = {}
 ns.Chat = Chat
@@ -23,19 +23,35 @@ function Chat.Frames()
     return frames
 end
 
----A chat line without its escape codes: colors, links (their text stays), textures, and atlases.
----Nothing here may be given a secret value; test with `ns.IsReadable` first.
----@param text string
----@return string
-function Chat.Plain(text)
-    text = gsub(text, "|c%x%x%x%x%x%x%x%x", "")
-    text = gsub(text, "|cn[^:|]*:", "")
-    text = gsub(text, "|r", "")
-    text = gsub(text, "|H[^|]*|h(.-)|h", "%1")
-    text = gsub(text, "|T[^|]*|t", "")
-    text = gsub(text, "|A[^|]*|a", "")
-    text = gsub(text, "||", "|")
-    return text
+---Calls `fn` with each chat window now, and again whenever windows are added or reset, while the
+---module is on. Call it from `OnEnable`.
+---@param module table
+---@param fn fun(frame: table)
+function Chat.EachWindow(module, fn)
+    local function all()
+        for _, frame in ipairs(Chat.Frames()) do
+            fn(frame)
+        end
+    end
+    all()
+    module:On("UPDATE_CHAT_WINDOWS", all)
+    module:On("UPDATE_FLOATING_CHAT_WINDOWS", all)
+end
+
+---Rewrites the lines a chat window already shows: each readable line `test` accepts becomes
+---`rewrite(line)`, keeping its color and links. Does nothing on a client without TransformMessages.
+---@param frame table
+---@param test fun(line: string): boolean
+---@param rewrite fun(line: string): string
+function Chat.Transform(frame, test, rewrite)
+    if not frame.TransformMessages then
+        return
+    end
+    frame:TransformMessages(function(message)
+        return ns.IsReadable(message) and type(message) == "string" and test(message)
+    end, function(message, ...)
+        return rewrite(message), ...
+    end)
 end
 
 ---A pattern that finds a chat timestamp at the start of a line, for one of Blizzard's chat
@@ -74,15 +90,7 @@ end
 
 local PIPE, LOWER_C, LOWER_R = 124, 99, 114
 
----A color code for red, green, and blue from 0 to 1.
----@param r number
----@param g number
----@param b number
----@return string
-local function hexCode(r, g, b)
-    return format("|cff%02x%02x%02x", floor(r * 255 + 0.5), floor(g * 255 + 0.5),
-        floor(b * 255 + 0.5))
-end
+local hexCode = ns.Colors.Code
 
 ---A named color (|cnIQ4: for an item's quality, |cnNAME: for a color global) as a plain color
 ---code, which edit boxes show; nil when the name isn't known.
@@ -236,13 +244,13 @@ local laying
 
 ---The last of Blizzard's own chat buttons, which ours go under.
 ---@return table?
-local function anchor()
+function Chat.Anchor()
     return _G.ChatFrameChannelButton or _G.ChatFrameMenuButton
 end
 
 ---Puts the buttons in the column back in place. Modules call it again when something moves one.
 function Chat.Layout()
-    local previous = anchor()
+    local previous = Chat.Anchor()
     if not previous then
         return
     end

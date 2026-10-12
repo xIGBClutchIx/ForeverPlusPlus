@@ -30,6 +30,11 @@ ns.changelog = {
                     .. "Bundle Costs, keeping your choice. It still takes its prices from Item "
                     .. "Tooltips' Auction Prices." },
             } },
+            { L.CHANGELOG_FIXED, {
+                { L.PROFTOOLTIPS_TITLE, "Recolors the \"Requires\" line on nodes and creatures in "
+                    .. "languages that number its parts (such as \"%1$s\"), which it missed "
+                    .. "before." },
+            } },
         },
     },
     {

@@ -8,8 +8,7 @@
 local _, ns = ...
 
 local _G, pairs, format, strfind, tconcat = _G, pairs, string.format, string.find, table.concat
-local C_Item, C_Container, C_Texture, C_Timer, C_EventUtils = C_Item, C_Container, C_Texture, C_Timer,
-    C_EventUtils
+local C_Item, C_Container, C_EventUtils = C_Item, C_Container, C_EventUtils
 local Enum = Enum
 local UnitName, GetRealmName, GetFileIDFromPath = UnitName, GetRealmName, GetFileIDFromPath
 local GRAY_FONT_COLOR = GRAY_FONT_COLOR
@@ -25,7 +24,7 @@ local internal = module.internal
 -- the client has, else none (and the words show instead).
 
 local function iconMarkup(atlas, file)
-    if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(atlas) then
+    if ns.Frames.HasAtlas(atlas) then
         return format("|A:%s:0:0|a", atlas)
     end
     if not GetFileIDFromPath or GetFileIDFromPath(file) then
@@ -94,20 +93,17 @@ local function scanBank()
     module.db.banks[characterKey()] = counts
 end
 
-local scanQueued = false
-
 -- Many slots change at once when items move; one scan on the next frame covers them all.
-local function queueScan()
-    if scanQueued or not bankOpen then
-        return
+local queueNext = ns.Frames.Coalesce(function()
+    if internal.Active("itemCount") then
+        scanBank()
     end
-    scanQueued = true
-    C_Timer.After(0, function()
-        scanQueued = false
-        if internal.Active("itemCount") then
-            scanBank()
-        end
-    end)
+end)
+
+local function queueScan()
+    if bankOpen then
+        queueNext()
+    end
 end
 
 local function onBankOpened()

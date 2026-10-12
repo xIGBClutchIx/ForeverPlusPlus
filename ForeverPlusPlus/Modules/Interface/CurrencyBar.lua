@@ -37,7 +37,6 @@ module.options = {
     },
 }
 
-local DEFAULT_X, DEFAULT_Y = 977, -462 -- the same as the defaults above
 local PAD = 10 -- between the text and the box's edge
 local ICON = 14 -- a currency's icon, about the size of the text
 local MAX_CURRENCIES = 10 -- far more than the Backpack's three, in case Forever allows more
@@ -168,16 +167,9 @@ end
 -- The frame ---------------------------------------------------------------------------------------
 
 local function newFrame()
-    local hasTemplate = C_XMLUtil and C_XMLUtil.GetTemplateInfo
-        and C_XMLUtil.GetTemplateInfo("TooltipBackdropTemplate")
     -- The same box Blizzard draws tooltips in.
-    local box = CreateFrame("Frame", nil, UIParent,
-        hasTemplate and "TooltipBackdropTemplate" or "BackdropTemplate")
+    local box = ns.Frames.TooltipBox(UIParent)
     box:SetFrameStrata("MEDIUM")
-    if not hasTemplate and box.SetBackdrop and BACKDROP_TOOLTIP_16_16_5555 then
-        box:SetBackdrop(BACKDROP_TOOLTIP_16_16_5555)
-        box:SetBackdropColor(0, 0, 0, 0.8)
-    end
     -- The text sits in a child that takes the scale, so the box's own position stays put in Edit Mode.
     box.inner = CreateFrame("Frame", nil, box)
     box.inner:SetSize(1, 1)
@@ -200,29 +192,11 @@ end
 
 -- Edit Mode ---------------------------------------------------------------------------------------
 
-local function moved(x, y)
-    module.db.x, module.db.y = x, y
+-- Edit Mode's reset moves the box and its scale slider resizes it; doing both covers either.
+local function layout()
+    place()
+    update()
 end
-
-local function resetPosition()
-    module.db.x, module.db.y = DEFAULT_X, DEFAULT_Y
-    if frame then
-        place()
-    end
-end
-
--- What Edit Mode's dialog for the box offers.
-local editModeOptions = {
-    reset = resetPosition,
-    scale = {
-        min = 50, max = 200, step = 10, format = "%d%%",
-        get = function() return module.db.scale end,
-        set = function(value)
-            module.db.scale = value
-            update()
-        end,
-    },
-}
 
 function module:OnEnable()
     if not frame then
@@ -230,8 +204,7 @@ function module:OnEnable()
     end
     startMoney = startMoney or GetMoney()
     noteCurrencies()
-    place()
-    update()
+    layout()
     frame:Show()
     self:On("PLAYER_MONEY", update)
     self:On("CURRENCY_DISPLAY_UPDATE", function()
@@ -242,7 +215,7 @@ function module:OnEnable()
         noteCurrencies()
         update()
     end)
-    ns.EditMode.Register(frame, L.CURRENCYBAR_TITLE, moved, editModeOptions)
+    ns.EditMode.RegisterModule(self, frame, L.CURRENCYBAR_TITLE, layout)
 end
 
 function module:OnDisable()

@@ -98,11 +98,17 @@ local function onAnyLinePre(tooltip, lineData)
     end
 end
 
-local function onItemPre(tooltip, data)
-    current[tooltip] = data
+-- Forgets what was drawn on the tooltip, for the next item.
+local function reset(tooltip)
     done[tooltip] = nil
     infoDone[tooltip] = nil
+    current[tooltip] = nil
     widest[tooltip] = nil
+end
+
+local function onItemPre(tooltip, data)
+    reset(tooltip)
+    current[tooltip] = data
 end
 
 local function onItem(tooltip, data)
@@ -112,10 +118,7 @@ local function onItem(tooltip, data)
     if not done[tooltip] and data then
         addPrices(tooltip, data)
     end
-    done[tooltip] = nil
-    infoDone[tooltip] = nil
-    current[tooltip] = nil
-    widest[tooltip] = nil
+    reset(tooltip)
 end
 
 -- Redraws the item tooltip when Shift goes up or down, so lines that depend on it change. Other
@@ -313,6 +316,16 @@ local function padding(tooltip, name)
     return gap > 0 and format(SPACER, gap) or ""
 end
 
+-- Adds the line in white: the value after the label, or against the right edge.
+local function emit(tooltip, align, label, value)
+    local r, g, b = HIGHLIGHT_FONT_COLOR:GetRGB()
+    if align == "inline" then
+        tooltip:AddLine(format(L.PRICE_INLINE, label, value), r, g, b)
+    else
+        tooltip:AddDoubleLine(label, value, r, g, b, r, g, b)
+    end
+end
+
 ---Adds a price line: the name and an "x20", then the coins ("Sell Price x20: <coins>").
 ---@param tooltip table
 ---@param data table tooltip data, for the stack's size
@@ -327,12 +340,7 @@ function ItemTooltip.AddPrice(tooltip, data, name, unitPrice, mode, align, color
     local quantity = (COLORS[color] or GRAY_FONT_COLOR):WrapTextInColorCode(format(L.PRICE_QUANTITY, count))
     -- The padding goes before the quantity, so the "x20"s line up.
     local label = format(L.PRICE_LINE, name .. padding(tooltip, name), quantity)
-    local r, g, b = HIGHLIGHT_FONT_COLOR:GetRGB()
-    if align == "inline" then
-        tooltip:AddLine(format(L.PRICE_INLINE, label, money(amount)), r, g, b)
-    else
-        tooltip:AddDoubleLine(label, money(amount), r, g, b, r, g, b)
-    end
+    emit(tooltip, align, label, money(amount))
 end
 
 ---Adds a line in the price lines' style with text instead of coins ("Scanned: 2h ago"). The
@@ -353,10 +361,5 @@ function ItemTooltip.AddInfo(tooltip, name, text, align, color)
     else
         value = (COLORS[color] or GRAY_FONT_COLOR):WrapTextInColorCode(text)
     end
-    local r, g, b = HIGHLIGHT_FONT_COLOR:GetRGB()
-    if align == "inline" then
-        tooltip:AddLine(format(L.PRICE_INLINE, label, value), r, g, b)
-    else
-        tooltip:AddDoubleLine(label, value, r, g, b, r, g, b)
-    end
+    emit(tooltip, align, label, value)
 end

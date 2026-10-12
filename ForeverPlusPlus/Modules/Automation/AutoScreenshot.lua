@@ -225,11 +225,7 @@ local function toPattern(text)
     if type(text) ~= "string" then
         return nil
     end
-    text = text:gsub("%%%d+%$", "%%") -- "%1$s" (reordered, in some languages) is "%s"
-    text = text:gsub("[%^%$%(%)%.%[%]%*%+%-%?]", "%%%0")
-    text = text:gsub("%%s", "(.+)")
-    text = text:gsub("%%d", "(%%d+)")
-    return "^" .. text .. "$"
+    return "^" .. ns.Text.FormatPattern(text, true) .. "$"
 end
 
 local lootPatterns -- built the first time, from the client's own (translated) formats

@@ -112,10 +112,6 @@ end
 
 -- Both frames are part of the always-loaded FrameXML.
 function module:OnEnable()
-    if MovieFrame and MovieFrame.PlayMovie then
-        self:Hook(MovieFrame, "PlayMovie", onPlayMovie)
-    end
-    if CinematicFrame then
-        self:HookScript(CinematicFrame, "OnEvent", onCinematicEvent)
-    end
+    self:Hook(MovieFrame, "PlayMovie", onPlayMovie)
+    self:HookScript(CinematicFrame, "OnEvent", onCinematicEvent)
 end

@@ -9,13 +9,14 @@
 -- a green tint that multiplies the icon, and the icon's own color is never touched.
 local _, ns = ...
 
-local _G, ipairs, type, strfind, gsub = _G, ipairs, type, strfind, gsub
+local _G, ipairs, type, strfind = _G, ipairs, type, strfind
 local setmetatable, pairs = setmetatable, pairs
-local C_Item, C_TooltipInfo, C_PetJournal, C_Container = C_Item, C_TooltipInfo, C_PetJournal, C_Container
+local C_Item, C_PetJournal, C_Container = C_Item, C_PetJournal, C_Container
 local C_ToyBox = C_ToyBox
 local C_Timer, GetTime = C_Timer, GetTime
 
 local L = ns.L
+local ItemButtons = ns.ItemButtons
 
 local module = ns.NewModule("AlreadyKnown", L.ALREADYKNOWN_DESC, {
     enabled = true,
@@ -69,17 +70,12 @@ local PET_ITEM_ID = 82800 -- the stand-in item for a caged pet in the auction ho
 -- Is it known ---------------------------------------------------------------------------------
 
 -- The pet line's "Collected (%d/%d)" as a pattern. Probe: the string is the client's.
-local petKnown
-if _G.ITEM_PET_KNOWN then
-    petKnown = gsub(_G.ITEM_PET_KNOWN, "%p", "%%%0")
-    petKnown = "^" .. gsub(petKnown, "%%%%d", "%%d+")
-end
+local petKnown = _G.ITEM_PET_KNOWN and "^" .. ns.Text.FormatPattern(_G.ITEM_PET_KNOWN)
 
 -- Nil while the game has no tooltip for the item yet (not cached), so that isn't taken for "no".
 local function tooltipKnown(link)
-    local data = C_TooltipInfo and C_TooltipInfo.GetHyperlink(link)
-    local lines = data and data.lines
-    if not lines or #lines == 0 then
+    local lines = ItemButtons.TooltipLines(link)
+    if not lines then
         return nil
     end
     local alreadyKnown = _G.ITEM_SPELL_KNOWN
@@ -159,10 +155,7 @@ local marks = setmetatable({}, { __mode = "k" }) -- icon texture -> { check = te
 
 -- Our own textures over the icon, never its color: Blizzard colors icons itself (red for an item
 -- you can't use), and putting a color back would wipe Blizzard's.
-local function overlay(icon, layer, sublevel)
-    return icon:GetParent():CreateTexture(nil, layer, nil, sublevel)
-end
-
+--
 -- Shows or clears our mark on an icon, as the Look option says. Does nothing for an icon that
 -- was never marked. `size` is the mark's size, chosen per place since the icons differ.
 local function setMark(icon, on, size)
@@ -181,13 +174,7 @@ local function setMark(icon, on, size)
     if on and style ~= "check" then
         local tint = state.tint
         if not tint then
-            -- Multiplies the icon (MOD blend), like a green vertex color, just above it.
-            local layer, sublevel = icon:GetDrawLayer()
-            sublevel = sublevel or 0
-            tint = overlay(icon, layer, sublevel < 7 and sublevel + 1 or 7)
-            tint:SetColorTexture(TINT[1], TINT[2], TINT[3])
-            tint:SetBlendMode("MOD")
-            tint:SetAllPoints(icon)
+            tint = ItemButtons.Tint(icon, TINT)
             state.tint = tint
         end
         tint:Show()
@@ -197,7 +184,7 @@ local function setMark(icon, on, size)
     if on and style ~= "tint" then
         local check = state.check
         if not check then
-            check = overlay(icon, "OVERLAY", 7)
+            check = icon:GetParent():CreateTexture(nil, "OVERLAY", nil, 7)
             check:SetTexture(CHECK_TEXTURE)
             check:SetPoint("BOTTOMLEFT", icon, "BOTTOMLEFT", 1, 1)
             state.check = check
@@ -217,28 +204,17 @@ end
 
 -- Merchants -------------------------------------------------------------------------------------
 
-local function merchantIcon(i)
-    local button = _G["MerchantItem" .. i .. "ItemButton"]
-    return button and (button.icon or _G["MerchantItem" .. i .. "ItemButtonIconTexture"])
-end
-
 local function updateMerchant()
-    local frame = _G.MerchantFrame
-    if not (frame and _G.GetMerchantItemLink) then
-        return
-    end
-    local perPage = _G.MERCHANT_ITEMS_PER_PAGE or 10
     local on = module.db.merchant
-    for i = 1, perPage do
-        local index = ((frame.page or 1) - 1) * perPage + i
-        setMark(merchantIcon(i), on and itemKnown(_G.GetMerchantItemLink(index)), 16)
-    end
+    ItemButtons.EachMerchantItem(function(icon, index)
+        setMark(icon, on and itemKnown(_G.GetMerchantItemLink(index)), 16)
+    end)
 end
 
 -- The buyback tab reuses the same buttons.
 local function clearMerchant()
     for i = 1, _G.MERCHANT_ITEMS_PER_PAGE or 10 do
-        setMark(merchantIcon(i), false)
+        setMark(ItemButtons.MerchantIcon(i), false)
     end
 end
 
@@ -283,28 +259,16 @@ end
 
 -- Bags ------------------------------------------------------------------------------------------
 
-local function bagFrames()
-    local list = { _G.ContainerFrameCombinedBags }
-    for i = 1, _G.NUM_CONTAINER_FRAMES or 13 do
-        list[#list + 1] = _G["ContainerFrame" .. i]
-    end
-    return list
-end
-
 local function updateBag(frame)
-    if not frame.EnumerateValidItems then
-        return
-    end
     local on = module.db.bags
-    for _, button in frame:EnumerateValidItems() do
-        local bag = button.GetBagID and button:GetBagID() or button:GetParent():GetID()
-        local link = on and C_Container.GetContainerItemLink(bag, button:GetID())
-        setMark(button.icon or button.Icon, link and itemKnown(link), 14)
-    end
+    ItemButtons.EachBagButton(frame, function(_, icon, bag, slot)
+        local link = on and C_Container.GetContainerItemLink(bag, slot)
+        setMark(icon, link and itemKnown(link), 14)
+    end)
 end
 
 local function hookBags()
-    for _, frame in ipairs(bagFrames()) do
+    for _, frame in ipairs(ItemButtons.Frames()) do
         if type(frame.UpdateItems) == "function" then
             module:Hook(frame, "UpdateItems", updateBag)
             if frame:IsShown() then
@@ -395,7 +359,7 @@ local function refresh()
         updateMerchant()
     end
     updateAuction()
-    for _, frame in ipairs(bagFrames()) do
+    for _, frame in ipairs(ItemButtons.Frames()) do
         if frame:IsShown() then
             updateBag(frame)
         end
@@ -422,17 +386,11 @@ local function onItemInfo()
     end)
 end
 
-local function hookGlobal(name, fn)
-    if type(_G[name]) == "function" then
-        module:Hook(name, fn)
-    end
-end
-
 function module:OnEnable()
-    hookGlobal("MerchantFrame_UpdateMerchantInfo", updateMerchant)
-    hookGlobal("MerchantFrame_UpdateBuybackInfo", clearMerchant)
-    hookGlobal("InboxFrame_Update", updateInbox)
-    hookGlobal("OpenMail_Update", updateOpenMail)
+    self:Hook("MerchantFrame_UpdateMerchantInfo", updateMerchant)
+    self:Hook("MerchantFrame_UpdateBuybackInfo", clearMerchant)
+    self:Hook("InboxFrame_Update", updateInbox)
+    self:Hook("OpenMail_Update", updateOpenMail)
     hookBags()
     hookLoot()
     ns.AddOns.WhenLoaded("Blizzard_AuctionHouseUI", hookAuction)

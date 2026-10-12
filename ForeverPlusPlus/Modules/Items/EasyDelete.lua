@@ -31,7 +31,5 @@ local function onShow(which)
 end
 
 function module:OnEnable()
-    if StaticPopup_Show then
-        self:Hook("StaticPopup_Show", onShow)
-    end
+    self:Hook("StaticPopup_Show", onShow)
 end

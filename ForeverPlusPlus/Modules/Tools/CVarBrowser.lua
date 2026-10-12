@@ -11,7 +11,7 @@ local ipairs, pairs, type, sort = ipairs, pairs, type, table.sort
 local format, tostring = string.format, tostring
 local strlower, strfind, strtrim, tinsert = string.lower, string.find, strtrim, table.insert
 local CreateFrame, InCombatLockdown = CreateFrame, InCombatLockdown
-local C_CVar, C_Timer = C_CVar, C_Timer
+local C_CVar = C_CVar
 -- The console's command list. Forever (build 70009) has the global, like Retail; C_Console is a
 -- guess at a later rename.
 local getAllCommands = ConsoleGetAllCommands or (C_Console and C_Console.GetAllCommands)
@@ -48,7 +48,6 @@ local byKey = {} -- lowercase name -> entry in `all`
 -- the list's groups in order, Changed and All first: { key, label, has(entry, changed) }
 local groups
 local search, selected = "", nil -- the search text, and the selected group's key
-local listening = false
 local ui -- the page's parts, once built
 
 -- value, default, and flags ({ account, character, readOnly, secure }) for one CVar.
@@ -379,33 +378,9 @@ end
 -- Page -----------------------------------------------------------------------------------------
 
 -- CVAR_UPDATE comes in bursts (the game's Settings can change dozens at once), and each refresh
--- goes through every CVar, so a burst refreshes once, on the next frame.
-local refreshQueued = false
-
-local function queuedRefresh()
-    refreshQueued = false
-    refresh()
-end
-
-local function onCVarUpdate()
-    if not refreshQueued then
-        refreshQueued = true
-        C_Timer.After(0, queuedRefresh)
-    end
-end
-
--- Follows changes made anywhere (the game's own settings, other addons) while the page is open.
-local function listen(on)
-    if on == listening then
-        return
-    end
-    listening = on
-    if on then
-        ns.On("CVAR_UPDATE", onCVarUpdate)
-    else
-        ns.Off("CVAR_UPDATE", onCVarUpdate)
-    end
-end
+-- goes through every CVar, so a burst refreshes once, on the next frame. Listened to only while
+-- the page is open, to follow changes made anywhere (the game's own settings, other addons).
+local onCVarUpdate = ns.Frames.Coalesce(refresh)
 
 ---Draws the page the first time it's shown (called by Settings.lua).
 ---@param frame table the empty page
@@ -460,9 +435,14 @@ function module:BuildPage(frame)
         end
     end
 
-    frame:HookScript("OnShow", function() listen(true); refresh() end)
-    frame:HookScript("OnHide", function() listen(false) end)
-    listen(frame:IsShown())
+    frame:HookScript("OnShow", function()
+        ns.On("CVAR_UPDATE", onCVarUpdate)
+        refresh()
+    end)
+    frame:HookScript("OnHide", function() ns.Off("CVAR_UPDATE", onCVarUpdate) end)
+    if frame:IsShown() then
+        ns.On("CVAR_UPDATE", onCVarUpdate)
+    end
     choose(selected)
 end
 

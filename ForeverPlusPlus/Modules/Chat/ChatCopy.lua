@@ -210,7 +210,7 @@ end
 local function newButton()
     -- In the chat window's button frame, so it fades along with Blizzard's buttons.
     local b = CreateFrame("Button", nil, ChatFrame1.buttonFrame or ChatFrame1.ButtonFrame or UIParent)
-    local template = ChatFrameChannelButton or ChatFrameMenuButton
+    local template = Chat.Anchor()
     b:SetSize(template and template:GetWidth() or 32, template and template:GetHeight() or 32)
     -- The same button art as Blizzard's menu and channel buttons.
     b:SetNormalAtlas("chatframe-button-up")
@@ -267,32 +267,29 @@ end
 ---@param frame table
 local function linkStamps(frame)
     local format = stampFormat()
-    if not (format and frame.TransformMessages) then
+    if not format then
         return
     end
     local pattern = Chat.TimestampPattern(format)
-    frame:TransformMessages(function(message)
-        return ns.IsReadable(message) and type(message) == "string" and find(message, pattern) ~= nil
-    end, function(message, ...)
+    Chat.Transform(frame, function(message)
+        return find(message, pattern) ~= nil
+    end, function(message)
         local _, finish = find(message, pattern)
         -- The space after the stamp stays outside the link.
         local stamp, space = match(sub(message, 1, finish), "^(.-)(%s*)$")
         lastStamp = lastStamp + 1
         return "|H" .. LINK_PREFIX .. SESSION .. lastStamp .. "|h" .. stamp .. "|h" .. space
-            .. sub(message, finish + 1), ...
+            .. sub(message, finish + 1)
     end)
 end
 
 ---Puts every line of a chat window back the way Blizzard wrote it.
 ---@param frame table
 local function unlinkStamps(frame)
-    if not frame.TransformMessages then
-        return
-    end
-    frame:TransformMessages(function(message)
-        return ns.IsReadable(message) and type(message) == "string" and find(message, LINKED) ~= nil
-    end, function(message, ...)
-        return (gsub(message, LINKED, "%1", 1)), ...
+    Chat.Transform(frame, function(message)
+        return find(message, LINKED) ~= nil
+    end, function(message)
+        return (gsub(message, LINKED, "%1", 1))
     end)
 end
 
@@ -334,7 +331,7 @@ local function onStampClick(_, link, _, button, frame)
     for i = 1, frame:GetNumMessages() do
         local text = frame:GetMessageInfo(i)
         if ns.IsReadable(text) and type(text) == "string" and find(text, wanted, 1, true) == 1 then
-            ns.Prompt("CHATCOPY_LINE", L.CHATCOPY_STAMPS_PROMPT, Chat.Plain(text))
+            ns.Prompt("CHATCOPY_LINE", L.CHATCOPY_STAMPS_PROMPT, ns.Text.Plain(text))
             return
         end
     end
@@ -383,16 +380,13 @@ function module:OnEnable()
     Chat.AddButton(self.name, button, 20)
     updateStamps()
     -- A chat window added later.
-    self:On("UPDATE_CHAT_WINDOWS", function()
+    local function onWindows()
         if stampsOn then
             attach()
         end
-    end)
-    self:On("UPDATE_FLOATING_CHAT_WINDOWS", function()
-        if stampsOn then
-            attach()
-        end
-    end)
+    end
+    self:On("UPDATE_CHAT_WINDOWS", onWindows)
+    self:On("UPDATE_FLOATING_CHAT_WINDOWS", onWindows)
 end
 
 function module:OnDisable()

@@ -5,6 +5,21 @@ local _, ns = ...
 local StaticPopupDialogs, StaticPopup_Show, YES, NO = StaticPopupDialogs, StaticPopup_Show, YES, NO
 local CANCEL, ACCEPT, CLOSE = CANCEL, ACCEPT, CLOSE
 
+-- Shows our popup for `key`, made from `build()` the first time the key is used, so a key always
+-- asks the same question and does the same thing.
+local function show(key, build, data)
+    local which = "FOREVERPLUSPLUS_" .. key
+    if not StaticPopupDialogs[which] then
+        local dialog = build()
+        dialog.timeout = 0
+        dialog.whileDead = true
+        dialog.hideOnEscape = true
+        dialog.preferredIndex = 3 -- clear of the popups the game's own UI uses
+        StaticPopupDialogs[which] = dialog
+    end
+    StaticPopup_Show(which, nil, nil, data)
+end
+
 ---Asks the player to confirm, then calls `onAccept`. The same `key` always asks the same question
 ---and does the same thing: the popup is made the first time it's used.
 ---@param key string a name for this question, such as "AUCTIONPRICES_RESET"
@@ -16,22 +31,16 @@ function ns.Confirm(key, text, onAccept)
         onAccept()
         return
     end
-    local which = "FOREVERPLUSPLUS_" .. key
-    if not StaticPopupDialogs[which] then
-        StaticPopupDialogs[which] = {
+    show(key, function()
+        return {
             text = text,
             button1 = YES,
             button2 = NO,
             OnAccept = function()
                 onAccept()
             end,
-            timeout = 0,
-            whileDead = true,
-            hideOnEscape = true,
-            preferredIndex = 3, -- clear of the popups the game's own UI uses
         }
-    end
-    StaticPopup_Show(which)
+    end)
 end
 
 ---Asks the player to pick one of two things or cancel, laid out like Blizzard's own Defaults popup
@@ -48,9 +57,8 @@ function ns.ConfirmChoice(key, text, first, onFirst, second, onSecond)
     if not (StaticPopupDialogs and StaticPopup_Show) then
         return
     end
-    local which = "FOREVERPLUSPLUS_" .. key
-    if not StaticPopupDialogs[which] then
-        StaticPopupDialogs[which] = {
+    show(key, function()
+        return {
             text = text,
             button1 = first,
             button2 = CANCEL,
@@ -61,13 +69,8 @@ function ns.ConfirmChoice(key, text, first, onFirst, second, onSecond)
             OnAlt = function()
                 onSecond()
             end,
-            timeout = 0,
-            whileDead = true,
-            hideOnEscape = true,
-            preferredIndex = 3,
         }
-    end
-    StaticPopup_Show(which)
+    end)
 end
 
 -- The popup's text box. Probe: GetEditBox is Mainline's; older popups had a field.
@@ -86,9 +89,8 @@ function ns.Prompt(key, text, initial, onAccept)
     if not (StaticPopupDialogs and StaticPopup_Show) then
         return
     end
-    local which = "FOREVERPLUSPLUS_" .. key
-    if not StaticPopupDialogs[which] then
-        StaticPopupDialogs[which] = {
+    show(key, function()
+        return {
             text = text,
             button1 = onAccept and ACCEPT or CLOSE,
             button2 = onAccept and CANCEL or nil,
@@ -117,11 +119,6 @@ function ns.Prompt(key, text, initial, onAccept)
             EditBoxOnEscapePressed = function(box)
                 box:GetParent():Hide()
             end,
-            timeout = 0,
-            whileDead = true,
-            hideOnEscape = true,
-            preferredIndex = 3,
         }
-    end
-    StaticPopup_Show(which, nil, nil, { initial = initial, onAccept = onAccept })
+    end, { initial = initial, onAccept = onAccept })
 end

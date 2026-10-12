@@ -6,8 +6,8 @@
 -- back at once.
 local _, ns = ...
 
-local _G, ipairs, type, pcall, sort, lower, gsub, find =
-    _G, ipairs, type, pcall, table.sort, string.lower, string.gsub, string.find
+local _G, ipairs, type, pcall, sort, lower, find =
+    _G, ipairs, type, pcall, table.sort, string.lower, string.find
 local C_AddOns, UnitGUID, CreateTreeDataProvider, geterrorhandler =
     C_AddOns, UnitGUID, CreateTreeDataProvider, geterrorhandler
 
@@ -36,9 +36,7 @@ local ADDON = "Blizzard_AddOnList"
 local busy = false
 
 local function plain(text)
-    local stripped = gsub(text or "", "|c%x%x%x%x%x%x%x%x", "")
-    stripped = gsub(stripped, "|r", "")
-    return lower(stripped)
+    return lower(ns.Text.Plain(text or ""))
 end
 
 local function addList()
@@ -202,11 +200,7 @@ local function start()
 end
 
 function module:OnEnable()
-    if addList() then
-        start()
-    else
-        ns.AddOns.WhenLoaded(ADDON, start)
-    end
+    ns.AddOns.WhenLoaded(ADDON, start)
 end
 
 function module:OnDisable()

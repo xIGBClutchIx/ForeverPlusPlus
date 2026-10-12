@@ -13,6 +13,10 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 - **Waylaid Crates**: Item Tooltips' Waylaid Crate Costs option moved here as Bundle Costs, keeping your choice. It still takes its prices from Item Tooltips' Auction Prices.
 
+### Fixed
+
+- **Profession Tooltips**: recolors the "Requires" line on nodes and creatures in languages that number its parts (such as "%1$s"), which it missed before.
+
 ## 0.8.4 (2026-10-11)
 
 ### Fixed

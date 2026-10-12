@@ -79,6 +79,7 @@ eq(ns.Colors.Faction("H"), ns.Colors.Faction("H"), "Faction stable")
 eq(ns.Colors.Faction("A").b > ns.Colors.Faction("A").r, true, "Alliance is blue")
 eq(ns.Colors.Faction("H").r > ns.Colors.Faction("H").b, true, "Horde is red")
 eq(ns.Colors.Faction("?"), ns.Colors.Faction(nil), "unknown side is neutral")
+eq(ns.Colors.ClassToken(nil), nil, "no class token, no color")
 
 player.level = 10 -- below the range: colored by its low end
 eq(ns.Colors.LevelRange(20, 30).r, 20, "range above you uses low")
@@ -111,6 +112,22 @@ eq(ns.Text.Ago(60), "1m ago", "ago minute")
 eq(ns.Text.Ago(3599), "59m ago", "ago last minute")
 eq(ns.Text.Ago(3600), "1h ago", "ago hour")
 eq(ns.Text.Ago(86400 * 2 + 5), "2d ago", "ago days")
+eq(ns.Text.Plain("|cffff0000red|r text"), "red text", "plain color")
+eq(ns.Text.Plain("|cnCOLOR:named|r"), "named", "plain named color")
+eq(ns.Text.Plain("|Hplayer:Bob:1|h[Bob]|h: hi"), "[Bob]: hi", "plain link keeps its text")
+eq(ns.Text.Plain("a |TInterface\\Icon:0|t b |A:Raid:14:14|a c"), "a  b  c", "plain textures")
+eq(ns.Text.Plain("100||"), "100|", "plain escaped pipe")
+
+local function matches(formatString, text, capture)
+    return text:match("^" .. ns.Text.FormatPattern(formatString, capture) .. "$")
+end
+eq(matches("Requires %s (%d)", "Requires Mining (75)", true), "Mining", "format pattern captures")
+eq(select(2, matches("Requires %s (%d)", "Requires Mining (75)", true)), "75",
+    "format pattern captures numbers")
+eq(matches("%2$s from %1$s.", "Axe from Bob.", true), "Axe", "format pattern reordered")
+eq(matches("Collected (%d/%d)", "Collected (1/3)") ~= nil, true, "format pattern without captures")
+eq(matches("Collected (%d/%d)", "Collected (a/3)"), nil, "format pattern %d needs digits")
+eq(matches("Press %s to submit", "Press [F1] to submit") ~= nil, true, "format pattern escapes")
 
 -- Secret ----------------------------------------------------------------------------------------
 
@@ -187,12 +204,6 @@ eq(Instances.Levels(Instances.byKey.mc, true), "60", "compact single")
 eq(Instances.Icon(Instances.byKey.mc, 14), "|A:Raid:14:14|a", "raid icon")
 eq(Instances.Icon(Instances.byKey.brd, 14), "|A:Dungeon:14:14|a", "dungeon icon")
 
--- Chat.Plain
-eq(ns.Chat.Plain("|cffff0000red|r text"), "red text", "plain color")
-eq(ns.Chat.Plain("|cnCOLOR:named|r"), "named", "plain named color")
-eq(ns.Chat.Plain("|Hplayer:Bob:1|h[Bob]|h: hi"), "[Bob]: hi", "plain link keeps its text")
-eq(ns.Chat.Plain("a |TInterface\\Icon:0|t b |A:Raid:14:14|a c"), "a  b  c", "plain textures")
-eq(ns.Chat.Plain("100||"), "100|", "plain escaped pipe")
 
 -- Chat.Colored, Chat.Uncolor, and offsets between them
 local Chat = ns.Chat

@@ -19,7 +19,7 @@
 -- Labels are kept per Blizzard unit frame and shared by every module, since plates are pooled.
 local _, ns = ...
 
-local pairs, ipairs, setmetatable, floor = pairs, ipairs, setmetatable, math.floor
+local pairs, ipairs, setmetatable, unpack, floor = pairs, ipairs, setmetatable, unpack, math.floor
 local CreateFrame, UnitLevel = CreateFrame, UnitLevel
 local UnitGroupRolesAssigned, GetTexCoordsForRoleSmallCircle =
     UnitGroupRolesAssigned, GetTexCoordsForRoleSmallCircle
@@ -101,13 +101,7 @@ end
 -- The first of an art's atlases this client has (probed: atlas names change between builds).
 local function findAtlas(art)
     if art.atlas == nil then
-        art.atlas = false
-        for _, name in ipairs(art.atlases) do
-            if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) then
-                art.atlas = name
-                break
-            end
-        end
+        art.atlas = ns.Frames.FirstAtlas(unpack(art.atlases)) or false
     end
     return art.atlas
 end
@@ -126,17 +120,16 @@ local function setArt(icon, key)
         else
             icon:SetTexture(nil)
         end
+        icon:SetTexCoord(0, 1, 0, 1)
     else
         icon:SetTexture(art.file)
-    end
-    if art.atlases then
-        icon:SetTexCoord(0, 1, 0, 1)
-    elseif art.role and GetTexCoordsForRoleSmallCircle then
-        icon:SetTexCoord(GetTexCoordsForRoleSmallCircle(art.role))
-    elseif art.round then
-        icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-    else
-        icon:SetTexCoord(0, 1, 0, 1)
+        if art.role and GetTexCoordsForRoleSmallCircle then
+            icon:SetTexCoord(GetTexCoordsForRoleSmallCircle(art.role))
+        elseif art.round then
+            icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+        else
+            icon:SetTexCoord(0, 1, 0, 1)
+        end
     end
     if art.round and not icon.masked then
         icon:AddMaskTexture(icon.mask)
@@ -383,17 +376,22 @@ local function placeLevel(label, record, unit, where)
     return width
 end
 
+-- Sets a row frame to `target`'s height and the label's width.
+local function span(row, target, label)
+    row:ClearAllPoints()
+    row:SetPoint("TOP", target, "TOP")
+    row:SetPoint("BOTTOM", target, "BOTTOM")
+    row:SetPoint("LEFT", label, "LEFT")
+    row:SetPoint("RIGHT", label, "RIGHT")
+end
+
 -- The row our label is centered on: the bar's height, but the unit frame's width (the label covers
 -- it), since the bar sits left of center with the level badge on its right end. Never anchor to
 -- the nameplate base frame (NamePlateN) itself: on 12.x that fails with "anchor family
 -- connection" and also breaks Blizzard's own nameplate anchors.
 local function placeRow(label, record, style)
     local row = label.row
-    row:ClearAllPoints()
-    row:SetPoint("TOP", record.container, "TOP")
-    row:SetPoint("BOTTOM", record.container, "BOTTOM")
-    row:SetPoint("LEFT", label, "LEFT")
-    row:SetPoint("RIGHT", label, "RIGHT")
+    span(row, record.container, label)
     -- Debug: a thin line through the plate's center, to check the centering in game.
     label.centerLine:SetShown(style.db.centerLine)
     return row
@@ -423,11 +421,7 @@ local function placeSubtitle(label, record, unit, style, shift)
     if Nameplates.IsCastBarShown(castBar) then
         -- Centered on the unit like the row, at the cast bar's height.
         local castRow = label.castRow
-        castRow:ClearAllPoints()
-        castRow:SetPoint("TOP", castBar, "TOP")
-        castRow:SetPoint("BOTTOM", castBar, "BOTTOM")
-        castRow:SetPoint("LEFT", label, "LEFT")
-        castRow:SetPoint("RIGHT", label, "RIGHT")
+        span(castRow, castBar, label)
         label.subtitle:SetPoint("TOP", castRow, "BOTTOM", 0, -1)
         label.barSubtitle:SetPoint("TOP", castRow, "BOTTOM", 0, -1)
     else
@@ -465,11 +459,7 @@ function PlateLabel.Layout(label, record, unit, style)
     label.barName:SetTextColor((style.BarNameColor or style.NameColor)(unit))
     local barIconsWidth = placeIcons(label.barIcons, label.barName, iconsLeft, fontSize, unit, style)
     local barRow = label.barRow
-    barRow:ClearAllPoints()
-    barRow:SetPoint("TOP", record.container, "TOP")
-    barRow:SetPoint("BOTTOM", record.container, "BOTTOM")
-    barRow:SetPoint("LEFT", label, "LEFT")
-    barRow:SetPoint("RIGHT", label, "RIGHT")
+    span(barRow, record.container, label)
     label.barName:ClearAllPoints()
     label.barNameShift = (iconsLeft and 1 or -1) * barIconsWidth / 2
     label.barName:SetPoint("BOTTOM", barRow, "TOP", label.barNameShift, 2)

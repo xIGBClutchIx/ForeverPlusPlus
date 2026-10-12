@@ -23,19 +23,7 @@ module.title = L.PLAYERPLATES_TITLE
 module.category = "nameplates"
 
 -- General first, then the name, the guild line, and the icons beside the name.
-module.options = {
-    {
-        key = "barWhenHurt", name = L.PLATES_BAR_WHEN_HURT, description = L.PLAYERPLATES_BAR_WHEN_HURT_DESC,
-        section = L.PLATES_SECTION_GENERAL,
-    },
-    {
-        key = "level", name = L.PLATES_LEVEL, description = L.PLATES_LEVEL_DESC,
-        choices = ns.PlateLabel.LEVEL_CHOICES, section = L.PLATES_SECTION_GENERAL,
-    },
-    {
-        key = "buffs", name = L.PLATES_BUFFS, description = L.PLATES_BUFFS_DESC,
-        choices = ns.PlateLabel.BUFF_CHOICES, section = L.PLATES_SECTION_GENERAL,
-    },
+module.options = ns.FriendlyPlates.Options(L.PLAYERPLATES_BAR_WHEN_HURT_DESC, {
     {
         key = "nameColor", name = L.PLATES_NAME_COLOR, description = L.PLAYERPLATES_NAME_COLOR_DESC,
         choices = { { "class", L.PLAYERPLATES_NAME_COLOR_CLASS }, { "white", L.PLATES_COLOR_WHITE } },
@@ -98,14 +86,11 @@ module.options = {
         key = "centerLine", name = L.PLATES_CENTER_LINE_PLAYER, description = L.PLATES_CENTER_LINE_DESC,
         debug = true, section = L.DEBUG_SECTION_TESTING,
     },
-}
+})
 
 -- Guild Name Color choices. Highlighted guildmates get guild chat's green, or white when every
 -- guild is already green, so they still stand out.
-local GUILD_COLORS = {
-    gray = ns.Colors.GRAY,
-    green = ns.Colors.GUILD_GREEN,
-}
+local GUILD_COLORS = ns.FriendlyPlates.SUBTITLE_COLORS
 local GUILDMATE_COLORS = {
     gray = GUILD_COLORS.green,
     green = { 0.9, 0.9, 0.9 },

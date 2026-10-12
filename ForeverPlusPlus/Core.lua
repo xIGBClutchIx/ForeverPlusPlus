@@ -266,22 +266,17 @@ end
 
 -- Hooks once per module, target, method and function, so `OnEnable` can ask for them every time
 -- it runs. The hook itself can't come off, so it does nothing while the module is off.
+local function child(t, key)
+    local value = t[key]
+    if not value then
+        value = {}
+        t[key] = value
+    end
+    return value
+end
+
 local function hookOnce(module, target, method, fn, install)
-    local hooked = module.hooked
-    if not hooked then
-        hooked = {}
-        module.hooked = hooked
-    end
-    local byMethod = hooked[target]
-    if not byMethod then
-        byMethod = {}
-        hooked[target] = byMethod
-    end
-    local byFn = byMethod[method]
-    if not byFn then
-        byFn = {}
-        byMethod[method] = byFn
-    end
+    local byFn = child(child(child(module, "hooked"), target), method)
     if not byFn[fn] then
         byFn[fn] = true
         install(function(...)
@@ -296,12 +291,16 @@ end
 ---while the module is on, and hooks it just once however often this is called. Use it in
 ---`OnEnable` instead of a `hooked` flag: `module:Hook("ToggleSheath", fn)` for a global function,
 ---or `module:Hook(object, "Method", fn)`. `fn` gets the same arguments the hooked function did.
----@param target table|string an object, or the name of a global function
+---Does nothing when the object or function isn't on this client, so callers needn't probe first.
+---@param target table|string|nil an object, or the name of a global function
 ---@param method string|function the method's name, or `fn` when `target` is a global's name
 ---@param fn? function
 function Module:Hook(target, method, fn)
     if type(target) == "string" then
         target, method, fn = _G, target, method
+    end
+    if type(target) ~= "table" or type(target[method]) ~= "function" then
+        return
     end
     hookOnce(self, target, method, fn, function(hook)
         hooksecurefunc(target, method, hook)
@@ -309,13 +308,30 @@ function Module:Hook(target, method, fn)
 end
 
 ---Like `module:Hook`, for a frame's script: `frame:HookScript(script, fn)` that runs only while
----the module is on, hooked once.
----@param frame table
+---the module is on, hooked once. Does nothing when the frame isn't there.
+---@param frame table?
 ---@param script string such as "OnEvent"
 ---@param fn function
 function Module:HookScript(frame, script, fn)
+    if not frame then
+        return
+    end
     hookOnce(self, frame, "script:" .. script, fn, function(hook)
         frame:HookScript(script, hook)
+    end)
+end
+
+---Like `module:Hook`, for every tooltip of one kind (`TooltipDataProcessor.AddTooltipPostCall`):
+---`fn(tooltip, data)` runs after the game fills one in, while the module is on. Does nothing on a
+---client without TooltipDataProcessor.
+---@param kind any such as Enum.TooltipDataType.Item, or TooltipDataProcessor.AllTypes
+---@param fn function
+function Module:TooltipPostCall(kind, fn)
+    if not (TooltipDataProcessor and TooltipDataProcessor.AddTooltipPostCall and kind) then
+        return
+    end
+    hookOnce(self, TooltipDataProcessor, kind, fn, function(hook)
+        TooltipDataProcessor.AddTooltipPostCall(kind, hook)
     end)
 end
 
@@ -484,7 +500,10 @@ function ns.OnWelcomed(fn)
     welcomed[#welcomed + 1] = fn
 end
 
-local function setWelcome(pending)
+---Marks the About page seen (false, from Settings.lua when it's first shown), or offers it again
+---as on a fresh install, keeping every setting (true, from the Debug page).
+---@param pending boolean
+function ns.SetWelcome(pending)
     if ns.WelcomePending() == pending then
         return
     end
@@ -494,14 +513,26 @@ local function setWelcome(pending)
     end
 end
 
----Marks the About page seen (Settings.lua, when it's first shown).
-function ns.Welcomed()
-    setWelcome(false)
+---A field from the TOC, such as "Notes", or "" when it has none.
+---@param field string
+---@return string
+function ns.Metadata(field)
+    local get = (C_AddOns and C_AddOns.GetAddOnMetadata) or GetAddOnMetadata
+    return get and get(addonName, field) or ""
 end
 
----Offers the About page again as on a fresh install, keeping every setting (the Debug page).
-function ns.ResetWelcome()
-    setWelcome(true)
+---The modules the player has on, by their internal names (what the code and issues call them),
+---leaving out tools that are always on.
+---@return string[]
+function ns.ModulesOn()
+    local names = {}
+    for _, name in ipairs(ns.order) do
+        local module = ns.modules[name]
+        if module.enabled and not module.alwaysOn then
+            names[#names + 1] = name
+        end
+    end
+    return names
 end
 
 ---Loads the saved settings and enables every module that is on (called once, at PLAYER_LOGIN).
@@ -513,8 +544,7 @@ function ns.Start()
     -- clicked since was seen in; Settings.lua marks what's added or changed after them as new. A
     -- fresh install has nothing to catch up on; saved settings from before this was kept have
     -- seen none of them.
-    local get = (C_AddOns and C_AddOns.GetAddOnMetadata) or GetAddOnMetadata
-    ns.version = get and get(addonName, "Version") or ""
+    ns.version = ns.Metadata("Version")
     if type(ns.db.seenVersion) ~= "string" then
         ns.db.seenVersion = next(ns.db.modules) == nil and ns.version or "0"
     end
@@ -640,11 +670,6 @@ function ns.ApplyPreset(enable, options)
     end
 end
 
----Puts every module back to its defaults (Recommended Defaults in the Defaults popup).
-function ns.ApplyDefaults()
-    ns.ApplyPreset()
-end
-
 ---Defaults plus the modules the developer turns on (Developer's Defaults in the Defaults popup).
 function ns.ApplyDeveloperDefaults()
     ns.ApplyPreset(developerEnables, developerOptions)
@@ -744,6 +769,9 @@ local function set(rest, flip)
     value = value and strtrim(value):lower()
     if key:lower() == "enabled" then
         local on = booleans[value or ""]
+        if on == nil and flip and not value then
+            on = not module.db.enabled
+        end
         if on == nil then
             ns.Print(format(L.MODULE_STATE_ALLOWED, module.name,
                 module.db.enabled and L.ON or L.OFF))
@@ -793,17 +821,9 @@ SlashCmdList.FOREVERPLUSPLUS = function(message)
     command = (command or ""):lower()
     if commands[command] then
         commands[command].fn(rest or "")
-    elseif command == "toggle" and rest and rest:find(" ") then
-        set(rest, true) -- /fpp toggle <module> <option> [value]
     elseif command == "toggle" and rest then
-        local module = findModule(rest)
-        if not module then
-            ns.Print(format(L.NO_MODULE, rest))
-            return
-        end
-        ns.SetEnabled(module.name, not module.db.enabled)
-        ns.RefreshSetting(module.name)
-        ns.Print(format(L.MODULE_STATE, module.name, module.db.enabled and L.ON or L.OFF))
+        -- /fpp toggle <module> [option] [value]: the module itself when no option is named.
+        set(rest:find(" ") and rest or rest .. " enabled", true)
     elseif command == "set" then
         set(rest)
     elseif command == "options" and rest then

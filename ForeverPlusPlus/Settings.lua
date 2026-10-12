@@ -32,9 +32,10 @@ local strlower, concat = string.lower, table.concat
 local min, max, pcall = math.min, math.max, pcall
 local InCombatLockdown, CreateFrame, GetBuildInfo = InCombatLockdown, CreateFrame, GetBuildInfo
 local wipe = wipe
-local C_AddOns, GetAddOnMetadata, GameTooltip = C_AddOns, GetAddOnMetadata, GameTooltip
-local C_XMLUtil, C_Texture, C_Timer = C_XMLUtil, C_Texture, C_Timer
+local GameTooltip = GameTooltip
+local C_Timer = C_Timer
 local L = ns.L
+local hasTemplate, hasAtlas = ns.Frames.HasTemplate, ns.Frames.HasAtlas
 
 local settings = {} -- module name -> its Blizzard setting objects, to refresh after /fpp changes
 local modulesCategory -- the Modules page, the top Forever++ entry, for /fpp
@@ -94,16 +95,6 @@ function ns.AddPageTitle(frame, text)
     local divider = frame:CreateTexture(nil, "ARTWORK")
     divider:SetAtlas("Options_HorizontalDivider", true)
     divider:SetPoint("TOP", 0, -50)
-end
-
--- Probe: a Blizzard template (Mainline's) this client has.
-local function hasTemplate(name)
-    return C_XMLUtil and C_XMLUtil.GetTemplateInfo and C_XMLUtil.GetTemplateInfo(name) and true
-        or false
-end
-
-local function hasAtlas(name)
-    return C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) and true or false
 end
 
 -- A scrolling area for a drawn page. Probe: fall back to the older template if Mainline's (the
@@ -168,7 +159,7 @@ end
 -- Developer's Defaults | Cancel | Recommended Defaults.
 local function askDefaults()
     ns.ConfirmChoice("DEFAULTS_CHOICE", L.DEFAULTS_ASK, L.DEFAULTS_DEVELOPER,
-        ns.ApplyDeveloperDefaults, L.DEFAULTS_RECOMMENDED, ns.ApplyDefaults)
+        ns.ApplyDeveloperDefaults, L.DEFAULTS_RECOMMENDED, function() ns.ApplyPreset() end)
 end
 
 -- NEW labels ----------------------------------------------------------------------------------
@@ -188,7 +179,7 @@ local newRows = {} -- module name (a new module), module table (one with a marke
 local newOrder -- the modules to mark, once trackNew has run
 local selected -- the module shown on the right of the Modules page
 local viewing -- the module the player is looking at, to call seen once they move on
-local refreshAll -- redraws the Modules page, once it's built
+local refreshAll -- redraws the Modules page (defined with it, below)
 
 -- Probe: NewFeatureLabelTemplate is Mainline's (LibUIDropDownMenu uses it on Forever).
 local function canLabel()
@@ -264,11 +255,6 @@ local function newMark(parent, text, room, key, other)
     end
 end
 
--- Whether a module has an option the player hasn't seen yet.
-local function hasNewOption(module)
-    return newRows[module] and true or false
-end
-
 -- Marks what's new in `newOrder`'s modules, afresh. With nothing marked, everything up to this
 -- version has been seen, so that's saved instead of each module.
 local function markNew()
@@ -303,9 +289,7 @@ local function moveOn(name)
     if module and (newRows[left] or newRows[module]) and not ns.db.showTags then
         ns.db.seenModules[left] = ns.version
         markNew()
-        if refreshAll then
-            refreshAll()
-        end
+        refreshAll()
     end
 end
 
@@ -379,20 +363,12 @@ end
 
 -- The Blizzard setting behind one of a module's options, read and written through the module.
 local function optionSetting(category, module, option)
-    local varType = Settings.VarType.Boolean
-    if option.choices then
-        varType = Settings.VarType.String
-    elseif option.min then
-        varType = Settings.VarType.Number
-    end
+    local varType = option.choices and Settings.VarType.String or Settings.VarType.Boolean
     local setting = Settings.RegisterProxySetting(category,
         format("ForeverPlusPlus_%s_%s", module.name, option.key), varType,
         option.name, module.defaults[option.key],
         function() return module.db[option.key] end,
         function(value)
-            if option.min then
-                value = ns.SliderValue(option, value)
-            end
             change(function()
                 ns.SetOption(module.name, option.key, value)
             end)
@@ -401,80 +377,28 @@ local function optionSetting(category, module, option)
     return setting
 end
 
-local function optionByKey(module, key)
-    for _, option in ipairs(module.options or {}) do
-        if option.key == key then
-            return option
-        end
-    end
-end
-
--- Whether a checkbox and its slider (`option.slider`) can share a row, like Blizzard's own. Probe:
--- the combined row is Mainline's; without it the slider gets a row of its own under the checkbox.
-local function canCombine()
-    return CreateSettingsCheckboxSliderInitializer ~= nil and Settings.CreateSliderOptions ~= nil
-end
-
--- A checkbox option and its slider option in one row. Rows under the checkbox (`requires`) follow
--- the checkbox.
-local function addCheckboxSlider(category, layout, module, option, slider)
-    local checkbox = optionSetting(category, module, option)
-    local initializer = CreateSettingsCheckboxSliderInitializer(checkbox, option.name,
-        option.description, optionSetting(category, module, slider), sliderOptions(slider),
-        slider.name, slider.description)
-    initializer.GetSetting = function() return checkbox end
-    layout:AddInitializer(initializer)
-    return initializer
-end
-
--- A debug option: a checkbox, a dropdown when it lists `choices`, or a slider when it has `min`
--- and `max` (in one row with the checkbox that names it as its `slider`, where it can), greyed
--- out while the module is off (or under the checkbox option named by `requires`, greyed out while
--- that is off). `added` maps the module's option keys to their rows, for `requires`.
-local function addOption(category, layout, module, option, added)
-    local choices, slider = option.choices, option.min
-    if added[option.key] then
-        return -- a slider already in its checkbox's row
-    end
-    if choices and not (Settings.CreateDropdown and Settings.CreateControlTextContainer) then
-        return -- Probe: dropdowns are Mainline's; leave the option at its default without one.
-    end
-    if slider and not (Settings.CreateSlider and Settings.CreateSliderOptions) then
-        return -- Probe: sliders are Mainline's; ArcaneWizardLibrary uses them on Forever.
-    end
+-- A debug option: a checkbox, or a dropdown when it lists `choices` (debug options are only
+-- these), greyed out while the module is off.
+local function addOption(category, module, option)
+    local choices = option.choices
     local initializer
-    local rowSlider = option.slider and layout and canCombine()
-        and optionByKey(module, option.slider)
-    if rowSlider then
-        initializer = addCheckboxSlider(category, layout, module, option, rowSlider)
-        added[rowSlider.key] = initializer
-    elseif slider then
-        local setting = optionSetting(category, module, option)
-        initializer = Settings.CreateSlider(category, setting, sliderOptions(option),
-            option.description)
-    elseif choices then
-        local setting = optionSetting(category, module, option)
-        initializer = Settings.CreateDropdown(category, setting, function()
-            local container = Settings.CreateControlTextContainer()
-            for _, choice in ipairs(choices) do
-                container:Add(choice[1], choice[2])
-            end
-            return container:GetData()
-        end, option.description)
+    if choices then
+        if not (Settings.CreateDropdown and Settings.CreateControlTextContainer) then
+            return -- Probe: dropdowns are Mainline's; leave the option at its default without one.
+        end
+        initializer = Settings.CreateDropdown(category, optionSetting(category, module, option),
+            function()
+                local container = Settings.CreateControlTextContainer()
+                for _, choice in ipairs(choices) do
+                    container:Add(choice[1], choice[2])
+                end
+                return container:GetData()
+            end, option.description)
     else
         initializer = Settings.CreateCheckbox(category, optionSetting(category, module, option),
             option.description)
     end
-    local requires = option.requires and added[option.requires]
-    if requires and initializer and initializer.SetParentInitializer then
-        initializer:SetParentInitializer(requires, function()
-            local value = module.db[option.requires]
-            return module.db.enabled and value and value ~= "off" -- a checkbox, or a dropdown
-        end)
-    else
-        greyWhenOff(initializer, module)
-    end
-    added[option.key] = initializer
+    greyWhenOff(initializer, module)
 end
 
 local function addHeader(layout, text)
@@ -513,11 +437,11 @@ local function hasDebugRows(module, section)
 end
 
 -- A module's debug options in `section` (nil: in none of the Debug page's), in the order it lists
--- them. `added` maps its option keys to their rows across sections, for `requires`.
-local function addDebugOptions(category, layout, module, section, added)
+-- them.
+local function addDebugOptions(category, module, section)
     for _, option in ipairs(module.options or {}) do
         if option.debug and debugSection(option) == section then
-            addOption(category, layout, module, option, added)
+            addOption(category, module, option)
         end
     end
 end
@@ -533,9 +457,7 @@ local function addShowTags(category)
             change(function()
                 ns.db.showTags = value or nil
                 markNew()
-                if refreshAll then
-                    refreshAll()
-                end
+                refreshAll()
             end)
         end)
     Settings.CreateCheckbox(category, setting, L.SETTINGS_SHOW_TAGS_DESC)
@@ -831,18 +753,25 @@ local function newDropdown(parent, module, option, width)
     return dropdown
 end
 
--- Moves `scroll` so `frame`, in its `content`, is at the top. After a frame, once the new layout's
--- sizes are known.
-local function scrollTo(scroll, content, frame)
+-- Moves `scroll` so `frame`, in its `content`, is at the top. With `onlyIfHidden`, only when the
+-- frame is below what shows. After a frame, once the new layout's sizes are known.
+local function scrollTo(scroll, content, frame, onlyIfHidden)
     if not (C_Timer and frame) then
         return
     end
     C_Timer.After(0, function()
         local top, inner = content:GetTop(), frame:GetTop()
-        if top and inner then
-            local range = scroll:GetVerticalScrollRange() or 0
-            scroll:SetVerticalScroll(min(max(top - inner - 4, 0), range))
+        if not (top and inner) then
+            return
         end
+        if onlyIfHidden then
+            local bottom, height = frame:GetBottom(), scroll:GetHeight()
+            if not (bottom and height and top - bottom > scroll:GetVerticalScroll() + height) then
+                return
+            end
+        end
+        local range = scroll:GetVerticalScrollRange() or 0
+        scroll:SetVerticalScroll(min(max(top - inner - 4, 0), range))
     end)
 end
 
@@ -968,6 +897,17 @@ local function newListButton(list, isSelected)
     return row
 end
 
+-- A split page's list row in grey for when it lists nothing, with its `text` set by the page.
+local function newEmptyRow(list, width)
+    local empty = CreateFrame("Frame", nil, list)
+    empty:SetSize(width, 40)
+    empty.text = empty:CreateFontString(nil, "OVERLAY", "GameFontDisable")
+    empty.text:SetPoint("TOPLEFT", 2, -4)
+    empty.text:SetWidth(width - 4)
+    empty.text:SetJustifyH("LEFT")
+    return empty
+end
+
 -- The selected module's rows -------------------------------------------------------------------
 -- A view is a stack of the module's rows: a name on the left and its control after. Its
 -- `updates` put its controls back to what's saved.
@@ -1042,24 +982,28 @@ local function addOptionRow(view, module, option, byKey, done)
         row:SetHeight(max(ROW_HEIGHT, label:GetStringHeight() + 8))
     end
     local room = view:GetWidth() - CONTROL_LEFT
-    if pair and pair.min then
-        -- A checkbox and its slider in one row, the slider greyed while the checkbox is off.
-        done[pair.key] = true
+    local paired = pair and pair.min
+    if paired or not (option.min or option.choices) then
         local box = newCheckbox(row, 30, function(checked) setOption(module, option, checked) end)
         box:SetPoint("LEFT", CONTROL_LEFT, 0)
-        local slider = newSlider(row, module, pair, min(200, room - 50) - 36)
-        if slider then
-            slider:SetPoint("LEFT", box, "RIGHT", 6, 0)
-        end
         updates[#updates + 1] = function()
             box:SetChecked(module.db[option.key] and true or false)
             box:SetEnabled(on())
-            if slider then
+        end
+        addTooltip(row, option.name, option.description, box)
+        if not paired then
+            return
+        end
+        -- Its slider in the same row, greyed while the checkbox is off.
+        done[pair.key] = true
+        local slider = newSlider(row, module, pair, min(200, room - 50) - 36)
+        if slider then
+            slider:SetPoint("LEFT", box, "RIGHT", 6, 0)
+            updates[#updates + 1] = function()
                 slider:SetValue(module.db[pair.key])
                 slider:SetEnabled(on() and module.db[option.key] and true or false)
             end
         end
-        addTooltip(row, option.name, option.description, box)
     elseif option.min then
         local slider = newSlider(row, module, option, min(200, room - 50))
         if not slider then
@@ -1082,14 +1026,6 @@ local function addOptionRow(view, module, option, byKey, done)
             dropdown:SetEnabled(on())
         end
         addTooltip(row, option.name, option.description, dropdown)
-    else
-        local box = newCheckbox(row, 30, function(checked) setOption(module, option, checked) end)
-        box:SetPoint("LEFT", CONTROL_LEFT, 0)
-        updates[#updates + 1] = function()
-            box:SetChecked(module.db[option.key] and true or false)
-            box:SetEnabled(on())
-        end
-        addTooltip(row, option.name, option.description, box)
     end
 end
 
@@ -1242,7 +1178,7 @@ end
 -- The module list ------------------------------------------------------------------------------
 
 -- Highlights the options of `view` the search finds. With `reveal`, scrolls the first of them into
--- sight when it's below what shows, after a frame, once the layout's sizes are known.
+-- sight when it's below what shows.
 local function markFound(view, reveal)
     local first
     for _, entry in ipairs(view.found) do
@@ -1250,17 +1186,9 @@ local function markFound(view, reveal)
         entry.highlight:SetShown(found)
         first = first or found and entry.row
     end
-    if not (reveal and first and C_Timer) then
-        return
+    if reveal then
+        scrollTo(page.pane, page.paneContent, first, true)
     end
-    local scroll, content = page.pane, page.paneContent
-    C_Timer.After(0, function()
-        local top, bottom = content:GetTop(), first:GetBottom()
-        local height = scroll:GetHeight()
-        if top and bottom and height and top - bottom > scroll:GetVerticalScroll() + height then
-            scrollTo(scroll, content, first)
-        end
-    end)
 end
 
 -- Shows `name` on the right (nil for none).
@@ -1286,6 +1214,21 @@ local function choose(name)
     -- Last, since moving on from a module with labels redraws the page.
     if newOrder and onModulesPage() then
         moveOn(name)
+    end
+end
+
+-- Shows `name` on the right and scrolls the list to it.
+local function selectModule(name)
+    choose(name)
+    scrollTo(page.listScroll, page.list, page.rows[name])
+end
+
+-- The first listed module with an option the player hasn't seen yet, or nil.
+local function firstNew()
+    for _, name in ipairs(listed) do
+        if newRows[ns.modules[name]] then
+            return name
+        end
     end
 end
 
@@ -1447,12 +1390,7 @@ local function buildModules(frame)
 
     -- "No modules match" while the search hides them all, or "Nothing new" while the New checkbox
     -- is on and nothing is marked.
-    local empty = CreateFrame("Frame", nil, page.list)
-    empty:SetSize(LIST_WIDTH, 40)
-    empty.text = empty:CreateFontString(nil, "OVERLAY", "GameFontDisable")
-    empty.text:SetPoint("TOPLEFT", 2, -4)
-    empty.text:SetWidth(LIST_WIDTH - 4)
-    empty.text:SetJustifyH("LEFT")
+    local empty = newEmptyRow(page.list, LIST_WIDTH)
     page.empty = empty
     addEntry(page.list, empty, function() return not anyMatch() end)
     local group
@@ -1473,17 +1411,9 @@ local function buildModules(frame)
 
     -- Opens on the module ns.OpenSettings asked for, or the first with a new option to see, or
     -- else the first.
-    if not selected then
-        for _, name in ipairs(listed) do
-            if hasNewOption(ns.modules[name]) then
-                selected = name
-                break
-            end
-        end
-    end
+    selected = selected or firstNew()
     if selected then
-        choose(selected)
-        scrollTo(page.listScroll, page.list, page.rows[selected])
+        selectModule(selected)
     end
     relayout()
     -- After /fpp or a preset changed things while the page was closed, and for notices.
@@ -1498,10 +1428,7 @@ end
 local WEBSITE = "https://github.com/xIGBClutchIx/ForeverPlusPlus"
 local ISSUES = WEBSITE .. "/issues"
 
-local function metadata(field)
-    local get = (C_AddOns and C_AddOns.GetAddOnMetadata) or GetAddOnMetadata
-    return get and get(ns.name, field) or ""
-end
+local metadata = ns.Metadata
 
 -- A gold label at the left of a row, for a value beside it.
 local function addLabel(frame, y, text)
@@ -1563,7 +1490,7 @@ end
 
 local function buildAbout(frame)
     ns.AddPageTitle(frame, L.ABOUT)
-    ns.Welcomed() -- the NEW tag on the Minimap Button can go
+    ns.SetWelcome(false) -- the NEW tag on the Minimap Button can go
     addPageDefaults(frame)
 
     local icon = frame:CreateTexture(nil, "ARTWORK")
@@ -1581,7 +1508,7 @@ local function buildAbout(frame)
 
     local version = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
     version:SetPoint("TOPLEFT", tagline, "BOTTOMLEFT", 0, -6)
-    version:SetText(format(L.HOME_VERSION, metadata("Version"), metadata("Author")))
+    version:SetText(format(L.HOME_VERSION, ns.version, metadata("Author")))
 
     -- Under the version, since the command list below grows with every module.
     local gameVersion, build, _, interface = GetBuildInfo()
@@ -1820,12 +1747,7 @@ local function buildChangelog(frame)
     end
 
     -- "No changes match" while the search finds nothing.
-    local empty = CreateFrame("Frame", nil, split.list)
-    empty:SetSize(CHANGELOG_LIST_WIDTH, 40)
-    empty.text = empty:CreateFontString(nil, "OVERLAY", "GameFontDisable")
-    empty.text:SetPoint("TOPLEFT", 2, -4)
-    empty.text:SetWidth(CHANGELOG_LIST_WIDTH - 4)
-    empty.text:SetJustifyH("LEFT")
+    local empty = newEmptyRow(split.list, CHANGELOG_LIST_WIDTH)
     addEntry(split.list, empty, function()
         for i in ipairs(releases) do
             if matches(i) then
@@ -1917,19 +1839,10 @@ local function resetSeen()
     wipe(ns.db.seenModules)
     markNew()
     if page then
-        selected = nil
-        for _, name in ipairs(listed) do
-            if hasNewOption(ns.modules[name]) then
-                selected = name
-                break
-            end
-        end
-        if refreshAll then
-            refreshAll()
-        end
+        selected = firstNew()
+        refreshAll()
         if selected then
-            choose(selected)
-            scrollTo(page.listScroll, page.list, page.rows[selected])
+            selectModule(selected)
         end
     end
     open(modulesCategory)
@@ -1938,13 +1851,7 @@ end
 -- One line for a bug report: the addon and client, and the modules on.
 local function debugInfo()
     local gameVersion, build, _, interface = GetBuildInfo()
-    local on = {}
-    for _, name in ipairs(ns.order) do
-        local module = ns.modules[name]
-        if module.enabled and not module.alwaysOn then
-            on[#on + 1] = name
-        end
-    end
+    local on = ns.ModulesOn()
     return format(L.DEBUG_INFO_LINE, ns.version, tostring(gameVersion), tostring(build),
         tostring(interface), GetLocale(), #on, concat(on, ", "))
 end
@@ -1993,7 +1900,7 @@ local DEBUG_TOOLS = {
     { name = L.DEBUG_RESET_WELCOME, button = L.DEBUG_RESET_WELCOME_BUTTON,
         description = L.DEBUG_RESET_WELCOME_DESC, section = L.DEBUG_SECTION_NEW,
         fn = function()
-            ns.ResetWelcome()
+            ns.SetWelcome(true)
             ns.Print(L.DEBUG_RESET_WELCOME_DONE)
         end },
     { name = L.DEBUG_INFO, button = L.DEBUG_INFO_BUTTON, description = L.DEBUG_INFO_DESC,
@@ -2024,10 +1931,8 @@ end
 -- The Debug page: a header for each section, with Forever++'s own rows and then each module's
 -- (by title) under it, and after them a header for each module with rows in no section.
 local function buildDebug(category, layout, order)
-    local added = {}
     local function addRows(module, section)
-        added[module] = added[module] or {}
-        addDebugOptions(category, layout, module, section, added[module])
+        addDebugOptions(category, module, section)
         addDebugActions(layout, module, section)
     end
     for _, section in ipairs(DEBUG_SECTIONS) do
@@ -2127,8 +2032,7 @@ function ns.OpenSettings(name)
             if not matches(name) and page.search then
                 page.search:SetText("")
             end
-            choose(name)
-            scrollTo(page.listScroll, page.list, page.rows[name])
+            selectModule(name)
         else
             selected = name -- the page opens on it
         end

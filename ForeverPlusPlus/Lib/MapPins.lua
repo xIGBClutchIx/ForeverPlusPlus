@@ -7,7 +7,7 @@ local _, ns = ...
 
 local ipairs, select, setmetatable, hooksecurefunc = ipairs, select, setmetatable, hooksecurefunc
 local CreateFrame = CreateFrame
-local C_Texture, C_Map, GameTooltip = C_Texture, C_Map, GameTooltip
+local C_Map, GameTooltip = C_Map, GameTooltip
 local CreateVector2D = CreateVector2D
 
 local MapPins = {}
@@ -21,14 +21,7 @@ local worldMap = WorldMap.Get
 ---@param ... string atlas names, best first
 ---@return string
 function MapPins.Atlas(...)
-    local count = select("#", ...)
-    for i = 1, count - 1 do
-        local name = select(i, ...)
-        if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) then
-            return name
-        end
-    end
-    return (select(count, ...))
+    return ns.Frames.FirstAtlas(...) or (select(select("#", ...), ...))
 end
 
 -- Where one map sits on another, by map ID pair, once asked. The layout doesn't change.

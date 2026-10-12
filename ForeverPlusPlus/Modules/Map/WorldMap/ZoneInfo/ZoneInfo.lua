@@ -9,7 +9,7 @@ local pairs, ipairs, tostring, format, concat = pairs, ipairs, tostring, string.
 local hooksecurefunc, MAP_AREA_LABEL_TYPE = hooksecurefunc, MAP_AREA_LABEL_TYPE
 local min, max, GetLocale = math.min, math.max, GetLocale
 local unpack, ceil = unpack, math.ceil
-local CreateFrame, C_Map, C_Item, C_XMLUtil = CreateFrame, C_Map, C_Item, C_XMLUtil
+local CreateFrame, C_Map, C_Item = CreateFrame, C_Map, C_Item
 
 local L = ns.L
 local Professions = ns.Professions
@@ -378,17 +378,9 @@ local panel, driver
 local shownHeld -- whether the detail key was held then
 local shown -- the zone the panel shows now, or false for none; nil to draw again
 
--- A tooltip's look, which Blizzard uses for small boxes over the map. Probe: the template is
--- Mainline's; without it, the plain backdrop template and its tooltip backdrop.
+-- A tooltip's look, which Blizzard uses for small boxes over the map.
 local function newPanel(parent)
-    local hasTemplate = C_XMLUtil and C_XMLUtil.GetTemplateInfo
-        and C_XMLUtil.GetTemplateInfo("TooltipBackdropTemplate")
-    local frame = CreateFrame("Frame", nil, parent,
-        hasTemplate and "TooltipBackdropTemplate" or "BackdropTemplate")
-    if not hasTemplate and frame.SetBackdrop and BACKDROP_TOOLTIP_16_16_5555 then
-        frame:SetBackdrop(BACKDROP_TOOLTIP_16_16_5555)
-        frame:SetBackdropColor(0, 0, 0, 0.8)
-    end
+    local frame = ns.Frames.TooltipBox(parent)
     -- Over the map's pins, which sit on the canvas inside the same container.
     frame:SetFrameLevel(parent:GetFrameLevel() + 2000)
     -- The fonts of a GameTooltip: a white title, white rows.

@@ -19,12 +19,14 @@ Locales\enUS\Tools.lua
 Lib\Secret.lua
 Lib\Colors.lua
 Lib\Text.lua
+Lib\Frames.lua
 Lib\Money.lua
 Lib\Confirm.lua
 Lib\CVars.lua
 Lib\Nameplates.lua
 Lib\Units.lua
 Lib\ItemTooltip.lua
+Lib\ItemButtons.lua
 Lib\Prices.lua
 Lib\Professions.lua
 Lib\PlateLabel.lua

@@ -15,19 +15,7 @@ module.title = L.NPCPLATES_TITLE
 module.category = "nameplates"
 
 -- Laid out like Player Nameplates: general, the name, then the title line.
-module.options = {
-    {
-        key = "barWhenHurt", name = L.PLATES_BAR_WHEN_HURT, description = L.NPCPLATES_BAR_WHEN_HURT_DESC,
-        section = L.PLATES_SECTION_GENERAL,
-    },
-    {
-        key = "level", name = L.PLATES_LEVEL, description = L.PLATES_LEVEL_DESC,
-        choices = ns.PlateLabel.LEVEL_CHOICES, section = L.PLATES_SECTION_GENERAL,
-    },
-    {
-        key = "buffs", name = L.PLATES_BUFFS, description = L.PLATES_BUFFS_DESC,
-        choices = ns.PlateLabel.BUFF_CHOICES, section = L.PLATES_SECTION_GENERAL,
-    },
+module.options = ns.FriendlyPlates.Options(L.NPCPLATES_BAR_WHEN_HURT_DESC, {
     {
         key = "nameColor", name = L.PLATES_NAME_COLOR, description = L.NPCPLATES_NAME_COLOR_DESC,
         choices = { { "green", L.PLATES_COLOR_GREEN }, { "white", L.PLATES_COLOR_WHITE } },
@@ -51,16 +39,13 @@ module.options = {
         key = "centerLine", name = L.PLATES_CENTER_LINE_NPC, description = L.PLATES_CENTER_LINE_DESC,
         debug = true, section = L.DEBUG_SECTION_TESTING,
     },
-}
+})
 
 local NAME_COLORS = {
     green = { 0.1, 1, 0.1 }, -- the green of friendly NPC names in the world
     white = { 1, 1, 1 },
 }
-local TITLE_COLORS = { -- the same as Player Nameplates' guild colors
-    gray = ns.Colors.GRAY,
-    green = ns.Colors.GUILD_GREEN,
-}
+local TITLE_COLORS = ns.FriendlyPlates.SUBTITLE_COLORS
 
 local function nameColor()
     return NAME_COLORS[module.db.nameColor] or NAME_COLORS.green

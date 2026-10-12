@@ -13,11 +13,12 @@ local max, min, floor, setmetatable, tremove = math.max, math.min, math.floor, s
     table.remove
 local CreateFrame, C_Traits, C_Spell, UnitLevel, UnitGUID, IsShiftKeyDown, PlaySound = CreateFrame,
     C_Traits, C_Spell, UnitLevel, UnitGUID, IsShiftKeyDown, PlaySound
-local GameTooltip, EventRegistry, UIErrorsFrame = GameTooltip, EventRegistry, UIErrorsFrame
+local GameTooltip, EventRegistry = GameTooltip, EventRegistry
 
 local L = ns.L
 local Plan = ns.TalentPlan
 local readable = ns.IsReadable
+local showError = ns.Frames.ErrorMessage
 
 local module = ns.NewModule("TalentPlanner", L.TALENTPLANNER_DESC, {
     enabled = true,
@@ -268,17 +269,6 @@ local function levelsFor(plan, id, points, first)
         end
     end
     return levels
-end
-
-local function showError(text)
-    if not (text and UIErrorsFrame) then
-        return
-    end
-    if UIErrorsFrame.AddExternalErrorMessage then
-        UIErrorsFrame:AddExternalErrorMessage(text)
-    else
-        UIErrorsFrame:AddMessage(text, 1, 0.1, 0.1)
-    end
 end
 
 local function playSound(name)
@@ -998,12 +988,8 @@ local function start()
         end
         module:HookScript(frame, "OnShow", refresh)
         module:HookScript(frame, "OnHide", onHide)
-        if frame.RefreshTreeHeaders then
-            module:Hook(frame, "RefreshTreeHeaders", onTreeParts)
-        end
-        if frame.RefreshGates then
-            module:Hook(frame, "RefreshGates", onTreeParts)
-        end
+        module:Hook(frame, "RefreshTreeHeaders", onTreeParts)
+        module:Hook(frame, "RefreshGates", onTreeParts)
         if EventRegistry then
             EventRegistry:RegisterCallback("TalentFrameBase.ButtonsUpdated", onButtonsUpdated, module)
             EventRegistry:RegisterCallback("TalentDisplay.TooltipCreated", onTalentTooltip, module)

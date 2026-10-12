@@ -12,9 +12,9 @@ local _, ns = ...
 
 local setmetatable, ipairs, select, type, format, floor = setmetatable, ipairs, select, type,
     string.format, math.floor
-local C_Texture = C_Texture
 
 local L = ns.L
+local hasAtlas = ns.Frames.HasAtlas
 
 local module = ns.NewModule("QuestIcons", L.QUESTICONS_DESC, {
     enabled = true,
@@ -66,10 +66,6 @@ local ICONS = {
     infinity = { atlas = "perks-infinity", height = 1, width = 1.9 },
     logo = { atlas = "logo-wow-forever", height = 2.6, width = 2.6 },
 }
-
-local function hasAtlas(name)
-    return C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(name) ~= nil
-end
 
 local function iconFor(fontString, percent)
     local icon = ICONS[module.db.icon] or ICONS.infinity
@@ -206,10 +202,7 @@ end
 -- the frame is hooked.
 local function hookTracker()
     for _, name in ipairs(TRACKERS) do
-        local tracker = _G[name]
-        if tracker and tracker.UpdateSingle then
-            module:Hook(tracker, "UpdateSingle", markTrackerQuest)
-        end
+        module:Hook(_G[name], "UpdateSingle", markTrackerQuest)
     end
     markTracker()
 end
@@ -222,22 +215,16 @@ local function markAll()
 end
 
 function module:OnEnable()
-    if QuestLogQuests_Update then
-        self:Hook("QuestLogQuests_Update", markLog)
-    end
+    self:Hook("QuestLogQuests_Update", markLog)
     ns.AddOns.WhenLoaded("Blizzard_ObjectiveTracker", hookTracker)
-    local box = GossipFrame and GossipFrame.GreetingPanel and GossipFrame.GreetingPanel.ScrollBox
-    if box then
-        -- Runs when the list is filled and when it scrolls.
-        self:Hook(box, "Update", markGossip)
-    end
+    -- Runs when the list is filled and when it scrolls.
+    self:Hook(GossipFrame and GossipFrame.GreetingPanel and GossipFrame.GreetingPanel.ScrollBox,
+        "Update", markGossip)
     if QuestFrameGreetingPanel then
         -- The panel's script holds the function it had at load, and Blizzard also calls the
         -- global itself, so both are hooked.
         self:HookScript(QuestFrameGreetingPanel, "OnShow", markGreeting)
-        if QuestFrameGreetingPanel_OnShow then
-            self:Hook("QuestFrameGreetingPanel_OnShow", markGreeting)
-        end
+        self:Hook("QuestFrameGreetingPanel_OnShow", markGreeting)
     end
     markAll()
 end
