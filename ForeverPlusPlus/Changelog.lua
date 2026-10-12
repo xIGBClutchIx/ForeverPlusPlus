@@ -65,6 +65,9 @@ ns.changelog = {
                     .. "collects (auction prices, flight times, chat history) apart from settings. "
                     .. "Talent plans and learned flight points are saved for each character on its "
                     .. "own. Everything you had carries over." },
+                { L.ITEMTOOLTIPS_TITLE, "Saved auction prices take about 60% less room in the "
+                    .. "saved file. Prices saved before 0.7.0, which the next scan of that auction "
+                    .. "house would have wiped, show again, aged from the scan that found them." },
                 { L.CHANGELOG_COMMANDS, "Module names in /fpp match their titles, such as /fpp "
                     .. "toggle BagSlotCounter instead of BagSlots and PersistentChat instead of "
                     .. "ChatFading. Your settings follow them." },

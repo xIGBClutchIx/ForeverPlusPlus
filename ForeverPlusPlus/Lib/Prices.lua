@@ -4,9 +4,39 @@
 local _, ns = ...
 
 local C_Item = C_Item
+local floor, format, tonumber, type = math.floor, string.format, tonumber, type
 
 local Prices = {}
 ns.Prices = Prices
+
+-- Saved prices ------------------------------------------------------------------------------------
+-- A saved price is one short string, "copper,minutes", with the minutes since EPOCH it was seen:
+-- thousands of them are saved, and a table each took three times the room in the saved file.
+
+local EPOCH = 1700000000 -- 2023-11-14, before any price was saved
+
+---A price and the time it was seen as the string saved for it.
+---@param copper number
+---@param seenAt number time()
+---@return string
+function Prices.Pack(copper, seenAt)
+    return format("%d,%d", floor(copper + 0.5), floor((seenAt - EPOCH) / 60))
+end
+
+---The price and the time (to the minute) a saved string holds, or nil for none.
+---@param saved string|nil
+---@return number|nil copper
+---@return number|nil seenAt
+function Prices.Unpack(saved)
+    if type(saved) ~= "string" then
+        return nil
+    end
+    local copper, minutes = saved:match("^(%d+),(%-?%d+)$")
+    if not copper then
+        return nil
+    end
+    return tonumber(copper), EPOCH + tonumber(minutes) * 60
+end
 
 local source -- { price = fn(itemID), itemByName = fn(name), inline = fn() }, or nil
 

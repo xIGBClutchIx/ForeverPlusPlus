@@ -389,6 +389,19 @@ eq(Prices.Inline(), true, "source's alignment")
 Prices.SetSource(nil)
 eq(Prices.Auction(4305), nil, "no prices once the source goes")
 
+-- Saved prices ------------------------------------------------------------------------------------
+
+local packed = Prices.Pack(4800, 1791836472)
+eq(packed, "4800,1530607", "prices: a saved price is copper and minutes")
+local copper, seenAt = Prices.Unpack(packed)
+eq(copper, 4800, "prices: unpacked copper")
+eq(seenAt, 1791836420, "prices: unpacked time, to the minute")
+eq(Prices.Unpack(nil), nil, "prices: nothing saved")
+eq(Prices.Unpack({ price = 1 }), nil, "prices: an old table isn't a saved price")
+copper, seenAt = Prices.Unpack(Prices.Pack(700, 0))
+eq(copper, 700, "prices: a price seen before the epoch keeps its copper")
+eq(seenAt <= 0, true, "prices: and a time before the epoch")
+
 -- Store -----------------------------------------------------------------------------------------
 
 local Store = ns.Store

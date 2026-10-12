@@ -37,12 +37,42 @@ local module = itemTooltips:NewPart({
     -- Data, not settings: they aren't in the options.
     -- What merchants charge for one of an item: { [itemID] = copper }, learned at each visit.
     vendor = {},
-    -- Per auction house ("Realm-Faction"): { scannedAt = time(), items = { [itemID] = { price =
-    -- copper, seenAt = time() } } }. scannedAt is the last full scan and decides when to scan
+    -- Per auction house ("Realm-Faction"): { scannedAt = time(), items = { [itemID] =
+    -- ns.Prices.Pack(copper, seenAt) } }. scannedAt is the last full scan and decides when to scan
     -- again; seenAt is when that item's price was last seen, which the tooltip's age shows, since
     -- an item missing from a scan keeps its older price.
     houses = {},
 })
+
+local packPrice, unpackPrice = ns.Prices.Pack, ns.Prices.Unpack
+
+-- Layout version 4 saves each price as one short string instead of a table. Houses saved before
+-- 0.7.0 kept `prices` (copper by item) with only the house's scan time; they become items seen then.
+ns.Migrate(4, function(db)
+    local houses = db.data and db.data.ItemTooltips and db.data.ItemTooltips.houses
+    for _, house in pairs(houses or {}) do
+        if type(house) == "table" then
+            local items = type(house.items) == "table" and house.items or {}
+            for itemID, item in pairs(items) do
+                if type(item) == "table" and item.price and item.seenAt then
+                    items[itemID] = packPrice(item.price, item.seenAt)
+                elseif type(item) ~= "string" then
+                    items[itemID] = nil
+                end
+            end
+            if type(house.prices) == "table" then
+                for itemID, copper in pairs(house.prices) do
+                    if items[itemID] == nil and type(copper) == "number" then
+                        items[itemID] = packPrice(copper, house.scannedAt or 0)
+                    end
+                end
+                house.prices = nil
+            end
+            house.items = items
+            house.scannedAt = house.scannedAt or 0
+        end
+    end
+end)
 
 -- The price line, then its age, then crafting and scanning, then Chat Messages.
 module:AddOptions({
@@ -185,20 +215,16 @@ local function addResults(results)
         local price = result.minPrice
         if itemID and result.totalQuantity and result.totalQuantity > 0 and price
             and price > 0 then
-            local item = items[itemID]
-            if listed[itemID] and item then -- no item when the prices were reset since
+            local old = unpackPrice(items[itemID])
+            if listed[itemID] and old then -- no price when the prices were reset since
                 -- One item can come back once per item level or suffix: keep the lowest.
-                if price < item.price then
-                    item.price = price
+                if price < old then
+                    items[itemID] = packPrice(price, now)
                 end
             else
                 -- The first price in these results replaces the old one.
                 listed[itemID] = true
-                if item then
-                    item.price, item.seenAt = price, now
-                else
-                    items[itemID] = { price = price, seenAt = now }
-                end
+                items[itemID] = packPrice(price, now)
             end
             if scanning and not seen[itemID] then
                 seen[itemID] = true
@@ -505,8 +531,7 @@ end
 
 local priceSource = {
     price = function(itemID)
-        local item = house().items[itemID]
-        return item and item.price
+        return (unpackPrice(house().items[itemID]))
     end,
     itemByName = itemByName,
     inline = function()
@@ -519,16 +544,16 @@ local function addAuctionPrice(tooltip, data)
     if not itemID then
         return
     end
-    local item = house().items[itemID]
-    if not item then
+    local price, seenAt = unpackPrice(house().items[itemID])
+    if not price then
         return
     end
     local db = module.db
-    ItemTooltip.AddPrice(tooltip, data, L.AUCTIONPRICES_LINE, item.price, db.mode, db.align, db.auctionColor)
+    ItemTooltip.AddPrice(tooltip, data, L.AUCTIONPRICES_LINE, price, db.mode, db.align, db.auctionColor)
     -- When this item's price was last seen, by a scan or the player's own search: an item
     -- missing from the last scan keeps its older price and age.
     if db.scanAge ~= "off" then
-        local age = time() - item.seenAt
+        local age = time() - seenAt
         local color = db.scanAgeColor == "age" and ageColor(age) or db.scanAgeColor
         ItemTooltip.AddInfo(tooltip, L.AUCTIONPRICES_SCAN_AGE_LINE, ns.Text.Ago(age), db.scanAge, color)
     end
@@ -580,11 +605,10 @@ end
 -- What one of a reagent costs: the lower of its auction and merchant prices, or nil. Then when
 -- the auction price was seen, when that's the one used.
 local function reagentCost(itemID)
-    local item = house().items[itemID]
-    local auction = item and item.price
+    local auction, seenAt = unpackPrice(house().items[itemID])
     local vendor = module.db.vendor[itemID]
     if auction and (not vendor or auction < vendor) then
-        return auction, item.seenAt
+        return auction, seenAt
     end
     return vendor
 end
@@ -592,9 +616,9 @@ end
 -- What one crafted item is worth: its auction price, or else what a merchant pays (and true).
 -- Then when the auction price was seen.
 local function craftedValue(itemID)
-    local item = house().items[itemID]
-    if item then
-        return item.price, false, item.seenAt
+    local price, seenAt = unpackPrice(house().items[itemID])
+    if price then
+        return price, false, seenAt
     end
     local sell = select(11, C_Item.GetItemInfo(itemID))
     if sell and sell > 0 then
