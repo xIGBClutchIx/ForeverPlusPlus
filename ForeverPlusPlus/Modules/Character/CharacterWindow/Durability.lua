@@ -8,7 +8,7 @@ local _, ns = ...
 local _G, pairs, CreateFrame = _G, pairs, CreateFrame
 local pcall, GetInventorySlotInfo, GetInventoryItemDurability = pcall, GetInventorySlotInfo, GetInventoryItemDurability
 
-local module = ns.modules.CharacterFrame
+local module = ns.modules.CharacterWindow
 local internal = module.internal
 
 -- Show a bar only below this much durability (a bar at exactly 1 is whole), by the `durability`

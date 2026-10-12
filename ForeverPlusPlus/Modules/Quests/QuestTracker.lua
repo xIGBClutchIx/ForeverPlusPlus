@@ -11,7 +11,7 @@ local _, ns = ...
 local pairs, ipairs, next, type, min, max = pairs, ipairs, next, type, math.min, math.max
 local setmetatable, sort = setmetatable, table.sort
 local InCombatLockdown, C_Timer, C_QuestLog, C_Map = InCombatLockdown, C_Timer, C_QuestLog, C_Map
-local GetRealZoneText, GetRealmName, UnitName, format = GetRealZoneText, GetRealmName, UnitName, string.format
+local GetRealZoneText = GetRealZoneText
 local GetQuestUiMapID, Enum = GetQuestUiMapID, Enum
 
 local L = ns.L
@@ -27,10 +27,11 @@ local module = ns.NewModule("QuestTracker", L.QUESTTRACKER_DESC, {
     fade = false,
     sort = "off", -- or "low" / "high": which level comes first
     zone = false,
-    hidden = {}, -- "Name-Realm" -> { [questID] = true }: quests Current Zone Only untracked
+    hidden = {}, -- [questID] = true: quests Current Zone Only untracked on this character
 })
 module.title = L.QUESTTRACKER_TITLE
 module.category = "quests"
+module.perCharacter = { hidden = true }
 
 -- Which quests and in what order, then the text, the box behind it, and combat.
 local QUESTS, TEXT, BOX, COMBAT = L.QUESTTRACKER_SECTION_QUESTS, L.QUESTTRACKER_SECTION_TEXT,
@@ -530,16 +531,14 @@ local mapNames -- lowercase name -> true for every map under Azeroth, made when 
 local filteredZone -- the zone the watch list was last filtered for
 local zoneAfterCombat = false
 
--- The quests Current Zone Only untracked on this character, or nil when it untracked none.
+-- The quests Current Zone Only untracked on this character (saved per character), or nil when it
+-- untracked none.
 local function hiddenQuests(create)
-    -- UnitName's second value is a surname on Forever, not a realm.
-    local key = format("%s-%s", (UnitName("player")) or "", GetRealmName() or "")
-    local hidden = module.db.hidden[key]
-    if not hidden and create then
-        hidden = {}
-        module.db.hidden[key] = hidden
+    local hidden = module.db.hidden
+    if next(hidden) == nil and not create then
+        return nil
     end
-    return hidden, key
+    return hidden
 end
 
 ---Whether a quest log header names a place: a map under Azeroth, or a dungeon or raid.
@@ -693,14 +692,14 @@ end
 -- Tracks every quest Current Zone Only untracked on this character again.
 local function restoreHidden()
     ns.AfterCombat(function()
-        local hidden, key = hiddenQuests()
+        local hidden = hiddenQuests()
         if not hidden then
             return
         end
         for questID in pairs(hidden) do
             C_QuestLog.AddQuestWatch(questID)
         end
-        module.db.hidden[key] = nil
+        module.db.hidden = {}
     end)
 end
 

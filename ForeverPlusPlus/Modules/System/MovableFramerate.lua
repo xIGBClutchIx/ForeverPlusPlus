@@ -12,14 +12,14 @@ local CreateFrame, UIParent = CreateFrame, UIParent
 
 local L = ns.L
 
-local module = ns.NewModule("Framerate", L.FRAMERATE_DESC, {
+local module = ns.NewModule("MovableFramerate", L.MOVABLEFRAMERATE_DESC, {
     enabled = false,
     moved = false, -- false while the text stays where Blizzard puts it
     x = 0, -- its offset from the center of the screen, once moved
     y = 0,
     scale = 100, -- percent
 })
-module.title = L.FRAMERATE_TITLE
+module.title = L.MOVABLEFRAMERATE_TITLE
 module.category = "system"
 
 local ADDON = "Blizzard_FramerateFrame"
@@ -163,7 +163,7 @@ local function setup()
     module:HookScript(FramerateFrame, "OnHide", updateSample)
     module:On("UI_SCALE_CHANGED", layout)
     module:On("DISPLAY_SIZE_CHANGED", layout)
-    ns.EditMode.Register(holder, L.FRAMERATE_TITLE, moved, editModeOptions)
+    ns.EditMode.Register(holder, L.MOVABLEFRAMERATE_TITLE, moved, editModeOptions)
 end
 
 function module:OnEnable()

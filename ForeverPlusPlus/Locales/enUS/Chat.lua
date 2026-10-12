@@ -21,14 +21,14 @@ L.CHATCOPY_STAMPS_PROMPT = "Press Ctrl+C to copy this chat line."
 L.CHATCOPY_HIDDEN = "(hidden by the game)"
 L.CHATCOPY_EMPTY = "(no chat yet)"
 
--- ChannelNames
-L.CHANNELNAMES_TITLE = "Short Channel Names"
-L.CHANNELNAMES_DESC = "Show chat channels as [1], [G], or [1. G] instead of [1. General]."
-L.CHANNELNAMES_STYLE = "Style"
-L.CHANNELNAMES_STYLE_DESC = "Whether a channel shows as its number, its first letter, or both."
-L.CHANNELNAMES_NUMBER = "Number"
-L.CHANNELNAMES_LETTER = "Letter"
-L.CHANNELNAMES_BOTH = "Number and Letter"
+-- ShortChannelNames
+L.SHORTCHANNELNAMES_TITLE = "Short Channel Names"
+L.SHORTCHANNELNAMES_DESC = "Show chat channels as [1], [G], or [1. G] instead of [1. General]."
+L.SHORTCHANNELNAMES_STYLE = "Style"
+L.SHORTCHANNELNAMES_STYLE_DESC = "Whether a channel shows as its number, its first letter, or both."
+L.SHORTCHANNELNAMES_NUMBER = "Number"
+L.SHORTCHANNELNAMES_LETTER = "Letter"
+L.SHORTCHANNELNAMES_BOTH = "Number and Letter"
 
 -- ChatHistory
 L.CHATHISTORY_TITLE = "Chat History"
@@ -54,7 +54,7 @@ L.CHATFONT_FONT_DESC = "The font the chat windows use."
 L.CHATFONT_INPUT = "Chat Input"
 L.CHATFONT_INPUT_DESC = "Use the font for the text you type into the chat box too. Its size stays as it is."
 
--- ChatFading
-L.CHATFADING_TITLE = "Persistent Chat"
-L.CHATFADING_DESC = "Keep chat text on screen instead of fading it out after a while. Turning "
+-- PersistentChat
+L.PERSISTENTCHAT_TITLE = "Persistent Chat"
+L.PERSISTENTCHAT_DESC = "Keep chat text on screen instead of fading it out after a while. Turning "
     .. "this off gives Blizzard's fading back."

@@ -8,7 +8,7 @@ local ipairs, GetGuildInfo = ipairs, GetGuildInfo
 local L = ns.L
 local Units = ns.Units
 
-local module = ns.NewModule("PlayerPlates", L.PLAYERPLATES_DESC, ns.FriendlyPlates.Defaults({
+local module = ns.NewModule("PlayerNameplates", L.PLAYERNAMEPLATES_DESC, ns.FriendlyPlates.Defaults({
     nameColor = "class", -- "class" or "white"
     recentAllies = "icon", -- "off", "color" (light blue name), or "icon"
     guildNames = "always", -- "always", "hidden" (only without the bar), or "off"
@@ -19,66 +19,66 @@ local module = ns.NewModule("PlayerPlates", L.PLAYERPLATES_DESC, ns.FriendlyPlat
     iconSide = "after", -- "after" or "before" the name
     testIcons = "off", -- debug: "off", "group", or "friend" on every friendly player
 }))
-module.title = L.PLAYERPLATES_TITLE
+module.title = L.PLAYERNAMEPLATES_TITLE
 module.category = "units"
 
 -- General first, then the name, the guild line, and the icons beside the name.
-module.options = ns.FriendlyPlates.Options(L.PLAYERPLATES_BAR_WHEN_HURT_DESC, {
+module.options = ns.FriendlyPlates.Options(L.PLAYERNAMEPLATES_BAR_WHEN_HURT_DESC, {
     {
-        key = "nameColor", name = L.PLATES_NAME_COLOR, description = L.PLAYERPLATES_NAME_COLOR_DESC,
-        choices = { { "class", L.PLAYERPLATES_NAME_COLOR_CLASS }, { "white", L.PLATES_COLOR_WHITE } },
+        key = "nameColor", name = L.PLATES_NAME_COLOR, description = L.PLAYERNAMEPLATES_NAME_COLOR_DESC,
+        choices = { { "class", L.PLAYERNAMEPLATES_NAME_COLOR_CLASS }, { "white", L.PLATES_COLOR_WHITE } },
         section = L.PLATES_SECTION_NAME,
     },
     ns.PlateLabel.NameSizeOption(L.PLATES_SECTION_NAME),
     {
-        key = "recentAllies", name = L.PLAYERPLATES_RECENT_ALLIES, description = L.PLAYERPLATES_RECENT_ALLIES_DESC,
+        key = "recentAllies", name = L.PLAYERNAMEPLATES_RECENT_ALLIES, description = L.PLAYERNAMEPLATES_RECENT_ALLIES_DESC,
         choices = {
-            { "off", L.PLAYERPLATES_RECENT_ALLIES_OFF },
-            { "color", L.PLAYERPLATES_RECENT_ALLIES_COLOR },
-            { "icon", L.PLAYERPLATES_RECENT_ALLIES_ICON },
+            { "off", L.PLAYERNAMEPLATES_RECENT_ALLIES_OFF },
+            { "color", L.PLAYERNAMEPLATES_RECENT_ALLIES_COLOR },
+            { "icon", L.PLAYERNAMEPLATES_RECENT_ALLIES_ICON },
         },
         section = L.PLATES_SECTION_NAME,
     },
     {
-        key = "guildNames", name = L.PLAYERPLATES_GUILD_NAMES, description = L.PLAYERPLATES_GUILD_NAMES_DESC,
-        choices = ns.PlateLabel.SUBTITLE_CHOICES, section = L.PLAYERPLATES_SECTION_GUILD,
+        key = "guildNames", name = L.PLAYERNAMEPLATES_GUILD_NAMES, description = L.PLAYERNAMEPLATES_GUILD_NAMES_DESC,
+        choices = ns.PlateLabel.SUBTITLE_CHOICES, section = L.PLAYERNAMEPLATES_SECTION_GUILD,
     },
     {
-        key = "guildColor", name = L.PLAYERPLATES_GUILD_COLOR, description = L.PLAYERPLATES_GUILD_COLOR_DESC,
+        key = "guildColor", name = L.PLAYERNAMEPLATES_GUILD_COLOR, description = L.PLAYERNAMEPLATES_GUILD_COLOR_DESC,
         choices = { { "gray", L.PLATES_COLOR_GRAY }, { "green", L.PLATES_COLOR_GREEN } },
-        requires = "guildNames", section = L.PLAYERPLATES_SECTION_GUILD,
+        requires = "guildNames", section = L.PLAYERNAMEPLATES_SECTION_GUILD,
     },
     {
-        key = "guildHighlight", name = L.PLAYERPLATES_GUILD_HIGHLIGHT, description = L.PLAYERPLATES_GUILD_HIGHLIGHT_DESC,
-        requires = "guildNames", section = L.PLAYERPLATES_SECTION_GUILD,
+        key = "guildHighlight", name = L.PLAYERNAMEPLATES_GUILD_HIGHLIGHT, description = L.PLAYERNAMEPLATES_GUILD_HIGHLIGHT_DESC,
+        requires = "guildNames", section = L.PLAYERNAMEPLATES_SECTION_GUILD,
     },
     {
-        key = "socialIcons", name = L.PLAYERPLATES_SOCIAL_ICONS, description = L.PLAYERPLATES_SOCIAL_ICONS_DESC,
-        section = L.PLAYERPLATES_SECTION_ICONS,
+        key = "socialIcons", name = L.PLAYERNAMEPLATES_SOCIAL_ICONS, description = L.PLAYERNAMEPLATES_SOCIAL_ICONS_DESC,
+        section = L.PLAYERNAMEPLATES_SECTION_ICONS,
     },
     {
-        key = "groupIcon", name = L.PLAYERPLATES_GROUP_ICON, description = L.PLAYERPLATES_GROUP_ICON_DESC,
+        key = "groupIcon", name = L.PLAYERNAMEPLATES_GROUP_ICON, description = L.PLAYERNAMEPLATES_GROUP_ICON_DESC,
         choices = {
-            { "role", L.PLAYERPLATES_GROUP_ICON_ROLE },
-            { "looking", L.PLAYERPLATES_GROUP_ICON_LOOKING },
+            { "role", L.PLAYERNAMEPLATES_GROUP_ICON_ROLE },
+            { "looking", L.PLAYERNAMEPLATES_GROUP_ICON_LOOKING },
         },
-        requires = "socialIcons", section = L.PLAYERPLATES_SECTION_ICONS,
+        requires = "socialIcons", section = L.PLAYERNAMEPLATES_SECTION_ICONS,
     },
     {
         -- Also the recent ally icon, so not under Group and Friend Icons.
-        key = "iconSide", name = L.PLAYERPLATES_ICON_SIDE, description = L.PLAYERPLATES_ICON_SIDE_DESC,
+        key = "iconSide", name = L.PLAYERNAMEPLATES_ICON_SIDE, description = L.PLAYERNAMEPLATES_ICON_SIDE_DESC,
         choices = {
-            { "after", L.PLAYERPLATES_ICON_SIDE_AFTER },
-            { "before", L.PLAYERPLATES_ICON_SIDE_BEFORE },
+            { "after", L.PLAYERNAMEPLATES_ICON_SIDE_AFTER },
+            { "before", L.PLAYERNAMEPLATES_ICON_SIDE_BEFORE },
         },
-        section = L.PLAYERPLATES_SECTION_ICONS,
+        section = L.PLAYERNAMEPLATES_SECTION_ICONS,
     },
     {
-        key = "testIcons", name = L.PLAYERPLATES_TEST_ICONS, description = L.PLAYERPLATES_TEST_ICONS_DESC,
+        key = "testIcons", name = L.PLAYERNAMEPLATES_TEST_ICONS, description = L.PLAYERNAMEPLATES_TEST_ICONS_DESC,
         choices = {
-            { "off", L.PLAYERPLATES_TEST_ICONS_OFF },
-            { "group", L.PLAYERPLATES_TEST_ICONS_GROUP },
-            { "friend", L.PLAYERPLATES_TEST_ICONS_FRIEND },
+            { "off", L.PLAYERNAMEPLATES_TEST_ICONS_OFF },
+            { "group", L.PLAYERNAMEPLATES_TEST_ICONS_GROUP },
+            { "friend", L.PLAYERNAMEPLATES_TEST_ICONS_FRIEND },
         },
         debug = true, section = L.DEBUG_SECTION_TESTING,
     },
@@ -151,7 +151,7 @@ end
 -- its options, or with its keybind), and then there are no plates to draw on.
 local SHOW_FRIENDLY = { "nameplateShowFriendlyPlayers", "nameplateShowFriends" }
 module.notice = ns.CVars.OffNotice(module, SHOW_FRIENDLY, L.PLATES_BLIZZARD_OFF,
-    L.PLAYERPLATES_BLIZZARD_OFF_DESC)
+    L.PLAYERNAMEPLATES_BLIZZARD_OFF_DESC)
 
 local plates -- set below; the recent allies list may load after login (or change): recolor
 

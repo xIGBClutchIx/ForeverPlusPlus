@@ -13,19 +13,19 @@ local C_AddOns, UnitGUID, CreateTreeDataProvider, geterrorhandler =
 
 local L = ns.L
 
-local module = ns.NewModule("AddOnList", L.ADDONLIST_DESC, {
+local module = ns.NewModule("AddOnsList", L.ADDONSLIST_DESC, {
     enabled = true,
     enabledFirst = true, -- enabled addons above the disabled ones
     ungroup = false, -- disabled addons leave their group and sit with the other disabled ones
     notes = true, -- the search box also looks in an addon's notes
 })
-module.title = L.ADDONLIST_TITLE
+module.title = L.ADDONSLIST_TITLE
 module.category = "system"
 
 module.options = {
-    { key = "enabledFirst", name = L.ADDONLIST_ENABLEDFIRST, description = L.ADDONLIST_ENABLEDFIRST_DESC },
-    { key = "ungroup", name = L.ADDONLIST_UNGROUP, description = L.ADDONLIST_UNGROUP_DESC },
-    { key = "notes", name = L.ADDONLIST_NOTES, description = L.ADDONLIST_NOTES_DESC },
+    { key = "enabledFirst", name = L.ADDONSLIST_ENABLEDFIRST, description = L.ADDONSLIST_ENABLEDFIRST_DESC },
+    { key = "ungroup", name = L.ADDONSLIST_UNGROUP, description = L.ADDONSLIST_UNGROUP_DESC },
+    { key = "notes", name = L.ADDONSLIST_NOTES, description = L.ADDONSLIST_NOTES_DESC },
 }
 
 -- Blizzard_AddOnList makes AddonList with a ScrollBox of tree rows (each row's data is

@@ -28,7 +28,7 @@ local RETRY = 2 -- seconds between tries while the player can't cast it yet
 -- would keep taking it.
 local FASTEST = 3
 
-local module = ns.NewModule("GatherTracking", L.GATHERTRACKING_DESC, {
+local module = ns.NewModule("GatheringTracking", L.GATHERINGTRACKING_DESC, {
     enabled = true,
     track = "both", -- a key of SPELLS
     reapply = true,
@@ -36,11 +36,12 @@ local module = ns.NewModule("GatherTracking", L.GATHERTRACKING_DESC, {
     swapEvery = 10, -- seconds between swaps
     chat = true,
 })
-module.title = L.GATHERTRACKING_TITLE
+module.title = L.GATHERINGTRACKING_TITLE
 module.category = "automation"
 
 -- Swap was one slider, 0.8.4 and before, whose first stop (2) meant never.
-ns.Migrate(function(saved)
+ns.Migrate(1, function(db)
+    local saved = db.modules or {}
     local db = saved.GatherTracking
     if not (db and type(db.swap) == "number") then
         return
@@ -54,35 +55,35 @@ end)
 module.options = {
     {
         key = "track",
-        name = L.GATHERTRACKING_TRACK,
-        description = L.GATHERTRACKING_TRACK_DESC,
+        name = L.GATHERINGTRACKING_TRACK,
+        description = L.GATHERINGTRACKING_TRACK_DESC,
         choices = {
-            { "both", L.GATHERTRACKING_TRACK_BOTH },
-            { "minerals", L.GATHERTRACKING_TRACK_MINERALS },
-            { "herbs", L.GATHERTRACKING_TRACK_HERBS },
+            { "both", L.GATHERINGTRACKING_TRACK_BOTH },
+            { "minerals", L.GATHERINGTRACKING_TRACK_MINERALS },
+            { "herbs", L.GATHERINGTRACKING_TRACK_HERBS },
         },
     },
     {
         key = "swap",
-        name = L.GATHERTRACKING_SWAP,
-        description = L.GATHERTRACKING_SWAP_DESC,
+        name = L.GATHERINGTRACKING_SWAP,
+        description = L.GATHERINGTRACKING_SWAP_DESC,
         slider = "swapEvery",
         changed = "0.8.5", -- a checkbox and its slider
     },
     {
         key = "swapEvery",
-        name = L.GATHERTRACKING_SWAP_EVERY_NAME,
-        description = L.GATHERTRACKING_SWAP_EVERY_DESC,
+        name = L.GATHERINGTRACKING_SWAP_EVERY_NAME,
+        description = L.GATHERINGTRACKING_SWAP_EVERY_DESC,
         requires = "swap",
         min = FASTEST, max = 30, step = 1,
         format = ns.Text.Seconds,
     },
     {
         key = "reapply",
-        name = L.GATHERTRACKING_REAPPLY,
-        description = L.GATHERTRACKING_REAPPLY_DESC,
+        name = L.GATHERINGTRACKING_REAPPLY,
+        description = L.GATHERINGTRACKING_REAPPLY_DESC,
     },
-    ns.ChatOption(L.GATHERTRACKING_CHAT_DESC),
+    ns.ChatOption(L.GATHERINGTRACKING_CHAT_DESC),
 }
 
 -- Reads the tracking list: the index of each of our spells the player knows, which of them is on,
@@ -126,7 +127,7 @@ local function track(i)
     local ok, err = pcall(C_Minimap.SetTracking, i, true)
     if not ok and not blocked then
         blocked = true
-        module:Print(format(L.GATHERTRACKING_FAILED, tostring(err)))
+        module:Print(format(L.GATHERINGTRACKING_FAILED, tostring(err)))
     end
 end
 
@@ -219,7 +220,7 @@ local function onBlocked(_, addon, action)
         and not blocked then
         blocked = true
         stopSwapping()
-        module:Print(L.GATHERTRACKING_BLOCKED)
+        module:Print(L.GATHERINGTRACKING_BLOCKED)
     end
 end
 

@@ -91,7 +91,7 @@ Open Game Menu > Options > AddOns > Forever++ (or type `/fpp`). It opens on the 
 | `/fpp list` | Lists the modules and whether each is on. |
 | `/fpp toggle <module> [option]` | Turns a module on or off, or with an option, flips that checkbox. |
 | `/fpp options <module>` | Lists a module's options and their values. |
-| `/fpp set <module> <option> [value]` | Changes an option: `on`/`off`, a choice such as `/fpp set PlayerPlates level after`, or a number such as `/fpp set WorldMap dungeonSize 150`. Leave out the value to see the choices. |
+| `/fpp set <module> <option> [value]` | Changes an option: `on`/`off`, a choice such as `/fpp set PlayerNameplates level after`, or a number such as `/fpp set WorldMap dungeonSize 150`. Leave out the value to see the choices. |
 | `/fpp reset` | Asks, then puts every setting back to its default, clears what Forever++ saved, and reloads. |
 | `/fpp cvar [search]` | Opens Console Variables. |
 | `/fpp selftest` | Probes the client APIs Forever++ depends on and records events (flights, deaths, duels) until `/reload`; the log is saved in `ForeverPlusPlusDB.selfTest`. Also a button on the Debug page. |
@@ -99,7 +99,7 @@ Open Game Menu > Options > AddOns > Forever++ (or type `/fpp`). It opens on the 
 | `/fpp scan` | Scans the open auction house now. |
 | `/fpp resetprices` | Forgets the saved auction prices. |
 
-Settings are saved per account in `ForeverPlusPlusDB`.
+Settings are saved per account in `ForeverPlusPlusDB`, and what belongs to one character (talent plans, learned flight points) in `ForeverPlusPlusCharDB`.
 
 ## Feedback
 

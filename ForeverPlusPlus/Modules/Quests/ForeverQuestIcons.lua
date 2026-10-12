@@ -16,7 +16,7 @@ local setmetatable, ipairs, select, type, format, floor = setmetatable, ipairs, 
 local L = ns.L
 local hasAtlas = ns.Frames.HasAtlas
 
-local module = ns.NewModule("QuestIcons", L.QUESTICONS_DESC, {
+local module = ns.NewModule("ForeverQuestIcons", L.FOREVERQUESTICONS_DESC, {
     enabled = true,
     log = true,
     tracker = true,
@@ -27,30 +27,30 @@ local module = ns.NewModule("QuestIcons", L.QUESTICONS_DESC, {
     trackerSize = 80,
     giversSize = 80,
 })
-module.title = L.QUESTICONS_TITLE
+module.title = L.FOREVERQUESTICONS_TITLE
 module.category = "quests"
 
 -- A place's checkbox, with its size slider in the same row.
 local function place(key, name, description)
     local sizeKey = key .. "Size"
     return { key = key, name = name, description = description, slider = sizeKey },
-        { key = sizeKey, name = L.QUESTICONS_SIZE, description = L.QUESTICONS_SIZE_DESC,
+        { key = sizeKey, name = L.FOREVERQUESTICONS_SIZE, description = L.FOREVERQUESTICONS_SIZE_DESC,
             requires = key, min = 50, max = 300, step = 10, format = "%d%%" }
 end
 
 module.options = {
     {
-        key = "icon", name = L.QUESTICONS_ICON, description = L.QUESTICONS_ICON_DESC,
+        key = "icon", name = L.FOREVERQUESTICONS_ICON, description = L.FOREVERQUESTICONS_ICON_DESC,
         choices = {
-            { "infinity", L.QUESTICONS_ICON_INFINITY },
-            { "logo", L.QUESTICONS_ICON_LOGO },
+            { "infinity", L.FOREVERQUESTICONS_ICON_INFINITY },
+            { "logo", L.FOREVERQUESTICONS_ICON_LOGO },
         },
     },
 }
 for _, args in ipairs({
-    { "log", L.QUESTICONS_LOG, L.QUESTICONS_LOG_DESC },
-    { "tracker", L.QUESTICONS_TRACKER, L.QUESTICONS_TRACKER_DESC },
-    { "givers", L.QUESTICONS_GIVERS, L.QUESTICONS_GIVERS_DESC },
+    { "log", L.FOREVERQUESTICONS_LOG, L.FOREVERQUESTICONS_LOG_DESC },
+    { "tracker", L.FOREVERQUESTICONS_TRACKER, L.FOREVERQUESTICONS_TRACKER_DESC },
+    { "givers", L.FOREVERQUESTICONS_GIVERS, L.FOREVERQUESTICONS_GIVERS_DESC },
 }) do
     local toggle, size = place(args[1], args[2], args[3])
     module.options[#module.options + 1] = toggle

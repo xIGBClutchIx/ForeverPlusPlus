@@ -17,7 +17,8 @@ module.category = "items"
 
 -- Before 0.8.0, Sell Price, Item Count, and Auction Prices were modules of their own. Item
 -- Tooltips is on if any of them was, and each keeps its own checkbox, options, and data.
-ns.Migrate(function(saved)
+ns.Migrate(1, function(db)
+    local saved = db.modules or {}
     local sell, count, auction = saved.SellPrice, saved.ItemCount, saved.AuctionPrices
     if not (sell or count or auction) then
         return

@@ -6,34 +6,34 @@ local _, ns = ...
 local L = ns.L
 local Units = ns.Units
 
-local module = ns.NewModule("NpcPlates", L.NPCPLATES_DESC, ns.FriendlyPlates.Defaults({
+local module = ns.NewModule("NpcNameplates", L.NPCNAMEPLATES_DESC, ns.FriendlyPlates.Defaults({
     nameColor = "green", -- "green" (as in the world) or "white"
     titles = "always", -- "always", "hidden" (only without the bar), or "off"
     titleColor = "name", -- "name" (the name's color), "gray", or "green"
 }))
-module.title = L.NPCPLATES_TITLE
+module.title = L.NPCNAMEPLATES_TITLE
 module.category = "units"
 
 -- Laid out like Player Nameplates: general, the name, then the title line.
-module.options = ns.FriendlyPlates.Options(L.NPCPLATES_BAR_WHEN_HURT_DESC, {
+module.options = ns.FriendlyPlates.Options(L.NPCNAMEPLATES_BAR_WHEN_HURT_DESC, {
     {
-        key = "nameColor", name = L.PLATES_NAME_COLOR, description = L.NPCPLATES_NAME_COLOR_DESC,
+        key = "nameColor", name = L.PLATES_NAME_COLOR, description = L.NPCNAMEPLATES_NAME_COLOR_DESC,
         choices = { { "green", L.PLATES_COLOR_GREEN }, { "white", L.PLATES_COLOR_WHITE } },
         section = L.PLATES_SECTION_NAME,
     },
     ns.PlateLabel.NameSizeOption(L.PLATES_SECTION_NAME),
     {
-        key = "titles", name = L.NPCPLATES_TITLES, description = L.NPCPLATES_TITLES_DESC,
-        choices = ns.PlateLabel.SUBTITLE_CHOICES, section = L.NPCPLATES_SECTION_TITLE,
+        key = "titles", name = L.NPCNAMEPLATES_TITLES, description = L.NPCNAMEPLATES_TITLES_DESC,
+        choices = ns.PlateLabel.SUBTITLE_CHOICES, section = L.NPCNAMEPLATES_SECTION_TITLE,
     },
     {
-        key = "titleColor", name = L.NPCPLATES_TITLE_COLOR, description = L.NPCPLATES_TITLE_COLOR_DESC,
+        key = "titleColor", name = L.NPCNAMEPLATES_TITLE_COLOR, description = L.NPCNAMEPLATES_TITLE_COLOR_DESC,
         choices = {
-            { "name", L.NPCPLATES_TITLE_COLOR_NAME },
+            { "name", L.NPCNAMEPLATES_TITLE_COLOR_NAME },
             { "gray", L.PLATES_COLOR_GRAY },
             { "green", L.PLATES_COLOR_GREEN },
         },
-        requires = "titles", section = L.NPCPLATES_SECTION_TITLE,
+        requires = "titles", section = L.NPCNAMEPLATES_SECTION_TITLE,
     },
     {
         key = "centerLine", name = L.PLATES_CENTER_LINE_NPC, description = L.PLATES_CENTER_LINE_DESC,
@@ -74,7 +74,7 @@ end
 -- there are no plates to draw on.
 local SHOW_NPCS = { "nameplateShowFriendlyNpcs", "nameplateShowFriendlyNPCs" }
 module.notice = ns.CVars.OffNotice(module, SHOW_NPCS, L.PLATES_BLIZZARD_OFF,
-    L.NPCPLATES_BLIZZARD_OFF_DESC)
+    L.NPCNAMEPLATES_BLIZZARD_OFF_DESC)
 
 ns.FriendlyPlates.New(module, {
     players = false,

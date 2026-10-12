@@ -4,6 +4,7 @@
 ## Author: xIGBClutchIx
 ## Version: 0.8.4
 ## SavedVariables: ForeverPlusPlusDB
+## SavedVariablesPerCharacter: ForeverPlusPlusCharDB
 ## IconTexture: Interface\AddOns\ForeverPlusPlus\Media\Icon
 
 Core.lua
@@ -18,6 +19,7 @@ Locales\enUS\Character.lua
 Locales\enUS\Chat.lua
 Locales\enUS\Map.lua
 Locales\enUS\Tools.lua
+Lib\Store.lua
 Lib\Secret.lua
 Lib\Colors.lua
 Lib\Text.lua
@@ -46,10 +48,10 @@ Lib\Chat.lua
 Lib\TalentPlan.lua
 Lib\Slash.lua
 Modules\System\ErrorCatcher.lua
-Modules\Units\PlayerPlates.lua
-Modules\Units\NpcPlates.lua
-Modules\Quests\QuestPlates.lua
-Modules\Tools\CVarBrowser.lua
+Modules\Units\PlayerNameplates.lua
+Modules\Units\NpcNameplates.lua
+Modules\Quests\QuestNameplates.lua
+Modules\Tools\ConsoleVariables.lua
 Modules\Tools\SelfTest.lua
 Modules\Automation\FastLoot.lua
 Modules\Automation\AutoRepair.lua
@@ -61,14 +63,14 @@ Modules\Items\ItemTooltips\AuctionPrices.lua
 Modules\Items\WaylaidCrates\WaylaidCrates.lua
 Modules\Items\WaylaidCrates\Costs.lua
 Modules\Items\WaylaidCrates\Category.lua
-Modules\Items\BagSlots.lua
+Modules\Items\BagSlotCounter.lua
 Modules\Items\AlreadyKnown.lua
-Modules\Items\UnusableItems.lua
-Modules\Quests\BestReward.lua
+Modules\Items\UnusableItemsTint.lua
+Modules\Quests\BestQuestReward.lua
 Modules\Items\EasyDelete.lua
-Modules\System\HideFeedback.lua
+Modules\System\HideBetaFeedback.lua
 Modules\Interface\Tooltips.lua
-Modules\Automation\GatherTracking.lua
+Modules\Automation\GatheringTracking.lua
 Modules\Items\ProfessionTooltips.lua
 Modules\Automation\AutoStow.lua
 Modules\Automation\AutoGossip.lua
@@ -84,22 +86,22 @@ Modules\Character\SpellRanks.lua
 Modules\Character\BuffTimers.lua
 Modules\Interface\RecipeColors.lua
 Modules\Interface\CombatAlert.lua
-Modules\System\Framerate.lua
+Modules\System\MovableFramerate.lua
 Modules\Character\XPBarText.lua
-Modules\System\AddOnList.lua
+Modules\System\AddOnsList.lua
 Modules\Interface\CurrencyBar.lua
-Modules\Character\CharacterFrame\CharacterFrame.lua
-Modules\Character\CharacterFrame\Durability.lua
-Modules\Character\CharacterFrame\Skills.lua
-Modules\Quests\QuestIcons.lua
+Modules\Character\CharacterWindow\CharacterWindow.lua
+Modules\Character\CharacterWindow\Durability.lua
+Modules\Character\CharacterWindow\Skills.lua
+Modules\Quests\ForeverQuestIcons.lua
 Modules\Quests\QuestTracker.lua
 Modules\Character\TalentPlanner.lua
 Modules\System\Commands.lua
 Modules\System\MinimapButton.lua
 Modules\Chat\ChatCopy.lua
-Modules\Chat\ChannelNames.lua
+Modules\Chat\ShortChannelNames.lua
 Modules\Chat\ChatFont.lua
-Modules\Chat\ChatFading.lua
+Modules\Chat\PersistentChat.lua
 Modules\Chat\ChatHistory.lua
 Modules\Chat\SocialButton.lua
 Modules\Units\ClassColors.lua

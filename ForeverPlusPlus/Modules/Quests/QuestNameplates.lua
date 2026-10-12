@@ -14,7 +14,7 @@ local L = ns.L
 local Nameplates = ns.Nameplates
 local readable = ns.IsReadable
 
-local module = ns.NewModule("QuestPlates", L.QUESTPLATES_DESC, {
+local module = ns.NewModule("QuestNameplates", L.QUESTNAMEPLATES_DESC, {
     enabled = true,
     progress = "count", -- "count" (3/8), "remaining" (5), or "off" (just the icon)
     party = "combined", -- whose progress: "own", "combined" (the party's added up), or "lowest"
@@ -23,37 +23,37 @@ local module = ns.NewModule("QuestPlates", L.QUESTPLATES_DESC, {
     side = "left", -- which side of the bar: "left" or "right"
     size = 100, -- a percent
 })
-module.title = L.QUESTPLATES_TITLE
+module.title = L.QUESTNAMEPLATES_TITLE
 module.category = "quests"
 
 module.options = {
     {
-        key = "progress", name = L.QUESTPLATES_PROGRESS, description = L.QUESTPLATES_PROGRESS_DESC,
+        key = "progress", name = L.QUESTNAMEPLATES_PROGRESS, description = L.QUESTNAMEPLATES_PROGRESS_DESC,
         choices = {
-            { "count", L.QUESTPLATES_PROGRESS_COUNT },
-            { "remaining", L.QUESTPLATES_PROGRESS_REMAINING },
-            { "off", L.QUESTPLATES_PROGRESS_OFF },
+            { "count", L.QUESTNAMEPLATES_PROGRESS_COUNT },
+            { "remaining", L.QUESTNAMEPLATES_PROGRESS_REMAINING },
+            { "off", L.QUESTNAMEPLATES_PROGRESS_OFF },
         },
     },
     {
-        key = "party", name = L.QUESTPLATES_PARTY, description = L.QUESTPLATES_PARTY_DESC,
+        key = "party", name = L.QUESTNAMEPLATES_PARTY, description = L.QUESTNAMEPLATES_PARTY_DESC,
         choices = {
-            { "own", L.QUESTPLATES_PARTY_OWN },
-            { "combined", L.QUESTPLATES_PARTY_COMBINED },
-            { "lowest", L.QUESTPLATES_PARTY_LOWEST },
+            { "own", L.QUESTNAMEPLATES_PARTY_OWN },
+            { "combined", L.QUESTNAMEPLATES_PARTY_COMBINED },
+            { "lowest", L.QUESTNAMEPLATES_PARTY_LOWEST },
         },
     },
-    { key = "completed", name = L.QUESTPLATES_COMPLETED, description = L.QUESTPLATES_COMPLETED_DESC },
+    { key = "completed", name = L.QUESTNAMEPLATES_COMPLETED, description = L.QUESTNAMEPLATES_COMPLETED_DESC },
     {
-        key = "completedCount", name = L.QUESTPLATES_COMPLETEDCOUNT, description = L.QUESTPLATES_COMPLETEDCOUNT_DESC,
+        key = "completedCount", name = L.QUESTNAMEPLATES_COMPLETEDCOUNT, description = L.QUESTNAMEPLATES_COMPLETEDCOUNT_DESC,
         requires = "completed",
     },
     {
-        key = "side", name = L.QUESTPLATES_SIDE, description = L.QUESTPLATES_SIDE_DESC,
-        choices = { { "left", L.QUESTPLATES_SIDE_LEFT }, { "right", L.QUESTPLATES_SIDE_RIGHT } },
+        key = "side", name = L.QUESTNAMEPLATES_SIDE, description = L.QUESTNAMEPLATES_SIDE_DESC,
+        choices = { { "left", L.QUESTNAMEPLATES_SIDE_LEFT }, { "right", L.QUESTNAMEPLATES_SIDE_RIGHT } },
     },
     {
-        key = "size", name = L.QUESTPLATES_SIZE, description = L.QUESTPLATES_SIZE_DESC,
+        key = "size", name = L.QUESTNAMEPLATES_SIZE, description = L.QUESTNAMEPLATES_SIZE_DESC,
         min = 50, max = 200, step = 10, format = "%d%%",
     },
 }

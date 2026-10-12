@@ -6,7 +6,7 @@ local _, ns = ...
 local _G, type = _G, type
 local GetInventoryItemID, GetInventorySlotInfo, pcall = GetInventoryItemID, GetInventorySlotInfo, pcall
 
-local module = ns.modules.CharacterFrame
+local module = ns.modules.CharacterWindow
 local internal = module.internal
 
 local WEAPON = 2 -- Enum.ItemClass.Weapon; shields are armor, so their subclass is no weapon's

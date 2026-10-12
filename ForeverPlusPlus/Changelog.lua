@@ -41,7 +41,7 @@ ns.changelog = {
                     .. "Shift to Skip and Skip Cinematics' Hold Shift to Watch are now Skip Key and "
                     .. "Watch Key dropdowns (Shift, Ctrl, Alt, or None), like Auto Quest's. Your "
                     .. "choice carries over." },
-                { L.GATHERTRACKING_TITLE, "Swap is a checkbox with its slider beside it, instead "
+                { L.GATHERINGTRACKING_TITLE, "Swap is a checkbox with its slider beside it, instead "
                     .. "of a slider whose first step meant Never. Your choice carries over." },
                 { L.AUTOSCREENSHOT_TITLE, "Loot Quality sits under Loot and is greyed out while "
                     .. "Loot is off." },
@@ -60,6 +60,14 @@ ns.changelog = {
                     .. "Level, and Ley Lines)." },
                 { L.CHANGELOG_COMMANDS, "/fpp reset asks before it puts every setting back and "
                     .. "clears what Forever++ saved." },
+                { L.CHANGELOG_SETTINGS, "Forever++ saves only the settings you change, so a "
+                    .. "better default reaches you wherever you kept the old one, and keeps what it "
+                    .. "collects (auction prices, flight times, chat history) apart from settings. "
+                    .. "Talent plans and learned flight points are saved for each character on its "
+                    .. "own. Everything you had carries over." },
+                { L.CHANGELOG_COMMANDS, "Module names in /fpp match their titles, such as /fpp "
+                    .. "toggle BagSlotCounter instead of BagSlots and PersistentChat instead of "
+                    .. "ChatFading. Your settings follow them." },
             } },
             { L.CHANGELOG_FIXED, {
                 { L.CHANGELOG_COMMANDS, "/fpp toggle on a tool, such as Self Test, says it's always "
@@ -101,12 +109,12 @@ ns.changelog = {
                     .. "No Weapon Fits." },
                 { L.BUFFTIMERS_TITLE, "Show Clock has an Under 1 Minute choice, for a clock only "
                     .. "on auras about to run out." },
-                { L.CHARACTERFRAME_TITLE, "The new Equipped Weapon Skills option (on by "
+                { L.CHARACTERWINDOW_TITLE, "The new Equipped Weapon Skills option (on by "
                     .. "default) colors the Skills tab's bars green for the weapons you have "
                     .. "equipped, instead of blue." },
                 { L.CHATHISTORY_TITLE, "No longer saves whispers, so they aren't written to your "
                     .. "saved settings file." },
-                { L.CVARBROWSER_TITLE, "Laid out like the Modules page: Changed, All, and the "
+                { L.CONSOLEVARIABLES_TITLE, "Laid out like the Modules page: Changed, All, and the "
                     .. "game's own categories on the left, each with how many match the search, "
                     .. "and their console variables beside it with each one's help text under its "
                     .. "name. The Changed group replaces the Changed Only checkbox." },
@@ -149,19 +157,19 @@ ns.changelog = {
                     .. "its saved file stays small." },
                 { L.FLIGHTTIMER_TITLE, "Turning Bar on during a flight shows the bar for the rest "
                     .. "of it." },
-                { L.HIDEFEEDBACK_TITLE, "Turning it off puts the quest windows' feedback alert back "
+                { L.HIDEBETAFEEDBACK_TITLE, "Turning it off puts the quest windows' feedback alert back "
                     .. "as it was." },
                 { L.HIDEFILTERRESET_TITLE, "Turning it off gives the mouse back only to the parts "
                     .. "that had it before." },
                 { L.ITEMTOOLTIPS_TITLE, "Your own auction house searches keep an item's lowest "
                     .. "price instead of the last one listed." },
-                { L.PLAYERPLATES_TITLE, "A player who turns hostile, like in a duel, gets "
+                { L.PLAYERNAMEPLATES_TITLE, "A player who turns hostile, like in a duel, gets "
                     .. "Blizzard's own nameplate back, health bar and all. So does an NPC that turns "
                     .. "hostile with NPC Nameplates on." },
-                { L.PLAYERPLATES_TITLE, "Puts your game settings back at login if it was turned "
+                { L.PLAYERNAMEPLATES_TITLE, "Puts your game settings back at login if it was turned "
                     .. "off in combat just before a reload. So do NPC Nameplates, Auto Dismount, and "
                     .. "World Map's Coordinates." },
-                { L.QUESTPLATES_TITLE, "An objective that needs 100 of something shows as 37/100, "
+                { L.QUESTNAMEPLATES_TITLE, "An objective that needs 100 of something shows as 37/100, "
                     .. "not 37%. Creatures that showed up during a fight get their quest icon once "
                     .. "it's over." },
                 { L.RECIPECOLORS_TITLE, "Turning it off clears the tint from every recipe row, not "
@@ -170,14 +178,14 @@ ns.changelog = {
                     .. "module marked NEW." },
                 { L.CHANGELOG_SETTINGS, "Recommended Defaults and Developer's Defaults keep where you "
                     .. "moved things and their size in Edit Mode, and reset only the options." },
-                { L.CHANNELNAMES_TITLE, "Turning it off gives channels already in chat their full "
+                { L.SHORTCHANNELNAMES_TITLE, "Turning it off gives channels already in chat their full "
                     .. "names again." },
                 { L.SOCIALBUTTON_TITLE, "Turning it off no longer leaves Chat Copy's button above "
                     .. "the chat window." },
                 { L.TALENTPLANNER_TITLE, "Refuses a shared plan with more than 51 points, which could "
                     .. "freeze the game, and a shared plan's name can't carry colors, icons, or "
                     .. "links." },
-                { L.UNUSABLEITEMS_TITLE, "No longer tints recipes you can learn because of the "
+                { L.UNUSABLEITEMSTINT_TITLE, "No longer tints recipes you can learn because of the "
                     .. "item they make, such as plans for mail armor or for gear above your level." },
                 { L.WAYPOINTS_TITLE, "/way is left to TomTom or another addon that has it even "
                     .. "after you've typed a slash command, and turning Waypoints on says so in "
@@ -238,7 +246,7 @@ ns.changelog = {
                     .. "minutes like 2 m. Choose under 10 minutes (the default), under an hour, "
                     .. "or always. When "
                     .. "the game hides an aura's time in combat, Blizzard's own timer shows." },
-                { L.UNUSABLEITEMS_TITLE, "New, on by default, in Items: tints red the items "
+                { L.UNUSABLEITEMSTINT_TITLE, "New, on by default, in Items: tints red the items "
                     .. "you can't use, because of your class, armor or weapon skill, level, or "
                     .. "profession, in your bags, the bank, and at merchants, the way merchants "
                     .. "tint them. At merchants it only adds what the merchant doesn't already "
@@ -309,7 +317,7 @@ ns.changelog = {
                 { L.CHANGELOG_SETTINGS, "Clearer names and descriptions for a few options: Auto "
                     .. "Quest's Skip Key, Item Tooltips' Bag and Bank Labels, Unexplored Areas' Tint "
                     .. "Strength, and Zone Info's Herbs, Ore, and Skinning." },
-                { L.CHARACTERFRAME_TITLE, "Character Frame Enhancements is now Character "
+                { L.CHARACTERWINDOW_TITLE, "Character Frame Enhancements is now Character "
                     .. "Window, so its name fits the Modules list, and Durability Bars is now its "
                     .. "Durability Bars option instead of a module of its own (always, only when "
                     .. "worn, below 50% or 25%, or off), set to what you had." },
@@ -328,7 +336,7 @@ ns.changelog = {
                     .. "or to everyone, or to no one." },
             } },
             { L.CHANGELOG_FIXED, {
-                { L.CHARACTERFRAME_TITLE, "Works with Forever's new Titles tab. Titles gets its "
+                { L.CHARACTERWINDOW_TITLE, "Works with Forever's new Titles tab. Titles gets its "
                     .. "own side tab, the Pet tab opens your pet's stats again instead of Titles, "
                     .. "the titles list starts at the top and runs further down like the stats, "
                     .. "and the pet pane keeps your pet's level and loyalty. Your pet's tab also "
@@ -336,7 +344,7 @@ ns.changelog = {
                     .. "can't use yet (no titles, no pet) says why when you point at it. The side "
                     .. "tabs sit as close together as Blizzard's, and get a little smaller when "
                     .. "needed, so the last one stays on the window." },
-                { L.CVARBROWSER_TITLE, "An empty list says why (nothing matches the search, or "
+                { L.CONSOLEVARIABLES_TITLE, "An empty list says why (nothing matches the search, or "
                     .. "nothing is changed), and a row stays highlighted with its tooltip while "
                     .. "you point at its value box or Default button." },
             } },
@@ -347,14 +355,14 @@ ns.changelog = {
         date = "2026-10-02",
         sections = {
             { L.CHANGELOG_ADDED, {
-                { L.BESTREWARD_TITLE, "New, on by default, in Items: marks the quest reward that "
+                { L.BESTQUESTREWARD_TITLE, "New, on by default, in Items: marks the quest reward that "
                     .. "sells to a vendor for the most with a gold coin, in the quest window and "
                     .. "the quest log." },
                 { L.ITEMCOUNT_TITLE, "New, off by default, in Items: shows in an item's tooltip "
                     .. "how many you own, in your bags and in your bank." },
                 { L.EASYDELETE_TITLE, "New, off by default, in Items: types DELETE for you when "
                     .. "you destroy a good item." },
-                { L.FRAMERATE_TITLE, "New, off by default, in Interface: move and resize the "
+                { L.MOVABLEFRAMERATE_TITLE, "New, off by default, in Interface: move and resize the "
                     .. "framerate text (Ctrl+R) in Edit Mode." },
                 { L.AUCTIONPRICES_TITLE, "New Crafting Costs option shows a recipe's total cost, "
                     .. "value, and profit in the professions window. Reagent tooltips there now "
@@ -399,11 +407,11 @@ ns.changelog = {
                     .. "window's Equipment and Pet tabs to the side with the others, removes the "
                     .. "portrait and level line so the stats start at the top, and shows your "
                     .. "level and name in your class color as the title." },
-                { L.QUESTICONS_TITLE, "New, on by default, in Interface: marks quests that are "
+                { L.FOREVERQUESTICONS_TITLE, "New, on by default, in Interface: marks quests that are "
                     .. "new to Forever with an infinity sign (or the Forever logo) after their "
                     .. "name in the quest log, the objective tracker, and quest givers' lists. "
                     .. "Idea from ForeverQuestTint." },
-                { L.QUESTPLATES_TITLE, "New Party Progress option to count everyone's progress "
+                { L.QUESTNAMEPLATES_TITLE, "New Party Progress option to count everyone's progress "
                     .. "added up (the default), only yours, or the party member furthest from "
                     .. "done. Creatures only a party member needs now show too." },
                 { L.CLASSCOLORS_TITLE, "The Names checkbox is now a Name Color choice (Default, "
@@ -412,7 +420,7 @@ ns.changelog = {
                     .. "their class color." },
             } },
             { L.CHANGELOG_CHANGED, {
-                { L.CHATFADING_TITLE, "Renamed from Chat Fading, and now on by default." },
+                { L.PERSISTENTCHAT_TITLE, "Renamed from Chat Fading, and now on by default." },
                 { L.AUTOREPAIR_TITLE, "Holding Shift to skip is now an option (on by default)." },
                 { L.AUTOSELLJUNK_TITLE, "Holding Shift to skip is now an option (on by default)." },
                 { L.CHANGELOG_SETTINGS, "The Defaults button on the Modules and Debug pages now "
@@ -440,14 +448,14 @@ ns.changelog = {
                     .. "instead of fading it out after a while." },
             } },
             { L.CHANGELOG_CHANGED, {
-                { L.HIDEFEEDBACK_TITLE, "Also hides the beta's feedback buttons on quest windows "
+                { L.HIDEBETAFEEDBACK_TITLE, "Also hides the beta's feedback buttons on quest windows "
                     .. "(quest, gossip, and quest log), with its own checkbox." },
-                { L.QUESTPLATES_TITLE, "The icon matches the objective: Blizzard's attack, pickup, "
+                { L.QUESTNAMEPLATES_TITLE, "The icon matches the objective: Blizzard's attack, pickup, "
                     .. "or interact icon for kill, item, or object objectives, and the quest icon "
                     .. "for the rest. A creature whose objective is done shows a green check "
                     .. "and its final count (8/8), unless you turn off Show Completed; the count can be "
                     .. "turned off to leave just the check." },
-                { L.PLAYERPLATES_TITLE .. " and " .. L.NPCPLATES_TITLE, "On name-only plates the "
+                { L.PLAYERNAMEPLATES_TITLE .. " and " .. L.NPCNAMEPLATES_TITLE, "On name-only plates the "
                     .. "buffs sit centered above the name instead of far off to the left. A Buffs "
                     .. "setting puts them above, before, or after the name, or back in Blizzard's "
                     .. "spot." },
@@ -459,7 +467,7 @@ ns.changelog = {
                     .. "now an option, off by default." },
             } },
             { L.CHANGELOG_FIXED, {
-                { L.HIDEFEEDBACK_TITLE, "The feedback box on quest windows no longer fades "
+                { L.HIDEBETAFEEDBACK_TITLE, "The feedback box on quest windows no longer fades "
                     .. "back in." },
                 { "Forever++", "An error in one module no longer stops the others from loading, "
                     .. "turning on, or turning off." },
@@ -493,14 +501,14 @@ ns.changelog = {
                     .. "(off by default). Duels and party invites each have their own checkbox." },
                 { L.FISHINGCAST_TITLE, "New, off by default, in Automation. Double right-click "
                     .. "with a fishing pole equipped to cast Fishing." },
-                { L.ADDONLIST_TITLE, "New, in Interface. The AddOns list without category "
+                { L.ADDONSLIST_TITLE, "New, in Interface. The AddOns list without category "
                     .. "headers, enabled addons first." },
                 { L.SPELLRANKS_TITLE, "New, in Interface. Marks action bar spells that have a "
                     .. "higher rank you already know, and adds the best rank to the tooltip. "
                     .. "/fpp ranks lists them." },
                 { L.RECIPECOLORS_TITLE, "New. Colors recipes in the professions window by your "
                     .. "chance of a skill-up, like the old trade skill window." },
-                { L.QUESTPLATES_TITLE, "New. A quest icon and your progress beside the health "
+                { L.QUESTNAMEPLATES_TITLE, "New. A quest icon and your progress beside the health "
                     .. "bar of creatures you need for a quest." },
                 { L.ALREADYKNOWN_TITLE, "New. A green check on recipes, mounts, pets, toys, and "
                     .. "other items you already know, on merchants, the auction house, bags, "
@@ -517,7 +525,7 @@ ns.changelog = {
                 { L.ZONEINFO_TITLE, "A Detail Key shows fishing, dungeons, herbs, ore, and "
                     .. "skinning only while you hold it, and the panel can sit in a top corner "
                     .. "of the map." },
-                { L.PLAYERPLATES_TITLE, "An Icon Position option puts the role, friend, and "
+                { L.PLAYERNAMEPLATES_TITLE, "An Icon Position option puts the role, friend, and "
                     .. "recent ally icons before or after the name." },
                 { L.TOOLTIPS_TITLE, "A Faction Color option colors the Horde or Alliance line on "
                     .. "a unit red or blue." },
@@ -528,9 +536,9 @@ ns.changelog = {
                 { L.ZONEINFO_TITLE .. " and " .. L.POI_TITLE, "Map tooltips look the same: white "
                     .. "title, gold kind of place, Horde red and Alliance blue, and each dungeon "
                     .. "or raid on one row with its icon." },
-                { L.PLAYERPLATES_TITLE, "Recent allies get an icon instead of a light blue name. "
+                { L.PLAYERNAMEPLATES_TITLE, "Recent allies get an icon instead of a light blue name. "
                     .. "Recent Allies is a dropdown: Off, Colored Name, or Icon." },
-                { L.PLAYERPLATES_TITLE .. " and " .. L.NPCPLATES_TITLE, "Name Size is 80% by "
+                { L.PLAYERNAMEPLATES_TITLE .. " and " .. L.NPCNAMEPLATES_TITLE, "Name Size is 80% by "
                     .. "default." },
                 { L.SKIPCINEMATICS_TITLE, "Forget asks you to confirm first." },
             } },
@@ -538,9 +546,9 @@ ns.changelog = {
                 { L.POI_TITLE, "No second icon beside ours for Undercity or for dungeon and "
                     .. "raid entrances. Learned flight points show as learned again, including "
                     .. "with translated names; visit a flight master once to pick yours up." },
-                { L.PLAYERPLATES_TITLE, "No more \"action blocked\" error at login." },
+                { L.PLAYERNAMEPLATES_TITLE, "No more \"action blocked\" error at login." },
                 { L.AUCTIONPRICES_TITLE, "Posting works while a scan runs." },
-                { L.PLAYERPLATES_TITLE .. " and " .. L.NPCPLATES_TITLE, "The guild or title no "
+                { L.PLAYERNAMEPLATES_TITLE .. " and " .. L.NPCNAMEPLATES_TITLE, "The guild or title no "
                     .. "longer overlaps the cast bar." },
                 { L.PROFTOOLTIPS_TITLE, "The skill line sits under the name, above quest lines, "
                     .. "also on minimap pins." },
@@ -567,17 +575,17 @@ ns.changelog = {
             { L.CHANGELOG_CHANGED, {
                 { L.CLASSCOLORS_TITLE, "Hostile NPCs' health bars are red, neutral ones yellow, "
                     .. "and tagged ones gray." },
-                { L.BAGSLOTS_TITLE, "Adds up every bag on the backpack button by default." },
+                { L.BAGSLOTCOUNTER_TITLE, "Adds up every bag on the backpack button by default." },
                 { L.AUTOSTOW_TITLE, "The delay is a slider." },
                 { L.AUTORELEASE_TITLE, "The delay is a slider." },
-                { L.GATHERTRACKING_TITLE, "Swap is a slider." },
+                { L.GATHERINGTRACKING_TITLE, "Swap is a slider." },
                 { L.AUCTIONPRICES_TITLE, "Red After is a slider." },
-                { L.PLAYERPLATES_TITLE, "A Name Size slider." },
-                { L.NPCPLATES_TITLE, "A Name Size slider." },
+                { L.PLAYERNAMEPLATES_TITLE, "A Name Size slider." },
+                { L.NPCNAMEPLATES_TITLE, "A Name Size slider." },
             } },
             { L.CHANGELOG_FIXED, {
-                { L.PLAYERPLATES_TITLE, "Chinese, Korean, and Cyrillic names show again." },
-                { L.NPCPLATES_TITLE, "Same fix for NPC names and titles." },
+                { L.PLAYERNAMEPLATES_TITLE, "Chinese, Korean, and Cyrillic names show again." },
+                { L.NPCNAMEPLATES_TITLE, "Same fix for NPC names and titles." },
             } },
         },
     },
@@ -601,7 +609,7 @@ ns.changelog = {
                     .. "checkboxes for loot of a chosen quality, reputation standings, PvP ranks, "
                     .. "new titles, battleground ends, and deaths, hiding the interface for the "
                     .. "shot, and a chat line saying why. Off by default." },
-                { L.BAGSLOTS_TITLE, "How many bag slots are free, on the bag buttons. Includes "
+                { L.BAGSLOTCOUNTER_TITLE, "How many bag slots are free, on the bag buttons. Includes "
                     .. "each bag's own count or the total on the backpack, the reagent bag on its "
                     .. "own button, added to the backpack, or hidden, counting special bags such "
                     .. "as quivers and herb bags, and the text's size and position." },
@@ -620,7 +628,7 @@ ns.changelog = {
                     .. "every one, holding Shift to watch, and a Forget button for the seen list." },
             } },
             { L.CHANGELOG_CHANGED, {
-                { L.PLAYERPLATES_TITLE, "Recent allies' names in the game's light blue, instead "
+                { L.PLAYERNAMEPLATES_TITLE, "Recent allies' names in the game's light blue, instead "
                     .. "of the Name Color. Includes a checkbox to turn it off." },
                 { L.CHANGELOG_SETTINGS, "Fewer entries in the sidebar. Forever++ opens on a "
                     .. "welcome page, and every module is on one Modules page, where the gear "
@@ -647,7 +655,7 @@ ns.changelog = {
                     .. "your own money, a minimum cost, and holding Shift to skip it." },
                 { L.AUTOSTOW_TITLE, "Puts your weapons away after combat. Includes the delay and "
                     .. "leaving them out in dungeons, raids, and battlegrounds." },
-                { L.CVARBROWSER_TITLE, "A Settings page to browse, search, and change the game's "
+                { L.CONSOLEVARIABLES_TITLE, "A Settings page to browse, search, and change the game's "
                     .. "console variables (CVars). Includes a Changed Only filter and "
                     .. "/fpp cvar [search]." },
                 { "Durability Bars", "A bar beside each item on the character window with how "
@@ -655,16 +663,16 @@ ns.changelog = {
                     .. "below 25%." },
                 { L.FASTLOOT_TITLE, "With auto loot on, takes everything at once. Includes a warning "
                     .. "in Settings, with a Turn On button, when Blizzard's auto loot is off." },
-                { L.GATHERTRACKING_TITLE, "Keeps Find Minerals or Find Herbs on. Includes minerals, "
+                { L.GATHERINGTRACKING_TITLE, "Keeps Find Minerals or Find Herbs on. Includes minerals, "
                     .. "herbs, or both, turning tracking back on after logging in, zoning, or dying, "
                     .. "and swapping between the two every few seconds." },
-                { L.HIDEFEEDBACK_TITLE, "Hides the beta's \"Press F6 to submit an issue\" tooltip "
+                { L.HIDEBETAFEEDBACK_TITLE, "Hides the beta's \"Press F6 to submit an issue\" tooltip "
                     .. "line and the bug report button, each on its own. Off by default, and only on "
                     .. "beta and PTR clients." },
-                { L.NPCPLATES_TITLE, "Friendly NPCs' names with their title, and a health bar only "
+                { L.NPCNAMEPLATES_TITLE, "Friendly NPCs' names with their title, and a health bar only "
                     .. "when they're hurt or in combat. Includes name color, where the level goes, "
                     .. "and when and in what color titles show." },
-                { L.PLAYERPLATES_TITLE, "Friendly players' names with their guild, and a health bar "
+                { L.PLAYERNAMEPLATES_TITLE, "Friendly players' names with their guild, and a health bar "
                     .. "only when they're hurt or in combat. Includes class-colored names, where the "
                     .. "level goes, guild line and color, highlighting guildmates, and role icons "
                     .. "for group members and Battle.net icons for friends." },

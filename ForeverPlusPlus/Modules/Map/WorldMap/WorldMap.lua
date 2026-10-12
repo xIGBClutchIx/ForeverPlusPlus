@@ -31,7 +31,8 @@ local MOVED = {
     { "Coordinates", "coordinates", { "player", "cursor", "tenths", "minimap", "titleBar", "saved" } },
 }
 
-ns.Migrate(function(saved)
+ns.Migrate(1, function(db)
+    local saved = db.modules or {}
     local db
     for _, moved in ipairs(MOVED) do
         local name, toggle, keys = moved[1], moved[2], moved[3]

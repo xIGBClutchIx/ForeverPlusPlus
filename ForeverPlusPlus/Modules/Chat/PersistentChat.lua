@@ -7,10 +7,10 @@ local ipairs, setmetatable = ipairs, setmetatable
 local L = ns.L
 local Chat = ns.Chat
 
-local module = ns.NewModule("ChatFading", L.CHATFADING_DESC, {
+local module = ns.NewModule("PersistentChat", L.PERSISTENTCHAT_DESC, {
     enabled = true,
 })
-module.title = L.CHATFADING_TITLE
+module.title = L.PERSISTENTCHAT_TITLE
 module.category = "chat"
 
 -- Whether each window faded before we changed it, to give back.

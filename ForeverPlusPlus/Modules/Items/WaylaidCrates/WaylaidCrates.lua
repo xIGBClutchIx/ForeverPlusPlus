@@ -20,7 +20,8 @@ module.category = "items"
 module.added = "0.8.5"
 
 -- Before 0.8.5, Bundle Costs was Item Tooltips' Waylaid Crate Costs option.
-ns.Migrate(function(saved)
+ns.Migrate(1, function(db)
+    local saved = db.modules or {}
     local old = saved.ItemTooltips
     if not (old and old.crates ~= nil) then
         return

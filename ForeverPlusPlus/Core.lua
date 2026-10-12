@@ -142,22 +142,9 @@ function ns.AfterCombat(fn)
 end
 
 -- Saved settings ------------------------------------------------------------------------------
--- ForeverPlusPlusDB = { modules = { [name] = { enabled = bool, ... } } }. Missing values are
--- filled from each module's defaults when the addon loads, and settings no module defines any
--- more (a removed module or option) are dropped.
-
-local function fill(target, defaults)
-    for key, value in pairs(defaults) do
-        if type(value) == "table" then
-            if type(target[key]) ~= "table" then
-                target[key] = {}
-            end
-            fill(target[key], value)
-        elseif target[key] == nil then
-            target[key] = value
-        end
-    end
-end
+-- Lib/Store.lua lays out ForeverPlusPlusDB and ForeverPlusPlusCharDB: each module's settings
+-- (only what the player changed) apart from what it collects, and a version so the steps that
+-- bring an older layout up to date each run once. `module.db` reads and writes both.
 
 ---A slider option's value brought into its range and onto its steps, or nil when it isn't a
 ---number.
@@ -193,29 +180,26 @@ local function checkValues(module)
     end
 end
 
--- Drops a module's top-level settings that its defaults no longer have. Only the top level:
--- tables inside (like a module's saved CVars) hold data, not settings.
-local function prune(target, defaults)
-    for key in pairs(target) do
-        if defaults[key] == nil then
-            target[key] = nil
-        end
-    end
+-- Moving settings -----------------------------------------------------------------------------
+-- When a release renames, merges, or moves a module, setting, or data between modules, a step
+-- moves what the player saved to where it now goes, once, at the first login with that release,
+-- before settings and data no module has are cleared.
+
+---Adds a step that moves saved settings from where an older version kept them, run once when the
+---saved layout is older than `version`. Give a new step the next version (Store.VERSION + 1, and
+---raise Store.VERSION to it). Version 1 steps work on the 0.8 layout, `db.modules`; later ones on
+---`db.settings[module]` and `db.data[module]` (see Lib/Store.lua).
+---@param version integer
+---@param fn fun(db: table) ForeverPlusPlusDB
+function ns.Migrate(version, fn)
+    ns.Store.Step(version, fn)
 end
 
--- Moving settings -----------------------------------------------------------------------------
--- When a release renames or merges a module or setting, a migration moves what the player saved
--- under the old name to the new one at login, before settings no module has are cleared.
-
-local migrations = {} -- functions run at login, in the order added
-
----Adds a step that moves saved settings from where an older version kept them. At login, before
----settings of modules and options that no longer exist are cleared, `fn` gets every module's saved
----table by module name. It runs at every login, so it must do nothing once there's nothing left
----to move: clear the old values it moved.
----@param fn fun(saved: table<string, table>)
-function ns.Migrate(fn)
-    migrations[#migrations + 1] = fn
+---Like ns.Migrate, for a character's own saved variables: `fn(char, db)` runs once per character.
+---@param version integer
+---@param fn fun(char: table, db: table) ForeverPlusPlusCharDB, ForeverPlusPlusDB
+function ns.MigrateCharacter(version, fn)
+    ns.Store.CharacterStep(version, fn)
 end
 
 ---Copies saved values from `from` to `to`. `keys` lists them: a plain entry keeps its name, and
@@ -370,10 +354,11 @@ end
 ---`module.category` for its group on the main Settings page (see Settings.lua). A tool with
 ---nothing to turn off sets `module.alwaysOn`: it has no toggle and stays on. A module only for
 ---some clients gives `module:IsAvailable()`; when it returns false at login, the module stays off
----and out of Settings and /fpp list.
+---and out of Settings and /fpp list. A default that is a table is data the module collects, not a
+---setting; one kept for each character on its own goes in `module.perCharacter` ({ [key] = true }).
 ---@param name string shown in /fpp
 ---@param description string one line for /fpp
----@param defaults? table its settings; `enabled` defaults to true
+---@param defaults? table its settings and data; `enabled` defaults to true
 ---@return table module with .db (its saved settings) once the addon has loaded
 function ns.NewModule(name, description, defaults)
     if ns.modules[name] then
@@ -535,40 +520,76 @@ function ns.ModulesOn()
     return names
 end
 
+-- Modules renamed in layout version 3 so their names match their titles: old -> new.
+local RENAMED = {
+    GatherTracking = "GatheringTracking",
+    CharacterFrame = "CharacterWindow",
+    ChannelNames = "ShortChannelNames",
+    ChatFading = "PersistentChat",
+    BagSlots = "BagSlotCounter",
+    UnusableItems = "UnusableItemsTint",
+    BestReward = "BestQuestReward",
+    QuestIcons = "ForeverQuestIcons",
+    QuestPlates = "QuestNameplates",
+    AddOnList = "AddOnsList",
+    Framerate = "MovableFramerate",
+    HideFeedback = "HideBetaFeedback",
+    CVarBrowser = "ConsoleVariables",
+    NpcPlates = "NpcNameplates",
+    PlayerPlates = "PlayerNameplates",
+}
+
+-- The core's own steps. Version 2 splits the 0.8 layout into settings, data, and per-character
+-- data each character takes when it logs in; version 3 renames modules to match their titles.
+local function addCoreSteps()
+    local Store = ns.Store
+    Store.Step(2, function(db)
+        local perCharacter = {}
+        for name, module in pairs(ns.modules) do
+            perCharacter[name] = module.perCharacter
+        end
+        -- Version 1 still had the old names.
+        for old, new in pairs(RENAMED) do
+            perCharacter[old] = perCharacter[new]
+        end
+        Store.Split(db, perCharacter)
+    end)
+    Store.Step(3, function(db)
+        Store.Rename(db, RENAMED)
+    end)
+end
+
 ---Loads the saved settings and enables every module that is on (called once, at PLAYER_LOGIN).
 function ns.Start()
+    local Store = ns.Store
     ForeverPlusPlusDB = type(ForeverPlusPlusDB) == "table" and ForeverPlusPlusDB or {}
-    ns.db = ForeverPlusPlusDB
-    ns.db.modules = ns.db.modules or {}
+    ForeverPlusPlusCharDB = type(ForeverPlusPlusCharDB) == "table" and ForeverPlusPlusCharDB or {}
+    ns.db, ns.charDB = ForeverPlusPlusDB, ForeverPlusPlusCharDB
+    addCoreSteps()
+    local fresh = Store.Upgrade(ns.db, ns.charDB)
     -- The last version whose Modules page the player has seen all of, and the version each module
     -- clicked since was seen in; Settings.lua marks what's added or changed after them as new. A
     -- fresh install has nothing to catch up on; saved settings from before this was kept have
     -- seen none of them.
     ns.version = ns.Metadata("Version")
     if type(ns.db.seenVersion) ~= "string" then
-        ns.db.seenVersion = next(ns.db.modules) == nil and ns.version or "0"
+        ns.db.seenVersion = fresh and ns.version or "0"
     end
     if type(ns.db.seenModules) ~= "table" then
         ns.db.seenModules = {}
     end
     -- A fresh install has the About page to see, which the Minimap Button offers once.
-    if next(ns.db.modules) == nil then
+    if fresh then
         ns.db.welcome = true
     end
-    for _, fn in ipairs(migrations) do
-        call(fn, ns.db.modules)
+    local known = {}
+    for _, name in ipairs(ns.order) do
+        known[name] = true
     end
-    for name in pairs(ns.db.modules) do
-        if not ns.modules[name] then
-            ns.db.modules[name] = nil
-        end
-    end
+    Store.Prune(ns.db, ns.charDB, known)
     for _, name in ipairs(ns.order) do
         local module = ns.modules[name]
-        ns.db.modules[name] = ns.db.modules[name] or {}
-        prune(ns.db.modules[name], module.defaults)
-        fill(ns.db.modules[name], module.defaults)
-        module.db = ns.db.modules[name]
+        module.db = Store.Load(ns.db, ns.charDB, name, module.defaults, module.perCharacter)
         for _, part in ipairs(module.parts or {}) do
             part.db = module.db
         end
@@ -617,7 +638,7 @@ end
 
 -- Modules the Developer's Defaults preset turns on, on top of every module's default settings.
 local developerEnables = { "FishingCast", "SkipCinematics", "AutoScreenshot", "CurrencyBar",
-    "HideFeedback", "ChannelNames", "EasyDelete", "AutoWeaponBuff" }
+    "HideBetaFeedback", "ShortChannelNames", "EasyDelete", "AutoWeaponBuff" }
 
 -- Options the Developer's Defaults preset sets differently from the module's default.
 local developerOptions = {
@@ -840,7 +861,7 @@ SlashCmdList.FOREVERPLUSPLUS = function(message)
     elseif command == "reset" then
         -- It throws away saved data too (prices, flight times, chat history), so it asks first.
         ns.Confirm("RESET_ALL", L.RESET_CONFIRM, function()
-            ForeverPlusPlusDB = nil
+            ForeverPlusPlusDB, ForeverPlusPlusCharDB = nil, nil
             ReloadUI()
         end)
     elseif command == "list" or command == "help" or not ns.OpenSettings() then

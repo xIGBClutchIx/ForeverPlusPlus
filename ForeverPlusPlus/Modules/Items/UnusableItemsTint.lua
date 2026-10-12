@@ -19,20 +19,20 @@ local C_Item, C_Container, C_Timer = C_Item, C_Container, C_Timer
 local L = ns.L
 local ItemButtons = ns.ItemButtons
 
-local module = ns.NewModule("UnusableItems", L.UNUSABLEITEMS_DESC, {
+local module = ns.NewModule("UnusableItemsTint", L.UNUSABLEITEMSTINT_DESC, {
     enabled = true,
     bags = true,
     bank = true,
     merchant = true,
 })
-module.title = L.UNUSABLEITEMS_TITLE
+module.title = L.UNUSABLEITEMSTINT_TITLE
 module.category = "items"
 module.added = "0.8.0"
 
 module.options = {
-    { key = "bags", name = L.UNUSABLEITEMS_BAGS, description = L.UNUSABLEITEMS_BAGS_DESC },
-    { key = "bank", name = L.UNUSABLEITEMS_BANK, description = L.UNUSABLEITEMS_BANK_DESC },
-    { key = "merchant", name = L.UNUSABLEITEMS_MERCHANT, description = L.UNUSABLEITEMS_MERCHANT_DESC },
+    { key = "bags", name = L.UNUSABLEITEMSTINT_BAGS, description = L.UNUSABLEITEMSTINT_BAGS_DESC },
+    { key = "bank", name = L.UNUSABLEITEMSTINT_BANK, description = L.UNUSABLEITEMSTINT_BANK_DESC },
+    { key = "merchant", name = L.UNUSABLEITEMSTINT_MERCHANT, description = L.UNUSABLEITEMSTINT_MERCHANT_DESC },
 }
 
 local TINT = { 0.9, 0, 0 } -- Blizzard's merchant tint for an item you can't use

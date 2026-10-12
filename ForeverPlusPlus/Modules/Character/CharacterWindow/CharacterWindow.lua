@@ -13,20 +13,21 @@ local HasPetUI, SetPortraitTexture = HasPetUI, SetPortraitTexture
 local L = ns.L
 local Colors = ns.Colors
 
-local module = ns.NewModule("CharacterFrame", L.CHARACTERFRAME_DESC, {
+local module = ns.NewModule("CharacterWindow", L.CHARACTERWINDOW_DESC, {
     enabled = true,
     sideTabs = true,
     colorTitle = true,
     durability = "always", -- "off", or which items get a bar (Durability.lua)
     weaponSkills = true, -- green skill bars for the weapons worn (Skills.lua)
 })
-module.title = L.CHARACTERFRAME_TITLE
+module.title = L.CHARACTERWINDOW_TITLE
 module.category = "character"
 module.internal = {}
 local internal = module.internal
 
 -- Before 0.8.0, Durability Bars was a module of its own, with a Show dropdown.
-ns.Migrate(function(saved)
+ns.Migrate(1, function(db)
+    local saved = db.modules or {}
     local old = saved.DurabilityBars
     if not old then
         return
@@ -39,24 +40,24 @@ end)
 
 module.options = {
     {
-        key = "sideTabs", name = L.CHARACTERFRAME_SIDETABS, description = L.CHARACTERFRAME_SIDETABS_DESC,
+        key = "sideTabs", name = L.CHARACTERWINDOW_SIDETABS, description = L.CHARACTERWINDOW_SIDETABS_DESC,
         changed = "0.8.0", -- the Titles tab
     },
-    { key = "colorTitle", name = L.CHARACTERFRAME_COLORTITLE, description = L.CHARACTERFRAME_COLORTITLE_DESC },
+    { key = "colorTitle", name = L.CHARACTERWINDOW_COLORTITLE, description = L.CHARACTERWINDOW_COLORTITLE_DESC },
     {
-        key = "durability", name = L.CHARACTERFRAME_DURABILITY,
-        description = L.CHARACTERFRAME_DURABILITY_DESC, added = "0.8.0",
+        key = "durability", name = L.CHARACTERWINDOW_DURABILITY,
+        description = L.CHARACTERWINDOW_DURABILITY_DESC, added = "0.8.0",
         choices = {
-            { "always", L.CHARACTERFRAME_DURABILITY_ALWAYS },
-            { "worn", L.CHARACTERFRAME_DURABILITY_WORN },
-            { "half", L.CHARACTERFRAME_DURABILITY_HALF },
-            { "quarter", L.CHARACTERFRAME_DURABILITY_QUARTER },
-            { "off", L.CHARACTERFRAME_DURABILITY_OFF },
+            { "always", L.CHARACTERWINDOW_DURABILITY_ALWAYS },
+            { "worn", L.CHARACTERWINDOW_DURABILITY_WORN },
+            { "half", L.CHARACTERWINDOW_DURABILITY_HALF },
+            { "quarter", L.CHARACTERWINDOW_DURABILITY_QUARTER },
+            { "off", L.CHARACTERWINDOW_DURABILITY_OFF },
         },
     },
     {
-        key = "weaponSkills", name = L.CHARACTERFRAME_WEAPONSKILLS,
-        description = L.CHARACTERFRAME_WEAPONSKILLS_DESC, added = "0.8.2",
+        key = "weaponSkills", name = L.CHARACTERWINDOW_WEAPONSKILLS,
+        description = L.CHARACTERWINDOW_WEAPONSKILLS_DESC, added = "0.8.2",
     },
 }
 
@@ -94,7 +95,7 @@ local function updateTitle()
     local level = Colors.Text(NORMAL_FONT_COLOR, UnitLevel("player"))
     local name = UnitPVPName("player") or UnitName("player")
     local color = Colors.Class("player")
-    text:SetText(format(L.CHARACTERFRAME_TITLE_FORMAT, level, color and Colors.Text(color, name) or name))
+    text:SetText(format(L.CHARACTERWINDOW_TITLE_FORMAT, level, color and Colors.Text(color, name) or name))
     text:SetTextColor(1, 1, 1)
 end
 

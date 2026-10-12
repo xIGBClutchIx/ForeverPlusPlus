@@ -24,7 +24,8 @@ module.title = L.AUTOGOSSIP_TITLE
 module.category = "automation"
 
 -- Hold Shift to Skip was a checkbox, 0.8.4 and before.
-ns.Migrate(function(saved)
+ns.Migrate(1, function(db)
+    local saved = db.modules or {}
     ns.Keys.MigrateShift(saved, "AutoGossip", "shiftSkips", "skipKey")
 end)
 

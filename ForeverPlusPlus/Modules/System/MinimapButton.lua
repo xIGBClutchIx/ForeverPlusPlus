@@ -29,7 +29,8 @@ module.added = "0.8.0"
 
 -- Before 0.8.0 the button was Error Catcher's, with its Minimap Button checkbox, Clear Key, and the
 -- button's place. A player who had turned that button off keeps it off the minimap.
-ns.Migrate(function(saved)
+ns.Migrate(1, function(db)
+    local saved = db.modules or {}
     local old = saved.ErrorCatcher
     if not (old and (old.minimap ~= nil or old.clearModifier ~= nil)) then
         return
@@ -61,8 +62,8 @@ local MODIFIERS = {
 -- The modules the right-click menu turns on and off, in this order. One that isn't available on
 -- this client (Hide Beta Feedback off the beta) is left out.
 local QUICK_TOGGLES = {
-    "FastLoot", "AutoQuest", "AutoSellJunk", "AutoStow", "FishingCast", "GatherTracking",
-    "HideFeedback",
+    "FastLoot", "AutoQuest", "AutoSellJunk", "AutoStow", "FishingCast", "GatheringTracking",
+    "HideBetaFeedback",
 }
 
 -- Turned on and off through Core, as the Modules page does, so Settings and /fpp follow along.

@@ -9,19 +9,19 @@ local hooksecurefunc, C_Timer = hooksecurefunc, C_Timer
 
 local L = ns.L
 
-local module = ns.NewModule("HideFeedback", L.HIDEFEEDBACK_DESC, {
+local module = ns.NewModule("HideBetaFeedback", L.HIDEBETAFEEDBACK_DESC, {
     enabled = false,
     tooltip = true, -- hide the "Press F6" reminder on tooltips
     button = true, -- hide the floating bug report button
     quest = true, -- hide the feedback widgets on quest windows
 })
-module.title = L.HIDEFEEDBACK_TITLE
+module.title = L.HIDEBETAFEEDBACK_TITLE
 module.category = "system"
 
 module.options = {
-    { key = "tooltip", name = L.HIDEFEEDBACK_TOOLTIP, description = L.HIDEFEEDBACK_TOOLTIP_DESC },
-    { key = "button", name = L.HIDEFEEDBACK_BUTTON, description = L.HIDEFEEDBACK_BUTTON_DESC },
-    { key = "quest", name = L.HIDEFEEDBACK_QUEST, description = L.HIDEFEEDBACK_QUEST_DESC },
+    { key = "tooltip", name = L.HIDEBETAFEEDBACK_TOOLTIP, description = L.HIDEBETAFEEDBACK_TOOLTIP_DESC },
+    { key = "button", name = L.HIDEBETAFEEDBACK_BUTTON, description = L.HIDEBETAFEEDBACK_BUTTON_DESC },
+    { key = "quest", name = L.HIDEBETAFEEDBACK_QUEST, description = L.HIDEBETAFEEDBACK_QUEST_DESC },
 }
 
 -- Only test clients (the beta, a PTR) have the feedback code. Probe: IsBetaBuild and

@@ -23,6 +23,8 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Settings**: the Modules page has new Character, Quests, and System categories, taken mostly from Interface, and Units, which joins Unit Frames and Nameplates. The categories are listed in alphabetical order.
 - **Settings**: buttons that throw away saved data all say Clear (Seen Cinematics, Saved Ley Lines, Saved Prices, and Flight Times), and dropdowns say Off where they turn something off (Scan Age, Reagent Bag, the nameplates' Level, and Ley Lines).
 - **Commands**: `/fpp reset` asks before it puts every setting back and clears what Forever++ saved.
+- **Settings**: Forever++ saves only the settings you change, so a better default reaches you wherever you kept the old one, and keeps what it collects (auction prices, flight times, chat history) apart from settings. Talent plans and learned flight points are saved for each character on its own. Everything you had carries over.
+- **Commands**: module names in `/fpp` match their titles, such as `/fpp toggle BagSlotCounter` instead of `BagSlots` and `PersistentChat` instead of `ChatFading`. Your settings follow them.
 
 ### Fixed
 

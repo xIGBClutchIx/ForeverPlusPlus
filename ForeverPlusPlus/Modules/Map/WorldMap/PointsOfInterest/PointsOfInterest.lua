@@ -45,13 +45,25 @@ local module = ns.modules.WorldMap:NewPart({
     leyLineSize = 80,
     leyLinesWorld = false,
     chat = true, -- say so in chat when a ley line is saved
-    -- Flight points seen learned at a flight master, by character then node ID. Data, not a
-    -- setting.
+    -- Flight points this character has seen learned at a flight master, by node ID. Data, not a
+    -- setting, saved per character.
     learnedNodes = {},
     -- Ley lines and elemental convergences found, by map ID: { kind, x, y } in percent. For the
     -- whole account, so every character sees what one found. Data, not a setting.
     leyLineSpots = {},
 })
+ns.modules.WorldMap.perCharacter = { learnedNodes = true }
+
+-- Up to 0.8.4 every character's learned flight points were saved for the account, by "Name-Realm".
+ns.MigrateCharacter(2, function(char, db)
+    -- UnitName's second value is a surname on Forever, not a realm.
+    local me = format("%s-%s", UnitName("player") or "", GetRealmName() or "")
+    ns.Store.Claim(char, db, "WorldMap", "learnedNodes", function(entries)
+        local mine = entries[me]
+        entries[me] = nil
+        return mine
+    end)
+end)
 -- Shared with Data.lua: `points` (by map ID), `instances` (by key), and `cities` (by map ID).
 local internal = {}
 ns.modules.WorldMap.internal.pointsOfInterest = internal
@@ -250,15 +262,8 @@ end
 -- (names repeat: Light's Hope Chapel has one per faction, and the game's names are in the
 -- player's language), saved per character. The map list above may not have them on Forever, so
 -- this is the other way to know.
-local function characterKey()
-    return format("%s-%s", UnitName("player") or "", GetRealmName() or "")
-end
-
 local function seenLearned()
-    local known = module.db.learnedNodes
-    local key = characterKey()
-    known[key] = known[key] or {}
-    return known[key]
+    return module.db.learnedNodes
 end
 
 -- At a flight master, remembers which of the flight points it lists are learned, by node ID.

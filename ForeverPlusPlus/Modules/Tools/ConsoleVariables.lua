@@ -17,8 +17,8 @@ local C_CVar = C_CVar
 local getAllCommands = ConsoleGetAllCommands or (C_Console and C_Console.GetAllCommands)
 local L = ns.L
 
-local module = ns.NewModule("CVarBrowser", L.CVARBROWSER_DESC, { enabled = true })
-module.title = L.CVARBROWSER_TITLE
+local module = ns.NewModule("ConsoleVariables", L.CONSOLEVARIABLES_DESC, { enabled = true })
+module.title = L.CONSOLEVARIABLES_TITLE
 module.alwaysOn = true -- a tool page, not a change to the game; it costs nothing until opened
 
 local LIST_WIDTH = 160 -- the group list, a little narrower than the module list
@@ -28,17 +28,17 @@ local RESET_WIDTH, VALUE_WIDTH, GAP = 78, 112, 10
 -- Names for the client's categories (Enum.ConsoleCategory keys). Some read badly to players, so
 -- they get plainer ones (see the locale file). A key the client adds later shows as it is.
 local CATEGORY_NAMES = {
-    Debug = L.CVARBROWSER_CATEGORY_DEBUG,
-    Graphics = L.CVARBROWSER_CATEGORY_GRAPHICS,
-    Console = L.CVARBROWSER_CATEGORY_CONSOLE,
-    Combat = L.CVARBROWSER_CATEGORY_COMBAT,
-    Game = L.CVARBROWSER_CATEGORY_GAME,
-    Default = L.CVARBROWSER_CATEGORY_DEFAULT,
-    Net = L.CVARBROWSER_CATEGORY_NET,
-    Sound = L.CVARBROWSER_CATEGORY_SOUND,
-    Gm = L.CVARBROWSER_CATEGORY_GM,
-    Reveal = L.CVARBROWSER_CATEGORY_REVEAL,
-    None = L.CVARBROWSER_CATEGORY_NONE,
+    Debug = L.CONSOLEVARIABLES_CATEGORY_DEBUG,
+    Graphics = L.CONSOLEVARIABLES_CATEGORY_GRAPHICS,
+    Console = L.CONSOLEVARIABLES_CATEGORY_CONSOLE,
+    Combat = L.CONSOLEVARIABLES_CATEGORY_COMBAT,
+    Game = L.CONSOLEVARIABLES_CATEGORY_GAME,
+    Default = L.CONSOLEVARIABLES_CATEGORY_DEFAULT,
+    Net = L.CONSOLEVARIABLES_CATEGORY_NET,
+    Sound = L.CONSOLEVARIABLES_CATEGORY_SOUND,
+    Gm = L.CONSOLEVARIABLES_CATEGORY_GM,
+    Reveal = L.CONSOLEVARIABLES_CATEGORY_REVEAL,
+    None = L.CONSOLEVARIABLES_CATEGORY_NONE,
 }
 
 -- every listed CVar, sorted: { name, key (lowercase name), text (lowercase name and help), help,
@@ -94,10 +94,10 @@ local function loadGroups(present)
     groups = {
         {
             key = "changed",
-            label = L.CVARBROWSER_CHANGED,
+            label = L.CONSOLEVARIABLES_CHANGED,
             has = function(_, changed) return changed end,
         },
-        { key = "all", label = L.CVARBROWSER_ALL, has = function() return true end },
+        { key = "all", label = L.CONSOLEVARIABLES_ALL, has = function() return true end },
     }
     for _, group in ipairs(categories) do
         groups[#groups + 1] = group
@@ -195,11 +195,11 @@ local function refresh(top)
     local empty
     if #rows == 0 then
         if query ~= "" then
-            empty = format(L.CVARBROWSER_NO_MATCH, search)
+            empty = format(L.CONSOLEVARIABLES_NO_MATCH, search)
         elseif #all == 0 then
-            empty = L.CVARBROWSER_NO_LIST
+            empty = L.CONSOLEVARIABLES_NO_LIST
         else
-            empty = L.CVARBROWSER_NONE_CHANGED
+            empty = L.CONSOLEVARIABLES_NONE_CHANGED
         end
     end
     ui.empty:SetText(empty or "")
@@ -208,11 +208,11 @@ end
 
 local function apply(name, value)
     if InCombatLockdown() then
-        ns.Print(format(L.CVARBROWSER_AFTER_COMBAT, name))
+        ns.Print(format(L.CONSOLEVARIABLES_AFTER_COMBAT, name))
     end
     ns.CVars.Apply(name, value, function(ok)
         if not ok then
-            ns.Print(format(L.CVARBROWSER_REFUSED, name))
+            ns.Print(format(L.CONSOLEVARIABLES_REFUSED, name))
         end
         refresh()
     end)
@@ -259,19 +259,19 @@ local function showTooltip(row)
     if entry.help ~= "" then
         GameTooltip:AddLine(entry.help, nil, nil, nil, true)
     end
-    GameTooltip:AddLine(format(L.CVARBROWSER_VALUE_IS, tostring(value)), unpack(ns.Colors.GRAY))
+    GameTooltip:AddLine(format(L.CONSOLEVARIABLES_VALUE_IS, tostring(value)), unpack(ns.Colors.GRAY))
     if default ~= nil then
-        GameTooltip:AddLine(format(L.CVARBROWSER_DEFAULT_IS, default), unpack(ns.Colors.GRAY))
+        GameTooltip:AddLine(format(L.CONSOLEVARIABLES_DEFAULT_IS, default), unpack(ns.Colors.GRAY))
     end
     if flags.account then
-        GameTooltip:AddLine(L.CVARBROWSER_ACCOUNT, unpack(ns.Colors.GRAY))
+        GameTooltip:AddLine(L.CONSOLEVARIABLES_ACCOUNT, unpack(ns.Colors.GRAY))
     elseif flags.character then
-        GameTooltip:AddLine(L.CVARBROWSER_CHARACTER, unpack(ns.Colors.GRAY))
+        GameTooltip:AddLine(L.CONSOLEVARIABLES_CHARACTER, unpack(ns.Colors.GRAY))
     end
     if flags.readOnly then
-        GameTooltip:AddLine(L.CVARBROWSER_READ_ONLY, unpack(ns.Colors.RED))
+        GameTooltip:AddLine(L.CONSOLEVARIABLES_READ_ONLY, unpack(ns.Colors.RED))
     elseif flags.secure then
-        GameTooltip:AddLine(L.CVARBROWSER_SECURE, unpack(ns.Colors.GRAY))
+        GameTooltip:AddLine(L.CONSOLEVARIABLES_SECURE, unpack(ns.Colors.GRAY))
     end
     GameTooltip:Show()
 end
@@ -298,7 +298,7 @@ local function buildRow(row)
     row.reset = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
     row.reset:SetSize(RESET_WIDTH, 22)
     row.reset:SetPoint("RIGHT", -4, 0)
-    row.reset:SetText(L.CVARBROWSER_DEFAULT)
+    row.reset:SetText(L.CONSOLEVARIABLES_DEFAULT)
     row.reset:SetScript("OnClick", function()
         local _, default = read(row.entry.name)
         if default ~= nil then
@@ -393,7 +393,7 @@ function module:BuildPage(frame)
 
     -- In the title row at the top right. No Defaults button here: it resets Forever++'s settings,
     -- not console variables, so on this page it reads as the wrong thing.
-    ui.search = ns.Split.AddSearchBox(frame, nil, L.CVARBROWSER_SEARCH, function(text)
+    ui.search = ns.Split.AddSearchBox(frame, nil, L.CONSOLEVARIABLES_SEARCH, function(text)
         search = text
         refresh()
     end)
@@ -461,10 +461,10 @@ local function openWith(text)
         choose(selected)
     end
     if not ns.OpenSettings(module.name) then
-        ns.Print(L.CVARBROWSER_NO_PAGE)
+        ns.Print(L.CONSOLEVARIABLES_NO_PAGE)
     end
 end
 
-ns.AddCommand("cvar", "[search]", L.CVARBROWSER_COMMAND, function(rest)
+ns.AddCommand("cvar", "[search]", L.CONSOLEVARIABLES_COMMAND, function(rest)
     openWith(strtrim(rest))
 end)

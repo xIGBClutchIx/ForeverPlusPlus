@@ -23,7 +23,8 @@ module.title = L.SKIPCINEMATICS_TITLE
 module.category = "automation"
 
 -- Hold Shift to Watch was a checkbox, 0.8.4 and before.
-ns.Migrate(function(saved)
+ns.Migrate(1, function(db)
+    local saved = db.modules or {}
     ns.Keys.MigrateShift(saved, "SkipCinematics", "shiftWatches", "watchKey")
 end)
 

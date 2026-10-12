@@ -500,7 +500,7 @@ local function checkSaved()
         for _ in pairs(map.db.learnedNodes or {}) do
             count = count + 1
         end
-        info("saved.learned-nodes", count .. " characters with learned flight points saved")
+        info("saved.learned-nodes", count .. " learned flight points saved for this character")
     end
     local timer = ns.modules.FlightTimer
     if timer and timer.db then

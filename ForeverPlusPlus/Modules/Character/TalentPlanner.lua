@@ -7,8 +7,8 @@
 -- tree's data comes from C_Traits (docs/forever-api.md, Talents); nothing here learns a talent.
 local _, ns = ...
 
-local ipairs, pairs, format, tonumber, tostring, concat, sort = ipairs, pairs, string.format,
-    tonumber, tostring, table.concat, table.sort
+local ipairs, pairs, type, format, tonumber, tostring, concat, sort = ipairs, pairs, type,
+    string.format, tonumber, tostring, table.concat, table.sort
 local max, min, floor, setmetatable, tremove = math.max, math.min, math.floor, setmetatable,
     table.remove
 local CreateFrame, C_Traits, C_Spell, UnitLevel, UnitGUID, IsShiftKeyDown, PlaySound = CreateFrame,
@@ -24,13 +24,34 @@ local module = ns.NewModule("TalentPlanner", L.TALENTPLANNER_DESC, {
     enabled = true,
     glow = true, -- the plan's next talent glows
     tooltip = true, -- talent tooltips say when the plan takes them
-    -- "<player GUID>-<spec tab>" -> { active = index, list = { { name, level, picks }, ... } },
+    -- Saved per character: spec tab -> { active = index, list = { { name, level, picks }, ... } },
     -- where picks are nodeIDs in order and level is the plan's level cap.
     builds = {},
 })
 module.title = L.TALENTPLANNER_TITLE
 module.category = "character"
 module.added = "0.8.0"
+module.perCharacter = { builds = true }
+
+-- Up to 0.8.4 every character's plans were saved for the account, by "<player GUID>-<spec tab>".
+ns.MigrateCharacter(2, function(char, db)
+    local guid = UnitGUID("player")
+    if not guid then
+        return
+    end
+    local prefix = guid .. "-"
+    ns.Store.Claim(char, db, "TalentPlanner", "builds", function(entries)
+        local mine
+        for key, builds in pairs(entries) do
+            if type(key) == "string" and key:sub(1, #prefix) == prefix then
+                mine = mine or {}
+                mine[tonumber(key:sub(#prefix + 1)) or 1] = builds
+                entries[key] = nil
+            end
+        end
+        return mine
+    end)
+end)
 
 module.options = {
     { key = "glow", name = L.TALENTPLANNER_GLOW, description = L.TALENTPLANNER_GLOW_DESC },
@@ -105,11 +126,10 @@ end
 
 -- The saved plans for this character and the shown spec tab, made when `create` is true.
 local function getBuilds(create)
-    local guid = UnitGUID("player")
-    if not (guid and readable(guid)) then
+    local key = frame.GetTab and frame:GetTab() or 1
+    if not readable(key) then
         return nil
     end
-    local key = guid .. "-" .. tostring(frame.GetTab and frame:GetTab() or 1)
     local builds = module.db.builds[key]
     if not builds and create then
         builds = { active = 1, list = { newPlan(format(L.TALENTPLANNER_PLAN_NAME, 1)) } }

@@ -45,29 +45,29 @@ L.AUTOSELLJUNK_KEY_DESC = "Hold this key as you talk to the merchant to leave yo
 L.AUTOSELLJUNK_CHAT_DESC = "Say in chat how many items were sold and what they sold for."
 L.AUTOSELLJUNK_SOLD = "Sold %d junk items for %s." -- count, money
 
--- GatherTracking
-L.GATHERTRACKING_TITLE = "Gathering Tracking"
-L.GATHERTRACKING_DESC = "Keep Find Minerals or Find Herbs on: turn it back on after logging in, "
+-- GatheringTracking
+L.GATHERINGTRACKING_TITLE = "Gathering Tracking"
+L.GATHERINGTRACKING_DESC = "Keep Find Minerals or Find Herbs on: turn it back on after logging in, "
     .. "zoning, or dying, and swap between the two if you like."
-L.GATHERTRACKING_TRACK = "Track"
-L.GATHERTRACKING_TRACK_DESC = "Which tracking to keep on. Only one tracks at a time, so with "
+L.GATHERINGTRACKING_TRACK = "Track"
+L.GATHERINGTRACKING_TRACK_DESC = "Which tracking to keep on. Only one tracks at a time, so with "
     .. "both, swapping shows each in turn."
-L.GATHERTRACKING_TRACK_BOTH = "Minerals and Herbs"
-L.GATHERTRACKING_TRACK_MINERALS = "Minerals Only"
-L.GATHERTRACKING_TRACK_HERBS = "Herbs Only"
-L.GATHERTRACKING_REAPPLY = "Turn Back On"
-L.GATHERTRACKING_REAPPLY_DESC = "After logging in, zoning, or coming back to life, turn tracking "
+L.GATHERINGTRACKING_TRACK_BOTH = "Minerals and Herbs"
+L.GATHERINGTRACKING_TRACK_MINERALS = "Minerals Only"
+L.GATHERINGTRACKING_TRACK_HERBS = "Herbs Only"
+L.GATHERINGTRACKING_REAPPLY = "Turn Back On"
+L.GATHERINGTRACKING_REAPPLY_DESC = "After logging in, zoning, or coming back to life, turn tracking "
     .. "back on if nothing is being tracked. Turning it off yourself lasts until then."
-L.GATHERTRACKING_SWAP = "Swap"
-L.GATHERTRACKING_SWAP_DESC = "With both chosen, swap between Find Minerals and Find Herbs while "
+L.GATHERINGTRACKING_SWAP = "Swap"
+L.GATHERINGTRACKING_SWAP_DESC = "With both chosen, swap between Find Minerals and Find Herbs while "
     .. "one of them is on, as often as the slider beside it says. Waits during combat, casting, "
     .. "and flights."
-L.GATHERTRACKING_SWAP_EVERY_NAME = "Swap Every"
-L.GATHERTRACKING_SWAP_EVERY_DESC = "How long to wait between swaps."
-L.GATHERTRACKING_CHAT_DESC = "Say in chat when the game stops Gathering Tracking from changing "
+L.GATHERINGTRACKING_SWAP_EVERY_NAME = "Swap Every"
+L.GATHERINGTRACKING_SWAP_EVERY_DESC = "How long to wait between swaps."
+L.GATHERINGTRACKING_CHAT_DESC = "Say in chat when the game stops Gathering Tracking from changing "
     .. "tracking."
-L.GATHERTRACKING_FAILED = "Gathering Tracking couldn't change tracking: %s" -- error
-L.GATHERTRACKING_BLOCKED = "The game blocked Gathering Tracking from changing tracking. It stops "
+L.GATHERINGTRACKING_FAILED = "Gathering Tracking couldn't change tracking: %s" -- error
+L.GATHERINGTRACKING_BLOCKED = "The game blocked Gathering Tracking from changing tracking. It stops "
     .. "until /reload."
 
 -- AutoStow

@@ -13,8 +13,8 @@ local C_Item = C_Item
 
 local L = ns.L
 
-local module = ns.NewModule("BestReward", L.BESTREWARD_DESC, { enabled = true })
-module.title = L.BESTREWARD_TITLE
+local module = ns.NewModule("BestQuestReward", L.BESTQUESTREWARD_DESC, { enabled = true })
+module.title = L.BESTQUESTREWARD_TITLE
 module.category = "quests"
 
 local COIN_TEXTURE = "Interface\\MoneyFrame\\UI-GoldIcon"

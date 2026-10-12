@@ -54,7 +54,7 @@ for _, file in ipairs({ "Core", "Map" }) do
     load("ForeverPlusPlus/Locales/enUS/" .. file .. ".lua")
 end
 for _, file in ipairs({ "Secret", "Colors", "Text", "WorldMap", "Instances", "Chat",
-    "TalentPlan", "Errors", "Prices" }) do
+    "TalentPlan", "Errors", "Prices", "Store" }) do
     load("ForeverPlusPlus/Lib/" .. file .. ".lua")
 end
 
@@ -388,6 +388,77 @@ eq(Prices.ItemByName("Strange Dust"), 10940, "item cache first")
 eq(Prices.Inline(), true, "source's alignment")
 Prices.SetSource(nil)
 eq(Prices.Auction(4305), nil, "no prices once the source goes")
+
+-- Store -----------------------------------------------------------------------------------------
+
+local Store = ns.Store
+
+-- A fresh install is current at once and runs no steps.
+local ran = {}
+Store.Step(1, function(db) ran[#ran + 1] = "1:" .. tostring(db.modules ~= nil) end)
+Store.Step(2, function(db)
+    ran[#ran + 1] = "2"
+    Store.Split(db, { TalentPlanner = { builds = true } })
+end)
+Store.Step(3, function(db)
+    ran[#ran + 1] = "3"
+    Store.Rename(db, { BagSlots = "BagSlotCounter" })
+end)
+Store.CharacterStep(2, function(char, db)
+    Store.Claim(char, db, "TalentPlanner", "builds", function(entries)
+        local mine = entries["G-1"] and { [1] = entries["G-1"] }
+        entries["G-1"] = nil
+        return mine
+    end)
+end)
+local freshDB, freshChar = {}, {}
+eq(Store.Upgrade(freshDB, freshChar), true, "store: empty saved variables are a fresh install")
+eq(#ran, 0, "store: a fresh install runs no account steps")
+eq(freshDB.version, Store.VERSION, "store: a fresh install is current")
+eq(freshChar.version, Store.VERSION, "store: a fresh character is current")
+
+-- The 0.8 layout: every setting and table in `modules`, under the old names.
+local oldDB = { seenModules = { BagSlots = "0.8.2" }, modules = {
+    BagSlots = { enabled = true, size = "large", position = "top" },
+    TalentPlanner = { enabled = true, builds = { ["G-1"] = { active = 1 }, ["H-1"] = { active = 2 } } },
+} }
+local oldChar = {}
+eq(Store.Upgrade(oldDB, oldChar), false, "store: saved settings aren't a fresh install")
+eq(table.concat(ran, ","), "1:true,2,3", "store: steps run in version order, version 1 on the old layout")
+eq(oldDB.modules, nil, "store: the old layout is gone")
+eq(oldDB.settings.BagSlotCounter.position, "top", "store: settings follow a renamed module")
+eq(oldDB.settings.BagSlots, nil, "store: the old name is gone")
+eq(oldDB.seenModules.BagSlotCounter, "0.8.2", "store: the version a module was seen in follows it")
+eq(oldChar.data.TalentPlanner.builds[1].active, 1, "store: a character takes its own data")
+eq(oldDB.unclaimed.TalentPlanner.builds["H-1"].active, 2, "store: another character's data waits")
+ran = {}
+Store.Upgrade(oldDB, oldChar)
+eq(#ran, 0, "store: each step runs once")
+
+-- What a module reads and writes.
+local defaults = { enabled = true, size = "large", position = "bottomright", banks = {}, seen = { list = {} } }
+oldDB.settings.BagSlotCounter.stale = 5
+oldDB.data.BagSlotCounter = { gone = {} }
+local view = Store.Load(oldDB, oldChar, "BagSlotCounter", defaults)
+local settings = oldDB.settings.BagSlotCounter
+eq(view.size, "large", "store: a setting reads its default")
+eq(settings.size, nil, "store: a setting equal to its default isn't saved")
+eq(settings.stale, nil, "store: a setting the defaults dropped is cleared")
+eq(view.position, "top", "store: a changed setting reads what was chosen")
+view.position = "bottomright"
+eq(settings.position, nil, "store: setting a value back to its default forgets it")
+view.size = "huge"
+eq(settings.size, "huge", "store: a changed setting is saved")
+eq(type(view.banks), "table", "store: data reads its table")
+eq(oldDB.data.BagSlotCounter.banks, view.banks, "store: data is saved apart from settings")
+eq(type(view.seen.list), "table", "store: data is filled with its default tables")
+eq(oldDB.data.BagSlotCounter.gone, nil, "store: data the defaults dropped is cleared")
+local plans = Store.Load(oldDB, oldChar, "TalentPlanner", { enabled = true, builds = {} }, { builds = true })
+eq(plans.builds[1].active, 1, "store: per-character data reads the character's table")
+plans.builds[2] = { active = 3 }
+eq(oldChar.data.TalentPlanner.builds[2].active, 3, "store: per-character data is saved for the character")
+Store.Prune(oldDB, oldChar, { BagSlotCounter = true })
+eq(oldDB.settings.TalentPlanner, nil, "store: a module that's gone loses its settings")
 
 -- Done ------------------------------------------------------------------------------------------
 

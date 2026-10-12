@@ -10,7 +10,7 @@ local CreateFrame, C_Container, Enum = CreateFrame, C_Container, Enum
 
 local L = ns.L
 
-local module = ns.NewModule("BagSlots", L.BAGSLOTS_DESC, {
+local module = ns.NewModule("BagSlotCounter", L.BAGSLOTCOUNTER_DESC, {
     enabled = true,
     show = "backpack", -- "backpack": the total on the backpack; "each": every bag its own
     special = true, -- count bags whose slots only take some items
@@ -18,52 +18,52 @@ local module = ns.NewModule("BagSlots", L.BAGSLOTS_DESC, {
     size = "large", -- a key of SIZES
     position = "bottomright", -- a key of POSITIONS
 })
-module.title = L.BAGSLOTS_TITLE
+module.title = L.BAGSLOTCOUNTER_TITLE
 module.category = "items"
 
 module.options = {
     {
-        key = "show", name = L.BAGSLOTS_SHOW, description = L.BAGSLOTS_SHOW_DESC,
-        section = L.BAGSLOTS_SECTION_COUNT,
+        key = "show", name = L.BAGSLOTCOUNTER_SHOW, description = L.BAGSLOTCOUNTER_SHOW_DESC,
+        section = L.BAGSLOTCOUNTER_SECTION_COUNT,
         choices = {
-            { "backpack", L.BAGSLOTS_SHOW_BACKPACK },
-            { "each", L.BAGSLOTS_SHOW_EACH },
+            { "backpack", L.BAGSLOTCOUNTER_SHOW_BACKPACK },
+            { "each", L.BAGSLOTCOUNTER_SHOW_EACH },
         },
     },
     {
-        key = "special", name = L.BAGSLOTS_SPECIAL, description = L.BAGSLOTS_SPECIAL_DESC,
-        section = L.BAGSLOTS_SECTION_COUNT,
+        key = "special", name = L.BAGSLOTCOUNTER_SPECIAL, description = L.BAGSLOTCOUNTER_SPECIAL_DESC,
+        section = L.BAGSLOTCOUNTER_SECTION_COUNT,
     },
     {
-        key = "reagent", name = L.BAGSLOTS_REAGENT, description = L.BAGSLOTS_REAGENT_DESC,
-        section = L.BAGSLOTS_SECTION_COUNT,
+        key = "reagent", name = L.BAGSLOTCOUNTER_REAGENT, description = L.BAGSLOTCOUNTER_REAGENT_DESC,
+        section = L.BAGSLOTCOUNTER_SECTION_COUNT,
         choices = {
-            { "own", L.BAGSLOTS_REAGENT_OWN },
-            { "total", L.BAGSLOTS_REAGENT_TOTAL },
-            { "off", L.BAGSLOTS_REAGENT_OFF },
+            { "own", L.BAGSLOTCOUNTER_REAGENT_OWN },
+            { "total", L.BAGSLOTCOUNTER_REAGENT_TOTAL },
+            { "off", L.BAGSLOTCOUNTER_REAGENT_OFF },
         },
     },
     {
-        key = "size", name = L.BAGSLOTS_SIZE, description = L.BAGSLOTS_SIZE_DESC,
-        section = L.BAGSLOTS_SECTION_TEXT,
+        key = "size", name = L.BAGSLOTCOUNTER_SIZE, description = L.BAGSLOTCOUNTER_SIZE_DESC,
+        section = L.BAGSLOTCOUNTER_SECTION_TEXT,
         choices = {
-            { "small", L.BAGSLOTS_SIZE_SMALL },
-            { "normal", L.BAGSLOTS_SIZE_NORMAL },
-            { "large", L.BAGSLOTS_SIZE_LARGE },
-            { "huge", L.BAGSLOTS_SIZE_HUGE },
+            { "small", L.BAGSLOTCOUNTER_SIZE_SMALL },
+            { "normal", L.BAGSLOTCOUNTER_SIZE_NORMAL },
+            { "large", L.BAGSLOTCOUNTER_SIZE_LARGE },
+            { "huge", L.BAGSLOTCOUNTER_SIZE_HUGE },
         },
     },
     {
-        key = "position", name = L.BAGSLOTS_POSITION, description = L.BAGSLOTS_POSITION_DESC,
-        section = L.BAGSLOTS_SECTION_TEXT,
+        key = "position", name = L.BAGSLOTCOUNTER_POSITION, description = L.BAGSLOTCOUNTER_POSITION_DESC,
+        section = L.BAGSLOTCOUNTER_SECTION_TEXT,
         choices = {
-            { "bottomright", L.BAGSLOTS_POSITION_BOTTOMRIGHT },
-            { "bottomleft", L.BAGSLOTS_POSITION_BOTTOMLEFT },
-            { "topright", L.BAGSLOTS_POSITION_TOPRIGHT },
-            { "topleft", L.BAGSLOTS_POSITION_TOPLEFT },
-            { "bottom", L.BAGSLOTS_POSITION_BOTTOM },
-            { "top", L.BAGSLOTS_POSITION_TOP },
-            { "center", L.BAGSLOTS_POSITION_CENTER },
+            { "bottomright", L.BAGSLOTCOUNTER_POSITION_BOTTOMRIGHT },
+            { "bottomleft", L.BAGSLOTCOUNTER_POSITION_BOTTOMLEFT },
+            { "topright", L.BAGSLOTCOUNTER_POSITION_TOPRIGHT },
+            { "topleft", L.BAGSLOTCOUNTER_POSITION_TOPLEFT },
+            { "bottom", L.BAGSLOTCOUNTER_POSITION_BOTTOM },
+            { "top", L.BAGSLOTCOUNTER_POSITION_TOP },
+            { "center", L.BAGSLOTCOUNTER_POSITION_CENTER },
         },
     },
 }

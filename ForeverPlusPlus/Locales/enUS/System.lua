@@ -58,16 +58,16 @@ L.ERRORCATCHER_TEST_DESC = "Raise a Lua error on purpose, to check that Error Ca
     .. "with it off, Blizzard's error window) catches it."
 L.ERRORCATCHER_TEST_MESSAGE = "Forever++ test error. Nothing is wrong."
 
--- AddOnList
-L.ADDONLIST_TITLE = "AddOns List"
-L.ADDONLIST_DESC = "Show the AddOns list without category headers, with enabled addons first."
-L.ADDONLIST_ENABLEDFIRST = "Enabled First"
-L.ADDONLIST_ENABLEDFIRST_DESC = "List the addons you have enabled above the disabled ones."
-L.ADDONLIST_UNGROUP = "Ungroup Disabled"
-L.ADDONLIST_UNGROUP_DESC = "Move disabled addons out of their group to the disabled part of the "
+-- AddOnsList
+L.ADDONSLIST_TITLE = "AddOns List"
+L.ADDONSLIST_DESC = "Show the AddOns list without category headers, with enabled addons first."
+L.ADDONSLIST_ENABLEDFIRST = "Enabled First"
+L.ADDONSLIST_ENABLEDFIRST_DESC = "List the addons you have enabled above the disabled ones."
+L.ADDONSLIST_UNGROUP = "Ungroup Disabled"
+L.ADDONSLIST_UNGROUP_DESC = "Move disabled addons out of their group to the disabled part of the "
     .. "list, so a group only shows the addons that are on."
-L.ADDONLIST_NOTES = "Search Notes"
-L.ADDONLIST_NOTES_DESC = "Let the search box also find words in an addon's notes."
+L.ADDONSLIST_NOTES = "Search Notes"
+L.ADDONSLIST_NOTES_DESC = "Let the search box also find words in an addon's notes."
 
 -- MinimapButton
 L.MINIMAPBUTTON_TITLE = "Minimap Button"
@@ -104,18 +104,18 @@ L.COMMANDS_CLEAR = "/clear"
 L.COMMANDS_CLEAR_DESC = "/clear empties the chat window you type it in. Left to another addon "
     .. "that already has /clear."
 
--- HideFeedback
-L.HIDEFEEDBACK_TITLE = "Hide Beta Feedback"
-L.HIDEFEEDBACK_DESC = "Hide the beta's \"Press F6 to submit an issue\" line on tooltips and its "
+-- HideBetaFeedback
+L.HIDEBETAFEEDBACK_TITLE = "Hide Beta Feedback"
+L.HIDEBETAFEEDBACK_DESC = "Hide the beta's \"Press F6 to submit an issue\" line on tooltips and its "
     .. "bug report button. F6 still reports an issue."
-L.HIDEFEEDBACK_TOOLTIP = "Hide Tooltip Reminder"
-L.HIDEFEEDBACK_TOOLTIP_DESC = "Hide the \"Press F6 to submit an issue\" line on tooltips."
-L.HIDEFEEDBACK_BUTTON = "Hide Bug Report Button"
-L.HIDEFEEDBACK_BUTTON_DESC = "Hide the floating bug report button."
-L.HIDEFEEDBACK_QUEST = "Hide Quest Feedback"
-L.HIDEFEEDBACK_QUEST_DESC = "Hide the feedback buttons on quest windows."
+L.HIDEBETAFEEDBACK_TOOLTIP = "Hide Tooltip Reminder"
+L.HIDEBETAFEEDBACK_TOOLTIP_DESC = "Hide the \"Press F6 to submit an issue\" line on tooltips."
+L.HIDEBETAFEEDBACK_BUTTON = "Hide Bug Report Button"
+L.HIDEBETAFEEDBACK_BUTTON_DESC = "Hide the floating bug report button."
+L.HIDEBETAFEEDBACK_QUEST = "Hide Quest Feedback"
+L.HIDEBETAFEEDBACK_QUEST_DESC = "Hide the feedback buttons on quest windows."
 
--- Framerate
-L.FRAMERATE_TITLE = "Movable Framerate"
-L.FRAMERATE_DESC = "Lets you move and resize the framerate text (Ctrl+R) in Edit Mode, like "
+-- MovableFramerate
+L.MOVABLEFRAMERATE_TITLE = "Movable Framerate"
+L.MOVABLEFRAMERATE_DESC = "Lets you move and resize the framerate text (Ctrl+R) in Edit Mode, like "
     .. "Blizzard's own frames. Until you move it, it stays where Blizzard puts it."

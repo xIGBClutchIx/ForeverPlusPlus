@@ -9,22 +9,22 @@ local ipairs, gsub, tonumber = ipairs, string.gsub, tonumber
 local L = ns.L
 local Chat = ns.Chat
 
-local module = ns.NewModule("ChannelNames", L.CHANNELNAMES_DESC, {
+local module = ns.NewModule("ShortChannelNames", L.SHORTCHANNELNAMES_DESC, {
     enabled = false,
     style = "both",
 })
-module.title = L.CHANNELNAMES_TITLE
+module.title = L.SHORTCHANNELNAMES_TITLE
 module.category = "chat"
 
 module.options = {
     {
         key = "style",
-        name = L.CHANNELNAMES_STYLE,
-        description = L.CHANNELNAMES_STYLE_DESC,
+        name = L.SHORTCHANNELNAMES_STYLE,
+        description = L.SHORTCHANNELNAMES_STYLE_DESC,
         choices = {
-            { "number", L.CHANNELNAMES_NUMBER },
-            { "letter", L.CHANNELNAMES_LETTER },
-            { "both", L.CHANNELNAMES_BOTH },
+            { "number", L.SHORTCHANNELNAMES_NUMBER },
+            { "letter", L.SHORTCHANNELNAMES_LETTER },
+            { "both", L.SHORTCHANNELNAMES_BOTH },
         },
     },
 }
