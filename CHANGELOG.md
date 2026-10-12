@@ -2,6 +2,12 @@
 
 What changed in each release of Forever++. The same notes show in game under Settings > AddOns > Forever++ > Changelog, from [`ForeverPlusPlus/Changelog.lua`](ForeverPlusPlus/Changelog.lua); change both together.
 
+## Unreleased
+
+### Fixed
+
+- **Auto Weapon Buff**: right-clicking a stone, oil, poison, or lure in your bags puts it on your weapon again, which 0.8.2 broke.
+
 ## 0.8.2 (2026-10-11)
 
 ### Changed
