@@ -9,7 +9,7 @@
 local _, ns = ...
 
 local pairs, ipairs, next, type, floor, min, max = pairs, ipairs, next, type, math.floor, math.min, math.max
-local setmetatable, GetLocale, CreateFrame, sort = setmetatable, GetLocale, CreateFrame, table.sort
+local setmetatable, GetLocale, sort = setmetatable, GetLocale, table.sort
 local InCombatLockdown, C_Timer, C_QuestLog, C_Map = InCombatLockdown, C_Timer, C_QuestLog, C_Map
 local GetRealZoneText, GetRealmName, UnitName, format = GetRealZoneText, GetRealmName, UnitName, string.format
 local GetQuestUiMapID, Enum = GetQuestUiMapID, Enum
@@ -222,14 +222,9 @@ end
 
 local function newBox()
     local frame = tracker()
-    local hasTemplate = C_XMLUtil and C_XMLUtil.GetTemplateInfo
-        and C_XMLUtil.GetTemplateInfo("TooltipBackdropTemplate")
     -- The same box Blizzard draws tooltips in, behind the tracker's own frames.
-    local b = CreateFrame("Frame", nil, frame, hasTemplate and "TooltipBackdropTemplate" or "BackdropTemplate")
+    local b = ns.Frames.TooltipBox(frame)
     b:SetFrameLevel(max(0, frame:GetFrameLevel() - 1))
-    if not hasTemplate and b.SetBackdrop and BACKDROP_TOOLTIP_16_16_5555 then
-        b:SetBackdrop(BACKDROP_TOOLTIP_16_16_5555)
-    end
     b:Hide()
     return b
 end
@@ -270,8 +265,9 @@ local function isDrawn(region)
 end
 
 local fitBox
-local pending, settling = false, false
 local SETTLE = 0.2 -- seconds; when to fit once more after a change
+local fitSoon = ns.Frames.Coalesce(function() fitBox() end)
+local fitSettled = ns.Frames.Coalesce(function() fitBox() end, SETTLE)
 -- How far the header art and the quests' map buttons reach past the tracker's left edge (about
 -- 5 pixels in game), so the padding on the left measures from them whether sections are open or
 -- not. Measured from what's drawn, the buttons' glow made it jump.
@@ -284,20 +280,8 @@ local function requestFit()
     if not module.enabled then
         return
     end
-    if not pending then
-        pending = true
-        C_Timer.After(0, function()
-            pending = false
-            fitBox()
-        end)
-    end
-    if not settling then
-        settling = true
-        C_Timer.After(SETTLE, function()
-            settling = false
-            fitBox()
-        end)
-    end
+    fitSoon()
+    fitSettled()
 end
 
 -- Collapsing a section, or a quest coming or going, shows, hides or resizes one of the tracker's

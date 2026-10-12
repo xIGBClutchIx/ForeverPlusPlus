@@ -69,20 +69,13 @@ internal.LINES = "(.-)\r?\n"
 
 local LINES = internal.LINES
 
----A text without its color codes.
----@param text string
----@return string
-function internal.StripCodes(text)
-    return (text:gsub(internal.NAMED_CODE, ""):gsub(internal.HEX_CODE, ""):gsub("|r", ""))
-end
-
 ---A tooltip line's text without color codes, or nil when it can't be read.
 ---@param line table
 ---@return string|nil
 function internal.PlainText(line)
     local text = line.leftText
     if type(text) == "string" and ns.IsReadable(text) then
-        return internal.StripCodes(text)
+        return ns.Text.Plain(text)
     end
 end
 

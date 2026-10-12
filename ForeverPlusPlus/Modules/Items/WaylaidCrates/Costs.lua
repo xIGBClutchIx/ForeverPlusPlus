@@ -90,7 +90,7 @@ local function replaceBundleLine(tooltip, data, lineData)
         if open then
             shown = shown .. "|r"
         end
-        local count, name = internal.BundleOf(internal.StripCodes(piece))
+        local count, name = internal.BundleOf(ns.Text.Plain(piece))
         if count then
             flush()
             local cost = bundleCost(count, name)
