@@ -7,7 +7,11 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Added
 
 - **Quest Tracker**: the new Current Zone Only option (off by default) tracks only the quests of the zone you're in, going by their quest log header, and tracks the others again when you get to their zone. Class and profession quests go by where their objective is, and the quest your map follows always shows. It waits for combat to end.
-- **Item Tooltips**: the new Crate Shopping List option (off by default) adds a Waylaid Crates entry at the top of the auction house's categories. Clicking it lists every item your Waylaid Crates still need in the Buy tab, one row each: the bundles they take, less what's already in your bags. Hovering it shows how many of each you need, and which have no auctions up.
+- **Waylaid Crates**: a new module for filling Waylaid Crates. Its Auction House Category adds a Waylaid Crates entry at the bottom (or top) of the auction house's categories. Clicking it lists every item your crates still need in the Buy tab, one row each: the bundles they take, less what's already in your bags. Hovering it shows how many of each you need, and which have no auctions up.
+
+### Changed
+
+- **Waylaid Crates**: Item Tooltips' Waylaid Crate Costs option moved here as Bundle Costs, keeping your choice. It still takes its prices from Item Tooltips' Auction Prices.
 
 ## 0.8.4 (2026-10-11)
 

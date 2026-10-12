@@ -13,7 +13,7 @@ local C_AuctionHouse, C_Timer, GetTime = C_AuctionHouse, C_Timer, GetTime
 local GetRealmName, UnitFactionGroup = GetRealmName, UnitFactionGroup
 local CreateFrame, pcall, type, hooksecurefunc = CreateFrame, pcall, type, hooksecurefunc
 local select, tostring, C_Item, C_TradeSkillUI, Enum = select, tostring, C_Item, C_TradeSkillUI, Enum
-local tonumber, GRAY_FONT_COLOR, HIGHLIGHT_FONT_COLOR = tonumber, GRAY_FONT_COLOR, HIGHLIGHT_FONT_COLOR
+local GRAY_FONT_COLOR, HIGHLIGHT_FONT_COLOR = GRAY_FONT_COLOR, HIGHLIGHT_FONT_COLOR
 local wipe = wipe
 
 local L = ns.L
@@ -408,14 +408,10 @@ local function ageColor(seconds)
     return { 1, (1 - t) * 2, 0 }
 end
 
--- Waylaid Crates -------------------------------------------------------------------------------
--- A Waylaid Crate's Use line lists the bundles that fill it, one per line ("- 6 Bolt of Woolen
--- Cloth"). Waylaid Crate Costs shows what buying each bundle at auction costs: the count times
--- the item's lowest buyout. Blizzard's line is skipped and we draw it again, the same text in
--- the same color, with each price beside its bundle ("beside": on the right, or after it with
--- inline price lines) or indented on a line of its own under it ("below"). The tooltip gives names,
--- not IDs, so items are found by name: in the client's item cache, or else among the names of
--- items with a saved price.
+-- Prices for other modules -----------------------------------------------------------------------
+-- ns.Prices hands our prices to other modules while this part is on. Waylaid Crates finds items
+-- by name, since a crate's tooltip gives names, not IDs: among the names of items with a saved
+-- price, when the client's item cache doesn't know them.
 
 local nameIDs = {} -- item name -> itemID
 local named = {} -- itemIDs already in nameIDs, so each is only asked once
@@ -428,7 +424,7 @@ local LOOK_AGAIN = 60 -- seconds, once every saved item has its name and this on
 -- have yet loads it, and the first look at a crate is usually before they've come in: look again
 -- soon while any are loading, or the bundles show No price until the long wait is over.
 local function itemByName(name)
-    local id = nameIDs[name] or (C_Item.GetItemInfoInstant and C_Item.GetItemInfoInstant(name))
+    local id = nameIDs[name]
     if id or not C_Item.GetItemNameByID then
         return id
     end
@@ -452,185 +448,16 @@ local function itemByName(name)
     return nameIDs[name]
 end
 
-local USE = _G.ITEM_SPELL_TRIGGER_ONUSE or "Use:" -- Blizzard's "Use:", in the player's language
-
--- Color codes come as |cAARRGGBB or as |cnNAME: with one of Blizzard's named colors
--- (|cnHIGHLIGHT_FONT_COLOR:), and end at |r.
-local HEX_CODE, NAMED_CODE = "|c%x%x%x%x%x%x%x%x", "|cn[%w_]+:"
-
--- Each line of a text, for gmatch on the text with "\n" added. The crate's text breaks lines
--- with "\r\n", and a "\r" left on a line we draw shows as an empty line after it.
-local LINES = "(.-)\r?\n"
-
-local function stripCodes(text)
-    return (text:gsub(NAMED_CODE, ""):gsub(HEX_CODE, ""):gsub("|r", ""))
-end
-
--- A line's text without color codes, or nil when it can't be read.
-local function plainText(line)
-    local text = line.leftText
-    if type(text) == "string" and ns.IsReadable(text) then
-        return stripCodes(text)
-    end
-end
-
--- The color code still running at the end of `piece`: the code, false when the piece ends its
--- color with |r, or nil when it has neither and the color before it runs on.
-local function runningColor(piece)
-    local lastOpen, code = 0, nil
-    for _, pattern in ipairs({ HEX_CODE, NAMED_CODE }) do
-        for at, found in piece:gmatch("()(" .. pattern .. ")") do
-            if at > lastOpen then
-                lastOpen, code = at, found
-            end
-        end
-    end
-    local lastClose = 0
-    for at in piece:gmatch("()|r") do
-        lastClose = at
-    end
-    if lastOpen > lastClose then
-        return code
-    elseif lastClose > 0 then
-        return false
-    end
-end
-
--- A bundle in the list ("- 6 Bolt of Woolen Cloth"): its count and item name, or nil.
-local function bundleOf(part)
-    local count, name = part:match("^%s*%-%s*(%d+)%s+(.-)%s*$")
-    if count and name ~= "" then
-        return tonumber(count), name
-    end
-end
-
--- Whether any of the text's lines is a bundle. The list may be part of the Use line's text, or
--- lines of their own after it.
-local function hasBundle(text)
-    for part in (text .. "\n"):gmatch(LINES) do
-        if bundleOf(part) then
-            return true
-        end
-    end
-    return false
-end
-
--- Whether `lineData` is the Use line or one of the bundle lines right after it.
-local function inList(data, lineData)
-    local found, chain = false, false
-    for _, line in ipairs(data.lines or {}) do
-        local text = plainText(line) or ""
-        if not found and text:find(USE, 1, true) == 1 then
-            found, chain = true, true
-        elseif found then
-            chain = chain and hasBundle(text)
-        end
-        if line == lineData then
-            return found and chain
-        end
-    end
-    return false
-end
-
----The bundles an item's tooltip lists after its Use line, for Crate Shopping List: { { count,
----name } }, empty for an item that isn't a crate.
----@param data table tooltip data, as C_TooltipInfo gives it
----@return table
-function internal.CrateBundles(data)
-    local bundles, found = {}, false
-    for _, line in ipairs(data.lines or {}) do
-        local text = plainText(line) or ""
-        if not found then
-            found = text:find(USE, 1, true) == 1
-        elseif not hasBundle(text) then
-            break
-        end
-        if found then
-            for part in (text .. "\n"):gmatch(LINES) do
-                local count, name = bundleOf(part)
-                if count then
-                    bundles[#bundles + 1] = { count, name }
-                end
-            end
-        end
-    end
-    return bundles
-end
-
-internal.ItemByName = itemByName
-
--- What buying a bundle costs at auction, or a gray "No price".
-local function bundleCost(count, name)
-    local itemID = itemByName(name)
-    local item = itemID and house().items[itemID]
-    if item then
-        return ns.Money(item.price * count)
-    end
-    return GRAY_FONT_COLOR:WrapTextInColorCode(L.AUCTIONPRICES_CRAFT_NO_PRICE)
-end
-
--- The indent of a cost under its bundle: Blizzard's blank texture.
-local UNDER_INDENT = "|TInterface\\Common\\spacer:1:12|t"
-
--- Draws a line that lists bundles again with their costs, and returns true so Blizzard's is
--- skipped. Text around the bundles keeps its own line, wrapped as Blizzard wraps it.
-local function replaceBundleLine(tooltip, data, lineData)
-    local mode = internal.Active("auction") and module.db.crates
-    if mode ~= "beside" and mode ~= "below" then
-        return
-    end
-    local below = mode == "below"
-    local text = plainText(lineData)
-    if not (text and hasBundle(text) and inList(data, lineData)) then
-        return
-    end
-    local r, g, b = 1, 1, 1
-    local color = lineData.leftColor
-    if color and color.GetRGB then
-        r, g, b = color:GetRGB()
-    end
-    local wr, wg, wb = HIGHLIGHT_FONT_COLOR:GetRGB()
-    local inline = module.db.align == "inline"
-    local pending -- text lines before the next bundle, drawn together
-    local function flush()
-        if pending then
-            tooltip:AddLine(pending, r, g, b, true)
-            pending = nil
-        end
-    end
-    -- Blizzard colors parts of the line with color codes (the Use text green, the bundles
-    -- white), and a code can run on past a line break. Each piece is drawn with the codes it
-    -- had, reopening a color still running from the piece before and closing it at its end.
-    local open -- the color code still running at the start of the next piece
-    for piece in (lineData.leftText .. "\n"):gmatch(LINES) do
-        local shown = (open or "") .. piece
-        local running = runningColor(piece)
-        if running ~= nil then
-            open = running or nil
-        end
-        if open then
-            shown = shown .. "|r"
-        end
-        local count, name = bundleOf(stripCodes(piece))
-        if count then
-            flush()
-            local cost = bundleCost(count, name)
-            if below then
-                -- The bundle's line as it was, then its cost under it, indented at the left.
-                tooltip:AddLine(shown, r, g, b)
-                tooltip:AddLine(UNDER_INDENT .. cost, wr, wg, wb)
-            elseif inline then
-                tooltip:AddLine(format(L.PRICE_INLINE, shown, cost), r, g, b)
-            else
-                tooltip:AddDoubleLine(shown, cost, r, g, b, wr, wg, wb)
-            end
-        else
-            pending = pending and (pending .. "\n" .. shown) or shown
-        end
-    end
-    flush()
-    return true
-end
+local priceSource = {
+    price = function(itemID)
+        local item = house().items[itemID]
+        return item and item.price
+    end,
+    itemByName = itemByName,
+    inline = function()
+        return module.db.align == "inline"
+    end,
+}
 
 local function addAuctionPrice(tooltip, data)
     local itemID = internal.Active("auction") and ItemTooltip.ItemID(data)
@@ -1001,13 +828,14 @@ internal.AddPart("auction", {
         end
         -- The hook can't be removed; addAuctionPrice checks the part is on instead.
         ItemTooltip.OnPrices(addAuctionPrice)
-        ItemTooltip.ReplaceLine(replaceBundleLine)
         ns.AddOns.WhenLoaded("Blizzard_Professions", hookProfessions)
+        ns.Prices.SetSource(priceSource)
     end,
     disable = function()
         for event, fn in pairs(events) do
             ns.Off(event, fn)
         end
+        ns.Prices.SetSource(nil)
         stopScan()
         hideIndicator()
         open = false

@@ -28,8 +28,6 @@ local module = ns.NewModule("ItemTooltips", L.ITEMTOOLTIPS_DESC, {
     scanAgeColor = "age", -- "age" (green when fresh to red when old), "gray", "white", or "gold"
     scanAgeRedHours = 12, -- hours old at which "age" is fully red
     crafting = true, -- costs, value, and profit under a recipe's reagents
-    crates = "beside", -- a Waylaid Crate's bundle costs: "off", "below" the prices, or "beside" each
-    crateList = false, -- a button in the auction house listing what the crates still need
     scanOnOpen = true,
     chat = true,
     -- Data, not settings: they aren't in module.options.
@@ -149,19 +147,6 @@ module.options = {
         section = AUCTION, requires = "auction",
     },
     {
-        key = "crates", name = L.AUCTIONPRICES_CRATES, description = L.AUCTIONPRICES_CRATES_DESC,
-        section = AUCTION, requires = "auction", added = "0.8.2",
-        choices = {
-            { "off", L.AUCTIONPRICES_CRATES_OFF },
-            { "below", L.AUCTIONPRICES_CRATES_BELOW },
-            { "beside", L.AUCTIONPRICES_CRATES_BESIDE },
-        },
-    },
-    {
-        key = "crateList", name = L.CRATELIST, description = L.CRATELIST_DESC, section = AUCTION,
-        requires = "auction", added = "0.8.5",
-    },
-    {
         key = "scanOnOpen", name = L.AUCTIONPRICES_SCAN_ON_OPEN, description = L.AUCTIONPRICES_SCAN_ON_OPEN_DESC,
         section = AUCTION, requires = "auction",
     },
@@ -174,12 +159,11 @@ module.options[#module.options + 1] = chat
 -- Each part is on while the module and its checkbox are: `enable` and `disable` undo each other,
 -- and `optionChanged(key)` hears about the module's other options while it's on.
 
-local parts = {} -- { key, enable, disable, optionChanged?, requires?, on }
+local parts = {} -- { key, enable, disable, optionChanged?, on }
 
----Adds a part, turned on and off by the checkbox option `key` (and the checkbox `requires`, for
----a part that's an option of another).
+---Adds a part, turned on and off by the checkbox option `key`.
 ---@param key string
----@param part table { enable = fn, disable = fn, optionChanged? = fn(key), requires? = key }
+---@param part table { enable = fn, disable = fn, optionChanged? = fn(key) }
 function internal.AddPart(key, part)
     part.key = key
     parts[#parts + 1] = part
@@ -194,7 +178,7 @@ end
 
 local function sync()
     for _, part in ipairs(parts) do
-        local on = internal.Active(part.key) and (not part.requires or internal.Active(part.requires))
+        local on = internal.Active(part.key)
         if on ~= (part.on or false) then
             part.on = on
             if on then

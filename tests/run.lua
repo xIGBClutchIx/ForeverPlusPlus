@@ -28,6 +28,12 @@ end
 GetRealZoneText = function(id)
     return game.zoneNames[id] or ""
 end
+game.cachedItems = {}
+C_Item = {
+    GetItemInfoInstant = function(name)
+        return game.cachedItems[name]
+    end,
+}
 
 local ns = {}
 ns.NewLocale = function()
@@ -48,7 +54,7 @@ for _, file in ipairs({ "Core", "Map" }) do
     load("ForeverPlusPlus/Locales/enUS/" .. file .. ".lua")
 end
 for _, file in ipairs({ "Secret", "Colors", "Text", "WorldMap", "Instances", "Chat",
-    "TalentPlan", "Errors" }) do
+    "TalentPlan", "Errors", "Prices" }) do
     load("ForeverPlusPlus/Lib/" .. file .. ".lua")
 end
 
@@ -342,6 +348,35 @@ Errors.Provide(nil)
 eq(Errors.IsOn(), false, "errors off again")
 eq(Errors.SavedCount(), 0, "no saved count while off")
 eq(heard, 3, "turning off tells listeners")
+
+-- Prices ----------------------------------------------------------------------------------------
+
+local Prices = ns.Prices
+game.cachedItems["Strange Dust"] = 10940
+eq(Prices.Available(), false, "no prices without a source")
+eq(Prices.Auction(10940), nil, "no auction price without a source")
+eq(Prices.ItemByName("Strange Dust"), 10940, "item cache finds a name without a source")
+eq(Prices.ItemByName("Bolt of Silk Cloth"), nil, "unknown name without a source")
+eq(Prices.Inline(), false, "price lines at the edge without a source")
+Prices.SetSource({
+    price = function(itemID)
+        return itemID == 4305 and 120 or nil
+    end,
+    itemByName = function(name)
+        return name == "Bolt of Silk Cloth" and 4305 or nil
+    end,
+    inline = function()
+        return true
+    end,
+})
+eq(Prices.Available(), true, "prices with a source")
+eq(Prices.Auction(4305), 120, "source's price")
+eq(Prices.Auction(10940), nil, "item the source has no price for")
+eq(Prices.ItemByName("Bolt of Silk Cloth"), 4305, "source finds a name the cache doesn't")
+eq(Prices.ItemByName("Strange Dust"), 10940, "item cache first")
+eq(Prices.Inline(), true, "source's alignment")
+Prices.SetSource(nil)
+eq(Prices.Auction(4305), nil, "no prices once the source goes")
 
 -- Done ------------------------------------------------------------------------------------------
 

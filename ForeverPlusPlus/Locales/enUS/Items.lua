@@ -39,24 +39,6 @@ L.AUCTIONPRICES_CRAFT_RANGE = "%d-%d" -- fewest and most the recipe makes
 L.AUCTIONPRICES_CRAFT_VENDOR = "Vendor"
 L.AUCTIONPRICES_CRAFT_PROFIT = "Estimated Profit"
 L.AUCTIONPRICES_CRAFT_AGE = "Oldest Price"
-L.AUCTIONPRICES_CRATES = "Waylaid Crate Costs"
-L.AUCTIONPRICES_CRATES_DESC = "On a Waylaid Crate, show what buying each bundle it takes costs "
-    .. "at the auction house (the count times the item's lowest buyout), beside or under each "
-    .. "bundle."
-L.AUCTIONPRICES_CRATES_OFF = "Off"
-L.AUCTIONPRICES_CRATES_BELOW = "Under Each Bundle"
-L.AUCTIONPRICES_CRATES_BESIDE = "Beside Each Bundle"
-L.CRATELIST = "Crate Shopping List"
-L.CRATELIST_DESC = "Add a Waylaid Crates entry at the top of the auction house's categories. It "
-    .. "lists every item your Waylaid Crates still need, one row each: the bundles they take, "
-    .. "less what's already in your bags."
-L.CRATELIST_CATEGORY = "Waylaid Crates"
-L.CRATELIST_TITLE = "Waylaid Crate Needs"
-L.CRATELIST_NO_CRATES = "No Waylaid Crates in your bags."
-L.CRATELIST_DONE = "Your bags hold everything your crates need."
-L.CRATELIST_HINT = "Click to list these items."
-L.CRATELIST_NOT_FOUND = "Unknown item" -- an item name not found in the client or saved prices
-L.CRATELIST_NONE_LISTED = "None listed" -- no auctions up for the item
 L.AUCTIONPRICES_SCANNING = "Scanning prices... %d items" -- count so far
 L.AUCTIONPRICES_SCANNED = "Prices updated for %d items" -- count
 L.AUCTIONPRICES_PAUSED = "Scan paused while you sell... %d items" -- count so far
@@ -249,3 +231,31 @@ L.PROFTOOLTIPS_LOCKPICKING_NAME = "Lockpicking"
 L.PROFTOOLTIPS_BEAST = "Beast"
 L.PROFTOOLTIPS_DRAGONKIN = "Dragonkin"
 
+
+-- WaylaidCrates
+L.WAYLAIDCRATES_TITLE = "Waylaid Crates"
+L.WAYLAIDCRATES_DESC = "Help fill your Waylaid Crates: what each bundle a crate takes costs at "
+    .. "the auction house, and an auction house category that lists every item your crates still "
+    .. "need. Prices come from Item Tooltips' Auction Prices."
+L.WAYLAIDCRATES_COSTS = "Bundle Costs"
+L.WAYLAIDCRATES_COSTS_DESC = "On a Waylaid Crate, show what buying each bundle it takes costs "
+    .. "at the auction house (the count times the item's lowest buyout), beside or under each "
+    .. "bundle."
+L.WAYLAIDCRATES_COSTS_OFF = "Off"
+L.WAYLAIDCRATES_COSTS_BELOW = "Under Each Bundle"
+L.WAYLAIDCRATES_COSTS_BESIDE = "Beside Each Bundle"
+L.WAYLAIDCRATES_NO_PRICE = "No price"
+L.WAYLAIDCRATES_LIST = "Auction House Category"
+L.WAYLAIDCRATES_LIST_DESC = "Add a Waylaid Crates entry to the auction house's categories, at the "
+    .. "top or the bottom. It lists every item your crates still need, one row each: the bundles "
+    .. "they take, less what's already in your bags."
+L.WAYLAIDCRATES_LIST_OFF = "Off"
+L.WAYLAIDCRATES_LIST_TOP = "Top of the List"
+L.WAYLAIDCRATES_LIST_BOTTOM = "Bottom of the List"
+L.WAYLAIDCRATES_CATEGORY = "Waylaid Crates"
+L.WAYLAIDCRATES_NEEDS = "Waylaid Crate Needs"
+L.WAYLAIDCRATES_NO_CRATES = "No Waylaid Crates in your bags."
+L.WAYLAIDCRATES_DONE = "Your bags hold everything your crates need."
+L.WAYLAIDCRATES_HINT = "Click to list these items."
+L.WAYLAIDCRATES_NOT_FOUND = "Unknown item" -- an item name not found in the client or saved prices
+L.WAYLAIDCRATES_NONE_LISTED = "None listed" -- no auctions up for the item

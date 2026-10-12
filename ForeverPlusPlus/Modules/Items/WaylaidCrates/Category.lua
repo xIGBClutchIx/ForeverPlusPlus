@@ -1,15 +1,13 @@
--- Item Tooltips' crate shopping list: a Waylaid Crates row at the top of the auction house's
--- category list that fills Blizzard's browse list with every item the crates in your bags still
--- need, one row each, the way the Favorites star lists your favorites. A crate's tooltip lists
--- the bundles it takes ("- 6 Bolt of Woolen Cloth"); what's still needed is every crate's bundles
--- added up, less what's already in your bags. Items are found by name, as Waylaid Crate Costs
--- finds them.
+-- Waylaid Crates' auction house category: a Waylaid Crates row at the top or bottom of the auction
+-- house's category list that fills Blizzard's browse list with every item the crates in your bags
+-- still need, one row each, the way the Favorites star lists your favorites. What's still needed
+-- is every crate's bundles added up, less what's already in your bags. Items are found by name.
 --
 -- The rows come from C_AuctionHouse.SearchForItemKeys: Blizzard's browse list shows whatever
 -- browse results arrive, whoever asked for them. A real category would mean adding to Blizzard's
 -- AuctionCategories table, which would taint the auction house, so the row is our own button in
--- the category buttons' art, and the list's scroll box moves down one row to make room for it
--- (put back when the option goes off).
+-- the category buttons' art, and the list's scroll box gives up one row's room for it (put back
+-- when the option goes off).
 local _, ns = ...
 
 local _G, ipairs, pairs, sort, format, wipe = _G, ipairs, pairs, table.sort, string.format, wipe
@@ -20,14 +18,14 @@ local GRAY_FONT_COLOR, HIGHLIGHT_FONT_COLOR, GREEN_FONT_COLOR = GRAY_FONT_COLOR,
 
 local L = ns.L
 
-local module = ns.modules.ItemTooltips
+local module = ns.modules.WaylaidCrates
 local internal = module.internal
 
 local LAST_BAG = 5 -- backpack, four bags, and the reagent bag
 local ROW_WIDTH, ROW_HEIGHT = 132, 21 -- Blizzard's category buttons (AuctionCategoryButtonTemplate)
 
 local row -- our Waylaid Crates row
-local scrollAnchor -- the category list's scroll box TOPLEFT anchor before we moved it
+local listAnchors = {} -- the category list's scroll box TOPLEFT and BOTTOMRIGHT anchors before we moved it
 local crates = 0 -- crates in the bags when last read
 local needs = {} -- what they still need, by name: { name, count, itemID? }
 local listed -- itemIDs our last search found auctions for, or nil before it has answered
@@ -48,7 +46,7 @@ local function readCrates()
         for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
             local info = C_Container.GetContainerItemInfo(bag, slot)
             local data = info and C_TooltipInfo.GetBagItem(bag, slot)
-            local bundles = data and internal.CrateBundles(data)
+            local bundles = data and internal.Bundles(data)
             if bundles and #bundles > 0 then
                 crates = crates + 1
                 for _, bundle in ipairs(bundles) do
@@ -62,7 +60,7 @@ local function readCrates()
         end
     end
     for _, name in ipairs(names) do
-        local itemID = internal.ItemByName(name)
+        local itemID = ns.Prices.ItemByName(name)
         local still = wanted[name] - (itemID and C_Item.GetItemCount(itemID) or 0)
         if still > 0 then
             needs[#needs + 1] = { name = name, count = still, itemID = itemID }
@@ -209,28 +207,28 @@ local function onEnter(self)
     self.HighlightTexture:Show()
     refresh()
     GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-    GameTooltip:SetText(L.CRATELIST_TITLE, HIGHLIGHT_FONT_COLOR:GetRGB())
+    GameTooltip:SetText(L.WAYLAIDCRATES_NEEDS, HIGHLIGHT_FONT_COLOR:GetRGB())
     if crates == 0 then
-        GameTooltip:AddLine(L.CRATELIST_NO_CRATES, GRAY_FONT_COLOR:GetRGB())
+        GameTooltip:AddLine(L.WAYLAIDCRATES_NO_CRATES, GRAY_FONT_COLOR:GetRGB())
     elseif #needs == 0 then
-        GameTooltip:AddLine(L.CRATELIST_DONE, GRAY_FONT_COLOR:GetRGB())
+        GameTooltip:AddLine(L.WAYLAIDCRATES_DONE, GRAY_FONT_COLOR:GetRGB())
     end
     local wr, wg, wb = HIGHLIGHT_FONT_COLOR:GetRGB()
     local gr, gg, gb = GRAY_FONT_COLOR:GetRGB()
     for _, need in ipairs(needs) do
         local count = format("%d", need.count)
         if not need.itemID then
-            GameTooltip:AddDoubleLine(need.name, L.CRATELIST_NOT_FOUND, gr, gg, gb, gr, gg, gb)
+            GameTooltip:AddDoubleLine(need.name, L.WAYLAIDCRATES_NOT_FOUND, gr, gg, gb, gr, gg, gb)
         elseif listed and not awaiting and not listed[need.itemID] then
             GameTooltip:AddDoubleLine(need.name, format("%s  %s", count,
-                GRAY_FONT_COLOR:WrapTextInColorCode(L.CRATELIST_NONE_LISTED)), wr, wg, wb, wr, wg, wb)
+                GRAY_FONT_COLOR:WrapTextInColorCode(L.WAYLAIDCRATES_NONE_LISTED)), wr, wg, wb, wr, wg, wb)
         else
             GameTooltip:AddDoubleLine(need.name, count, wr, wg, wb, wr, wg, wb)
         end
     end
     if searchable() then
         GameTooltip:AddLine(" ")
-        GameTooltip:AddLine(L.CRATELIST_HINT, GREEN_FONT_COLOR:GetRGB())
+        GameTooltip:AddLine(L.WAYLAIDCRATES_HINT, GREEN_FONT_COLOR:GetRGB())
     end
     GameTooltip:Show()
 end
@@ -280,7 +278,7 @@ local function makeRow(list)
     text:SetJustifyH("LEFT")
     text:SetShadowOffset(1, -1)
     row:SetFontString(text)
-    row:SetText(L.CRATELIST_CATEGORY)
+    row:SetText(L.WAYLAIDCRATES_CATEGORY)
     row:SetPushedTextOffset(1, -1)
     row:SetScript("OnClick", onClick)
     row:SetScript("OnEnter", onEnter)
@@ -289,50 +287,77 @@ local function makeRow(list)
     row:SetScript("OnHide", onHide)
 end
 
--- The scroll box's TOPLEFT anchor: its index and values, or nil.
-local function topLeft(box)
+
+-- The scroll box's anchor for `point`: { relativeTo, relativePoint, x, y }, or nil.
+local function anchorOf(box, point)
     for i = 1, box:GetNumPoints() do
-        local point, relativeTo, relativePoint, x, y = box:GetPoint(i)
-        if point == "TOPLEFT" then
+        local p, relativeTo, relativePoint, x, y = box:GetPoint(i)
+        if p == point then
             return { relativeTo, relativePoint, x, y }
         end
     end
 end
 
--- Our row where the list's first row was, and the list one row lower.
-local function setup()
+local function categoryList()
     local frame = _G.AuctionHouseFrame
     local list = frame and frame.CategoriesList
-    local box = list and list.ScrollBox
+    return list, list and list.ScrollBox
+end
+
+-- Puts the scroll box's anchors back where Blizzard had them.
+local function restoreList(box)
+    for point, anchor in pairs(listAnchors) do
+        box:SetPoint(point, anchor[1], anchor[2], anchor[3], anchor[4])
+    end
+end
+
+-- Our row in the first slot with the list one row lower ("top"), or under the list, which ends a
+-- row higher ("bottom"). The list's view pads its rows 3 from the left.
+local function place()
+    local _, box = categoryList()
+    if not (row and box) then
+        return
+    end
+    restoreList(box)
+    local top, bottom = listAnchors.TOPLEFT, listAnchors.BOTTOMRIGHT
+    row:ClearAllPoints()
+    if module.db.list == "top" then
+        row:SetPoint("TOPLEFT", top[1], top[2], top[3] + 3, top[4])
+        box:SetPoint("TOPLEFT", top[1], top[2], top[3], top[4] - ROW_HEIGHT)
+    else
+        box:SetPoint("BOTTOMRIGHT", bottom[1], bottom[2], bottom[3], bottom[4] + ROW_HEIGHT)
+        row:SetPoint("TOPLEFT", box, "BOTTOMLEFT", 3, 0)
+    end
+    row:Show()
+end
+
+local function setup()
+    local list, box = categoryList()
     if not (box and C_AuctionHouse.SearchForItemKeys and C_AuctionHouse.MakeItemKey
         and C_TooltipInfo and C_TooltipInfo.GetBagItem) then
         return
     end
-    scrollAnchor = scrollAnchor or topLeft(box)
-    if not scrollAnchor then
-        return
+    if not listAnchors.TOPLEFT then
+        local top, bottom = anchorOf(box, "TOPLEFT"), anchorOf(box, "BOTTOMRIGHT")
+        if not (top and bottom) then
+            return -- not the layout we know: leave the list alone
+        end
+        listAnchors.TOPLEFT, listAnchors.BOTTOMRIGHT = top, bottom
     end
     if not row then
         makeRow(list)
         module:Hook(list, "SetSelectedCategory", onCategorySelected)
     end
-    local anchor = scrollAnchor
-    -- The list's view pads its rows 3 from the left.
-    row:ClearAllPoints()
-    row:SetPoint("TOPLEFT", anchor[1], anchor[2], anchor[3] + 3, anchor[4])
-    box:SetPoint("TOPLEFT", anchor[1], anchor[2], anchor[3], anchor[4] - ROW_HEIGHT)
-    row:Show()
+    place()
 end
 
 local function teardown()
     if row then
         row:Hide()
     end
-    local list = _G.AuctionHouseFrame and _G.AuctionHouseFrame.CategoriesList
-    local box = list and list.ScrollBox
-    if box and scrollAnchor then
-        local anchor = scrollAnchor
-        box:SetPoint("TOPLEFT", anchor[1], anchor[2], anchor[3], anchor[4])
+    local _, box = categoryList()
+    if box then
+        restoreList(box)
     end
 end
 
@@ -341,8 +366,7 @@ local events = {
     AUCTION_HOUSE_BROWSE_RESULTS_ADDED = onResultsAdded,
 }
 
-internal.AddPart("crateList", {
-    requires = "auction",
+internal.AddPart("list", {
     enable = function()
         for event, fn in pairs(events) do
             ns.On(event, fn)
@@ -356,5 +380,10 @@ internal.AddPart("crateList", {
         ns.AddOns.Cancel("Blizzard_AuctionHouseUI", setup)
         listed, awaiting = nil, false
         teardown()
+    end,
+    optionChanged = function(key)
+        if key == "list" then
+            place()
+        end
     end,
 })
