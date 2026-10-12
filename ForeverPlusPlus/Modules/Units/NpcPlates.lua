@@ -12,7 +12,7 @@ local module = ns.NewModule("NpcPlates", L.NPCPLATES_DESC, ns.FriendlyPlates.Def
     titleColor = "name", -- "name" (the name's color), "gray", or "green"
 }))
 module.title = L.NPCPLATES_TITLE
-module.category = "nameplates"
+module.category = "units"
 
 -- Laid out like Player Nameplates: general, the name, then the title line.
 module.options = ns.FriendlyPlates.Options(L.NPCPLATES_BAR_WHEN_HURT_DESC, {

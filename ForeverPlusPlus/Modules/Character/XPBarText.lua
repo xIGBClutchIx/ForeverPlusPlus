@@ -20,7 +20,7 @@ local module = ns.NewModule("XPBarText", L.XPBARTEXT_DESC, {
     quests = "complete", -- "off", "complete" (ready to turn in), or "all"
 })
 module.title = L.XPBARTEXT_TITLE
-module.category = "interface"
+module.category = "character"
 module.added = "0.8.0"
 
 module.options = {

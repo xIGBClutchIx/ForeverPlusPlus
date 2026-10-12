@@ -24,7 +24,7 @@ local module = ns.NewModule("SpellRanks", L.SPELLRANKS_DESC, {
     chat = true,
 })
 module.title = L.SPELLRANKS_TITLE
-module.category = "interface"
+module.category = "character"
 
 module.options = {
     {

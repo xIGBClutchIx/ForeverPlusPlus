@@ -16,7 +16,7 @@ local module = ns.NewModule("HideFeedback", L.HIDEFEEDBACK_DESC, {
     quest = true, -- hide the feedback widgets on quest windows
 })
 module.title = L.HIDEFEEDBACK_TITLE
-module.category = "interface"
+module.category = "system"
 
 module.options = {
     { key = "tooltip", name = L.HIDEFEEDBACK_TOOLTIP, description = L.HIDEFEEDBACK_TOOLTIP_DESC },

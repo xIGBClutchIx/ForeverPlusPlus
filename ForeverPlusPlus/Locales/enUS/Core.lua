@@ -64,12 +64,14 @@ L.CHAT_MESSAGES = "Chat Messages" -- a module's checkbox for what it says in cha
 -- Settings
 -- The main Settings page's groups of modules.
 L.CATEGORY_AUTOMATION = "Automation"
-L.CATEGORY_ITEMS = "Items"
-L.CATEGORY_INTERFACE = "Interface"
-L.CATEGORY_MAP = "Map"
-L.CATEGORY_UNITFRAMES = "Unit Frames"
-L.CATEGORY_NAMEPLATES = "Nameplates"
+L.CATEGORY_CHARACTER = "Character"
 L.CATEGORY_CHAT = "Chat"
+L.CATEGORY_INTERFACE = "Interface"
+L.CATEGORY_ITEMS = "Items"
+L.CATEGORY_MAP = "Map"
+L.CATEGORY_QUESTS = "Quests"
+L.CATEGORY_SYSTEM = "System"
+L.CATEGORY_UNITS = "Units" -- unit frames and nameplates
 L.CATEGORY_OTHER = "Other"
 L.DEBUG = "Debug"
 L.SETTINGS_AFTER_COMBAT = "Settings open after combat."
@@ -150,7 +152,7 @@ L.HOME_INTRO = "Each module is one small change to Blizzard's interface, made to
     .. "see what it does and its options. Settings are saved for your whole account."
 L.HOME_MODULES_ON = "%d of %d modules on" -- on, total
 L.HOME_DEFAULTS = "Defaults"
--- The popup of the Defaults button at the top right of every Forever++ page
+-- The popup of the Defaults button at the top right of the Modules, Debug, Changelog, and About pages
 L.DEFAULTS_ASK = "Put all Forever++ settings back to defaults? This replaces your current "
     .. "Forever++ settings. The rest of the game's settings stay as they are."
 L.DEFAULTS_DEVELOPER = "Developer's Defaults"

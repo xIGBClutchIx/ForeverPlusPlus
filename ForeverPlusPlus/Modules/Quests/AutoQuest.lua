@@ -18,7 +18,7 @@ local module = ns.NewModule("AutoQuest", L.AUTOQUEST_DESC, {
     pauseKey = "shift", -- "shift", "ctrl", "alt", or "none"
 })
 module.title = L.AUTOQUEST_TITLE
-module.category = "automation"
+module.category = "quests"
 module.added = "0.8.0"
 
 module.options = {

@@ -35,7 +35,7 @@ local module = ns.NewModule("ErrorCatcher", L.ERRORCATCHER_DESC, {
     },
 })
 module.title = L.ERRORCATCHER_TITLE
-module.category = "interface"
+module.category = "system"
 
 local MAX_ERRORS = 100 -- the oldest go first
 local MAX_TEXT = 2000 -- letters kept of a stack or the locals, so the saved file stays small

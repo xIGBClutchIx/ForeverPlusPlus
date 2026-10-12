@@ -24,7 +24,7 @@ local module = ns.NewModule("QuestPlates", L.QUESTPLATES_DESC, {
     size = 100, -- a percent
 })
 module.title = L.QUESTPLATES_TITLE
-module.category = "nameplates"
+module.category = "quests"
 
 module.options = {
     {

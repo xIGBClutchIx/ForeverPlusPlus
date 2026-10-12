@@ -15,7 +15,7 @@ local module = ns.NewModule("BuffTimers", L.BUFFTIMERS_DESC, {
     limit = "10m", -- "1m", "10m", "hour", or "all": which auras get a clock
 })
 module.title = L.BUFFTIMERS_TITLE
-module.category = "interface"
+module.category = "character"
 module.added = "0.8.0"
 -- Blizzard shows its own Duration text only with this CVar on, and so do we (see below).
 module.notice = ns.CVars.OffNotice(module, "buffDurations", L.BUFFTIMERS_BLIZZARD_OFF,

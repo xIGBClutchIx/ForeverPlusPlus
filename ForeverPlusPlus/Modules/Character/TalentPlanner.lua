@@ -29,7 +29,7 @@ local module = ns.NewModule("TalentPlanner", L.TALENTPLANNER_DESC, {
     builds = {},
 })
 module.title = L.TALENTPLANNER_TITLE
-module.category = "interface"
+module.category = "character"
 module.added = "0.8.0"
 
 module.options = {

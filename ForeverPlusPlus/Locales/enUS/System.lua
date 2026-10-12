@@ -1,0 +1,121 @@
+-- English text for the system modules. Locales/enUS/Core.lua says how locale files work.
+local _, ns = ...
+
+local L = ns.NewLocale("enUS")
+if not L then
+    return
+end
+
+-- ErrorCatcher
+L.ERRORCATCHER_TITLE = "Error Catcher"
+L.ERRORCATCHER_DESC = "Catch Lua errors and blocked actions quietly instead of in Blizzard's "
+    .. "error window, and read them later in a window you can copy from, with /fpp errors or "
+    .. "a Shift-right-click on the Forever++ minimap button."
+L.ERRORCATCHER_CHAT_DESC = "Say in chat when an error is caught."
+L.ERRORCATCHER_SHOW = "Errors"
+L.ERRORCATCHER_SHOW_BUTTON = "Show"
+L.ERRORCATCHER_SHOW_DESC = "Open the window with the errors caught so far."
+L.ERRORCATCHER_CLEAR = "Clear"
+L.ERRORCATCHER_CLEAR_NAME = "Saved Errors"
+L.ERRORCATCHER_CLEAR_DESC = "Forget every saved error, from every session."
+L.ERRORCATCHER_CLEAR_CONFIRM = "Forget every saved error?"
+L.ERRORCATCHER_COMMAND = "show the caught Lua errors"
+L.ERRORCATCHER_OFF = "Error Catcher is off. Turn it on in /fpp."
+L.ERRORCATCHER_CAUGHT = "Caught an error: %s Type /fpp errors to see it." -- first line of the error
+L.ERRORCATCHER_CAUGHT_LOADING = "Caught %d errors while logging in. Type /fpp errors to see them."
+L.ERRORCATCHER_OTHER_HANDLER = "Another addon, such as BugGrabber, is catching Lua errors, so "
+    .. "Error Catcher only sees blocked actions and warnings."
+L.ERRORCATCHER_BLOCKED = "%s: %s tried to call the protected function %s." -- event, addon, function
+L.ERRORCATCHER_SECRET = "(The game hid this error's text.)"
+L.ERRORCATCHER_UNKNOWN = "unknown"
+L.ERRORCATCHER_THIS_SESSION = "This Session"
+L.ERRORCATCHER_LAST_SESSION = "Previous Session"
+L.ERRORCATCHER_ALL = "All Sessions"
+L.ERRORCATCHER_FILTER = "%s (%d)" -- a filter above, how many errors it shows
+L.ERRORCATCHER_SUMMARY = "%d this session, %d saved" -- errors this session, errors saved
+L.ERRORCATCHER_NONE = "No errors caught."
+L.ERRORCATCHER_KIND_ERROR = "Lua Error"
+L.ERRORCATCHER_KIND_BLOCKED = "Blocked Action"
+L.ERRORCATCHER_KIND_WARNING = "Lua Warning"
+L.ERRORCATCHER_POSITION = "%d of %d" -- this one, how many
+L.ERRORCATCHER_ROW_INFO = "%dx, %s" -- times seen, how long ago ("12m ago")
+-- times, session, first and last time it happened, how long ago ("12m ago")
+L.ERRORCATCHER_META = "Seen %d times in session %d, first at %s, last at %s (%s)."
+L.ERRORCATCHER_STACK = "Stack:"
+L.ERRORCATCHER_LOCALS = "Locals:"
+L.ERRORCATCHER_NO_STACK = "No stack: blocked actions and warnings don't come with one."
+L.ERRORCATCHER_COPY = "Copy Bug Report"
+L.ERRORCATCHER_COPY_HINT = "Selected. Press Ctrl+C to copy."
+L.ERRORCATCHER_REPORT_HEADER = "Forever++ %s bug report" -- the addon's version
+L.ERRORCATCHER_REPORT_CLIENT = "Client: %s, build %s, interface %s, %s" -- version, build, interface, locale
+L.ERRORCATCHER_REPORT_DATE = "Date: %s"
+L.ERRORCATCHER_REPORT_MODULES = "Modules on (%d): %s"
+L.ERRORCATCHER_REPORT_ADDONS = "Other addons (%d): %s"
+L.ERRORCATCHER_REPORT_NONE = "none"
+L.ERRORCATCHER_TEST = "Test Error"
+L.ERRORCATCHER_TEST_BUTTON = "Throw"
+L.ERRORCATCHER_TEST_DESC = "Raise a Lua error on purpose, to check that Error Catcher (or, "
+    .. "with it off, Blizzard's error window) catches it."
+L.ERRORCATCHER_TEST_MESSAGE = "Forever++ test error. Nothing is wrong."
+
+-- AddOnList
+L.ADDONLIST_TITLE = "AddOns List"
+L.ADDONLIST_DESC = "Show the AddOns list without category headers, with enabled addons first."
+L.ADDONLIST_ENABLEDFIRST = "Enabled First"
+L.ADDONLIST_ENABLEDFIRST_DESC = "List the addons you have enabled above the disabled ones."
+L.ADDONLIST_UNGROUP = "Ungroup Disabled"
+L.ADDONLIST_UNGROUP_DESC = "Move disabled addons out of their group to the disabled part of the "
+    .. "list, so a group only shows the addons that are on."
+L.ADDONLIST_NOTES = "Search Notes"
+L.ADDONLIST_NOTES_DESC = "Let the search box also find words in an addon's notes."
+
+-- MinimapButton
+L.MINIMAPBUTTON_TITLE = "Minimap Button"
+L.MINIMAPBUTTON_DESC = "A Forever++ button on the minimap, in the addon compartment, or both. "
+    .. "Click it for settings, right-click it for quick toggles, and Shift-right-click it for "
+    .. "caught errors."
+L.MINIMAPBUTTON_WHERE = "Show In"
+L.MINIMAPBUTTON_WHERE_DESC = "Where the button goes: on the minimap, in the addon compartment "
+    .. "under it, or both. Drag the minimap button to move it around the minimap."
+L.MINIMAPBUTTON_WHERE_MINIMAP = "Minimap"
+L.MINIMAPBUTTON_WHERE_COMPARTMENT = "Addon Compartment"
+L.MINIMAPBUTTON_WHERE_BOTH = "Both"
+L.MINIMAPBUTTON_COMPARTMENT_COUNT = "%s (%d)" -- Forever++, errors this session
+L.MINIMAPBUTTON_TIP_SESSION = "Errors this session: %d"
+L.MINIMAPBUTTON_TIP_SAVED = "Saved errors: %d"
+L.MINIMAPBUTTON_TIP_SETTINGS = "Click to open Forever++ settings."
+L.MINIMAPBUTTON_TIP_WELCOME = "Click to see what Forever++ is."
+L.MINIMAPBUTTON_TIP_TOGGLES = "Right-click for quick toggles."
+L.MINIMAPBUTTON_TIP_ERRORS = "Shift-right-click to show the errors."
+L.MINIMAPBUTTON_TIP_DRAG = "Drag to move the button."
+L.MINIMAPBUTTON_TIP_CLEAR = "%s-right-click to clear this session's errors." -- a key, such as Ctrl
+L.MINIMAPBUTTON_CLEAR_KEY = "Clear Key"
+L.MINIMAPBUTTON_CLEAR_KEY_DESC = "The key to hold while right-clicking the button to clear "
+    .. "this session's errors, while Error Catcher is on. A Shift-right-click shows them."
+
+-- Commands
+L.COMMANDS_TITLE = "Commands"
+L.COMMANDS_DESC = "Add short slash commands: /rl to reload the UI and /clear to empty a chat "
+    .. "window. /way is in Waypoints."
+L.COMMANDS_RELOAD = "/rl"
+L.COMMANDS_RELOAD_DESC = "/rl reloads the UI, like /reload. Left to another addon that already "
+    .. "has /rl."
+L.COMMANDS_CLEAR = "/clear"
+L.COMMANDS_CLEAR_DESC = "/clear empties the chat window you type it in. Left to another addon "
+    .. "that already has /clear."
+
+-- HideFeedback
+L.HIDEFEEDBACK_TITLE = "Hide Beta Feedback"
+L.HIDEFEEDBACK_DESC = "Hide the beta's \"Press F6 to submit an issue\" line on tooltips and its "
+    .. "bug report button. F6 still reports an issue."
+L.HIDEFEEDBACK_TOOLTIP = "Hide Tooltip Reminder"
+L.HIDEFEEDBACK_TOOLTIP_DESC = "Hide the \"Press F6 to submit an issue\" line on tooltips."
+L.HIDEFEEDBACK_BUTTON = "Hide Bug Report Button"
+L.HIDEFEEDBACK_BUTTON_DESC = "Hide the floating bug report button."
+L.HIDEFEEDBACK_QUEST = "Hide Quest Feedback"
+L.HIDEFEEDBACK_QUEST_DESC = "Hide the feedback buttons on quest windows."
+
+-- Framerate
+L.FRAMERATE_TITLE = "Movable Framerate"
+L.FRAMERATE_DESC = "Lets you move and resize the framerate text (Ctrl+R) in Edit Mode, like "
+    .. "Blizzard's own frames. Until you move it, it stays where Blizzard puts it."

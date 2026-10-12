@@ -1,10 +1,46 @@
--- English text for friendly nameplates and the two plate modules. Locales/enUS/Core.lua says how locale files work.
+-- English text for the unit modules: class colors, friendly nameplates, and the two plate modules. Locales/enUS/Core.lua says how locale files work.
 local _, ns = ...
 
 local L = ns.NewLocale("enUS")
 if not L then
     return
 end
+
+-- ClassColors
+L.CLASSCOLORS_TITLE = "Class Colors"
+L.CLASSCOLORS_DESC = "Show players' health bars and names in their class color on the player, "
+    .. "target, focus, party, and target-of-target frames, NPCs' bars by reaction, and names in "
+    .. "the friends and who lists."
+L.CLASSCOLORS_SECTION_PARTS = "Color"
+L.CLASSCOLORS_SECTION_FRAMES = "Frames"
+L.CLASSCOLORS_BARS = "Health Bars"
+L.CLASSCOLORS_BARS_DESC = "Color a player's health bar by their class."
+L.CLASSCOLORS_NPC_BARS = "NPC Health Bars"
+L.CLASSCOLORS_NPC_BARS_DESC = "Color an NPC's health bar red when it's hostile, yellow when it's "
+    .. "neutral, and gray when someone else has tagged it. Friendly NPCs stay green."
+L.CLASSCOLORS_NAMES = "Name Color"
+L.CLASSCOLORS_NAMES_DESC = "The color of the name on these frames. Class color applies to players "
+    .. "only; other names keep Blizzard's color."
+L.CLASSCOLORS_NAMES_DEFAULT = "Default"
+L.CLASSCOLORS_NAMES_WHITE = "White"
+L.CLASSCOLORS_NAMES_CLASS = "Class Color"
+L.CLASSCOLORS_NAME_BG = "Name Backgrounds"
+L.CLASSCOLORS_NAME_BG_DESC = "Color the bar behind a player's name by their class instead of "
+    .. "Blizzard's faction color. Target and focus frames only."
+L.CLASSCOLORS_SOCIAL = "Friends and Who List"
+L.CLASSCOLORS_SOCIAL_DESC = "Show online friends' names in the friends list and names in the "
+    .. "who list in their class color."
+L.CLASSCOLORS_PLAYER = "Player"
+L.CLASSCOLORS_PLAYER_DESC = "Your own frame."
+L.CLASSCOLORS_TARGET = "Target"
+L.CLASSCOLORS_TARGET_DESC = "Your target's frame."
+L.CLASSCOLORS_FOCUS = "Focus"
+L.CLASSCOLORS_FOCUS_DESC = "Your focus's frame."
+L.CLASSCOLORS_PARTY = "Party"
+L.CLASSCOLORS_PARTY_DESC = "Your party members' frames. Raid-style party frames have their own "
+    .. "class color setting in Blizzard's options."
+L.CLASSCOLORS_TOT = "Target of Target"
+L.CLASSCOLORS_TOT_DESC = "The small frames for your target's target and your focus's target."
 
 -- Friendly nameplates (Lib/PlateLabel.lua and both plate modules)
 L.PLATES_BLIZZARD_OFF = "Blizzard's nameplates are off" -- a gray row atop the page, with a button
@@ -103,32 +139,3 @@ L.NPCPLATES_TITLES_DESC = "When to show an NPC's title, like <Innkeeper>, under 
 L.NPCPLATES_TITLE_COLOR = "Title Color"
 L.NPCPLATES_TITLE_COLOR_DESC = "The color of an NPC's <Title> line."
 L.NPCPLATES_TITLE_COLOR_NAME = "Same as Name"
-
-
--- QuestPlates
-L.QUESTPLATES_TITLE = "Quest Nameplates"
-L.QUESTPLATES_DESC = "Show a quest icon and your progress beside the health bar of creatures "
-    .. "you need for a quest."
-L.QUESTPLATES_PROGRESS = "Progress"
-L.QUESTPLATES_PROGRESS_DESC = "What to show beside the icon: how far along the objective is, "
-    .. "how many are left, or nothing."
-L.QUESTPLATES_PROGRESS_COUNT = "Count (3/8)"
-L.QUESTPLATES_PROGRESS_REMAINING = "Remaining"
-L.QUESTPLATES_PROGRESS_OFF = "Icon Only"
-L.QUESTPLATES_PARTY = "Party Progress"
-L.QUESTPLATES_PARTY_DESC = "Whose progress to count in a party: only yours, everyone's added "
-    .. "together, or the member furthest from done. Party members show only when they share the quest."
-L.QUESTPLATES_PARTY_OWN = "Own Only"
-L.QUESTPLATES_PARTY_COMBINED = "Party Combined"
-L.QUESTPLATES_PARTY_LOWEST = "Lowest"
-L.QUESTPLATES_COMPLETED = "Show Completed"
-L.QUESTPLATES_COMPLETED_DESC = "Keep a green check and the final count on creatures whose "
-    .. "objective is done."
-L.QUESTPLATES_COMPLETEDCOUNT = "Show Count on Completed"
-L.QUESTPLATES_COMPLETEDCOUNT_DESC = "Show the final count (8/8) under the check. Turn this off for just the check."
-L.QUESTPLATES_SIDE = "Position"
-L.QUESTPLATES_SIDE_DESC = "Which side of the health bar the icon sits on."
-L.QUESTPLATES_SIDE_LEFT = "Left of Bar"
-L.QUESTPLATES_SIDE_RIGHT = "Right of Bar"
-L.QUESTPLATES_SIZE = "Size"
-L.QUESTPLATES_SIZE_DESC = "How big the icon and its text are."

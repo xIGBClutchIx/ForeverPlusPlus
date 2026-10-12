@@ -1,0 +1,149 @@
+-- English text for the character modules. Locales/enUS/Core.lua says how locale files work.
+local _, ns = ...
+
+local L = ns.NewLocale("enUS")
+if not L then
+    return
+end
+
+-- CharacterFrame
+L.CHARACTERFRAME_TITLE = "Character Window"
+L.CHARACTERFRAME_DESC = "Tidy the Character window: side tabs for Equipment, Titles, and Pet, "
+    .. "stats from the top, your level and name in your class color, and a durability bar beside "
+    .. "each item."
+L.CHARACTERFRAME_SIDETABS = "Side Tabs"
+L.CHARACTERFRAME_SIDETABS_DESC = "Move the Equipment, Titles, and Pet tabs beside the Reputation, "
+    .. "Skills, and other tabs, and remove the portrait and level line above the stats so they "
+    .. "start at the top (your pet's level and loyalty stay above its stats). They work like the "
+    .. "other tabs: pick the Character tab to go back to the stats."
+L.CHARACTERFRAME_COLORTITLE = "Colored Title"
+L.CHARACTERFRAME_COLORTITLE_DESC = "Show your level, in gold, before your name, in your class color, "
+    .. "in the window's title."
+L.CHARACTERFRAME_TITLE_FORMAT = "%s %s"
+L.CHARACTERFRAME_DURABILITY = "Durability Bars"
+L.CHARACTERFRAME_DURABILITY_DESC = "A small bar beside each item with how worn it is, from green "
+    .. "to red, and which items get one. Items without durability never do."
+L.CHARACTERFRAME_DURABILITY_ALWAYS = "Always"
+L.CHARACTERFRAME_DURABILITY_WORN = "Only When Worn"
+L.CHARACTERFRAME_DURABILITY_HALF = "Below 50%"
+L.CHARACTERFRAME_DURABILITY_QUARTER = "Below 25%"
+L.CHARACTERFRAME_DURABILITY_OFF = "Off"
+L.CHARACTERFRAME_WEAPONSKILLS = "Equipped Weapon Skills"
+L.CHARACTERFRAME_WEAPONSKILLS_DESC = "On the Skills tab, color the bars of the weapon skills for "
+    .. "the weapons you have equipped green instead of blue."
+
+-- Talent Planner
+L.TALENTPLANNER_TITLE = "Talent Planner"
+L.TALENTPLANNER_DESC = "Add a Plan Talents button to the talent window: place talents freely, in "
+    .. "order, up to the points you have at a level you choose, and follow the plan as you level."
+L.TALENTPLANNER_GLOW = "Highlight Next Talent"
+L.TALENTPLANNER_GLOW_DESC = "Make the plan's next talent glow gold when you have a point to spend."
+L.TALENTPLANNER_TOOLTIP = "Tooltip Line"
+L.TALENTPLANNER_TOOLTIP_DESC = "Add the levels at which the plan takes a talent to its tooltip."
+L.TALENTPLANNER_PLAN = "Plan Talents"
+L.TALENTPLANNER_DONE = "Done Planning"
+L.TALENTPLANNER_PLAN_DESC = "Place talents without learning them. Each click adds a point to the "
+    .. "plan, in order, so you can follow it as you level. The plan is saved for this character."
+L.TALENTPLANNER_CLICK = "Left-click to add a point, right-click to remove one. Hold Shift for "
+    .. "every rank."
+L.TALENTPLANNER_RANK = "Rank %d/%d" -- planned ranks, most ranks
+L.TALENTPLANNER_NEXT_RANK = "Next Rank:"
+L.TALENTPLANNER_PLANNED = "Planned at Level:"
+L.TALENTPLANNER_POINTS = "Points Planned: %d/%d" -- planned, points at the plan's level
+L.TALENTPLANNER_MORE = "(%d more after this level)"
+L.TALENTPLANNER_NEXT = "Next: %s (Level %d)" -- talent name, level
+L.TALENTPLANNER_COMPLETE = "Talent plan complete."
+L.TALENTPLANNER_ORDER = "Talent Order"
+L.TALENTPLANNER_UPCOMING = "Upcoming Talents"
+L.TALENTPLANNER_LEVEL_ONE = "Level %d"
+L.TALENTPLANNER_LEVEL_RANGE = "Levels %d-%d" -- first and last level
+L.TALENTPLANNER_MORE_LINES = "...and %d more"
+L.TALENTPLANNER_LEVEL = "Level"
+L.TALENTPLANNER_LEVEL_DESC = "Plan only the talent points a character has at this level."
+L.TALENTPLANNER_CLEAR = "Clear"
+L.TALENTPLANNER_CLEAR_DESC = "Take every point out of the plan."
+L.TALENTPLANNER_CLEAR_CONFIRM = "Clear your talent plan?"
+L.TALENTPLANNER_RESET = "Reset"
+L.TALENTPLANNER_RESET_DESC = "Start the plan over from the talents you have learned."
+L.TALENTPLANNER_RESET_CONFIRM = "Start your talent plan over from the talents you have learned?"
+L.TALENTPLANNER_NO_POINTS = "No talent points left at level %d."
+L.TALENTPLANNER_MAXED = "That talent is at its highest rank."
+L.TALENTPLANNER_TIER = "Requires %d points in %s." -- points, tab name
+L.TALENTPLANNER_PREREQ = "Requires %s at its highest rank." -- talent names
+L.TALENTPLANNER_NEEDED = "Talents planned after this one need that point."
+L.TALENTPLANNER_PLAN_NAME = "Plan %d"
+L.TALENTPLANNER_NEW = "New Plan"
+L.TALENTPLANNER_NEW_PROMPT = "Name the new talent plan. It starts from the talents you have learned."
+L.TALENTPLANNER_RENAME = "Rename Plan"
+L.TALENTPLANNER_RENAME_PROMPT = "Rename this talent plan:"
+L.TALENTPLANNER_SHARE = "Share Plan"
+L.TALENTPLANNER_SHARE_PROMPT = "Press Ctrl+C to copy this talent plan. Import Plan on any character "
+    .. "of the same class reads it."
+L.TALENTPLANNER_IMPORT = "Import Plan"
+L.TALENTPLANNER_IMPORT_PROMPT = "Paste a shared talent plan (Ctrl+V):"
+L.TALENTPLANNER_IMPORT_BAD = "That isn't a shared talent plan."
+L.TALENTPLANNER_IMPORT_CLASS = "That talent plan is for another class."
+L.TALENTPLANNER_IMPORT_INVALID = "That talent plan doesn't fit this talent tree."
+L.TALENTPLANNER_DELETE = "Delete Plan"
+L.TALENTPLANNER_DELETE_CONFIRM = "Delete this talent plan?"
+
+-- SpellRanks
+L.SPELLRANKS_TITLE = "Spell Ranks"
+L.SPELLRANKS_DESC = "Mark the spells on your action bars that have a higher rank you already "
+    .. "know, and say the best rank in their tooltips. /fpp ranks lists them."
+L.SPELLRANKS_STYLE = "Mark Style"
+L.SPELLRANKS_STYLE_DESC = "How an action button with an outdated spell rank is marked."
+L.SPELLRANKS_STYLE_BADGE = "Warning Badge"
+L.SPELLRANKS_STYLE_TINT = "Red Tint"
+L.SPELLRANKS_TOOLTIP = "Tooltip Line"
+L.SPELLRANKS_TOOLTIP_DESC = "Add the best rank you know to the tooltip of a spell that has a "
+    .. "higher rank."
+L.SPELLRANKS_CHAT_DESC = "Say in chat how many action bar spells have a higher rank after you "
+    .. "learn new spells or level up."
+L.SPELLRANKS_BEST = "Higher Rank Known:"
+L.SPELLRANKS_BEST_RANK = "Rank %d" -- the best rank known
+L.SPELLRANKS_FOUND = "%d action bar spells have a higher rank. /fpp ranks lists them."
+L.SPELLRANKS_COMMAND = "List the action bar spells that have a higher rank"
+L.SPELLRANKS_OFF = "Spell Ranks is off."
+L.SPELLRANKS_NONE = "Every spell on your action bars is its highest rank."
+L.SPELLRANKS_LINE = "Bar %d, slot %d: %s is Rank %d, and Rank %d is known." -- bar, slot, spell link, ranks
+
+-- BuffTimers
+L.BUFFTIMERS_TITLE = "Buff Timers"
+L.BUFFTIMERS_DESC = "Show the time left on your buffs and debuffs as a clock, like 1:23, instead "
+    .. "of rounded minutes like 2 m. In combat the game may hide aura times from addons; then "
+    .. "Blizzard's own timer shows."
+L.BUFFTIMERS_BLIZZARD_OFF = "Blizzard's buff durations are off" -- a gray row atop the module, with a button
+L.BUFFTIMERS_BLIZZARD_OFF_DESC = "Blizzard's buff durations are off, so no time shows under your "
+    .. "buffs and debuffs, ours included. Turn them on here or in Blizzard's options."
+L.BUFFTIMERS_LIMIT = "Show Clock"
+L.BUFFTIMERS_LIMIT_DESC = "Which auras get a clock. Longer ones keep Blizzard's timer."
+L.BUFFTIMERS_LIMIT_1M = "Under 1 Minute"
+L.BUFFTIMERS_LIMIT_10M = "Under 10 Minutes"
+L.BUFFTIMERS_LIMIT_1H = "Under 1 Hour"
+L.BUFFTIMERS_LIMIT_ALL = "Always"
+
+-- XPBarText
+L.XPBARTEXT_TITLE = "XP Bar Text"
+L.XPBARTEXT_DESC = "Show your experience on the experience bar all the time, with the percent, "
+    .. "your rested XP, and the XP the quests in your log will give. Quest XP turns green once "
+    .. "turning them in would level you."
+L.XPBARTEXT_ALWAYS = "Always Show"
+L.XPBARTEXT_ALWAYS_DESC = "Show the text all the time. Turn it off to see it only while the "
+    .. "mouse is over the bar, like Blizzard's."
+L.XPBARTEXT_PERCENT = "Percent"
+L.XPBARTEXT_PERCENT_DESC = "Show how far through the level you are, and what rested and quest XP "
+    .. "come to, as a percent of the level."
+L.XPBARTEXT_RESTED = "Rested XP"
+L.XPBARTEXT_RESTED_DESC = "Show how much rested XP you have left."
+L.XPBARTEXT_QUESTS = "Quest XP"
+L.XPBARTEXT_QUESTS_DESC = "Show the XP the quests in your log give: only the ones ready to turn "
+    .. "in, or all of them."
+L.XPBARTEXT_QUESTS_COMPLETE = "Ready to Turn In"
+L.XPBARTEXT_QUESTS_ALL = "All Quests"
+L.XPBARTEXT_QUESTS_OFF = "Off"
+L.XPBARTEXT_XP = "XP: %s / %s" -- current, needed for the level
+L.XPBARTEXT_WITH_PERCENT = "%s (%d%%)" -- the XP text, its percent
+L.XPBARTEXT_AMOUNT = "%s (%d%%)" -- an amount of XP, as a percent of the level
+L.XPBARTEXT_RESTED_TEXT = "Rested: %s"
+L.XPBARTEXT_QUESTS_TEXT = "Quests: %s"

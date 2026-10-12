@@ -20,7 +20,7 @@ local module = ns.NewModule("Framerate", L.FRAMERATE_DESC, {
     scale = 100, -- percent
 })
 module.title = L.FRAMERATE_TITLE
-module.category = "interface"
+module.category = "system"
 
 local ADDON = "Blizzard_FramerateFrame"
 local SAMPLE = 144 -- a wide framerate, to size the Edit Mode box

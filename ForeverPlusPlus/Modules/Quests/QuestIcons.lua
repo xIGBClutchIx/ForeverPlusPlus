@@ -28,7 +28,7 @@ local module = ns.NewModule("QuestIcons", L.QUESTICONS_DESC, {
     giversSize = 80,
 })
 module.title = L.QUESTICONS_TITLE
-module.category = "interface"
+module.category = "quests"
 
 -- A place's checkbox, with its size slider in the same row.
 local function place(key, name, description)

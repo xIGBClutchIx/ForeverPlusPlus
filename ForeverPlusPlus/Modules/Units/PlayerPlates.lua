@@ -20,7 +20,7 @@ local module = ns.NewModule("PlayerPlates", L.PLAYERPLATES_DESC, ns.FriendlyPlat
     testIcons = "off", -- debug: "off", "group", or "friend" on every friendly player
 }))
 module.title = L.PLAYERPLATES_TITLE
-module.category = "nameplates"
+module.category = "units"
 
 -- General first, then the name, the guild line, and the icons beside the name.
 module.options = ns.FriendlyPlates.Options(L.PLAYERPLATES_BAR_WHEN_HURT_DESC, {

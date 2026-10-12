@@ -30,7 +30,7 @@ local module = ns.NewModule("QuestTracker", L.QUESTTRACKER_DESC, {
     hidden = {}, -- "Name-Realm" -> { [questID] = true }: quests Current Zone Only untracked
 })
 module.title = L.QUESTTRACKER_TITLE
-module.category = "interface"
+module.category = "quests"
 
 -- Which quests and in what order, then the text, the box behind it, and combat.
 local QUESTS, TEXT, BOX, COMBAT = L.QUESTTRACKER_SECTION_QUESTS, L.QUESTTRACKER_SECTION_TEXT,

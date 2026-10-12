@@ -112,11 +112,6 @@ L.ITEMCOUNT_ICON_COUNT = "%s %d" -- bag or bank icon, count
 L.ITEMCOUNT_IN_BAGS = "%d in bags" -- count
 L.ITEMCOUNT_IN_BANK = "%d in bank" -- count
 
--- BestReward
-L.BESTREWARD_TITLE = "Best Quest Reward"
-L.BESTREWARD_DESC = "Mark the quest reward choice that sells to a vendor for the most with a gold "
-    .. "coin, in the quest window and the quest log. It doesn't choose it for you."
-
 -- EasyDelete
 L.EASYDELETE_TITLE = "Easy Delete"
 L.EASYDELETE_DESC = "Type DELETE for you when destroying a good item, so Yes is a single click."

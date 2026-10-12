@@ -15,7 +15,7 @@ local L = ns.L
 
 local module = ns.NewModule("BestReward", L.BESTREWARD_DESC, { enabled = true })
 module.title = L.BESTREWARD_TITLE
-module.category = "items"
+module.category = "quests"
 
 local COIN_TEXTURE = "Interface\\MoneyFrame\\UI-GoldIcon"
 local COIN_SIZE = 16

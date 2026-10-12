@@ -37,7 +37,7 @@ local module = ns.NewModule("ClassColors", L.CLASSCOLORS_DESC, {
     targetOfTarget = true,
 })
 module.title = L.CLASSCOLORS_TITLE
-module.category = "unitframes"
+module.category = "units"
 
 local PARTS = L.CLASSCOLORS_SECTION_PARTS
 local FRAMES = L.CLASSCOLORS_SECTION_FRAMES

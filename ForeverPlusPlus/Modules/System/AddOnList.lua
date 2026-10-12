@@ -20,7 +20,7 @@ local module = ns.NewModule("AddOnList", L.ADDONLIST_DESC, {
     notes = true, -- the search box also looks in an addon's notes
 })
 module.title = L.ADDONLIST_TITLE
-module.category = "interface"
+module.category = "system"
 
 module.options = {
     { key = "enabledFirst", name = L.ADDONLIST_ENABLEDFIRST, description = L.ADDONLIST_ENABLEDFIRST_DESC },

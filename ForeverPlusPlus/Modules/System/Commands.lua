@@ -14,7 +14,7 @@ local module = ns.NewModule("Commands", L.COMMANDS_DESC, {
     clear = true,
 })
 module.title = L.COMMANDS_TITLE
-module.category = "interface"
+module.category = "system"
 module.added = "0.8.0"
 
 module.options = {

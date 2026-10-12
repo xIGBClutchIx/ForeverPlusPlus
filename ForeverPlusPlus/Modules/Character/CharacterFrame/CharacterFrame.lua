@@ -21,7 +21,7 @@ local module = ns.NewModule("CharacterFrame", L.CHARACTERFRAME_DESC, {
     weaponSkills = true, -- green skill bars for the weapons worn (Skills.lua)
 })
 module.title = L.CHARACTERFRAME_TITLE
-module.category = "interface"
+module.category = "character"
 module.internal = {}
 local internal = module.internal
 

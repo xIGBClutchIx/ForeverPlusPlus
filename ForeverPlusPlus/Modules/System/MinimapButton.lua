@@ -24,7 +24,7 @@ local module = ns.NewModule("MinimapButton", L.MINIMAPBUTTON_DESC, {
     },
 })
 module.title = L.MINIMAPBUTTON_TITLE
-module.category = "interface"
+module.category = "system"
 module.added = "0.8.0"
 
 -- Before 0.8.0 the button was Error Catcher's, with its Minimap Button checkbox, Clear Key, and the
