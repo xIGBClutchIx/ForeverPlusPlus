@@ -10,7 +10,8 @@ local L = ns.L
 
 ns.changelog = {
     {
-        version = L.CHANGELOG_UNRELEASED,
+        version = "0.8.4",
+        date = "2026-10-11",
         sections = {
             { L.CHANGELOG_FIXED, {
                 { L.ITEMTOOLTIPS_TITLE, "Waylaid Crate Costs shows each bundle's price again, "
