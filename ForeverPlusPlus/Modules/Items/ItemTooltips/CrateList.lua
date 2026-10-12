@@ -106,7 +106,14 @@ local function search()
     local keys = {}
     for _, need in ipairs(needs) do
         if need.itemID then
-            keys[#keys + 1] = C_AuctionHouse.MakeItemKey(need.itemID)
+            local seen = module.db.itemKeys[need.itemID]
+            if seen then
+                for _, key in ipairs(seen) do
+                    keys[#keys + 1] = C_AuctionHouse.MakeItemKey(need.itemID, key[1], key[2])
+                end
+            else
+                keys[#keys + 1] = C_AuctionHouse.MakeItemKey(need.itemID)
+            end
         end
     end
     if #keys == 0 then
@@ -135,12 +142,43 @@ function onThrottleReady()
     search()
 end
 
+-- Keeps the item level and suffix of each item's key, from any browse results with auctions up
+-- (the price scan's too). MakeItemKey(itemID) alone leaves the level at 0, and a search with
+-- that key showed "None available" for items that had auctions; most likely the auction house
+-- wants the key it sent itself (inferred, not confirmed in game).
+local function learnKeys(results)
+    local itemKeys = module.db.itemKeys
+    for _, result in ipairs(results or {}) do
+        local key = result.itemKey
+        local itemID = key and key.itemID
+        if itemID and (result.totalQuantity or 0) > 0 then
+            local level, suffix = key.itemLevel or 0, key.itemSuffix or 0
+            local seen = itemKeys[itemID]
+            if not seen then
+                seen = {}
+                itemKeys[itemID] = seen
+            end
+            local found = false
+            for _, old in ipairs(seen) do
+                if old[1] == level and old[2] == suffix then
+                    found = true
+                    break
+                end
+            end
+            if not found then
+                seen[#seen + 1] = { level, suffix }
+            end
+        end
+    end
+end
+
 -- Notes which items our search found auctions for, so the tooltip can say which have none.
+-- A row of an item with none up comes back with no quantity, as a favorite does.
 local function addResults(results)
     listed = listed or {}
     for _, result in ipairs(results or {}) do
         local itemID = result.itemKey and result.itemKey.itemID
-        if itemID then
+        if itemID and (result.totalQuantity or 0) > 0 then
             listed[itemID] = true
         end
     end
@@ -149,15 +187,18 @@ end
 
 -- New browse results that aren't ours (a search, favorites, a sort) replace our list.
 local function onResultsUpdated()
+    local results = C_AuctionHouse.GetBrowseResults()
+    learnKeys(results)
     if awaiting then
         listed = nil
-        addResults(C_AuctionHouse.GetBrowseResults())
+        addResults(results)
     elseif row and row.selected then
         setSelected(false)
     end
 end
 
 local function onResultsAdded(_, added)
+    learnKeys(added)
     if awaiting then
         addResults(added)
     end

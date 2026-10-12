@@ -42,6 +42,9 @@ local module = ns.NewModule("ItemTooltips", L.ITEMTOOLTIPS_DESC, {
     houses = {},
     -- Per character ("Realm-Name"): { [itemID] = count } in the bank when it was last open.
     banks = {},
+    -- The item level and suffix of each item's auction house key: { [itemID] = { { level,
+    -- suffix } } }, from browse results, for Crate Shopping List's search.
+    itemKeys = {},
 })
 module.title = L.ITEMTOOLTIPS_TITLE
 module.category = "items"
