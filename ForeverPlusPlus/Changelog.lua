@@ -10,6 +10,18 @@ local L = ns.L
 
 ns.changelog = {
     {
+        version = L.CHANGELOG_UNRELEASED,
+        sections = {
+            { L.CHANGELOG_ADDED, {
+                { L.QUESTTRACKER_TITLE, "The new Current Zone Only option (off by default) tracks "
+                    .. "only the quests of the zone you're in, going by their quest log header, and "
+                    .. "tracks the others again when you get to their zone. Class, profession, and "
+                    .. "holiday quests and the quest your map follows always show. It waits for "
+                    .. "combat to end." },
+            } },
+        },
+    },
+    {
         version = "0.8.4",
         date = "2026-10-11",
         sections = {

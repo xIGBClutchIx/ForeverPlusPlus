@@ -2,6 +2,12 @@
 
 What changed in each release of Forever++. The same notes show in game under Settings > AddOns > Forever++ > Changelog, from [`ForeverPlusPlus/Changelog.lua`](ForeverPlusPlus/Changelog.lua); change both together.
 
+## Unreleased
+
+### Added
+
+- **Quest Tracker**: the new Current Zone Only option (off by default) tracks only the quests of the zone you're in, going by their quest log header, and tracks the others again when you get to their zone. Class, profession, and holiday quests and the quest your map follows always show. It waits for combat to end.
+
 ## 0.8.4 (2026-10-11)
 
 ### Fixed

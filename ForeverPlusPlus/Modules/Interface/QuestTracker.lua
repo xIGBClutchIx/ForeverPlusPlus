@@ -1,15 +1,17 @@
 -- Quest Tracker: restyles Blizzard's own objective tracker instead of replacing it, so it keeps
 -- its Edit Mode place, height and opacity, its menus, quest items and clicks. It changes the
 -- tracker's font objects (face, size, outline), draws a tooltip-style box that fits what the
--- tracker shows, can fade the tracker in combat, and can sort tracked quests by level.
+-- tracker shows, can fade the tracker in combat, can sort tracked quests by level, and can show
+-- only the tracked quests of the current zone.
 -- It never calls the tracker's update or layout itself: that would run Blizzard's layout as
 -- addon code and could taint the quest item buttons. A font change the tracker has already laid
 -- out settles at its next update (any quest progress, or collapsing and expanding it).
 local _, ns = ...
 
-local pairs, ipairs, type, floor, min, max = pairs, ipairs, type, math.floor, math.min, math.max
+local pairs, ipairs, next, type, floor, min, max = pairs, ipairs, next, type, math.floor, math.min, math.max
 local setmetatable, GetLocale, CreateFrame, sort = setmetatable, GetLocale, CreateFrame, table.sort
-local InCombatLockdown, C_Timer, C_QuestLog = InCombatLockdown, C_Timer, C_QuestLog
+local InCombatLockdown, C_Timer, C_QuestLog, C_Map = InCombatLockdown, C_Timer, C_QuestLog, C_Map
+local GetRealZoneText, GetRealmName, UnitName, format = GetRealZoneText, GetRealmName, UnitName, string.format
 
 local L = ns.L
 
@@ -24,6 +26,8 @@ local module = ns.NewModule("QuestTracker", L.QUESTTRACKER_DESC, {
     padding = 10,
     fade = false,
     sort = "off", -- or "low" / "high": which level comes first
+    zone = false,
+    hidden = {}, -- "Name-Realm" -> { [questID] = true }: quests Current Zone Only untracked
 })
 module.title = L.QUESTTRACKER_TITLE
 module.category = "interface"
@@ -43,6 +47,13 @@ module.options = {
             { "low", L.QUESTTRACKER_SORT_LOW },
             { "high", L.QUESTTRACKER_SORT_HIGH },
         },
+    },
+    {
+        key = "zone",
+        name = L.QUESTTRACKER_ZONE,
+        description = L.QUESTTRACKER_ZONE_DESC,
+        section = QUESTS,
+        added = "0.8.5",
     },
     {
         key = "font",
@@ -534,6 +545,188 @@ local function setSorting(on)
     end
 end
 
+-- Current zone ------------------------------------------------------------------------------------
+-- Current Zone Only works on the watch list too: it untracks the tracked quests of other zones and
+-- tracks them again once you're there, remembering which it untracked (per character, so a reload
+-- or logout keeps them). A quest's zone is its quest log header, as the log groups them. A header
+-- that names no map or instance (a class, a profession, a holiday) has no zone, so its quests
+-- always show, and so does the quest the map and arrow follow. It filters once each time you
+-- arrive in a zone, so a quest tracked by hand stays until you leave. Out of combat only, like
+-- sorting; Sort by Level then sorts what's left as the watch list changes.
+
+local AZEROTH = 947 -- Forever's Azeroth map, over every zone and instance
+local mapNames -- lowercase name -> true for every map under Azeroth, made when first needed
+local filteredZone -- the zone the watch list was last filtered for
+local zoneAfterCombat = false
+
+-- The quests Current Zone Only untracked on this character, or nil when it untracked none.
+local function hiddenQuests(create)
+    -- UnitName's second value is a surname on Forever, not a realm.
+    local key = format("%s-%s", (UnitName("player")) or "", GetRealmName() or "")
+    local hidden = module.db.hidden[key]
+    if not hidden and create then
+        hidden = {}
+        module.db.hidden[key] = hidden
+    end
+    return hidden, key
+end
+
+---Whether a quest log header names a place: a map under Azeroth, or a dungeon or raid.
+---@param header string
+---@return boolean
+local function isPlace(header)
+    if not mapNames then
+        mapNames = {}
+        if C_Map and C_Map.GetMapChildrenInfo then
+            for _, info in ipairs(C_Map.GetMapChildrenInfo(AZEROTH, nil, true) or {}) do
+                if type(info.name) == "string" then
+                    mapNames[info.name:lower()] = true
+                end
+            end
+        end
+    end
+    -- Without the map list, every header counts as a place rather than none.
+    return next(mapNames) == nil or mapNames[header:lower()] or ns.Instances.ByName(header) ~= nil
+end
+
+-- Each quest in the log by ID -> the title of the header it's under.
+local function questHeaders()
+    local headers, header = {}, nil
+    for i = 1, (C_QuestLog.GetNumQuestLogEntries()) do
+        local info = C_QuestLog.GetInfo(i)
+        if info and info.isHeader then
+            header = info.title
+        elseif info and info.questID and type(header) == "string" then
+            headers[info.questID] = header
+        end
+    end
+    return headers
+end
+
+-- The watch list as questID -> true.
+local function watchedQuests()
+    local watched = {}
+    for i = 1, C_QuestLog.GetNumQuestWatches() do
+        local questID = C_QuestLog.GetQuestIDForQuestWatchIndex(i)
+        if questID then
+            watched[questID] = true
+        end
+    end
+    return watched
+end
+
+local function filterZone()
+    if not (module.enabled and module.db.zone) then
+        return
+    end
+    local zone = GetRealZoneText()
+    if type(zone) ~= "string" or zone == "" or zone == filteredZone then
+        return
+    end
+    if InCombatLockdown() then
+        zoneAfterCombat = true
+        return
+    end
+    if (C_QuestLog.GetNumQuestLogEntries()) == 0 then
+        return -- the quest log isn't ready (or is empty); its next update filters
+    end
+    filteredZone = zone
+    zone = zone:lower()
+    local headers = questHeaders()
+    local super = C_SuperTrack and C_SuperTrack.GetSuperTrackedQuestID
+        and C_SuperTrack.GetSuperTrackedQuestID()
+    -- A quest not under any header (or under a collapsed one) shows, rather than going unseen.
+    local function belongs(questID)
+        local header = headers[questID]
+        return questID == super or not header or header:lower() == zone or not isPlace(header)
+    end
+    -- Untrack first, so the quests tracked again here have room under the watch limit.
+    local leaving = {}
+    for questID in pairs(watchedQuests()) do
+        if not belongs(questID) then
+            leaving[#leaving + 1] = questID
+        end
+    end
+    local hidden = hiddenQuests(#leaving > 0)
+    for _, questID in ipairs(leaving) do
+        C_QuestLog.RemoveQuestWatch(questID)
+        hidden[questID] = true
+    end
+    if not hidden then
+        return
+    end
+    for questID in pairs(hidden) do
+        if not C_QuestLog.GetLogIndexForQuestID(questID) then
+            hidden[questID] = nil -- turned in or abandoned
+        elseif belongs(questID) then
+            C_QuestLog.AddQuestWatch(questID)
+        end
+    end
+    -- One the watch limit kept out stays hidden, to try again in the next zone.
+    local watched = watchedQuests()
+    for questID in pairs(hidden) do
+        if watched[questID] then
+            hidden[questID] = nil
+        end
+    end
+end
+
+-- A hidden quest the player tracks again by hand is theirs to keep.
+local function onWatchListChanged()
+    local hidden = hiddenQuests()
+    if not hidden then
+        return
+    end
+    local watched = watchedQuests()
+    for questID in pairs(hidden) do
+        if watched[questID] then
+            hidden[questID] = nil
+        end
+    end
+end
+
+local function onZoneCombatEnd()
+    if zoneAfterCombat then
+        zoneAfterCombat = false
+        filterZone()
+    end
+end
+
+-- Tracks every quest Current Zone Only untracked on this character again.
+local function restoreHidden()
+    ns.AfterCombat(function()
+        local hidden, key = hiddenQuests()
+        if not hidden then
+            return
+        end
+        for questID in pairs(hidden) do
+            C_QuestLog.AddQuestWatch(questID)
+        end
+        module.db.hidden[key] = nil
+    end)
+end
+
+local function setZoneFilter(on)
+    filteredZone = nil
+    zoneAfterCombat = false
+    if on then
+        module:On("ZONE_CHANGED_NEW_AREA", filterZone)
+        module:On("PLAYER_ENTERING_WORLD", filterZone)
+        -- Only acts on a new zone, so this just catches the quest log becoming ready.
+        module:On("QUEST_LOG_UPDATE", filterZone)
+        module:On("QUEST_WATCH_LIST_CHANGED", onWatchListChanged)
+        module:On("PLAYER_REGEN_ENABLED", onZoneCombatEnd)
+        filterZone()
+    else
+        module:Off("ZONE_CHANGED_NEW_AREA", filterZone)
+        module:Off("PLAYER_ENTERING_WORLD", filterZone)
+        module:Off("QUEST_LOG_UPDATE", filterZone)
+        module:Off("QUEST_WATCH_LIST_CHANGED", onWatchListChanged)
+        module:Off("PLAYER_REGEN_ENABLED", onZoneCombatEnd)
+        restoreHidden()
+    end
+end
+
 -- Module ------------------------------------------------------------------------------------------
 
 function module:IsAvailable()
@@ -560,11 +753,13 @@ function module:OnEnable()
     self:On("PLAYER_REGEN_ENABLED", function() setFaded(false) end)
     setFaded(InCombatLockdown())
     setSorting(self.db.sort ~= "off")
+    setZoneFilter(self.db.zone)
     onUpdate()
 end
 
 function module:OnDisable()
     restoreFonts()
+    restoreHidden()
     if box then
         box:Hide()
     end
@@ -585,6 +780,8 @@ function module:OnOptionChanged(key)
         setFaded(InCombatLockdown())
     elseif key == "sort" then
         setSorting(self.db.sort ~= "off")
+    elseif key == "zone" then
+        setZoneFilter(self.db.zone)
     else
         fitBox()
     end
