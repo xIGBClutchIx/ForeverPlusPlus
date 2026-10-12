@@ -12,6 +12,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Changed
 
 - **Waylaid Crates**: Item Tooltips' Waylaid Crate Costs option moved here as Bundle Costs, keeping your choice. It still takes its prices from Item Tooltips' Auction Prices.
+- **Item Tooltips**: Sell Price, Item Count, and Auction Prices are each turned on with an Enabled checkbox under their heading, like World Map's parts. Your settings stay as they were.
 
 ### Fixed
 

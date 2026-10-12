@@ -29,6 +29,9 @@ ns.changelog = {
                 { L.WAYLAIDCRATES_TITLE, "Item Tooltips' Waylaid Crate Costs option moved here as "
                     .. "Bundle Costs, keeping your choice. It still takes its prices from Item "
                     .. "Tooltips' Auction Prices." },
+                { L.ITEMTOOLTIPS_TITLE, "Sell Price, Item Count, and Auction Prices are each "
+                    .. "turned on with an Enabled checkbox under their heading, like World Map's "
+                    .. "parts. Your settings stay as they were." },
             } },
             { L.CHANGELOG_FIXED, {
                 { L.PROFTOOLTIPS_TITLE, "Recolors the \"Requires\" line on nodes and creatures in "

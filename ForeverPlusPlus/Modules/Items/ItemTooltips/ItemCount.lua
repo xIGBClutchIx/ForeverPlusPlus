@@ -16,8 +16,25 @@ local GRAY_FONT_COLOR = GRAY_FONT_COLOR
 local L = ns.L
 local ItemTooltip = ns.ItemTooltip
 
-local module = ns.modules.ItemTooltips
-local internal = module.internal
+local module = ns.modules.ItemTooltips:NewPart({
+    key = "itemCount", name = L.ITEMTOOLTIPS_ITEMCOUNT, description = L.ITEMCOUNT_DESC,
+    section = L.ITEMCOUNT_TITLE,
+}, {
+    itemCount = false,
+    bank = true,
+    labels = "icons", -- "icons" (Blizzard's bag and bank icons) or "words"
+    -- Data, not a setting: per character ("Realm-Name"), { [itemID] = count } in the bank when it
+    -- was last open.
+    banks = {},
+})
+
+module:AddOptions({
+    { key = "bank", name = L.ITEMCOUNT_BANK, description = L.ITEMCOUNT_BANK_DESC },
+    {
+        key = "labels", name = L.ITEMCOUNT_LABELS, description = L.ITEMCOUNT_LABELS_DESC,
+        choices = { { "icons", L.ITEMCOUNT_LABELS_ICONS }, { "words", L.ITEMCOUNT_LABELS_WORDS } },
+    },
+})
 
 -- Icons ----------------------------------------------------------------------------------------
 -- Blizzard's own art at the text's height: an atlas when the client has it, else a texture file
@@ -95,7 +112,7 @@ end
 
 -- Many slots change at once when items move; one scan on the next frame covers them all.
 local queueNext = ns.Frames.Coalesce(function()
-    if internal.Active("itemCount") then
+    if module.enabled then
         scanBank()
     end
 end)
@@ -139,7 +156,7 @@ end
 -- "Owned: 45 (bag 30  bank 15)": the total in white, where they are in gray. With all of them in
 -- one place, just that place and its count.
 local function addCount(tooltip, data)
-    local id = internal.Active("itemCount") and ItemTooltip.ItemID(data)
+    local id = module.enabled and ItemTooltip.ItemID(data)
     if not (id and C_Item.GetItemCount) then
         return
     end
@@ -170,25 +187,21 @@ for _, event in pairs({ "PLAYERBANKSLOTS_CHANGED", "PLAYERREAGENTBANKSLOTS_CHANG
     events[event] = queueScan
 end
 
-internal.AddPart("itemCount", {
-    enable = function()
-        for event, fn in pairs(events) do
-            -- Probe: registering an event the client doesn't know is an error.
-            if not (C_EventUtils and C_EventUtils.IsEventValid) or C_EventUtils.IsEventValid(event) then
-                ns.On(event, fn)
-            end
+function module:OnEnable()
+    for event, fn in pairs(events) do
+        -- Probe: registering an event the client doesn't know is an error.
+        if not (C_EventUtils and C_EventUtils.IsEventValid) or C_EventUtils.IsEventValid(event) then
+            self:On(event, fn)
         end
-        -- Turned on at the bank: count it now. Probe: BankFrame is Blizzard's bank window.
-        local bankFrame = _G.BankFrame
-        bankOpen = bankFrame and bankFrame:IsShown() or false
-        queueScan()
-        -- The hook can't be removed; addCount checks the part is on instead.
-        ItemTooltip.OnInfo(addCount)
-    end,
-    disable = function()
-        for event, fn in pairs(events) do
-            ns.Off(event, fn)
-        end
-        bankOpen = false
-    end,
-})
+    end
+    -- Turned on at the bank: count it now. Probe: BankFrame is Blizzard's bank window.
+    local bankFrame = _G.BankFrame
+    bankOpen = bankFrame and bankFrame:IsShown() or false
+    queueScan()
+    -- The hook can't be removed; addCount checks the part is on instead.
+    ItemTooltip.OnInfo(addCount)
+end
+
+function module:OnDisable()
+    bankOpen = false
+end
