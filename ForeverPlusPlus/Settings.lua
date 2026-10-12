@@ -943,8 +943,11 @@ local function controlWidth(room)
     return min(180, room - 16)
 end
 
--- How wide a slider is, so its value label (drawn after it) ends where a dropdown would: the
--- dropdown's width less the room its widest label takes.
+-- How far past a dropdown's end a slider's value label may reach, so the slider isn't cramped.
+local SLIDER_REACH = 40
+
+-- How wide a slider is, so its value label (drawn after it) ends a little past where a dropdown
+-- would: that width less the room its widest label takes.
 local function sliderWidth(row, option, room)
     local measure = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     local widest = 0
@@ -955,7 +958,7 @@ local function sliderWidth(row, option, room)
         widest = max(widest, ns.Text.Width(measure))
     end
     measure:Hide()
-    return max(60, controlWidth(room) - widest - 12)
+    return max(60, min(controlWidth(room) + SLIDER_REACH, room - 16) - widest - 12)
 end
 
 -- One of the module's options, with `byKey` for the option it's under (`requires`) or the slider
