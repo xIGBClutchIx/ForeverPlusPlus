@@ -528,18 +528,19 @@ end
 
 -- Module categories ---------------------------------------------------------------------------
 
--- The Modules page's groups, in order: a module's `category` and its label. A module without one
--- goes under Other.
+-- The Modules page's groups: a module's `category` and its label. They show in the order their
+-- labels sort in the player's language, with Other last. A module without one goes under Other.
 local CATEGORIES = {
     { "automation", L.CATEGORY_AUTOMATION },
-    { "items", L.CATEGORY_ITEMS },
-    { "interface", L.CATEGORY_INTERFACE },
     { "chat", L.CATEGORY_CHAT },
+    { "interface", L.CATEGORY_INTERFACE },
+    { "items", L.CATEGORY_ITEMS },
     { "map", L.CATEGORY_MAP },
-    { "unitframes", L.CATEGORY_UNITFRAMES },
     { "nameplates", L.CATEGORY_NAMEPLATES },
-    { "other", L.CATEGORY_OTHER },
+    { "unitframes", L.CATEGORY_UNITFRAMES },
 }
+sort(CATEGORIES, function(a, b) return strlower(a[2]) < strlower(b[2]) end)
+CATEGORIES[#CATEGORIES + 1] = { "other", L.CATEGORY_OTHER }
 local CATEGORY_NAMES = {}
 for _, group in ipairs(CATEGORIES) do
     CATEGORY_NAMES[group[1]] = group[2]
@@ -936,6 +937,26 @@ local function addRow(view, text, indent, on, shown)
     return row, label
 end
 
+-- How wide a dropdown or button is in a row with `room` after the option's name.
+local function controlWidth(room)
+    return min(180, room - 16)
+end
+
+-- How wide a slider is, so its value label (drawn after it) ends where a dropdown would: the
+-- dropdown's width less the room its widest label takes.
+local function sliderWidth(row, option, room)
+    local measure = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    local widest = 0
+    for _, value in ipairs({ option.min, option.max }) do
+        local text = type(option.format) == "function" and option.format(value)
+            or format(option.format or "%s", value)
+        measure:SetText(text)
+        widest = max(widest, ns.Text.Width(measure))
+    end
+    measure:Hide()
+    return max(60, controlWidth(room) - widest - 12)
+end
+
 -- One of the module's options, with `byKey` for the option it's under (`requires`) or the slider
 -- in its row (`slider`), and `done` for those already drawn.
 local function addOptionRow(view, module, option, byKey, done)
@@ -999,7 +1020,7 @@ local function addOptionRow(view, module, option, byKey, done)
         end
         -- Its slider in the same row, greyed while the checkbox is off.
         done[pair.key] = true
-        local slider = newSlider(row, module, pair, min(200, room - 50) - 36)
+        local slider = newSlider(row, module, pair, sliderWidth(row, pair, room) - 36)
         if slider then
             slider:SetPoint("LEFT", box, "RIGHT", 6, 0)
             updates[#updates + 1] = function()
@@ -1008,7 +1029,7 @@ local function addOptionRow(view, module, option, byKey, done)
             end
         end
     elseif option.min then
-        local slider = newSlider(row, module, option, min(200, room - 50))
+        local slider = newSlider(row, module, option, sliderWidth(row, option, room))
         if not slider then
             return -- leave the option at its default without one
         end
@@ -1019,7 +1040,7 @@ local function addOptionRow(view, module, option, byKey, done)
         end
         addTooltip(row, option.name, option.description, slider.Slider)
     elseif option.choices then
-        local dropdown = newDropdown(row, module, option, min(180, room - 16))
+        local dropdown = newDropdown(row, module, option, controlWidth(room))
         if not dropdown then
             return
         end

@@ -75,7 +75,7 @@ module.options = {
         description = L.GATHERTRACKING_SWAP_EVERY_DESC,
         requires = "swap",
         min = FASTEST, max = 30, step = 1,
-        format = function(seconds) return format(L.GATHERTRACKING_SWAP_EVERY, seconds) end,
+        format = ns.Text.Seconds,
     },
     {
         key = "reapply",

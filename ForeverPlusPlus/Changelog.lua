@@ -49,6 +49,9 @@ ns.changelog = {
                     .. "time shows, with a button to turn them on." },
                 { L.QUESTTRACKER_TITLE, "Font Size is gone: Edit Mode's Text Size sets the "
                     .. "tracker's size." },
+                { L.CHANGELOG_SETTINGS, "Sliders are shorter, so their value fits beside them and "
+                    .. "ends where a dropdown does, and the Modules page lists its categories in "
+                    .. "alphabetical order." },
                 { L.CHANGELOG_SETTINGS, "Every Forever++ page has the Defaults button at the top "
                     .. "right, Console Variables included." },
                 { L.CHANGELOG_SETTINGS, "Buttons that throw away saved data all say Clear (Seen "

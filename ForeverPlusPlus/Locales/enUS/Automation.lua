@@ -64,7 +64,6 @@ L.GATHERTRACKING_SWAP_DESC = "With both chosen, swap between Find Minerals and F
     .. "and flights."
 L.GATHERTRACKING_SWAP_EVERY_NAME = "Swap Every"
 L.GATHERTRACKING_SWAP_EVERY_DESC = "How long to wait between swaps."
-L.GATHERTRACKING_SWAP_EVERY = "Every %d Seconds" -- seconds
 L.GATHERTRACKING_CHAT_DESC = "Say in chat when the game stops Gathering Tracking from changing "
     .. "tracking."
 L.GATHERTRACKING_FAILED = "Gathering Tracking couldn't change tracking: %s" -- error

@@ -19,6 +19,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Auto Screenshot**: Loot Quality sits under Loot and is greyed out while Loot is off.
 - **Buff Timers**: says when Blizzard's buff durations are off, since then no time shows, with a button to turn them on.
 - **Quest Tracker**: Font Size is gone: Edit Mode's Text Size sets the tracker's size.
+- **Settings**: sliders are shorter, so their value fits beside them and ends where a dropdown does, and the Modules page lists its categories in alphabetical order.
 - **Settings**: every Forever++ page has the Defaults button at the top right, Console Variables included.
 - **Settings**: buttons that throw away saved data all say Clear (Seen Cinematics, Saved Ley Lines, Saved Prices, and Flight Times), and dropdowns say Off where they turn something off (Scan Age, Reagent Bag, the nameplates' Level, and Ley Lines).
 - **Commands**: `/fpp reset` asks before it puts every setting back and clears what Forever++ saved.
