@@ -10,7 +10,8 @@ local L = ns.L
 
 ns.changelog = {
     {
-        version = L.CHANGELOG_UNRELEASED,
+        version = "0.8.3",
+        date = "2026-10-11",
         sections = {
             { L.CHANGELOG_FIXED, {
                 { L.AUTOWEAPONBUFF_TITLE, "Right-clicking a stone, oil, poison, or lure in your "
