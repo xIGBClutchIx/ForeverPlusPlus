@@ -1,12 +1,15 @@
--- Item Tooltips' crate shopping list: a crate button beside the auction house's Favorites star
--- that fills Blizzard's browse list with every item the Waylaid Crates in your bags still need,
--- one row each, the way the star lists your favorites. A crate's tooltip lists the bundles it
--- takes ("- 6 Bolt of Woolen Cloth"); what's still needed is every crate's bundles added up, less
--- what's already in your bags. Items are found by name, as Waylaid Crate Costs finds them.
+-- Item Tooltips' crate shopping list: a Waylaid Crates row at the top of the auction house's
+-- category list that fills Blizzard's browse list with every item the crates in your bags still
+-- need, one row each, the way the Favorites star lists your favorites. A crate's tooltip lists
+-- the bundles it takes ("- 6 Bolt of Woolen Cloth"); what's still needed is every crate's bundles
+-- added up, less what's already in your bags. Items are found by name, as Waylaid Crate Costs
+-- finds them.
 --
 -- The rows come from C_AuctionHouse.SearchForItemKeys: Blizzard's browse list shows whatever
--- browse results arrive, whoever asked for them. A category in Blizzard's list would mean adding
--- to its AuctionCategories table, which would taint the auction house, so it's our own button.
+-- browse results arrive, whoever asked for them. A real category would mean adding to Blizzard's
+-- AuctionCategories table, which would taint the auction house, so the row is our own button in
+-- the category buttons' art, and the list's scroll box moves down one row to make room for it
+-- (put back when the option goes off).
 local _, ns = ...
 
 local _G, ipairs, pairs, sort, format, wipe = _G, ipairs, pairs, table.sort, string.format, wipe
@@ -21,9 +24,10 @@ local module = ns.modules.ItemTooltips
 local internal = module.internal
 
 local LAST_BAG = 5 -- backpack, four bags, and the reagent bag
-local CRATE_ICON = "Interface\\Icons\\INV_Crate_01" -- until a crate in the bags gives its own
+local ROW_WIDTH, ROW_HEIGHT = 132, 21 -- Blizzard's category buttons (AuctionCategoryButtonTemplate)
 
-local button
+local row -- our Waylaid Crates row
+local scrollAnchor -- the category list's scroll box TOPLEFT anchor before we moved it
 local crates = 0 -- crates in the bags when last read
 local needs = {} -- what they still need, by name: { name, count, itemID? }
 local listed -- itemIDs our last search found auctions for, or nil before it has answered
@@ -39,7 +43,7 @@ end
 local function readCrates()
     wipe(needs)
     crates = 0
-    local wanted, names, icon = {}, {}, nil
+    local wanted, names = {}, {}
     for bag = 0, LAST_BAG do
         for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
             local info = C_Container.GetContainerItemInfo(bag, slot)
@@ -47,7 +51,6 @@ local function readCrates()
             local bundles = data and internal.CrateBundles(data)
             if bundles and #bundles > 0 then
                 crates = crates + 1
-                icon = icon or info.iconFileID
                 for _, bundle in ipairs(bundles) do
                     local count, name = bundle[1], bundle[2]
                     if not wanted[name] then
@@ -66,9 +69,6 @@ local function readCrates()
         end
     end
     sort(needs, byName)
-    if button then
-        button:SetIcon(icon or CRATE_ICON)
-    end
 end
 
 -- Whether any need can be searched for.
@@ -81,12 +81,15 @@ local function searchable()
     return false
 end
 
--- Enabled while there's something to list, desaturated otherwise, like the Favorites star.
+-- Gold like Blizzard's categories while there's something to list, gray otherwise.
 local function refresh()
     readCrates()
-    local enabled = searchable()
-    button:SetEnabled(enabled)
-    button.Icon:SetDesaturated(not enabled)
+    row:SetNormalFontObject(searchable() and "GameFontNormalSmall" or "GameFontDisableSmall")
+end
+
+local function setSelected(selected)
+    row.selected = selected
+    row.SelectedTexture:SetShown(selected)
 end
 
 -- Searching -------------------------------------------------------------------------------------
@@ -109,11 +112,13 @@ local function search()
     if #keys == 0 then
         return
     end
-    -- The browse list only shows on the Buy display, not an item's own listings. Then an empty
-    -- list while the search runs, as the Favorites star does. Probed: Mainline's frame.
-    local frame, modes = _G.AuctionHouseFrame, _G.AuctionHouseFrameDisplayMode
-    if frame and modes and frame.GetDisplayMode and frame:GetDisplayMode() ~= modes.Buy then
-        frame:SetDisplayMode(modes.Buy)
+    -- As the Favorites star does: no Blizzard category selected (which also shows the Buy
+    -- display, where the browse list is), then an empty list while the search runs. Probed:
+    -- Mainline's frame.
+    local frame = _G.AuctionHouseFrame
+    local list = frame and frame.CategoriesList
+    if list and list.SetSelectedCategory then
+        list:SetSelectedCategory(nil)
     end
     local mixin = _G.AuctionHouseFrameMixin
     if frame and frame.TriggerEvent and mixin and mixin.Event and mixin.Event.BrowseSearchStarted then
@@ -122,6 +127,7 @@ local function search()
     local order = Enum.AuctionHouseSortOrder
     local sorts = order and { { sortOrder = order.Name, reverseSort = false } } or {}
     listed, awaiting = nil, true
+    setSelected(true)
     C_AuctionHouse.SearchForItemKeys(keys, sorts)
 end
 
@@ -141,10 +147,13 @@ local function addResults(results)
     awaiting = not C_AuctionHouse.HasFullBrowseResults()
 end
 
+-- New browse results that aren't ours (a search, favorites, a sort) replace our list.
 local function onResultsUpdated()
     if awaiting then
         listed = nil
         addResults(C_AuctionHouse.GetBrowseResults())
+    elseif row and row.selected then
+        setSelected(false)
     end
 end
 
@@ -154,7 +163,14 @@ local function onResultsAdded(_, added)
     end
 end
 
--- Button ----------------------------------------------------------------------------------------
+-- Picking one of Blizzard's categories deselects ours.
+local function onCategorySelected()
+    if row and row.selected and not awaiting then
+        setSelected(false)
+    end
+end
+
+-- Row -------------------------------------------------------------------------------------------
 
 local function onClick()
     refresh()
@@ -162,6 +178,7 @@ local function onClick()
 end
 
 local function onEnter(self)
+    self.HighlightTexture:Show()
     refresh()
     GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
     GameTooltip:SetText(L.CRATELIST_TITLE, HIGHLIGHT_FONT_COLOR:GetRGB())
@@ -190,7 +207,8 @@ local function onEnter(self)
     GameTooltip:Show()
 end
 
-local function onLeave()
+local function onLeave(self)
+    self.HighlightTexture:Hide()
     GameTooltip:Hide()
 end
 
@@ -203,29 +221,91 @@ end
 local function onHide()
     ns.Off("BAG_UPDATE_DELAYED", refresh)
     ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
+    awaiting = false
+    setSelected(false)
 end
 
--- Our own square icon button, Blizzard's template for the Favorites star, just left of the star
--- on the search bar, so it shows on the Buy tab with it.
+-- A texture in one of the category button's atlases, sized and placed as Blizzard's top-level
+-- category buttons set theirs (AuctionHouseFilterButton_SetUp).
+local function texture(layer, atlas, width, height, point, x)
+    local tex = row:CreateTexture(nil, layer)
+    tex:SetAtlas(atlas, false)
+    tex:SetSize(width, height)
+    tex:SetPoint(point, x, 0)
+    return tex
+end
+
+local function makeRow(list)
+    row = CreateFrame("Button", nil, list)
+    row:SetSize(ROW_WIDTH, ROW_HEIGHT)
+    texture("BACKGROUND", "auctionhouse-nav-button", 136, 32, "TOPLEFT", -2)
+    row.HighlightTexture = texture("BORDER", "auctionhouse-nav-button-highlight", ROW_WIDTH, ROW_HEIGHT,
+        "LEFT", 0)
+    row.HighlightTexture:Hide()
+    row.SelectedTexture = texture("ARTWORK", "auctionhouse-nav-button-select", ROW_WIDTH, ROW_HEIGHT,
+        "LEFT", 0)
+    row.SelectedTexture:SetBlendMode("ADD")
+    row.SelectedTexture:Hide()
+    local text = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    text:SetPoint("LEFT", 8, 0)
+    text:SetPoint("RIGHT", -4, 0)
+    text:SetJustifyH("LEFT")
+    text:SetShadowOffset(1, -1)
+    row:SetFontString(text)
+    row:SetText(L.CRATELIST_CATEGORY)
+    row:SetPushedTextOffset(1, -1)
+    row:SetScript("OnClick", onClick)
+    row:SetScript("OnEnter", onEnter)
+    row:SetScript("OnLeave", onLeave)
+    row:SetScript("OnShow", onShow)
+    row:SetScript("OnHide", onHide)
+end
+
+-- The scroll box's TOPLEFT anchor: its index and values, or nil.
+local function topLeft(box)
+    for i = 1, box:GetNumPoints() do
+        local point, relativeTo, relativePoint, x, y = box:GetPoint(i)
+        if point == "TOPLEFT" then
+            return { relativeTo, relativePoint, x, y }
+        end
+    end
+end
+
+-- Our row where the list's first row was, and the list one row lower.
 local function setup()
-    local bar = _G.AuctionHouseFrame and _G.AuctionHouseFrame.SearchBar
-    local star = bar and bar.FavoritesSearchButton
-    if not (star and C_AuctionHouse.SearchForItemKeys and C_AuctionHouse.MakeItemKey
+    local frame = _G.AuctionHouseFrame
+    local list = frame and frame.CategoriesList
+    local box = list and list.ScrollBox
+    if not (box and C_AuctionHouse.SearchForItemKeys and C_AuctionHouse.MakeItemKey
         and C_TooltipInfo and C_TooltipInfo.GetBagItem) then
         return
     end
-    if not button then
-        button = CreateFrame("Button", nil, bar, "SquareIconButtonTemplate")
-        button:SetPoint("RIGHT", star, "LEFT", -2, 0)
-        button:SetMotionScriptsWhileDisabled(true)
-        button:SetScript("OnClick", onClick)
-        button:SetScript("OnEnter", onEnter)
-        button:SetScript("OnLeave", onLeave)
-        button:SetScript("OnShow", onShow)
-        button:SetScript("OnHide", onHide)
-        button:SetIcon(CRATE_ICON)
+    scrollAnchor = scrollAnchor or topLeft(box)
+    if not scrollAnchor then
+        return
     end
-    button:Show()
+    if not row then
+        makeRow(list)
+        module:Hook(list, "SetSelectedCategory", onCategorySelected)
+    end
+    local anchor = scrollAnchor
+    -- The list's view pads its rows 3 from the left.
+    row:ClearAllPoints()
+    row:SetPoint("TOPLEFT", anchor[1], anchor[2], anchor[3] + 3, anchor[4])
+    box:SetPoint("TOPLEFT", anchor[1], anchor[2], anchor[3], anchor[4] - ROW_HEIGHT)
+    row:Show()
+end
+
+local function teardown()
+    if row then
+        row:Hide()
+    end
+    local list = _G.AuctionHouseFrame and _G.AuctionHouseFrame.CategoriesList
+    local box = list and list.ScrollBox
+    if box and scrollAnchor then
+        local anchor = scrollAnchor
+        box:SetPoint("TOPLEFT", anchor[1], anchor[2], anchor[3], anchor[4])
+    end
 end
 
 local events = {
@@ -247,8 +327,6 @@ internal.AddPart("crateList", {
         end
         ns.AddOns.Cancel("Blizzard_AuctionHouseUI", setup)
         listed, awaiting = nil, false
-        if button then
-            button:Hide()
-        end
+        teardown()
     end,
 })
