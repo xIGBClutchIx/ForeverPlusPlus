@@ -53,10 +53,6 @@ L.CHATFONT_FONT = "Font"
 L.CHATFONT_FONT_DESC = "The font the chat windows use."
 L.CHATFONT_INPUT = "Chat Input"
 L.CHATFONT_INPUT_DESC = "Use the font for the text you type into the chat box too. Its size stays as it is."
-L.CHATFONT_FRIZQT = "Friz Quadrata"
-L.CHATFONT_ARIALN = "Arial Narrow"
-L.CHATFONT_SKURRI = "Skurri"
-L.CHATFONT_MORPHEUS = "Morpheus"
 
 -- ChatFading
 L.CHATFADING_TITLE = "Persistent Chat"

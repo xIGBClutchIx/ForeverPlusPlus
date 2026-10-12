@@ -20,6 +20,12 @@ L.TEXT_AGO_MINUTES = "%dm ago" -- minutes
 L.TEXT_AGO_HOURS = "%dh ago" -- hours
 L.TEXT_AGO_DAYS = "%dd ago" -- days
 
+-- Lib/Fonts.lua: the game's fonts, in every font dropdown
+L.FONT_FRIZQT = "Friz Quadrata"
+L.FONT_ARIALN = "Arial Narrow"
+L.FONT_SKURRI = "Skurri"
+L.FONT_MORPHEUS = "Morpheus"
+
 -- Core: /fpp and chat
 L.ON = "on"
 L.OFF = "off"
@@ -92,7 +98,7 @@ L.DEBUG_RESET_WELCOME_BUTTON = "Reset"
 L.DEBUG_RESET_WELCOME_DESC = "Show the welcome again as on a fresh install: the NEW tag on the "
     .. "Minimap Button, which opens the About page once. Keeps all your settings."
 L.DEBUG_RESET_WELCOME_DONE = "The welcome shows again. Click the Minimap Button to see it."
-L.DEBUG_INFO ="Copy Debug Info"
+L.DEBUG_INFO = "Copy Debug Info"
 L.DEBUG_INFO_BUTTON = "Copy"
 L.DEBUG_INFO_DESC = "Show one line to copy into a bug report: the Forever++ version, the client "
     .. "build, and the modules that are on."

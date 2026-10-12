@@ -1,8 +1,8 @@
 -- The "Forever++" pages in the game's Settings > AddOns list, built from Blizzard's own settings
 -- templates so they look like any other options page. Few entries, so the sidebar stays short:
 --   Forever++        the Modules page: every module (the only place modules turn on and off) in
---                    a list on the left,
---                    with a checkbox each, under a label per `module.category`. Clicking one shows
+--                    a list on the left, with a checkbox each, under a label per
+--                    `module.category`. Clicking one shows
 --                    it on the right: its title, category and description, its Enabled
 --                    checkbox, its `notice` (a warning) while that applies, then its options
 --                    (checkboxes, dropdowns and sliders) and buttons (from `module.actions`),
@@ -382,7 +382,9 @@ end
 local function addOption(category, module, option)
     local choices = option.choices
     local initializer
-    if choices then
+    if option.min then
+        return -- a slider isn't one of these; it stays at its default rather than show as a checkbox
+    elseif choices then
         if not (Settings.CreateDropdown and Settings.CreateControlTextContainer) then
             return -- Probe: dropdowns are Mainline's; leave the option at its default without one.
         end

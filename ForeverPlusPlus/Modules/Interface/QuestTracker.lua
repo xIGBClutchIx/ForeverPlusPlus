@@ -9,7 +9,7 @@
 local _, ns = ...
 
 local pairs, ipairs, next, type, floor, min, max = pairs, ipairs, next, type, math.floor, math.min, math.max
-local setmetatable, GetLocale, sort = setmetatable, GetLocale, table.sort
+local setmetatable, sort = setmetatable, table.sort
 local InCombatLockdown, C_Timer, C_QuestLog, C_Map = InCombatLockdown, C_Timer, C_QuestLog, C_Map
 local GetRealZoneText, GetRealmName, UnitName, format = GetRealZoneText, GetRealmName, UnitName, string.format
 local GetQuestUiMapID, Enum = GetQuestUiMapID, Enum
@@ -61,13 +61,7 @@ module.options = {
         name = L.QUESTTRACKER_FONT,
         description = L.QUESTTRACKER_FONT_DESC,
         section = TEXT,
-        choices = {
-            { "default", L.QUESTTRACKER_DEFAULT },
-            { "Fonts\\FRIZQT__.TTF", L.QUESTTRACKER_FRIZQT },
-            { "Fonts\\ARIALN.TTF", L.QUESTTRACKER_ARIALN },
-            { "Fonts\\skurri.ttf", L.QUESTTRACKER_SKURRI },
-            { "Fonts\\MORPHEUS.TTF", L.QUESTTRACKER_MORPHEUS },
-        },
+        choices = ns.Fonts.ChoicesAfter({ "default", L.QUESTTRACKER_DEFAULT }),
     },
     {
         key = "size",
@@ -126,10 +120,6 @@ module.options = {
     },
 }
 
--- SetFont takes a single file, so the alphabets the game's fonts cover with fallbacks would draw
--- blank in another face; those clients keep Blizzard's face and only get size and outline.
-local NON_ROMAN = { koKR = true, zhCN = true, zhTW = true, ruRU = true }
-
 local FADED = 0.3 -- the tracker's alpha in combat with Fade in Combat
 
 -- Font objects the tracker is known to use, set before its first layout when they exist. The
@@ -161,7 +151,9 @@ local function applyFont(font)
     end
     local db = module.db
     local file = saved[1]
-    if db.font ~= "default" and not NON_ROMAN[GetLocale()] then
+    -- Clients whose alphabets need the game's fallbacks keep Blizzard's face (ns.Fonts.CanChange)
+    -- and only get size and outline.
+    if db.font ~= "default" and ns.Fonts.CanChange() then
         file = db.font
     end
     local flags = saved[3]

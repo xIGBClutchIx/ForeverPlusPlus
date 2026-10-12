@@ -21,6 +21,7 @@ Lib\Colors.lua
 Lib\Text.lua
 Lib\Frames.lua
 Lib\Money.lua
+Lib\Fonts.lua
 Lib\Confirm.lua
 Lib\CVars.lua
 Lib\Nameplates.lua

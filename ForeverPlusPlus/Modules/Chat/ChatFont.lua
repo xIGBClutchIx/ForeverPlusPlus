@@ -4,7 +4,7 @@
 -- Chinese, Cyrillic) would draw blank; the module stays off on clients in those languages.
 local _, ns = ...
 
-local ipairs, setmetatable, GetLocale = ipairs, setmetatable, GetLocale
+local ipairs, setmetatable = ipairs, setmetatable
 
 local L = ns.L
 local Chat = ns.Chat
@@ -22,12 +22,7 @@ module.options = {
         key = "font",
         name = L.CHATFONT_FONT,
         description = L.CHATFONT_FONT_DESC,
-        choices = {
-            { "Fonts\\FRIZQT__.TTF", L.CHATFONT_FRIZQT },
-            { "Fonts\\ARIALN.TTF", L.CHATFONT_ARIALN },
-            { "Fonts\\skurri.ttf", L.CHATFONT_SKURRI },
-            { "Fonts\\MORPHEUS.TTF", L.CHATFONT_MORPHEUS },
-        },
+        choices = ns.Fonts.CHOICES,
     },
     {
         key = "inputBox",
@@ -35,8 +30,6 @@ module.options = {
         description = L.CHATFONT_INPUT_DESC,
     },
 }
-
-local NON_ROMAN = { koKR = true, zhCN = true, zhTW = true, ruRU = true }
 
 -- The font file each window or input box had before we changed it, to give back.
 local original = setmetatable({}, { __mode = "k" })
@@ -99,7 +92,7 @@ local function applyAll()
 end
 
 function module:IsAvailable()
-    return ChatFrame1 ~= nil and not NON_ROMAN[GetLocale()]
+    return ChatFrame1 ~= nil and ns.Fonts.CanChange()
 end
 
 function module:OnEnable()
