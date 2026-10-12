@@ -38,7 +38,7 @@ module.options = {
             { "all", L.SKIPCINEMATICS_SKIP_ALL },
         },
     },
-    ns.Keys.Option("watchKey", L.SKIPCINEMATICS_KEY, L.SKIPCINEMATICS_KEY_DESC, nil, "0.8.5"),
+    ns.Keys.Option("watchKey", L.SKIPCINEMATICS_KEY, L.SKIPCINEMATICS_KEY_DESC, nil, "0.9.0"),
     ns.ChatOption(L.SKIPCINEMATICS_CHAT_DESC),
     {
         key = "printKeys",

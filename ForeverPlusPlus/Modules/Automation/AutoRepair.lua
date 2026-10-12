@@ -49,7 +49,7 @@ module.options = {
             { "10000", money(10000) },
         },
     },
-    ns.Keys.Option("skipKey", L.SKIP_KEY, L.AUTOREPAIR_KEY_DESC, nil, "0.8.5"),
+    ns.Keys.Option("skipKey", L.SKIP_KEY, L.AUTOREPAIR_KEY_DESC, nil, "0.9.0"),
     ns.ChatOption(L.AUTOREPAIR_CHAT_DESC),
 }
 

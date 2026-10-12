@@ -68,7 +68,7 @@ module.options = {
         name = L.GATHERINGTRACKING_SWAP,
         description = L.GATHERINGTRACKING_SWAP_DESC,
         slider = "swapEvery",
-        changed = "0.8.5", -- a checkbox and its slider
+        changed = "0.9.0", -- a checkbox and its slider
     },
     {
         key = "swapEvery",

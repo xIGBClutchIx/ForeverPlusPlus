@@ -54,7 +54,7 @@ module.options = {
         name = L.QUESTTRACKER_ZONE,
         description = L.QUESTTRACKER_ZONE_DESC,
         section = QUESTS,
-        added = "0.8.5",
+        added = "0.9.0",
     },
     {
         key = "font",

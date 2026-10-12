@@ -32,7 +32,7 @@ module.options = {
         name = L.AUTOSELLJUNK_BUYBACK,
         description = L.AUTOSELLJUNK_BUYBACK_DESC,
     },
-    ns.Keys.Option("skipKey", L.SKIP_KEY, L.AUTOSELLJUNK_KEY_DESC, nil, "0.8.5"),
+    ns.Keys.Option("skipKey", L.SKIP_KEY, L.AUTOSELLJUNK_KEY_DESC, nil, "0.9.0"),
     ns.ChatOption(L.AUTOSELLJUNK_CHAT_DESC),
 }
 

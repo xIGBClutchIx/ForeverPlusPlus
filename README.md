@@ -99,7 +99,7 @@ Open Game Menu > Options > AddOns > Forever++ (or type `/fpp`). It opens on the 
 | `/fpp scan` | Scans the open auction house now. |
 | `/fpp resetprices` | Forgets the saved auction prices. |
 
-Settings are saved per account in `ForeverPlusPlusDB`, and what belongs to one character (talent plans, learned flight points) in `ForeverPlusPlusCharDB`.
+Settings are saved per account in `ForeverPlusPlusDB`, and what belongs to one character (talent plans, learned flight points, Quest Tracker's zone-hidden quests) in `ForeverPlusPlusCharDB`.
 
 ## Feedback
 

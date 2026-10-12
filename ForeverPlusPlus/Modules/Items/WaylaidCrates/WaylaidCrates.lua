@@ -17,9 +17,9 @@ local module = ns.NewModule("WaylaidCrates", L.WAYLAIDCRATES_DESC, {
 })
 module.title = L.WAYLAIDCRATES_TITLE
 module.category = "items"
-module.added = "0.8.5"
+module.added = "0.9.0"
 
--- Before 0.8.5, Bundle Costs was Item Tooltips' Waylaid Crate Costs option.
+-- Before 0.9.0, Bundle Costs was Item Tooltips' Waylaid Crate Costs option.
 ns.Migrate(1, function(db)
     local saved = db.modules or {}
     local old = saved.ItemTooltips

@@ -6,26 +6,19 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Added
 
-- **Quest Tracker**: the new Current Zone Only option (off by default) tracks only the quests of the zone you're in, going by their quest log header, and tracks the others again when you get to their zone. Class and profession quests go by where their objective is, and the quest your map follows always shows. It waits for combat to end.
-- **Waylaid Crates**: a new module for filling Waylaid Crates. Its Auction House Category adds a Waylaid Crates entry at the bottom (or top) of the auction house's categories. Clicking it lists every item your crates still need in the Buy tab, one row each: the bundles they take, less what's already in your bags. Hovering it shows how many of each you need, and which have no auctions up.
+- **Quest Tracker**: the new Current Zone Only option (off by default) tracks only the quests of the zone you're in, and tracks the others again when you get there. The quest your map follows always shows.
+- **Waylaid Crates**: a new module for filling Waylaid Crates. Its Waylaid Crates entry in the auction house's categories lists every item your crates still need, less what's already in your bags.
 
 ### Changed
 
-- **Waylaid Crates**: Item Tooltips' Waylaid Crate Costs option moved here as Bundle Costs, keeping your choice. It still takes its prices from Item Tooltips' Auction Prices.
-- **Item Tooltips**: Sell Price, Item Count, and Auction Prices are each turned on with an Enabled checkbox under their heading, like World Map's parts. Your settings stay as they were.
-- **World Map**: Coordinates no longer has its own Player, Cursor, Tenths, and On the Minimap checkboxes, which turned Blizzard's coordinate settings back on at every login. It moves whichever coordinates Blizzard's settings under Gameplay > Interface show into the title bar, and World Map says when they're all off, with a button to turn them on.
-- **Settings**: Auto Gossip's, Auto Repair's, and Auto Sell Junk's Hold Shift to Skip and Skip Cinematics' Hold Shift to Watch are now Skip Key and Watch Key dropdowns (Shift, Ctrl, Alt, or None), like Auto Quest's. Your choice carries over.
-- **Gathering Tracking**: Swap is a checkbox with its slider beside it, instead of a slider whose first step meant Never. Your choice carries over.
-- **Auto Screenshot**: Loot Quality sits under Loot and is greyed out while Loot is off.
-- **Buff Timers**: says when Blizzard's buff durations are off, since then no time shows, with a button to turn them on.
+- **Waylaid Crates**: Item Tooltips' Waylaid Crate Costs option moved here as Bundle Costs, keeping your choice.
+- **World Map**: Coordinates follows Blizzard's coordinate settings under Gameplay > Interface instead of its own checkboxes, which turned them back on at every login.
 - **Quest Tracker**: Font Size is gone: Edit Mode's Text Size sets the tracker's size.
-- **Settings**: sliders are shorter, so their value fits beside them and ends where a dropdown does.
-- **Settings**: the Modules page has new Character, Quests, and System categories, taken mostly from Interface, and Units, which joins Unit Frames and Nameplates. The categories are listed in alphabetical order.
-- **Settings**: buttons that throw away saved data all say Clear (Seen Cinematics, Saved Ley Lines, Saved Prices, and Flight Times), and dropdowns say Off where they turn something off (Scan Age, Reagent Bag, the nameplates' Level, and Ley Lines).
-- **Commands**: `/fpp reset` asks before it puts every setting back and clears what Forever++ saved.
-- **Settings**: Forever++ saves only the settings you change, so a better default reaches you wherever you kept the old one, and keeps what it collects (auction prices, flight times, chat history) apart from settings. Talent plans and learned flight points are saved for each character on its own. Everything you had carries over.
-- **Item Tooltips**: saved auction prices take about 60% less room in the saved file. Prices saved before 0.7.0, which the next scan of that auction house would have wiped, show again, aged from the scan that found them.
-- **Commands**: module names in `/fpp` match their titles, such as `/fpp toggle BagSlotCounter` instead of `BagSlots` and `PersistentChat` instead of `ChatFading`. Your settings follow them.
+- **Settings**: the Modules page has new Character, Quests, System, and Units categories, listed in alphabetical order.
+- **Settings**: Hold Shift to Skip and Hold Shift to Watch are now Skip Key and Watch Key dropdowns (Shift, Ctrl, Alt, or None), like Auto Quest's.
+- **Settings**: options look and read the same across modules: Item Tooltips' parts each have an Enabled checkbox, sliders are shorter, buttons that throw away data say Clear, and modules say when a Blizzard setting they need is off.
+- **Settings**: Forever++ saves only the settings you change, so a better default reaches you, and saves talent plans and learned flight points for each character. Saved auction prices take about 60% less room. Everything you had carries over.
+- **Commands**: `/fpp reset` asks first, and module names in `/fpp` match their titles, such as `/fpp toggle BagSlotCounter`.
 
 ### Fixed
 

@@ -32,7 +32,7 @@ end)
 local GENERAL, NPCS = L.AUTOGOSSIP_SECTION_GENERAL, L.AUTOGOSSIP_SECTION_NPCS
 
 module.options = {
-    ns.Keys.Option("skipKey", L.SKIP_KEY, L.AUTOGOSSIP_KEY_DESC, GENERAL, "0.8.5"),
+    ns.Keys.Option("skipKey", L.SKIP_KEY, L.AUTOGOSSIP_KEY_DESC, GENERAL, "0.9.0"),
     -- Alphabetical, with the catch-all last.
     { key = "banker", name = L.AUTOGOSSIP_BANKER, description = L.AUTOGOSSIP_BANKER_DESC, section = NPCS },
     { key = "taxi", name = L.AUTOGOSSIP_TAXI, description = L.AUTOGOSSIP_TAXI_DESC, section = NPCS },

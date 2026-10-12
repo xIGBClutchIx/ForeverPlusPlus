@@ -14,63 +14,34 @@ ns.changelog = {
         sections = {
             { L.CHANGELOG_ADDED, {
                 { L.QUESTTRACKER_TITLE, "The new Current Zone Only option (off by default) tracks "
-                    .. "only the quests of the zone you're in, going by their quest log header, and "
-                    .. "tracks the others again when you get to their zone. Class and profession "
-                    .. "quests go by where their objective is, and the quest your map follows "
-                    .. "always shows. It waits for combat to end." },
-                { L.WAYLAIDCRATES_TITLE, "A new module for filling Waylaid Crates. Its Auction "
-                    .. "House Category adds a Waylaid Crates entry at the bottom (or top) of the "
-                    .. "auction house's categories. Clicking it lists every item your crates still "
-                    .. "need in the Buy tab, one row each: the bundles they take, less what's "
-                    .. "already in your bags. Hovering it shows how many of each you need, and "
-                    .. "which have no auctions up." },
+                    .. "only the quests of the zone you're in, and tracks the others again when you "
+                    .. "get there. The quest your map follows always shows." },
+                { L.WAYLAIDCRATES_TITLE, "A new module for filling Waylaid Crates. Its Waylaid "
+                    .. "Crates entry in the auction house's categories lists every item your crates "
+                    .. "still need, less what's already in your bags." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.WAYLAIDCRATES_TITLE, "Item Tooltips' Waylaid Crate Costs option moved here as "
-                    .. "Bundle Costs, keeping your choice. It still takes its prices from Item "
-                    .. "Tooltips' Auction Prices." },
-                { L.ITEMTOOLTIPS_TITLE, "Sell Price, Item Count, and Auction Prices are each "
-                    .. "turned on with an Enabled checkbox under their heading, like World Map's "
-                    .. "parts. Your settings stay as they were." },
-                { L.WORLDMAP_TITLE, "Coordinates no longer has its own Player, Cursor, Tenths, "
-                    .. "and On the Minimap checkboxes, which turned Blizzard's coordinate settings "
-                    .. "back on at every login. It moves whichever coordinates Blizzard's settings "
-                    .. "under Gameplay > Interface show into the title bar, and World Map says when "
-                    .. "they're all off, with a button to turn them on." },
-                { L.CHANGELOG_SETTINGS, "Auto Gossip's, Auto Repair's, and Auto Sell Junk's Hold "
-                    .. "Shift to Skip and Skip Cinematics' Hold Shift to Watch are now Skip Key and "
-                    .. "Watch Key dropdowns (Shift, Ctrl, Alt, or None), like Auto Quest's. Your "
-                    .. "choice carries over." },
-                { L.GATHERINGTRACKING_TITLE, "Swap is a checkbox with its slider beside it, instead "
-                    .. "of a slider whose first step meant Never. Your choice carries over." },
-                { L.AUTOSCREENSHOT_TITLE, "Loot Quality sits under Loot and is greyed out while "
-                    .. "Loot is off." },
-                { L.BUFFTIMERS_TITLE, "Says when Blizzard's buff durations are off, since then no "
-                    .. "time shows, with a button to turn them on." },
+                    .. "Bundle Costs, keeping your choice." },
+                { L.WORLDMAP_TITLE, "Coordinates follows Blizzard's coordinate settings under "
+                    .. "Gameplay > Interface instead of its own checkboxes, which turned them back on "
+                    .. "at every login." },
                 { L.QUESTTRACKER_TITLE, "Font Size is gone: Edit Mode's Text Size sets the "
                     .. "tracker's size." },
-                { L.CHANGELOG_SETTINGS, "Sliders are shorter, so their value fits beside them and "
-                    .. "ends where a dropdown does." },
-                { L.CHANGELOG_SETTINGS, "The Modules page has new Character, Quests, and System "
-                    .. "categories, taken mostly from Interface, and Units, which joins Unit Frames "
-                    .. "and Nameplates. The categories are listed in alphabetical order." },
-                { L.CHANGELOG_SETTINGS, "Buttons that throw away saved data all say Clear (Seen "
-                    .. "Cinematics, Saved Ley Lines, Saved Prices, and Flight Times), and dropdowns "
-                    .. "say Off where they turn something off (Scan Age, Reagent Bag, the nameplates' "
-                    .. "Level, and Ley Lines)." },
-                { L.CHANGELOG_COMMANDS, "/fpp reset asks before it puts every setting back and "
-                    .. "clears what Forever++ saved." },
+                { L.CHANGELOG_SETTINGS, "The Modules page has new Character, Quests, System, and "
+                    .. "Units categories, listed in alphabetical order." },
+                { L.CHANGELOG_SETTINGS, "Hold Shift to Skip and Hold Shift to Watch are now Skip "
+                    .. "Key and Watch Key dropdowns (Shift, Ctrl, Alt, or None), like Auto Quest's." },
+                { L.CHANGELOG_SETTINGS, "Options look and read the same across modules: Item "
+                    .. "Tooltips' parts each have an Enabled checkbox, sliders are shorter, buttons "
+                    .. "that throw away data say Clear, and modules say when a Blizzard setting "
+                    .. "they need is off." },
                 { L.CHANGELOG_SETTINGS, "Forever++ saves only the settings you change, so a "
-                    .. "better default reaches you wherever you kept the old one, and keeps what it "
-                    .. "collects (auction prices, flight times, chat history) apart from settings. "
-                    .. "Talent plans and learned flight points are saved for each character on its "
-                    .. "own. Everything you had carries over." },
-                { L.ITEMTOOLTIPS_TITLE, "Saved auction prices take about 60% less room in the "
-                    .. "saved file. Prices saved before 0.7.0, which the next scan of that auction "
-                    .. "house would have wiped, show again, aged from the scan that found them." },
-                { L.CHANGELOG_COMMANDS, "Module names in /fpp match their titles, such as /fpp "
-                    .. "toggle BagSlotCounter instead of BagSlots and PersistentChat instead of "
-                    .. "ChatFading. Your settings follow them." },
+                    .. "better default reaches you, and saves talent plans and learned flight points "
+                    .. "for each character. Saved auction prices take about 60% less room. "
+                    .. "Everything you had carries over." },
+                { L.CHANGELOG_COMMANDS, "/fpp reset asks first, and module names in /fpp match "
+                    .. "their titles, such as /fpp toggle BagSlotCounter." },
             } },
             { L.CHANGELOG_FIXED, {
                 { L.CHANGELOG_COMMANDS, "/fpp toggle on a tool, such as Self Test, says it's always "
