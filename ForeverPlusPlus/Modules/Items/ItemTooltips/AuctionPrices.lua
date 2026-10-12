@@ -532,6 +532,33 @@ local function inList(data, lineData)
     return false
 end
 
+---The bundles an item's tooltip lists after its Use line, for Crate Shopping List: { { count,
+---name } }, empty for an item that isn't a crate.
+---@param data table tooltip data, as C_TooltipInfo gives it
+---@return table
+function internal.CrateBundles(data)
+    local bundles, found = {}, false
+    for _, line in ipairs(data.lines or {}) do
+        local text = plainText(line) or ""
+        if not found then
+            found = text:find(USE, 1, true) == 1
+        elseif not hasBundle(text) then
+            break
+        end
+        if found then
+            for part in (text .. "\n"):gmatch(LINES) do
+                local count, name = bundleOf(part)
+                if count then
+                    bundles[#bundles + 1] = { count, name }
+                end
+            end
+        end
+    end
+    return bundles
+end
+
+internal.ItemByName = itemByName
+
 -- What buying a bundle costs at auction, or a gray "No price".
 local function bundleCost(count, name)
     local itemID = itemByName(name)

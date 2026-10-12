@@ -46,6 +46,16 @@ L.AUCTIONPRICES_CRATES_DESC = "On a Waylaid Crate, show what buying each bundle 
 L.AUCTIONPRICES_CRATES_OFF = "Off"
 L.AUCTIONPRICES_CRATES_BELOW = "Under Each Bundle"
 L.AUCTIONPRICES_CRATES_BESIDE = "Beside Each Bundle"
+L.CRATELIST = "Crate Shopping List"
+L.CRATELIST_DESC = "Add a crate button beside the auction house's Favorites star. It lists every "
+    .. "item your Waylaid Crates still need, one row each: the bundles they take, less what's "
+    .. "already in your bags."
+L.CRATELIST_TITLE = "Waylaid Crate Needs"
+L.CRATELIST_NO_CRATES = "No Waylaid Crates in your bags."
+L.CRATELIST_DONE = "Your bags hold everything your crates need."
+L.CRATELIST_HINT = "Click to list these items."
+L.CRATELIST_NOT_FOUND = "Unknown item" -- an item name not found in the client or saved prices
+L.CRATELIST_NONE_LISTED = "None listed" -- no auctions up for the item
 L.AUCTIONPRICES_SCANNING = "Scanning prices... %d items" -- count so far
 L.AUCTIONPRICES_SCANNED = "Prices updated for %d items" -- count
 L.AUCTIONPRICES_PAUSED = "Scan paused while you sell... %d items" -- count so far

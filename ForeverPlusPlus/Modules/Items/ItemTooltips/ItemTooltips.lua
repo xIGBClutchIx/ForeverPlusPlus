@@ -29,6 +29,7 @@ local module = ns.NewModule("ItemTooltips", L.ITEMTOOLTIPS_DESC, {
     scanAgeRedHours = 12, -- hours old at which "age" is fully red
     crafting = true, -- costs, value, and profit under a recipe's reagents
     crates = "beside", -- a Waylaid Crate's bundle costs: "off", "below" the prices, or "beside" each
+    crateList = false, -- a button in the auction house listing what the crates still need
     scanOnOpen = true,
     chat = true,
     -- Data, not settings: they aren't in module.options.
@@ -157,6 +158,10 @@ module.options = {
         },
     },
     {
+        key = "crateList", name = L.CRATELIST, description = L.CRATELIST_DESC, section = AUCTION,
+        requires = "auction", added = "0.8.5",
+    },
+    {
         key = "scanOnOpen", name = L.AUCTIONPRICES_SCAN_ON_OPEN, description = L.AUCTIONPRICES_SCAN_ON_OPEN_DESC,
         section = AUCTION, requires = "auction",
     },
@@ -169,11 +174,12 @@ module.options[#module.options + 1] = chat
 -- Each part is on while the module and its checkbox are: `enable` and `disable` undo each other,
 -- and `optionChanged(key)` hears about the module's other options while it's on.
 
-local parts = {} -- { key, enable, disable, optionChanged?, on }
+local parts = {} -- { key, enable, disable, optionChanged?, requires?, on }
 
----Adds a part, turned on and off by the checkbox option `key`.
+---Adds a part, turned on and off by the checkbox option `key` (and the checkbox `requires`, for
+---a part that's an option of another).
 ---@param key string
----@param part table { enable = fn, disable = fn, optionChanged? = fn(key) }
+---@param part table { enable = fn, disable = fn, optionChanged? = fn(key), requires? = key }
 function internal.AddPart(key, part)
     part.key = key
     parts[#parts + 1] = part
@@ -188,7 +194,7 @@ end
 
 local function sync()
     for _, part in ipairs(parts) do
-        local on = internal.Active(part.key)
+        local on = internal.Active(part.key) and (not part.requires or internal.Active(part.requires))
         if on ~= (part.on or false) then
             part.on = on
             if on then
