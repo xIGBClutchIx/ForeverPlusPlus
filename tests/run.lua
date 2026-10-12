@@ -54,7 +54,7 @@ for _, file in ipairs({ "Core", "Map" }) do
     load("ForeverPlusPlus/Locales/enUS/" .. file .. ".lua")
 end
 for _, file in ipairs({ "Secret", "Colors", "Text", "WorldMap", "Instances", "Chat",
-    "TalentPlan", "Errors", "Prices", "Store" }) do
+    "TalentPlan", "Errors", "Prices", "Store", "Keys" }) do
     load("ForeverPlusPlus/Lib/" .. file .. ".lua")
 end
 
@@ -401,6 +401,30 @@ eq(Prices.Unpack({ price = 1 }), nil, "prices: an old table isn't a saved price"
 copper, seenAt = Prices.Unpack(Prices.Pack(700, 0))
 eq(copper, 700, "prices: a price seen before the epoch keeps its copper")
 eq(seenAt <= 0, true, "prices: and a time before the epoch")
+
+-- A house from 0.7.0 to 0.8.4, and one from before 0.7.0.
+local newer = { scannedAt = 1791836000, items = { [1] = { price = 50, seenAt = 1791836472 },
+    [2] = "60,1530600", [3] = { broken = true } } }
+Prices.PackHouse(newer)
+eq(newer.items[1], Prices.Pack(50, 1791836472), "prices: a saved table is packed")
+eq(newer.items[2], "60,1530600", "prices: a packed price stays")
+eq(newer.items[3], nil, "prices: a broken entry goes")
+local older = { scannedAt = 1790781485, prices = { [7] = 4800, [8] = 700 } }
+Prices.PackHouse(older)
+eq(older.prices, nil, "prices: the old price list goes")
+copper, seenAt = Prices.Unpack(older.items[7])
+eq(copper, 4800, "prices: an old price is kept")
+eq(math.abs(seenAt - 1790781485) < 60, true, "prices: aged from the house's scan")
+
+-- Hold Shift to Skip checkboxes become key dropdowns.
+local shiftSaved = { AutoGossip = { shiftSkips = false }, AutoRepair = { shiftSkips = true } }
+ns.Keys.MigrateShift(shiftSaved, "AutoGossip", "shiftSkips", "skipKey")
+ns.Keys.MigrateShift(shiftSaved, "AutoRepair", "shiftSkips", "skipKey")
+ns.Keys.MigrateShift(shiftSaved, "AutoSellJunk", "shiftSkips", "skipKey")
+eq(shiftSaved.AutoGossip.skipKey, "none", "keys: an unticked checkbox is None")
+eq(shiftSaved.AutoRepair.skipKey, "shift", "keys: a ticked checkbox is Shift")
+eq(shiftSaved.AutoRepair.shiftSkips, nil, "keys: the checkbox goes")
+eq(shiftSaved.AutoSellJunk, nil, "keys: nothing saved, nothing made")
 
 -- Store -----------------------------------------------------------------------------------------
 

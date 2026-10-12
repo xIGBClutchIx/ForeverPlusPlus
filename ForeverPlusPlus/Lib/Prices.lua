@@ -4,7 +4,7 @@
 local _, ns = ...
 
 local C_Item = C_Item
-local floor, format, tonumber, type = math.floor, string.format, tonumber, type
+local floor, format, tonumber, type, pairs = math.floor, string.format, tonumber, type, pairs
 
 local Prices = {}
 ns.Prices = Prices
@@ -36,6 +36,34 @@ function Prices.Unpack(saved)
         return nil
     end
     return tonumber(copper), EPOCH + tonumber(minutes) * 60
+end
+
+---Brings one auction house's saved prices to the packed form, for a migration: items saved as
+---{ price, seenAt } tables (0.7.0 to 0.8.4), and `prices` saved before 0.7.0 with only the house's
+---scan time, which become items seen at that scan.
+---@param house table { scannedAt, items, prices }
+function Prices.PackHouse(house)
+    if type(house) ~= "table" then
+        return
+    end
+    local items = type(house.items) == "table" and house.items or {}
+    for itemID, item in pairs(items) do
+        if type(item) == "table" and type(item.price) == "number" and type(item.seenAt) == "number" then
+            items[itemID] = Prices.Pack(item.price, item.seenAt)
+        elseif type(item) ~= "string" then
+            items[itemID] = nil
+        end
+    end
+    if type(house.prices) == "table" then
+        for itemID, copper in pairs(house.prices) do
+            if items[itemID] == nil and type(copper) == "number" then
+                items[itemID] = Prices.Pack(copper, house.scannedAt or 0)
+            end
+        end
+        house.prices = nil
+    end
+    house.items = items
+    house.scannedAt = house.scannedAt or 0
 end
 
 local source -- { price = fn(itemID), itemByName = fn(name), inline = fn() }, or nil

@@ -51,26 +51,7 @@ local packPrice, unpackPrice = ns.Prices.Pack, ns.Prices.Unpack
 ns.Migrate(4, function(db)
     local houses = db.data and db.data.ItemTooltips and db.data.ItemTooltips.houses
     for _, house in pairs(houses or {}) do
-        if type(house) == "table" then
-            local items = type(house.items) == "table" and house.items or {}
-            for itemID, item in pairs(items) do
-                if type(item) == "table" and item.price and item.seenAt then
-                    items[itemID] = packPrice(item.price, item.seenAt)
-                elseif type(item) ~= "string" then
-                    items[itemID] = nil
-                end
-            end
-            if type(house.prices) == "table" then
-                for itemID, copper in pairs(house.prices) do
-                    if items[itemID] == nil and type(copper) == "number" then
-                        items[itemID] = packPrice(copper, house.scannedAt or 0)
-                    end
-                end
-                house.prices = nil
-            end
-            house.items = items
-            house.scannedAt = house.scannedAt or 0
-        end
+        ns.Prices.PackHouse(house)
     end
 end)
 
