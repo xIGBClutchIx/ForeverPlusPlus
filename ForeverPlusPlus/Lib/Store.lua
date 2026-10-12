@@ -116,11 +116,15 @@ function Store.Split(db, perCharacter)
         if type(saved) == "table" then
             for key, value in pairs(saved) do
                 local into = db.settings
-                if type(value) == "table" then
+                if type(value) == "table" and next(value) == nil then
+                    into = nil -- nothing collected yet; Store.Load makes it again
+                elseif type(value) == "table" then
                     into = perCharacter[name] and perCharacter[name][key] and db.unclaimed or db.data
                 end
-                into[name] = into[name] or {}
-                into[name][key] = value
+                if into then
+                    into[name] = into[name] or {}
+                    into[name][key] = value
+                end
             end
         end
     end
@@ -206,34 +210,47 @@ end
 ---@return table view
 function Store.Load(db, char, name, defaults, perCharacter)
     perCharacter = perCharacter or {}
-    local settings = child(child(db, "settings"), name)
-    local data = child(child(db, "data"), name)
-    local own = child(child(char, "data"), name)
+    -- Looked up on each use, not kept: Store.Tidy drops empty tables before the game saves, and
+    -- a write after it (a module saving at logout) makes them again.
+    local function settingsTable()
+        return child(child(db, "settings"), name)
+    end
+    local function dataTable(key)
+        return child(child(perCharacter[key] and char or db, "data"), name)
+    end
+    local function dataFor(key)
+        local store = dataTable(key)
+        if type(store[key]) ~= "table" then
+            store[key] = {}
+        end
+        fill(store[key], defaults[key])
+        return store[key]
+    end
+    local settings = settingsTable()
     for key, value in pairs(settings) do
         if defaults[key] == nil or isData(defaults, key) or value == defaults[key] then
             settings[key] = nil
         end
     end
-    for _, store in ipairs({ data, own }) do
+    for _, store in ipairs({ child(child(db, "data"), name), child(child(char, "data"), name) }) do
         for key in pairs(store) do
-            if not isData(defaults, key) or (perCharacter[key] and true or false) ~= (store == own) then
+            if not isData(defaults, key) or dataTable(key) ~= store then
                 store[key] = nil
             end
         end
     end
     for key, value in pairs(defaults) do
         if type(value) == "table" then
-            local store = perCharacter[key] and own or data
-            store[key] = type(store[key]) == "table" and store[key] or {}
-            fill(store[key], value)
+            dataFor(key)
         end
     end
     return setmetatable({}, {
         __index = function(_, key)
             if isData(defaults, key) then
-                return (perCharacter[key] and own or data)[key]
+                local store = dataTable(key)
+                return type(store[key]) == "table" and store[key] or dataFor(key)
             end
-            local value = settings[key]
+            local value = settingsTable()[key]
             if value == nil then
                 return defaults[key]
             end
@@ -241,14 +258,44 @@ function Store.Load(db, char, name, defaults, perCharacter)
         end,
         __newindex = function(_, key, value)
             if isData(defaults, key) then
-                (perCharacter[key] and own or data)[key] = value
+                dataTable(key)[key] = value
             elseif value == defaults[key] then
-                settings[key] = nil
+                settingsTable()[key] = nil
             else
-                settings[key] = value
+                settingsTable()[key] = value
             end
         end,
     })
+end
+
+-- Whether a table holds nothing but empty tables, all the way down.
+local function hollow(t)
+    for _, value in pairs(t) do
+        if type(value) ~= "table" or not hollow(value) then
+            return false
+        end
+    end
+    return true
+end
+
+---Drops what's left empty before the game writes the saved variables (at logout or /reload):
+---a module with no changed settings, and data with nothing collected, which Store.Load makes
+---again. Keeps the file to what was actually saved.
+---@param db table
+---@param char table
+function Store.Tidy(db, char)
+    for _, byName in ipairs({ db.settings or {}, db.data or {}, db.unclaimed or {}, char.data or {} }) do
+        for name, byKey in pairs(byName) do
+            for key, value in pairs(byKey) do
+                if type(value) == "table" and hollow(value) then
+                    byKey[key] = nil
+                end
+            end
+            if next(byKey) == nil then
+                byName[name] = nil
+            end
+        end
+    end
 end
 
 ---Drops the settings and data of modules that no longer exist. `known` is { [name] = true }.

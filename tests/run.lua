@@ -459,6 +459,15 @@ plans.builds[2] = { active = 3 }
 eq(oldChar.data.TalentPlanner.builds[2].active, 3, "store: per-character data is saved for the character")
 Store.Prune(oldDB, oldChar, { BagSlotCounter = true })
 eq(oldDB.settings.TalentPlanner, nil, "store: a module that's gone loses its settings")
+view.size = "large"
+Store.Tidy(oldDB, oldChar)
+eq(oldDB.settings.BagSlotCounter, nil, "store: tidy drops a module with no changed settings")
+eq(oldDB.data.BagSlotCounter, nil, "store: tidy drops data with nothing collected")
+view.position = "top"
+eq(oldDB.settings.BagSlotCounter.position, "top", "store: a write after tidy is saved again")
+eq(type(view.seen.list), "table", "store: data after tidy is made again")
+view.banks.x = 1
+eq(oldDB.data.BagSlotCounter.banks.x, 1, "store: data made again is saved")
 
 -- Done ------------------------------------------------------------------------------------------
 

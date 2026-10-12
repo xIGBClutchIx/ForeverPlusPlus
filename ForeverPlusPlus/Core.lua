@@ -587,6 +587,11 @@ function ns.Start()
         known[name] = true
     end
     Store.Prune(ns.db, ns.charDB, known)
+    -- Before the game writes the saved variables, drop what's empty so the file holds only what
+    -- was saved. module.db makes it again if a module saves at logout after this.
+    ns.On("PLAYER_LOGOUT", function()
+        Store.Tidy(ns.db, ns.charDB)
+    end)
     for _, name in ipairs(ns.order) do
         local module = ns.modules[name]
         module.db = Store.Load(ns.db, ns.charDB, name, module.defaults, module.perCharacter)
