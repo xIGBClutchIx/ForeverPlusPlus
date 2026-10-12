@@ -12,6 +12,7 @@ local pairs, ipairs, next, type, floor, min, max = pairs, ipairs, next, type, ma
 local setmetatable, GetLocale, CreateFrame, sort = setmetatable, GetLocale, CreateFrame, table.sort
 local InCombatLockdown, C_Timer, C_QuestLog, C_Map = InCombatLockdown, C_Timer, C_QuestLog, C_Map
 local GetRealZoneText, GetRealmName, UnitName, format = GetRealZoneText, GetRealmName, UnitName, string.format
+local GetQuestUiMapID, Enum = GetQuestUiMapID, Enum
 
 local L = ns.L
 
@@ -549,8 +550,9 @@ end
 -- Current Zone Only works on the watch list too: it untracks the tracked quests of other zones and
 -- tracks them again once you're there, remembering which it untracked (per character, so a reload
 -- or logout keeps them). A quest's zone is its quest log header, as the log groups them. A header
--- that names no map or instance (a class, a profession, a holiday) has no zone, so its quests
--- always show, and so does the quest the map and arrow follow. It filters once each time you
+-- that names no map or instance (a class, a profession, a holiday) goes by the zone of the quest's
+-- objective on the map instead, and shows when the map doesn't know it. The quest the map and
+-- arrow follow always shows. It filters once each time you
 -- arrive in a zone, so a quest tracked by hand stays until you leave. Out of combat only, like
 -- sorting; Sort by Level then sorts what's left as the watch list changes.
 
@@ -587,6 +589,24 @@ local function isPlace(header)
     end
     -- Without the map list, every header counts as a place rather than none.
     return next(mapNames) == nil or mapNames[header:lower()] or ns.Instances.ByName(header) ~= nil
+end
+
+local ZONE_MAP = Enum and Enum.UIMapType and Enum.UIMapType.Zone or 3
+
+---The zone a map is in: the map itself, or the zone over a dungeon, building, or cave in it. Nil
+---for a continent or the world, or no map (GetQuestUiMapID gives 0 when it doesn't know).
+---@param mapID number?
+---@return number?
+local function zoneMap(mapID)
+    local info = mapID and mapID ~= 0 and C_Map.GetMapInfo(mapID)
+    while info and info.mapType and info.mapType > ZONE_MAP do
+        local parent = info.parentMapID and info.parentMapID ~= 0 and C_Map.GetMapInfo(info.parentMapID)
+        if not (parent and parent.mapType and parent.mapType >= ZONE_MAP) then
+            return info.mapID -- a dungeon right under a continent counts as its own zone
+        end
+        info = parent
+    end
+    return info and info.mapType == ZONE_MAP and info.mapID or nil
 end
 
 -- Each quest in the log by ID -> the title of the header it's under.
@@ -636,9 +656,18 @@ local function filterZone()
     local super = C_SuperTrack and C_SuperTrack.GetSuperTrackedQuestID
         and C_SuperTrack.GetSuperTrackedQuestID()
     -- A quest not under any header (or under a collapsed one) shows, rather than going unseen.
+    local here = C_Map and C_Map.GetBestMapForUnit and zoneMap(C_Map.GetBestMapForUnit("player"))
     local function belongs(questID)
         local header = headers[questID]
-        return questID == super or not header or header:lower() == zone or not isPlace(header)
+        if questID == super or not header or header:lower() == zone then
+            return true
+        end
+        if isPlace(header) then
+            return false
+        end
+        -- A class or profession quest goes by where its objective is, when the map knows.
+        local there = here and GetQuestUiMapID and zoneMap(GetQuestUiMapID(questID, true))
+        return not there or there == here
     end
     -- Untrack first, so the quests tracked again here have room under the watch limit.
     local leaving = {}

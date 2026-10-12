@@ -256,6 +256,7 @@
     "GetMacroSpell",
     "C_Macro",
     "GetRealZoneText",
+    "GetQuestUiMapID",
     "BACKDROP_TOOLTIP_16_16_5555",
     "C_MapExplorationInfo",
     "BattlefieldMapFrame",

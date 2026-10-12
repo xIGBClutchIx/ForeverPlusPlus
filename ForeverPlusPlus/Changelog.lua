@@ -15,9 +15,9 @@ ns.changelog = {
             { L.CHANGELOG_ADDED, {
                 { L.QUESTTRACKER_TITLE, "The new Current Zone Only option (off by default) tracks "
                     .. "only the quests of the zone you're in, going by their quest log header, and "
-                    .. "tracks the others again when you get to their zone. Class, profession, and "
-                    .. "holiday quests and the quest your map follows always show. It waits for "
-                    .. "combat to end." },
+                    .. "tracks the others again when you get to their zone. Class and profession "
+                    .. "quests go by where their objective is, and the quest your map follows "
+                    .. "always shows. It waits for combat to end." },
                 { L.ITEMTOOLTIPS_TITLE, "The new Crate Shopping List option (off by default) adds "
                     .. "a Waylaid Crates entry at the top of the auction house's categories. "
                     .. "Clicking it lists "
