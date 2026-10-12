@@ -944,7 +944,7 @@ local function controlWidth(room)
 end
 
 -- How wide every slider is, its arrows included, so they all look alike whatever their values.
-local SLIDER_WIDTH = 150
+local SLIDER_WIDTH = 180
 
 -- How wide a slider starting `left` into a row with `room` is: SLIDER_WIDTH, or less where its
 -- value label (drawn after it) wouldn't fit.
