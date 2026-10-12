@@ -13,7 +13,7 @@
 local _, ns = ...
 
 local _G, ipairs, pairs, sort, format, wipe = _G, ipairs, pairs, table.sort, string.format, wipe
-local CreateFrame, GameTooltip, Enum = CreateFrame, GameTooltip, Enum
+local CreateFrame, GameTooltip, Enum, C_Timer = CreateFrame, GameTooltip, Enum, C_Timer
 local C_Container, C_Item, C_TooltipInfo, C_AuctionHouse = C_Container, C_Item, C_TooltipInfo, C_AuctionHouse
 local GRAY_FONT_COLOR, HIGHLIGHT_FONT_COLOR, GREEN_FONT_COLOR = GRAY_FONT_COLOR, HIGHLIGHT_FONT_COLOR,
     GREEN_FONT_COLOR
@@ -96,6 +96,14 @@ end
 
 local onThrottleReady
 
+-- On Forever the first search for these keys comes back with every row "None available", and
+-- the same search sent again fills in the prices (seen in game: the second or third click
+-- showed them). So while any row has no quantity, the search goes out again, up to RETRIES
+-- times, before a row is taken as having no auctions.
+local RETRIES = 3
+local RETRY_DELAY = 0.5 -- seconds
+local tries = 0 -- searches sent for this click
+
 local function search()
     ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
     local ready = C_AuctionHouse.IsThrottledMessageSystemReady
@@ -106,33 +114,29 @@ local function search()
     local keys = {}
     for _, need in ipairs(needs) do
         if need.itemID then
-            local seen = module.db.itemKeys[need.itemID]
-            if seen then
-                for _, key in ipairs(seen) do
-                    keys[#keys + 1] = C_AuctionHouse.MakeItemKey(need.itemID, key[1], key[2])
-                end
-            else
-                keys[#keys + 1] = C_AuctionHouse.MakeItemKey(need.itemID)
-            end
+            keys[#keys + 1] = C_AuctionHouse.MakeItemKey(need.itemID)
         end
     end
     if #keys == 0 then
         return
     end
     -- As the Favorites star does: no Blizzard category selected (which also shows the Buy
-    -- display, where the browse list is), then an empty list while the search runs. Probed:
-    -- Mainline's frame.
-    local frame = _G.AuctionHouseFrame
-    local list = frame and frame.CategoriesList
-    if list and list.SetSelectedCategory then
-        list:SetSelectedCategory(nil)
-    end
-    local mixin = _G.AuctionHouseFrameMixin
-    if frame and frame.TriggerEvent and mixin and mixin.Event and mixin.Event.BrowseSearchStarted then
-        frame:TriggerEvent(mixin.Event.BrowseSearchStarted)
+    -- display, where the browse list is), then an empty list while the search runs. Only on
+    -- the click, not a retry, so the rows stay up meanwhile. Probed: Mainline's frame.
+    if tries == 0 then
+        local frame = _G.AuctionHouseFrame
+        local list = frame and frame.CategoriesList
+        if list and list.SetSelectedCategory then
+            list:SetSelectedCategory(nil)
+        end
+        local mixin = _G.AuctionHouseFrameMixin
+        if frame and frame.TriggerEvent and mixin and mixin.Event and mixin.Event.BrowseSearchStarted then
+            frame:TriggerEvent(mixin.Event.BrowseSearchStarted)
+        end
     end
     local order = Enum.AuctionHouseSortOrder
     local sorts = order and { { sortOrder = order.Name, reverseSort = false } } or {}
+    tries = tries + 1
     listed, awaiting = nil, true
     setSelected(true)
     C_AuctionHouse.SearchForItemKeys(keys, sorts)
@@ -142,63 +146,45 @@ function onThrottleReady()
     search()
 end
 
--- Keeps the item level and suffix of each item's key, from any browse results with auctions up
--- (the price scan's too). MakeItemKey(itemID) alone leaves the level at 0, and a search with
--- that key showed "None available" for items that had auctions; most likely the auction house
--- wants the key it sent itself (inferred, not confirmed in game).
-local function learnKeys(results)
-    local itemKeys = module.db.itemKeys
-    for _, result in ipairs(results or {}) do
-        local key = result.itemKey
-        local itemID = key and key.itemID
-        if itemID and (result.totalQuantity or 0) > 0 then
-            local level, suffix = key.itemLevel or 0, key.itemSuffix or 0
-            local seen = itemKeys[itemID]
-            if not seen then
-                seen = {}
-                itemKeys[itemID] = seen
-            end
-            local found = false
-            for _, old in ipairs(seen) do
-                if old[1] == level and old[2] == suffix then
-                    found = true
-                    break
-                end
-            end
-            if not found then
-                seen[#seen + 1] = { level, suffix }
-            end
-        end
+-- Sends the search again, unless something else replaced our list in the meantime.
+local function retry()
+    if row and row.selected and not awaiting then
+        search()
     end
 end
 
 -- Notes which items our search found auctions for, so the tooltip can say which have none.
--- A row of an item with none up comes back with no quantity, as a favorite does.
+-- Returns whether any row came back with no quantity.
 local function addResults(results)
     listed = listed or {}
+    local empty = false
     for _, result in ipairs(results or {}) do
         local itemID = result.itemKey and result.itemKey.itemID
         if itemID and (result.totalQuantity or 0) > 0 then
             listed[itemID] = true
+        elseif itemID then
+            empty = true
         end
     end
     awaiting = not C_AuctionHouse.HasFullBrowseResults()
+    return empty
 end
 
 -- New browse results that aren't ours (a search, favorites, a sort) replace our list.
 local function onResultsUpdated()
-    local results = C_AuctionHouse.GetBrowseResults()
-    learnKeys(results)
     if awaiting then
         listed = nil
-        addResults(results)
+        local empty = addResults(C_AuctionHouse.GetBrowseResults())
+        if empty and not awaiting and tries < RETRIES then
+            listed = nil -- not known yet: the tooltip shouldn't say None listed
+            C_Timer.After(RETRY_DELAY, retry)
+        end
     elseif row and row.selected then
         setSelected(false)
     end
 end
 
 local function onResultsAdded(_, added)
-    learnKeys(added)
     if awaiting then
         addResults(added)
     end
@@ -214,6 +200,7 @@ end
 -- Row -------------------------------------------------------------------------------------------
 
 local function onClick()
+    tries = 0
     refresh()
     search()
 end
