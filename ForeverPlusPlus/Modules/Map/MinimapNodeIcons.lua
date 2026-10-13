@@ -17,7 +17,8 @@ local ipairs, type, pcall, floor, sin, cos = ipairs, type, pcall, math.floor, ma
 local gmatch, match, tostring, format = string.gmatch, string.match, tostring, string.format
 local min, max, huge, concat = math.min, math.max, math.huge, table.concat
 local CreateFrame, Minimap, GetTime, C_Timer = CreateFrame, Minimap, GetTime, C_Timer
-local GetCursorPosition = GetCursorPosition
+local GetCursorPosition, GameTooltip, tonumber = GetCursorPosition, GameTooltip, tonumber
+local ITEM_MIN_SKILL = ITEM_MIN_SKILL
 local C_Map, C_Minimap, C_TooltipInfo, C_Item = C_Map, C_Minimap, C_TooltipInfo, C_Item
 local InCombatLockdown, GetPlayerFacing, GetCVarBool = InCombatLockdown, GetPlayerFacing, GetCVarBool
 local GetNumLootItems, GetLootSlotInfo = GetNumLootItems, GetLootSlotInfo
@@ -32,6 +33,7 @@ local module = ns.NewModule("MinimapNodeIcons", L.MINIMAPNODEICONS_DESC, {
     enabled = true,
     size = 8, -- icon size on the minimap
     border = true, -- a gold ring around each icon
+    levels = true, -- gray while the minimap names the node in gray (another level)
     tint = false, -- red while the skill is too low
     gray = false, -- gray once gathering no longer raises the skill
     detail = "medium", -- a key of STEPS
@@ -51,6 +53,7 @@ module.options = {
         min = 5, max = 20, step = 1, format = "%d",
     },
     { key = "border", name = L.MINIMAPNODEICONS_BORDER, description = L.MINIMAPNODEICONS_BORDER_DESC },
+    { key = "levels", name = L.MINIMAPNODEICONS_LEVELS, description = L.MINIMAPNODEICONS_LEVELS_DESC },
     { key = "tint", name = L.MINIMAPNODEICONS_TINT, description = L.MINIMAPNODEICONS_TINT_DESC },
     { key = "gray", name = L.MINIMAPNODEICONS_GRAY, description = L.MINIMAPNODEICONS_GRAY_DESC },
     {
@@ -88,6 +91,7 @@ local HERBS, MINERALS = 2383, 2580 -- Find Herbs, Find Minerals
 local STEPS = { low = 8, medium = 6, high = 4 } -- minimap units between probes
 local PER_FRAME = 60 -- probes each frame, so a sweep is spread over a few frames
 local REST = 0.4 -- seconds between sweeps
+local NONE = {}
 local REACH = 1.5 -- hits this many probe spacings apart touch (diagonal neighbors are 1.41)
 local EDGE = 2 -- keep probes and icons this far inside the minimap's edge
 local LEARN_WAIT = 10 -- seconds from a cast to its loot window that still count as one gather
@@ -208,9 +212,68 @@ local function currentSpace()
     return module.db.calibration.space or ORDER[trying]
 end
 
--- Points the minimap's mouseover at a spot right and up of its center and returns the text the
--- tooltip there would show, its lines joined by newlines. Call between startProbing and
--- stopProbing.
+-- A line's own color as r, g, b, or nil. Tooltip data colors are color mixins or plain tables.
+local function lineColor(line)
+    local color = line.leftColor
+    if not (color and readable(color) and type(color) == "table") then
+        return nil
+    end
+    if color.GetRGB then
+        return color:GetRGB()
+    end
+    return color.r, color.g, color.b
+end
+
+-- Whether a name's color is gray rather than white or a color: how the minimap may name a node on
+-- another level than the player, as in a cave. Unverified; /fpp nodes here prints the color.
+local function isGray(r, g, b)
+    if not (r and g and b and readable(r) and readable(g) and readable(b)) then
+        return false
+    end
+    local high, low = max(r, g, b), min(r, g, b)
+    return high < 0.8 and high - low < 0.08
+end
+
+-- The names in a line of a probe's text, one per row (overlapping dots each add one), without the
+-- color codes and spaces the game may wrap them in, each with its color: its own color code, or
+-- else the line's.
+local function addNames(list, text, r, g, b)
+    for row in gmatch(text, "[^\n]+") do
+        local hex = match(row, "|c%x%x(%x%x%x%x%x%x)")
+        local cr, cg, cb = r, g, b
+        if hex then
+            cr = tonumber(hex:sub(1, 2), 16) / 255
+            cg = tonumber(hex:sub(3, 4), 16) / 255
+            cb = tonumber(hex:sub(5, 6), 16) / 255
+        end
+        local name = match(plain(row), "^%s*(.-)%s*$")
+        if name ~= "" then
+            list[#list + 1] = { name = name, gray = isGray(cr, cg, cb), r = cr, g = cg, b = cb }
+        end
+    end
+end
+
+-- What the minimap's mouseover names now, as probe returns it.
+local function readMouseover()
+    local data = C_TooltipInfo.GetMinimapMouseover()
+    local lines = data and data.lines
+    if not (lines and readable(lines) and type(lines) == "table") then
+        return nil
+    end
+    local list
+    for _, line in ipairs(lines) do
+        local left = line.leftText
+        if readable(left) and type(left) == "string" and left ~= "" then
+            list = list or {}
+            addNames(list, left, lineColor(line))
+        end
+    end
+    return list
+end
+
+-- Points the minimap's mouseover at a spot right and up of its center and returns what the
+-- tooltip there would name: a list of { name, gray, r, g, b }, or nil. Call between startProbing
+-- and stopProbing.
 local function probe(right, up, space)
     local x, y = (SPACES[space] or SPACES.cursor)(right, up)
     local ok, err = pcall(Minimap.UpdateMouseoverAtPoint, Minimap, x, y)
@@ -219,19 +282,7 @@ local function probe(right, up, space)
         module:Print(format(L.MINIMAPNODEICONS_FAILED, tostring(err)))
         return nil
     end
-    local data = C_TooltipInfo.GetMinimapMouseover()
-    local lines = data and data.lines
-    if not (lines and readable(lines) and type(lines) == "table") then
-        return nil
-    end
-    local text
-    for _, line in ipairs(lines) do
-        local left = line.leftText
-        if readable(left) and type(left) == "string" and left ~= "" then
-            text = text and (text .. "\n" .. left) or left
-        end
-    end
-    return text
+    return readMouseover()
 end
 
 -- The minimap takes a probe's point only in soft cursor mode (a controller's cursor); otherwise
@@ -249,19 +300,6 @@ local function stopProbing()
     if Minimap.SetUsingSoftCursor then
         pcall(Minimap.SetUsingSoftCursor, Minimap, false)
     end
-end
-
--- The names in a probe's text, one per row (overlapping dots each add one), without the color
--- codes and spaces the game may wrap them in.
-local function namesIn(text)
-    local list = {}
-    for row in gmatch(plain(text), "[^\n]+") do
-        local name = match(row, "^%s*(.-)%s*$")
-        if name ~= "" then
-            list[#list + 1] = name
-        end
-    end
-    return list
 end
 
 -- The spots a sweep probes, right and up of the minimap's center, inside its circle.
@@ -288,7 +326,9 @@ end
 
 -- Sweeping ---------------------------------------------------------------------------------------
 
-local nodes = {} -- the last sweep's nodes: { x, y, icon, standing } on the zone map `nodesMap`
+-- The last sweep's nodes on the zone map `nodesMap`: { x, y, name, icon, standing, level }, where
+-- `level` is true when the minimap names it in gray (on another level, as in a cave).
+local nodes = {}
 local nodesMap
 local seen = {} -- names the minimap showed that aren't nodes we know, for learning
 
@@ -309,9 +349,9 @@ end
 
 -- Records a probe that read a node's name. Spots are kept on the zone map, so hits from frames
 -- apart still line up while the player moves.
-local function addHit(hits, v, name, icon, right, up)
+local function addHit(hits, v, entry, icon, right, up)
     local x, y = fromMinimap(v, right, up)
-    hits[#hits + 1] = { name = name, icon = icon, x = x, y = y }
+    hits[#hits + 1] = { name = entry.name, gray = entry.gray, icon = icon, x = x, y = y }
 end
 
 -- A dot answers to every probe near it, so one dot gives a patch of hits. Hits of one name that
@@ -325,11 +365,12 @@ local function group(hits, v, reach)
         if not taken[i] then
             taken[i] = true
             local queue, at = { first }, 1
-            local sumX, sumY = 0, 0
+            local sumX, sumY, gray = 0, 0, false
             while at <= #queue do
                 local a = queue[at]
                 at = at + 1
                 sumX, sumY = sumX + a.x, sumY + a.y
+                gray = gray or a.gray
                 for j, b in ipairs(hits) do
                     if not taken[j] and b.name == a.name then
                         local dr, du = a.right - b.right, a.up - b.up
@@ -340,8 +381,8 @@ local function group(hits, v, reach)
                     end
                 end
             end
-            result[#result + 1] = { x = sumX / #queue, y = sumY / #queue, icon = first.icon,
-                standing = standing(first.name) }
+            result[#result + 1] = { x = sumX / #queue, y = sumY / #queue, name = first.name,
+                icon = first.icon, standing = standing(first.name), level = gray }
         end
     end
     return result
@@ -381,19 +422,16 @@ local function step(v)
     startProbing()
     for i = sweep.index, last do
         local right, up = list[i][1], list[i][2]
-        local text = probe(right, up, sweep.space)
+        local found = probe(right, up, sweep.space)
         if blocked then
             break
         end
-        if text then
-            -- Overlapping dots put several names in the line, one per row.
-            for _, name in ipairs(namesIn(text)) do
-                local icon = iconFor(name)
-                if icon then
-                    addHit(sweep.hits, v, name, icon, right, up)
-                else
-                    seen[name] = true
-                end
+        for _, entry in ipairs(found or NONE) do
+            local icon = iconFor(entry.name)
+            if icon then
+                addHit(sweep.hits, v, entry, icon, right, up)
+            else
+                seen[entry.name] = true
             end
         end
     end
@@ -411,7 +449,7 @@ end
 -- Drawing ---------------------------------------------------------------------------------------
 
 local frame -- over the minimap; holds the icons and runs the sweeps
-local icons, rings = {}, {}
+local pins = {}
 
 -- The gold ring of the minimap's tracking button, which Blizzard also puts around a 24 pixel spec
 -- icon (ItemDisplay.xml): the 64 pixel file with the icon's center 19 right and 18 down of its
@@ -419,34 +457,84 @@ local icons, rings = {}, {}
 local RING = "Interface\\Minimap\\MiniMap-TrackingBorder"
 local RING_ICON, RING_FILE, RING_X, RING_Y = 24, 64, 19, 18
 
-local function getIcon(i)
-    local icon = icons[i]
-    if not icon then
-        icon = frame:CreateTexture(nil, "ARTWORK")
+-- The skill line's name in the player's language: from their own professions, or the client's
+-- trade skill names. Nil when neither has it.
+local function skillName(line)
+    local _, name = Professions.Rank(line)
+    if name then
+        return name
+    end
+    if C_TradeSkillUI and C_TradeSkillUI.GetTradeSkillDisplayName then
+        local ok, display = pcall(C_TradeSkillUI.GetTradeSkillDisplayName, line)
+        if ok and display and readable(display) and display ~= "" then
+            return display
+        end
+    end
+end
+
+-- A pin's tooltip, like the minimap's own: the node's name, then the skill it takes, colored
+-- against the player's the way Profession Tooltips colors it.
+local function showTooltip(pin)
+    local node = pin.node
+    if not node then
+        return
+    end
+    GameTooltip:SetOwner(pin, "ANCHOR_CURSOR")
+    GameTooltip:SetText(node.name, 1, 1, 1)
+    local known = NODES[node.name]
+    local name = known and skillName(known[1])
+    if name and ITEM_MIN_SKILL then
+        local color = Professions.Difficulty(Professions.Rank(known[1]), known[2])
+        GameTooltip:AddLine(format(ITEM_MIN_SKILL, name, known[2]), color.r, color.g, color.b)
+    end
+    GameTooltip:Show()
+end
+
+local function hideTooltip(pin)
+    if GameTooltip:IsOwned(pin) then
+        GameTooltip:Hide()
+    end
+end
+
+-- A pin: the icon, round, with the ring around it. It shows a tooltip under the mouse but lets
+-- clicks through to the minimap, for pinging.
+local function getPin(i)
+    local pin = pins[i]
+    if not pin then
+        pin = CreateFrame("Frame", nil, frame)
+        pin:EnableMouse(true)
+        if pin.SetMouseClickEnabled then
+            pin:SetMouseClickEnabled(false)
+        end
+        pin:SetScript("OnEnter", showTooltip)
+        pin:SetScript("OnLeave", hideTooltip)
+        local icon = pin:CreateTexture(nil, "ARTWORK")
+        icon:SetAllPoints()
         icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
         -- A round icon, like the minimap's own. Probe: the mask is Mainline's portrait mask.
-        local mask = frame:CreateMaskTexture()
+        local mask = pin:CreateMaskTexture()
         mask:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE",
             "CLAMPTOBLACKADDITIVE")
         mask:SetAllPoints(icon)
         icon:AddMaskTexture(mask)
-        icons[i] = icon
-        local ring = frame:CreateTexture(nil, "OVERLAY")
+        local ring = pin:CreateTexture(nil, "OVERLAY")
         ring:SetTexture(RING)
-        rings[i] = ring
+        pin.icon, pin.ring = icon, ring
+        pins[i] = pin
     end
-    return icon, rings[i]
+    return pin
 end
 
-local function hideIcons(from)
-    for i = from or 1, #icons do
-        icons[i]:Hide()
-        rings[i]:Hide()
+local function hidePins(from)
+    for i = from or 1, #pins do
+        pins[i]:Hide()
+        pins[i].node = nil
     end
 end
 
--- Puts the ring around an icon of `size`, or hides it.
-local function placeRing(ring, icon, size, shown)
+-- Puts the ring around a pin of `size`, or hides it.
+local function placeRing(pin, size, shown)
+    local ring = pin.ring
     if not shown then
         ring:Hide()
         return
@@ -454,43 +542,46 @@ local function placeRing(ring, icon, size, shown)
     local k = size / RING_ICON
     ring:SetSize(RING_FILE * k, RING_FILE * k)
     ring:ClearAllPoints()
-    ring:SetPoint("TOPLEFT", icon, "CENTER", -RING_X * k, RING_Y * k)
+    ring:SetPoint("TOPLEFT", pin, "CENTER", -RING_X * k, RING_Y * k)
     ring:Show()
 end
 
 local function draw(v)
     local shown = 0
     if v and v.mapID == nodesMap then
-        local size, tint, gray, border = module.db.size, module.db.tint, module.db.gray, module.db.border
+        local db = module.db
+        local size = db.size
         local limit = v.half - EDGE - size / 4
         for _, node in ipairs(nodes) do
             local right, up = toMinimap(v, node.x, node.y)
             if right * right + up * up <= limit * limit then
                 shown = shown + 1
-                local icon, ring = getIcon(shown)
+                local pin = getPin(shown)
+                pin.node = node
+                local icon = pin.icon
                 icon:SetTexture(node.icon)
-                local grayed = gray and node.standing == "gray"
+                local grayed = (db.gray and node.standing == "gray") or (db.levels and node.level)
                 icon:SetDesaturated(grayed)
-                if tint and node.standing == "low" then
+                if db.tint and node.standing == "low" then
                     icon:SetVertexColor(RED[1], RED[2], RED[3])
                 elseif grayed then
                     icon:SetVertexColor(GRAY[1], GRAY[2], GRAY[3])
                 else
                     icon:SetVertexColor(1, 1, 1)
                 end
-                icon:SetSize(size, size)
-                icon:SetPoint("CENTER", Minimap, "CENTER", right, up)
-                icon:Show()
-                placeRing(ring, icon, size, border)
+                pin:SetSize(size, size)
+                pin:SetPoint("CENTER", Minimap, "CENTER", right, up)
+                pin:Show()
+                placeRing(pin, size, db.border)
             end
         end
     end
-    hideIcons(shown + 1)
+    hidePins(shown + 1)
 end
 
 local function onUpdate()
     if not tracking then
-        hideIcons()
+        hidePins()
         return
     end
     local v = readView()
@@ -565,19 +656,18 @@ local function report()
         local names, order, known = {}, {}, 0
         startProbing()
         for _, point in ipairs(list) do
-            local text = probe(point[1], point[2], space)
+            local found = probe(point[1], point[2], space)
             if blocked then
                 stopProbing()
                 return
             end
-            if text then
-                for _, name in ipairs(namesIn(text)) do
-                    if not names[name] then
-                        names[name] = true
-                        order[#order + 1] = name
-                        if iconFor(name) then
-                            known = known + 1
-                        end
+            for _, entry in ipairs(found or NONE) do
+                local name = entry.name
+                if not names[name] then
+                    names[name] = true
+                    order[#order + 1] = name
+                    if iconFor(name) then
+                        known = known + 1
                     end
                 end
             end
@@ -614,14 +704,13 @@ local function measure()
     local scale = Minimap:GetEffectiveScale()
     local cx, cy = Minimap:GetCenter()
     local right, up = x / scale - cx, y / scale - cy
-    local data = C_TooltipInfo.GetMinimapMouseover()
-    local line = data and data.lines and data.lines[1]
-    local text = line and line.leftText
-    local name = text and readable(text) and namesIn(text)[1]
-    if not name then
+    local under = readMouseover()
+    local first = under and under[1]
+    if not first then
         ns.Print(L.MINIMAPNODEICONS_HERE_NONE)
         return
     end
+    local name = first.name
     local list = grid(Minimap:GetWidth() / 2, STEPS.high)
     local space = currentSpace()
     local hits = {}
@@ -631,11 +720,9 @@ local function measure()
         if blocked then
             break
         end
-        if found then
-            for _, other in ipairs(namesIn(found)) do
-                if other == name then
-                    hits[#hits + 1] = { right = point[1], up = point[2] }
-                end
+        for _, entry in ipairs(found or NONE) do
+            if entry.name == name then
+                hits[#hits + 1] = { right = point[1], up = point[2] }
             end
         end
     end
@@ -674,6 +761,9 @@ local function measure()
     end
     ns.Print(format(L.MINIMAPNODEICONS_HERE_CURSOR, name, right, up, Minimap:GetZoom(),
         tostring(C_Minimap.GetViewRadius and C_Minimap.GetViewRadius())))
+    -- The name's color, for telling whether a node on another level is named in gray.
+    ns.Print(format(L.MINIMAPNODEICONS_HERE_COLOR, tostring(first.r), tostring(first.g),
+        tostring(first.b), first.gray and L.MINIMAPNODEICONS_REPORT_YES or L.MINIMAPNODEICONS_REPORT_NO))
     if #patch == 0 then
         ns.Print(L.MINIMAPNODEICONS_HERE_MISSED)
         return

@@ -237,6 +237,9 @@ L.MINIMAPNODEICONS_SIZE = "Icon Size"
 L.MINIMAPNODEICONS_SIZE_DESC = "How big the icons are on the minimap."
 L.MINIMAPNODEICONS_BORDER = "Round Border"
 L.MINIMAPNODEICONS_BORDER_DESC = "A gold ring around each icon, like the minimap's tracking button."
+L.MINIMAPNODEICONS_LEVELS = "Gray Other Levels"
+L.MINIMAPNODEICONS_LEVELS_DESC = "Show a node's icon in gray when the minimap does, as for a node "
+    .. "above or below you, like in a cave."
 L.MINIMAPNODEICONS_TINT = "Tint Unusable"
 L.MINIMAPNODEICONS_TINT_DESC = "Tint a node's icon red while your skill is too low to gather it."
 L.MINIMAPNODEICONS_GRAY = "Gray Out Trivial"
@@ -256,6 +259,7 @@ L.MINIMAPNODEICONS_HERE_START = "Point at a dot on the minimap; reading it in %d
 L.MINIMAPNODEICONS_HERE_NONE = "Nothing under the cursor. Point at a dot and try again."
 -- name, cursor right and up of the minimap's center, zoom level, view radius in yards
 L.MINIMAPNODEICONS_HERE_CURSOR = "%s: cursor at %.1f, %.1f. Zoom %d, %s yards."
+L.MINIMAPNODEICONS_HERE_COLOR = "Name color: %s, %s, %s. Gray: %s." -- red, green, blue, yes/no
 L.MINIMAPNODEICONS_HERE_MISSED = "A sweep didn't find it near the cursor."
 -- hits, middle right and up, then right from-to and up from-to
 L.MINIMAPNODEICONS_HERE_PATCH = "Sweep: %d hits, middle at %.1f, %.1f, across %.1f to %.1f, "
