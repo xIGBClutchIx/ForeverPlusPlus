@@ -23,7 +23,7 @@ local module = ns.NewModule("XPBarText", L.XPBARTEXT_DESC, {
     rested = true,
     quests = "complete", -- "off", "complete" (ready to turn in), or "all"
     questColor = true,
-    questBar = false,
+    questBar = true,
     tooltip = true,
 })
 module.title = L.XPBARTEXT_TITLE

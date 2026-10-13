@@ -35,7 +35,7 @@ ns.changelog = {
                     .. "the arrow to the quest selected on the map instead of your map pin, and "
                     .. "back to the pin when no quest is selected. Its Show Quest Name option (on "
                     .. "by default) shows the quest's name under the distance." },
-                { L.XPBARTEXT_TITLE, "The new Fill Bar with Ready Quests option (off by default) fills the "
+                { L.XPBARTEXT_TITLE, "The new Fill Bar with Ready Quests option (on by default) fills the "
                     .. "experience bar on from your XP in green with what your quests ready to turn "
                     .. "in will give, like rested XP." },
                 { L.XPBARTEXT_TITLE, "The new Detailed Tooltip option (on by default) adds to the "
