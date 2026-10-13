@@ -346,6 +346,7 @@ local function updateStamps()
     stampsOn = on
     if on then
         attach()
+        module:Hook("FCF_OpenTemporaryWindow", attach) -- a whisper popped out into its own tab
         EventRegistry:RegisterCallback("SetItemRef", onStampClick, module)
         for _, frame in ipairs(Chat.Frames()) do
             linkStamps(frame)

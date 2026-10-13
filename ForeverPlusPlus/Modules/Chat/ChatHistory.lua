@@ -47,11 +47,17 @@ local function whisperIDs()
     return ids
 end
 
+-- Windows are kept by their number, so only the numbered ones: a temporary window's number belongs
+-- to another whisper after a reload. The combat log isn't chat, so it's skipped.
+local function isCombatLog(frame)
+    return frame == _G.COMBATLOG or (_G.IsCombatLog and _G.IsCombatLog(frame)) and true or false
+end
+
 local function save()
     local saved = {}
     local whispers = whisperIDs()
-    for index, frame in ipairs(Chat.Frames()) do
-        local total = frame:GetNumMessages()
+    for index, frame in ipairs(Chat.Frames(true)) do
+        local total = isCombatLog(frame) and 0 or frame:GetNumMessages()
         local lines = {}
         for i = max(1, total - module.db.lines + 1), total do
             local text, r, g, b, chatTypeID = frame:GetMessageInfo(i)
@@ -75,8 +81,8 @@ local function restore(_, isLogin, isReload)
     if not (isLogin or isReload) then
         return
     end
-    for index, frame in ipairs(Chat.Frames()) do
-        local lines = module.db.saved[index]
+    for index, frame in ipairs(Chat.Frames(true)) do
+        local lines = not isCombatLog(frame) and module.db.saved[index]
         if lines and #lines > 0 then
             for _, line in ipairs(lines) do
                 frame:AddMessage(line[1], line[2], line[3], line[4])

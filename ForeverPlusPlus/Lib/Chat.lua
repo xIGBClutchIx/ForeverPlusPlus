@@ -4,27 +4,41 @@
 local _, ns = ...
 
 local _G, ipairs, type, tonumber, gsub = _G, ipairs, type, tonumber, string.gsub
+local setmetatable = setmetatable
 local byte, find, match, sub = string.byte, string.find, string.match, string.sub
 local min, concat = math.min, table.concat
 
 local Chat = {}
 ns.Chat = Chat
 
----The chat windows that exist, in order.
+---The chat windows that exist, in order: the numbered ones (ChatFrame1 to 10), then the
+---temporary ones Blizzard makes for a whisper popped out into its own tab (ChatFrame11 and up,
+---listed in CHAT_FRAMES), unless `numbered`.
+---@param numbered? boolean only the numbered windows
 ---@return table[]
-function Chat.Frames()
-    local frames = {}
-    for i = 1, NUM_CHAT_WINDOWS or 10 do
-        local frame = _G["ChatFrame" .. i]
-        if frame then
+function Chat.Frames(numbered)
+    local frames, seen = {}, {}
+    local function add(frame)
+        if type(frame) == "table" and not seen[frame] then
+            seen[frame] = true
             frames[#frames + 1] = frame
+        end
+    end
+    for i = 1, NUM_CHAT_WINDOWS or 10 do
+        add(_G["ChatFrame" .. i])
+    end
+    if not numbered and type(CHAT_FRAMES) == "table" then
+        for _, name in ipairs(CHAT_FRAMES) do
+            add(_G[name])
         end
     end
     return frames
 end
 
+local eachWindow = setmetatable({}, { __mode = "k" }) -- module -> its fn for Chat.EachWindow
+
 ---Calls `fn` with each chat window now, and again whenever windows are added or reset, while the
----module is on. Call it from `OnEnable`.
+---module is on. Call it from `OnEnable`, once: a second call replaces the module's `fn`.
 ---@param module table
 ---@param fn fun(frame: table)
 function Chat.EachWindow(module, fn)
@@ -36,6 +50,18 @@ function Chat.EachWindow(module, fn)
     all()
     module:On("UPDATE_CHAT_WINDOWS", all)
     module:On("UPDATE_FLOATING_CHAT_WINDOWS", all)
+    -- A temporary window comes with no chat window event. The hook can't be handed the window it
+    -- made, so every window gets `fn` again. Hooked once per module, running its latest `fn`.
+    local hooked = eachWindow[module] ~= nil
+    eachWindow[module] = fn
+    if not hooked then
+        module:Hook("FCF_OpenTemporaryWindow", function()
+            local current = eachWindow[module]
+            for _, frame in ipairs(Chat.Frames()) do
+                current(frame)
+            end
+        end)
+    end
 end
 
 ---Rewrites the lines a chat window already shows: each readable line `test` accepts becomes
