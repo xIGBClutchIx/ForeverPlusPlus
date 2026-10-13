@@ -4,7 +4,7 @@
 -- the game marks secret can't be read and are left alone.
 local _, ns = ...
 
-local ipairs, gsub, tonumber = ipairs, string.gsub, tonumber
+local ipairs, gsub, tonumber, concat = ipairs, string.gsub, tonumber, table.concat
 
 local L = ns.L
 local Chat = ns.Chat
@@ -21,6 +21,7 @@ module.options = {
         key = "style",
         name = L.SHORTCHANNELNAMES_STYLE,
         description = L.SHORTCHANNELNAMES_STYLE_DESC,
+        changed = "0.9.0",
         choices = {
             { "number", L.SHORTCHANNELNAMES_NUMBER },
             { "letter", L.SHORTCHANNELNAMES_LETTER },
@@ -32,6 +33,27 @@ module.options = {
 -- The first character of a name, whole, even when it takes several bytes (UTF-8).
 local FIRST_CHARACTER = "^[%z\1-\127\194-\244][\128-\191]*"
 
+---A channel's initials: the first character of each word, and each capital inside a word, of
+---its name before any " - Zone" part. General and Trade give G and T, LocalDefense and
+---LookingForGroup give LD and LFG. Nil for an empty name.
+---@param name string
+---@return string?
+local function initials(name)
+    local base = name:match("^(.-) %- ") or name
+    local letters = {}
+    for word in base:gmatch("%S+") do
+        local first = word:match(FIRST_CHARACTER)
+        if first then
+            letters[#letters + 1] = first
+            for capital in word:sub(#first + 1):gmatch("%u") do
+                letters[#letters + 1] = capital
+            end
+        end
+    end
+    local text = concat(letters)
+    return text ~= "" and text or nil
+end
+
 -- The rendered link is |Hchannel:channel:5|h[5. General - Elwynn Forest]|h.
 local LINK = "(|Hchannel:channel:%d+|h%[)(%d+)%. ([^%]]-)(%]|h)"
 
@@ -40,7 +62,7 @@ local LINK = "(|Hchannel:channel:%d+|h%[)(%d+)%. ([^%]]-)(%]|h)"
 ---@return string
 local function rewrite(text)
     return (gsub(text, LINK, function(open, number, name, close)
-        local letter = name:match(FIRST_CHARACTER)
+        local letter = initials(name)
         local short = number
         if module.db.style == "letter" then
             short = letter or number
@@ -90,7 +112,7 @@ local function restore(text)
         if type(name) ~= "string" or name == "" then
             return nil
         end
-        local letter = name:match(FIRST_CHARACTER)
+        local letter = initials(name)
         if inner == number or inner == letter or (letter and inner == number .. ". " .. letter) then
             return open .. number .. ". " .. name .. close
         end
