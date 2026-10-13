@@ -33,7 +33,7 @@ ns.changelog = {
                     .. "still need, less what's already in your bags and bank." },
                 { L.WAYPOINTS_TITLE, "The new Follow Selected Quest option (on by default) points "
                     .. "the arrow to the quest selected on the map instead of your map pin, and "
-                    .. "back to the pin when no quest is selected. Its Show Quest Name option (off "
+                    .. "back to the pin when no quest is selected. Its Show Quest Name option (on "
                     .. "by default) shows the quest's name under the distance." },
                 { L.XPBARTEXT_TITLE, "The new Fill Bar with Ready Quests option (off by default) fills the "
                     .. "experience bar on from your XP in green with what your quests ready to turn "
