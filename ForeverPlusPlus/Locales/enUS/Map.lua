@@ -257,19 +257,17 @@ L.MINIMAPNODEICONS_FAILED = "Minimap Node Icons couldn't check the minimap: %s" 
 L.MINIMAPNODEICONS_COMMAND = "Check what Minimap Node Icons sees on the minimap right now."
 L.MINIMAPNODEICONS_HERE_START = "Point at a dot on the minimap; reading it in %d seconds." -- seconds
 L.MINIMAPNODEICONS_HERE_NONE = "Nothing under the cursor. Point at a dot and try again."
--- name, cursor right and up of the minimap's center, zoom level, view radius in yards
-L.MINIMAPNODEICONS_HERE_CURSOR = "%s: cursor at %.1f, %.1f. Zoom %d, %s yards."
+-- name, cursor right and up of the minimap's center, zoom level
+L.MINIMAPNODEICONS_HERE_CURSOR = "%s: cursor at %.1f, %.1f. Zoom %d."
 L.MINIMAPNODEICONS_HERE_COLOR = "Name color: %s, %s, %s. Gray: %s." -- red, green, blue, yes/no
-L.MINIMAPNODEICONS_HERE_MISSED = "A sweep didn't find it near the cursor."
--- hits, middle right and up, then right from-to and up from-to
-L.MINIMAPNODEICONS_HERE_PATCH = "Sweep: %d hits, middle at %.1f, %.1f, across %.1f to %.1f, "
-    .. "up %.1f to %.1f."
+L.MINIMAPNODEICONS_HERE_ICON = "Its icon is at %.1f, %.1f." -- right and up of the minimap's center
+L.MINIMAPNODEICONS_HERE_MISSED = "No icon for it yet."
 L.MINIMAPNODEICONS_REPORT_UNAVAILABLE = "This client can't check the minimap for nodes."
 L.MINIMAPNODEICONS_REPORT_COMBAT = "Can't check the minimap in combat."
 L.MINIMAPNODEICONS_REPORT_YES = "yes"
 L.MINIMAPNODEICONS_REPORT_NO = "no"
--- tracking on (yes/no), position readable (yes/no), minimap width, view radius in yards
-L.MINIMAPNODEICONS_REPORT_STATE = "Tracking on: %s. Position: %s. Minimap: %d wide, %s yards."
+-- tracking on (yes/no), minimap width
+L.MINIMAPNODEICONS_REPORT_STATE = "Tracking on: %s. Minimap: %d wide."
 -- space name, names found, nodes known among them, the first few names
 L.MINIMAPNODEICONS_REPORT_SPACE = "%s: %d names, %d nodes known: %s"
 L.MINIMAPNODEICONS_REPORT_NONE = "none"
