@@ -16,6 +16,9 @@ ns.changelog = {
                 { L.ADDONSLIST_TITLE, "The new AddOn Sets option (off by default) adds a Sets "
                     .. "dropdown beside Disable All, to save which addons are on under a name and "
                     .. "turn that set back on later." },
+                { L.ITEMTOOLTIPS_TITLE, "The new Repair Cost line (off by default) shows what "
+                    .. "repairing damaged gear costs, on gear you wear or carry, without a "
+                    .. "merchant's repair cursor." },
                 { L.QUESTTRACKER_TITLE, "The new Current Zone Only option (off by default) tracks "
                     .. "only the quests of the zone you're in, and tracks the others again when you "
                     .. "get there. The quest your map follows always shows." },
