@@ -171,10 +171,11 @@ local function warnNoFit(bag, slot)
 end
 
 -- A right-click in the bags means something else while one of these is open (sell, deposit,
--- attach, trade, auction), so it goes to Blizzard's button then.
+-- attach, trade, auction, guild bank), so it goes to Blizzard's button then.
 local function busy()
-    local frames = { _G.MerchantFrame, _G.BankFrame, _G.SendMailFrame, _G.TradeFrame, _G.AuctionHouseFrame }
-    for i = 1, 5 do
+    local frames = { _G.MerchantFrame, _G.BankFrame, _G.SendMailFrame, _G.TradeFrame, _G.AuctionHouseFrame,
+        _G.GuildBankFrame }
+    for i = 1, 6 do
         if frames[i] and frames[i]:IsShown() then
             return true
         end
