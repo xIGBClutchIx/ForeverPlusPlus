@@ -1,9 +1,9 @@
 -- Character Window: tidies the Character window. The Equipment Manager, Titles, and Pet tabs that
 -- sit across the top of the stats pane move to the side, under the Character, Reputation, and
--- other tabs, and the pane's header (the portrait tab and the "Level 60 Class" line) goes, so the
--- stats start at the top. The window's title becomes your level and name in your class color,
--- each item gets a durability bar (Durability.lua), and the Skills tab can show the skills of the
--- weapons you wear in green (Skills.lua).
+-- other tabs, and the pane's header (the portrait tab) goes, so the stats start at the top. The
+-- window's title becomes your level and name in your class color, each item gets a durability bar
+-- (Durability.lua), and the Skills tab can show the skills of the weapons you wear in green
+-- (Skills.lua).
 local _, ns = ...
 
 local _G, ipairs, pairs, type, CreateFrame = _G, ipairs, pairs, type, CreateFrame
@@ -65,7 +65,6 @@ local ADDON = "Blizzard_UIPanels_Game"
 local STATS = 1 -- Blizzard's PAPERDOLL_SIDEBARS index for the stats; every other one gets a side tab
 local SPACING = 2 -- between side tabs, ours included, as Blizzard spaces its own
 local BOTTOM = 6 -- kept clear above the bottom of the window
-local LEVEL_TOP = 8 -- from the top of the right pane to the pet's level line
 
 local started
 local tabs = {} -- sidebar index -> our side tab, from STATS + 1 to numSidebars
@@ -110,12 +109,11 @@ local function collapsed()
     return _G.CharacterFrame:IsRightPaneCollapsed()
 end
 
--- The tab row always goes. The level line goes too, except on the pet pane: there it carries the
--- pet's level, family, and loyalty, which the title doesn't, so it moves to the top of the pane.
+-- The tab row goes. The level lines stay: they sit on the strip over the model, and Blizzard
+-- swaps the player's for the pet's itself.
 local function updateHeader()
     if module.db.sideTabs then
         _G.PaperDollSidebarTabs:Hide()
-        _G.PaperDollLevelInfo:SetShown(petPane:IsVisible())
     end
 end
 
@@ -123,18 +121,8 @@ end
 -- header, so they move up to the top of the right pane.
 local function anchorPanes(up)
     local host = _G.CharacterFrame.RightPaneHost
-    local info = _G.PaperDollLevelInfo
     for pane, stats in pairs(panes) do
-        if pane == petPane then
-            -- The pet stats start under the level line, which is two lines tall with loyalty.
-            pane:ClearAllPoints()
-            if up then
-                pane:SetPoint("TOP", info, "BOTTOM", 0, -4)
-            else
-                pane:SetPoint("TOPLEFT", host.StoneBg, "BOTTOMLEFT")
-            end
-            pane:SetPoint("BOTTOMRIGHT", host, "BOTTOMRIGHT")
-        elseif up then
+        if up then
             pane:SetPoint("TOPLEFT", host, "TOPLEFT")
         else
             pane:SetPoint("TOPLEFT", host.StoneBg, "BOTTOMLEFT")
@@ -148,19 +136,12 @@ local function anchorPanes(up)
             pane.ScrollBar:SetPoint("BOTTOMLEFT", pane.ScrollBox, "BOTTOMRIGHT", 0, up and 10 or 0)
         end
     end
-    info:ClearAllPoints()
-    if up then
-        info:SetPoint("TOP", host, "TOP", 0, -LEVEL_TOP)
-    else
-        info:SetPoint("TOP", _G.PaperDollSidebarTabs, "TOP", 0, -50)
-    end
     host.StoneBg:SetAlpha(up and 0 or 1)
 end
 
 -- Blizzard's header back.
 local function showHeader()
     anchorPanes(false)
-    _G.PaperDollLevelInfo:Show()
     _G.PaperDollSidebarTabs:SetShown(_G.PaperDollFrame:IsShown() and not collapsed())
 end
 
@@ -348,7 +329,6 @@ local function start()
 
     -- Blizzard shows the header again whenever the pane opens.
     module:HookScript(_G.PaperDollSidebarTabs, "OnShow", updateHeader)
-    module:HookScript(_G.PaperDollLevelInfo, "OnShow", updateHeader)
     module:HookScript(_G.PaperDollFrame, "OnShow", refreshTabs)
     module:HookScript(_G.PaperDollFrame, "OnHide", refreshTabs)
     module:Hook("PaperDollFrame_UpdateSidebarTabs", refreshTabs)
