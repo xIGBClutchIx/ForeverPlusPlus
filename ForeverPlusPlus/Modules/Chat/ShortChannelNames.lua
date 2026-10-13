@@ -1,17 +1,20 @@
--- Short Channel Names: [1. General] becomes [1], [G], or [1. G] in chat. Blizzard builds the channel link
--- from the channel's full name, so this rewrites the finished line after it is added to the
--- window, through the chat frame's own TransformMessages (the line stays a working link). Lines
--- the game marks secret can't be read and are left alone.
+-- Short Channel Names: [1. General] becomes [1], [G], [1. G], or another short form in chat, and
+-- optionally [Guild], [Party], [Raid] and the like become [GD], [P], [R]. Blizzard builds the
+-- channel link from the channel's full name, so this rewrites the finished line after it is added
+-- to the window, through the chat frame's own TransformMessages (the line stays a working link).
+-- Lines the game marks secret can't be read and are left alone.
 local _, ns = ...
 
-local ipairs, gsub, tonumber, concat = ipairs, string.gsub, tonumber, table.concat
+local pairs, ipairs, gsub, tonumber, concat = pairs, ipairs, string.gsub, tonumber, table.concat
+local find, sub, type, _G = string.find, string.sub, type, _G
 
 local L = ns.L
 local Chat = ns.Chat
 
 local module = ns.NewModule("ShortChannelNames", L.SHORTCHANNELNAMES_DESC, {
     enabled = false,
-    style = "both",
+    style = "numberInitials",
+    chatTypes = true,
 })
 module.title = L.SHORTCHANNELNAMES_TITLE
 module.category = "chat"
@@ -25,8 +28,18 @@ module.options = {
         choices = {
             { "number", L.SHORTCHANNELNAMES_NUMBER },
             { "letter", L.SHORTCHANNELNAMES_LETTER },
+            { "initials", L.SHORTCHANNELNAMES_INITIALS },
+            { "name", L.SHORTCHANNELNAMES_NAME },
             { "both", L.SHORTCHANNELNAMES_BOTH },
+            { "numberInitials", L.SHORTCHANNELNAMES_NUMBER_INITIALS },
+            { "numberName", L.SHORTCHANNELNAMES_NUMBER_NAME },
         },
+    },
+    {
+        key = "chatTypes",
+        name = L.SHORTCHANNELNAMES_CHAT_TYPES,
+        description = L.SHORTCHANNELNAMES_CHAT_TYPES_DESC,
+        added = "0.9.0",
     },
 }
 
@@ -54,27 +67,101 @@ local function initials(name)
     return text ~= "" and text or nil
 end
 
+-- Each style's short form of a channel, from its number and full name: the part before the
+-- number's ". ", if any, and the part after it.
+local FORMS = {
+    number = function() return nil end,
+    letter = function(name) return name:match(FIRST_CHARACTER) end,
+    initials = initials,
+    name = function(name) return name:match("^(.-) %- ") or name end,
+}
+FORMS.both, FORMS.numberInitials, FORMS.numberName = FORMS.letter, FORMS.initials, FORMS.name
+local NUMBERED = { number = true, both = true, numberInitials = true, numberName = true }
+
+---A channel's short form in a style: [1], [G], [LFG], [General], [1. G], [1. LFG], or [1. General].
+---@param style string
+---@param number string
+---@param name string
+---@return string
+local function shortName(style, number, name)
+    local form = FORMS[style] or FORMS.number
+    local part = name ~= "" and form(name) or nil
+    if not part or part == "" then
+        return number
+    end
+    return NUMBERED[style] and number .. ". " .. part or part
+end
+
+-- Guild, party, raid, and the like: Blizzard's format string for the line, and our short name.
+-- The line starts with the format's part before the speaker ("|Hchannel:GUILD|h[Guild]|h"), in
+-- the client's language, so that part is what's swapped.
+local CHAT_TYPES = {
+    { "CHAT_GUILD_GET", L.SHORTCHANNELNAMES_GUILD },
+    { "CHAT_OFFICER_GET", L.SHORTCHANNELNAMES_OFFICER },
+    { "CHAT_PARTY_GET", L.SHORTCHANNELNAMES_PARTY },
+    { "CHAT_PARTY_LEADER_GET", L.SHORTCHANNELNAMES_PARTY_LEADER },
+    { "CHAT_PARTY_GUIDE_GET", L.SHORTCHANNELNAMES_PARTY_GUIDE },
+    { "CHAT_RAID_GET", L.SHORTCHANNELNAMES_RAID },
+    { "CHAT_RAID_LEADER_GET", L.SHORTCHANNELNAMES_RAID_LEADER },
+    { "CHAT_RAID_WARNING_GET", L.SHORTCHANNELNAMES_RAID_WARNING },
+    { "CHAT_INSTANCE_CHAT_GET", L.SHORTCHANNELNAMES_INSTANCE },
+    { "CHAT_INSTANCE_CHAT_LEADER_GET", L.SHORTCHANNELNAMES_INSTANCE_LEADER },
+}
+
+local prefixes -- { full, short } for each chat type this client has, made when first needed
+
+local function chatTypePrefixes()
+    if prefixes then
+        return prefixes
+    end
+    prefixes = {}
+    for _, entry in ipairs(CHAT_TYPES) do
+        local format = _G[entry[1]]
+        local full = type(format) == "string" and format:match("^(.-%])")
+        if full then
+            local short = (gsub(full, "%[[^%]]*%]", function()
+                return "[" .. entry[2] .. "]"
+            end, 1))
+            prefixes[#prefixes + 1] = { full, short }
+        end
+    end
+    return prefixes
+end
+
+---`text` with the first `from` in it, found as plain text, replaced by `to`.
+local function swap(text, from, to)
+    local first, last = find(text, from, 1, true)
+    if not first then
+        return text
+    end
+    return sub(text, 1, first - 1) .. to .. sub(text, last + 1)
+end
+
 -- The rendered link is |Hchannel:channel:5|h[5. General - Elwynn Forest]|h.
 local LINK = "(|Hchannel:channel:%d+|h%[)(%d+)%. ([^%]]-)(%]|h)"
 
----A chat line with its numbered channel link shortened.
+---A chat line with its numbered channel link, or its guild, party, or raid name, shortened.
 ---@param text string
 ---@return string
 local function rewrite(text)
-    return (gsub(text, LINK, function(open, number, name, close)
-        local letter = initials(name)
-        local short = number
-        if module.db.style == "letter" then
-            short = letter or number
-        elseif module.db.style == "both" and letter then
-            short = number .. ". " .. letter
+    if find(text, "|Hchannel:channel:", 1, true) then
+        return (gsub(text, LINK, function(open, number, name, close)
+            return open .. shortName(module.db.style, number, name) .. close
+        end))
+    end
+    if module.db.chatTypes then
+        for _, prefix in ipairs(chatTypePrefixes()) do
+            local short = swap(text, prefix[1], prefix[2])
+            if short ~= text then
+                return short
+            end
         end
-        return open .. short .. close
-    end))
+    end
+    return text
 end
 
 local function onMessage(frame, text)
-    if not (ns.IsReadable(text) and type(text) == "string" and text:find("|Hchannel:channel:", 1, true)) then
+    if not (ns.IsReadable(text) and type(text) == "string") then
         return
     end
     local short = rewrite(text)
@@ -103,28 +190,40 @@ end
 local SHORT_LINK = "(|Hchannel:channel:(%d+)|h%[)([^%]]-)(%]|h)"
 
 ---A chat line with its shortened channel link given its full name again, as the channel is named
----now. Only an inner text that is one of our short forms for that channel is replaced.
+---now, or its short guild, party, or raid name made whole. Only an inner text that is one of our
+---short forms for that channel is replaced.
 ---@param text string
 ---@return string
 local function restore(text)
-    return (gsub(text, SHORT_LINK, function(open, number, inner, close)
-        local _, name = GetChannelName(tonumber(number))
-        if type(name) ~= "string" or name == "" then
+    if find(text, "|Hchannel:channel:", 1, true) then
+        return (gsub(text, SHORT_LINK, function(open, number, inner, close)
+            local _, name = GetChannelName(tonumber(number))
+            if type(name) ~= "string" or name == "" then
+                return nil
+            end
+            -- Any style's form, since the style may have changed since the line was shortened.
+            for style in pairs(FORMS) do
+                if inner == shortName(style, number, name) then
+                    return open .. number .. ". " .. name .. close
+                end
+            end
             return nil
+        end))
+    end
+    for _, prefix in ipairs(chatTypePrefixes()) do
+        local full = swap(text, prefix[2], prefix[1])
+        if full ~= text then
+            return full
         end
-        local letter = initials(name)
-        if inner == number or inner == letter or (letter and inner == number .. ". " .. letter) then
-            return open .. number .. ". " .. name .. close
-        end
-        return nil
-    end))
+    end
+    return text
 end
 
 -- Lines already shortened get their names back, so turning the module off undoes it.
 function module:OnDisable()
     for _, frame in ipairs(Chat.Frames()) do
         Chat.Transform(frame, function(message)
-            return message:find("|Hchannel:channel:", 1, true) ~= nil and restore(message) ~= message
+            return restore(message) ~= message
         end, restore)
     end
 end
