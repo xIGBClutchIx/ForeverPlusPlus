@@ -224,6 +224,7 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 
 - Fast looting works the Retail way: `LOOT_READY`, then `LootSlot(i)` from `GetNumLootItems()` down to 1, when `autoLootDefault` differs from `IsModifiedClick("AUTOLOOTTOGGLE")`. **[addon]** (Leatrix_Plus `Leatrix_Plus.lua`, BleakfibersQuestTracker `SocialModule.lua`)
 - `CanMerchantRepair`, `GetRepairAllCost`, `RepairAllItems(guildBank)`, `CanGuildBankRepair` and `IsInGuild` are there. **[addon]** (Leatrix_Plus `Leatrix_Plus.lua`, repairs at `MERCHANT_SHOW`) `GetGuildBankWithdrawMoney` returning -1 for no limit, and a failed guild bank repair raising `UI_ERROR_MESSAGE` (the AutoRepair module's fallback to the player's own money), are Retail behavior and **Unverified** on Forever.
+- Forever's FrameXML shows an item's repair cost only with a merchant's repair cursor: `TooltipDataRules.FinalizeItemTooltip` adds `REPAIR_COST` and the coins from `tooltipData.repairCost` when `InRepairMode()`. **[source]** (Gethe/wow-ui-source `forever`, `Blizzard_SharedXMLGame/Tooltip/TooltipDataRules.lua`) Whether the client fills `repairCost` outside repair mode, for bag and equipped gear, is **Unverified**; Item Tooltips' Repair Cost relies on it. Probe: `/run local d=C_TooltipInfo.GetInventoryItem("player",5) print(d and d.repairCost)` with a damaged chest piece.
 
 ## Bags and the bank
 

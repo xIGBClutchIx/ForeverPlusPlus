@@ -13,6 +13,12 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_ADDED, {
+                { L.ADDONSLIST_TITLE, "The new AddOn Sets option (off by default) adds a Sets "
+                    .. "dropdown beside Disable All, to save which addons are on under a name and "
+                    .. "turn that set back on later." },
+                { L.ITEMTOOLTIPS_TITLE, "The new Repair Cost line (off by default) shows what "
+                    .. "repairing damaged gear costs, on gear you wear or carry, without a "
+                    .. "merchant's repair cursor." },
                 { L.QUESTGIVERLEVELS_TITLE, "A new module that shows each quest's level before its "
                     .. "name in a quest giver's list, like the quest log's [12]. On by default." },
                 { L.QUESTTRACKER_TITLE, "The new Current Zone Only option (off by default) tracks "

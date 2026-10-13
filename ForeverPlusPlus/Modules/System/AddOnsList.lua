@@ -3,13 +3,15 @@
 -- with addons you have enabled first and the disabled ones after, each group in name order. It
 -- changes only which rows the list's scroll box shows, so the rows, the checkboxes, and the
 -- Enable All / Disable All buttons are still Blizzard's. Turning it off gives Blizzard's own list
--- back at once.
-local _, ns = ...
+-- back at once. Its AddOn Sets option adds a Sets dropdown beside Disable All, to save which
+-- addons are on under a name and turn that list back on later.
+local addonName, ns = ...
 
-local _G, ipairs, type, pcall, sort, lower, find =
-    _G, ipairs, type, pcall, table.sort, string.lower, string.find
-local C_AddOns, UnitGUID, CreateTreeDataProvider, geterrorhandler =
-    C_AddOns, UnitGUID, CreateTreeDataProvider, geterrorhandler
+local _G, ipairs, pairs, next, type, pcall, sort, lower, find, match, format =
+    _G, ipairs, pairs, next, type, pcall, table.sort, string.lower, string.find, string.match,
+    string.format
+local C_AddOns, UnitGUID, CreateFrame, CreateTreeDataProvider, geterrorhandler =
+    C_AddOns, UnitGUID, CreateFrame, CreateTreeDataProvider, geterrorhandler
 
 local L = ns.L
 
@@ -18,6 +20,10 @@ local module = ns.NewModule("AddOnsList", L.ADDONSLIST_DESC, {
     enabledFirst = true, -- enabled addons above the disabled ones
     ungroup = false, -- disabled addons leave their group and sit with the other disabled ones
     notes = true, -- the search box also looks in an addon's notes
+    showSets = false, -- the Sets dropdown beside Disable All
+    -- Saved sets, account-wide: { [set name] = { [addon name] = true } }. By addon name, since an
+    -- addon's index changes when addons are added or removed.
+    sets = {},
 })
 module.title = L.ADDONSLIST_TITLE
 module.category = "system"
@@ -26,6 +32,7 @@ module.options = {
     { key = "enabledFirst", name = L.ADDONSLIST_ENABLEDFIRST, description = L.ADDONSLIST_ENABLEDFIRST_DESC },
     { key = "ungroup", name = L.ADDONSLIST_UNGROUP, description = L.ADDONSLIST_UNGROUP_DESC },
     { key = "notes", name = L.ADDONSLIST_NOTES, description = L.ADDONSLIST_NOTES_DESC },
+    { key = "showSets", name = L.ADDONSLIST_SETS, description = L.ADDONSLIST_SETS_DESC, added = "0.9.0" },
 }
 
 -- Blizzard_AddOnList makes AddonList with a ScrollBox of tree rows (each row's data is
@@ -192,6 +199,141 @@ local function rebuild()
     busy = false
 end
 
+-- AddOn sets ---------------------------------------------------------------------------------------
+
+local setsDropdown
+
+local function trim(text)
+    return match(text or "", "^%s*(.-)%s*$")
+end
+
+local function isOn(index, character)
+    local none = Enum and Enum.AddOnEnableState and Enum.AddOnEnableState.None or 0
+    return C_AddOns.GetAddOnEnableState(index, character) > none
+end
+
+-- Blizzard redraws the checkboxes, and turns Okay into Reload UI when anything changed.
+local function refreshList()
+    if type(_G.AddonList_Update) == "function" then
+        _G.AddonList_Update()
+    end
+end
+
+---Saves the addons on for the character the list shows (all characters for All) as `name`,
+---replacing a set of that name.
+local function saveSet(name)
+    local character = selectedCharacter(addList())
+    local set = {}
+    for index = 1, C_AddOns.GetNumAddOns() do
+        if isOn(index, character) then
+            set[(C_AddOns.GetAddOnInfo(index))] = true
+        end
+    end
+    module.db.sets[name] = set
+    ns.Print(format(L.ADDONSLIST_SETS_SAVED, name))
+end
+
+---Turns on the set's addons and turns off the rest, for the character the list shows, like
+---checking the boxes by hand: nothing changes until Okay, and Cancel undoes it. Forever++ stays on,
+---so the sets are still there next time.
+local function applySet(name)
+    local set = module.db.sets[name]
+    if not set then
+        return
+    end
+    local character = selectedCharacter(addList())
+    local installed = {}
+    for index = 1, C_AddOns.GetNumAddOns() do
+        local addon = C_AddOns.GetAddOnInfo(index)
+        installed[addon] = true
+        if set[addon] or addon == addonName then
+            C_AddOns.EnableAddOn(index, character)
+        else
+            C_AddOns.DisableAddOn(index, character)
+        end
+    end
+    local missing = 0
+    for addon in pairs(set) do
+        if not installed[addon] then
+            missing = missing + 1
+        end
+    end
+    refreshList()
+    if missing > 0 then
+        ns.Print(format(L.ADDONSLIST_SETS_MISSING, name, missing))
+    end
+end
+
+local function promptSave()
+    ns.Prompt("ADDONSLIST_SETS_SAVE", L.ADDONSLIST_SETS_SAVE_PROMPT, "", function(text)
+        local name = trim(text)
+        if name == "" then
+            return
+        end
+        if module.db.sets[name] then
+            ns.Confirm("ADDONSLIST_SETS_REPLACE", L.ADDONSLIST_SETS_REPLACE_CONFIRM, function()
+                saveSet(name)
+            end, name)
+        else
+            saveSet(name)
+        end
+    end)
+end
+
+local function deleteSet(name)
+    ns.Confirm("ADDONSLIST_SETS_DELETE", L.ADDONSLIST_SETS_DELETE_CONFIRM, function()
+        module.db.sets[name] = nil
+    end, name)
+end
+
+local function setNames()
+    local names = {}
+    for name in pairs(module.db.sets) do
+        names[#names + 1] = name
+    end
+    sort(names, function(a, b)
+        return lower(a) < lower(b)
+    end)
+    return names
+end
+
+-- Click a set to apply it; save and delete under a divider.
+local function setupSetsMenu(_, root)
+    local names = setNames()
+    if #names == 0 then
+        root:CreateTitle(L.ADDONSLIST_SETS_NONE)
+    end
+    for _, name in ipairs(names) do
+        root:CreateButton(name, applySet, name)
+    end
+    root:CreateDivider()
+    root:CreateButton(L.ADDONSLIST_SETS_SAVE, promptSave)
+    if next(module.db.sets) then
+        local delete = root:CreateButton(L.ADDONSLIST_SETS_DELETE)
+        for _, name in ipairs(names) do
+            delete:CreateButton(name, deleteSet, name)
+        end
+    end
+end
+
+-- Shows the Sets dropdown while the module and its option are on, made the first time.
+local function updateSets()
+    local list = addList()
+    local want = module.enabled and module.db.showSets and list
+    if want and not setsDropdown and WowStyle1DropdownMixin and list.DisableAllButton then
+        -- Probe: WowStyle1DropdownTemplate is Mainline's menu dropdown, the one the list's own
+        -- character dropdown uses. It fits in the gap between Disable All and Okay.
+        setsDropdown = CreateFrame("DropdownButton", nil, list, "WowStyle1DropdownTemplate")
+        setsDropdown:SetWidth(130)
+        setsDropdown:SetPoint("LEFT", list.DisableAllButton, "RIGHT", 8, 0)
+        setsDropdown:SetDefaultText(L.ADDONSLIST_SETS_BUTTON)
+        setsDropdown:SetupMenu(setupSetsMenu)
+    end
+    if setsDropdown then
+        setsDropdown:SetShown(want and true or false)
+    end
+end
+
 local function start()
     local list = addList()
     if not list then
@@ -200,6 +342,7 @@ local function start()
     module:Hook("AddonList_Update", rebuild)
     module:HookScript(list.SearchBox, "OnTextChanged", rebuild)
     module:HookScript(list, "OnShow", rebuild)
+    updateSets()
     rebuild()
 end
 
@@ -209,14 +352,20 @@ end
 
 function module:OnDisable()
     ns.AddOns.Cancel(ADDON, start)
+    updateSets()
     -- Blizzard's own update puts its categories back.
-    if addList() and type(_G.AddonList_Update) == "function" then
-        _G.AddonList_Update()
+    if addList() then
+        refreshList()
     end
 end
 
-function module:OnOptionChanged()
-    if self.enabled then
+function module:OnOptionChanged(key)
+    if not self.enabled then
+        return
+    end
+    if key == "showSets" then
+        updateSets()
+    else
         rebuild()
     end
 end

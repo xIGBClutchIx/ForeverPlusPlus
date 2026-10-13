@@ -6,8 +6,8 @@ local StaticPopupDialogs, StaticPopup_Show, YES, NO = StaticPopupDialogs, Static
 local CANCEL, ACCEPT, CLOSE = CANCEL, ACCEPT, CLOSE
 
 -- Shows our popup for `key`, made from `build()` the first time the key is used, so a key always
--- asks the same question and does the same thing.
-local function show(key, build, data)
+-- has the same buttons. `textArg` fills a %s in its text.
+local function show(key, build, data, textArg)
     local which = "FOREVERPLUSPLUS_" .. key
     if not StaticPopupDialogs[which] then
         local dialog = build()
@@ -17,15 +17,16 @@ local function show(key, build, data)
         dialog.preferredIndex = 3 -- clear of the popups the game's own UI uses
         StaticPopupDialogs[which] = dialog
     end
-    StaticPopup_Show(which, nil, nil, data)
+    StaticPopup_Show(which, textArg, nil, data)
 end
 
----Asks the player to confirm, then calls `onAccept`. The same `key` always asks the same question
----and does the same thing: the popup is made the first time it's used.
+---Asks the player to confirm, then calls `onAccept`. The same `key` always asks the same question:
+---the popup is made the first time it's used. `textArg` fills a %s in `text`, such as a name.
 ---@param key string a name for this question, such as "AUCTIONPRICES_RESET"
 ---@param text string the question
 ---@param onAccept function
-function ns.Confirm(key, text, onAccept)
+---@param textArg? string
+function ns.Confirm(key, text, onAccept, textArg)
     -- Probe: StaticPopup is Blizzard's confirmation dialog; without it, just do it.
     if not (StaticPopupDialogs and StaticPopup_Show) then
         onAccept()
@@ -36,11 +37,12 @@ function ns.Confirm(key, text, onAccept)
             text = text,
             button1 = YES,
             button2 = NO,
-            OnAccept = function()
-                onAccept()
+            -- This call's function, not the first one's, since the popup is made only once.
+            OnAccept = function(_, data)
+                data.onAccept()
             end,
         }
-    end)
+    end, { onAccept = onAccept }, textArg)
 end
 
 ---Asks the player to pick one of two things or cancel, laid out like Blizzard's own Defaults popup
