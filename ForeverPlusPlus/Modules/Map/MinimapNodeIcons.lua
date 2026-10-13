@@ -10,8 +10,9 @@
 --     that read the same name is a dot, at the patch's middle. A zoom finds them all at once.
 --   - Following: every frame, each dot found is probed again along a short line across it and one
 --     up through it, and its icon goes to the middle of what reads its name. So an icon stays on
---     its dot as the player moves, turns, or zooms, without working out yards or facing, and a dot
---     that stops answering (gathered, or out of range) loses its icon.
+--     its dot as the player moves or turns, without working out yards or facing, and a dot that
+--     stops answering (gathered, or out of range) loses its icon. On a zoom, each icon first moves
+--     by the change in the minimap's view radius, which keeps it near enough for following.
 -- Probing stops in combat and while the cursor is on the minimap, where the game's own mouseover
 -- and tooltip (which the icons let through) are the player's.
 --
@@ -565,7 +566,38 @@ local function draw()
     hidePins(shown + 1)
 end
 
+-- The yards from the minimap's center to its edge, or nil when it can't be read.
+local function viewRadius()
+    local radius = C_Minimap.GetViewRadius and C_Minimap.GetViewRadius()
+    if radius and readable(radius) and type(radius) == "number" and radius > 0 then
+        return radius
+    end
+end
+
+local lastRadius
+
+-- When the zoom changes, every dot moves toward or away from the center by the change in yards
+-- shown: move the icons the same way at once, so they stay on their dots through the zoom, and
+-- following then fixes what's left. Read every frame, since the radius may change a frame after
+-- the zoom event.
+local function followZoom()
+    local radius = viewRadius()
+    if radius and lastRadius and radius ~= lastRadius then
+        local k = lastRadius / radius
+        for i = #nodes, 1, -1 do
+            local node = nodes[i]
+            node.right, node.up = node.right * k, node.up * k
+            if not inside(node.right, node.up) then
+                tremove(nodes, i)
+            end
+        end
+        findAll = true
+    end
+    lastRadius = radius
+end
+
 local function onUpdate()
+    followZoom()
     if not tracking or InCombatLockdown() then
         -- In combat the dots aren't followed, so their icons would be left behind.
         hidePins()
@@ -623,9 +655,10 @@ local function onSkill()
     end
 end
 
--- A zoom moves every dot further than following reaches: find them all again at once.
+-- A zoom moves every dot further than following reaches. Each icon moves with it straight away
+-- (see followZoom), and the whole minimap is looked over again for dots the zoom brought in.
 local function onZoom()
-    nodes, findAll = {}, true
+    findAll = true
 end
 
 -- /fpp nodes ----------------------------------------------------------------------------------------
