@@ -8,8 +8,10 @@
 --       cvars = { { names = { "cvarName", "olderName" }, value = "1" }, ... },
 --       style = { NameColor = fn, Subtitle = fn, SubtitleColor = fn, icons = bool },
 --       OnEnable = fn(module), -- optional: more to do when the module turns on
+--       Skip = fn(unit),       -- optional: true leaves this unit's plate to Blizzard
 --   })
 --   plates:Refresh() -- after a setting the plates draw from changed
+--   plates:Recheck() -- after a setting Skip reads changed
 --
 -- New gives the module its OnEnable, OnDisable and OnOptionChanged (unless it has its own
 -- OnDisable or OnOptionChanged). The module's settings come from FriendlyPlates.Defaults: they
@@ -196,6 +198,10 @@ function FriendlyPlates.New(module, spec)
     self.onAdded = function(unit, frame) self:Add(unit, frame) end
     self.onRemoved = function(unit) self:Remove(unit) end
     self.onUnitEvent = function(event, unit)
+        -- A unit can come under a player's control (or leave it) with the plate still up.
+        if event == "UNIT_FLAGS" and spec.Skip then
+            self.onFaction(event, unit)
+        end
         if self.records[unit] then
             if event == "UNIT_NAME_UPDATE" or event == "UNIT_LEVEL" then
                 self:Layout(unit)
@@ -241,6 +247,7 @@ function FriendlyPlates.New(module, spec)
     end
     module.OnOptionChanged = module.OnOptionChanged or function(mod)
         if mod.enabled then
+            self:Recheck()
             self:Refresh()
         end
     end
@@ -289,14 +296,25 @@ FriendlyPlates.SUBTITLE_COLORS = {
 }
 
 -- Whether this is one of ours: a friendly player (or NPC). The personal resource display is a
--- friendly player too, so leave out ourselves. Nil when the game won't say (secret values).
+-- friendly player too, so leave out ourselves, and any the module's Skip turns down (one it can't
+-- tell about stays ours). Nil when the game won't say (secret values).
 function Plates:IsOurs(unit)
     local isPlayer, isFriend, isSelf = UnitIsPlayer(unit), UnitIsFriend("player", unit),
         UnitIsUnit(unit, "player")
     if not (readable(isPlayer) and readable(isFriend) and readable(isSelf)) then
         return nil
     end
-    return isFriend and not isSelf and (isPlayer and true or false) == self.spec.players
+    if not (isFriend and not isSelf and (isPlayer and true or false) == self.spec.players) then
+        return false
+    end
+    return not (self.spec.Skip and self.spec.Skip(unit))
+end
+
+---Takes over or gives back each plate on screen, after a setting the module's Skip reads changed.
+function Plates:Recheck()
+    if self.spec.Skip then
+        Nameplates.ForEach(function(unit) self.onFaction(nil, unit) end)
+    end
 end
 
 function Plates:Layout(unit)

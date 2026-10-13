@@ -1,5 +1,6 @@
 -- NPC Nameplates: friendly NPCs always show their name, with their title (<Innkeeper>) and level
--- beside it, and the health bar only shows while they're hurt or in combat.
+-- beside it, and the health bar only shows while they're hurt or in combat. Players' pets and
+-- summons keep Blizzard's plate unless Skip Pets and Summons is off.
 -- The plates themselves are ns.FriendlyPlates; this module picks the colors and the title line.
 local _, ns = ...
 
@@ -10,12 +11,18 @@ local module = ns.NewModule("NpcNameplates", L.NPCNAMEPLATES_DESC, ns.FriendlyPl
     nameColor = "green", -- "green" (as in the world) or "white"
     titles = "always", -- "always", "hidden" (only without the bar), or "off"
     titleColor = "name", -- "name" (the name's color), "gray", or "green"
+    skipSummons = true, -- leave players' pets, guardians, totems, and companions to Blizzard
 }))
 module.title = L.NPCNAMEPLATES_TITLE
 module.category = "units"
 
 -- Laid out like Player Nameplates: general, the name, then the title line.
 module.options = ns.FriendlyPlates.Options(L.NPCNAMEPLATES_BAR_WHEN_HURT_DESC, {
+    {
+        key = "skipSummons", name = L.NPCNAMEPLATES_SKIP_SUMMONS,
+        description = L.NPCNAMEPLATES_SKIP_SUMMONS_DESC, section = L.PLATES_SECTION_GENERAL,
+        added = "0.9.0",
+    },
     {
         key = "nameColor", name = L.PLATES_NAME_COLOR, description = L.NPCNAMEPLATES_NAME_COLOR_DESC,
         choices = { { "green", L.PLATES_COLOR_GREEN }, { "white", L.PLATES_COLOR_WHITE } },
@@ -82,4 +89,9 @@ ns.FriendlyPlates.New(module, {
         { names = SHOW_NPCS, value = "1" },
     },
     style = style,
+    -- A player's pet or summon has the player's name in its title ("Cameron's Minion"), which
+    -- reads as clutter on a name-only plate.
+    Skip = function(unit)
+        return module.db.skipSummons and Units.IsSummon(unit)
+    end,
 })

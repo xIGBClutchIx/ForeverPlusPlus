@@ -1,5 +1,5 @@
 -- Who a unit is to the player: in their group, on their friends list, a recent ally, in their guild,
--- and an NPC's title. Friends and guildmates can also be checked by name. Identity can be secret (mostly in instances), and a value we can't read counts
+-- someone's pet or summon, and an NPC's title. Friends and guildmates can also be checked by name. Identity can be secret (mostly in instances), and a value we can't read counts
 -- as "no".
 local _, ns = ...
 
@@ -7,6 +7,7 @@ local UnitInParty, UnitInRaid, UnitGUID, UnitIsInMyGuild = UnitInParty, UnitInRa
 local C_FriendList, C_BattleNet, C_TooltipInfo, type = C_FriendList, C_BattleNet, C_TooltipInfo, type
 local C_RecentAllies, C_GuildInfo, IsInGuild, IsGuildMember = C_RecentAllies, C_GuildInfo, IsInGuild, IsGuildMember
 local BNGetNumFriends, GetNumGuildMembers, GetGuildRosterInfo = BNGetNumFriends, GetNumGuildMembers, GetGuildRosterInfo
+local UnitPlayerControlled, UnitCreatureType, UnitIsOtherPlayersPet = UnitPlayerControlled, UnitCreatureType, UnitIsOtherPlayersPet
 
 local readable = ns.IsReadable
 
@@ -145,6 +146,37 @@ function Units.IsGuildmateName(name)
         if bare((GetGuildRosterInfo(i))) == want then
             return true
         end
+    end
+    return false
+end
+
+-- Creature types that are always someone's summon (UnitCreatureType's second value on Mainline).
+local SUMMON_TYPES = {
+    [11] = true, -- Totem
+    [12] = true, -- Non-combat Pet (companions)
+}
+
+---Whether the unit is a player's pet, minion, guardian, totem, or companion rather than an NPC of
+---its own. Nil when the game won't say (secret values).
+---@param unit string
+---@return boolean?
+function Units.IsSummon(unit)
+    local controlled = UnitPlayerControlled(unit)
+    if readable(controlled) and controlled then
+        return true
+    end
+    if UnitIsOtherPlayersPet then
+        local pet = UnitIsOtherPlayersPet(unit)
+        if readable(pet) and pet then
+            return true
+        end
+    end
+    local _, kind = UnitCreatureType(unit)
+    if readable(kind) and type(kind) == "number" and SUMMON_TYPES[kind] then
+        return true
+    end
+    if not readable(controlled) then
+        return nil
     end
     return false
 end

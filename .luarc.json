@@ -251,6 +251,7 @@
     "UnitIsTapDenied",
     "CreateColor",
     "UnitCreatureType",
+    "UnitIsOtherPlayersPet",
     "UnitCanAttack",
     "QuestDifficultyColors",
     "MinimalSliderWithSteppersMixin",
