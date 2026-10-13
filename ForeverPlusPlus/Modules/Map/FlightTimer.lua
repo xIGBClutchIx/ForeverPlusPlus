@@ -6,7 +6,7 @@
 -- for the whole account, since a flight is the same for every character.
 local _, ns = ...
 
-local ipairs, floor, max, min = ipairs, math.floor, math.max, math.min
+local ipairs, floor, format, max, min = ipairs, math.floor, string.format, math.max, math.min
 local C_TaxiMap, Enum, GetTime, UnitOnTaxi = C_TaxiMap, Enum, GetTime, UnitOnTaxi
 local CreateFrame, UIParent, GameTooltip = CreateFrame, UIParent, GameTooltip
 
@@ -16,6 +16,7 @@ local module = ns.NewModule("FlightTimer", L.FLIGHTTIMER_DESC, {
     enabled = true,
     bar = true,
     tooltip = true,
+    tooltipStyle = "double", -- "double" (label left, time right), "line", or "gray" (one line)
     scale = 100, -- percent
     x = 0, -- the bar's offset from the center of the screen
     y = 250,
@@ -28,6 +29,15 @@ module.category = "map"
 module.options = {
     { key = "bar", name = L.FLIGHTTIMER_BAR, description = L.FLIGHTTIMER_BAR_DESC },
     { key = "tooltip", name = L.FLIGHTTIMER_TOOLTIP, description = L.FLIGHTTIMER_TOOLTIP_DESC },
+    {
+        key = "tooltipStyle", name = L.FLIGHTTIMER_STYLE, description = L.FLIGHTTIMER_STYLE_DESC,
+        requires = "tooltip", added = "0.9.0",
+        choices = {
+            { "double", L.FLIGHTTIMER_STYLE_DOUBLE },
+            { "line", L.FLIGHTTIMER_STYLE_LINE },
+            { "gray", L.FLIGHTTIMER_STYLE_GRAY },
+        },
+    },
 }
 
 local WIDTH, HEIGHT = 208, 16 -- about Blizzard's cast bar
@@ -229,7 +239,14 @@ local function onTooltipShow(tooltip)
         return
     end
     adding = true
-    tooltip:AddDoubleLine(L.FLIGHTTIMER_TIME, clock(time), 1, 1, 1, 1, 1, 1)
+    local style = module.db.tooltipStyle
+    if style == "line" then
+        tooltip:AddLine(format(L.FLIGHTTIMER_TIME_LINE, clock(time)), 1, 1, 1)
+    elseif style == "gray" then
+        tooltip:AddLine(format(L.FLIGHTTIMER_TIME_LINE, clock(time)), 0.5, 0.5, 0.5)
+    else
+        tooltip:AddDoubleLine(L.FLIGHTTIMER_TIME, clock(time), 1, 1, 1, 1, 1, 1)
+    end
     tooltip:Show() -- to fit the new line
     adding = false
 end
