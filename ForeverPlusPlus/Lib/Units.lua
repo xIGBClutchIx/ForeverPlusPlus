@@ -5,7 +5,7 @@ local _, ns = ...
 
 local UnitInParty, UnitInRaid, UnitGUID, UnitIsInMyGuild = UnitInParty, UnitInRaid, UnitGUID, UnitIsInMyGuild
 local C_FriendList, C_BattleNet, C_TooltipInfo, type = C_FriendList, C_BattleNet, C_TooltipInfo, type
-local C_RecentAllies, C_GuildInfo, IsInGuild = C_RecentAllies, C_GuildInfo, IsInGuild
+local C_RecentAllies, C_GuildInfo, IsInGuild, IsGuildMember = C_RecentAllies, C_GuildInfo, IsInGuild, IsGuildMember
 local BNGetNumFriends, GetNumGuildMembers, GetGuildRosterInfo = BNGetNumFriends, GetNumGuildMembers, GetGuildRosterInfo
 
 local readable = ns.IsReadable
@@ -25,8 +25,14 @@ end
 ---@param unit string
 ---@return boolean
 function Units.IsFriend(unit)
-    local guid = UnitGUID(unit)
-    if not (readable(guid) and guid) then
+    return Units.IsFriendGUID(UnitGUID(unit))
+end
+
+---Whether the player with this GUID is on the player's friends list or a Battle.net friend.
+---@param guid string?
+---@return boolean
+function Units.IsFriendGUID(guid)
+    if not (readable(guid) and type(guid) == "string" and guid ~= "") then
         return false
     end
     if C_FriendList and C_FriendList.IsFriend and C_FriendList.IsFriend(guid) then
@@ -34,6 +40,18 @@ function Units.IsFriend(unit)
     end
     return C_BattleNet and C_BattleNet.GetAccountInfoByGUID
         and C_BattleNet.GetAccountInfoByGUID(guid) ~= nil or false
+end
+
+---Whether the player with this GUID is in the player's guild. Asks the server, so unlike
+---IsGuildmateName it doesn't need the guild roster loaded.
+---@param guid string?
+---@return boolean
+function Units.IsGuildmateGUID(guid)
+    if not (IsGuildMember and readable(guid) and type(guid) == "string" and guid ~= "") then
+        return false
+    end
+    local mate = IsGuildMember(guid)
+    return readable(mate) and mate and true or false
 end
 
 -- Fire when the recent allies list loads or changes. We can't ask for the list ourselves:

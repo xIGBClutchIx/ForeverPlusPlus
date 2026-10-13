@@ -33,8 +33,16 @@ local function who(name)
     return L.AUTODECLINE_SOMEONE
 end
 
-local function isAllowed(name)
-    return module.db.allowFriends and ns.IsReadable(name) and type(name) == "string"
+-- By GUID when the event gives one (a party invite does), which needs no guild roster loaded;
+-- otherwise (a duel) by name.
+local function isAllowed(name, guid)
+    if not module.db.allowFriends then
+        return false
+    end
+    if Units.IsFriendGUID(guid) or Units.IsGuildmateGUID(guid) then
+        return true
+    end
+    return ns.IsReadable(name) and type(name) == "string"
         and (Units.IsFriendName(name) or Units.IsGuildmateName(name))
 end
 
@@ -52,9 +60,9 @@ end
 
 -- Blizzard_Game shows the invite popup (a group finder invite: LFGInvitePopup) on the same event,
 -- before ours runs, so a declined invite's popup is up for an instant and is closed here. An
--- allowed inviter keeps Blizzard's popup as it is.
-local function onInvite(_, name)
-    if isAllowed(name) then
+-- allowed inviter keeps Blizzard's popup as it is. The seventh value is the inviter's GUID.
+local function onInvite(_, name, _, _, _, _, _, guid)
+    if isAllowed(name, guid) then
         return
     end
     DeclineGroup()
