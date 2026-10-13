@@ -39,6 +39,7 @@ module.options = {
 
 local PAD = 10 -- between the text and the box's edge
 local ICON = 14 -- a currency's icon, about the size of the text
+local HINT_WIDTH = 200 -- the hint shown with nothing to show wraps at this width
 local MAX_CURRENCIES = 10 -- far more than the Backpack's three, in case Forever allows more
 
 local frame
@@ -79,11 +80,20 @@ local function update()
         return
     end
     local list = parts()
-    frame.text:SetText(tconcat(list, module.db.vertical and "\n" or "   "))
+    local text = frame.text
+    if #list == 0 then
+        -- Nothing to show: say how to fill it, instead of an empty box.
+        text:SetWidth(HINT_WIDTH)
+        text:SetText(Colors.Code(0.8, 0.8, 0.8) .. L.CURRENCYBAR_HINT .. "|r")
+    else
+        text:SetWidth(0)
+        text:SetText(tconcat(list, module.db.vertical and "\n" or "   "))
+    end
+    local width = #list == 0 and HINT_WIDTH or text:GetStringWidth()
     local scale = module.db.scale / 100
     frame.inner:SetScale(scale)
-    frame:SetSize(max(frame.text:GetStringWidth(), 24) * scale + PAD * 2,
-        max(frame.text:GetStringHeight(), 12) * scale + PAD * 2)
+    frame:SetSize(max(width, 24) * scale + PAD * 2,
+        max(text:GetStringHeight(), 12) * scale + PAD * 2)
 end
 
 local function place()
