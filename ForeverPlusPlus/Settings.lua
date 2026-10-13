@@ -1518,7 +1518,9 @@ end
 
 local function buildAbout(frame)
     ns.AddPageTitle(frame, L.ABOUT)
-    ns.SetWelcome(false) -- the NEW tag on the Minimap Button can go
+    -- The NEW tag on the Minimap Button can go. On every show, since Reset Welcome sets it again.
+    ns.SetWelcome(false)
+    frame:HookScript("OnShow", function() ns.SetWelcome(false) end)
     addPageDefaults(frame)
 
     local icon = frame:CreateTexture(nil, "ARTWORK")
