@@ -157,7 +157,7 @@ L.PRICE_INFO_LINE = "%s:" -- line name, on a price-style line with text instead 
 
 -- BagSlotCounter
 L.BAGSLOTCOUNTER_TITLE = "Bag Slot Counter"
-L.BAGSLOTCOUNTER_DESC = "Show how many bag slots are free on the bag buttons."
+L.BAGSLOTCOUNTER_DESC = "Show how many bag slots are free on the bag buttons: orange when 4 or fewer are left, red when none are."
 L.BAGSLOTCOUNTER_SECTION_COUNT = "Free Slots"
 L.BAGSLOTCOUNTER_SECTION_TEXT = "Text"
 L.BAGSLOTCOUNTER_SHOW = "Show Free Slots"
@@ -250,7 +250,7 @@ L.WAYLAIDCRATES_NO_PRICE = "No price"
 L.WAYLAIDCRATES_LIST = "Auction House Category"
 L.WAYLAIDCRATES_LIST_DESC = "Add a Waylaid Crates entry to the auction house's categories, at the "
     .. "top or the bottom. It lists every item your crates still need, one row each: the bundles "
-    .. "they take, less what's already in your bags."
+    .. "they take, less what's already in your bags and bank."
 L.WAYLAIDCRATES_LIST_OFF = "Off"
 L.WAYLAIDCRATES_LIST_TOP = "Top of the List"
 L.WAYLAIDCRATES_LIST_BOTTOM = "Bottom of the List"

@@ -11,7 +11,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Forever Quest Icons**: the new Quest Details option (on by default) puts the icon after the quest's name at the top of its details, in the quest window and on the map.
 - **Quest Levels**: a new module that shows a quest's level before its name, like the quest log's [12], in a quest giver's list and at the top of the quest's details. On by default.
 - **Quest Tracker**: the new Current Zone Only option (off by default) tracks only the quests of the zone you're in, and tracks the others again when you get there. The quest your map follows always shows.
-- **Waylaid Crates**: a new module for filling Waylaid Crates. Its Waylaid Crates entry in the auction house's categories lists every item your crates still need, less what's already in your bags.
+- **Waylaid Crates**: a new module for filling Waylaid Crates. Its Waylaid Crates entry in the auction house's categories lists every item your crates still need, less what's already in your bags and bank.
 - **XP Bar Text**: the new Fill Bar with Ready Quests option (off by default) fills the experience bar on from your XP in green with what your quests ready to turn in will give, like rested XP.
 - **XP Bar Text**: the new Detailed Tooltip option (on by default) adds to the bar's tooltip the XP left to level, your rested XP, the XP of your quests, and your XP per hour and time to level since you logged in.
 - **XP Bar Text**: the new Green When Quests Level You option (on by default) turns off the green quest XP text shown once turning those quests in would level you.
@@ -28,6 +28,13 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Commands**: `/fpp reset` asks first, and module names in `/fpp` match their titles, such as `/fpp toggle BagSlotCounter`.
 - **Chat Copy**: copies everything the chat window holds. The Lines slider is gone, since a window keeps only its last 128 lines.
 - **Chat History**: Lines Saved goes up to 125, about all a chat window holds.
+- **Already Known**: the Loot option also marks known items on group loot rolls, before you choose Need or Greed.
+- **Auto Sell Junk**: Keep Everything Buyable Back sells only as much junk as the buyback list has room for beside what you sold yourself, so an item sold by mistake stays buyable.
+- **Bag Slot Counter**: the count turns orange when 4 or fewer slots are free.
+- **Currency Bar**: with nothing to show, it says how to track currencies instead of showing an empty box.
+- **Error Catcher**: says on its Settings page, instead of in chat, when another addon such as BugGrabber is catching Lua errors, and leaves Blizzard's error window and blocked action popup to it.
+- **Flight Timer**: the flight map tooltip's Flight Time line looks like the Sell Price line, with the time at the right.
+- **Short Channel Names**: the Letter style is now Initials, so Local Defense and Looking For Group show as [LD] and [LFG].
 
 ### Fixed
 
@@ -43,6 +50,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Buff Timers**: Edit Mode's example buffs and debuffs don't keep an old clock.
 - **Class Colors**: turning name backgrounds off puts back the target frame's own color.
 - **Auto Weapon Buff**: right-clicking a stone or oil in your bags at the guild bank deposits it instead of putting it on your weapon.
+- **Auto Decline**: Allow Friends and Guild lets party invites from guildmates through even before your guild roster has loaded.
 
 ## 0.8.4 (2026-10-11)
 

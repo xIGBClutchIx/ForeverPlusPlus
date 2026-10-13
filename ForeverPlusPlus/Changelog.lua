@@ -30,7 +30,7 @@ ns.changelog = {
                     .. "get there. The quest your map follows always shows." },
                 { L.WAYLAIDCRATES_TITLE, "A new module for filling Waylaid Crates. Its Waylaid "
                     .. "Crates entry in the auction house's categories lists every item your crates "
-                    .. "still need, less what's already in your bags." },
+                    .. "still need, less what's already in your bags and bank." },
                 { L.XPBARTEXT_TITLE, "The new Fill Bar with Ready Quests option (off by default) fills the "
                     .. "experience bar on from your XP in green with what your quests ready to turn "
                     .. "in will give, like rested XP." },
@@ -65,6 +65,21 @@ ns.changelog = {
                 { L.CHATCOPY_TITLE, "Copies everything the chat window holds. The Lines slider is "
                     .. "gone, since a window keeps only its last 128 lines." },
                 { L.CHATHISTORY_TITLE, "Lines Saved goes up to 125, about all a chat window holds." },
+                { L.ALREADYKNOWN_TITLE, "The Loot option also marks known items on group loot "
+                    .. "rolls, before you choose Need or Greed." },
+                { L.AUTOSELLJUNK_TITLE, "Keep Everything Buyable Back sells only as much junk as "
+                    .. "the buyback list has room for beside what you sold yourself, so an item "
+                    .. "sold by mistake stays buyable." },
+                { L.BAGSLOTCOUNTER_TITLE, "The count turns orange when 4 or fewer slots are free." },
+                { L.CURRENCYBAR_TITLE, "With nothing to show, it says how to track currencies "
+                    .. "instead of showing an empty box." },
+                { L.ERRORCATCHER_TITLE, "Says on its Settings page, instead of in chat, when "
+                    .. "another addon such as BugGrabber is catching Lua errors, and leaves "
+                    .. "Blizzard's error window and blocked action popup to it." },
+                { L.FLIGHTTIMER_TITLE, "The flight map tooltip's Flight Time line looks like the "
+                    .. "Sell Price line, with the time at the right." },
+                { L.SHORTCHANNELNAMES_TITLE, "The Letter style is now Initials, so Local Defense "
+                    .. "and Looking For Group show as [LD] and [LFG]." },
             } },
             { L.CHANGELOG_FIXED, {
                 { L.XPBARTEXT_TITLE, "Blizzard's own XP text no longer shows through under ours "
@@ -94,6 +109,8 @@ ns.changelog = {
                     .. "own color." },
                 { L.AUTOWEAPONBUFF_TITLE, "Right-clicking a stone or oil in your bags at the guild "
                     .. "bank deposits it instead of putting it on your weapon." },
+                { L.AUTODECLINE_TITLE, "Allow Friends and Guild lets party invites from "
+                    .. "guildmates through even before your guild roster has loaded." },
             } },
         },
     },
