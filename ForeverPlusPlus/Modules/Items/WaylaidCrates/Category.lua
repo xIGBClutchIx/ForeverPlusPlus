@@ -1,7 +1,7 @@
 -- Waylaid Crates' auction house category: a Waylaid Crates row at the top or bottom of the auction
 -- house's category list that fills Blizzard's browse list with every item the crates in your bags
 -- still need, one row each, the way the Favorites star lists your favorites. What's still needed
--- is every crate's bundles added up, less what's already in your bags. Items are found by name.
+-- is every crate's bundles added up, less what's already in your bags and bank. Items are found by name.
 --
 -- The rows come from C_AuctionHouse.SearchForItemKeys: Blizzard's browse list shows whatever
 -- browse results arrive, whoever asked for them. A real category would mean adding to Blizzard's
@@ -61,7 +61,8 @@ local function readCrates()
     end
     for _, name in ipairs(names) do
         local itemID = ns.Prices.ItemByName(name)
-        local still = wanted[name] - (itemID and C_Item.GetItemCount(itemID) or 0)
+        -- What's in the bank counts too: it needn't be bought.
+        local still = wanted[name] - (itemID and C_Item.GetItemCount(itemID, true) or 0)
         if still > 0 then
             needs[#needs + 1] = { name = name, count = still, itemID = itemID }
         end
