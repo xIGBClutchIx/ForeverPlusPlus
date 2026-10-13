@@ -62,10 +62,20 @@ end
 
 local events = CreateFrame("Frame")
 local handlers = {} -- event -> list of functions
+-- Handler -> the module that added it with module:On, for the Profiler page (Lib/Profiler.lua).
+local owners = setmetatable({}, { __mode = "k" })
 
 events:SetScript("OnEvent", function(_, event, ...)
     local list = handlers[event]
     if not list then
+        return
+    end
+    local profiler = ns.Profiler
+    if profiler and profiler.recording then
+        for i = 1, #list do
+            local fn = list[i]
+            profiler.Call(owners[fn], call, fn, event, ...)
+        end
         return
     end
     for i = 1, #list do
@@ -231,6 +241,7 @@ Module.__index = Module
 function Module:On(event, fn)
     self.events = self.events or {}
     self.events[#self.events + 1] = { event, fn }
+    owners[fn] = owners[fn] or self
     ns.On(event, fn)
 end
 
@@ -265,7 +276,12 @@ local function hookOnce(module, target, method, fn, install)
         byFn[fn] = true
         install(function(...)
             if module.enabled then
-                fn(...)
+                local profiler = ns.Profiler
+                if profiler and profiler.recording then
+                    profiler.Call(module, call, fn, ...)
+                else
+                    fn(...)
+                end
             end
         end)
     end

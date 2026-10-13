@@ -254,6 +254,19 @@ L.MINIMAPNODEICONS_DETAIL_HIGH = "High"
 L.MINIMAPNODEICONS_CHAT_DESC = "Say in chat when the game stops Minimap Node Icons from checking "
     .. "the minimap."
 L.MINIMAPNODEICONS_FAILED = "Minimap Node Icons couldn't check the minimap: %s" -- error
+-- The gray notice above the module's options (shown always; it has no button).
+L.MINIMAPNODEICONS_NOTICE = "Not fully accurate, and uses more CPU than other modules."
+L.MINIMAPNODEICONS_NOTICE_DESC = "The game lists its tracking dots nowhere an addon can read, so "
+    .. "this module asks the minimap what is under many spots, several times a second. That "
+    .. "takes more of your computer's time than other modules, and an icon can sit a little off "
+    .. "its dot or go missing for a moment. This should improve over time with optimizations "
+    .. "and changes."
+-- Its rows on the Profiler page, after "Minimap Node Icons: ".
+L.MINIMAPNODEICONS_PART_VIEW = "reading your spot"
+L.MINIMAPNODEICONS_PART_FOLLOW = "following dots"
+L.MINIMAPNODEICONS_PART_FIND = "finding new dots"
+L.MINIMAPNODEICONS_PART_ASK = "asking the game"
+L.MINIMAPNODEICONS_PART_DRAW = "drawing icons"
 L.MINIMAPNODEICONS_COMMAND = "Check what Minimap Node Icons sees on the minimap right now."
 L.MINIMAPNODEICONS_HERE_START = "Point at a dot on the minimap; reading it in %d seconds." -- seconds
 L.MINIMAPNODEICONS_HERE_NONE = "Nothing under the cursor. Point at a dot and try again."
@@ -264,6 +277,8 @@ L.MINIMAPNODEICONS_HERE_COLOR = "Name color: %s, %s, %s. Gray: %s." -- red, gree
 L.MINIMAPNODEICONS_HERE_ICON = "Its icon is at %.1f, %.1f; it last answered at %.1f, %.1f."
 -- trail right and up, standing still (yes/no)
 L.MINIMAPNODEICONS_HERE_LAG = "Trail while moving: %.1f, %.1f. Standing still: %s."
+L.MINIMAPNODEICONS_HERE_PROBED = "Probing at the cursor finds it at %.1f, %.1f. Icons with this name: %d." -- right, up, count
+L.MINIMAPNODEICONS_HERE_UNPROBED = "Probing at the cursor finds nothing by that name. Icons with this name: %d." -- count
 L.MINIMAPNODEICONS_HERE_MISSED = "No icon for it yet."
 L.MINIMAPNODEICONS_REPORT_UNAVAILABLE = "This client can't check the minimap for nodes."
 L.MINIMAPNODEICONS_REPORT_COMBAT = "Can't check the minimap in combat."

@@ -57,6 +57,14 @@ local module = ns.NewModule("MinimapNodeIcons", L.MINIMAPNODEICONS_DESC, {
 module.title = L.MINIMAPNODEICONS_TITLE
 module.category = "map"
 module.added = "0.9.0"
+-- Honest about what probing costs and misses (see the top of this file); a notice with no button.
+module.notice = {
+    text = L.MINIMAPNODEICONS_NOTICE,
+    description = L.MINIMAPNODEICONS_NOTICE_DESC,
+    shown = function()
+        return true
+    end,
+}
 
 module.options = {
     {
@@ -100,6 +108,7 @@ end
 local HERBS, MINERALS = 2383, 2580 -- Find Herbs, Find Minerals
 
 local TICK = 0.1 -- seconds between rounds of probes; icons are drawn every frame regardless
+local STILL_FOLLOW = 0.33 -- seconds between rounds of following while standing still: dots don't move
 local STEPS = { low = 8, medium = 6, high = 4 } -- minimap units between finding probes
 local PER_TICK = 120 -- finding probes each tick, so a pass over the minimap takes a few ticks
 local REACH = 1.5 -- finding hits this many probe spacings apart touch (diagonal neighbors are 1.41)
@@ -654,6 +663,7 @@ local frame -- over the minimap; holds the icons and runs the probes
 local pins = {}
 local findAll = false -- find every dot at the next tick, after a zoom or a reset
 local sinceTick = 0
+local sinceFollow = 0 -- seconds since the dots were last followed
 
 -- The gold ring of the minimap's tracking button, which Blizzard also puts around a 24 pixel spec
 -- icon (ItemDisplay.xml): the 64 pixel file with the icon's center 19 right and 18 down of its
@@ -742,7 +752,13 @@ local function tick(v)
     end
     startProbing()
     local space = currentSpace()
-    followAll(v, space)
+    -- Standing still the dots don't move, so they're followed a few times a second rather than
+    -- every tick: still often enough to see one gathered. Finding goes on every tick.
+    sinceFollow = sinceFollow + TICK
+    if not still() or sinceFollow >= STILL_FOLLOW then
+        sinceFollow = 0
+        followAll(v, space)
+    end
     if not blocked then
         if findAll then
             findAll = false
@@ -944,7 +960,7 @@ function module:OnEnable()
         frame:SetFrameLevel(Minimap:GetFrameLevel() + 5)
     end
     frame:Show()
-    frame:SetScript("OnUpdate", onUpdate)
+    frame:SetScript("OnUpdate", ns.Profiler.Wrap(self, onUpdate)) -- timed while the Profiler records
     readTracking()
     findAll = true
     self:On("MINIMAP_UPDATE_TRACKING", readTracking)

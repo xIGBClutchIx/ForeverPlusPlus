@@ -114,7 +114,7 @@ end
 internal.AddPart("costs", {
     enable = function()
         -- The hook can't be removed; replaceBundleLine checks the part is on instead.
-        ItemTooltip.ReplaceLine(replaceBundleLine)
+        ItemTooltip.ReplaceLine(replaceBundleLine, module)
     end,
     disable = function() end,
 })

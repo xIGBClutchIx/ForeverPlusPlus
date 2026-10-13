@@ -91,7 +91,7 @@ local BUFF_SIDE_GAP = 4
 -- moved it inward on Forever, so the icon isn't where its XML suggests.)
 local BUFF_BAR_GAP = 8
 
-local aboveCurves = {} -- "hurt:full" -> a health curve giving the above row's y offset
+local aboveCurves = {} -- the name's rise -> a health curve giving the above row's y offset
 
 -- How far the bar view's name (above the bar) sits above the name-only one, from sizes alone:
 -- positions can't be read here, the plate's frames anchor to restricted ones.
@@ -107,6 +107,29 @@ local function nameRise(label)
     local barTop = rowHeight / 2 + 2 + barHeight -- see PlateLabel.Layout
     local nameTop = label.subtitle:IsShown() and 1 + nameHeight or nameHeight / 2
     return max(barTop - nameTop, 0)
+end
+
+-- Sets the buff row's anchor; run through pcall by anchorBuffs. A plain function rather than a
+-- closure, since health changes call it often.
+local function setBuffAnchor(record, label, where, x, y, secretY)
+    local buffs = record.buffs
+    buffs:ClearAllPoints()
+    if where == "above" then
+        -- A client that won't take a secret offset gets the bar view's height: clear of the
+        -- bar, a little high over a name-only plate.
+        local target = label.barName
+        if not (secretY and pcall(buffs.SetPoint, buffs, "BOTTOM", target, "TOP", x, y)) then
+            buffs:SetPoint("BOTTOM", target, "TOP", x, secretY and BUFF_ABOVE_GAP or y)
+        end
+    elseif where == "before" then
+        buffs:SetPoint("RIGHT", label.name, "LEFT", x, 0)
+    elseif where == "after" then
+        buffs:SetPoint("LEFT", label.name, "RIGHT", x, 0)
+    elseif where == "bar" then
+        buffs:SetPoint("RIGHT", record.container, "LEFT", -BUFF_BAR_GAP, 0)
+    else
+        buffs:SetPoint("RIGHT", record.classification, "LEFT", -5, 0)
+    end
 end
 
 ---@param where string "above", "before", "after", "bar" (beside the bar), or "blizzard"
@@ -129,10 +152,12 @@ local function anchorBuffs(record, where, unit, state)
         if state == "bar" then
             y = BUFF_ABOVE_GAP
         elseif state == "unsure" and unit and curve then
-            local key = BUFF_ABOVE_GAP .. ":" .. (BUFF_ABOVE_GAP - rise)
-            aboveCurves[key] = aboveCurves[key] or ns.HealthStepCurve(BUFF_ABOVE_GAP,
-                BUFF_ABOVE_GAP - rise)
-            y = UnitHealthPercent(unit, true, aboveCurves[key])
+            local above = aboveCurves[rise]
+            if not above then
+                above = ns.HealthStepCurve(BUFF_ABOVE_GAP, BUFF_ABOVE_GAP - rise)
+                aboveCurves[rise] = above
+            end
+            y = UnitHealthPercent(unit, true, above)
         else
             y = BUFF_ABOVE_GAP - rise
         end
@@ -158,25 +183,7 @@ local function anchorBuffs(record, where, unit, state)
         return
     end
     record.buffsWhere, record.buffsX, record.buffsY = where, x, (not secretY) and y or nil
-    pcall(function()
-        buffs:ClearAllPoints()
-        if where == "above" then
-            -- A client that won't take a secret offset gets the bar view's height: clear of the
-            -- bar, a little high over a name-only plate.
-            local target = label.barName
-            if not (secretY and pcall(buffs.SetPoint, buffs, "BOTTOM", target, "TOP", x, y)) then
-                buffs:SetPoint("BOTTOM", target, "TOP", x, secretY and BUFF_ABOVE_GAP or y)
-            end
-        elseif where == "before" then
-            buffs:SetPoint("RIGHT", label.name, "LEFT", x, 0)
-        elseif where == "after" then
-            buffs:SetPoint("LEFT", label.name, "RIGHT", x, 0)
-        elseif where == "bar" then
-            buffs:SetPoint("RIGHT", record.container, "LEFT", -BUFF_BAR_GAP, 0)
-        else
-            buffs:SetPoint("RIGHT", record.classification, "LEFT", -5, 0)
-        end
-    end)
+    pcall(setBuffAnchor, record, label, where, x, y, secretY)
 end
 
 ---Friendly plates for one module (see the top of this file).

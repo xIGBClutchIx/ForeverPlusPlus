@@ -33,5 +33,5 @@ end
 
 function module:OnEnable()
     -- The hook can't be removed; addRepairCost checks the part is on instead.
-    ItemTooltip.OnPrices(addRepairCost)
+    ItemTooltip.OnPrices(addRepairCost, module)
 end

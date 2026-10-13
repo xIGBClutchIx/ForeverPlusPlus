@@ -889,7 +889,7 @@ function module:OnEnable()
     local frame = _G.AuctionHouseFrame
     open = frame and frame:IsShown() and true or false
     -- The hook can't be removed; addAuctionPrice checks the part is on instead.
-    ItemTooltip.OnPrices(addAuctionPrice)
+    ItemTooltip.OnPrices(addAuctionPrice, module)
     -- The price changes from the stack to one item with Shift.
     ItemTooltip.RedrawOnShift(self, true)
     ns.AddOns.WhenLoaded("Blizzard_Professions", hookProfessions)

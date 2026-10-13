@@ -27,6 +27,9 @@ ns.changelog = {
                     .. "on. On by default. Its Tint Unusable option (off by default) turns an icon "
                     .. "red while your skill is too low to gather it, and Gray Out Trivial (off by "
                     .. "default) turns it gray once gathering it no longer raises your skill." },
+                { L.PROFILER_TITLE, "A new page in Settings (/fpp profile) that records how "
+                    .. "much CPU each module takes, heaviest first, beside Forever++'s total CPU "
+                    .. "and memory. Nothing is timed until you press Record." },
                 { L.QUESTLEVELS_TITLE, "A new module that shows a quest's level before its name, "
                     .. "like the quest log's [12], in a quest giver's list and at the top of the "
                     .. "quest's details. On by default." },
@@ -98,6 +101,9 @@ ns.changelog = {
                 { L.SHORTCHANNELNAMES_TITLE, "The new Guild, Party, and Raid option (on by "
                     .. "default) also shortens [Guild], [Officer], [Party], [Raid], [Raid Warning], "
                     .. "and [Instance] to [GD], [O], [P], [R], [RW], and [I]." },
+                "Buff Timers, Waypoints, Quest Tracker, Quest Nameplates, Player and NPC "
+                    .. "Nameplates, and Already Known use less CPU: they look the same and redo "
+                    .. "their work only when something changed.",
             } },
             { L.CHANGELOG_FIXED, {
                 { L.XPBARTEXT_TITLE, "Blizzard's own XP text no longer shows through under ours "

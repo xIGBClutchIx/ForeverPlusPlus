@@ -40,17 +40,28 @@ local function itemData(tooltip)
     end
 end
 
+local owners = setmetatable({}, { __mode = "k" }) -- a module's fn -> the module, for the Profiler
+
+-- Calls one module's fn, timed for the Profiler page while it records.
+local function run(fn, ...)
+    local profiler = ns.Profiler
+    if profiler and profiler.recording then
+        return profiler.Call(owners[fn], fn, ...)
+    end
+    return fn(...)
+end
+
 local function addPrices(tooltip, data)
     done[tooltip] = true
     for _, fn in ipairs(providers) do
-        fn(tooltip, data)
+        run(fn, tooltip, data)
     end
 end
 
 local function addInfo(tooltip, data)
     infoDone[tooltip] = true
     for _, fn in ipairs(infoProviders) do
-        fn(tooltip, data)
+        run(fn, tooltip, data)
     end
 end
 
@@ -59,7 +70,7 @@ local function onSellPricePre(tooltip, lineData)
     if data and not infoDone[tooltip] then
         addInfo(tooltip, data)
     end
-    if data and replacer and replacer(tooltip, data, lineData) then
+    if data and replacer and run(replacer, tooltip, data, lineData) then
         addPrices(tooltip, data)
         return true -- Blizzard's line is skipped; ours is in its place
     end
@@ -92,7 +103,7 @@ local function onAnyLinePre(tooltip, lineData)
         return
     end
     for _, fn in ipairs(lineReplacers) do
-        if fn(tooltip, data, lineData) then
+        if run(fn, tooltip, data, lineData) then
             return true -- Blizzard's line is skipped; the module drew its own
         end
     end
@@ -186,37 +197,47 @@ end
 
 ---Calls `fn(tooltip, data)` on every item tooltip, where the price lines go. Hooks can't be
 ---removed, so `fn` checks whether its module is on. Asking again with the same `fn` changes
----nothing, so it can be called from `OnEnable`.
+---nothing, so it can be called from `OnEnable`. `owner`, the module (or part), is who the
+---Profiler page charges its time to.
 ---@param fn fun(tooltip: table, data: table)
-function ItemTooltip.OnPrices(fn)
+---@param owner? table
+function ItemTooltip.OnPrices(fn, owner)
     hook()
+    owners[fn] = owner
     addProvider(providers, fn)
 end
 
 ---Calls `fn(tooltip, data)` on every item tooltip just above the price lines (or where they'd
 ---go), for lines about the item that aren't prices. Hooks can't be removed, so `fn` checks
----whether its module is on; asking again with the same `fn` changes nothing.
+---whether its module is on; asking again with the same `fn` changes nothing. `owner` as in
+---OnPrices.
 ---@param fn fun(tooltip: table, data: table)
-function ItemTooltip.OnInfo(fn)
+---@param owner? table
+function ItemTooltip.OnInfo(fn, owner)
     hook()
+    owners[fn] = owner
     addProvider(infoProviders, fn)
 end
 
 ---Calls `fn(tooltip, data, lineData)` before each line of an item tooltip; when it returns true,
 ---it drew that line itself and Blizzard's is skipped. For adding to one of Blizzard's lines, such
 ---as a price beside it. Hooks can't be removed, so `fn` checks whether its module is on; asking
----again with the same `fn` changes nothing.
+---again with the same `fn` changes nothing. `owner` as in OnPrices.
 ---@param fn fun(tooltip: table, data: table, lineData: table): boolean?
-function ItemTooltip.ReplaceLine(fn)
+---@param owner? table
+function ItemTooltip.ReplaceLine(fn, owner)
     hook()
+    owners[fn] = owner
     addProvider(lineReplacers, fn)
 end
 
 ---Lets `fn(tooltip, data, lineData)` draw the sell price line instead of Blizzard. It returns
----true when it drew one; otherwise Blizzard's line shows.
+---true when it drew one; otherwise Blizzard's line shows. `owner` as in OnPrices.
 ---@param fn fun(tooltip: table, data: table, lineData: table): boolean?
-function ItemTooltip.ReplaceSellPrice(fn)
+---@param owner? table
+function ItemTooltip.ReplaceSellPrice(fn, owner)
     hook()
+    owners[fn] = owner
     replacer = fn
 end
 

@@ -10,6 +10,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Item Tooltips**: the new Repair Cost line (off by default) shows what repairing damaged gear costs, on gear you wear or carry, without a merchant's repair cursor.
 - **Forever Quest Icons**: the new Quest Details option (on by default) puts the icon after the quest's name at the top of its details, in the quest window and on the map.
 - **Minimap Node Icons**: a new module that puts the herb's or ore's own icon on each tracking dot on the minimap while Find Herbs or Find Minerals is on. On by default. Its Tint Unusable option (off by default) turns an icon red while your skill is too low to gather it, and Gray Out Trivial (off by default) turns it gray once gathering it no longer raises your skill.
+- **Profiler**: a new page in Settings (`/fpp profile`) that records how much CPU each module takes, heaviest first, beside Forever++'s total CPU and memory. Nothing is timed until you press Record.
 - **Quest Levels**: a new module that shows a quest's level before its name, like the quest log's [12], in a quest giver's list and at the top of the quest's details. On by default.
 - **Quest Tracker**: the new Current Zone Only option (off by default) tracks only the quests of the zone you're in, and tracks the others again when you get there. The quest your map follows always shows.
 - **Waylaid Crates**: a new module for filling Waylaid Crates. Its Waylaid Crates entry in the auction house's categories lists every item your crates still need, less what's already in your bags and bank.
@@ -39,6 +40,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Flight Timer**: the flight map tooltip's Flight Time line looks like the Sell Price line, with the time at the right. The new Tooltip Line option puts it back on one line, white or gray.
 - **Short Channel Names**: the Style dropdown also offers initials ([LFG] for LookingForGroup) and the name without its zone ([General]), alone or after the number. Number and Initials ([1. LFG]) is the new default.
 - **Short Channel Names**: the new Guild, Party, and Raid option (on by default) also shortens [Guild], [Officer], [Party], [Raid], [Raid Warning], and [Instance] to [GD], [O], [P], [R], [RW], and [I].
+- Buff Timers, Waypoints, Quest Tracker, Quest Nameplates, Player and NPC Nameplates, and Already Known use less CPU: they look the same and redo their work only when something changed.
 
 ### Fixed
 

@@ -48,7 +48,7 @@ end
 function module:OnEnable()
     -- The hook can't be removed; drawSellPrice checks the part is on and lets Blizzard's line
     -- show when it's off.
-    ItemTooltip.ReplaceSellPrice(drawSellPrice)
+    ItemTooltip.ReplaceSellPrice(drawSellPrice, module)
     -- The price changes from the stack to one item with Shift.
     ItemTooltip.RedrawOnShift(self, true)
 end

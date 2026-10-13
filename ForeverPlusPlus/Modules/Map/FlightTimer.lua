@@ -286,7 +286,7 @@ function module:OnEnable()
         bar = newBar()
         watcher = CreateFrame("Frame", nil, UIParent)
         watcher:Hide()
-        watcher:SetScript("OnUpdate", ns.WorldMap.Throttled(0.1, tick))
+        watcher:SetScript("OnUpdate", ns.Profiler.Wrap(self, ns.WorldMap.Throttled(0.1, tick)))
     end
     place()
     self:On("TAXIMAP_OPENED", readNodes)

@@ -7,6 +7,7 @@ local _, ns = ...
 
 local ipairs, pairs, setmetatable, tonumber, unpack, floor, max = ipairs, pairs, setmetatable, tonumber,
     unpack, math.floor, math.max
+local tostring = tostring
 local CreateFrame, C_Timer, C_TooltipInfo, C_QuestLog, UnitName = CreateFrame, C_Timer, C_TooltipInfo,
     C_QuestLog, UnitName
 
@@ -328,6 +329,7 @@ local function update(unit, frame)
     if not current then
         if box then
             box:Hide()
+            box.shows = nil
         end
         return
     end
@@ -335,6 +337,13 @@ local function update(unit, frame)
         box = create(frame)
         indicators[frame] = box
     end
+    -- Quest events come often and mostly change nothing on a given plate: lay it out again only
+    -- when what it shows changed.
+    local shows = current .. "/" .. needed .. ":" .. tostring(kind) .. ":" .. tostring(percent)
+    if box.shows == shows then
+        return
+    end
+    box.shows = shows
     place(box, frame, current, needed, kind, percent)
 end
 
@@ -363,6 +372,7 @@ function module:OnEnable()
             local box = indicators[frame]
             if box then
                 box:Hide()
+                box.shows = nil
             end
         end,
     })
@@ -380,6 +390,10 @@ end
 
 function module:OnOptionChanged()
     if self.enabled then
+        -- The look changed, so every plate is laid out again, not only those whose count did.
+        for _, box in pairs(indicators) do
+            box.shows = nil
+        end
         Nameplates.ForEach(update)
     end
 end

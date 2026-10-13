@@ -107,6 +107,7 @@ end
 
 local known = {} -- key -> true, once known (you don't forget a recipe)
 local checked = {} -- key -> GetTime() it was last found not known
+local waiting = {} -- itemID -> true while the game has no tooltip for it yet
 
 -- Whether `test(arg)` says known, remembering it so a full bag isn't looked up on every update.
 -- Not known is remembered only briefly, since learning something makes it known.
@@ -125,6 +126,8 @@ local function check(key, test, arg)
         return true
     elseif result == false then
         checked[key] = now
+    elseif type(key) == "number" then
+        waiting[key] = true -- not loaded yet: look again when its data arrives
     end
     return false
 end
@@ -401,8 +404,18 @@ end
 
 local refreshTimer
 
--- Item data arrives a little after a window opens; look again once it has.
-local function onItemInfo()
+-- Item data arrives a little after a window opens; look again once it has. This fires for every
+-- item the game loads (the auction house loads hundreds), so only for an item we couldn't answer
+-- for yet, or while a merchant or the mailbox is open, whose links are missing until it loads.
+local function onItemInfo(_, itemID)
+    local merchant, mail = _G.MerchantFrame, _G.MailFrame
+    if not ((itemID and waiting[itemID]) or (merchant and merchant:IsShown())
+        or (mail and mail:IsShown())) then
+        return
+    end
+    if itemID then
+        waiting[itemID] = nil
+    end
     if refreshTimer then
         return
     end

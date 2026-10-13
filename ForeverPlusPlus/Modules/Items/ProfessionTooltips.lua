@@ -576,7 +576,7 @@ function module:OnEnable()
     self:TooltipPostCall(types.Object, onObject)
     self:TooltipPostCall(types.MinimapMouseover, onObject)
     self:TooltipPostCall(types.Unit, onUnit)
-    ItemTooltip.OnInfo(onItem)
+    ItemTooltip.OnInfo(onItem, module)
     -- Pre and line calls can't be removed and have no hook-once helper: hooked once here, they
     -- only keep state for the post calls, and what they add checks module.enabled.
     if preHooked then

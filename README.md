@@ -76,6 +76,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Player Nameplates | Always shows friendly players' names with their guild, with a name size slider, a choice of where buffs sit, and an icon (or light blue name) for recent allies. The health bar appears only when they're hurt or in combat. |
 | **Tools** | |
 | Console Variables | A page in Settings to browse and change the game's console variables (CVars). |
+| Profiler | A page in Settings that records how much CPU each module takes, heaviest first, beside Forever++'s total CPU and memory. Nothing is timed until you press Record. |
 
 ## Install
 
@@ -85,7 +86,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 
 ## Use
 
-Open Game Menu > Options > AddOns > Forever++ (or type `/fpp`). It opens on the Modules page: every module with a checkbox, grouped by category, with a search box at the top that narrows the list by name and description and a New checkbox beside it that shows only modules marked NEW; click a module to see what it does and its options beside the list. Console Variables is its own page, Debug has sections for What's New (Show Tags and buttons to reset the version you last saw and the welcome), Diagnostics (copy debug info, print each module's events, and reload), Testing (Self Test, Test Error, and nameplate checks), and Logging (options that print what a module does in chat), and Changelog has what changed in each release (also in [CHANGELOG.md](CHANGELOG.md)). About has the version, links, and commands. The Defaults button at the top right of Modules, Debug, and About offers two choices: Recommended Defaults puts every module's settings back to how they start, and Developer's Defaults does that and also turns on Fishing Cast, Skip Cinematics, Auto Screenshot, Currency Bar, Hide Beta Feedback, Short Channel Names, Easy Delete, and Auto Weapon Buff, and sets World Map's Zone Info Dungeons and Fishing to Hold Detail Key.
+Open Game Menu > Options > AddOns > Forever++ (or type `/fpp`). It opens on the Modules page: every module with a checkbox, grouped by category, with a search box at the top that narrows the list by name and description and a New checkbox beside it that shows only modules marked NEW; click a module to see what it does and its options beside the list. Console Variables and Profiler are their own pages, Debug has sections for What's New (Show Tags and buttons to reset the version you last saw and the welcome), Diagnostics (copy debug info, print each module's events, and reload), Testing (Self Test, Test Error, and nameplate checks), and Logging (options that print what a module does in chat), and Changelog has what changed in each release (also in [CHANGELOG.md](CHANGELOG.md)). About has the version, links, and commands. The Defaults button at the top right of Modules, Debug, and About offers two choices: Recommended Defaults puts every module's settings back to how they start, and Developer's Defaults does that and also turns on Fishing Cast, Skip Cinematics, Auto Screenshot, Currency Bar, Hide Beta Feedback, Short Channel Names, Easy Delete, and Auto Weapon Buff, and sets World Map's Zone Info Dungeons and Fishing to Hold Detail Key.
 
 | Command | What it does |
 |---|---|
@@ -96,6 +97,7 @@ Open Game Menu > Options > AddOns > Forever++ (or type `/fpp`). It opens on the 
 | `/fpp set <module> <option> [value]` | Changes an option: `on`/`off`, a choice such as `/fpp set PlayerNameplates level after`, or a number such as `/fpp set WorldMap dungeonSize 150`. Leave out the value to see the choices. |
 | `/fpp reset` | Asks, then puts every setting back to its default, clears what Forever++ saved, and reloads. |
 | `/fpp cvar [search]` | Opens Console Variables. |
+| `/fpp profile` | Opens the Profiler. |
 | `/fpp selftest` | Probes the client APIs Forever++ depends on and records events (flights, deaths, duels) until `/reload`; the log is saved in `ForeverPlusPlusDB.selfTest`. Also a button on the Debug page. |
 | `/fpp errors` | Shows the errors Error Catcher caught. |
 | `/fpp scan` | Scans the open auction house now. |

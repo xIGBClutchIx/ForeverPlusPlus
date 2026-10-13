@@ -335,10 +335,16 @@ function fitBox()
 end
 
 -- After the tracker lays itself out: style fonts it has started using, and fit the box.
+-- After each tracker update. At Blizzard's font and outline there's nothing to style, so its text
+-- isn't searched. The box is fitted now, so it never trails a frame behind, and once more as the
+-- tracker settles; not again next frame as well (requestFit), since nothing moved since now.
 local function onUpdate()
-    findFonts(tracker(), 4)
+    local db = module.db
+    if db.font ~= "default" or db.outline ~= "default" then
+        findFonts(tracker(), 4)
+    end
     fitBox()
-    requestFit()
+    fitSettled()
 end
 
 -- Fading ------------------------------------------------------------------------------------------

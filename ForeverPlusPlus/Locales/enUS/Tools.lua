@@ -50,3 +50,27 @@ L.SELFTEST_BUTTON = "Run"
 L.SELFTEST_BUTTON_DESC = "Probe the client APIs Forever++ relies on, then record flights, deaths and "
     .. "other events until you /reload. The results are saved to Forever++'s SavedVariables file."
 L.SELFTEST_DONE = "Self test wrote %d lines. Type /reload to save them." -- number of lines
+
+-- Profiler
+L.PROFILER_TITLE = "Profiler"
+L.PROFILER_DESC = "See how much CPU each module takes, on a page in Settings, to find what's slow."
+L.PROFILER_COMMAND = "open the Profiler page"
+L.PROFILER_NO_PAGE = "This client's Settings can't open the Profiler page."
+L.PROFILER_RECORD = "Record"
+L.PROFILER_STOP = "Stop"
+L.PROFILER_RESET = "Clear"
+L.PROFILER_IDLE = "Press Record and play as usual. The modules that take the most CPU rise to the top."
+L.PROFILER_RECORDING = "Recording for %s." -- time, such as 1:23
+L.PROFILER_STOPPED = "Recorded %s." -- time, such as 1:23
+L.PROFILER_ADDON_CPU = "All of Forever++: %.3f ms a frame lately, %.1f ms at most." -- ms, ms
+L.PROFILER_ADDON_MEMORY = "Memory: %.1f MB." -- megabytes
+L.PROFILER_MODULE = "Module"
+L.PROFILER_PER_SECOND = "ms a second"
+L.PROFILER_PEAK = "Worst frame (ms)"
+L.PROFILER_CALLS = "Calls a second"
+L.PROFILER_SHARED = "Shared code" -- time in Forever++'s libraries not traced to one module
+L.PROFILER_OWN = "everything else" -- under a module's parts: its time outside them
+L.PROFILER_EMPTY = "Nothing recorded yet."
+L.PROFILER_MORE = "%d more not shown." -- number of modules
+L.PROFILER_NOTE = "Only Forever++'s own code is timed, and timing it adds a little cost of its own "
+    .. "while recording. Memory can only be read for the whole addon, not for each module."

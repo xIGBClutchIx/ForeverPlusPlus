@@ -199,7 +199,7 @@ function module:OnEnable()
     bankOpen = bankFrame and bankFrame:IsShown() or false
     queueScan()
     -- The hook can't be removed; addCount checks the part is on instead.
-    ItemTooltip.OnInfo(addCount)
+    ItemTooltip.OnInfo(addCount, module)
 end
 
 function module:OnDisable()

@@ -231,8 +231,10 @@ local function questPoint(questID)
     return nil
 end
 
--- The quest point is looked up again each QUEST_INTERVAL, not every turn of the arrow.
+-- The quest point is looked up again each QUEST_INTERVAL, not every turn of the arrow, and the
+-- map pin once each time it changes (refresh).
 local cachedQuest, cachedPoint, cachedTitle, checkedAt = nil, nil, nil, 0
+local cachedWaypoint, waypointRead = nil, false
 
 -- What the arrow points at: the selected quest when it has a spot, otherwise the map pin. The
 -- second value is the quest's name when it's the quest.
@@ -248,14 +250,18 @@ local function destination()
             return cachedPoint, cachedTitle
         end
     end
-    return C_Map.GetUserWaypoint and C_Map.GetUserWaypoint()
+    if not waypointRead then
+        waypointRead = true
+        cachedWaypoint = C_Map.GetUserWaypoint and C_Map.GetUserWaypoint()
+    end
+    return cachedWaypoint
 end
 
--- Where `point` is from the player, through WorldMap.Toward; see locate.
-local function toward(point)
-    if not (point and point.uiMapID and point.position) then
-        return nil
-    end
+-- The maps a point can be pointed at on, from its own up to its continent, each with the point's
+-- spot on it and the map's size: { mapID, target, width, height }. Worked out once per point, so
+-- each turn of the arrow only reads where the player is.
+local function route(point)
+    local steps = {}
     local pinMap = point.uiMapID
     local continent, world
     if C_Map.GetWorldPosFromMapPos then
@@ -265,19 +271,37 @@ local function toward(point)
     while mapID and mapID ~= 0 do
         local info = C_Map.GetMapInfo(mapID)
         if not info or (info.mapType and info.mapType < continentType) then
-            return nil -- past the continent: another continent's pin has no direction from here
+            break -- past the continent: another continent's pin has no direction from here
         end
-        local here = C_Map.GetPlayerMapPosition(mapID, "player")
-        if here then
-            local target = point.position
-            if mapID ~= pinMap then
-                target = nil
-                if world and C_Map.GetMapPosFromWorldPos then
-                    local _, pos = C_Map.GetMapPosFromWorldPos(continent, world, mapID)
-                    target = pos
-                end
+        local target = point.position
+        if mapID ~= pinMap then
+            target = nil
+            if world and C_Map.GetMapPosFromWorldPos then
+                local _, pos = C_Map.GetMapPosFromWorldPos(continent, world, mapID)
+                target = pos
             end
-            local width, height = C_Map.GetMapWorldSize(mapID)
+        end
+        local width, height = C_Map.GetMapWorldSize(mapID)
+        steps[#steps + 1] = { mapID = mapID, target = target, width = width, height = height }
+        mapID = info.parentMapID
+    end
+    return steps
+end
+
+local steps, stepsFor -- route(stepsFor)
+
+-- Where `point` is from the player, through WorldMap.Toward; see locate.
+local function toward(point)
+    if not (point and point.uiMapID and point.position) then
+        return nil
+    end
+    if stepsFor ~= point then
+        steps, stepsFor = route(point), point
+    end
+    for _, step in ipairs(steps) do
+        local here = C_Map.GetPlayerMapPosition(step.mapID, "player")
+        if here then
+            local target, width, height = step.target, step.width, step.height
             local px, py = here.x, here.y
             if target and ns.IsReadable(px) and ns.IsReadable(width) and width > 0 and height > 0
                 and not (px == 0 and py == 0) then
@@ -288,7 +312,6 @@ local function toward(point)
                 end
             end
         end
-        mapID = info.parentMapID
     end
     return nil
 end
@@ -344,6 +367,9 @@ local function place()
     ns.EditMode.Place(frame, module.db.x, module.db.y)
 end
 
+-- What the arrow's two lines say now, so they're only set when that changes.
+local shownYards, shownTitle
+
 -- Turns the arrow toward the waypoint, or takes it down when there's no direction to give.
 local function update()
     if ns.EditMode.IsActive() then
@@ -356,8 +382,16 @@ local function update()
         return
     end
     frame.arrow:SetRotation(angle - facing)
-    frame.distance:SetText(distanceText(yards))
-    frame.quest:SetText(module.db.questName and title or "")
+    local rounded = floor(yards + 0.5)
+    if rounded ~= shownYards then
+        shownYards = rounded
+        frame.distance:SetText(distanceText(yards))
+    end
+    title = module.db.questName and title or ""
+    if title ~= shownTitle then
+        shownTitle = title
+        frame.quest:SetText(title)
+    end
     frame:Show()
 end
 
@@ -374,6 +408,8 @@ local function refresh()
         return
     end
     cachedQuest = nil -- look the quest up again: the selection or the quest may have changed
+    waypointRead = false -- and the map pin
+    shownYards, shownTitle = nil, nil
     if arrowWanted() then
         watcher:Show()
         update()
@@ -389,6 +425,7 @@ end
 
 -- In Edit Mode the arrow shows pointing ahead, so it can be placed.
 local function sample(active)
+    shownYards, shownTitle = nil, nil -- the sample's text replaces what update set
     if active then
         frame.arrow:SetRotation(0)
         frame.distance:SetText(distanceText(120))
@@ -407,7 +444,7 @@ local function syncArrow()
             frame = newFrame()
             watcher = CreateFrame("Frame", nil, UIParent)
             watcher:Hide()
-            watcher:SetScript("OnUpdate", WorldMap.Throttled(INTERVAL, update))
+            watcher:SetScript("OnUpdate", ns.Profiler.Wrap(module, WorldMap.Throttled(INTERVAL, update)))
         end
         place()
         module:On("USER_WAYPOINT_UPDATED", refresh)
