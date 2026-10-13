@@ -27,7 +27,8 @@ local module = ns.NewModule("ForeverQuestIcons", L.FOREVERQUESTICONS_DESC, {
     logSize = 80,
     trackerSize = 80,
     giversSize = 80,
-    detailsSize = 80,
+    -- The details title's font is larger, so a smaller share keeps the icon near the lists' size.
+    detailsSize = 60,
 })
 module.title = L.FOREVERQUESTICONS_TITLE
 module.category = "quests"
