@@ -69,6 +69,9 @@ module.options = {
 local ADDON = "Blizzard_StatusTrackingBar"
 -- The reputation bar's green, a fill made for this bar.
 local QUEST_FILL = "UI-HUD-ExperienceBar-Fill-Reputation-Faction-Green"
+-- Tooltip values in their colors on the bar: Blizzard's rested blue, and our quest green.
+local RESTED_COLOR = { 0.25, 0.6, 1 }
+local READY_COLOR = { 0.25, 0.85, 0.25 }
 
 local texts = setmetatable({}, { __mode = "k" }) -- Blizzard's experience bar -> our font string
 local fills = setmetatable({}, { __mode = "k" }) -- Blizzard's experience bar -> our quest fill
@@ -158,17 +161,22 @@ local function addTooltip()
         and readable(max) and type(current) == "number" and type(max) == "number" and max > 0) then
         return
     end
-    local function line(label, value)
-        tooltip:AddDoubleLine(label, value, 1, 1, 1, 1, 1, 1)
+    -- A value's color, when it has one, is its color on the bar.
+    local function line(label, value, color)
+        local r, g, b = 1, 1, 1
+        if color then
+            r, g, b = color[1], color[2], color[3]
+        end
+        tooltip:AddDoubleLine(label, value, 1, 1, 1, r, g, b)
     end
     GameTooltip_AddBlankLineToTooltip(tooltip)
     line(L.XPBARTEXT_TIP_LEFT, amount(max - current, max))
     local rested = GetXPExhaustion and GetXPExhaustion()
     if rested and readable(rested) and type(rested) == "number" and rested > 0 then
-        line(L.XPBARTEXT_TIP_RESTED, amount(rested, max))
+        line(L.XPBARTEXT_TIP_RESTED, amount(rested, max), RESTED_COLOR)
     end
     if readyXP > 0 then
-        line(L.XPBARTEXT_TIP_READY, amount(readyXP, max))
+        line(L.XPBARTEXT_TIP_READY, amount(readyXP, max), READY_COLOR)
     end
     if allXP > readyXP then
         line(L.XPBARTEXT_TIP_ALL, amount(allXP, max))
