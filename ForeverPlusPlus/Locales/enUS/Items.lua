@@ -157,7 +157,14 @@ L.PRICE_INFO_LINE = "%s:" -- line name, on a price-style line with text instead 
 
 -- BagSlotCounter
 L.BAGSLOTCOUNTER_TITLE = "Bag Slot Counter"
-L.BAGSLOTCOUNTER_DESC = "Show how many bag slots are free on the bag buttons: orange when 4 or fewer are left, red when none are."
+L.BAGSLOTCOUNTER_DESC = "Show how many bag slots are free on the bag buttons, in orange when few are "
+    .. "left and red when none are."
+L.BAGSLOTCOUNTER_COLOR = "Color When Low"
+L.BAGSLOTCOUNTER_COLOR_DESC = "Turn the count red when no slots are free, and orange when this many "
+    .. "or fewer are."
+L.BAGSLOTCOUNTER_LOW_SLOTS = "Orange At"
+L.BAGSLOTCOUNTER_LOW_SLOTS_DESC = "Turn the count orange when this many slots or fewer are free."
+L.BAGSLOTCOUNTER_LOW_SLOTS_OFF = "Off"
 L.BAGSLOTCOUNTER_SECTION_COUNT = "Free Slots"
 L.BAGSLOTCOUNTER_SECTION_TEXT = "Text"
 L.BAGSLOTCOUNTER_SHOW = "Show Free Slots"

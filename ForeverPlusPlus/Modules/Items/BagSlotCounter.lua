@@ -17,6 +17,8 @@ local module = ns.NewModule("BagSlotCounter", L.BAGSLOTCOUNTER_DESC, {
     reagent = "own", -- the reagent bag: "own" count on its button, in the backpack's "total", or "off"
     size = "large", -- a key of SIZES
     position = "bottomright", -- a key of POSITIONS
+    color = true, -- red at 0 free, and orange at `lowSlots` or fewer
+    lowSlots = 4, -- 0 for no orange
 })
 module.title = L.BAGSLOTCOUNTER_TITLE
 module.category = "items"
@@ -66,6 +68,17 @@ module.options = {
             { "center", L.BAGSLOTCOUNTER_POSITION_CENTER },
         },
     },
+    {
+        key = "color", name = L.BAGSLOTCOUNTER_COLOR, description = L.BAGSLOTCOUNTER_COLOR_DESC,
+        section = L.BAGSLOTCOUNTER_SECTION_TEXT, slider = "lowSlots", added = "0.9.0",
+    },
+    {
+        key = "lowSlots", name = L.BAGSLOTCOUNTER_LOW_SLOTS, description = L.BAGSLOTCOUNTER_LOW_SLOTS_DESC,
+        section = L.BAGSLOTCOUNTER_SECTION_TEXT, requires = "color",
+        min = 0, max = 20, step = 1, format = function(value)
+            return value == 0 and L.BAGSLOTCOUNTER_LOW_SLOTS_OFF or tostring(value)
+        end,
+    },
 }
 
 -- Blizzard's number fonts, the ones stack counts use, smallest to largest.
@@ -104,7 +117,6 @@ local BAGS = {
 local RED_FONT_COLOR = RED_FONT_COLOR
 local FULL = RED_FONT_COLOR and { RED_FONT_COLOR:GetRGB() } or { 1, 0.1, 0.1 } -- a count of 0
 local LOW = ORANGE_FONT_COLOR and { ORANGE_FONT_COLOR:GetRGB() } or { 1, 0.5, 0.25 } -- a few left
-local LOW_SLOTS = 4 -- this many free or fewer counts as a few
 local WHITE = { 1, 1, 1 }
 
 local counts = {} -- bag id -> our FontString, on its own frame over the button
@@ -167,7 +179,10 @@ local function setCount(text, free)
         return
     end
     if free then
-        local color = free == 0 and FULL or free <= LOW_SLOTS and LOW or WHITE
+        local color = WHITE
+        if module.db.color then
+            color = free == 0 and FULL or free <= module.db.lowSlots and LOW or WHITE
+        end
         text:SetTextColor(color[1], color[2], color[3])
         text:SetText(tostring(free))
         text:Show()
