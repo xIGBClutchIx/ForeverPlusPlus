@@ -39,7 +39,14 @@ local curve -- health fraction -> alpha: 1 below full health, 0 at full
 local inverse -- the opposite: 0 below full health, 1 at full
 
 local EVENTS = { "UNIT_HEALTH", "UNIT_MAXHEALTH", "UNIT_FLAGS", "UNIT_NAME_UPDATE", "UNIT_LEVEL" }
-local SOCIAL_EVENTS = { "GROUP_ROSTER_UPDATE", "FRIENDLIST_UPDATE" }
+-- When a group, friend (Battle.net ones too), or guild changes, so the icons and colors follow.
+local SOCIAL_EVENTS = { "GROUP_ROSTER_UPDATE", "FRIENDLIST_UPDATE", "BN_FRIEND_INFO_CHANGED",
+    "BN_FRIEND_LIST_SIZE_CHANGED", "PLAYER_GUILD_UPDATE" }
+
+-- Whether this client has an event, since registering one it doesn't have is an error.
+local function hasEvent(event)
+    return not (C_EventUtils and C_EventUtils.IsEventValid) or C_EventUtils.IsEventValid(event)
+end
 
 -- Blizzard sets the name text (with surname) itself; our label copies it as it changes, and the
 -- icons beside Blizzard's name move to where the new text ends.
@@ -428,7 +435,9 @@ function Plates:Enable()
     end
     if self.style.icons then
         for _, event in ipairs(SOCIAL_EVENTS) do
-            module:On(event, self.onSocialChange)
+            if hasEvent(event) then
+                module:On(event, self.onSocialChange)
+            end
         end
     end
     module:On("UNIT_FACTION", self.onFaction)
