@@ -92,13 +92,15 @@ end
 ---@param text string
 ---@return string
 function Text.Plain(text)
+    -- An escaped pipe is set aside first, so "||r" or "||cff..." isn't read as a code.
+    text = gsub(text, "||", "\1")
     text = gsub(text, "|c%x%x%x%x%x%x%x%x", "")
     text = gsub(text, "|cn[^:|]*:", "")
     text = gsub(text, "|r", "")
     text = gsub(text, "|H[^|]*|h(.-)|h", "%1")
     text = gsub(text, "|T[^|]*|t", "")
     text = gsub(text, "|A[^|]*|a", "")
-    text = gsub(text, "||", "|")
+    text = gsub(text, "\1", "|")
     return text
 end
 
