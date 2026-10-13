@@ -197,6 +197,7 @@
     "UnitXP",
     "UnitXPMax",
     "GetXPExhaustion",
+    "IsXPUserDisabled",
     "C_QuestLog",
     "CancelDuel",
     "DeclineGroup",

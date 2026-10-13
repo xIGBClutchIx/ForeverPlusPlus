@@ -1,12 +1,15 @@
 -- XP Bar Text: the experience bar shows its numbers all the time, not only under the mouse, with
--- the percent, your rested XP, and the XP the quests in your log will give. Blizzard's bar text is
--- set to alpha 0 and a font string of ours, in the same font and spot, shows ours instead. Each
+-- the percent, your rested XP, and the XP the quests in your log will give. Blizzard's bar text's
+-- frame is hidden and a font string of ours, in the same font and spot, shows ours instead. Each
 -- status bar container (Edit Mode's two) has its own experience bar, so both get one. The bars
 -- come from Blizzard_StatusTrackingBar (FrameXML on Forever build 70338).
+--
+-- Quest XP on Bar fills the bar on from your XP with what the quests ready to turn in give, in
+-- green, the way Blizzard's bar already shows rested XP ahead of it (ExhaustionLevelFillBar).
 local _, ns = ...
 
-local ipairs, floor, format = ipairs, math.floor, string.format
-local UnitXP, UnitXPMax, GetXPExhaustion = UnitXP, UnitXPMax, GetXPExhaustion
+local ipairs, floor, format, min = ipairs, math.floor, string.format, math.min
+local CreateFrame, UnitXP, UnitXPMax, GetXPExhaustion = CreateFrame, UnitXP, UnitXPMax, GetXPExhaustion
 local C_QuestLog, BreakUpLargeNumbers = C_QuestLog, BreakUpLargeNumbers
 
 local L = ns.L
@@ -18,6 +21,8 @@ local module = ns.NewModule("XPBarText", L.XPBARTEXT_DESC, {
     percent = true,
     rested = true,
     quests = "complete", -- "off", "complete" (ready to turn in), or "all"
+    questColor = true,
+    questBar = false,
 })
 module.title = L.XPBARTEXT_TITLE
 module.category = "character"
@@ -35,13 +40,25 @@ module.options = {
             { "off", L.XPBARTEXT_QUESTS_OFF },
         },
     },
+    {
+        key = "questColor", name = L.XPBARTEXT_QUEST_COLOR, description = L.XPBARTEXT_QUEST_COLOR_DESC,
+        added = "0.9.0",
+    },
+    {
+        key = "questBar", name = L.XPBARTEXT_QUEST_BAR, description = L.XPBARTEXT_QUEST_BAR_DESC,
+        added = "0.9.0",
+    },
 }
 
 local ADDON = "Blizzard_StatusTrackingBar"
+-- The reputation bar's green, a fill made for this bar.
+local QUEST_FILL = "UI-HUD-ExperienceBar-Fill-Reputation-Faction-Green"
 
 local texts = setmetatable({}, { __mode = "k" }) -- Blizzard's experience bar -> our font string
+local fills = setmetatable({}, { __mode = "k" }) -- Blizzard's experience bar -> our quest fill
 local bars = {} -- the experience bars, once found
-local questXP = 0
+local questXP = 0 -- what the Quest XP choice counts, for the text
+local readyXP = 0 -- what the quests ready to turn in give, for the bar
 
 local function number(n)
     return BreakUpLargeNumbers and BreakUpLargeNumbers(n) or n
@@ -55,23 +72,32 @@ local function amount(n, max)
     return number(n)
 end
 
--- The XP the quests in your log give: only those ready to turn in, or all of them. A quest's
--- reward reads 0 until the game has its data; QUEST_LOG_UPDATE comes when it does.
+-- The XP the quests in your log give: for the text, only those ready to turn in or all of them;
+-- for the bar, those ready to turn in. A quest's reward reads 0 until the game has its data;
+-- QUEST_LOG_UPDATE comes when it does.
 local function countQuestXP()
-    questXP = 0
+    questXP, readyXP = 0, 0
     local which = module.db.quests
-    if which == "off" or not (GetQuestLogRewardXP and C_QuestLog and C_QuestLog.GetNumQuestLogEntries
-        and C_QuestLog.GetInfo) then
+    if (which == "off" and not module.db.questBar) or not (GetQuestLogRewardXP and C_QuestLog
+        and C_QuestLog.GetNumQuestLogEntries and C_QuestLog.GetInfo) then
         return
     end
     local isComplete = C_QuestLog.ReadyForTurnIn or C_QuestLog.IsComplete
     for index = 1, (C_QuestLog.GetNumQuestLogEntries()) do
         local info = C_QuestLog.GetInfo(index)
         local id = info and not info.isHeader and info.questID
-        if id and (which == "all" or (isComplete and isComplete(id))) then
-            local xp = GetQuestLogRewardXP(id)
-            if readable(xp) and type(xp) == "number" then
-                questXP = questXP + xp
+        if id then
+            local ready = isComplete and isComplete(id)
+            if which == "all" or ready then
+                local xp = GetQuestLogRewardXP(id)
+                if readable(xp) and type(xp) == "number" then
+                    if which == "all" or (which == "complete" and ready) then
+                        questXP = questXP + xp
+                    end
+                    if ready then
+                        readyXP = readyXP + xp
+                    end
+                end
             end
         end
     end
@@ -94,7 +120,7 @@ local function barText()
     end
     if module.db.quests ~= "off" and questXP > 0 then
         local quests = format(L.XPBARTEXT_QUESTS_TEXT, amount(questXP, max))
-        if current + questXP >= max then
+        if module.db.questColor and current + questXP >= max then
             -- Enough to level: green, like a quest you can turn in.
             quests = ns.Colors.Text(GREEN_FONT_COLOR, quests)
         end
@@ -103,18 +129,42 @@ local function barText()
     return text
 end
 
+-- Our green fill from the end of Blizzard's XP fill, as long as the ready quests' XP, up to the
+-- bar's end. It follows Blizzard's fill as that grows, and hides where the XP can't be read.
+local function updateFill(bar)
+    local fill = fills[bar]
+    local current, max = UnitXP("player"), UnitXPMax("player")
+    local xpFill = bar.StatusBar:GetStatusBarTexture()
+    if not (module.enabled and module.db.questBar and readyXP > 0 and xpFill and readable(current)
+        and readable(max) and type(current) == "number" and type(max) == "number" and max > 0
+        and current < max and not (IsXPUserDisabled and IsXPUserDisabled())) then
+        fill:Hide()
+        return
+    end
+    local width = bar.StatusBar:GetWidth()
+    local gain = min(readyXP, max - current)
+    fill:ClearAllPoints()
+    fill:SetPoint("TOPLEFT", xpFill, "TOPRIGHT")
+    fill:SetPoint("BOTTOMLEFT", xpFill, "BOTTOMRIGHT")
+    fill:SetWidth(gain / max * width)
+    -- The part of the art this stretch of the bar would show, as Blizzard does for rested XP.
+    fill:SetTexCoord(current / max, (current + gain) / max, 0, 1)
+    fill:Show()
+end
+
 local function update(bar)
     local ours = texts[bar]
     if not ours then
         return
     end
+    updateFill(bar)
     local text = module.enabled and barText()
     if not text then
         ours:Hide()
-        bar.OverlayFrame.Text:SetAlpha(1)
+        bar.OverlayFrame:Show()
         return
     end
-    bar.OverlayFrame.Text:SetAlpha(0)
+    bar.OverlayFrame:Hide()
     ours:SetText(text)
     ours:SetShown(module.db.always or (bar.ShouldBarTextBeDisplayed
         and bar:ShouldBarTextBeDisplayed()) or false)
@@ -131,6 +181,29 @@ local function refreshQuests()
     updateAll()
 end
 
+-- The bar's width changes with Edit Mode and the action bars.
+local function onResized(statusBar)
+    update(statusBar:GetParent())
+end
+
+-- A frame of ours over Blizzard's XP fill and rested XP, but under the bar's border and text,
+-- which are a strata higher, holding the quest fill.
+local function newFill(bar)
+    local frame = CreateFrame("Frame", nil, bar)
+    frame:SetAllPoints(bar.StatusBar)
+    frame:SetFrameLevel(bar.StatusBar:GetFrameLevel() + 1)
+    local fill = frame:CreateTexture(nil, "ARTWORK")
+    if ns.Frames.HasAtlas(QUEST_FILL) then
+        fill:SetAtlas(QUEST_FILL)
+    else
+        fill:SetColorTexture(0.1, 0.6, 0.1)
+    end
+    -- A darker green than the art, so it reads as XP still to come and stands apart from rested XP.
+    fill:SetVertexColor(0.55, 0.55, 0.55)
+    fill:Hide()
+    return fill
+end
+
 -- Finds each container's experience bar and gives it our text, once.
 local function setUp()
     if not module.enabled then
@@ -144,12 +217,21 @@ local function setUp()
     end
     for _, container in ipairs(manager.barContainers) do
         local bar = container.bars and container.bars[index]
-        if bar and bar.OverlayFrame and bar.OverlayFrame.Text and not texts[bar] then
-            local ours = bar.OverlayFrame:CreateFontString(nil, "ARTWORK", "TextStatusBarText")
+        if bar and bar.OverlayFrame and bar.OverlayFrame.Text and bar.StatusBar and not texts[bar] then
+            -- Our own frame like Blizzard's OverlayFrame, so that one (holding only Blizzard's
+            -- text) can be hidden while ours shows. Hidden, not alpha 0: on Forever something
+            -- outside Lua put its alpha back to 1 just after login (2026-10-13).
+            local holder = CreateFrame("Frame", nil, bar)
+            holder:SetFrameStrata("MEDIUM")
+            holder:SetAllPoints(bar.OverlayFrame)
+            -- Above the bar's divider lines and border, as Blizzard's text is.
+            holder:SetFrameLevel(bar.OverlayFrame:GetFrameLevel() + 1)
+            local ours = holder:CreateFontString(nil, "ARTWORK", "TextStatusBarText")
             ours:SetDrawLayer("ARTWORK", 5)
-            ours:SetPoint("CENTER", bar.OverlayFrame, "CENTER", 0, 1)
+            ours:SetPoint("CENTER", holder, "CENTER", 0, 0)
             ours:Hide()
             texts[bar] = ours
+            fills[bar] = newFill(bar)
             bars[#bars + 1] = bar
         end
     end
@@ -157,6 +239,7 @@ local function setUp()
         -- Blizzard sets its text on every XP update and shows it on mouseover.
         module:Hook(bar, "UpdateCurrentText", update)
         module:Hook(bar, "UpdateTextVisibility", update)
+        module:HookScript(bar.StatusBar, "OnSizeChanged", onResized)
     end
     refreshQuests()
 end
@@ -174,7 +257,8 @@ function module:OnDisable()
     ns.AddOns.Cancel(ADDON, setUp)
     for _, bar in ipairs(bars) do
         texts[bar]:Hide()
-        bar.OverlayFrame.Text:SetAlpha(1)
+        fills[bar]:Hide()
+        bar.OverlayFrame:Show()
     end
 end
 

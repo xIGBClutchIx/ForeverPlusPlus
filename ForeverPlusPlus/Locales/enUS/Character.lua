@@ -141,6 +141,12 @@ L.XPBARTEXT_QUESTS_DESC = "Show the XP the quests in your log give: only the one
 L.XPBARTEXT_QUESTS_COMPLETE = "Ready to Turn In"
 L.XPBARTEXT_QUESTS_ALL = "All Quests"
 L.XPBARTEXT_QUESTS_OFF = "Off"
+L.XPBARTEXT_QUEST_COLOR = "Green When Leveling"
+L.XPBARTEXT_QUEST_COLOR_DESC = "Show the quest XP text in green once turning those quests in "
+    .. "would level you."
+L.XPBARTEXT_QUEST_BAR ="Quest XP on Bar"
+L.XPBARTEXT_QUEST_BAR_DESC = "Fill the bar on from your XP in green with the XP of the quests "
+    .. "ready to turn in, like rested XP."
 L.XPBARTEXT_XP = "XP: %s / %s" -- current, needed for the level
 L.XPBARTEXT_WITH_PERCENT = "%s (%d%%)" -- the XP text, its percent
 L.XPBARTEXT_AMOUNT = "%s (%d%%)" -- an amount of XP, as a percent of the level

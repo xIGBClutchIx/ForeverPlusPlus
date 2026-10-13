@@ -19,6 +19,11 @@ ns.changelog = {
                 { L.WAYLAIDCRATES_TITLE, "A new module for filling Waylaid Crates. Its Waylaid "
                     .. "Crates entry in the auction house's categories lists every item your crates "
                     .. "still need, less what's already in your bags." },
+                { L.XPBARTEXT_TITLE, "The new Quest XP on Bar option (off by default) fills the "
+                    .. "experience bar on from your XP in green with what your quests ready to turn "
+                    .. "in will give, like rested XP." },
+                { L.XPBARTEXT_TITLE, "The new Green When Leveling option (on by default) turns off "
+                    .. "the green quest XP text shown once turning those quests in would level you." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.WAYLAIDCRATES_TITLE, "Item Tooltips' Waylaid Crate Costs option moved here as "
@@ -47,6 +52,8 @@ ns.changelog = {
                 { L.CHATHISTORY_TITLE, "Lines Saved goes up to 125, about all a chat window holds." },
             } },
             { L.CHANGELOG_FIXED, {
+                { L.XPBARTEXT_TITLE, "Blizzard's own XP text no longer shows through under ours "
+                    .. "after a reload." },
                 { L.CLASSCOLORS_TITLE, "Hostile NPCs' health bars are red, like their names, "
                     .. "instead of sometimes yellow or green." },
                 { L.CHANGELOG_COMMANDS, "/fpp toggle on a tool, such as Self Test, says it's always "

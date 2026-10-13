@@ -8,6 +8,8 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 - **Quest Tracker**: the new Current Zone Only option (off by default) tracks only the quests of the zone you're in, and tracks the others again when you get there. The quest your map follows always shows.
 - **Waylaid Crates**: a new module for filling Waylaid Crates. Its Waylaid Crates entry in the auction house's categories lists every item your crates still need, less what's already in your bags.
+- **XP Bar Text**: the new Quest XP on Bar option (off by default) fills the experience bar on from your XP in green with what your quests ready to turn in will give, like rested XP.
+- **XP Bar Text**: the new Green When Leveling option (on by default) turns off the green quest XP text shown once turning those quests in would level you.
 
 ### Changed
 
@@ -24,6 +26,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Fixed
 
+- **XP Bar Text**: Blizzard's own XP text no longer shows through under ours after a reload.
 - **Class Colors**: hostile NPCs' health bars are red, like their names, instead of sometimes yellow or green.
 - **Commands**: `/fpp toggle` on a tool, such as Self Test, says it's always on, instead of that it's off.
 - **Profession Tooltips**: recolors the "Requires" line on nodes and creatures in languages that number its parts (such as "%1$s"), which it missed before.
