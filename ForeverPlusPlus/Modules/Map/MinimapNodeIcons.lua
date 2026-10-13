@@ -1,5 +1,6 @@
 -- Minimap Node Icons: the herb or ore a tracking dot on the minimap stands for, as that item's
--- icon over the dot, tinted red while the player's skill is too low to gather it. The game draws
+-- icon over the dot, optionally red while the player's skill is too low to gather it and gray once
+-- gathering it no longer raises the skill. The game draws
 -- the dots itself and lists them nowhere an addon can read, but Forever's minimap has
 -- UpdateMouseoverAtPoint, which points its mouseover at a spot as if the cursor were there, and the
 -- tooltip data for the mouseover names what is under that spot. So while Find Herbs or Find
@@ -29,6 +30,7 @@ local module = ns.NewModule("MinimapNodeIcons", L.MINIMAPNODEICONS_DESC, {
     enabled = true,
     size = 16, -- icon size on the minimap
     tint = false, -- red while the skill is too low
+    gray = false, -- gray once gathering no longer raises the skill
     detail = "medium", -- a key of STEPS
     chat = true,
     -- Node name -> icon, for names not in NODES, from what gathering them gave. Data, not a setting.
@@ -44,6 +46,7 @@ module.options = {
         min = 10, max = 24, step = 1, format = "%d",
     },
     { key = "tint", name = L.MINIMAPNODEICONS_TINT, description = L.MINIMAPNODEICONS_TINT_DESC },
+    { key = "gray", name = L.MINIMAPNODEICONS_GRAY, description = L.MINIMAPNODEICONS_GRAY_DESC },
     {
         key = "detail", name = L.MINIMAPNODEICONS_DETAIL, description = L.MINIMAPNODEICONS_DETAIL_DESC,
         choices = {
@@ -83,6 +86,7 @@ local SAME = 9 -- hits of one name this close (minimap units) are one node
 local EDGE = 2 -- keep probes and icons this far inside the minimap's edge
 local LEARN_WAIT = 10 -- seconds from a cast to its loot window that still count as one gather
 local RED = { 1, 0.25, 0.25 } -- the icon's vertex color while the skill is too low
+local GRAY = { 0.7, 0.7, 0.7 } -- dims a gray (desaturated) icon, for nodes that give no skill
 
 -- The icon for a node's name, or nil for a name that isn't a node we know.
 local function iconFor(name)
@@ -94,15 +98,20 @@ local function iconFor(name)
     return node and C_Item.GetItemIconByID(node[3])
 end
 
--- Whether the player's skill is too low to gather the node named `name` (or they lack the
--- profession). False for a node whose skill isn't known.
-local function tooLow(name)
+-- How the player's skill stands against the node named `name`: "low" when it's too low to gather
+-- (or they lack the profession), "gray" when gathering it no longer raises the skill, else nil,
+-- as for a node whose skill isn't known.
+local function standing(name)
     local node = NODES[name]
     if not node then
-        return false
+        return nil
     end
     local rank = Professions.Rank(node[1])
-    return not rank or rank < node[2]
+    if not rank or rank < node[2] then
+        return "low"
+    elseif Professions.Difficulty(rank, node[2]) == Professions.TRIVIAL then
+        return "gray"
+    end
 end
 
 -- Where the player is ---------------------------------------------------------------------------
@@ -247,7 +256,8 @@ end
 local function finish()
     nodes, nodesMap = {}, sweep.mapID
     for _, hit in ipairs(sweep.hits) do
-        nodes[#nodes + 1] = { x = hit.x / hit.n, y = hit.y / hit.n, icon = hit.icon, low = tooLow(hit.name) }
+        nodes[#nodes + 1] = { x = hit.x / hit.n, y = hit.y / hit.n, icon = hit.icon,
+            standing = standing(hit.name) }
     end
     sweep = nil
     nextSweep = GetTime() + REST
@@ -325,7 +335,7 @@ end
 local function draw(v)
     local shown = 0
     if v and v.mapID == nodesMap then
-        local size, tint = module.db.size, module.db.tint
+        local size, tint, gray = module.db.size, module.db.tint, module.db.gray
         local limit = v.half - EDGE - size / 4
         for _, node in ipairs(nodes) do
             local right, up = toMinimap(v, node.x, node.y)
@@ -333,8 +343,12 @@ local function draw(v)
                 shown = shown + 1
                 local icon = getIcon(shown)
                 icon:SetTexture(node.icon)
-                if tint and node.low then
+                local grayed = gray and node.standing == "gray"
+                icon:SetDesaturated(grayed)
+                if tint and node.standing == "low" then
                     icon:SetVertexColor(RED[1], RED[2], RED[3])
+                elseif grayed then
+                    icon:SetVertexColor(GRAY[1], GRAY[2], GRAY[3])
                 else
                     icon:SetVertexColor(1, 1, 1)
                 end
