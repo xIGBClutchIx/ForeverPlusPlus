@@ -14,6 +14,15 @@ local CreateFrame, C_Map, C_Item = CreateFrame, C_Map, C_Item
 local L = ns.L
 local Professions = ns.Professions
 local NoBreak = ns.MapTooltip.NoBreak
+local Keys = ns.Keys
+
+-- The Skip Key dropdown's keys, without None: each row that uses the key has its own Off.
+local DETAIL_KEYS = {}
+for _, choice in ipairs(Keys.CHOICES) do
+    if choice[1] ~= "none" then
+        DETAIL_KEYS[#DETAIL_KEYS + 1] = choice
+    end
+end
 
 local module = ns.modules.WorldMap:NewPart({
     key = "zoneInfo", name = L.ZONEINFO_TITLE, description = L.ZONEINFO_DESC,
@@ -74,11 +83,7 @@ module:AddOptions({
     },
     {
         key = "detailKey", name = L.ZONEINFO_DETAIL_KEY, description = L.ZONEINFO_DETAIL_KEY_DESC,
-        choices = {
-            { "shift", L.KEY_SHIFT },
-            { "alt", L.KEY_ALT },
-            { "ctrl", L.KEY_CTRL },
-        },
+        choices = DETAIL_KEYS,
         section = GENERAL,
     },
     { key = "levels", name = L.ZONEINFO_LEVELS, description = L.ZONEINFO_LEVELS_DESC, section = ZONE },
@@ -181,13 +186,7 @@ end
 
 -- Whether the detail key is held.
 local function detailHeld()
-    local key = module.db.detailKey
-    if key == "alt" then
-        return IsAltKeyDown()
-    elseif key == "ctrl" then
-        return IsControlKeyDown()
-    end
-    return IsShiftKeyDown()
+    return Keys.IsDown(module.db.detailKey)
 end
 
 -- Whether a gathering row shows: its setting is "always", "known" and the player has the
