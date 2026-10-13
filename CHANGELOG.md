@@ -30,11 +30,12 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Chat History**: Lines Saved goes up to 125, about all a chat window holds.
 - **Already Known**: the Loot option also marks known items on group loot rolls, before you choose Need or Greed.
 - **Auto Sell Junk**: Keep Everything Buyable Back sells only as much junk as the buyback list has room for beside what you sold yourself, so an item sold by mistake stays buyable.
-- **Bag Slot Counter**: the count turns orange when 4 or fewer slots are free.
+- **Bag Slot Counter**: the count turns orange when 4 or fewer slots are free. The new Color When Low option sets that number, or turns the colors off.
 - **Currency Bar**: with nothing to show, it says how to track currencies instead of showing an empty box.
 - **Error Catcher**: says on its Settings page, instead of in chat, when another addon such as BugGrabber is catching Lua errors, and leaves Blizzard's error window and blocked action popup to it.
-- **Flight Timer**: the flight map tooltip's Flight Time line looks like the Sell Price line, with the time at the right.
-- **Short Channel Names**: the Letter style is now Initials, so Local Defense and Looking For Group show as [LD] and [LFG].
+- **Flight Timer**: the flight map tooltip's Flight Time line looks like the Sell Price line, with the time at the right. The new Tooltip Line option puts it back on one line, white or gray.
+- **Short Channel Names**: the Style dropdown also offers initials ([LFG] for LookingForGroup) and the name without its zone ([General]), alone or after the number. Number and Initials ([1. LFG]) is the new default.
+- **Short Channel Names**: the new Guild, Party, and Raid option (on by default) also shortens [Guild], [Officer], [Party], [Raid], [Raid Warning], and [Instance] to [GD], [O], [P], [R], [RW], and [I].
 
 ### Fixed
 

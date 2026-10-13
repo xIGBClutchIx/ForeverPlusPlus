@@ -70,16 +70,22 @@ ns.changelog = {
                 { L.AUTOSELLJUNK_TITLE, "Keep Everything Buyable Back sells only as much junk as "
                     .. "the buyback list has room for beside what you sold yourself, so an item "
                     .. "sold by mistake stays buyable." },
-                { L.BAGSLOTCOUNTER_TITLE, "The count turns orange when 4 or fewer slots are free." },
+                { L.BAGSLOTCOUNTER_TITLE, "The count turns orange when 4 or fewer slots are free. "
+                    .. "The new Color When Low option sets that number, or turns the colors off." },
                 { L.CURRENCYBAR_TITLE, "With nothing to show, it says how to track currencies "
                     .. "instead of showing an empty box." },
                 { L.ERRORCATCHER_TITLE, "Says on its Settings page, instead of in chat, when "
                     .. "another addon such as BugGrabber is catching Lua errors, and leaves "
                     .. "Blizzard's error window and blocked action popup to it." },
                 { L.FLIGHTTIMER_TITLE, "The flight map tooltip's Flight Time line looks like the "
-                    .. "Sell Price line, with the time at the right." },
-                { L.SHORTCHANNELNAMES_TITLE, "The Letter style is now Initials, so Local Defense "
-                    .. "and Looking For Group show as [LD] and [LFG]." },
+                    .. "Sell Price line, with the time at the right. The new Tooltip Line option "
+                    .. "puts it back on one line, white or gray." },
+                { L.SHORTCHANNELNAMES_TITLE, "The Style dropdown also offers initials ([LFG] for "
+                    .. "LookingForGroup) and the name without its zone ([General]), alone or after "
+                    .. "the number. Number and Initials ([1. LFG]) is the new default." },
+                { L.SHORTCHANNELNAMES_TITLE, "The new Guild, Party, and Raid option (on by "
+                    .. "default) also shortens [Guild], [Officer], [Party], [Raid], [Raid Warning], "
+                    .. "and [Instance] to [GD], [O], [P], [R], [RW], and [I]." },
             } },
             { L.CHANGELOG_FIXED, {
                 { L.XPBARTEXT_TITLE, "Blizzard's own XP text no longer shows through under ours "
