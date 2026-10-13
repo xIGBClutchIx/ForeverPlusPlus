@@ -13,6 +13,8 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_ADDED, {
+                { L.QUESTGIVERLEVELS_TITLE, "A new module that shows each quest's level before its "
+                    .. "name in a quest giver's list, like the quest log's [12]. On by default." },
                 { L.QUESTTRACKER_TITLE, "The new Current Zone Only option (off by default) tracks "
                     .. "only the quests of the zone you're in, and tracks the others again when you "
                     .. "get there. The quest your map follows always shows." },

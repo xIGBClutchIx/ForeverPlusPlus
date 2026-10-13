@@ -46,6 +46,11 @@ L.QUESTTRACKER_PADDING_DESC = "How much room the box leaves around the text."
 L.QUESTTRACKER_FADE = "Fade in Combat"
 L.QUESTTRACKER_FADE_DESC = "Make the tracker faint while you're in combat, and clear again after."
 
+-- QuestGiverLevels
+L.QUESTGIVERLEVELS_TITLE = "Quest Giver Levels"
+L.QUESTGIVERLEVELS_DESC = "Show each quest's level before its name in a quest giver's list, "
+    .. "like the quest log's [12]."
+
 -- ForeverQuestIcons
 L.FOREVERQUESTICONS_TITLE = "Forever Quest Icons"
 L.FOREVERQUESTICONS_DESC = "Mark quests that are new to Forever, the ones that weren't in original "
