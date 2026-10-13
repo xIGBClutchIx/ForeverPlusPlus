@@ -6,6 +6,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Added
 
+- **Item Tooltips**: the new Repair Cost line (off by default) shows what repairing damaged gear costs, on gear you wear or carry, without a merchant's repair cursor.
 - **Quest Tracker**: the new Current Zone Only option (off by default) tracks only the quests of the zone you're in, and tracks the others again when you get there. The quest your map follows always shows.
 - **Waylaid Crates**: a new module for filling Waylaid Crates. Its Waylaid Crates entry in the auction house's categories lists every item your crates still need, less what's already in your bags.
 - **XP Bar Text**: the new Fill Bar with Ready Quests option (off by default) fills the experience bar on from your XP in green with what your quests ready to turn in will give, like rested XP.

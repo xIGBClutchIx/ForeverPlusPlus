@@ -99,6 +99,7 @@
     "GetMoneyString",
     "BreakUpLargeNumbers",
     "IsShiftKeyDown",
+    "InRepairMode",
     "IsAltKeyDown",
     "IsControlKeyDown",
     "C_Timer",

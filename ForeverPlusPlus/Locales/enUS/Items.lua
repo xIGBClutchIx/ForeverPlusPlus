@@ -116,17 +116,23 @@ L.ITEMCOUNT_IN_BANK = "%d in bank" -- count
 L.EASYDELETE_TITLE = "Easy Delete"
 L.EASYDELETE_DESC = "Type DELETE for you when destroying a good item, so Yes is a single click."
 
--- ItemTooltips (its parts' sections use SELLPRICE_TITLE, ITEMCOUNT_TITLE, and AUCTIONPRICES_TITLE)
+-- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE, and
+-- AUCTIONPRICES_TITLE)
 L.ITEMTOOLTIPS_TITLE = "Item Tooltips"
-L.ITEMTOOLTIPS_DESC = "Add to item tooltips: the sell price of the whole stack, how many you own, "
-    .. "and the lowest auction house buyout, scanned when you open the auction house. Each has "
-    .. "its own checkbox."
+L.ITEMTOOLTIPS_DESC = "Add to item tooltips: the sell price of the whole stack, what damaged gear "
+    .. "costs to repair, how many you own, and the lowest auction house buyout, scanned when you "
+    .. "open the auction house. Each has its own checkbox."
 L.ITEMTOOLTIPS_SECTION_GENERAL = "Price Lines"
 L.ITEMTOOLTIPS_SELLPRICE = "Show Sell Price"
+L.ITEMTOOLTIPS_REPAIRCOST = "Show Repair Cost"
 L.ITEMTOOLTIPS_ITEMCOUNT = "Show Item Count"
 L.ITEMTOOLTIPS_AUCTION = "Show Auction Prices"
 L.SELLPRICE_TITLE = "Sell Price"
 L.SELLPRICE_DESC = "Show the vendor price of the whole stack. Hold Shift to see one item."
+L.REPAIRCOST_TITLE = "Repair Cost"
+L.REPAIRCOST_DESC = "Show what repairing damaged gear costs, on gear you wear or carry, without "
+    .. "needing a merchant's repair cursor."
+L.REPAIRCOST_LINE = "Repair Cost"
 
 -- Price lines in item tooltips
 L.PRICE_MODE = "Price For"
