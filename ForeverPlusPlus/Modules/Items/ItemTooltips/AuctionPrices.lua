@@ -885,6 +885,9 @@ function module:OnEnable()
     for event, fn in pairs(events) do
         self:On(event, fn)
     end
+    -- Turned on with the auction house already open, its show event has passed.
+    local frame = _G.AuctionHouseFrame
+    open = frame and frame:IsShown() and true or false
     -- The hook can't be removed; addAuctionPrice checks the part is on instead.
     ItemTooltip.OnPrices(addAuctionPrice)
     -- The price changes from the stack to one item with Shift.
