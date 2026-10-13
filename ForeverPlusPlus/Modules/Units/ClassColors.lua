@@ -109,7 +109,9 @@ local function reactionColor(unit)
     if readable(controlled) and not controlled and readable(tapped) and tapped then
         return TAPPED
     end
-    local reaction = UnitReaction("player", unit)
+    -- The unit's reaction to the player, as Blizzard's tooltip reads it. The player's reaction to
+    -- the unit can differ: a hostile mob of a faction the player is neutral with reads neutral.
+    local reaction = UnitReaction(unit, "player")
     if not (readable(reaction) and reaction) then
         return nil
     elseif reaction < NEUTRAL_REACTION then

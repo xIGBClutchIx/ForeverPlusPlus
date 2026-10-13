@@ -22,6 +22,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Fixed
 
+- **Class Colors**: hostile NPCs' health bars are red, like their names, instead of sometimes yellow or green.
 - **Commands**: `/fpp toggle` on a tool, such as Self Test, says it's always on, instead of that it's off.
 - **Profession Tooltips**: recolors the "Requires" line on nodes and creatures in languages that number its parts (such as "%1$s"), which it missed before.
 

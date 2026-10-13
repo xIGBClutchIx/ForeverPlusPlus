@@ -44,6 +44,8 @@ ns.changelog = {
                     .. "their titles, such as /fpp toggle BagSlotCounter." },
             } },
             { L.CHANGELOG_FIXED, {
+                { L.CLASSCOLORS_TITLE, "Hostile NPCs' health bars are red, like their names, "
+                    .. "instead of sometimes yellow or green." },
                 { L.CHANGELOG_COMMANDS, "/fpp toggle on a tool, such as Self Test, says it's always "
                     .. "on, instead of that it's off." },
                 { L.PROFTOOLTIPS_TITLE, "Recolors the \"Requires\" line on nodes and creatures in "
