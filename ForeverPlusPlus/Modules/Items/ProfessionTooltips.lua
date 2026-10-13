@@ -79,66 +79,14 @@ module.options = {
 }
 
 -- Data ---------------------------------------------------------------------------------------
--- The skill each gathers at, from Classic. Forever may change some; fix them here.
+-- The skill each gathers at, from Classic. Forever may change some; fix them here, and herbs and
+-- veins in Lib/Professions, which Minimap Node Icons shares.
 
-local NODES = { -- object name -> { skill line, skill }
-    ["Peacebloom"] = { HERB, 1 },
-    ["Silverleaf"] = { HERB, 1 },
-    ["Earthroot"] = { HERB, 15 },
-    ["Mageroyal"] = { HERB, 50 },
-    ["Briarthorn"] = { HERB, 70 },
-    ["Stranglekelp"] = { HERB, 85 },
-    ["Bruiseweed"] = { HERB, 100 },
-    ["Wild Steelbloom"] = { HERB, 115 },
-    ["Grave Moss"] = { HERB, 120 },
-    ["Kingsblood"] = { HERB, 125 },
-    ["Liferoot"] = { HERB, 150 },
-    ["Fadeleaf"] = { HERB, 160 },
-    ["Goldthorn"] = { HERB, 170 },
-    ["Khadgar's Whisker"] = { HERB, 185 },
-    ["Wintersbite"] = { HERB, 195 },
-    ["Firebloom"] = { HERB, 205 },
-    ["Purple Lotus"] = { HERB, 210 },
-    ["Arthas' Tears"] = { HERB, 220 },
-    ["Sungrass"] = { HERB, 230 },
-    ["Blindweed"] = { HERB, 235 },
-    ["Ghost Mushroom"] = { HERB, 245 },
-    ["Gromsblood"] = { HERB, 250 },
-    ["Golden Sansam"] = { HERB, 260 },
-    ["Dreamfoil"] = { HERB, 270 },
-    ["Mountain Silversage"] = { HERB, 280 },
-    ["Plaguebloom"] = { HERB, 285 },
-    ["Icecap"] = { HERB, 290 },
-    ["Black Lotus"] = { HERB, 300 },
-
-    ["Copper Vein"] = { MINE, 1 },
-    ["Tin Vein"] = { MINE, 65 },
-    ["Incendicite Mineral Vein"] = { MINE, 65 },
-    ["Silver Vein"] = { MINE, 75 },
-    ["Ooze Covered Silver Vein"] = { MINE, 75 },
-    ["Lesser Bloodstone Deposit"] = { MINE, 75 },
-    ["Iron Deposit"] = { MINE, 125 },
-    ["Ooze Covered Iron Deposit"] = { MINE, 125 },
-    ["Indurium Mineral Vein"] = { MINE, 150 },
-    ["Gold Vein"] = { MINE, 155 },
-    ["Ooze Covered Gold Vein"] = { MINE, 155 },
-    ["Mithril Deposit"] = { MINE, 175 },
-    ["Ooze Covered Mithril Deposit"] = { MINE, 175 },
-    ["Truesilver Deposit"] = { MINE, 230 },
-    ["Ooze Covered Truesilver Deposit"] = { MINE, 230 },
-    ["Dark Iron Deposit"] = { MINE, 230 },
-    ["Small Thorium Vein"] = { MINE, 245 },
-    ["Ooze Covered Thorium Vein"] = { MINE, 245 },
-    ["Rich Thorium Vein"] = { MINE, 275 },
-    ["Ooze Covered Rich Thorium Vein"] = { MINE, 275 },
-    ["Hakkari Thorium Vein"] = { MINE, 275 },
-    ["Small Obsidian Chunk"] = { MINE, 305 },
-    ["Large Obsidian Chunk"] = { MINE, 305 },
-
+local NODES = setmetatable({ -- object name -> { skill line, skill }
     -- Locked chests in the world; add more (and doors) here as they're confirmed in game.
     ["Solid Chest"] = { LOCK, 1 },
     ["Large Solid Chest"] = { LOCK, 1 },
-}
+}, { __index = Professions.NODES })
 
 local ITEMS = { -- item ID -> { skill line, skill }
     [2447] = { HERB, 1 }, -- Peacebloom

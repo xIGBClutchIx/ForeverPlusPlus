@@ -1,5 +1,6 @@
--- The player's profession skills by skill line, read once and again only after they change.
--- Nothing is listened to until a module first asks.
+-- The player's profession skills by skill line, read once and again only after they change, and
+-- the herbs and veins in the world with the skill they take. Nothing is listened to until a
+-- module first asks.
 local _, ns = ...
 
 local type = type
@@ -26,6 +27,66 @@ local YELLOW = { r = 1, g = 1, b = 0 }
 local GREEN = COLORS.standard or { r = 0.25, g = 0.75, b = 0.25 }
 local GRAY = COLORS.trivial or { r = 0.5, g = 0.5, b = 0.5 }
 Professions.STANDARD = GREEN -- Blizzard's green for a quest at your level, for "enough"
+
+local HERB, MINE = Professions.HERBALISM, Professions.MINING
+
+-- Herbs and veins by their name in the world (English): the skill line that gathers them, the
+-- skill it takes, from Classic, and the item they give first. Forever may change some; fix them
+-- here.
+Professions.NODES = { -- object name -> { skill line, skill, item ID }
+    ["Peacebloom"] = { HERB, 1, 2447 },
+    ["Silverleaf"] = { HERB, 1, 765 },
+    ["Earthroot"] = { HERB, 15, 2449 },
+    ["Mageroyal"] = { HERB, 50, 785 },
+    ["Briarthorn"] = { HERB, 70, 2450 },
+    ["Stranglekelp"] = { HERB, 85, 3820 },
+    ["Bruiseweed"] = { HERB, 100, 2453 },
+    ["Wild Steelbloom"] = { HERB, 115, 3355 },
+    ["Grave Moss"] = { HERB, 120, 3369 },
+    ["Kingsblood"] = { HERB, 125, 3356 },
+    ["Liferoot"] = { HERB, 150, 3357 },
+    ["Fadeleaf"] = { HERB, 160, 3818 },
+    ["Goldthorn"] = { HERB, 170, 3821 },
+    ["Khadgar's Whisker"] = { HERB, 185, 3358 },
+    ["Wintersbite"] = { HERB, 195, 3819 },
+    ["Firebloom"] = { HERB, 205, 4625 },
+    ["Purple Lotus"] = { HERB, 210, 8831 },
+    ["Arthas' Tears"] = { HERB, 220, 8836 },
+    ["Sungrass"] = { HERB, 230, 8838 },
+    ["Blindweed"] = { HERB, 235, 8839 },
+    ["Ghost Mushroom"] = { HERB, 245, 8845 },
+    ["Gromsblood"] = { HERB, 250, 8846 },
+    ["Golden Sansam"] = { HERB, 260, 13464 },
+    ["Dreamfoil"] = { HERB, 270, 13463 },
+    ["Mountain Silversage"] = { HERB, 280, 13465 },
+    ["Plaguebloom"] = { HERB, 285, 13466 },
+    ["Icecap"] = { HERB, 290, 13467 },
+    ["Black Lotus"] = { HERB, 300, 13468 },
+
+    ["Copper Vein"] = { MINE, 1, 2770 },
+    ["Tin Vein"] = { MINE, 65, 2771 },
+    ["Incendicite Mineral Vein"] = { MINE, 65, 3340 },
+    ["Silver Vein"] = { MINE, 75, 2775 },
+    ["Ooze Covered Silver Vein"] = { MINE, 75, 2775 },
+    ["Lesser Bloodstone Deposit"] = { MINE, 75, 4278 },
+    ["Iron Deposit"] = { MINE, 125, 2772 },
+    ["Ooze Covered Iron Deposit"] = { MINE, 125, 2772 },
+    ["Indurium Mineral Vein"] = { MINE, 150, 5833 },
+    ["Gold Vein"] = { MINE, 155, 2776 },
+    ["Ooze Covered Gold Vein"] = { MINE, 155, 2776 },
+    ["Mithril Deposit"] = { MINE, 175, 3858 },
+    ["Ooze Covered Mithril Deposit"] = { MINE, 175, 3858 },
+    ["Truesilver Deposit"] = { MINE, 230, 7911 },
+    ["Ooze Covered Truesilver Deposit"] = { MINE, 230, 7911 },
+    ["Dark Iron Deposit"] = { MINE, 230, 11370 },
+    ["Small Thorium Vein"] = { MINE, 245, 10620 },
+    ["Ooze Covered Thorium Vein"] = { MINE, 245, 10620 },
+    ["Rich Thorium Vein"] = { MINE, 275, 10620 },
+    ["Ooze Covered Rich Thorium Vein"] = { MINE, 275, 10620 },
+    ["Hakkari Thorium Vein"] = { MINE, 275, 10620 },
+    ["Small Obsidian Chunk"] = { MINE, 305, 22202 },
+    ["Large Obsidian Chunk"] = { MINE, 305, 22203 },
+}
 
 ---How hard gathering something that needs `need` is at skill `rank`, as a color (r, g, b): red
 ---can't yet, then orange (a skill point every time), yellow (often), green (sometimes), and gray

@@ -1,14 +1,15 @@
 -- Minimap Node Icons: the herb or ore a tracking dot on the minimap stands for, as that item's
--- icon over the dot. The game draws the dots itself and lists them nowhere an addon can read,
--- but Forever's minimap has UpdateMouseoverAtPoint, which points its mouseover at a spot as if the
--- cursor were there, and the tooltip data for the mouseover names what is under that spot. So
--- while Find Herbs or Find Minerals is on, the minimap is swept with probes a few times a second,
--- out of combat and while the cursor isn't on it. Each node found is kept as a spot on the zone
--- map, so its icon follows the minimap between sweeps as the player moves and turns.
+-- icon over the dot, tinted red while the player's skill is too low to gather it. The game draws
+-- the dots itself and lists them nowhere an addon can read, but Forever's minimap has
+-- UpdateMouseoverAtPoint, which points its mouseover at a spot as if the cursor were there, and the
+-- tooltip data for the mouseover names what is under that spot. So while Find Herbs or Find
+-- Minerals is on, the minimap is swept with probes a few times a second, out of combat and while
+-- the cursor isn't on it. Each node found is kept as a spot on the zone map, so its icon follows
+-- the minimap between sweeps as the player moves and turns.
 --
--- Names are matched in English through NODES. Any other name is learned the first time the player
--- gathers it: the spell's target, then the first item in the loot window. Ideas from NodeSight;
--- none of its code.
+-- Names are matched in English through Professions.NODES. Any other name is learned the first
+-- time the player gathers it: the spell's target, then the first item in the loot window; a
+-- learned node has no known skill, so it's never tinted. Ideas from NodeSight; none of its code.
 local _, ns = ...
 
 local ipairs, type, pcall, floor, sin, cos = ipairs, type, pcall, math.floor, math.sin, math.cos
@@ -21,10 +22,13 @@ local GetNumLootItems, GetLootSlotInfo = GetNumLootItems, GetLootSlotInfo
 local L = ns.L
 local readable = ns.IsReadable
 local plain = ns.Text.Plain
+local Professions = ns.Professions
+local NODES = Professions.NODES
 
 local module = ns.NewModule("MinimapNodeIcons", L.MINIMAPNODEICONS_DESC, {
-    enabled = false,
+    enabled = true,
     size = 16, -- icon size on the minimap
+    tint = true, -- red while the skill is too low
     detail = "medium", -- a key of STEPS
     chat = true,
     -- Node name -> icon, for names not in NODES, from what gathering them gave. Data, not a setting.
@@ -39,6 +43,7 @@ module.options = {
         key = "size", name = L.MINIMAPNODEICONS_SIZE, description = L.MINIMAPNODEICONS_SIZE_DESC,
         min = 10, max = 24, step = 1, format = "%d",
     },
+    { key = "tint", name = L.MINIMAPNODEICONS_TINT, description = L.MINIMAPNODEICONS_TINT_DESC },
     {
         key = "detail", name = L.MINIMAPNODEICONS_DETAIL, description = L.MINIMAPNODEICONS_DETAIL_DESC,
         choices = {
@@ -63,64 +68,11 @@ module.actions = {
     },
 }
 
--- Data ---------------------------------------------------------------------------------------
--- The item each node gives first, for its icon, from Classic. Forever may add nodes; those are
--- learned by gathering them.
-
-local NODES = { -- object name -> item ID
-    ["Peacebloom"] = 2447,
-    ["Silverleaf"] = 765,
-    ["Earthroot"] = 2449,
-    ["Mageroyal"] = 785,
-    ["Briarthorn"] = 2450,
-    ["Stranglekelp"] = 3820,
-    ["Bruiseweed"] = 2453,
-    ["Wild Steelbloom"] = 3355,
-    ["Grave Moss"] = 3369,
-    ["Kingsblood"] = 3356,
-    ["Liferoot"] = 3357,
-    ["Fadeleaf"] = 3818,
-    ["Goldthorn"] = 3821,
-    ["Khadgar's Whisker"] = 3358,
-    ["Wintersbite"] = 3819,
-    ["Firebloom"] = 4625,
-    ["Purple Lotus"] = 8831,
-    ["Arthas' Tears"] = 8836,
-    ["Sungrass"] = 8838,
-    ["Blindweed"] = 8839,
-    ["Ghost Mushroom"] = 8845,
-    ["Gromsblood"] = 8846,
-    ["Golden Sansam"] = 13464,
-    ["Dreamfoil"] = 13463,
-    ["Mountain Silversage"] = 13465,
-    ["Plaguebloom"] = 13466,
-    ["Icecap"] = 13467,
-    ["Black Lotus"] = 13468,
-
-    ["Copper Vein"] = 2770,
-    ["Tin Vein"] = 2771,
-    ["Incendicite Mineral Vein"] = 3340,
-    ["Silver Vein"] = 2775,
-    ["Ooze Covered Silver Vein"] = 2775,
-    ["Lesser Bloodstone Deposit"] = 4278,
-    ["Iron Deposit"] = 2772,
-    ["Ooze Covered Iron Deposit"] = 2772,
-    ["Indurium Mineral Vein"] = 5833,
-    ["Gold Vein"] = 2776,
-    ["Ooze Covered Gold Vein"] = 2776,
-    ["Mithril Deposit"] = 3858,
-    ["Ooze Covered Mithril Deposit"] = 3858,
-    ["Truesilver Deposit"] = 7911,
-    ["Ooze Covered Truesilver Deposit"] = 7911,
-    ["Dark Iron Deposit"] = 11370,
-    ["Small Thorium Vein"] = 10620,
-    ["Ooze Covered Thorium Vein"] = 10620,
-    ["Rich Thorium Vein"] = 10620,
-    ["Ooze Covered Rich Thorium Vein"] = 10620,
-    ["Hakkari Thorium Vein"] = 10620,
-    ["Small Obsidian Chunk"] = 22202,
-    ["Large Obsidian Chunk"] = 22202,
-}
+-- Forever only: the minimap's UpdateMouseoverAtPoint is in its API docs (1.60.1).
+function module:IsAvailable()
+    return Minimap and Minimap.UpdateMouseoverAtPoint and C_TooltipInfo
+        and C_TooltipInfo.GetMinimapMouseover and true or false
+end
 
 local HERBS, MINERALS = 2383, 2580 -- Find Herbs, Find Minerals
 
@@ -130,6 +82,7 @@ local REST = 0.4 -- seconds between sweeps
 local SAME = 9 -- hits of one name this close (minimap units) are one node
 local EDGE = 2 -- keep probes and icons this far inside the minimap's edge
 local LEARN_WAIT = 10 -- seconds from a cast to its loot window that still count as one gather
+local RED = { 1, 0.25, 0.25 } -- the icon's vertex color while the skill is too low
 
 -- The icon for a node's name, or nil for a name that isn't a node we know.
 local function iconFor(name)
@@ -137,8 +90,19 @@ local function iconFor(name)
     if learned then
         return learned
     end
-    local itemID = NODES[name]
-    return itemID and C_Item.GetItemIconByID(itemID)
+    local node = NODES[name]
+    return node and C_Item.GetItemIconByID(node[3])
+end
+
+-- Whether the player's skill is too low to gather the node named `name` (or they lack the
+-- profession). False for a node whose skill isn't known.
+local function tooLow(name)
+    local node = NODES[name]
+    if not node then
+        return false
+    end
+    local rank = Professions.Rank(node[1])
+    return not rank or rank < node[2]
 end
 
 -- Where the player is ---------------------------------------------------------------------------
@@ -200,8 +164,8 @@ end
 local blocked = false -- the client refused a probe; stop until /reload
 
 -- Points the minimap's mouseover at a spot right and up of its center and returns the text the
--- tooltip there would show. Forever only: UpdateMouseoverAtPoint is in its API docs (1.60.1).
--- Its points are taken to be the cursor's (GetCursorPosition): screen pixels from the bottom left.
+-- tooltip there would show. Its points are taken to be the cursor's (GetCursorPosition): screen
+-- pixels from the bottom left. Unverified on Forever; see docs/forever-api.md.
 local function probe(right, up)
     local cx, cy = Minimap:GetCenter()
     local scale = Minimap:GetEffectiveScale()
@@ -243,7 +207,7 @@ end
 
 -- Sweeping ---------------------------------------------------------------------------------------
 
-local nodes = {} -- the last sweep's nodes: { x, y, icon } on the zone map `nodesMap`
+local nodes = {} -- the last sweep's nodes: { x, y, icon, low } on the zone map `nodesMap`
 local nodesMap
 local seen = {} -- names the minimap showed that aren't nodes we know, for learning
 
@@ -283,7 +247,7 @@ end
 local function finish()
     nodes, nodesMap = {}, sweep.mapID
     for _, hit in ipairs(sweep.hits) do
-        nodes[#nodes + 1] = { x = hit.x / hit.n, y = hit.y / hit.n, icon = hit.icon }
+        nodes[#nodes + 1] = { x = hit.x / hit.n, y = hit.y / hit.n, icon = hit.icon, low = tooLow(hit.name) }
     end
     sweep = nil
     nextSweep = GetTime() + REST
@@ -361,7 +325,7 @@ end
 local function draw(v)
     local shown = 0
     if v and v.mapID == nodesMap then
-        local size = module.db.size
+        local size, tint = module.db.size, module.db.tint
         local limit = v.half - EDGE - size / 4
         for _, node in ipairs(nodes) do
             local right, up = toMinimap(v, node.x, node.y)
@@ -369,6 +333,11 @@ local function draw(v)
                 shown = shown + 1
                 local icon = getIcon(shown)
                 icon:SetTexture(node.icon)
+                if tint and node.low then
+                    icon:SetVertexColor(RED[1], RED[2], RED[3])
+                else
+                    icon:SetVertexColor(1, 1, 1)
+                end
                 icon:SetSize(size, size)
                 icon:SetPoint("CENTER", Minimap, "CENTER", right, up)
                 icon:Show()
@@ -417,12 +386,14 @@ local function onLootOpened()
     end
 end
 
+-- A skill-up can lift the tint: sweep again now, which reads the skill again.
+local function onSkill()
+    nextSweep = 0
+end
+
 -- Turning on and off ------------------------------------------------------------------------------
 
 function module:OnEnable()
-    if not (Minimap and Minimap.UpdateMouseoverAtPoint and C_TooltipInfo and C_TooltipInfo.GetMinimapMouseover) then
-        return -- not this client
-    end
     if not frame then
         frame = CreateFrame("Frame", nil, Minimap)
         frame:SetAllPoints(Minimap)
@@ -435,6 +406,7 @@ function module:OnEnable()
     self:On("PLAYER_ENTERING_WORLD", readTracking)
     self:On("UNIT_SPELLCAST_SENT", onCastSent)
     self:On("LOOT_OPENED", onLootOpened)
+    self:On("SKILL_LINES_CHANGED", onSkill)
 end
 
 function module:OnDisable()
