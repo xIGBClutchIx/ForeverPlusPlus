@@ -31,7 +31,7 @@ ns.changelog = {
                 { L.WAYLAIDCRATES_TITLE, "A new module for filling Waylaid Crates. Its Waylaid "
                     .. "Crates entry in the auction house's categories lists every item your crates "
                     .. "still need, less what's already in your bags and bank." },
-                { L.WAYPOINTS_TITLE, "The new Follow Selected Quest option (off by default) points "
+                { L.WAYPOINTS_TITLE, "The new Follow Selected Quest option (on by default) points "
                     .. "the arrow to the quest selected on the map instead of your map pin, and "
                     .. "back to the pin when no quest is selected." },
                 { L.XPBARTEXT_TITLE, "The new Fill Bar with Ready Quests option (off by default) fills the "
