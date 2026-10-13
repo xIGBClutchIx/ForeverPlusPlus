@@ -19,12 +19,22 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Settings**: options look and read the same across modules: Item Tooltips' parts each have an Enabled checkbox, sliders are shorter, buttons that throw away data say Clear, and modules say when a Blizzard setting they need is off.
 - **Settings**: Forever++ saves only the settings you change, so a better default reaches you, and saves talent plans and learned flight points for each character. Saved auction prices take about 60% less room. Everything you had carries over.
 - **Commands**: `/fpp reset` asks first, and module names in `/fpp` match their titles, such as `/fpp toggle BagSlotCounter`.
+- **Chat Copy**: copies everything the chat window holds. The Lines slider is gone, since a window keeps only its last 128 lines.
+- **Chat History**: Lines Saved goes up to 125, about all a chat window holds.
 
 ### Fixed
 
 - **Class Colors**: hostile NPCs' health bars are red, like their names, instead of sometimes yellow or green.
 - **Commands**: `/fpp toggle` on a tool, such as Self Test, says it's always on, instead of that it's off.
 - **Profession Tooltips**: recolors the "Requires" line on nodes and creatures in languages that number its parts (such as "%1$s"), which it missed before.
+- **Character Window**: with Side Tabs on, your level shows above your character again, and your pet's on the pet pane, where the game now puts them.
+- Chat Font, Persistent Chat, Short Channel Names, and Chat Copy's Click Timestamps also work in whisper windows popped out into their own tab.
+- **Player Nameplates**: Battle.net friend icons and guildmate colors update as those lists change, and names on player and NPC plates get smaller again when you make nameplates smaller.
+- **AddOns List**: shows which addons are on for the character picked in the dropdown, or for All, instead of always for you.
+- **Item Tooltips**: Auction Prices turned on with the auction house open can scan it without reopening it.
+- **Buff Timers**: Edit Mode's example buffs and debuffs don't keep an old clock.
+- **Class Colors**: turning name backgrounds off puts back the target frame's own color.
+- **Auto Weapon Buff**: right-clicking a stone or oil in your bags at the guild bank deposits it instead of putting it on your weapon.
 
 ## 0.8.4 (2026-10-11)
 

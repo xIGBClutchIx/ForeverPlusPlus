@@ -42,6 +42,9 @@ ns.changelog = {
                     .. "Everything you had carries over." },
                 { L.CHANGELOG_COMMANDS, "/fpp reset asks first, and module names in /fpp match "
                     .. "their titles, such as /fpp toggle BagSlotCounter." },
+                { L.CHATCOPY_TITLE, "Copies everything the chat window holds. The Lines slider is "
+                    .. "gone, since a window keeps only its last 128 lines." },
+                { L.CHATHISTORY_TITLE, "Lines Saved goes up to 125, about all a chat window holds." },
             } },
             { L.CHANGELOG_FIXED, {
                 { L.CLASSCOLORS_TITLE, "Hostile NPCs' health bars are red, like their names, "
@@ -51,6 +54,24 @@ ns.changelog = {
                 { L.PROFTOOLTIPS_TITLE, "Recolors the \"Requires\" line on nodes and creatures in "
                     .. "languages that number its parts (such as \"%1$s\"), which it missed "
                     .. "before." },
+                { L.CHARACTERWINDOW_TITLE, "With Side Tabs on, your level shows above your "
+                    .. "character again, and your pet's on the pet pane, where the game now puts "
+                    .. "them." },
+                "Chat Font, Persistent Chat, Short Channel Names, and Chat Copy's Click Timestamps "
+                    .. "also work in whisper windows popped out into their own tab.",
+                { L.PLAYERNAMEPLATES_TITLE, "Battle.net friend icons and guildmate colors update "
+                    .. "as those lists change, and names on player and NPC plates get smaller again "
+                    .. "when you make nameplates smaller." },
+                { L.ADDONSLIST_TITLE, "Shows which addons are on for the character picked in the "
+                    .. "dropdown, or for All, instead of always for you." },
+                { L.ITEMTOOLTIPS_TITLE, "Auction Prices turned on with the auction house open can "
+                    .. "scan it without reopening it." },
+                { L.BUFFTIMERS_TITLE, "Edit Mode's example buffs and debuffs don't keep an old "
+                    .. "clock." },
+                { L.CLASSCOLORS_TITLE, "Turning name backgrounds off puts back the target frame's "
+                    .. "own color." },
+                { L.AUTOWEAPONBUFF_TITLE, "Right-clicking a stone or oil in your bags at the guild "
+                    .. "bank deposits it instead of putting it on your weapon." },
             } },
         },
     },
