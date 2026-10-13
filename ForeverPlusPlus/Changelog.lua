@@ -13,6 +13,9 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_ADDED, {
+                { L.ADDONSLIST_TITLE, "The new AddOn Sets option (off by default) adds a Sets "
+                    .. "dropdown beside Disable All, to save which addons are on under a name and "
+                    .. "turn that set back on later." },
                 { L.QUESTTRACKER_TITLE, "The new Current Zone Only option (off by default) tracks "
                     .. "only the quests of the zone you're in, and tracks the others again when you "
                     .. "get there. The quest your map follows always shows." },
