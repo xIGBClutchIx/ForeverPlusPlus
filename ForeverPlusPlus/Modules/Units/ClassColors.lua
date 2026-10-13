@@ -257,6 +257,13 @@ local function paintBackground(texture, frame)
         end
         return
     end
+    -- Blizzard may have colored it before our hook, so keep what it shows now to put back.
+    if not painted[texture] and not blizzardBackground[texture] then
+        local r, g, b, a = texture:GetVertexColor()
+        if ns.IsReadable(r) then
+            blizzardBackground[texture] = { r, g, b, a }
+        end
+    end
     applying[texture] = true
     texture:SetVertexColor(color:GetRGB())
     applying[texture] = nil
