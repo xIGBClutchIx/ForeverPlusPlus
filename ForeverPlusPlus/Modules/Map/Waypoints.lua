@@ -19,6 +19,7 @@ local module = ns.NewModule("Waypoints", L.WAYPOINTS_DESC, {
     way = true,
     arrow = true,
     quest = true,
+    questName = false,
     scale = 100, -- percent
     x = 0, -- the arrow's offset from the center of the screen
     y = 530,
@@ -32,6 +33,8 @@ module.options = {
     { key = "arrow", name = L.WAYPOINTS_ARROW, description = L.WAYPOINTS_ARROW_DESC },
     { key = "quest", name = L.WAYPOINTS_QUEST, description = L.WAYPOINTS_QUEST_DESC,
         requires = "arrow", added = "0.9.0" },
+    { key = "questName", name = L.WAYPOINTS_QUEST_NAME, description = L.WAYPOINTS_QUEST_NAME_DESC,
+        requires = "quest", added = "0.9.0" },
 }
 
 -- /way ----------------------------------------------------------------------------------------
@@ -229,29 +232,27 @@ local function questPoint(questID)
 end
 
 -- The quest point is looked up again each QUEST_INTERVAL, not every turn of the arrow.
-local cachedQuest, cachedPoint, checkedAt = nil, nil, 0
+local cachedQuest, cachedPoint, cachedTitle, checkedAt = nil, nil, nil, 0
 
--- What the arrow points at: the selected quest when it has a spot, otherwise the map pin.
+-- What the arrow points at: the selected quest when it has a spot, otherwise the map pin. The
+-- second value is the quest's name when it's the quest.
 local function destination()
     local questID = selectedQuest()
     if questID then
         local now = GetTime()
         if questID ~= cachedQuest or now - checkedAt >= QUEST_INTERVAL then
             cachedQuest, cachedPoint, checkedAt = questID, questPoint(questID), now
+            cachedTitle = C_QuestLog.GetTitleForQuestID and C_QuestLog.GetTitleForQuestID(questID)
         end
         if cachedPoint then
-            return cachedPoint
+            return cachedPoint, cachedTitle
         end
     end
     return C_Map.GetUserWaypoint and C_Map.GetUserWaypoint()
 end
 
--- How far the target is from the player in yards, and its direction counter-clockwise from
--- north, or nil when the game can't say (no target, in an instance, another continent).
--- Works on the target's own map, or the first map above it the player is also on, so a pin in
--- the next zone still points the right way.
-local function locate()
-    local point = destination()
+-- Where `point` is from the player, through WorldMap.Toward; see locate.
+local function toward(point)
     if not (point and point.uiMapID and point.position) then
         return nil
     end
@@ -292,6 +293,16 @@ local function locate()
     return nil
 end
 
+-- How far the target is from the player in yards, its direction counter-clockwise from north,
+-- and the quest's name when it's the selected quest, or nil when the game can't say (no target,
+-- in an instance, another continent). Works on the target's own map, or the first map above it
+-- the player is also on, so a pin in the next zone still points the right way.
+local function locate()
+    local point, title = destination()
+    local yards, angle = toward(point)
+    return yards, angle, title
+end
+
 -- The arrow -----------------------------------------------------------------------------------
 
 local ARROW_ATLAS = "Navigation-Tracked-Arrow" -- the arrow of Blizzard's own waypoint marker
@@ -322,6 +333,8 @@ local function newFrame()
     f.arrow:SetSize(SIZE * 0.6, SIZE * 0.6)
     f.distance = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     f.distance:SetPoint("TOP", f, "BOTTOM", 0, 4)
+    f.quest = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    f.quest:SetPoint("TOP", f.distance, "BOTTOM", 0, -2)
     f:Hide()
     return f
 end
@@ -336,7 +349,7 @@ local function update()
     if ns.EditMode.IsActive() then
         return -- the sample stays put while it's being placed
     end
-    local yards, angle = locate()
+    local yards, angle, title = locate()
     local facing = GetPlayerFacing and GetPlayerFacing()
     if not yards or yards < ARRIVED or not (facing and ns.IsReadable(facing)) then
         frame:Hide()
@@ -344,6 +357,7 @@ local function update()
     end
     frame.arrow:SetRotation(angle - facing)
     frame.distance:SetText(distanceText(yards))
+    frame.quest:SetText(module.db.questName and title or "")
     frame:Show()
 end
 
@@ -378,6 +392,8 @@ local function sample(active)
     if active then
         frame.arrow:SetRotation(0)
         frame.distance:SetText(distanceText(120))
+        frame.quest:SetText(module.db.quest and module.db.questName and L.WAYPOINTS_QUEST_NAME_SAMPLE
+            or "")
         frame:Show()
     else
         frame:Hide()

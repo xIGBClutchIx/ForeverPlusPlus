@@ -213,6 +213,10 @@ L.WAYPOINTS_ARROW_DESC = "An arrow that points to your map pin, from /way or a c
 L.WAYPOINTS_QUEST = "Follow Selected Quest"
 L.WAYPOINTS_QUEST_DESC = "While a quest is selected on the map, the arrow points to that quest "
     .. "instead of your map pin, and back to the pin when none is."
+L.WAYPOINTS_QUEST_NAME = "Show Quest Name"
+L.WAYPOINTS_QUEST_NAME_DESC = "Show the quest's name under the distance while the arrow points "
+    .. "to a quest."
+L.WAYPOINTS_QUEST_NAME_SAMPLE = "Quest Name" -- shown under the arrow in Edit Mode
 L.WAYPOINTS_USAGE = "/way [zone] x y, such as /way 45.2 67.8 or /way Elwynn Forest 45 67. "
     .. "/way clear takes the pin away."
 L.WAYPOINTS_SET = "Waypoint set in %s at %.1f, %.1f." -- zone, x, y
