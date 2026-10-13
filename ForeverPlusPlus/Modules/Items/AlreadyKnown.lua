@@ -1,7 +1,7 @@
 -- Already Known: marks items you can't learn again, such as recipes you know and mounts, pets,
 -- and toys you already have, with Blizzard's green ready-check mark on the item's icon (or a
--- green tint). It shows on merchants, the auction house, bags, the inbox, and the loot window,
--- each with its own checkbox.
+-- green tint). It shows on merchants, the auction house, bags, the inbox, and the loot window
+-- and loot rolls, each with its own checkbox.
 --
 -- "Known" is what the game's own item tooltip says: its "Already known" line, or the pet
 -- line's "Collected (1/3)". A pet in the auction house is asked of the pet journal by species.
@@ -58,7 +58,7 @@ module.options = {
     },
     {
         key = "loot", name = L.ALREADYKNOWN_LOOT, description = L.ALREADYKNOWN_LOOT_DESC,
-        section = L.ALREADYKNOWN_SECTION_SHOW,
+        section = L.ALREADYKNOWN_SECTION_SHOW, changed = "0.9.0",
     },
 }
 
@@ -351,6 +351,33 @@ local function hookLoot()
     _G.ScrollUtil.AddAcquiredFrameCallback(box, onLootFrame, module, true)
 end
 
+-- Loot rolls: GroupLootFrame1..4 (Mainline's, which Forever loads), each showing its rollID's item
+-- on IconFrame.Icon. Marked as the frame shows, before the player picks Need.
+local ROLL_FRAMES = _G.NUM_GROUP_LOOT_FRAMES or 4
+
+local function updateRoll(frame)
+    local icon = frame.IconFrame and frame.IconFrame.Icon
+    local rollID = frame.rollID
+    local getLink = _G.GetLootRollItemLink
+    local link = module.db.loot and rollID and getLink and getLink(rollID)
+    setMark(icon, link and itemKnown(link), 14)
+end
+
+local function updateRolls()
+    for i = 1, ROLL_FRAMES do
+        local frame = _G["GroupLootFrame" .. i]
+        if frame and frame:IsShown() then
+            updateRoll(frame)
+        end
+    end
+end
+
+local function hookRolls()
+    for i = 1, ROLL_FRAMES do
+        module:HookScript(_G["GroupLootFrame" .. i], "OnShow", updateRoll)
+    end
+end
+
 -- Module ----------------------------------------------------------------------------------------
 
 local function refresh()
@@ -369,6 +396,7 @@ local function refresh()
         updateInbox()
         updateOpenMail()
     end
+    updateRolls()
 end
 
 local refreshTimer
@@ -393,6 +421,7 @@ function module:OnEnable()
     self:Hook("OpenMail_Update", updateOpenMail)
     hookBags()
     hookLoot()
+    hookRolls()
     ns.AddOns.WhenLoaded("Blizzard_AuctionHouseUI", hookAuction)
     self:On("LOOT_OPENED", hookLoot)
     self:On("GET_ITEM_INFO_RECEIVED", onItemInfo)
