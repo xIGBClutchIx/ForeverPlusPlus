@@ -24,7 +24,9 @@ L.ERRORCATCHER_OFF = "Error Catcher is off. Turn it on in /fpp."
 L.ERRORCATCHER_CAUGHT = "Caught an error: %s Type /fpp errors to see it." -- first line of the error
 L.ERRORCATCHER_CAUGHT_LOADING = "Caught %d errors while logging in. Type /fpp errors to see them."
 L.ERRORCATCHER_OTHER_HANDLER = "Another addon, such as BugGrabber, is catching Lua errors, so "
-    .. "Error Catcher only sees blocked actions and warnings."
+    .. "Error Catcher sees only blocked actions and warnings."
+L.ERRORCATCHER_OTHER_HANDLER_DESC = "Lua errors go to that addon instead, such as BugSack's window. "
+    .. "Blizzard's error window and its blocked action popup are left to it too."
 L.ERRORCATCHER_BLOCKED = "%s: %s tried to call the protected function %s." -- event, addon, function
 L.ERRORCATCHER_SECRET = "(The game hid this error's text.)"
 L.ERRORCATCHER_UNKNOWN = "unknown"

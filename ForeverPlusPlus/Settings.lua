@@ -1091,9 +1091,15 @@ local function addModuleRows(view, module)
         return module.db.enabled and true or false
     end
     -- A gray row while `shown()` is true, such as a Blizzard setting the module needs being off,
-    -- with a button that fixes it. ns.CVars.OffNotice makes one for a CVar.
+    -- with a button that fixes it. ns.CVars.OffNotice makes one for a CVar. One without a `button`
+    -- only says so, across the whole row.
     local notice = module.notice
-    if notice then
+    if notice and not notice.button then
+        local row, label = addRow(view, format("|cff999999%s|r", notice.text), 0, nil, notice.shown)
+        label:SetWidth(view:GetWidth() - 8)
+        row:SetHeight(max(ROW_HEIGHT, label:GetStringHeight() + 8))
+        addTooltip(row, notice.text, notice.description)
+    elseif notice then
         addButtonRow(view, format("|cff999999%s|r", notice.text), nil, notice.shown,
             notice.button, function()
                 notice.fn()

@@ -255,6 +255,21 @@ end
 previous = geterrorhandler()
 seterrorhandler(onError)
 
+-- Whether another addon (BugGrabber) keeps the error handler to itself, so ours never goes in.
+local function otherHandler()
+    return geterrorhandler() ~= onError
+end
+
+-- A gray row in Settings while another addon catches the Lua errors, since then the window shows
+-- only blocked actions and warnings, which would read as "no errors" without it.
+module.notice = {
+    text = L.ERRORCATCHER_OTHER_HANDLER,
+    description = L.ERRORCATCHER_OTHER_HANDLER_DESC,
+    shown = function()
+        return module.enabled and otherHandler()
+    end,
+}
+
 -- The bug report ----------------------------------------------------------------------------
 
 -- What each kind of entry is called, and its color in the window.
@@ -830,24 +845,25 @@ function module:OnEnable()
         previous = current
         seterrorhandler(onError)
     end
-    -- BugGrabber keeps the handler to itself, so ours never goes in.
-    if geterrorhandler() ~= onError then
-        self:Print(L.ERRORCATCHER_OTHER_HANDLER)
-    end
     listen("ADDON_ACTION_BLOCKED", onBlocked)
     listen("ADDON_ACTION_FORBIDDEN", onBlocked)
     listen("LUA_WARNING", onWarning)
-    -- Blizzard's "blocked from an action" popup, which offers to turn the addon off.
+    -- Blizzard's "blocked from an action" popup, which offers to turn the addon off. Left to the
+    -- addon that has the error handler (module.notice says so), like Blizzard's error window.
     if StaticPopup_Show and StaticPopup_Hide then
         self:Hook("StaticPopup_Show", function(which)
-            if which == "ADDON_ACTION_FORBIDDEN" then
+            if which == "ADDON_ACTION_FORBIDDEN" and not otherHandler() then
                 StaticPopup_Hide(which)
             end
         end)
     end
     -- Blizzard's error window, which still opens for Lua warnings.
     if ScriptErrorsFrame then
-        self:HookScript(ScriptErrorsFrame, "OnShow", ScriptErrorsFrame.Hide)
+        self:HookScript(ScriptErrorsFrame, "OnShow", function(frame)
+            if not otherHandler() then
+                frame:Hide()
+            end
+        end)
     end
 
     if #pending > 0 then
