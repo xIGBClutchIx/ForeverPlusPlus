@@ -80,7 +80,7 @@ L.ALREADYKNOWN_MAIL = "Mail"
 L.ALREADYKNOWN_MAIL_DESC = "Mark mail whose attachments you already know, in the inbox and in an "
     .. "open letter."
 L.ALREADYKNOWN_LOOT = "Loot"
-L.ALREADYKNOWN_LOOT_DESC = "Mark known items in the loot window."
+L.ALREADYKNOWN_LOOT_DESC = "Mark known items in the loot window and on loot rolls."
 
 L.UNUSABLEITEMSTINT_TITLE = "Unusable Items Tint"
 L.UNUSABLEITEMSTINT_DESC = "Tint red the items you can't use, because of your class, armor or weapon "
