@@ -44,6 +44,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Commands**: `/fpp toggle` on a tool, such as Self Test, says it's always on, instead of that it's off.
 - **Profession Tooltips**: recolors the "Requires" line on nodes and creatures in languages that number its parts (such as "%1$s"), which it missed before.
 - **Character Window**: with Side Tabs on, your level shows above your character again, and your pet's on the pet pane, where the game now puts them.
+- **Character Window**: the Skills tab shows your equipped weapons' skills in green right after you log in, instead of only once you change a weapon or reload.
 - Chat Font, Persistent Chat, Short Channel Names, and Chat Copy's Click Timestamps also work in whisper windows popped out into their own tab.
 - **Player Nameplates**: Battle.net friend icons and guildmate colors update as those lists change, and names on player and NPC plates get smaller again when you make nameplates smaller.
 - **AddOns List**: shows which addons are on for the character picked in the dropdown, or for All, instead of always for you.

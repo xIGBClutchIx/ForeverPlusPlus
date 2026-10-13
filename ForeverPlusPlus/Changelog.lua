@@ -100,6 +100,9 @@ ns.changelog = {
                 { L.CHARACTERWINDOW_TITLE, "With Side Tabs on, your level shows above your "
                     .. "character again, and your pet's on the pet pane, where the game now puts "
                     .. "them." },
+                { L.CHARACTERWINDOW_TITLE, "The Skills tab shows your equipped weapons' skills in "
+                    .. "green right after you log in, instead of only once you change a weapon or "
+                    .. "reload." },
                 "Chat Font, Persistent Chat, Short Channel Names, and Chat Copy's Click Timestamps "
                     .. "also work in whisper windows popped out into their own tab.",
                 { L.PLAYERNAMEPLATES_TITLE, "Battle.net friend icons and guildmate colors update "

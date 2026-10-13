@@ -116,6 +116,14 @@ local function start()
     end
     frame.ScrollBox:RegisterCallback(_G.ScrollBoxListMixin.Event.OnInitializedFrame, paintEntry, module)
     module:Hook(frame.SkillDetailFrame, "RefreshRankBar", paintDetail)
+    -- The weapons are read again each time the tab opens: at a fresh login the character frame
+    -- loads before the worn items or their item data are there, and no equipment event follows.
+    module:HookScript(frame, "OnShow", function()
+        if on() then
+            readEquipped()
+            repaint()
+        end
+    end)
 end
 
 local function onEquipment()
