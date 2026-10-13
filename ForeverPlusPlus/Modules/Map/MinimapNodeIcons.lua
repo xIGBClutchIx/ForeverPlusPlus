@@ -15,8 +15,9 @@ local _, ns = ...
 
 local ipairs, type, pcall, floor, sin, cos = ipairs, type, pcall, math.floor, math.sin, math.cos
 local gmatch, match, tostring, format = string.gmatch, string.match, tostring, string.format
-local min, concat = math.min, table.concat
-local CreateFrame, Minimap, GetTime = CreateFrame, Minimap, GetTime
+local min, max, huge, concat = math.min, math.max, math.huge, table.concat
+local CreateFrame, Minimap, GetTime, C_Timer = CreateFrame, Minimap, GetTime, C_Timer
+local GetCursorPosition = GetCursorPosition
 local C_Map, C_Minimap, C_TooltipInfo, C_Item = C_Map, C_Minimap, C_TooltipInfo, C_Item
 local InCombatLockdown, GetPlayerFacing, GetCVarBool = InCombatLockdown, GetPlayerFacing, GetCVarBool
 local GetNumLootItems, GetLootSlotInfo = GetNumLootItems, GetLootSlotInfo
@@ -29,7 +30,7 @@ local NODES = Professions.NODES
 
 local module = ns.NewModule("MinimapNodeIcons", L.MINIMAPNODEICONS_DESC, {
     enabled = true,
-    size = 11, -- icon size on the minimap
+    size = 8, -- icon size on the minimap
     border = true, -- a gold ring around each icon
     tint = false, -- red while the skill is too low
     gray = false, -- gray once gathering no longer raises the skill
@@ -47,7 +48,7 @@ module.added = "0.9.0"
 module.options = {
     {
         key = "size", name = L.MINIMAPNODEICONS_SIZE, description = L.MINIMAPNODEICONS_SIZE_DESC,
-        min = 6, max = 20, step = 1, format = "%d",
+        min = 5, max = 20, step = 1, format = "%d",
     },
     { key = "border", name = L.MINIMAPNODEICONS_BORDER, description = L.MINIMAPNODEICONS_BORDER_DESC },
     { key = "tint", name = L.MINIMAPNODEICONS_TINT, description = L.MINIMAPNODEICONS_TINT_DESC },
@@ -531,6 +532,11 @@ local function onSkill()
     nextSweep = 0
 end
 
+-- A zoom moves every dot; rather than show icons where they were, drop them and sweep again now.
+local function onZoom()
+    nodes, sweep, nextSweep = {}, nil, 0
+end
+
 -- /fpp nodes ----------------------------------------------------------------------------------------
 -- What the sweep sees, for finding out in game why no icons show: whether tracking is on, whether
 -- the player's spot can be read, and a whole sweep in each space with the names it found. The
@@ -597,7 +603,97 @@ local function report()
     sweep, nextSweep = nil, 0
 end
 
-ns.AddCommand("nodes", "", L.MINIMAPNODEICONS_COMMAND, report)
+-- /fpp nodes here: where the dot under the cursor is against where a sweep puts it. After a few
+-- seconds to point at a dot, the cursor's spot and the name the game shows there are read; then a
+-- sweep finds that name's patch of hits nearest the cursor and prints its middle and edges, all in
+-- minimap units right and up of its center, with the zoom and the view radius.
+local HERE_WAIT = 3 -- seconds to put the cursor on a dot
+
+local function measure()
+    local x, y = GetCursorPosition()
+    local scale = Minimap:GetEffectiveScale()
+    local cx, cy = Minimap:GetCenter()
+    local right, up = x / scale - cx, y / scale - cy
+    local data = C_TooltipInfo.GetMinimapMouseover()
+    local line = data and data.lines and data.lines[1]
+    local text = line and line.leftText
+    local name = text and readable(text) and namesIn(text)[1]
+    if not name then
+        ns.Print(L.MINIMAPNODEICONS_HERE_NONE)
+        return
+    end
+    local list = grid(Minimap:GetWidth() / 2, STEPS.high)
+    local space = currentSpace()
+    local hits = {}
+    startProbing()
+    for _, point in ipairs(list) do
+        local found = probe(point[1], point[2], space)
+        if blocked then
+            break
+        end
+        if found then
+            for _, other in ipairs(namesIn(found)) do
+                if other == name then
+                    hits[#hits + 1] = { right = point[1], up = point[2] }
+                end
+            end
+        end
+    end
+    stopProbing()
+    -- The patch: hits that touch, grown from the hit nearest the cursor.
+    local nearest, best
+    for i, hit in ipairs(hits) do
+        local dr, du = hit.right - right, hit.up - up
+        local d = dr * dr + du * du
+        if not best or d < best then
+            nearest, best = i, d
+        end
+    end
+    local reach = STEPS.high * REACH
+    local patch, taken = {}, {}
+    if nearest then
+        patch[1], taken[nearest] = hits[nearest], true
+        local at = 1
+        while at <= #patch do
+            local a = patch[at]
+            at = at + 1
+            for j, b in ipairs(hits) do
+                local dr, du = a.right - b.right, a.up - b.up
+                if not taken[j] and dr * dr + du * du <= reach * reach then
+                    taken[j] = true
+                    patch[#patch + 1] = b
+                end
+            end
+        end
+    end
+    local sumR, sumU, minR, maxR, minU, maxU = 0, 0, huge, -huge, huge, -huge
+    for _, hit in ipairs(patch) do
+        sumR, sumU = sumR + hit.right, sumU + hit.up
+        minR, maxR = min(minR, hit.right), max(maxR, hit.right)
+        minU, maxU = min(minU, hit.up), max(maxU, hit.up)
+    end
+    ns.Print(format(L.MINIMAPNODEICONS_HERE_CURSOR, name, right, up, Minimap:GetZoom(),
+        tostring(C_Minimap.GetViewRadius and C_Minimap.GetViewRadius())))
+    if #patch == 0 then
+        ns.Print(L.MINIMAPNODEICONS_HERE_MISSED)
+        return
+    end
+    ns.Print(format(L.MINIMAPNODEICONS_HERE_PATCH, #patch, sumR / #patch, sumU / #patch, minR, maxR,
+        minU, maxU))
+end
+
+ns.AddCommand("nodes", "[here]", L.MINIMAPNODEICONS_COMMAND, function(rest)
+    if rest and rest:lower():match("^%s*here") then
+        if not module:IsAvailable() or InCombatLockdown() then
+            ns.Print(L.MINIMAPNODEICONS_REPORT_COMBAT)
+            return
+        end
+        ns.Print(format(L.MINIMAPNODEICONS_HERE_START, HERE_WAIT))
+        C_Timer.After(HERE_WAIT, measure)
+        return
+    end
+    report()
+end)
 
 -- Turning on and off ------------------------------------------------------------------------------
 
@@ -615,6 +711,7 @@ function module:OnEnable()
     self:On("UNIT_SPELLCAST_SENT", onCastSent)
     self:On("LOOT_OPENED", onLootOpened)
     self:On("SKILL_LINES_CHANGED", onSkill)
+    self:On("MINIMAP_UPDATE_ZOOM", onZoom)
 end
 
 function module:OnDisable()

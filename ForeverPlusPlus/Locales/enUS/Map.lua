@@ -252,6 +252,14 @@ L.MINIMAPNODEICONS_CHAT_DESC = "Say in chat when the game stops Minimap Node Ico
     .. "the minimap."
 L.MINIMAPNODEICONS_FAILED = "Minimap Node Icons couldn't check the minimap: %s" -- error
 L.MINIMAPNODEICONS_COMMAND = "Check what Minimap Node Icons sees on the minimap right now."
+L.MINIMAPNODEICONS_HERE_START = "Point at a dot on the minimap; reading it in %d seconds." -- seconds
+L.MINIMAPNODEICONS_HERE_NONE = "Nothing under the cursor. Point at a dot and try again."
+-- name, cursor right and up of the minimap's center, zoom level, view radius in yards
+L.MINIMAPNODEICONS_HERE_CURSOR = "%s: cursor at %.1f, %.1f. Zoom %d, %s yards."
+L.MINIMAPNODEICONS_HERE_MISSED = "A sweep didn't find it near the cursor."
+-- hits, middle right and up, then right from-to and up from-to
+L.MINIMAPNODEICONS_HERE_PATCH = "Sweep: %d hits, middle at %.1f, %.1f, across %.1f to %.1f, "
+    .. "up %.1f to %.1f."
 L.MINIMAPNODEICONS_REPORT_UNAVAILABLE = "This client can't check the minimap for nodes."
 L.MINIMAPNODEICONS_REPORT_COMBAT = "Can't check the minimap in combat."
 L.MINIMAPNODEICONS_REPORT_YES = "yes"
