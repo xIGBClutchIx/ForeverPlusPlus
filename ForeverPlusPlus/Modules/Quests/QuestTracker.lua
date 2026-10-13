@@ -630,11 +630,16 @@ local function filterZone()
         if questID == super or not header or header:lower() == zone then
             return true
         end
-        if isPlace(header) then
-            return false
-        end
-        -- A class or profession quest goes by where its objective is, when the map knows.
+        -- Where its objective is, when the map knows.
         local there = here and GetQuestUiMapID and zoneMap(GetQuestUiMapID(questID, true))
+        if isPlace(header) then
+            -- A dungeon's quest sits under the zone that gave it, but belongs inside the dungeon.
+            if there and there == here then
+                return true
+            end
+            return C_QuestLog.IsOnMap and (C_QuestLog.IsOnMap(questID)) and true or false
+        end
+        -- A class or profession quest goes by where its objective is.
         return not there or there == here
     end
     -- Untrack first, so the quests tracked again here have room under the watch limit.
