@@ -235,6 +235,8 @@ L.MINIMAPNODEICONS_DESC = "Put the herb's or ore's own icon on each tracking dot
     .. "isn't on the minimap. A node it doesn't know gets its icon once you gather it."
 L.MINIMAPNODEICONS_SIZE = "Icon Size"
 L.MINIMAPNODEICONS_SIZE_DESC = "How big the icons are on the minimap."
+L.MINIMAPNODEICONS_BORDER = "Round Border"
+L.MINIMAPNODEICONS_BORDER_DESC = "A gold ring around each icon, like the minimap's tracking button."
 L.MINIMAPNODEICONS_TINT = "Tint Unusable"
 L.MINIMAPNODEICONS_TINT_DESC = "Tint a node's icon red while your skill is too low to gather it."
 L.MINIMAPNODEICONS_GRAY = "Gray Out Trivial"

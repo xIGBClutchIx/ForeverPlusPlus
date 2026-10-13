@@ -29,7 +29,8 @@ local NODES = Professions.NODES
 
 local module = ns.NewModule("MinimapNodeIcons", L.MINIMAPNODEICONS_DESC, {
     enabled = true,
-    size = 16, -- icon size on the minimap
+    size = 11, -- icon size on the minimap
+    border = true, -- a gold ring around each icon
     tint = false, -- red while the skill is too low
     gray = false, -- gray once gathering no longer raises the skill
     detail = "medium", -- a key of STEPS
@@ -46,8 +47,9 @@ module.added = "0.9.0"
 module.options = {
     {
         key = "size", name = L.MINIMAPNODEICONS_SIZE, description = L.MINIMAPNODEICONS_SIZE_DESC,
-        min = 10, max = 24, step = 1, format = "%d",
+        min = 6, max = 20, step = 1, format = "%d",
     },
+    { key = "border", name = L.MINIMAPNODEICONS_BORDER, description = L.MINIMAPNODEICONS_BORDER_DESC },
     { key = "tint", name = L.MINIMAPNODEICONS_TINT, description = L.MINIMAPNODEICONS_TINT_DESC },
     { key = "gray", name = L.MINIMAPNODEICONS_GRAY, description = L.MINIMAPNODEICONS_GRAY_DESC },
     {
@@ -85,7 +87,7 @@ local HERBS, MINERALS = 2383, 2580 -- Find Herbs, Find Minerals
 local STEPS = { low = 8, medium = 6, high = 4 } -- minimap units between probes
 local PER_FRAME = 60 -- probes each frame, so a sweep is spread over a few frames
 local REST = 0.4 -- seconds between sweeps
-local SAME = 9 -- hits of one name this close (minimap units) are one node
+local REACH = 1.5 -- hits this many probe spacings apart touch (diagonal neighbors are 1.41)
 local EDGE = 2 -- keep probes and icons this far inside the minimap's edge
 local LEARN_WAIT = 10 -- seconds from a cast to its loot window that still count as one gather
 local RED = { 1, 0.25, 0.25 } -- the icon's vertex color while the skill is too low
@@ -285,7 +287,7 @@ end
 
 -- Sweeping ---------------------------------------------------------------------------------------
 
-local nodes = {} -- the last sweep's nodes: { x, y, icon, low } on the zone map `nodesMap`
+local nodes = {} -- the last sweep's nodes: { x, y, icon, standing } on the zone map `nodesMap`
 local nodesMap
 local seen = {} -- names the minimap showed that aren't nodes we know, for learning
 
@@ -304,25 +306,47 @@ local function readTracking()
     end
 end
 
--- Adds a hit to the node of that name it is close to, or starts a node. Spots are kept on the zone
--- map, so hits from frames apart still meet while the player moves.
+-- Records a probe that read a node's name. Spots are kept on the zone map, so hits from frames
+-- apart still line up while the player moves.
 local function addHit(hits, v, name, icon, right, up)
-    for _, hit in ipairs(hits) do
-        if hit.name == name then
-            local r, u = toMinimap(v, hit.x / hit.n, hit.y / hit.n)
-            local dr, du = r - right, u - up
-            if dr * dr + du * du <= SAME * SAME then
-                local x, y = fromMinimap(v, right, up)
-                hit.x, hit.y, hit.n = hit.x + x, hit.y + y, hit.n + 1
-                return
-            end
-        end
-    end
     local x, y = fromMinimap(v, right, up)
-    hits[#hits + 1] = { name = name, icon = icon, x = x, y = y, n = 1 }
+    hits[#hits + 1] = { name = name, icon = icon, x = x, y = y }
 end
 
-local function finish()
+-- A dot answers to every probe near it, so one dot gives a patch of hits. Hits of one name that
+-- touch (within `reach` minimap units, a probe's neighbors) are one dot, at the middle of them.
+local function group(hits, v, reach)
+    for _, hit in ipairs(hits) do
+        hit.right, hit.up = toMinimap(v, hit.x, hit.y)
+    end
+    local result, taken = {}, {}
+    for i, first in ipairs(hits) do
+        if not taken[i] then
+            taken[i] = true
+            local queue, at = { first }, 1
+            local sumX, sumY = 0, 0
+            while at <= #queue do
+                local a = queue[at]
+                at = at + 1
+                sumX, sumY = sumX + a.x, sumY + a.y
+                for j, b in ipairs(hits) do
+                    if not taken[j] and b.name == a.name then
+                        local dr, du = a.right - b.right, a.up - b.up
+                        if dr * dr + du * du <= reach * reach then
+                            taken[j] = true
+                            queue[#queue + 1] = b
+                        end
+                    end
+                end
+            end
+            result[#result + 1] = { x = sumX / #queue, y = sumY / #queue, icon = first.icon,
+                standing = standing(first.name) }
+        end
+    end
+    return result
+end
+
+local function finish(v)
     if not module.db.calibration.space then
         if #sweep.hits > 0 then
             module.db.calibration.space = sweep.space
@@ -330,11 +354,7 @@ local function finish()
             trying = trying % #ORDER + 1
         end
     end
-    nodes, nodesMap = {}, sweep.mapID
-    for _, hit in ipairs(sweep.hits) do
-        nodes[#nodes + 1] = { x = hit.x / hit.n, y = hit.y / hit.n, icon = hit.icon,
-            standing = standing(hit.name) }
-    end
+    nodes, nodesMap = group(sweep.hits, v, sweep.step * REACH), sweep.mapID
     sweep = nil
     nextSweep = GetTime() + REST
 end
@@ -345,8 +365,9 @@ local function step(v)
         if GetTime() < nextSweep then
             return
         end
-        sweep = { mapID = v.mapID, index = 1, hits = {}, space = currentSpace(),
-            points = grid(v.half, STEPS[module.db.detail] or STEPS.medium) }
+        local spacing = STEPS[module.db.detail] or STEPS.medium
+        sweep = { mapID = v.mapID, index = 1, hits = {}, space = currentSpace(), step = spacing,
+            points = grid(v.half, spacing) }
     elseif sweep.mapID ~= v.mapID then
         sweep = nil -- a new zone map; start over
         return
@@ -382,19 +403,25 @@ local function step(v)
     end
     sweep.index = last + 1
     if sweep.index > #list then
-        finish()
+        finish(v)
     end
 end
 
 -- Drawing ---------------------------------------------------------------------------------------
 
 local frame -- over the minimap; holds the icons and runs the sweeps
-local icons = {}
+local icons, rings = {}, {}
+
+-- The gold ring of the minimap's tracking button, which Blizzard also puts around a 24 pixel spec
+-- icon (ItemDisplay.xml): the 64 pixel file with the icon's center 19 right and 18 down of its
+-- corner. Scaled to the icon here.
+local RING = "Interface\\Minimap\\MiniMap-TrackingBorder"
+local RING_ICON, RING_FILE, RING_X, RING_Y = 24, 64, 19, 18
 
 local function getIcon(i)
     local icon = icons[i]
     if not icon then
-        icon = frame:CreateTexture(nil, "OVERLAY")
+        icon = frame:CreateTexture(nil, "ARTWORK")
         icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
         -- A round icon, like the minimap's own. Probe: the mask is Mainline's portrait mask.
         local mask = frame:CreateMaskTexture()
@@ -403,26 +430,43 @@ local function getIcon(i)
         mask:SetAllPoints(icon)
         icon:AddMaskTexture(mask)
         icons[i] = icon
+        local ring = frame:CreateTexture(nil, "OVERLAY")
+        ring:SetTexture(RING)
+        rings[i] = ring
     end
-    return icon
+    return icon, rings[i]
 end
 
 local function hideIcons(from)
     for i = from or 1, #icons do
         icons[i]:Hide()
+        rings[i]:Hide()
     end
+end
+
+-- Puts the ring around an icon of `size`, or hides it.
+local function placeRing(ring, icon, size, shown)
+    if not shown then
+        ring:Hide()
+        return
+    end
+    local k = size / RING_ICON
+    ring:SetSize(RING_FILE * k, RING_FILE * k)
+    ring:ClearAllPoints()
+    ring:SetPoint("TOPLEFT", icon, "CENTER", -RING_X * k, RING_Y * k)
+    ring:Show()
 end
 
 local function draw(v)
     local shown = 0
     if v and v.mapID == nodesMap then
-        local size, tint, gray = module.db.size, module.db.tint, module.db.gray
+        local size, tint, gray, border = module.db.size, module.db.tint, module.db.gray, module.db.border
         local limit = v.half - EDGE - size / 4
         for _, node in ipairs(nodes) do
             local right, up = toMinimap(v, node.x, node.y)
             if right * right + up * up <= limit * limit then
                 shown = shown + 1
-                local icon = getIcon(shown)
+                local icon, ring = getIcon(shown)
                 icon:SetTexture(node.icon)
                 local grayed = gray and node.standing == "gray"
                 icon:SetDesaturated(grayed)
@@ -436,6 +480,7 @@ local function draw(v)
                 icon:SetSize(size, size)
                 icon:SetPoint("CENTER", Minimap, "CENTER", right, up)
                 icon:Show()
+                placeRing(ring, icon, size, border)
             end
         end
     end
