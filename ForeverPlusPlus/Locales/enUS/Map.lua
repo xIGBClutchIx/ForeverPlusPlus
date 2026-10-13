@@ -186,7 +186,7 @@ L.FLIGHTTIMER_BAR_DESC = "A bar with the time left while you fly. Move and resiz
 L.FLIGHTTIMER_TOOLTIP = "Flight Map Tooltip"
 L.FLIGHTTIMER_TOOLTIP_DESC = "How long the flight takes, on a flight point's tooltip on the flight "
     .. "map, once you have flown it. Each route is timed on its own."
-L.FLIGHTTIMER_TIME = "Flight time: %s" -- a time like 2:05
+L.FLIGHTTIMER_TIME = "Flight Time:"
 L.FLIGHTTIMER_RESET_TIMES = "Flight Times"
 L.FLIGHTTIMER_RESET_TIMES_BUTTON = "Clear"
 L.FLIGHTTIMER_RESET_TIMES_DESC = "Forget every flight time. They're timed again as you fly."

@@ -6,7 +6,7 @@
 -- for the whole account, since a flight is the same for every character.
 local _, ns = ...
 
-local ipairs, floor, format, max, min = ipairs, math.floor, string.format, math.max, math.min
+local ipairs, floor, max, min = ipairs, math.floor, math.max, math.min
 local C_TaxiMap, Enum, GetTime, UnitOnTaxi = C_TaxiMap, Enum, GetTime, UnitOnTaxi
 local CreateFrame, UIParent, GameTooltip = CreateFrame, UIParent, GameTooltip
 
@@ -229,8 +229,7 @@ local function onTooltipShow(tooltip)
         return
     end
     adding = true
-    tooltip:AddLine(format(L.FLIGHTTIMER_TIME, clock(time)),
-        1, 1, 1)
+    tooltip:AddDoubleLine(L.FLIGHTTIMER_TIME, clock(time), 1, 1, 1, 1, 1, 1)
     tooltip:Show() -- to fit the new line
     adding = false
 end
