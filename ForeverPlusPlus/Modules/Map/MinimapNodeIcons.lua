@@ -14,7 +14,7 @@
 local _, ns = ...
 
 local ipairs, type, pcall, floor, sin, cos = ipairs, type, pcall, math.floor, math.sin, math.cos
-local gmatch, tostring, format = string.gmatch, tostring, string.format
+local gmatch, tostring, format, min, concat = string.gmatch, tostring, string.format, math.min, table.concat
 local CreateFrame, Minimap, GetTime = CreateFrame, Minimap, GetTime
 local C_Map, C_Minimap, C_TooltipInfo, C_Item = C_Map, C_Minimap, C_TooltipInfo, C_Item
 local InCombatLockdown, GetPlayerFacing, GetCVarBool = InCombatLockdown, GetPlayerFacing, GetCVarBool
@@ -35,6 +35,8 @@ local module = ns.NewModule("MinimapNodeIcons", L.MINIMAPNODEICONS_DESC, {
     chat = true,
     -- Node name -> icon, for names not in NODES, from what gathering them gave. Data, not a setting.
     learned = {},
+    -- { space = a key of SPACES }, once a sweep has found a node with it. Data, not a setting.
+    calibration = {},
 })
 module.title = L.MINIMAPNODEICONS_TITLE
 module.category = "map"
@@ -172,13 +174,41 @@ end
 
 local blocked = false -- the client refused a probe; stop until /reload
 
+-- What UpdateMouseoverAtPoint's point is measured in isn't documented (see docs/forever-api.md), so
+-- each way it could be is tried until a sweep finds a node, and the one that does is saved. Each
+-- turns minimap units right and up of its center into that space.
+local SPACES = {
+    -- Screen pixels from the bottom left, like GetCursorPosition.
+    cursor = function(right, up)
+        local cx, cy = Minimap:GetCenter()
+        local scale = Minimap:GetEffectiveScale()
+        return (cx + right) * scale, (cy + up) * scale
+    end,
+    -- Minimap units from its center.
+    center = function(right, up)
+        return right, up
+    end,
+    -- Minimap units from its bottom left.
+    corner = function(right, up)
+        return Minimap:GetWidth() / 2 + right, Minimap:GetHeight() / 2 + up
+    end,
+    -- 0 to 1 across and up the minimap.
+    unit = function(right, up)
+        return 0.5 + right / Minimap:GetWidth(), 0.5 + up / Minimap:GetHeight()
+    end,
+}
+local ORDER = { "cursor", "center", "corner", "unit" }
+local trying = 1 -- the space in ORDER tried while none is saved
+
+local function currentSpace()
+    return module.db.calibration.space or ORDER[trying]
+end
+
 -- Points the minimap's mouseover at a spot right and up of its center and returns the text the
--- tooltip there would show. Its points are taken to be the cursor's (GetCursorPosition): screen
--- pixels from the bottom left. Unverified on Forever; see docs/forever-api.md.
-local function probe(right, up)
-    local cx, cy = Minimap:GetCenter()
-    local scale = Minimap:GetEffectiveScale()
-    local ok, err = pcall(Minimap.UpdateMouseoverAtPoint, Minimap, (cx + right) * scale, (cy + up) * scale)
+-- tooltip there would show.
+local function probe(right, up, space)
+    local x, y = (SPACES[space] or SPACES.cursor)(right, up)
+    local ok, err = pcall(Minimap.UpdateMouseoverAtPoint, Minimap, x, y)
     if not ok then
         blocked = true
         module:Print(format(L.MINIMAPNODEICONS_FAILED, tostring(err)))
@@ -254,6 +284,13 @@ local function addHit(hits, v, name, icon, right, up)
 end
 
 local function finish()
+    if not module.db.calibration.space then
+        if #sweep.hits > 0 then
+            module.db.calibration.space = sweep.space
+        else
+            trying = trying % #ORDER + 1
+        end
+    end
     nodes, nodesMap = {}, sweep.mapID
     for _, hit in ipairs(sweep.hits) do
         nodes[#nodes + 1] = { x = hit.x / hit.n, y = hit.y / hit.n, icon = hit.icon,
@@ -269,7 +306,7 @@ local function step(v)
         if GetTime() < nextSweep then
             return
         end
-        sweep = { mapID = v.mapID, index = 1, hits = {},
+        sweep = { mapID = v.mapID, index = 1, hits = {}, space = currentSpace(),
             points = grid(v.half, STEPS[module.db.detail] or STEPS.medium) }
     elseif sweep.mapID ~= v.mapID then
         sweep = nil -- a new zone map; start over
@@ -282,7 +319,7 @@ local function step(v)
     end
     for i = sweep.index, last do
         local right, up = list[i][1], list[i][2]
-        local text = probe(right, up)
+        local text = probe(right, up, sweep.space)
         if blocked then
             sweep = nil
             return
@@ -404,6 +441,71 @@ end
 local function onSkill()
     nextSweep = 0
 end
+
+-- /fpp nodes ----------------------------------------------------------------------------------------
+-- What the sweep sees, for finding out in game why no icons show: whether tracking is on, whether
+-- the player's spot can be read, and a whole sweep in each space with the names it found. The
+-- space whose sweep finds the most nodes is saved.
+
+local REPORT_NAMES = 4 -- names listed for each space
+
+local function report()
+    if not module:IsAvailable() then
+        ns.Print(L.MINIMAPNODEICONS_REPORT_UNAVAILABLE)
+        return
+    end
+    if InCombatLockdown() then
+        ns.Print(L.MINIMAPNODEICONS_REPORT_COMBAT)
+        return
+    end
+    readTracking()
+    local v = readView()
+    ns.Print(format(L.MINIMAPNODEICONS_REPORT_STATE,
+        tracking and L.MINIMAPNODEICONS_REPORT_YES or L.MINIMAPNODEICONS_REPORT_NO,
+        v and L.MINIMAPNODEICONS_REPORT_YES or L.MINIMAPNODEICONS_REPORT_NO,
+        floor(Minimap:GetWidth() + 0.5), tostring(C_Minimap.GetViewRadius and C_Minimap.GetViewRadius())))
+    local list = grid(Minimap:GetWidth() / 2, STEPS.high)
+    local best, bestCount = nil, 0
+    for _, space in ipairs(ORDER) do
+        local names, order, known = {}, {}, 0
+        for _, point in ipairs(list) do
+            local text = probe(point[1], point[2], space)
+            if blocked then
+                return
+            end
+            if text then
+                for name in gmatch(plain(text), "[^\n]+") do
+                    if not names[name] then
+                        names[name] = true
+                        order[#order + 1] = name
+                        if iconFor(name) then
+                            known = known + 1
+                        end
+                    end
+                end
+            end
+        end
+        local shown = {}
+        for i = 1, min(#order, REPORT_NAMES) do
+            shown[i] = order[i]
+        end
+        ns.Print(format(L.MINIMAPNODEICONS_REPORT_SPACE, space, #order, known,
+            #shown > 0 and concat(shown, ", ") or L.MINIMAPNODEICONS_REPORT_NONE))
+        if known > bestCount then
+            best, bestCount = space, known
+        end
+    end
+    if best then
+        module.db.calibration.space = best
+        ns.Print(format(L.MINIMAPNODEICONS_REPORT_SAVED, best))
+    else
+        module.db.calibration.space = nil
+        ns.Print(L.MINIMAPNODEICONS_REPORT_NOTHING)
+    end
+    sweep, nextSweep = nil, 0
+end
+
+ns.AddCommand("nodes", "", L.MINIMAPNODEICONS_COMMAND, report)
 
 -- Turning on and off ------------------------------------------------------------------------------
 

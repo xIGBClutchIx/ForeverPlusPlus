@@ -100,6 +100,7 @@ Open Game Menu > Options > AddOns > Forever++ (or type `/fpp`). It opens on the 
 | `/fpp errors` | Shows the errors Error Catcher caught. |
 | `/fpp scan` | Scans the open auction house now. |
 | `/fpp resetprices` | Forgets the saved auction prices. |
+| `/fpp nodes` | Checks what Minimap Node Icons sees on the minimap now: whether tracking is on and which herbs and veins it can read. |
 
 Settings are saved per account in `ForeverPlusPlusDB`, and what belongs to one character (talent plans, learned flight points, Quest Tracker's zone-hidden quests) in `ForeverPlusPlusCharDB`.
 

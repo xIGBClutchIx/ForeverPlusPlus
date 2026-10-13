@@ -249,6 +249,19 @@ L.MINIMAPNODEICONS_DETAIL_HIGH = "High"
 L.MINIMAPNODEICONS_CHAT_DESC = "Say in chat when the game stops Minimap Node Icons from checking "
     .. "the minimap."
 L.MINIMAPNODEICONS_FAILED = "Minimap Node Icons couldn't check the minimap: %s" -- error
+L.MINIMAPNODEICONS_COMMAND = "Check what Minimap Node Icons sees on the minimap right now."
+L.MINIMAPNODEICONS_REPORT_UNAVAILABLE = "This client can't check the minimap for nodes."
+L.MINIMAPNODEICONS_REPORT_COMBAT = "Can't check the minimap in combat."
+L.MINIMAPNODEICONS_REPORT_YES = "yes"
+L.MINIMAPNODEICONS_REPORT_NO = "no"
+-- tracking on (yes/no), position readable (yes/no), minimap width, view radius in yards
+L.MINIMAPNODEICONS_REPORT_STATE = "Tracking on: %s. Position: %s. Minimap: %d wide, %s yards."
+-- space name, names found, nodes known among them, the first few names
+L.MINIMAPNODEICONS_REPORT_SPACE = "%s: %d names, %d nodes known: %s"
+L.MINIMAPNODEICONS_REPORT_NONE = "none"
+L.MINIMAPNODEICONS_REPORT_SAVED = "Using %s from now on." -- space name
+L.MINIMAPNODEICONS_REPORT_NOTHING = "No node found. Stand near a herb or vein with tracking on, "
+    .. "and keep the cursor off the minimap."
 L.MINIMAPNODEICONS_CLEAR = "Learned Nodes"
 L.MINIMAPNODEICONS_CLEAR_BUTTON = "Clear"
 L.MINIMAPNODEICONS_CLEAR_DESC = "Forget the icons learned by gathering nodes. They're learned "
