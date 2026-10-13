@@ -43,6 +43,9 @@ ns.changelog = {
                     .. "and your XP per hour and time to level since you logged in." },
                 { L.XPBARTEXT_TITLE, "The new Green When Quests Level You option (on by default) turns off "
                     .. "the green quest XP text shown once turning those quests in would level you." },
+                { L.CHANGELOG_SETTINGS, "An option you've changed has an undo arrow at the end of "
+                    .. "its row that sets it back to its default, and its tooltip says what the "
+                    .. "default is." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.WAYLAIDCRATES_TITLE, "Item Tooltips' Waylaid Crate Costs option moved here as "

@@ -29,7 +29,7 @@ local _, ns = ...
 
 local ipairs, pairs, next, format, type, sort = ipairs, pairs, next, string.format, type, table.sort
 local strlower, concat = string.lower, table.concat
-local min, max, pcall = math.min, math.max, pcall
+local min, max, pcall, tostring = math.min, math.max, pcall, tostring
 local InCombatLockdown, CreateFrame, GetBuildInfo = InCombatLockdown, CreateFrame, GetBuildInfo
 local wipe = wipe
 local GameTooltip = GameTooltip
@@ -961,6 +961,93 @@ local function sliderWidth(row, option, room, left)
     return max(60, min(SLIDER_WIDTH, room - 16 - left - widest - 12))
 end
 
+-- The room the reset arrow takes at the end of an option's row.
+local RESET_SIZE = 20
+
+-- An option's default as its control shows it: a slider's text, a dropdown's choice, or checked.
+local function defaultText(module, option)
+    local value = module.defaults[option.key]
+    if option.min then
+        return type(option.format) == "function" and option.format(value)
+            or format(option.format or "%s", value)
+    elseif option.choices then
+        for _, choice in ipairs(option.choices) do
+            if choice[1] == value then
+                return choice[2]
+            end
+        end
+        return tostring(value)
+    end
+    return value and L.SETTINGS_CHECKED or L.SETTINGS_UNCHECKED
+end
+
+-- The undo arrow at the end of an option's row (and the slider in it, `pair`), shown while either
+-- isn't at its default, that puts them back. Like the undo buttons on Blizzard's Talents and
+-- Transmog windows. Probe: their atlases are Mainline's; without one, no arrow.
+local function addResetButton(view, row, module, option, pair, on)
+    local atlas = hasAtlas("common-icon-undo") and "common-icon-undo"
+        or hasAtlas("talents-button-undo") and "talents-button-undo"
+    if not atlas then
+        return
+    end
+    local keys = { option, pair }
+    local function changed()
+        for _, each in ipairs(keys) do
+            if module.db[each.key] ~= module.defaults[each.key] then
+                return true
+            end
+        end
+        return false
+    end
+    local button = CreateFrame("Button", nil, row)
+    button:SetSize(RESET_SIZE, RESET_SIZE)
+    button:SetPoint("RIGHT", -2, 0)
+    local icon = button:CreateTexture(nil, "ARTWORK")
+    icon:SetAtlas(atlas)
+    icon:SetSize(16, 16)
+    icon:SetPoint("CENTER")
+    button:SetHighlightAtlas(atlas, "ADD")
+    button:GetHighlightTexture():SetAllPoints(icon)
+    -- Pressed in a pixel, as Blizzard's icon buttons are.
+    button:SetScript("OnMouseDown", function(self)
+        if self:IsEnabled() then
+            icon:SetPoint("CENTER", 1, -1)
+        end
+    end)
+    button:SetScript("OnMouseUp", function() icon:SetPoint("CENTER") end)
+    button:SetScript("OnClick", function()
+        if PlaySound and SOUNDKIT then
+            PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+        end
+        for _, each in ipairs(keys) do
+            local default = module.defaults[each.key]
+            if module.db[each.key] ~= default then
+                ns.SetOption(module.name, each.key, default)
+            end
+        end
+        ns.RefreshSetting(module.name)
+    end)
+    -- Greyed with the option, and still saying what it would do.
+    button:SetMotionScriptsWhileDisabled(true)
+    button:SetScript("OnEnter", function(self)
+        local text = defaultText(module, option)
+        if pair then
+            text = format(L.SETTINGS_RESET_PAIR, text, defaultText(module, pair))
+        end
+        showTooltip(self, L.SETTINGS_RESET, format(L.SETTINGS_RESET_TO, text))
+    end)
+    button:SetScript("OnLeave", function(self)
+        if GameTooltip:GetOwner() == self then
+            GameTooltip:Hide()
+        end
+    end)
+    view.updates[#view.updates + 1] = function()
+        button:SetShown(changed())
+        button:SetEnabled(on())
+        icon:SetDesaturated(not on())
+    end
+end
+
 -- One of the module's options, with `byKey` for the option it's under (`requires`) or the slider
 -- in its row (`slider`), and `done` for those already drawn.
 local function addOptionRow(view, module, option, byKey, done)
@@ -1009,8 +1096,9 @@ local function addOptionRow(view, module, option, byKey, done)
         mark()
         row:SetHeight(max(ROW_HEIGHT, label:GetStringHeight() + 8))
     end
-    local room = view:GetWidth() - CONTROL_LEFT
+    local room = view:GetWidth() - CONTROL_LEFT - RESET_SIZE
     local paired = pair and pair.min
+    addResetButton(view, row, module, option, paired and pair or nil, on)
     if paired or not (option.min or option.choices) then
         local box = newCheckbox(row, 30, function(checked) setOption(module, option, checked) end)
         box:SetPoint("LEFT", CONTROL_LEFT, 0)

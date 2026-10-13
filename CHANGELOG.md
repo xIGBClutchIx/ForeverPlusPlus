@@ -16,6 +16,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **XP Bar Text**: the new Fill Bar with Ready Quests option (off by default) fills the experience bar on from your XP in green with what your quests ready to turn in will give, like rested XP.
 - **XP Bar Text**: the new Detailed Tooltip option (on by default) adds to the bar's tooltip the XP left to level, your rested XP, the XP of your quests, and your XP per hour and time to level since you logged in.
 - **XP Bar Text**: the new Green When Quests Level You option (on by default) turns off the green quest XP text shown once turning those quests in would level you.
+- **Settings**: an option you've changed has an undo arrow at the end of its row that sets it back to its default, and its tooltip says what the default is.
 
 ### Changed
 
