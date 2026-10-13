@@ -22,6 +22,9 @@ ns.changelog = {
                 { L.FOREVERQUESTICONS_TITLE, "The new Quest Details option (on by default) puts the "
                     .. "icon after the quest's name at the top of its details, in the quest window "
                     .. "and on the map." },
+                { L.MINIMAPNODEICONS_TITLE, "A new module that puts the herb's or ore's own icon "
+                    .. "on each tracking dot on the minimap while Find Herbs or Find Minerals is "
+                    .. "on. Off by default." },
                 { L.QUESTLEVELS_TITLE, "A new module that shows a quest's level before its name, "
                     .. "like the quest log's [12], in a quest giver's list and at the top of the "
                     .. "quest's details. On by default." },

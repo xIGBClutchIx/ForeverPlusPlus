@@ -252,6 +252,8 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 - Blizzard shows nothing on screen when tracking changes. A centered "Find Minerals is off" comes from GatherSkillTooltip's tracking warning, not the client. **[local]** (GatherSkillTooltip `Locales/enUS.lua` `SPELL_OFF`)
 - Only one tracking spell is on at a time, as in Classic: turning on Find Herbs turns off Find Minerals. **[addon]** (GatherSkillTooltip treats either one being on as enough when the player has both skills) **Unverified** in game.
 - Tracking is lost on death and needs turning back on after resurrection. **[addon]** (AutoTrackers restores on `PLAYER_ALIVE` / `PLAYER_UNGHOST`)
+- The game draws tracking dots (herbs, veins) itself, and no API lists them or where they are: `C_Minimap` has tracking, zoom, view radius, and blob textures, and `C_VignetteInfo` is for vignettes, which Classic gathering nodes aren't. **[web]** (Gethe `forever` branch, `MinimapDocumentation.lua`, `MinimapFrameAPIDocumentation.lua`, `VignetteInfoDocumentation.lua`, checked 2026-10-13)
+- Forever's minimap has `Minimap:UpdateMouseoverAtPoint(pointX, pointY)` (and `SetUsingSoftCursor`), with `SecretArguments = "AllowedWhenUntainted"`; warcraft.wiki.gg lists it for Forever 1.60.1 only. It points the minimap's mouseover at a spot as if the cursor were there, and `C_TooltipInfo.GetMinimapMouseover()` gives the tooltip data for it, as `GameTooltip:SetMinimapMouseover()` does on hover (`Minimap_OnUpdate` in `Blizzard_Minimap/Mainline/Minimap.lua`). **[web]** (same docs, `TooltipInfoDocumentation.lua`, checked 2026-10-13) Minimap Node Icons sweeps the minimap with it to find each dot's name. The point's coordinate space is **Unverified**: the module takes it to be the cursor's (`GetCursorPosition`, screen pixels from the bottom left). Whether an addon may call it, and whether it disturbs the real mouseover, are **Unverified**. NodeSight (a Forever addon on CurseForge) puts herb and ore icons on the dots with a "scan detail" setting, which suggests the same approach works. **[web]**
 
 ## Professions and gathering tooltips
 
@@ -374,6 +376,7 @@ Check these in the live client and move them up with a tag and date:
 - [x] `[AllowLoadGameType camelot]` loads on Forever and `standard` doesn't. (2026-09-25)
 - [ ] Does `ConsoleGetAllCommands()` list every CVar on Forever, or only some?
 - [ ] Is `ReloadUI()` blocked when called from an addon's own button? (From `/run` it works.)
+- [ ] What space does `Minimap:UpdateMouseoverAtPoint` take its point in (cursor pixels, UI units, or relative to the minimap), and does `C_TooltipInfo.GetMinimapMouseover()` then name the dot there?
 - [ ] Does `C_Minimap.SetTracking` from a timer swap Find Minerals and Find Herbs, mounted and not, without an error or a dismount?
 - [x] Secure snippets run on 70009. (2026-09-25)
 - [x] `Settings.RegisterAddOnCategory`, `Menu.ModifyMenu`, and `TooltipDataProcessor.AddTooltipPostCall` are present. (2026-09-25)

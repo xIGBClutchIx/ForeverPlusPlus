@@ -227,3 +227,26 @@ L.WAYPOINTS_NO_MAP = "There's no map here. Name a zone: /way Elwynn Forest 45 67
 L.WAYPOINTS_NOT_HERE = "Can't put a waypoint on the %s map." -- zone
 L.WAYPOINTS_UNAVAILABLE = "This client has no map waypoints."
 L.WAYPOINTS_YARDS = "%s yds" -- a distance; the game's own words are used when it has them
+
+-- MinimapNodeIcons
+L.MINIMAPNODEICONS_TITLE = "Minimap Node Icons"
+L.MINIMAPNODEICONS_DESC = "Put the herb's or ore's own icon on each tracking dot on the minimap "
+    .. "while Find Herbs or Find Minerals is on. Icons update out of combat, while your cursor "
+    .. "isn't on the minimap. A node it doesn't know gets its icon once you gather it."
+L.MINIMAPNODEICONS_SIZE = "Icon Size"
+L.MINIMAPNODEICONS_SIZE_DESC = "How big the icons are on the minimap."
+L.MINIMAPNODEICONS_DETAIL = "Scan Detail"
+L.MINIMAPNODEICONS_DETAIL_DESC = "How closely the minimap is checked for dots. Higher finds dots "
+    .. "that sit close together, but takes more of your computer's time."
+L.MINIMAPNODEICONS_DETAIL_LOW = "Low"
+L.MINIMAPNODEICONS_DETAIL_MEDIUM = "Medium"
+L.MINIMAPNODEICONS_DETAIL_HIGH = "High"
+L.MINIMAPNODEICONS_CHAT_DESC = "Say in chat when the game stops Minimap Node Icons from checking "
+    .. "the minimap."
+L.MINIMAPNODEICONS_FAILED = "Minimap Node Icons couldn't check the minimap: %s" -- error
+L.MINIMAPNODEICONS_CLEAR = "Learned Nodes"
+L.MINIMAPNODEICONS_CLEAR_BUTTON = "Clear"
+L.MINIMAPNODEICONS_CLEAR_DESC = "Forget the icons learned by gathering nodes. They're learned "
+    .. "again as you gather."
+L.MINIMAPNODEICONS_CLEAR_CONFIRM = "Forget every node icon Minimap Node Icons has learned?"
+L.MINIMAPNODEICONS_CLEAR_DONE = "Learned node icons cleared."

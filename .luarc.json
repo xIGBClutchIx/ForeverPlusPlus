@@ -87,6 +87,7 @@
     "AddonList_Update",
     "GetTime",
     "GetNumLootItems",
+    "GetLootSlotInfo",
     "LootSlot",
     "IsModifiedClick",
     "CanMerchantRepair",
