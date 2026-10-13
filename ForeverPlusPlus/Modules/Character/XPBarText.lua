@@ -9,7 +9,8 @@
 local _, ns = ...
 
 local ipairs, floor, format, min = ipairs, math.floor, string.format, math.min
-local CreateFrame, UnitXP, UnitXPMax, GetXPExhaustion = CreateFrame, UnitXP, UnitXPMax, GetXPExhaustion
+local CreateFrame, GetTime, UnitLevel = CreateFrame, GetTime, UnitLevel
+local UnitXP, UnitXPMax, GetXPExhaustion = UnitXP, UnitXPMax, GetXPExhaustion
 local C_QuestLog, BreakUpLargeNumbers = C_QuestLog, BreakUpLargeNumbers
 
 local L = ns.L
@@ -23,15 +24,25 @@ local module = ns.NewModule("XPBarText", L.XPBARTEXT_DESC, {
     quests = "complete", -- "off", "complete" (ready to turn in), or "all"
     questColor = true,
     questBar = false,
+    tooltip = true,
 })
 module.title = L.XPBARTEXT_TITLE
 module.category = "character"
 module.added = "0.8.0"
 
 module.options = {
-    { key = "always", name = L.XPBARTEXT_ALWAYS, description = L.XPBARTEXT_ALWAYS_DESC },
-    { key = "percent", name = L.XPBARTEXT_PERCENT, description = L.XPBARTEXT_PERCENT_DESC },
-    { key = "rested", name = L.XPBARTEXT_RESTED, description = L.XPBARTEXT_RESTED_DESC },
+    {
+        key = "always", name = L.XPBARTEXT_ALWAYS, description = L.XPBARTEXT_ALWAYS_DESC,
+        section = L.XPBARTEXT_SECTION_TEXT,
+    },
+    {
+        key = "percent", name = L.XPBARTEXT_PERCENT, description = L.XPBARTEXT_PERCENT_DESC,
+        section = L.XPBARTEXT_SECTION_TEXT,
+    },
+    {
+        key = "rested", name = L.XPBARTEXT_RESTED, description = L.XPBARTEXT_RESTED_DESC,
+        section = L.XPBARTEXT_SECTION_TEXT,
+    },
     {
         key = "quests", name = L.XPBARTEXT_QUESTS, description = L.XPBARTEXT_QUESTS_DESC,
         choices = {
@@ -39,14 +50,19 @@ module.options = {
             { "all", L.XPBARTEXT_QUESTS_ALL },
             { "off", L.XPBARTEXT_QUESTS_OFF },
         },
+        section = L.XPBARTEXT_SECTION_TEXT,
     },
     {
         key = "questColor", name = L.XPBARTEXT_QUEST_COLOR, description = L.XPBARTEXT_QUEST_COLOR_DESC,
-        added = "0.9.0",
+        added = "0.9.0", section = L.XPBARTEXT_SECTION_TEXT,
     },
     {
         key = "questBar", name = L.XPBARTEXT_QUEST_BAR, description = L.XPBARTEXT_QUEST_BAR_DESC,
-        added = "0.9.0",
+        added = "0.9.0", section = L.XPBARTEXT_SECTION_BAR,
+    },
+    {
+        key = "tooltip", name = L.XPBARTEXT_TOOLTIP, description = L.XPBARTEXT_TOOLTIP_DESC,
+        added = "0.9.0", section = L.XPBARTEXT_SECTION_BAR,
     },
 }
 
@@ -58,7 +74,8 @@ local texts = setmetatable({}, { __mode = "k" }) -- Blizzard's experience bar ->
 local fills = setmetatable({}, { __mode = "k" }) -- Blizzard's experience bar -> our quest fill
 local bars = {} -- the experience bars, once found
 local questXP = 0 -- what the Quest XP choice counts, for the text
-local readyXP = 0 -- what the quests ready to turn in give, for the bar
+local readyXP = 0 -- what the quests ready to turn in give
+local allXP = 0 -- what all the quests in the log give
 
 local function number(n)
     return BreakUpLargeNumbers and BreakUpLargeNumbers(n) or n
@@ -72,14 +89,14 @@ local function amount(n, max)
     return number(n)
 end
 
--- The XP the quests in your log give: for the text, only those ready to turn in or all of them;
--- for the bar, those ready to turn in. A quest's reward reads 0 until the game has its data;
--- QUEST_LOG_UPDATE comes when it does.
+-- The XP the quests in your log give, those ready to turn in and all of them: the text shows one
+-- (the Quest XP choice), the bar the first, the tooltip both. A quest's reward reads 0 until the
+-- game has its data; QUEST_LOG_UPDATE comes when it does.
 local function countQuestXP()
-    questXP, readyXP = 0, 0
+    questXP, readyXP, allXP = 0, 0, 0
     local which = module.db.quests
-    if (which == "off" and not module.db.questBar) or not (GetQuestLogRewardXP and C_QuestLog
-        and C_QuestLog.GetNumQuestLogEntries and C_QuestLog.GetInfo) then
+    if not (GetQuestLogRewardXP and C_QuestLog and C_QuestLog.GetNumQuestLogEntries
+        and C_QuestLog.GetInfo) then
         return
     end
     local isComplete = C_QuestLog.ReadyForTurnIn or C_QuestLog.IsComplete
@@ -87,20 +104,81 @@ local function countQuestXP()
         local info = C_QuestLog.GetInfo(index)
         local id = info and not info.isHeader and info.questID
         if id then
-            local ready = isComplete and isComplete(id)
-            if which == "all" or ready then
-                local xp = GetQuestLogRewardXP(id)
-                if readable(xp) and type(xp) == "number" then
-                    if which == "all" or (which == "complete" and ready) then
-                        questXP = questXP + xp
-                    end
-                    if ready then
-                        readyXP = readyXP + xp
-                    end
+            local xp = GetQuestLogRewardXP(id)
+            if readable(xp) and type(xp) == "number" then
+                allXP = allXP + xp
+                if isComplete and isComplete(id) then
+                    readyXP = readyXP + xp
                 end
             end
         end
     end
+    questXP = (which == "all" and allXP) or (which == "complete" and readyXP) or 0
+end
+
+-- XP gained since login (or since the module came on), for XP per hour and time to level.
+local session = {}
+
+local function trackXP()
+    local xp, max, level = UnitXP("player"), UnitXPMax("player"), UnitLevel("player")
+    if not (readable(xp) and readable(max) and readable(level) and type(xp) == "number"
+        and type(max) == "number" and type(level) == "number") then
+        return
+    end
+    if not session.xp then
+        session.start, session.gained = GetTime(), 0
+    elseif level > session.level then
+        -- Leveled: the rest of the old level, then what's into the new one.
+        session.gained = session.gained + (session.max - session.xp) + xp
+    elseif xp > session.xp then
+        session.gained = session.gained + (xp - session.xp)
+    end
+    session.xp, session.max, session.level = xp, max, level
+end
+
+-- XP per hour this session, or nil before there's a minute of it with XP gained.
+local function xpPerHour()
+    local elapsed = session.start and GetTime() - session.start or 0
+    if elapsed < 60 or session.gained <= 0 then
+        return nil
+    end
+    return session.gained / elapsed * 3600
+end
+
+-- Our lines under Blizzard's tooltip for the bar, which it builds on every mouseover: Blizzard's
+-- has your XP and rested state, ours what's left, rested XP, quest XP, and the pace.
+local function addTooltip()
+    if not module.db.tooltip then
+        return
+    end
+    local tooltip = GetAppropriateTooltip and GetAppropriateTooltip() or GameTooltip
+    local current, max = UnitXP("player"), UnitXPMax("player")
+    -- Blizzard's builds nothing without a rest state; then there's nothing to add to.
+    if not (tooltip:IsShown() and tooltip:GetOwner() == UIParent and readable(current)
+        and readable(max) and type(current) == "number" and type(max) == "number" and max > 0) then
+        return
+    end
+    local function line(label, value)
+        tooltip:AddDoubleLine(label, value, 1, 1, 1, 1, 1, 1)
+    end
+    GameTooltip_AddBlankLineToTooltip(tooltip)
+    line(L.XPBARTEXT_TIP_LEFT, amount(max - current, max))
+    local rested = GetXPExhaustion and GetXPExhaustion()
+    if rested and readable(rested) and type(rested) == "number" and rested > 0 then
+        line(L.XPBARTEXT_TIP_RESTED, amount(rested, max))
+    end
+    if readyXP > 0 then
+        line(L.XPBARTEXT_TIP_READY, amount(readyXP, max))
+    end
+    if allXP > readyXP then
+        line(L.XPBARTEXT_TIP_ALL, amount(allXP, max))
+    end
+    local rate = xpPerHour()
+    if rate then
+        line(L.XPBARTEXT_TIP_RATE, number(floor(rate)))
+        line(L.XPBARTEXT_TIP_TIME, ns.Text.Clock((max - current) / rate * 3600))
+    end
+    tooltip:Show()
 end
 
 -- Our text, or nil when the XP can't be read (then Blizzard's own text stays).
@@ -240,13 +318,20 @@ local function setUp()
         module:Hook(bar, "UpdateCurrentText", update)
         module:Hook(bar, "UpdateTextVisibility", update)
         module:HookScript(bar.StatusBar, "OnSizeChanged", onResized)
+        -- The bar's mouseover tooltip, built by its rested XP marker.
+        module:Hook(bar.ExhaustionTick, "ExhaustionToolTipText", addTooltip)
     end
     refreshQuests()
 end
 
 function module:OnEnable()
     ns.AddOns.WhenLoaded(ADDON, setUp)
-    self:On("PLAYER_XP_UPDATE", updateAll)
+    session = {}
+    trackXP()
+    self:On("PLAYER_XP_UPDATE", function()
+        trackXP()
+        updateAll()
+    end)
     self:On("UPDATE_EXHAUSTION", updateAll)
     self:On("PLAYER_LEVEL_UP", updateAll)
     self:On("PLAYER_ENTERING_WORLD", refreshQuests)

@@ -22,6 +22,9 @@ ns.changelog = {
                 { L.XPBARTEXT_TITLE, "The new Quest XP on Bar option (off by default) fills the "
                     .. "experience bar on from your XP in green with what your quests ready to turn "
                     .. "in will give, like rested XP." },
+                { L.XPBARTEXT_TITLE, "The new More in Tooltip option (on by default) adds to the "
+                    .. "bar's tooltip the XP left to level, your rested XP, the XP of your quests, "
+                    .. "and your XP per hour and time to level since you logged in." },
                 { L.XPBARTEXT_TITLE, "The new Green When Leveling option (on by default) turns off "
                     .. "the green quest XP text shown once turning those quests in would level you." },
             } },

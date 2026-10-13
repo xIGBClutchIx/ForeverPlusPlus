@@ -198,6 +198,8 @@
     "UnitXPMax",
     "GetXPExhaustion",
     "IsXPUserDisabled",
+    "GetAppropriateTooltip",
+    "GameTooltip_AddBlankLineToTooltip",
     "C_QuestLog",
     "CancelDuel",
     "DeclineGroup",

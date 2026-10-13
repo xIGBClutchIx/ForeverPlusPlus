@@ -147,7 +147,18 @@ L.XPBARTEXT_QUEST_COLOR_DESC = "Show the quest XP text in green once turning tho
 L.XPBARTEXT_QUEST_BAR ="Quest XP on Bar"
 L.XPBARTEXT_QUEST_BAR_DESC = "Fill the bar on from your XP in green with the XP of the quests "
     .. "ready to turn in, like rested XP."
-L.XPBARTEXT_XP = "XP: %s / %s" -- current, needed for the level
+L.XPBARTEXT_SECTION_TEXT = "Text"
+L.XPBARTEXT_SECTION_BAR = "Bar and Tooltip"
+L.XPBARTEXT_TOOLTIP ="More in Tooltip"
+L.XPBARTEXT_TOOLTIP_DESC = "Add to the bar's tooltip the XP left to level, your rested XP, the XP "
+    .. "of your quests, and your XP per hour and time to level since you logged in."
+L.XPBARTEXT_TIP_LEFT = "To Level:"
+L.XPBARTEXT_TIP_RESTED = "Rested:"
+L.XPBARTEXT_TIP_READY = "Quests Ready:"
+L.XPBARTEXT_TIP_ALL = "All Quests:"
+L.XPBARTEXT_TIP_RATE = "XP per Hour:"
+L.XPBARTEXT_TIP_TIME = "Time to Level:"
+L.XPBARTEXT_XP ="XP: %s / %s" -- current, needed for the level
 L.XPBARTEXT_WITH_PERCENT = "%s (%d%%)" -- the XP text, its percent
 L.XPBARTEXT_AMOUNT = "%s (%d%%)" -- an amount of XP, as a percent of the level
 L.XPBARTEXT_RESTED_TEXT = "Rested: %s"
