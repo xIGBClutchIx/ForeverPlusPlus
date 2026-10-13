@@ -26,7 +26,8 @@ module.options = {
         key = "lines",
         name = L.CHATHISTORY_LINES,
         description = L.CHATHISTORY_LINES_DESC,
-        min = 25, max = 250, step = 25, format = "%d",
+        -- Blizzard's windows hold 128 lines, so more could never be saved.
+        min = 25, max = 125, step = 25, format = "%d",
     },
     { key = "divider", name = L.CHATHISTORY_DIVIDER_OPTION, description = L.CHATHISTORY_DIVIDER_DESC },
 }

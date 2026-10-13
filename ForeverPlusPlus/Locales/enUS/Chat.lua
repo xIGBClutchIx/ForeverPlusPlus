@@ -10,8 +10,6 @@ end
 L.CHATCOPY_TITLE = "Chat Copy"
 L.CHATCOPY_DESC = "Add a button beside the chat window that opens the chat as text you can "
     .. "select and copy."
-L.CHATCOPY_LINES = "Lines"
-L.CHATCOPY_LINES_DESC = "How many of the latest chat lines the window shows."
 L.CHATCOPY_TOOLTIP = "Copy Chat"
 L.CHATCOPY_TOOLTIP_DESC = "Open the chat as text you can select and copy."
 L.CHATCOPY_STAMPS = "Click Timestamps"

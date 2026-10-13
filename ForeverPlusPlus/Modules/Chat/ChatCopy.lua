@@ -12,26 +12,19 @@ local _, ns = ...
 
 local CreateFrame, UIParent, C_Timer, EventRegistry = CreateFrame, UIParent, C_Timer, EventRegistry
 local ipairs, pairs, next, type, time = ipairs, pairs, next, type, time
-local max, floor, concat = math.max, math.floor, table.concat
+local floor, concat = math.floor, table.concat
 local find, gsub, match, sub = string.find, string.gsub, string.match, string.sub
 
 local L = ns.L
 local Chat = ns.Chat
 
 local module = ns.NewModule("ChatCopy", L.CHATCOPY_DESC, {
-    lines = 250,
     stamps = false,
 })
 module.title = L.CHATCOPY_TITLE
 module.category = "chat"
 
 module.options = {
-    {
-        key = "lines",
-        name = L.CHATCOPY_LINES,
-        description = L.CHATCOPY_LINES_DESC,
-        min = 50, max = 500, step = 50, format = "%d",
-    },
     {
         key = "stamps",
         name = L.CHATCOPY_STAMPS,
@@ -53,7 +46,8 @@ local MARKER = "{fpp:selection}"
 
 local button, window
 
----The chat window the player is looking at in its chat colors, newest line last.
+---The chat window the player is looking at in its chat colors, newest line last: every line it
+---holds (Blizzard's windows keep 128).
 ---@return string
 local function chatText()
     local frame = SELECTED_CHAT_FRAME or ChatFrame1
@@ -62,7 +56,7 @@ local function chatText()
     end
     local total = frame:GetNumMessages()
     local lines, size = {}, 0
-    for i = total, max(1, total - module.db.lines + 1), -1 do
+    for i = total, 1, -1 do
         local text, r, g, b = frame:GetMessageInfo(i)
         local line
         if ns.IsReadable(text) and type(text) == "string" then
