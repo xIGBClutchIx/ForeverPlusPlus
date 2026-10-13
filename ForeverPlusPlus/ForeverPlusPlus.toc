@@ -96,7 +96,7 @@ Modules\Character\CharacterWindow\Durability.lua
 Modules\Character\CharacterWindow\Skills.lua
 Modules\Quests\ForeverQuestIcons.lua
 Modules\Quests\QuestTracker.lua
-Modules\Quests\QuestGiverLevels.lua
+Modules\Quests\QuestLevels.lua
 Modules\Character\TalentPlanner.lua
 Modules\System\Commands.lua
 Modules\System\MinimapButton.lua

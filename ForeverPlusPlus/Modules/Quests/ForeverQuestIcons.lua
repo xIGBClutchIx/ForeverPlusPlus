@@ -1,6 +1,6 @@
 -- Forever Quest Icons: a small icon after the name of quests that are new to Forever, the ones
--- that weren't in original Classic, in the quest log on the world map, the objective tracker, and
--- a quest giver's list of quests, each with its own checkbox. Idea from ForeverQuestTint; none of
+-- that weren't in original Classic, in the quest log on the world map, the objective tracker, a
+-- quest giver's list of quests, and the title of a quest's details, each with its own checkbox. Idea from ForeverQuestTint; none of
 -- its code.
 --
 -- New quests are told apart by ID. Every quest of original Classic has an ID of 9665 or less
@@ -10,8 +10,8 @@
 -- we add to it, so a title the icon would push onto another line is left without one.
 local _, ns = ...
 
-local setmetatable, ipairs, select, type, format, floor = setmetatable, ipairs, select, type,
-    string.format, math.floor
+local pairs, ipairs, select, type, format, floor = pairs, ipairs, select, type, string.format,
+    math.floor
 
 local L = ns.L
 local hasAtlas = ns.Frames.HasAtlas
@@ -21,19 +21,21 @@ local module = ns.NewModule("ForeverQuestIcons", L.FOREVERQUESTICONS_DESC, {
     log = true,
     tracker = true,
     givers = true,
+    details = true,
     icon = "infinity",
     -- Icon size in each place, in percent.
     logSize = 80,
     trackerSize = 80,
     giversSize = 80,
+    detailsSize = 80,
 })
 module.title = L.FOREVERQUESTICONS_TITLE
 module.category = "quests"
 
 -- A place's checkbox, with its size slider in the same row.
-local function place(key, name, description)
+local function place(key, name, description, added)
     local sizeKey = key .. "Size"
-    return { key = key, name = name, description = description, slider = sizeKey },
+    return { key = key, name = name, description = description, slider = sizeKey, added = added },
         { key = sizeKey, name = L.FOREVERQUESTICONS_SIZE, description = L.FOREVERQUESTICONS_SIZE_DESC,
             requires = key, min = 50, max = 300, step = 10, format = "%d%%" }
 end
@@ -51,8 +53,9 @@ for _, args in ipairs({
     { "log", L.FOREVERQUESTICONS_LOG, L.FOREVERQUESTICONS_LOG_DESC },
     { "tracker", L.FOREVERQUESTICONS_TRACKER, L.FOREVERQUESTICONS_TRACKER_DESC },
     { "givers", L.FOREVERQUESTICONS_GIVERS, L.FOREVERQUESTICONS_GIVERS_DESC },
+    { "details", L.FOREVERQUESTICONS_DETAILS, L.FOREVERQUESTICONS_DETAILS_DESC, "0.9.0" },
 }) do
-    local toggle, size = place(args[1], args[2], args[3])
+    local toggle, size = place(args[1], args[2], args[3], args[4])
     module.options[#module.options + 1] = toggle
     module.options[#module.options + 1] = size
 end
@@ -85,27 +88,28 @@ local function isNew(questID)
     return type(questID) == "number" and questID > LAST_CLASSIC_QUEST
 end
 
--- The text Blizzard gave each title, and the text we set, so a title we marked can be marked
--- again (another icon, or none) without stacking icons.
-local original = setmetatable({}, { __mode = "k" })
-local marked = setmetatable({}, { __mode = "k" })
+-- A title without our icon at its end, so a title can be marked again (another icon, or none)
+-- without stacking icons, even after something else (Quest Levels) changed the rest of it.
+local function plain(text)
+    for _, icon in pairs(ICONS) do
+        text = text:gsub(" |A:" .. icon.atlas:gsub("%-", "%%-") .. ":%d+:%d+|a$", "")
+    end
+    return text
+end
 
 ---Adds the icon to a quest title, or takes it off.
 ---@param fontString table the title's font string
 ---@param questID number|nil
----@param place string "log", "tracker", or "givers": its checkbox and size
+---@param place string "log", "tracker", "givers", or "details": its checkbox and size
 local function mark(fontString, questID, place)
     if not fontString then
         return
     end
     local text = fontString:GetText()
-    if not text then
+    if type(text) ~= "string" then
         return
     end
-    if marked[fontString] == text then
-        text = original[fontString]
-    end
-    original[fontString] = text
+    text = plain(text)
     local db = module.db
     local icon = module.enabled and db[place] and isNew(questID)
         and iconFor(fontString, db[place .. "Size"])
@@ -117,14 +121,12 @@ local function mark(fontString, questID, place)
             local lines = fontString:GetNumLines()
             fontString:SetText(wanted)
             if fontString:GetNumLines() > lines then
-                wanted = text
                 fontString:SetText(text)
             end
         else
             fontString:SetText(wanted)
         end
     end
-    marked[fontString] = wanted
 end
 
 -- The quest log beside the world map.
@@ -198,6 +200,23 @@ local function markGreeting()
     end
 end
 
+-- The title of a quest's details: QuestInfo_Display fills them for a quest giver's offer and
+-- reward, and for the quest log on the map.
+local function markDetails()
+    local questID
+    if QuestInfoFrame and QuestInfoFrame.questLog then
+        questID = C_QuestLog.GetSelectedQuest and C_QuestLog.GetSelectedQuest()
+    else
+        questID = GetQuestID and GetQuestID()
+    end
+    mark(QuestInfoTitleHeader, questID, "details")
+end
+
+-- The window that asks for a quest's items before you turn it in.
+local function markProgress()
+    mark(QuestProgressTitleText, GetQuestID and GetQuestID(), "details")
+end
+
 -- The tracker is its own Blizzard addon. Each tracker frame has its own copy of the method, so
 -- the frame is hooked.
 local function hookTracker()
@@ -212,6 +231,8 @@ local function markAll()
     markTracker()
     markGossip()
     markGreeting()
+    markDetails()
+    markProgress()
 end
 
 function module:OnEnable()
@@ -226,6 +247,9 @@ function module:OnEnable()
         self:HookScript(QuestFrameGreetingPanel, "OnShow", markGreeting)
         self:Hook("QuestFrameGreetingPanel_OnShow", markGreeting)
     end
+    self:Hook("QuestInfo_Display", markDetails)
+    self:HookScript(QuestFrameProgressPanel, "OnShow", markProgress)
+    self:Hook("QuestFrameProgressPanel_OnShow", markProgress)
     markAll()
 end
 

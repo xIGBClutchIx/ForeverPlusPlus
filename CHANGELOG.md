@@ -8,7 +8,8 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 - **AddOns List**: the new AddOn Sets option (off by default) adds a Sets dropdown beside Disable All, to save which addons are on under a name and turn that set back on later.
 - **Item Tooltips**: the new Repair Cost line (off by default) shows what repairing damaged gear costs, on gear you wear or carry, without a merchant's repair cursor.
-- **Quest Giver Levels**: a new module that shows each quest's level before its name in a quest giver's list, like the quest log's [12]. On by default.
+- **Forever Quest Icons**: the new Quest Details option (on by default) puts the icon after the quest's name at the top of its details, in the quest window and on the map.
+- **Quest Levels**: a new module that shows a quest's level before its name, like the quest log's [12], in a quest giver's list and at the top of the quest's details. On by default.
 - **Quest Tracker**: the new Current Zone Only option (off by default) tracks only the quests of the zone you're in, and tracks the others again when you get there. The quest your map follows always shows.
 - **Waylaid Crates**: a new module for filling Waylaid Crates. Its Waylaid Crates entry in the auction house's categories lists every item your crates still need, less what's already in your bags.
 - **XP Bar Text**: the new Fill Bar with Ready Quests option (off by default) fills the experience bar on from your XP in green with what your quests ready to turn in will give, like rested XP.

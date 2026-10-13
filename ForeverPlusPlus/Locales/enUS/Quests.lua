@@ -46,10 +46,10 @@ L.QUESTTRACKER_PADDING_DESC = "How much room the box leaves around the text."
 L.QUESTTRACKER_FADE = "Fade in Combat"
 L.QUESTTRACKER_FADE_DESC = "Make the tracker faint while you're in combat, and clear again after."
 
--- QuestGiverLevels
-L.QUESTGIVERLEVELS_TITLE = "Quest Giver Levels"
-L.QUESTGIVERLEVELS_DESC = "Show each quest's level before its name in a quest giver's list, "
-    .. "like the quest log's [12]."
+-- QuestLevels
+L.QUESTLEVELS_TITLE = "Quest Levels"
+L.QUESTLEVELS_DESC = "Show a quest's level before its name, like the quest log's [12], in a quest "
+    .. "giver's list and at the top of the quest's details."
 
 -- ForeverQuestIcons
 L.FOREVERQUESTICONS_TITLE = "Forever Quest Icons"
@@ -62,7 +62,10 @@ L.FOREVERQUESTICONS_TRACKER = "Objective Tracker"
 L.FOREVERQUESTICONS_TRACKER_DESC = "Show the icon on quests in the objective tracker."
 L.FOREVERQUESTICONS_GIVERS = "Quest Givers"
 L.FOREVERQUESTICONS_GIVERS_DESC = "Show the icon in the list of quests a quest giver offers."
-L.FOREVERQUESTICONS_SIZE = "Icon Size"
+L.FOREVERQUESTICONS_DETAILS = "Quest Details"
+L.FOREVERQUESTICONS_DETAILS_DESC = "Show the icon after the quest's name at the top of its "
+    .. "details, in the quest window and on the map."
+L.FOREVERQUESTICONS_SIZE ="Icon Size"
 L.FOREVERQUESTICONS_SIZE_DESC = "How big the icon is here, next to the quest's name. A size that would "
     .. "push a name onto another line leaves that name without the icon."
 L.FOREVERQUESTICONS_ICON = "Icon"

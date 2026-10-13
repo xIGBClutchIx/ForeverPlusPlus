@@ -19,8 +19,12 @@ ns.changelog = {
                 { L.ITEMTOOLTIPS_TITLE, "The new Repair Cost line (off by default) shows what "
                     .. "repairing damaged gear costs, on gear you wear or carry, without a "
                     .. "merchant's repair cursor." },
-                { L.QUESTGIVERLEVELS_TITLE, "A new module that shows each quest's level before its "
-                    .. "name in a quest giver's list, like the quest log's [12]. On by default." },
+                { L.FOREVERQUESTICONS_TITLE, "The new Quest Details option (on by default) puts the "
+                    .. "icon after the quest's name at the top of its details, in the quest window "
+                    .. "and on the map." },
+                { L.QUESTLEVELS_TITLE, "A new module that shows a quest's level before its name, "
+                    .. "like the quest log's [12], in a quest giver's list and at the top of the "
+                    .. "quest's details. On by default." },
                 { L.QUESTTRACKER_TITLE, "The new Current Zone Only option (off by default) tracks "
                     .. "only the quests of the zone you're in, and tracks the others again when you "
                     .. "get there. The quest your map follows always shows." },
