@@ -19,13 +19,13 @@ ns.changelog = {
                 { L.WAYLAIDCRATES_TITLE, "A new module for filling Waylaid Crates. Its Waylaid "
                     .. "Crates entry in the auction house's categories lists every item your crates "
                     .. "still need, less what's already in your bags." },
-                { L.XPBARTEXT_TITLE, "The new Quest XP on Bar option (off by default) fills the "
+                { L.XPBARTEXT_TITLE, "The new Fill Bar with Ready Quests option (off by default) fills the "
                     .. "experience bar on from your XP in green with what your quests ready to turn "
                     .. "in will give, like rested XP." },
-                { L.XPBARTEXT_TITLE, "The new More in Tooltip option (on by default) adds to the "
+                { L.XPBARTEXT_TITLE, "The new Detailed Tooltip option (on by default) adds to the "
                     .. "bar's tooltip the XP left to level, your rested XP, the XP of your quests, "
                     .. "and your XP per hour and time to level since you logged in." },
-                { L.XPBARTEXT_TITLE, "The new Green When Leveling option (on by default) turns off "
+                { L.XPBARTEXT_TITLE, "The new Green When Quests Level You option (on by default) turns off "
                     .. "the green quest XP text shown once turning those quests in would level you." },
             } },
             { L.CHANGELOG_CHANGED, {

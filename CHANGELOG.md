@@ -8,9 +8,9 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 - **Quest Tracker**: the new Current Zone Only option (off by default) tracks only the quests of the zone you're in, and tracks the others again when you get there. The quest your map follows always shows.
 - **Waylaid Crates**: a new module for filling Waylaid Crates. Its Waylaid Crates entry in the auction house's categories lists every item your crates still need, less what's already in your bags.
-- **XP Bar Text**: the new Quest XP on Bar option (off by default) fills the experience bar on from your XP in green with what your quests ready to turn in will give, like rested XP.
-- **XP Bar Text**: the new More in Tooltip option (on by default) adds to the bar's tooltip the XP left to level, your rested XP, the XP of your quests, and your XP per hour and time to level since you logged in.
-- **XP Bar Text**: the new Green When Leveling option (on by default) turns off the green quest XP text shown once turning those quests in would level you.
+- **XP Bar Text**: the new Fill Bar with Ready Quests option (off by default) fills the experience bar on from your XP in green with what your quests ready to turn in will give, like rested XP.
+- **XP Bar Text**: the new Detailed Tooltip option (on by default) adds to the bar's tooltip the XP left to level, your rested XP, the XP of your quests, and your XP per hour and time to level since you logged in.
+- **XP Bar Text**: the new Green When Quests Level You option (on by default) turns off the green quest XP text shown once turning those quests in would level you.
 
 ### Changed
 
