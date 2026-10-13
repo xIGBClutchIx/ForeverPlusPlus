@@ -118,11 +118,17 @@ local function search()
     if #keys == 0 then
         return
     end
-    -- As the Favorites star does: no Blizzard category selected (which also shows the Buy
-    -- display, where the browse list is), then an empty list while the search runs. Only on
-    -- the click, not a retry, so the rows stay up meanwhile. Probed: Mainline's frame.
+    -- As the Favorites star does: the Buy display, where the browse list is (clearing the
+    -- category doesn't leave an item's or commodity's buy page), no Blizzard category selected,
+    -- then an empty list while the search runs. Only on the click, not a retry, so the rows stay
+    -- up meanwhile. Probed: Mainline's frame.
     if tries == 0 then
         local frame = _G.AuctionHouseFrame
+        local modes = _G.AuctionHouseFrameDisplayMode
+        if frame and modes and modes.Buy and frame.GetDisplayMode and frame.SetDisplayMode
+            and frame:GetDisplayMode() ~= modes.Buy then
+            frame:SetDisplayMode(modes.Buy)
+        end
         local list = frame and frame.CategoriesList
         if list and list.SetSelectedCategory then
             list:SetSelectedCategory(nil)
