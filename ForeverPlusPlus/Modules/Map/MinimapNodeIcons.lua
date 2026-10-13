@@ -14,7 +14,8 @@
 local _, ns = ...
 
 local ipairs, type, pcall, floor, sin, cos = ipairs, type, pcall, math.floor, math.sin, math.cos
-local gmatch, tostring, format, min, concat = string.gmatch, tostring, string.format, math.min, table.concat
+local gmatch, match, tostring, format = string.gmatch, string.match, tostring, string.format
+local min, concat = math.min, table.concat
 local CreateFrame, Minimap, GetTime = CreateFrame, Minimap, GetTime
 local C_Map, C_Minimap, C_TooltipInfo, C_Item = C_Map, C_Minimap, C_TooltipInfo, C_Item
 local InCombatLockdown, GetPlayerFacing, GetCVarBool = InCombatLockdown, GetPlayerFacing, GetCVarBool
@@ -205,7 +206,8 @@ local function currentSpace()
 end
 
 -- Points the minimap's mouseover at a spot right and up of its center and returns the text the
--- tooltip there would show.
+-- tooltip there would show, its lines joined by newlines. Call between startProbing and
+-- stopProbing.
 local function probe(right, up, space)
     local x, y = (SPACES[space] or SPACES.cursor)(right, up)
     local ok, err = pcall(Minimap.UpdateMouseoverAtPoint, Minimap, x, y)
@@ -215,11 +217,48 @@ local function probe(right, up, space)
         return nil
     end
     local data = C_TooltipInfo.GetMinimapMouseover()
-    local line = data and data.lines and data.lines[1]
-    local text = line and line.leftText
-    if text and readable(text) and text ~= "" then
-        return text
+    local lines = data and data.lines
+    if not (lines and readable(lines) and type(lines) == "table") then
+        return nil
     end
+    local text
+    for _, line in ipairs(lines) do
+        local left = line.leftText
+        if readable(left) and type(left) == "string" and left ~= "" then
+            text = text and (text .. "\n" .. left) or left
+        end
+    end
+    return text
+end
+
+-- The minimap takes a probe's point only in soft cursor mode (a controller's cursor); otherwise
+-- the mouse's spot wins and every probe reads nothing (in game, 2026-10-13). So probes run between
+-- these two: on, then the point off the minimap and back to the mouse. This would also end a real
+-- controller's soft cursor on the minimap; it takes it up again as it moves.
+local function startProbing()
+    if Minimap.SetUsingSoftCursor then
+        pcall(Minimap.SetUsingSoftCursor, Minimap, true)
+    end
+end
+
+local function stopProbing()
+    pcall(Minimap.UpdateMouseoverAtPoint, Minimap, -10000, -10000)
+    if Minimap.SetUsingSoftCursor then
+        pcall(Minimap.SetUsingSoftCursor, Minimap, false)
+    end
+end
+
+-- The names in a probe's text, one per row (overlapping dots each add one), without the color
+-- codes and spaces the game may wrap them in.
+local function namesIn(text)
+    local list = {}
+    for row in gmatch(plain(text), "[^\n]+") do
+        local name = match(row, "^%s*(.-)%s*$")
+        if name ~= "" then
+            list[#list + 1] = name
+        end
+    end
+    return list
 end
 
 -- The spots a sweep probes, right and up of the minimap's center, inside its circle.
@@ -317,16 +356,16 @@ local function step(v)
     if last > #list then
         last = #list
     end
+    startProbing()
     for i = sweep.index, last do
         local right, up = list[i][1], list[i][2]
         local text = probe(right, up, sweep.space)
         if blocked then
-            sweep = nil
-            return
+            break
         end
         if text then
             -- Overlapping dots put several names in the line, one per row.
-            for name in gmatch(plain(text), "[^\n]+") do
+            for _, name in ipairs(namesIn(text)) do
                 local icon = iconFor(name)
                 if icon then
                     addHit(sweep.hits, v, name, icon, right, up)
@@ -335,6 +374,11 @@ local function step(v)
                 end
             end
         end
+    end
+    stopProbing()
+    if blocked then
+        sweep = nil
+        return
     end
     sweep.index = last + 1
     if sweep.index > #list then
@@ -468,13 +512,15 @@ local function report()
     local best, bestCount = nil, 0
     for _, space in ipairs(ORDER) do
         local names, order, known = {}, {}, 0
+        startProbing()
         for _, point in ipairs(list) do
             local text = probe(point[1], point[2], space)
             if blocked then
+                stopProbing()
                 return
             end
             if text then
-                for name in gmatch(plain(text), "[^\n]+") do
+                for _, name in ipairs(namesIn(text)) do
                     if not names[name] then
                         names[name] = true
                         order[#order + 1] = name
@@ -485,6 +531,7 @@ local function report()
                 end
             end
         end
+        stopProbing()
         local shown = {}
         for i = 1, min(#order, REPORT_NAMES) do
             shown[i] = order[i]
