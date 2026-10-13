@@ -96,6 +96,16 @@ local function buttons()
     return list
 end
 
+-- Edit Mode's example auras, and buttons left without an aura, don't count down through
+-- UpdateDuration, so our clock would stay as it was.
+local function afterAuraButtons(frame)
+    for _, button in ipairs(frame.auraFrames or {}) do
+        if texts[button] and (button.isExample or not button:IsShown()) then
+            restore(button)
+        end
+    end
+end
+
 function module:OnEnable()
     for _, button in ipairs(buttons()) do
         if type(button.UpdateDuration) == "function" and button.Duration then
@@ -103,6 +113,8 @@ function module:OnEnable()
             self:Hook(button, "UpdateExpirationTime", expiration)
         end
     end
+    self:Hook(BuffFrame, "UpdateAuraButtons", afterAuraButtons)
+    self:Hook(DebuffFrame, "UpdateAuraButtons", afterAuraButtons)
 end
 
 function module:OnDisable()
