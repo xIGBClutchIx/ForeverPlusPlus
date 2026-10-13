@@ -117,6 +117,8 @@ eq(ns.Text.Plain("|cnCOLOR:named|r"), "named", "plain named color")
 eq(ns.Text.Plain("|Hplayer:Bob:1|h[Bob]|h: hi"), "[Bob]: hi", "plain link keeps its text")
 eq(ns.Text.Plain("a |TInterface\\Icon:0|t b |A:Raid:14:14|a c"), "a  b  c", "plain textures")
 eq(ns.Text.Plain("100||"), "100|", "plain escaped pipe")
+eq(ns.Text.Plain("a||rb ||cffffffffc |cff00ff00d|r"), "a|rb |cffffffffc d",
+    "plain escaped pipe before a code letter")
 
 local function matches(formatString, text, capture)
     return text:match("^" .. ns.Text.FormatPattern(formatString, capture) .. "$")
@@ -415,6 +417,13 @@ eq(older.prices, nil, "prices: the old price list goes")
 copper, seenAt = Prices.Unpack(older.items[7])
 eq(copper, 4800, "prices: an old price is kept")
 eq(math.abs(seenAt - 1790781485) < 60, true, "prices: aged from the house's scan")
+local unscanned = { prices = { [7] = 4800 } }
+Prices.PackHouse(unscanned)
+eq(unscanned.prices, nil, "prices: an unscanned house's old list goes")
+eq(unscanned.items[7], nil, "prices: and its prices with it, having no age")
+local zeroScan = { scannedAt = 0, prices = { [7] = 4800 } }
+Prices.PackHouse(zeroScan)
+eq(zeroScan.items[7], nil, "prices: a house scanned at 0 drops its old prices")
 
 -- Hold Shift to Skip checkboxes become key dropdowns.
 local shiftSaved = { AutoGossip = { shiftSkips = false }, AutoRepair = { shiftSkips = true } }

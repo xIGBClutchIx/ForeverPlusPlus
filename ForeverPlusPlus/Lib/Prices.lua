@@ -54,14 +54,16 @@ function Prices.PackHouse(house)
             items[itemID] = nil
         end
     end
-    if type(house.prices) == "table" then
+    -- Without a scan time there's no age to give them, so they go rather than show as decades old.
+    local scannedAt = house.scannedAt
+    if type(house.prices) == "table" and type(scannedAt) == "number" and scannedAt > 0 then
         for itemID, copper in pairs(house.prices) do
             if items[itemID] == nil and type(copper) == "number" then
-                items[itemID] = Prices.Pack(copper, house.scannedAt or 0)
+                items[itemID] = Prices.Pack(copper, scannedAt)
             end
         end
-        house.prices = nil
     end
+    house.prices = nil
     house.items = items
     house.scannedAt = house.scannedAt or 0
 end
