@@ -103,6 +103,8 @@ local BAGS = {
 
 local RED_FONT_COLOR = RED_FONT_COLOR
 local FULL = RED_FONT_COLOR and { RED_FONT_COLOR:GetRGB() } or { 1, 0.1, 0.1 } -- a count of 0
+local LOW = ORANGE_FONT_COLOR and { ORANGE_FONT_COLOR:GetRGB() } or { 1, 0.5, 0.25 } -- a few left
+local LOW_SLOTS = 4 -- this many free or fewer counts as a few
 local WHITE = { 1, 1, 1 }
 
 local counts = {} -- bag id -> our FontString, on its own frame over the button
@@ -165,7 +167,7 @@ local function setCount(text, free)
         return
     end
     if free then
-        local color = free == 0 and FULL or WHITE
+        local color = free == 0 and FULL or free <= LOW_SLOTS and LOW or WHITE
         text:SetTextColor(color[1], color[2], color[3])
         text:SetText(tostring(free))
         text:Show()
