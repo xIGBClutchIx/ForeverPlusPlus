@@ -54,21 +54,6 @@ local function makeBar(button, side)
     return bar
 end
 
-local function build()
-    container = CreateFrame("Frame", nil, _G.PaperDollItemsFrame)
-    container:SetAllPoints()
-    for side, names in pairs(SIDES) do
-        for i = 1, #names do
-            local name = names[i] .. "Slot"
-            local button = _G["Character" .. name]
-            local ok, slot = pcall(GetInventorySlotInfo, name)
-            if button and ok and slot then
-                bars[slot] = makeBar(button, side)
-            end
-        end
-    end
-end
-
 local function update()
     if not (container and container:IsShown()) then
         return
@@ -88,6 +73,24 @@ local function update()
             bar:Show()
         else
             bar:Hide()
+        end
+    end
+end
+
+local function build()
+    container = CreateFrame("Frame", nil, _G.PaperDollItemsFrame)
+    container:SetAllPoints()
+    -- Read again each time the window opens: at a fresh login the bars are built before the worn
+    -- items are there, and no durability event may follow.
+    container:SetScript("OnShow", update)
+    for side, names in pairs(SIDES) do
+        for i = 1, #names do
+            local name = names[i] .. "Slot"
+            local button = _G["Character" .. name]
+            local ok, slot = pcall(GetInventorySlotInfo, name)
+            if button and ok and slot then
+                bars[slot] = makeBar(button, side)
+            end
         end
     end
 end

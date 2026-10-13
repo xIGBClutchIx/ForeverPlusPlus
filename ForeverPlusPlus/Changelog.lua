@@ -103,6 +103,13 @@ ns.changelog = {
                 { L.CHARACTERWINDOW_TITLE, "The Skills tab shows your equipped weapons' skills in "
                     .. "green right after you log in, instead of only once you change a weapon or "
                     .. "reload." },
+                { L.CHARACTERWINDOW_TITLE, "Durability bars are read again each time the window "
+                    .. "opens, so they're right after you log in." },
+                { L.AUTODECLINE_TITLE, "Asks for your guild's roster again once your guild is "
+                    .. "known after logging in, so guildmates' duels aren't declined while Allow "
+                    .. "Friends and Guild is on." },
+                { L.GATHERINGTRACKING_TITLE, "After logging in, waits a few more seconds for the "
+                    .. "tracking list to fill before giving up on turning tracking back on." },
                 "Chat Font, Persistent Chat, Short Channel Names, and Chat Copy's Click Timestamps "
                     .. "also work in whisper windows popped out into their own tab.",
                 { L.PLAYERNAMEPLATES_TITLE, "Battle.net friend icons and guildmate colors update "

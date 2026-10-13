@@ -135,6 +135,9 @@ end
 
 local want = false -- turn tracking back on at the next chance
 local waiting = false -- a retry is scheduled
+local tries = 0 -- retries left while the tracking list has none of our spells yet
+
+local LIST_TRIES = 5 -- at a fresh login the list fills in seconds after the event
 
 local function reapply()
     waiting = false
@@ -147,11 +150,19 @@ local function reapply()
         C_Timer.After(RETRY, reapply)
         return
     end
-    want = false
     local index, _, any = scan()
     if any then
+        want = false
         return -- something is tracked already, maybe by the player's choice
     end
+    -- None of our spells listed may only mean the list isn't filled yet, or that they're unknown.
+    if not (index[HERBS] or index[MINERALS]) and tries > 0 then
+        tries = tries - 1
+        waiting = true
+        C_Timer.After(RETRY, reapply)
+        return
+    end
+    want = false
     local spells = SPELLS[module.db.track]
     local first
     for _, spellID in ipairs(spells) do
@@ -171,6 +182,7 @@ end
 -- Login, /reload, zoning, and coming back to life. The tracking list can lag the event a little.
 local function request()
     want = true
+    tries = LIST_TRIES
     if not waiting then
         waiting = true
         C_Timer.After(1, reapply)

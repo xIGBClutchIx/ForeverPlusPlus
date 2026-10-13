@@ -75,8 +75,17 @@ local function onInvite(_, name, _, _, _, _, _, guid)
     module:Print(format(L.AUTODECLINE_DECLINED_INVITE, who(name)))
 end
 
+-- At a fresh login the player isn't in a guild yet when the module turns on, so the roster is
+-- asked for again once the guild is known.
+local function onGuild()
+    if module.db.allowFriends then
+        Units.RequestGuildRoster()
+    end
+end
+
 function module:OnEnable()
     self:On("DUEL_REQUESTED", onDuel)
+    self:On("PLAYER_GUILD_UPDATE", onGuild)
     if self.db.partyInvites then
         self:On("PARTY_INVITE_REQUEST", onInvite)
     end

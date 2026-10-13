@@ -45,6 +45,9 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Profession Tooltips**: recolors the "Requires" line on nodes and creatures in languages that number its parts (such as "%1$s"), which it missed before.
 - **Character Window**: with Side Tabs on, your level shows above your character again, and your pet's on the pet pane, where the game now puts them.
 - **Character Window**: the Skills tab shows your equipped weapons' skills in green right after you log in, instead of only once you change a weapon or reload.
+- **Character Window**: durability bars are read again each time the window opens, so they're right after you log in.
+- **Auto Decline**: asks for your guild's roster again once your guild is known after logging in, so guildmates' duels aren't declined while Allow Friends and Guild is on.
+- **Gathering Tracking**: after logging in, waits a few more seconds for the tracking list to fill before giving up on turning tracking back on.
 - Chat Font, Persistent Chat, Short Channel Names, and Chat Copy's Click Timestamps also work in whisper windows popped out into their own tab.
 - **Player Nameplates**: Battle.net friend icons and guildmate colors update as those lists change, and names on player and NPC plates get smaller again when you make nameplates smaller.
 - **AddOns List**: shows which addons are on for the character picked in the dropdown, or for All, instead of always for you.
