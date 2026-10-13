@@ -107,6 +107,10 @@ local LEARN_WAIT = 10 -- seconds from a cast to its loot window that still count
 local RED = { 1, 0.25, 0.25 } -- the icon's vertex color while the skill is too low
 local GRAY = { 0.7, 0.7, 0.7 } -- dims a gray (desaturated) icon
 local NONE = {}
+-- How far (minimap units) an icon is drawn from the middle of what names its dot, until /fpp nodes
+-- here measures it: from Cameron's screenshot, the dot sat about this far up and left.
+local OFFSET_X, OFFSET_Y = -2, 8
+local OFFSET_MAX = 20 -- a measured offset further than this is a mistake, not saved
 
 -- The icon for a node's name, or nil for a name that isn't a node we know.
 local function iconFor(name)
@@ -542,6 +546,10 @@ end
 local function draw()
     local db = module.db
     local size = db.size
+    -- Where a dot answers probes isn't quite where it's drawn: in game, the middle of what names
+    -- it sat below and right of the dot by the same amount everywhere (2026-10-13). /fpp nodes
+    -- here measures that and saves it; icons are drawn that far back.
+    local offsetX, offsetY = db.calibration.x or OFFSET_X, db.calibration.y or OFFSET_Y
     local shown = 0
     for _, node in ipairs(nodes) do
         shown = shown + 1
@@ -559,7 +567,7 @@ local function draw()
         end
         pin:SetSize(size, size)
         pin:ClearAllPoints()
-        pin:SetPoint("CENTER", Minimap, "CENTER", node.right, node.up)
+        pin:SetPoint("CENTER", Minimap, "CENTER", node.right + offsetX, node.up + offsetY)
         pin:Show()
         placeRing(pin, size, db.border)
     end
@@ -754,6 +762,12 @@ local function measure()
     end
     if nearest then
         ns.Print(format(L.MINIMAPNODEICONS_HERE_ICON, nearest.right, nearest.up))
+        -- The cursor on the dot's middle is where its icon belongs: keep that offset.
+        local dx, dy = right - nearest.right, up - nearest.up
+        if dx * dx + dy * dy <= OFFSET_MAX * OFFSET_MAX then
+            module.db.calibration.x, module.db.calibration.y = dx, dy
+            ns.Print(format(L.MINIMAPNODEICONS_HERE_SAVED, dx, dy))
+        end
     else
         ns.Print(L.MINIMAPNODEICONS_HERE_MISSED)
     end
