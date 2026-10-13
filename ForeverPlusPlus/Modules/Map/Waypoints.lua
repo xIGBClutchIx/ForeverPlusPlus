@@ -2,13 +2,14 @@
 -- game draws its pin and its marker in the world; a command another addon already has (TomTom's
 -- /way) is left to that addon (Lib/Slash). The Arrow option adds a small arrow on screen that
 -- turns toward the waypoint as you turn, with the distance under it, for the pin set by /way or
--- by clicking the map. It reads only the player's own position and facing, never another unit's.
+-- by clicking the map, or with Follow Selected Quest, for the quest selected on the map. It reads
+-- only the player's own position and facing, never another unit's.
 local _, ns = ...
 
 local ipairs, tonumber, format, floor = ipairs, tonumber, string.format, math.floor
 local tconcat = table.concat
-local CreateFrame, UIParent, C_Map = CreateFrame, UIParent, C_Map
-local GetPlayerFacing = GetPlayerFacing
+local CreateFrame, UIParent, C_Map, C_QuestLog = CreateFrame, UIParent, C_Map, C_QuestLog
+local GetPlayerFacing, GetTime = GetPlayerFacing, GetTime
 
 local L = ns.L
 local WorldMap = ns.WorldMap
@@ -17,6 +18,7 @@ local module = ns.NewModule("Waypoints", L.WAYPOINTS_DESC, {
     enabled = true,
     way = true,
     arrow = true,
+    quest = false,
     scale = 100, -- percent
     x = 0, -- the arrow's offset from the center of the screen
     y = 530,
@@ -28,6 +30,8 @@ module.added = "0.8.0"
 module.options = {
     { key = "way", name = L.WAYPOINTS_WAY, description = L.WAYPOINTS_WAY_DESC },
     { key = "arrow", name = L.WAYPOINTS_ARROW, description = L.WAYPOINTS_ARROW_DESC },
+    { key = "quest", name = L.WAYPOINTS_QUEST, description = L.WAYPOINTS_QUEST_DESC,
+        requires = "arrow", added = "0.9.0" },
 }
 
 -- /way ----------------------------------------------------------------------------------------
@@ -179,13 +183,75 @@ end
 -- Where the waypoint is ----------------------------------------------------------------------
 
 local ARRIVED = 5 -- yards; closer than this the arrow goes away
+local QUEST_INTERVAL = 1 -- seconds between looking up where the selected quest is
 
--- How far the waypoint is from the player in yards, and its direction counter-clockwise from
--- north, or nil when the game can't say (no waypoint, in an instance, another continent).
--- Works on the waypoint's own map, or the first map above it the player is also on, so a pin in
+local continentType = Enum and Enum.UIMapType and Enum.UIMapType.Continent or 2
+
+-- The quest selected on the map (the super-tracked one) while Follow Selected Quest is on.
+local function selectedQuest()
+    if not (module.db.quest and C_SuperTrack and C_SuperTrack.GetSuperTrackedQuestID) then
+        return nil
+    end
+    local questID = C_SuperTrack.GetSuperTrackedQuestID()
+    if questID and questID ~= 0 then
+        return questID
+    end
+    return nil
+end
+
+-- Where a quest is, as a point like the map pin's: the next stop the game routes through to get
+-- there (a quest in another zone), or else its spot on the player's map or a map above it, up to
+-- the continent. Both are the quest's own map icon, from Mainline's C_QuestLog.
+local function questPoint(questID)
+    if C_QuestLog.GetNextWaypoint then
+        local mapID, x, y = C_QuestLog.GetNextWaypoint(questID)
+        if mapID and x and y then
+            return { uiMapID = mapID, position = { x = x, y = y } }
+        end
+    end
+    if not C_QuestLog.GetQuestsOnMap then
+        return nil
+    end
+    local mapID = C_Map.GetBestMapForUnit("player")
+    while mapID and mapID ~= 0 do
+        for _, quest in ipairs(C_QuestLog.GetQuestsOnMap(mapID) or {}) do
+            if quest.questID == questID and quest.x and quest.y then
+                return { uiMapID = mapID, position = { x = quest.x, y = quest.y } }
+            end
+        end
+        local info = C_Map.GetMapInfo(mapID)
+        if not info or (info.mapType and info.mapType <= continentType) then
+            return nil
+        end
+        mapID = info.parentMapID
+    end
+    return nil
+end
+
+-- The quest point is looked up again each QUEST_INTERVAL, not every turn of the arrow.
+local cachedQuest, cachedPoint, checkedAt = nil, nil, 0
+
+-- What the arrow points at: the selected quest when it has a spot, otherwise the map pin.
+local function destination()
+    local questID = selectedQuest()
+    if questID then
+        local now = GetTime()
+        if questID ~= cachedQuest or now - checkedAt >= QUEST_INTERVAL then
+            cachedQuest, cachedPoint, checkedAt = questID, questPoint(questID), now
+        end
+        if cachedPoint then
+            return cachedPoint
+        end
+    end
+    return C_Map.GetUserWaypoint and C_Map.GetUserWaypoint()
+end
+
+-- How far the target is from the player in yards, and its direction counter-clockwise from
+-- north, or nil when the game can't say (no target, in an instance, another continent).
+-- Works on the target's own map, or the first map above it the player is also on, so a pin in
 -- the next zone still points the right way.
 local function locate()
-    local point = C_Map.GetUserWaypoint and C_Map.GetUserWaypoint()
+    local point = destination()
     if not (point and point.uiMapID and point.position) then
         return nil
     end
@@ -194,7 +260,6 @@ local function locate()
     if C_Map.GetWorldPosFromMapPos then
         continent, world = C_Map.GetWorldPosFromMapPos(pinMap, point.position)
     end
-    local continentType = Enum and Enum.UIMapType and Enum.UIMapType.Continent or 2
     local mapID = pinMap
     while mapID and mapID ~= 0 do
         local info = C_Map.GetMapInfo(mapID)
@@ -217,7 +282,9 @@ local function locate()
                 and not (px == 0 and py == 0) then
                 -- Read x and y, not GetXY: on Forever the waypoint's position is a plain table.
                 local tx, ty = target.x, target.y
-                return WorldMap.Toward(width, height, px, py, tx, ty)
+                if ns.IsReadable(tx) then
+                    return WorldMap.Toward(width, height, px, py, tx, ty)
+                end
             end
         end
         mapID = info.parentMapID
@@ -281,15 +348,18 @@ local function update()
 end
 
 local function arrowWanted()
-    return module.enabled and module.db.arrow and C_Map.HasUserWaypoint
-        and C_Map.HasUserWaypoint() or false
+    if not (module.enabled and module.db.arrow) then
+        return false
+    end
+    return selectedQuest() ~= nil or (C_Map.HasUserWaypoint and C_Map.HasUserWaypoint()) or false
 end
 
--- Runs the watcher only while there is a waypoint to point at.
+-- Runs the watcher only while there is a waypoint or a selected quest to point at.
 local function refresh()
     if not frame then
         return
     end
+    cachedQuest = nil -- look the quest up again: the selection or the quest may have changed
     if arrowWanted() then
         watcher:Show()
         update()
@@ -332,6 +402,12 @@ local function syncArrow()
         module:Off("PLAYER_ENTERING_WORLD", refresh)
         ns.EditMode.Unregister(frame)
     end
+    -- A new selection shows at once; a quest's spot moving is caught by QUEST_INTERVAL.
+    if module.enabled and module.db.arrow and module.db.quest then
+        module:On("SUPER_TRACKING_CHANGED", refresh)
+    elseif frame then
+        module:Off("SUPER_TRACKING_CHANGED", refresh)
+    end
     refresh()
 end
 
@@ -348,7 +424,7 @@ end
 function module:OnOptionChanged(option)
     if option == "way" then
         syncWay()
-    elseif option == "arrow" then
+    elseif option == "arrow" or option == "quest" then
         syncArrow()
     end
 end

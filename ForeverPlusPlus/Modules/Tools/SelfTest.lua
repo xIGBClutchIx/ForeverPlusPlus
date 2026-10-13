@@ -250,6 +250,8 @@ local function checkMap()
         "hash_SlashCmdList" })
     present("map.arrow", { "C_Map.GetUserWaypoint", "C_Map.HasUserWaypoint",
         "C_Map.GetPlayerMapPosition", "C_Map.GetMapWorldSize", "GetPlayerFacing" })
+    present("map.questarrow", { "C_SuperTrack.GetSuperTrackedQuestID",
+        "C_QuestLog.GetNextWaypoint", "C_QuestLog.GetQuestsOnMap" })
     local mapID = C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit("player")
     if not mapID then
         skip("map.here", "the player has no map here")
