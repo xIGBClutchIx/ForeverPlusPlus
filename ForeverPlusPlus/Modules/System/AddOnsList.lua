@@ -48,18 +48,22 @@ end
 
 ---The character the list asks about. On Forever the list passes a character's GUID to
 ---GetAddOnEnableState, not its name: a name gets "enabled" for every addon (probed 2026-09-30).
----It is the dropdown's pick when that can be read, else the player.
+---It is the dropdown's pick: nil for All, a GUID for one character. When the pick can't be read,
+---the player. The pick is the third value of CollectSelectionData, a list of menu descriptions
+---(GetSelectionData's first is always nil there).
 ---@param list table|nil
----@return string
+---@return string|nil
 local function selectedCharacter(list)
     local dropdown = list and list.Dropdown
-    if dropdown and dropdown.GetSelectionData then
-        local ok, data = pcall(dropdown.GetSelectionData, dropdown)
-        if ok and type(data) == "table" then
-            data = data.data or data.value or data.character
-        end
-        if ok and type(data) == "string" and find(data, "^Player%-") then
-            return data
+    if dropdown and dropdown.CollectSelectionData then
+        local ok, _, _, selections = pcall(dropdown.CollectSelectionData, dropdown)
+        local selected = ok and type(selections) == "table" and selections[1]
+        if selected and selected.GetData then
+            local data = selected:GetData()
+            if type(data) == "string" and find(data, "^Player%-") then
+                return data
+            end
+            return nil
         end
     end
     return UnitGUID("player")
