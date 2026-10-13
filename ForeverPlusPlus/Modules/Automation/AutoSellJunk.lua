@@ -4,6 +4,7 @@ local _, ns = ...
 
 local format, select = string.format, select
 local C_Container, C_Item = C_Container, C_Item
+local GetNumBuybackItems, GetBuybackItemLink = GetNumBuybackItems, GetBuybackItemLink
 
 local L = ns.L
 local money = ns.Money
@@ -31,16 +32,34 @@ module.options = {
         key = "buybackOnly",
         name = L.AUTOSELLJUNK_BUYBACK,
         description = L.AUTOSELLJUNK_BUYBACK_DESC,
+        changed = "0.9.0",
     },
     ns.Keys.Option("skipKey", L.SKIP_KEY, L.AUTOSELLJUNK_KEY_DESC, nil, "0.9.0"),
     ns.ChatOption(L.AUTOSELLJUNK_CHAT_DESC),
 }
 
+-- How many gray items can be sold without pushing anything else off the buyback list: the room
+-- left beside the items there that aren't gray, so one sold by mistake stays buyable.
+local function buybackRoom()
+    local kept = 0
+    for i = 1, (GetNumBuybackItems and GetNumBuybackItems() or 0) do
+        local link = GetBuybackItemLink(i)
+        local quality = link and C_Item.GetItemQualityByID(link)
+        if quality ~= Enum.ItemQuality.Poor then
+            kept = kept + 1
+        end
+    end
+    return BUYBACK_SLOTS - kept
+end
+
 local function onMerchantShow()
     if ns.Keys.IsDown(module.db.skipKey) then
         return
     end
-    local limit = module.db.buybackOnly and BUYBACK_SLOTS or nil
+    local limit = module.db.buybackOnly and buybackRoom() or nil
+    if limit and limit <= 0 then
+        return
+    end
     local sold, total = 0, 0
     for bag = 0, LAST_BAG do -- backpack, four bags, and the reagent bag
         for slot = 1, C_Container.GetContainerNumSlots(bag) do
