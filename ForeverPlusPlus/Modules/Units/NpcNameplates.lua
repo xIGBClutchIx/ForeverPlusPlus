@@ -1,6 +1,6 @@
 -- NPC Nameplates: friendly NPCs always show their name, with their title (<Innkeeper>) and level
--- beside it, and the health bar only shows while they're hurt or in combat. Players' pets and
--- summons keep Blizzard's plate unless Skip Pets and Summons is off.
+-- beside it, and the health bar only shows while they're hurt or in combat. Players' pets,
+-- totems, and companions can keep Blizzard's plate instead, each kind with its own option.
 -- The plates themselves are ns.FriendlyPlates; this module picks the colors and the title line.
 local _, ns = ...
 
@@ -11,18 +11,16 @@ local module = ns.NewModule("NpcNameplates", L.NPCNAMEPLATES_DESC, ns.FriendlyPl
     nameColor = "green", -- "green" (as in the world) or "white"
     titles = "always", -- "always", "hidden" (only without the bar), or "off"
     titleColor = "name", -- "name" (the name's color), "gray", or "green"
-    skipSummons = true, -- leave players' pets, guardians, totems, and companions to Blizzard
+    -- Players' summons left to Blizzard's plate, by kind (see Units.SummonKind)
+    skipPets = false, -- pets, minions, and guardians
+    skipTotems = false,
+    skipCompanions = false,
 }))
 module.title = L.NPCNAMEPLATES_TITLE
 module.category = "units"
 
--- Laid out like Player Nameplates: general, the name, then the title line.
+-- Laid out like Player Nameplates: general, the name, then the title line, then summons.
 module.options = ns.FriendlyPlates.Options(L.NPCNAMEPLATES_BAR_WHEN_HURT_DESC, {
-    {
-        key = "skipSummons", name = L.NPCNAMEPLATES_SKIP_SUMMONS,
-        description = L.NPCNAMEPLATES_SKIP_SUMMONS_DESC, section = L.PLATES_SECTION_GENERAL,
-        added = "0.9.0",
-    },
     {
         key = "nameColor", name = L.PLATES_NAME_COLOR, description = L.NPCNAMEPLATES_NAME_COLOR_DESC,
         choices = { { "green", L.PLATES_COLOR_GREEN }, { "white", L.PLATES_COLOR_WHITE } },
@@ -41,6 +39,20 @@ module.options = ns.FriendlyPlates.Options(L.NPCNAMEPLATES_BAR_WHEN_HURT_DESC, {
             { "green", L.PLATES_COLOR_GREEN },
         },
         requires = "titles", section = L.NPCNAMEPLATES_SECTION_TITLE,
+    },
+    {
+        key = "skipPets", name = L.NPCNAMEPLATES_SKIP_PETS, description = L.NPCNAMEPLATES_SKIP_PETS_DESC,
+        section = L.NPCNAMEPLATES_SECTION_SUMMONS, added = "0.9.0",
+    },
+    {
+        key = "skipTotems", name = L.NPCNAMEPLATES_SKIP_TOTEMS,
+        description = L.NPCNAMEPLATES_SKIP_TOTEMS_DESC, section = L.NPCNAMEPLATES_SECTION_SUMMONS,
+        added = "0.9.0",
+    },
+    {
+        key = "skipCompanions", name = L.NPCNAMEPLATES_SKIP_COMPANIONS,
+        description = L.NPCNAMEPLATES_SKIP_COMPANIONS_DESC, section = L.NPCNAMEPLATES_SECTION_SUMMONS,
+        added = "0.9.0",
     },
     {
         key = "centerLine", name = L.PLATES_CENTER_LINE_NPC, description = L.PLATES_CENTER_LINE_DESC,
@@ -92,6 +104,12 @@ ns.FriendlyPlates.New(module, {
     -- A player's pet or summon has the player's name in its title ("Cameron's Minion"), which
     -- reads as clutter on a name-only plate.
     Skip = function(unit)
-        return module.db.skipSummons and Units.IsSummon(unit)
+        local db = module.db
+        if not (db.skipPets or db.skipTotems or db.skipCompanions) then
+            return false
+        end
+        local kind = Units.SummonKind(unit)
+        return kind == "pet" and db.skipPets or kind == "totem" and db.skipTotems
+            or kind == "companion" and db.skipCompanions or false
     end,
 })

@@ -27,9 +27,9 @@ ns.changelog = {
                     .. "on. On by default. Its Tint Unusable option (off by default) turns an icon "
                     .. "red while your skill is too low to gather it, and Gray Out Trivial (off by "
                     .. "default) turns it gray once gathering it no longer raises your skill." },
-                { L.NPCNAMEPLATES_TITLE, "The new Skip Pets and Summons option (on by default) "
-                    .. "leaves players' pets, minions, guardians, totems, and companions with "
-                    .. "Blizzard's own nameplate instead of a name and title." },
+                { L.NPCNAMEPLATES_TITLE, "The new Skip Pets, Skip Totems, and Skip Companions "
+                    .. "options (off by default) leave players' pets and minions, totems, or "
+                    .. "companions with Blizzard's own nameplate instead of a name and title." },
                 { L.PROFILER_TITLE, "A new page in Settings (/fpp profile) that records how "
                     .. "much CPU each module takes, heaviest first, beside Forever++'s total CPU "
                     .. "and memory. Nothing is timed until you press Record." },

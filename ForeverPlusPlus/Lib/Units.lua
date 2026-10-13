@@ -151,29 +151,30 @@ function Units.IsGuildmateName(name)
 end
 
 -- Creature types that are always someone's summon (UnitCreatureType's second value on Mainline).
+-- Checked first, since a player's totem or companion is player controlled too.
 local SUMMON_TYPES = {
-    [11] = true, -- Totem
-    [12] = true, -- Non-combat Pet (companions)
+    [11] = "totem", -- Totem
+    [12] = "companion", -- Non-combat Pet
 }
 
----Whether the unit is a player's pet, minion, guardian, totem, or companion rather than an NPC of
----its own. Nil when the game won't say (secret values).
+---What kind of summon the unit is: "totem", "companion", or "pet" (a player's pet, minion, or
+---guardian). False for an NPC of its own, nil when the game won't say (secret values).
 ---@param unit string
----@return boolean?
-function Units.IsSummon(unit)
+---@return string|boolean|nil
+function Units.SummonKind(unit)
+    local _, kind = UnitCreatureType(unit)
+    if readable(kind) and type(kind) == "number" and SUMMON_TYPES[kind] then
+        return SUMMON_TYPES[kind]
+    end
     local controlled = UnitPlayerControlled(unit)
     if readable(controlled) and controlled then
-        return true
+        return "pet"
     end
     if UnitIsOtherPlayersPet then
         local pet = UnitIsOtherPlayersPet(unit)
         if readable(pet) and pet then
-            return true
+            return "pet"
         end
-    end
-    local _, kind = UnitCreatureType(unit)
-    if readable(kind) and type(kind) == "number" and SUMMON_TYPES[kind] then
-        return true
     end
     if not readable(controlled) then
         return nil
