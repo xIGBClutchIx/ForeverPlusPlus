@@ -20,6 +20,7 @@
 local _, ns = ...
 
 local pairs, ipairs, setmetatable, unpack, floor = pairs, ipairs, setmetatable, unpack, math.floor
+local type, lower = type, string.lower
 local CreateFrame, UnitLevel = CreateFrame, UnitLevel
 local UnitGroupRolesAssigned, GetTexCoordsForRoleSmallCircle =
     UnitGroupRolesAssigned, GetTexCoordsForRoleSmallCircle
@@ -307,8 +308,17 @@ end
 -- Use the font Blizzard's name is drawn with right now. Its font object can be a different size
 -- (nameplates set the size on the string), which made our copy come out small.
 -- Blizzard also shrinks the font of a long name to fit its plate, so copying each plate's size
--- made long names tiny. Every label uses the largest size seen instead: the normal one.
+-- made long names tiny. Every label uses the largest size seen instead: the normal one. When the
+-- player changes a nameplate setting (its size among them) it's measured again, so a smaller
+-- size takes effect too.
 local fullSize = 0
+local watchingSize = false
+
+local function onCVarUpdate(_, name)
+    if type(name) == "string" and lower(name):find("^nameplate") then
+        fullSize = 0
+    end
+end
 
 -- Blizzard's nameplate font is a font family: a font per alphabet, so Chinese, Korean, and
 -- Cyrillic names draw with fonts that have those glyphs. SetFont with the one file GetFont
@@ -330,6 +340,10 @@ local function matchFont(label, name, scale)
     local base = name:GetFontObject() or _G.SystemFont_NamePlate
     if not (size and base) then
         return
+    end
+    if not watchingSize then
+        watchingSize = true
+        ns.On("CVAR_UPDATE", onCVarUpdate)
     end
     if size > fullSize then
         fullSize = size
