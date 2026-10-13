@@ -24,7 +24,8 @@ ns.changelog = {
                     .. "and on the map." },
                 { L.MINIMAPNODEICONS_TITLE, "A new module that puts the herb's or ore's own icon "
                     .. "on each tracking dot on the minimap while Find Herbs or Find Minerals is "
-                    .. "on, tinted red while your skill is too low to gather it. On by default." },
+                    .. "on. On by default. Its Tint Unusable option (off by default) turns an icon "
+                    .. "red while your skill is too low to gather it." },
                 { L.QUESTLEVELS_TITLE, "A new module that shows a quest's level before its name, "
                     .. "like the quest log's [12], in a quest giver's list and at the top of the "
                     .. "quest's details. On by default." },

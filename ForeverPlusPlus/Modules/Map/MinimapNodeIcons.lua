@@ -28,7 +28,7 @@ local NODES = Professions.NODES
 local module = ns.NewModule("MinimapNodeIcons", L.MINIMAPNODEICONS_DESC, {
     enabled = true,
     size = 16, -- icon size on the minimap
-    tint = true, -- red while the skill is too low
+    tint = false, -- red while the skill is too low
     detail = "medium", -- a key of STEPS
     chat = true,
     -- Node name -> icon, for names not in NODES, from what gathering them gave. Data, not a setting.
