@@ -5,16 +5,20 @@
 -- The game draws the dots itself, lists them nowhere an addon can read, and has no way to change
 -- or hide one (Forever's minimap has no SetBlipTexture). But its minimap has UpdateMouseoverAtPoint,
 -- which points its mouseover at a spot as if a controller's cursor were there, and the tooltip
--- data for the mouseover names what is under that spot. So:
---   - Finding: the whole minimap is probed on a grid, a few rows each frame, and a patch of probes
---     that read the same name is a dot, at the patch's middle. A zoom finds them all at once.
---   - Following: every frame, each dot found is probed again along a short line across it and one
---     up through it, and its icon goes to the middle of what reads its name. So an icon stays on
---     its dot as the player moves or turns, without working out yards or facing, and a dot that
---     stops answering (gathered, or out of range) loses its icon. On a zoom, each icon first moves
---     by the change in the minimap's view radius, which keeps it near enough for following.
+-- data for the mouseover names what is under that spot. Where a dot answers lags behind where it's
+-- drawn while the player moves, and catches up once they stop (in game, 2026-10-13), so probes
+-- can't place an icon frame by frame. Instead:
+--   - Every frame, each icon is drawn from its node's spot on the zone map and the player's own
+--     (C_Map.GetPlayerMapPosition), the minimap's view radius, and its rotation. That's exact
+--     through moving, turning, and zooming, and costs no probes.
+--   - A few times a second, the whole minimap is looked over for new dots on a grid, a part at a
+--     time, and each node known is looked for again where its dot should be: a line of probes
+--     across it and one up through it. While the player stands still the answer is exact and fixes
+--     the node's spot; while they move the answer's lag is measured instead, and taken off new
+--     dots found. A node that stops answering (gathered, out of range) loses its icon.
 -- Probing stops in combat and while the cursor is on the minimap, where the game's own mouseover
--- and tooltip (which the icons let through) are the player's.
+-- and tooltip (which the icons let through) are the player's; icons keep moving meanwhile.
+-- Where the player's spot can't be read (an instance), icons sit where the dots answered.
 --
 -- Names are matched in English through Professions.NODES. Any other name is learned the first
 -- time the player gathers it: the spell's target, then the first item in the loot window; a
@@ -23,10 +27,10 @@ local _, ns = ...
 
 local ipairs, type, pcall, floor, tonumber = ipairs, type, pcall, math.floor, tonumber
 local gmatch, match, tostring, format = string.gmatch, string.match, tostring, string.format
-local min, max, concat, tremove = math.min, math.max, table.concat, table.remove
+local min, max, sin, cos, abs, concat, tremove = math.min, math.max, math.sin, math.cos, math.abs, table.concat, table.remove
 local CreateFrame, Minimap, GetTime, C_Timer = CreateFrame, Minimap, GetTime, C_Timer
-local GetCursorPosition = GetCursorPosition
-local C_Minimap, C_TooltipInfo, C_Item = C_Minimap, C_TooltipInfo, C_Item
+local GetCursorPosition, GetPlayerFacing, GetCVarBool = GetCursorPosition, GetPlayerFacing, GetCVarBool
+local C_Map, C_Minimap, C_TooltipInfo, C_Item = C_Map, C_Minimap, C_TooltipInfo, C_Item
 local InCombatLockdown = InCombatLockdown
 local GetNumLootItems, GetLootSlotInfo = GetNumLootItems, GetLootSlotInfo
 
@@ -47,7 +51,7 @@ local module = ns.NewModule("MinimapNodeIcons", L.MINIMAPNODEICONS_DESC, {
     chat = true,
     -- Node name -> icon, for names not in NODES, from what gathering them gave. Data, not a setting.
     learned = {},
-    -- { space = a key of SPACES }, once a sweep has found a node with it. Data, not a setting.
+    -- { space = a key of SPACES }, once a pass has found a node with it. Data, not a setting.
     calibration = {},
 })
 module.title = L.MINIMAPNODEICONS_TITLE
@@ -95,14 +99,18 @@ end
 
 local HERBS, MINERALS = 2383, 2580 -- Find Herbs, Find Minerals
 
+local TICK = 0.1 -- seconds between rounds of probes; icons are drawn every frame regardless
 local STEPS = { low = 8, medium = 6, high = 4 } -- minimap units between finding probes
-local PER_FRAME = 40 -- finding probes each frame, so a pass over the minimap takes a few frames
+local PER_TICK = 120 -- finding probes each tick, so a pass over the minimap takes a few ticks
 local REACH = 1.5 -- finding hits this many probe spacings apart touch (diagonal neighbors are 1.41)
-local FOLLOW_REACH = 12 -- how far (minimap units) each way of a dot following probes look
+local FOLLOW_REACH = 14 -- how far (minimap units) each way of a dot's spot following probes look
 local FOLLOW_STEP = 2 -- minimap units between following probes
-local MISSES = 3 -- frames in a row a dot can not answer before its icon goes
+local MISSES = 4 -- ticks in a row a dot can not answer before its icon goes
 local SAME_SPOT = 4 -- two dots of one name closer than this (minimap units) are one
 local EDGE = 2 -- keep probes and icons this far inside the minimap's edge
+local STILL_TICKS = 3 -- ticks without moving before the dots' answers are trusted again
+local STILL_YARDS = 0.05 -- less movement than this in a tick is standing still
+local LAG_SMOOTH = 0.5 -- how much of each new lag reading replaces the running one
 local LEARN_WAIT = 10 -- seconds from a cast to its loot window that still count as one gather
 local RED = { 1, 0.25, 0.25 } -- the icon's vertex color while the skill is too low
 local GRAY = { 0.7, 0.7, 0.7 } -- dims a gray (desaturated) icon
@@ -132,6 +140,65 @@ local function standing(name)
     elseif Professions.Difficulty(rank, node[2]) == Professions.TRIVIAL then
         return "gray"
     end
+end
+
+-- The view ----------------------------------------------------------------------------------------
+
+-- What the minimap shows right now: the player's zone map and spot on it, the map's size in
+-- yards, minimap units per yard, and the angle the minimap is turned by (0 unless it rotates).
+-- Nil when any of it can't be read, as in an instance.
+local view = {}
+
+local function readView()
+    local mapID = C_Map.GetBestMapForUnit("player")
+    if not (mapID and readable(mapID)) then
+        return nil
+    end
+    local pos = C_Map.GetPlayerMapPosition(mapID, "player")
+    local x, y = pos and pos.x, pos and pos.y
+    if not (x and y and readable(x) and readable(y)) then
+        return nil
+    end
+    local width, height = C_Map.GetMapWorldSize(mapID)
+    if not (width and height and readable(width) and readable(height) and width > 0 and height > 0) then
+        return nil
+    end
+    local radius = C_Minimap.GetViewRadius and C_Minimap.GetViewRadius()
+    if not (radius and readable(radius) and type(radius) == "number" and radius > 0) then
+        return nil
+    end
+    local angle = 0
+    if GetCVarBool("rotateMinimap") then
+        angle = GetPlayerFacing and GetPlayerFacing()
+        if not (angle and readable(angle)) then
+            return nil
+        end
+    end
+    view.mapID, view.x, view.y, view.width, view.height = mapID, x, y, width, height
+    view.half = Minimap:GetWidth() / 2
+    view.scale = view.half / radius -- minimap units per yard
+    view.angle = angle
+    return view
+end
+
+-- A spot on the zone map as minimap units right and up of its center.
+local function toMinimap(v, x, y)
+    local east = (x - v.x) * v.width * v.scale
+    local north = (v.y - y) * v.height * v.scale
+    local c, s = cos(v.angle), sin(v.angle)
+    return east * c + north * s, north * c - east * s
+end
+
+-- Minimap units right and up of its center as a spot on the zone map.
+local function fromMinimap(v, right, up)
+    local c, s = cos(v.angle), sin(v.angle)
+    local east, north = right * c - up * s, right * s + up * c
+    return v.x + east / (v.width * v.scale), v.y - north / (v.height * v.scale)
+end
+
+local function inside(right, up)
+    local radius = Minimap:GetWidth() / 2 - EDGE
+    return right * right + up * up <= radius * radius
 end
 
 -- Probing ---------------------------------------------------------------------------------------
@@ -279,11 +346,14 @@ local function grid(half, spacing)
     return points
 end
 
--- Dots ------------------------------------------------------------------------------------------
+-- Nodes -------------------------------------------------------------------------------------------
 
--- The dots found: { name, icon, right, up, level, misses, standing }, in minimap units right and
--- up of its center. `level` is true while the minimap names it in gray (on another level).
+-- The nodes with an icon: { name, icon, standing, level, misses, right, up, x, y }. `right` and
+-- `up` are where the dot answered last, in minimap units from the center; `x` and `y` its spot on
+-- the zone map `nodesMap`, set when the view could be read, and what the icon is drawn from.
+-- `level` is true while the minimap names it in gray (on another level).
 local nodes = {}
+local nodesMap
 local seen = {} -- names the minimap showed that aren't nodes we know, for learning
 local tracking = false -- Find Herbs or Find Minerals is on
 
@@ -299,9 +369,61 @@ local function readTracking()
     nodes = {}
 end
 
-local function inside(right, up)
-    local radius = Minimap:GetWidth() / 2 - EDGE
-    return right * right + up * up <= radius * radius
+-- Where a node's icon belongs right now, from its map spot when there is a view, else where it
+-- answered last.
+local function drawnAt(node, v)
+    if v and node.x and v.mapID == nodesMap then
+        return toMinimap(v, node.x, node.y)
+    end
+    return node.right, node.up
+end
+
+-- Standing still and lag --------------------------------------------------------------------------
+-- While the player moves, where a dot answers trails where it's drawn by about the same vector for
+-- every dot (in game, 2026-10-13). So the answers are only trusted for a node's spot after the
+-- player has stood still a few ticks; while moving, the trail is measured from the nodes already
+-- placed (answer minus where the icon is) and taken off any new dot found.
+
+local stillTicks = 0 -- ticks in a row without moving
+local lastX, lastY, lastAngle -- the player's spot and the minimap's angle at the last tick
+local lagR, lagU = 0, 0 -- the running trail, minimap units
+local lagKnown = false -- whether the trail was measured since the player last moved off
+
+local function noteMovement(v)
+    if not v then
+        stillTicks = 0
+        return
+    end
+    local moved = true
+    if lastX then
+        local east = (v.x - lastX) * v.width
+        local north = (v.y - lastY) * v.height
+        moved = east * east + north * north > STILL_YARDS * STILL_YARDS
+            or (v.angle ~= lastAngle and abs(v.angle - lastAngle) > 0.001)
+    end
+    lastX, lastY, lastAngle = v.x, v.y, v.angle
+    if moved then
+        stillTicks = 0
+    else
+        stillTicks = stillTicks + 1
+        if stillTicks >= STILL_TICKS then
+            -- Measured afresh when the player moves off again: it depends on the direction.
+            lagKnown = false
+        end
+    end
+end
+
+local function still()
+    return stillTicks >= STILL_TICKS
+end
+
+local function noteLag(dr, du)
+    if lagKnown then
+        lagR = lagR + (dr - lagR) * LAG_SMOOTH
+        lagU = lagU + (du - lagU) * LAG_SMOOTH
+    else
+        lagR, lagU, lagKnown = dr, du, true
+    end
 end
 
 -- Following ----------------------------------------------------------------------------------------
@@ -336,58 +458,82 @@ local function scanLine(name, right, up, vertical, space)
     end
 end
 
--- Moves a dot's icon to where the dot is now: the middle of what names it up through its last
--- spot, then across that. A dot that moved further than the line reaches is looked for across
--- first. Returns false when it wasn't found.
-local function follow(node, space)
-    local name = node.name
-    local du, gray = scanLine(name, node.right, node.up, true, space)
+-- Where a dot named `name` answers near a spot: the middle of what names it up through the spot,
+-- then across that, or across first when nothing answers up through it. Nil when nothing does.
+local function locate(name, right, up, space)
+    local du, gray = scanLine(name, right, up, true, space)
     if du then
-        node.up = node.up + du
-        local dr, gray2 = scanLine(name, node.right, node.up, false, space)
+        up = up + du
+        local dr, gray2 = scanLine(name, right, up, false, space)
         if dr then
-            node.right = node.right + dr
+            right = right + dr
         end
-        node.level = gray or gray2 or false
-        return true
+        return right, up, gray or gray2 or false
     end
-    local dr = scanLine(name, node.right, node.up, false, space)
+    local dr = scanLine(name, right, up, false, space)
     if dr then
-        node.right = node.right + dr
-        du, gray = scanLine(name, node.right, node.up, true, space)
+        right = right + dr
+        du, gray = scanLine(name, right, up, true, space)
         if du then
-            node.up = node.up + du
+            up = up + du
         end
-        node.level = gray or false
-        return true
+        return right, up, gray or false
     end
-    return false
 end
 
-local function followAll(space)
+-- Looks for each node again where its dot should answer: where its icon is, plus the trail while
+-- the player moves. Standing still, the answer fixes the node's spot; moving, it measures the
+-- trail. A node that doesn't answer a few ticks running, or left the minimap, goes.
+local function followAll(v, space)
+    local trusted = still()
+    if not v then
+        lagKnown = false
+    end
     for i = #nodes, 1, -1 do
         local node = nodes[i]
-        if follow(node, space) then
-            node.misses = 0
-        else
-            node.misses = node.misses + 1
+        local right, up = drawnAt(node, v)
+        local guessR, guessU = right, up
+        if v and node.x and not trusted and lagKnown then
+            guessR, guessU = right + lagR, up + lagU
         end
+        local foundR, foundU, gray = locate(node.name, guessR, guessU, space)
         if blocked then
             return
         end
-        if node.misses >= MISSES or not inside(node.right, node.up) then
+        if foundR then
+            node.misses = 0
+            node.level = gray
+            node.right, node.up = foundR, foundU
+            if v then
+                if trusted or not node.x then
+                    -- Standing still the answer is where the dot is. A node without a spot yet
+                    -- (found with no view) takes this one, trail and all, until the player stops.
+                    node.x, node.y = fromMinimap(v, foundR, foundU)
+                else
+                    noteLag(foundR - right, foundU - up)
+                end
+            end
+        else
+            node.misses = node.misses + 1
+        end
+        local nowR, nowU = drawnAt(node, v)
+        if node.misses >= MISSES or not inside(nowR, nowU) then
             tremove(nodes, i)
         end
     end
-    -- Two dots of one name that met are one.
+    -- Two nodes of one name that met are one.
     for i = #nodes, 2, -1 do
         local a = nodes[i]
+        local ar, au = drawnAt(a, v)
         for j = 1, i - 1 do
             local b = nodes[j]
-            local dr, du = a.right - b.right, a.up - b.up
-            if a.name == b.name and dr * dr + du * du <= SAME_SPOT * SAME_SPOT then
-                tremove(nodes, i)
-                break
+            if a.name == b.name then
+                local br, bu = drawnAt(b, v)
+                local dr, du = ar - br, au - bu
+                if dr * dr + du * du <= SAME_SPOT * SAME_SPOT then
+                    tremove(nodes, i)
+                    break
+                end
             end
         end
     end
@@ -403,10 +549,14 @@ local function newPass()
         points = grid(Minimap:GetWidth() / 2, spacing) }
 end
 
--- Whether a dot of that name is followed already near a spot.
-local function known(name, right, up)
+-- Whether a node of that name is followed already near where a dot answered.
+local function known(name, right, up, v)
     for _, node in ipairs(nodes) do
-        local dr, du = node.right - right, node.up - up
+        local nr, nu = drawnAt(node, v)
+        if v and node.x and not still() and lagKnown then
+            nr, nu = nr + lagR, nu + lagU
+        end
+        local dr, du = nr - right, nu - up
         if node.name == name and dr * dr + du * du <= FOLLOW_REACH * FOLLOW_REACH then
             return true
         end
@@ -414,9 +564,24 @@ local function known(name, right, up)
     return false
 end
 
--- Turns a finished pass's hits into dots: hits of one name that touch are one dot, at their
+-- Adds a node for a dot that answered at a spot. Moving, the trail is taken off before the spot
+-- is placed on the map.
+local function addNode(name, icon, right, up, gray, v)
+    local node = { name = name, icon = icon, right = right, up = up, level = gray, misses = 0,
+        standing = standing(name) }
+    if v then
+        local placeR, placeU = right, up
+        if not still() and lagKnown then
+            placeR, placeU = right - lagR, up - lagU
+        end
+        node.x, node.y = fromMinimap(v, placeR, placeU)
+    end
+    nodes[#nodes + 1] = node
+end
+
+-- Turns a finished pass's hits into nodes: hits of one name that touch are one dot, at their
 -- middle. Dots already followed are left to following.
-local function finishPass()
+local function finishPass(v)
     local hits = pass.hits
     if not module.db.calibration.space then
         if #hits > 0 then
@@ -448,9 +613,8 @@ local function finishPass()
                 end
             end
             local right, up = sumR / #queue, sumU / #queue
-            if not known(first.name, right, up) then
-                nodes[#nodes + 1] = { name = first.name, icon = first.icon, right = right, up = up,
-                    level = gray, misses = 0, standing = standing(first.name) }
+            if not known(first.name, right, up, v) then
+                addNode(first.name, first.icon, right, up, gray, v)
             end
         end
     end
@@ -458,7 +622,7 @@ local function finishPass()
 end
 
 -- Probes the next `count` spots of the finding pass (all of them without a count).
-local function find(count)
+local function find(count, v)
     pass = pass or newPass()
     local list = pass.points
     local last = count and min(pass.index + count - 1, #list) or #list
@@ -480,7 +644,7 @@ local function find(count)
     end
     pass.index = last + 1
     if pass.index > #list then
-        finishPass()
+        finishPass(v)
     end
 end
 
@@ -488,7 +652,8 @@ end
 
 local frame -- over the minimap; holds the icons and runs the probes
 local pins = {}
-local findAll = false -- find every dot this frame, after a zoom
+local findAll = false -- find every dot at the next tick, after a zoom or a reset
+local sinceTick = 0
 
 -- The gold ring of the minimap's tracking button, which Blizzard also puts around a 24 pixel spec
 -- icon (ItemDisplay.xml): the 64 pixel file with the icon's center 19 right and 18 down of its
@@ -539,94 +704,74 @@ local function placeRing(pin, size, shown)
     ring:Show()
 end
 
-local function draw()
+local function draw(v)
     local db = module.db
     local size = db.size
     local shown = 0
     for _, node in ipairs(nodes) do
-        shown = shown + 1
-        local pin = getPin(shown)
-        local icon = pin.icon
-        icon:SetTexture(node.icon)
-        local grayed = (db.gray and node.standing == "gray") or (db.levels and node.level) or false
-        icon:SetDesaturated(grayed)
-        if db.tint and node.standing == "low" then
-            icon:SetVertexColor(RED[1], RED[2], RED[3])
-        elseif grayed then
-            icon:SetVertexColor(GRAY[1], GRAY[2], GRAY[3])
-        else
-            icon:SetVertexColor(1, 1, 1)
+        local right, up = drawnAt(node, v)
+        if inside(right, up) then
+            shown = shown + 1
+            local pin = getPin(shown)
+            local icon = pin.icon
+            icon:SetTexture(node.icon)
+            local grayed = (db.gray and node.standing == "gray") or (db.levels and node.level) or false
+            icon:SetDesaturated(grayed)
+            if db.tint and node.standing == "low" then
+                icon:SetVertexColor(RED[1], RED[2], RED[3])
+            elseif grayed then
+                icon:SetVertexColor(GRAY[1], GRAY[2], GRAY[3])
+            else
+                icon:SetVertexColor(1, 1, 1)
+            end
+            pin:SetSize(size, size)
+            pin:ClearAllPoints()
+            pin:SetPoint("CENTER", Minimap, "CENTER", right, up)
+            pin:Show()
+            placeRing(pin, size, db.border)
         end
-        pin:SetSize(size, size)
-        pin:ClearAllPoints()
-        pin:SetPoint("CENTER", Minimap, "CENTER", node.right, node.up)
-        pin:Show()
-        placeRing(pin, size, db.border)
     end
     hidePins(shown + 1)
 end
 
--- The yards from the minimap's center to its edge, or nil when it can't be read.
-local function viewRadius()
-    local radius = C_Minimap.GetViewRadius and C_Minimap.GetViewRadius()
-    if radius and readable(radius) and type(radius) == "number" and radius > 0 then
-        return radius
+-- A round of probes: following, then a part of the finding pass.
+local function tick(v)
+    noteMovement(v)
+    if blocked or InCombatLockdown() or Minimap:IsMouseOver() then
+        return
     end
-end
-
-local lastRadius
-
--- When the zoom changes, every dot moves toward or away from the center by the change in yards
--- shown: move the icons the same way at once, so they stay on their dots through the zoom, and
--- following then fixes what's left. Read every frame, since the radius may change a frame after
--- the zoom event.
-local function followZoom()
-    local radius = viewRadius()
-    if radius and lastRadius and radius ~= lastRadius then
-        local k = lastRadius / radius
-        for i = #nodes, 1, -1 do
-            local node = nodes[i]
-            node.right, node.up = node.right * k, node.up * k
-            if not inside(node.right, node.up) then
-                tremove(nodes, i)
-            end
+    startProbing()
+    local space = currentSpace()
+    followAll(v, space)
+    if not blocked then
+        if findAll then
+            findAll = false
+            pass = nil
+            find(nil, v)
+        else
+            find(PER_TICK, v)
         end
-        findAll = true
     end
-    lastRadius = radius
+    stopProbing()
 end
 
-local function onUpdate()
-    followZoom()
-    if not tracking or InCombatLockdown() then
-        -- In combat the dots aren't followed, so their icons would be left behind.
+local function onUpdate(_, elapsed)
+    if not tracking then
         hidePins()
         return
     end
-    -- The cursor on the minimap: its mouseover and tooltip are the player's. Icons stay put.
-    if not blocked and not Minimap:IsMouseOver() then
-        -- While the player moves, the dots' answers trailed where they're drawn until the player
-        -- stopped (in game, 2026-10-13), as if the minimap's mouseover reads blip spots it updates
-        -- less often than it draws them. UpdateBlips (Blizzard calls it on a target change) may
-        -- bring them up to date first. Unverified that it does.
-        if Minimap.UpdateBlips then
-            pcall(Minimap.UpdateBlips, Minimap)
-        end
-        startProbing()
-        local space = currentSpace()
-        followAll(space)
-        if not blocked then
-            if findAll then
-                findAll = false
-                pass = nil
-                find()
-            else
-                find(PER_FRAME)
-            end
-        end
-        stopProbing()
+    local v = readView()
+    -- A new zone map: the nodes' spots were on the old one.
+    if v and v.mapID ~= nodesMap then
+        nodes, nodesMap, pass, findAll = {}, v.mapID, nil, true
+        lastX = nil
     end
-    draw()
+    sinceTick = sinceTick + elapsed
+    if sinceTick >= TICK then
+        sinceTick = 0
+        tick(v)
+    end
+    draw(v)
 end
 
 -- Learning names ----------------------------------------------------------------------------------
@@ -662,10 +807,13 @@ local function onSkill()
     end
 end
 
--- A zoom moves every dot further than following reaches. Each icon moves with it straight away
--- (see followZoom), and the whole minimap is looked over again for dots the zoom brought in.
+-- A zoom: icons drawn from map spots move with it by themselves; look over the minimap for dots it
+-- brought in. Without a view, where the dots answered is all there is, so start over.
 local function onZoom()
     findAll = true
+    if not readView() then
+        nodes = {}
+    end
 end
 
 -- /fpp nodes ----------------------------------------------------------------------------------------
@@ -685,9 +833,11 @@ local function report()
         return
     end
     readTracking()
+    local v = readView()
     ns.Print(format(L.MINIMAPNODEICONS_REPORT_STATE,
         tracking and L.MINIMAPNODEICONS_REPORT_YES or L.MINIMAPNODEICONS_REPORT_NO,
-        floor(Minimap:GetWidth() + 0.5)))
+        v and L.MINIMAPNODEICONS_REPORT_YES or L.MINIMAPNODEICONS_REPORT_NO,
+        floor(Minimap:GetWidth() + 0.5), v and format("%.1f", v.scale * 100) or "?"))
     local list = grid(Minimap:GetWidth() / 2, STEPS.high)
     local best, bestCount = nil, 0
     for _, space in ipairs(ORDER) do
@@ -733,7 +883,8 @@ end
 
 -- /fpp nodes here: where the dot under the cursor is against where its icon is. After a few
 -- seconds to point at a dot, the cursor's spot and the name the game shows there (with its color)
--- are read, and the nearest icon of that name, all in minimap units right and up of its center.
+-- are read, and the nearest icon of that name, all in minimap units right and up of its center,
+-- with the trail measured while moving.
 local HERE_WAIT = 3 -- seconds to put the cursor on a dot
 
 local function measure()
@@ -751,19 +902,24 @@ local function measure()
     -- The name's color, for telling whether a node on another level is named in gray.
     ns.Print(format(L.MINIMAPNODEICONS_HERE_COLOR, tostring(first.r), tostring(first.g),
         tostring(first.b), first.gray and L.MINIMAPNODEICONS_REPORT_YES or L.MINIMAPNODEICONS_REPORT_NO))
+    local v = readView()
     local nearest, best
     for _, node in ipairs(nodes) do
-        local dr, du = node.right - right, node.up - up
+        local nr, nu = drawnAt(node, v)
+        local dr, du = nr - right, nu - up
         local d = dr * dr + du * du
         if node.name == first.name and (not best or d < best) then
             nearest, best = node, d
         end
     end
     if nearest then
-        ns.Print(format(L.MINIMAPNODEICONS_HERE_ICON, nearest.right, nearest.up))
+        local nr, nu = drawnAt(nearest, v)
+        ns.Print(format(L.MINIMAPNODEICONS_HERE_ICON, nr, nu, nearest.right, nearest.up))
     else
         ns.Print(L.MINIMAPNODEICONS_HERE_MISSED)
     end
+    ns.Print(format(L.MINIMAPNODEICONS_HERE_LAG, lagR, lagU,
+        still() and L.MINIMAPNODEICONS_REPORT_YES or L.MINIMAPNODEICONS_REPORT_NO))
 end
 
 ns.AddCommand("nodes", "[here]", L.MINIMAPNODEICONS_COMMAND, function(rest)
@@ -790,6 +946,7 @@ function module:OnEnable()
     frame:Show()
     frame:SetScript("OnUpdate", onUpdate)
     readTracking()
+    findAll = true
     self:On("MINIMAP_UPDATE_TRACKING", readTracking)
     self:On("PLAYER_ENTERING_WORLD", readTracking)
     self:On("UNIT_SPELLCAST_SENT", onCastSent)
@@ -803,7 +960,7 @@ function module:OnDisable()
         frame:SetScript("OnUpdate", nil)
         frame:Hide()
     end
-    nodes, pass, pending = {}, nil, nil
+    nodes, nodesMap, pass, pending = {}, nil, nil, nil
 end
 
 function module:OnOptionChanged(key)

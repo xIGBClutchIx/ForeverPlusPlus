@@ -260,14 +260,17 @@ L.MINIMAPNODEICONS_HERE_NONE = "Nothing under the cursor. Point at a dot and try
 -- name, cursor right and up of the minimap's center, zoom level
 L.MINIMAPNODEICONS_HERE_CURSOR = "%s: cursor at %.1f, %.1f. Zoom %d."
 L.MINIMAPNODEICONS_HERE_COLOR = "Name color: %s, %s, %s. Gray: %s." -- red, green, blue, yes/no
-L.MINIMAPNODEICONS_HERE_ICON = "Its icon is at %.1f, %.1f." -- right and up of the minimap's center
+-- icon right and up of the minimap's center, then where the dot answered last
+L.MINIMAPNODEICONS_HERE_ICON = "Its icon is at %.1f, %.1f; it last answered at %.1f, %.1f."
+-- trail right and up, standing still (yes/no)
+L.MINIMAPNODEICONS_HERE_LAG = "Trail while moving: %.1f, %.1f. Standing still: %s."
 L.MINIMAPNODEICONS_HERE_MISSED = "No icon for it yet."
 L.MINIMAPNODEICONS_REPORT_UNAVAILABLE = "This client can't check the minimap for nodes."
 L.MINIMAPNODEICONS_REPORT_COMBAT = "Can't check the minimap in combat."
 L.MINIMAPNODEICONS_REPORT_YES = "yes"
 L.MINIMAPNODEICONS_REPORT_NO = "no"
--- tracking on (yes/no), minimap width
-L.MINIMAPNODEICONS_REPORT_STATE = "Tracking on: %s. Minimap: %d wide."
+-- tracking on (yes/no), position readable (yes/no), minimap width, minimap units per 100 yards
+L.MINIMAPNODEICONS_REPORT_STATE = "Tracking on: %s. Position: %s. Minimap: %d wide, %s per 100 yards."
 -- space name, names found, nodes known among them, the first few names
 L.MINIMAPNODEICONS_REPORT_SPACE = "%s: %d names, %d nodes known: %s"
 L.MINIMAPNODEICONS_REPORT_NONE = "none"
