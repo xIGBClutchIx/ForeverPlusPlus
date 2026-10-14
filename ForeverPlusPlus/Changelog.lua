@@ -67,6 +67,9 @@ ns.changelog = {
                     .. "default is." },
             } },
             { L.CHANGELOG_CHANGED, {
+                { L.AUTOWEAPONBUFF_TITLE, "An item it doesn't know yet, or a stone on a fist "
+                    .. "weapon, works from a right-click too once you've put it on that kind of "
+                    .. "weapon by hand, for every character." },
                 { L.WAYLAIDCRATES_TITLE, "Item Tooltips' Waylaid Crate Costs option moved here as "
                     .. "Bundle Costs, keeping your choice." },
                 { L.WORLDMAP_TITLE, "Coordinates follows Blizzard's coordinate settings under "

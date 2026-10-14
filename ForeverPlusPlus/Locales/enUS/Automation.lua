@@ -192,7 +192,8 @@ L.FISHINGCAST_COMBAT_TEXT = "You have a fishing pole equipped."
 L.AUTOWEAPONBUFF_TITLE = "Auto Weapon Buff"
 L.AUTOWEAPONBUFF_DESC = "Right-click a sharpening stone, weightstone, oil, poison, or lure in your "
     .. "bags to put it straight on your weapon: the main hand, or the off hand when only it fits or "
-    .. "the main hand is buffed. Not in combat."
+    .. "the main hand is buffed. Not in combat. Anything else you put on a weapon by hand works "
+    .. "this way from then on."
 L.AUTOWEAPONBUFF_WARN = "Warn When No Weapon Fits"
 L.AUTOWEAPONBUFF_WARN_DESC = "When no equipped weapon can take the item, like a weightstone with "
     .. "only blades, say so in red at the top of the screen instead of bringing up a cursor."
@@ -200,9 +201,11 @@ L.AUTOWEAPONBUFF_WARN_TEXT = "No equipped weapon can take %s." -- item name
 L.AUTOWEAPONBUFF_WARN_TEXT_ANY = "No equipped weapon can take that."
 L.AUTOWEAPONBUFF_PRINT = "Print Weapon Checks"
 L.AUTOWEAPONBUFF_PRINT_DESC = "Print in chat, each time you right-click a weapon buff in your bags, "
-    .. "which kind of item it is and which weapon slot was picked."
--- debug codes: item link, item kind (sharp, blunt, melee, pole), slot picked (16, 17, or nil)
+    .. "which kind of item it is and which weapon slot was picked, and each time it learns a weapon "
+    .. "an item goes on."
+-- debug codes: item link, item kind (sharp, blunt, melee, pole, learned), slot picked (16, 17, or nil)
 L.AUTOWEAPONBUFF_PRINT_LINE = "Weapon buff: %s kind=%s -> slot %s"
+L.AUTOWEAPONBUFF_LEARNED_LINE = "Weapon buff learned: %s goes on %s." -- item name, weapon type
 
 -- ComprehendScrolls
 L.COMPREHENDSCROLLS_TITLE = "Comprehend Scrolls"

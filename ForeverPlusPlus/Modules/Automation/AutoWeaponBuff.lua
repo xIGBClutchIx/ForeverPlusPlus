@@ -6,17 +6,20 @@
 -- weapon slot through Blizzard's own `target-slot` attribute. Not in combat, when the bags work as
 -- Blizzard's.
 --
--- Which items count, and which weapons they go on, comes from the table below, since the game only
--- says what an item fits once its cursor is up. Main hand first; the off hand when only it can
+-- Which items count, and which weapons they go on, starts from the table below, since the game only
+-- says what an item fits once its cursor is up. On top of it (ns.GameData, for the account), an
+-- item with a use spell that you put on a weapon yourself is learned for that kind of weapon: once
+-- its cast ends and the weapon has a new temporary buff. That covers items the table lacks and
+-- fist weapons, which it leaves to the cursor. Main hand first; the off hand when only it can
 -- take the item, when the main hand already has a buff and the off hand doesn't, or when the off
 -- hand's buff runs out sooner. When no equipped weapon can take the item (a weightstone with only
 -- blades), the right-click says so in red at the top of the screen, like Blizzard's own errors,
 -- instead of bringing up a cursor nothing will take.
 local _, ns = ...
 
-local C_Item, C_Container, C_PaperDollInfo = C_Item, C_Container, C_PaperDollInfo
-local GetInventoryItemID, GetWeaponEnchantInfo = GetInventoryItemID, GetWeaponEnchantInfo
-local pairs, select, tostring = pairs, select, tostring
+local C_Item, C_Container, C_PaperDollInfo, C_Timer = C_Item, C_Container, C_PaperDollInfo, C_Timer
+local GetInventoryItemID, GetWeaponEnchantInfo, GetTime = GetInventoryItemID, GetWeaponEnchantInfo, GetTime
+local pairs, select, tostring, type = pairs, select, tostring, type
 
 local L = ns.L
 
@@ -54,8 +57,10 @@ local FIST = 13 -- Enum.ItemWeaponSubclass.Unarmed
 local SHARP = { [0] = true, [1] = true, [6] = true, [7] = true, [8] = true, [15] = true }
 local BLUNT = { [4] = true, [5] = true, [10] = true }
 
--- Item ID to the weapons it goes on: "sharp", "blunt", "melee" (oils and poisons, any weapon but
--- a fishing pole), or "pole" (fishing lures).
+-- The seed: item ID to the weapons it goes on: "sharp", "blunt", "melee" (oils and poisons, any
+-- weapon but a fishing pole), or "pole" (fishing lures). What was learned in play is a table
+-- instead: `kind` (the seed's, or nil for an item it lacks) and weapon subclass -> true for each
+-- kind of weapon the item went on, which wins over the kind.
 local KINDS = {}
 local function add(kind, ...)
     for i = 1, select("#", ...) do
@@ -75,21 +80,45 @@ add("melee", 6947, 6949, 6950, 8926, 8927, 8928, 2892, 2893, 8984, 8985, 20844, 
 -- Worm, Aquadynamic Fish Lens.
 add("pole", 6529, 6530, 6532, 6533, 7307, 6811)
 
+local BUFFS = ns.GameData.New("weaponBuffs", KINDS, { kind = "item", label = "Auto Weapon Buff items" })
+
 function module:IsAvailable()
     return ns.BagClicks.IsAvailable() and C_Item and C_Item.GetItemInfoInstant and GetInventoryItemID
         and true or false
 end
 
--- Whether an item of this kind can go on the weapon in this slot: true, false, or nil when we
--- don't know (a stone on a fist weapon).
-local function fits(kind, slot)
+-- The weapon subclass in this slot, or nil when it holds no weapon.
+local function weaponSubclass(slot)
     local itemID = GetInventoryItemID("player", slot)
     if not itemID then
-        return false
+        return nil
     end
     local _, _, _, _, _, classID, subclassID = C_Item.GetItemInfoInstant(itemID)
     if classID ~= WEAPON then
+        return nil
+    end
+    return subclassID
+end
+
+-- Whether an item with this entry (BUFFS's) can go on the weapon in this slot: true, false, or nil
+-- when we don't know (a stone on a fist weapon, or a learned item on a kind of weapon it never
+-- went on).
+local function fits(entry, slot)
+    local subclassID = weaponSubclass(slot)
+    if not subclassID then
         return false
+    elseif not entry then
+        return nil
+    end
+    local kind = entry
+    if type(entry) == "table" then
+        if entry[subclassID] then
+            return slot == MAINHAND or subclassID ~= FISHING_POLE
+        end
+        kind = entry.kind
+        if not kind then
+            return nil
+        end
     end
     if kind == "pole" then
         return slot == MAINHAND and subclassID == FISHING_POLE
@@ -139,9 +168,9 @@ local function buffLeft(slot)
     return left
 end
 
--- The slot to put an item of this kind on, or nil when neither weapon can take it.
-local function pickSlot(kind)
-    local main, off = fits(kind, MAINHAND), fits(kind, OFFHAND)
+-- The slot to put an item with this entry on, or nil when neither weapon can take it.
+local function pickSlot(entry)
+    local main, off = fits(entry, MAINHAND), fits(entry, OFFHAND)
     if main and off then
         local mainLeft, offLeft = buffLeft(MAINHAND), buffLeft(OFFHAND)
         if mainLeft and (not offLeft or offLeft < mainLeft) then
@@ -152,9 +181,17 @@ local function pickSlot(kind)
     return main and MAINHAND or off and OFFHAND or nil
 end
 
--- Whether we know neither weapon can take an item of this kind.
-local function noneFits(kind)
-    return fits(kind, MAINHAND) == false and fits(kind, OFFHAND) == false
+-- Whether we know neither weapon can take an item with this entry.
+local function noneFits(entry)
+    return fits(entry, MAINHAND) == false and fits(entry, OFFHAND) == false
+end
+
+-- The entry's kind for Print Weapon Checks: the seed's, or "learned".
+local function describe(entry)
+    if type(entry) == "table" then
+        return entry.kind or "learned"
+    end
+    return entry
 end
 
 local function warnNoFit(bag, slot)
@@ -167,15 +204,15 @@ end
 
 -- An overlay for each item with a weapon that takes it, or none when Warn says so.
 local function match(itemID)
-    local kind = KINDS[itemID]
-    if kind and (fits(kind, MAINHAND) or fits(kind, OFFHAND) or module.db.warnNoFit and noneFits(kind)) then
-        return kind
+    local entry = BUFFS:Get(itemID)
+    if entry and (fits(entry, MAINHAND) or fits(entry, OFFHAND) or module.db.warnNoFit and noneFits(entry)) then
+        return entry
     end
 end
 
-local function click(overlay, kind, bag, slot, down)
-    local target = pickSlot(kind)
-    local warn = not target and module.db.warnNoFit and noneFits(kind)
+local function click(overlay, entry, bag, slot, down)
+    local target = pickSlot(entry)
+    local warn = not target and module.db.warnNoFit and noneFits(entry)
     if target then
         overlay:SetAttribute("type2", "item")
         overlay:SetAttribute("item", bag .. " " .. slot)
@@ -186,7 +223,7 @@ local function click(overlay, kind, bag, slot, down)
     end
     if not down and module.db.printSteps then
         ns.Print(L.AUTOWEAPONBUFF_PRINT_LINE:format(tostring(C_Container.GetContainerItemLink(bag, slot)),
-            kind, tostring(target)))
+            describe(entry), tostring(target)))
     end
     -- A warning takes the click: nothing goes to the bag button, so no cursor comes up.
     return target ~= nil or warn
@@ -194,9 +231,108 @@ end
 
 local overlays = ns.BagClicks.New(module, match, click)
 
+-- Learning -------------------------------------------------------------------------------------
+
+-- The ID of the slot's temporary buff, or nil when it has none or we can't read it.
+local function buffID(slot)
+    local id
+    if C_Item.GetWeaponEnchantInfo then
+        for _, enchant in pairs(C_Item.GetWeaponEnchantInfo(slot - MAINHAND) or {}) do
+            if enchant.hasEnchant then
+                id = enchant.enchantID
+                break
+            end
+        end
+    elseif GetWeaponEnchantInfo then
+        id = select(slot == MAINHAND and 4 or 8, GetWeaponEnchantInfo())
+    end
+    return ns.IsReadable(id) and id or nil
+end
+
+local function snapshot(slot)
+    return { left = buffLeft(slot), id = buffID(slot) }
+end
+
+-- Whether the slot got a temporary buff between the two snapshots: a new one, another one, or the
+-- same one with more time (a buff's time only runs down).
+local function refreshed(before, now)
+    if now.left == nil then
+        return false
+    elseif before.left == nil then
+        return true
+    elseif now.id and before.id and now.id ~= before.id then
+        return true
+    end
+    return now.left > before.left
+end
+
+-- The last bag item with a use spell the player used, and both weapons' buffs at that moment.
+local pending
+
+-- Using a bag item (a right-click in the bags, or our overlay): remember it, in case it goes on a
+-- weapon.
+local function onUse(bag, slot)
+    local itemID = C_Container.GetContainerItemID(bag, slot)
+    if not itemID or not C_Item.GetItemSpell then
+        return
+    end
+    local _, spellID = C_Item.GetItemSpell(itemID)
+    if not spellID or not ns.IsReadable(spellID) then
+        return
+    end
+    pending = { itemID = itemID, spellID = spellID, time = GetTime(),
+        [MAINHAND] = snapshot(MAINHAND), [OFFHAND] = snapshot(OFFHAND) }
+end
+
+local function learn(used)
+    for slot = MAINHAND, OFFHAND do
+        local subclassID = weaponSubclass(slot)
+        if subclassID and refreshed(used[slot], snapshot(slot)) then
+            local entry = BUFFS:Get(used.itemID)
+            if fits(entry, slot) then
+                return -- already known
+            end
+            local learned = { kind = type(entry) == "table" and entry.kind or entry }
+            if type(entry) == "table" then
+                for key, value in pairs(entry) do
+                    learned[key] = value
+                end
+            end
+            learned[subclassID] = true
+            BUFFS:Learn(used.itemID, learned)
+            overlays:Refresh()
+            if module.db.printSteps then
+                local weapon = C_Item.GetItemSubClassInfo and C_Item.GetItemSubClassInfo(WEAPON, subclassID)
+                ns.Print(L.AUTOWEAPONBUFF_LEARNED_LINE:format(
+                    tostring(C_Item.GetItemNameByID and C_Item.GetItemNameByID(used.itemID) or used.itemID),
+                    tostring(weapon or subclassID)))
+            end
+            return
+        end
+    end
+end
+
+-- The used item's cast went off: once the buff is on, see which weapon it went on.
+local function onCast(_, unit, _, spellID)
+    if not (pending and ns.IsReadable(unit) and ns.IsReadable(spellID)) or unit ~= "player"
+        or spellID ~= pending.spellID then
+        return
+    end
+    local used = pending
+    pending = nil
+    if GetTime() - used.time > 60 then
+        return
+    end
+    C_Timer.After(1, function()
+        learn(used)
+    end)
+end
+
 function module:OnEnable()
     overlays:Enable()
     self:On("PLAYER_EQUIPMENT_CHANGED", overlays.refresh)
+    self:Hook(C_Container, "UseContainerItem", onUse)
+    self:On("UNIT_SPELLCAST_SUCCEEDED", onCast)
 end
 
 function module:OnOptionChanged(key)

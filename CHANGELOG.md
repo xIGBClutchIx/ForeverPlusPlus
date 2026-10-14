@@ -25,6 +25,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Changed
 
+- **Auto Weapon Buff**: an item it doesn't know yet, or a stone on a fist weapon, works from a right-click too once you've put it on that kind of weapon by hand, for every character.
 - **Waylaid Crates**: Item Tooltips' Waylaid Crate Costs option moved here as Bundle Costs, keeping your choice.
 - **World Map**: Coordinates follows Blizzard's coordinate settings under Gameplay > Interface instead of its own checkboxes, which turned them back on at every login.
 - **World Map**: dungeon levels come from the game's dungeon finder, and Forever dungeons it lists that Forever++ didn't know get their names and levels in map tooltips.
