@@ -45,10 +45,7 @@ local EVENTS = { "UNIT_HEALTH", "UNIT_MAXHEALTH", "UNIT_FLAGS", "UNIT_NAME_UPDAT
 local SOCIAL_EVENTS = { "GROUP_ROSTER_UPDATE", "FRIENDLIST_UPDATE", "BN_FRIEND_INFO_CHANGED",
     "BN_FRIEND_LIST_SIZE_CHANGED", "PLAYER_GUILD_UPDATE" }
 
--- Whether this client has an event, since registering one it doesn't have is an error.
-local function hasEvent(event)
-    return not (C_EventUtils and C_EventUtils.IsEventValid) or C_EventUtils.IsEventValid(event)
-end
+local hasEvent = ns.HasEvent
 
 -- Blizzard sets the name text (with surname) itself; our label copies it and lays itself out
 -- again as it changes.

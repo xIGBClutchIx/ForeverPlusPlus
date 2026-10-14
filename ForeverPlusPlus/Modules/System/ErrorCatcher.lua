@@ -824,7 +824,7 @@ module.debugActions = {
 
 -- An event this client may not have: RegisterEvent can raise an error for an unknown one.
 local function listen(event, fn)
-    if not (C_EventUtils and C_EventUtils.IsEventValid) or C_EventUtils.IsEventValid(event) then
+    if ns.HasEvent(event) then
         module:On(event, fn)
     end
 end

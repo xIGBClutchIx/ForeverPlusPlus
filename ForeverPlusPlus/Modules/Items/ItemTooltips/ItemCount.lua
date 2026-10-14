@@ -8,7 +8,7 @@
 local _, ns = ...
 
 local _G, pairs, format, strfind, tconcat = _G, pairs, string.format, string.find, table.concat
-local C_Item, C_Container, C_EventUtils = C_Item, C_Container, C_EventUtils
+local C_Item, C_Container = C_Item, C_Container
 local Enum = Enum
 local UnitName, GetRealmName, GetFileIDFromPath = UnitName, GetRealmName, GetFileIDFromPath
 local GRAY_FONT_COLOR = GRAY_FONT_COLOR
@@ -189,8 +189,7 @@ end
 
 function module:OnEnable()
     for event, fn in pairs(events) do
-        -- Probe: registering an event the client doesn't know is an error.
-        if not (C_EventUtils and C_EventUtils.IsEventValid) or C_EventUtils.IsEventValid(event) then
+        if ns.HasEvent(event) then
             self:On(event, fn)
         end
     end

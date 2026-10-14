@@ -101,6 +101,16 @@ function ns.On(event, fn)
     list[#list + 1] = fn
 end
 
+---Whether this client has `event`. Registering one it doesn't have is an error, and Forever is a
+---beta, so check an event a patch may add or drop before `ns.On` or `module:On`. Probe: without
+---C_EventUtils.IsEventValid, every event counts as there.
+---@param event string
+---@return boolean
+function ns.HasEvent(event)
+    local utils = C_EventUtils
+    return not (utils and utils.IsEventValid) or utils.IsEventValid(event) and true or false
+end
+
 ---Stops calling `fn` for `event`.
 ---@param event string
 ---@param fn function

@@ -7,7 +7,7 @@ local _, ns = ...
 
 local ipairs, pairs, format, tonumber, type = ipairs, pairs, string.format, tonumber, type
 local concat = table.concat
-local C_Timer, C_Item, C_EventUtils = C_Timer, C_Item, C_EventUtils
+local C_Timer, C_Item = C_Timer, C_Item
 local Screenshot, InCombatLockdown, UIParent = Screenshot, InCombatLockdown, UIParent
 local CreateFrame, GetBindingKey = CreateFrame, GetBindingKey
 local SetOverrideBindingClick, ClearOverrideBindings = SetOverrideBindingClick, ClearOverrideBindings
@@ -357,10 +357,7 @@ local HANDLERS = {
     end },
 }
 
--- Registering an event the client doesn't have is an error, and Forever is a beta.
-local function exists(event)
-    return not (C_EventUtils and C_EventUtils.IsEventValid) or C_EventUtils.IsEventValid(event)
-end
+local exists = ns.HasEvent
 
 -- Listens for the events of the checkboxes that are on, and stops the rest.
 local function sync()
