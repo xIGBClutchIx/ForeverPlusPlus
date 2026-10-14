@@ -23,6 +23,9 @@ ns.changelog = {
                     .. "read with Comprehension in your bags to cast Comprehend Scroll on it, "
                     .. "without opening the spellbook. Not in combat. On by default; it does "
                     .. "nothing for characters without the spell." },
+                { L.COMBATALERT_TITLE, "The new Play Sound option (off by default) plays the "
+                    .. "raid warning sound as you enter combat and a soft chime as you leave, for "
+                    .. "when you're looking somewhere else." },
                 { L.ITEMTOOLTIPS_TITLE, "The new Repair Cost line (off by default) shows what "
                     .. "repairing damaged gear costs, on gear you wear or carry, without a "
                     .. "merchant's repair cursor." },

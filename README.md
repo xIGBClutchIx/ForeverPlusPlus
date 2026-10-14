@@ -40,7 +40,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Social Button | Moves the social (Quick Join) button down beside the chat window's other buttons. |
 | **Interface** | |
 | Recipe Colors | Colors recipes in the professions window by your chance of a skill-up: orange, yellow, green, or gray, with the row's highlight to match. |
-| Combat Alert | Floats a red "Entering Combat" or green "Leaving Combat" line up and away from the middle of the screen, each with its own checkbox, plus how long it stays (move and resize it in Edit Mode). Off by default. |
+| Combat Alert | Floats a red "Entering Combat" or green "Leaving Combat" line up and away from the middle of the screen, each with its own checkbox, plus how long it stays and an optional sound (move and resize it in Edit Mode). Off by default. |
 | Currency Bar | Shows your gold in a small tooltip-styled box, all three coins always, and optionally the currencies you tick Show on Backpack. Hovering it lists your gold and currencies with what this session gained or spent. Options for the tooltip, the session figures, and a column layout (move and resize it in Edit Mode). Off by default. |
 | Tooltips | Colors unit and item tooltips by class, reaction, or quality, colors the Horde or Alliance line red or blue, and adds player titles and who a unit is targeting. |
 | **Items** | |

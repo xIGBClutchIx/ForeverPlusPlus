@@ -4,7 +4,7 @@
 -- (PLAYER_REGEN_DISABLED and PLAYER_REGEN_ENABLED), which is the same thing the log would say.
 local _, ns = ...
 
-local CreateFrame, UIParent = CreateFrame, UIParent
+local CreateFrame, UIParent, PlaySound = CreateFrame, UIParent, PlaySound
 
 local L = ns.L
 local Colors = ns.Colors
@@ -13,6 +13,7 @@ local module = ns.NewModule("CombatAlert", L.COMBATALERT_DESC, {
     enabled = false,
     entering = true,
     leaving = true,
+    sound = false,
     scale = 100, -- percent
     duration = 2, -- seconds
     x = 0, -- the text's offset from the center of the screen
@@ -30,6 +31,8 @@ module.options = {
         description = L.COMBATALERT_DURATION_DESC,
         min = 1, max = 5, step = 1, format = ns.Text.Seconds,
     },
+    { key = "sound", name = L.COMBATALERT_SOUND, description = L.COMBATALERT_SOUND_DESC,
+        added = "0.9.0" },
 }
 
 local WIDTH, HEIGHT = 400, 50
@@ -74,8 +77,15 @@ local function place()
     frame:SetPoint("CENTER", UIParent, "CENTER", module.db.x, module.db.y)
 end
 
--- Shows `text` in a color, floating up for the set time and fading out over the second half.
-local function alert(text, color)
+-- Shows `text` in a color, floating up for the set time and fading out over the second half,
+-- with the SOUNDKIT named `sound` when Play Sound is on (skipped if this client lacks it).
+local function alert(text, color, sound)
+    if module.db.sound then
+        local kit = SOUNDKIT and SOUNDKIT[sound]
+        if kit and PlaySound then
+            PlaySound(kit)
+        end
+    end
     frame.group:Stop()
     frame.text:SetText(text)
     frame.text:SetTextColor(color[1], color[2], color[3])
@@ -90,13 +100,14 @@ end
 
 local function entering()
     if module.db.entering then
-        alert(L.COMBATALERT_ENTER_TEXT, Colors.RED)
+        alert(L.COMBATALERT_ENTER_TEXT, Colors.RED, "RAID_WARNING")
     end
 end
 
 local function leaving()
     if module.db.leaving then
-        alert(L.COMBATALERT_LEAVE_TEXT, Colors.GUILD_GREEN)
+        -- A softer sound going out: the whisper chime, not the raid warning horn.
+        alert(L.COMBATALERT_LEAVE_TEXT, Colors.GUILD_GREEN, "TELL_MESSAGE")
     end
 end
 

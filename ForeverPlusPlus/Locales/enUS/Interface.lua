@@ -72,6 +72,9 @@ L.COMBATALERT_LEAVING = "Leaving Combat"
 L.COMBATALERT_LEAVING_DESC = "Show a green alert when you leave combat."
 L.COMBATALERT_DURATION = "Duration"
 L.COMBATALERT_DURATION_DESC = "How long the text stays up before it has faded away."
+L.COMBATALERT_SOUND = "Play Sound"
+L.COMBATALERT_SOUND_DESC = "Play a sound with each alert: the raid warning going in and a soft "
+    .. "chime coming out, for when you're looking somewhere else."
 
 -- CurrencyBar
 L.CURRENCYBAR_TITLE = "Currency Bar"
