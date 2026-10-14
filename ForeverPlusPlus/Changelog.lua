@@ -18,8 +18,8 @@ ns.changelog = {
                     .. "turn that set back on later." },
                 { L.COMPREHENDSCROLLS_TITLE, "A new module for Mages: right-click a scroll you "
                     .. "read with Comprehension in your bags to cast Comprehend Scroll on it, "
-                    .. "without opening the spellbook. Not in combat. On by default, and only "
-                    .. "Mages see it." },
+                    .. "without opening the spellbook. Not in combat. On by default; it does "
+                    .. "nothing for characters without the spell." },
                 { L.ITEMTOOLTIPS_TITLE, "The new Repair Cost line (off by default) shows what "
                     .. "repairing damaged gear costs, on gear you wear or carry, without a "
                     .. "merchant's repair cursor." },

@@ -8,12 +8,12 @@
 -- `target-slot` attributes. Not in combat, when the bags work as Blizzard's. A scroll that needs
 -- more skill than the player has is still tried, so the game says why it can't be read.
 --
--- On by default, but only Mages have it: other classes don't see it in Settings, and a Mage
--- who hasn't learned the spell gets no overlays.
+-- On by default, but only a character who knows Comprehend Scroll (a Mage) gets overlays, so
+-- nobody else notices it.
 local _, ns = ...
 
 local C_SpellBook = C_SpellBook
-local IsSpellKnown, UnitClass = IsSpellKnown, UnitClass
+local IsSpellKnown = IsSpellKnown
 
 local L = ns.L
 
@@ -38,8 +38,7 @@ local SCROLLS = {
 }
 
 function module:IsAvailable()
-    local _, class = UnitClass("player")
-    return class == "MAGE" and ns.BagClicks.IsAvailable()
+    return ns.BagClicks.IsAvailable()
 end
 
 local function known()
