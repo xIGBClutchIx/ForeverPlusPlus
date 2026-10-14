@@ -34,7 +34,7 @@ module.options = {
 
 -- The name can't be read (secret) or is missing: say "someone" rather than skip the message.
 local function who(name)
-    if ns.IsReadable(name) and type(name) == "string" and name ~= "" then
+    if ns.IsText(name, true) then
         return name
     end
     return L.AUTODECLINE_SOMEONE
@@ -49,7 +49,7 @@ local function isAllowed(name, guid)
     if Units.IsFriendGUID(guid) or Units.IsGuildmateGUID(guid) then
         return true
     end
-    return ns.IsReadable(name) and type(name) == "string"
+    return ns.IsText(name)
         and (Units.IsFriendName(name) or Units.IsGuildmateName(name))
 end
 

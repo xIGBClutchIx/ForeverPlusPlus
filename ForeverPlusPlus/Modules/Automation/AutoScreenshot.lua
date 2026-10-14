@@ -279,7 +279,7 @@ end
 
 local function onStanding(_, text)
     local pattern = getStanding()
-    if not (pattern and readable(text) and type(text) == "string") then
+    if not (pattern and ns.IsText(text)) then
         return
     end
     local standing = text:match(pattern)

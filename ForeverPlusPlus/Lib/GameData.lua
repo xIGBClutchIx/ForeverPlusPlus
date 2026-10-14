@@ -272,7 +272,7 @@ function GameData.TooltipRequires(data)
     end
     for i = 2, #lines do
         local text = lines[i] and lines[i].leftText
-        if ns.IsReadable(text) and type(text) == "string" then
+        if ns.IsText(text) then
             local skill, rank = GameData.Requires(ns.Text.Plain(text))
             if skill then
                 return skill, rank, i

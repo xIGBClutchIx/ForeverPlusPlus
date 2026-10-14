@@ -2,6 +2,7 @@
 -- (mostly in combat and instances) and must not be tested or compared in Lua.
 local _, ns = ...
 
+local type = type
 local issecretvalue, C_CurveUtil, UnitHealthPercent, Enum = issecretvalue, C_CurveUtil, UnitHealthPercent, Enum
 
 ---Whether a value can be tested, compared, or used in Lua. Secret values can't; treat them as
@@ -10,6 +11,34 @@ local issecretvalue, C_CurveUtil, UnitHealthPercent, Enum = issecretvalue, C_Cur
 ---@return boolean
 function ns.IsReadable(value)
     return not (issecretvalue and issecretvalue(value))
+end
+
+---Whether a value is a string Lua can read: not secret, and with `nonEmpty`, not "" either. The
+---check text from the game (names, tooltip lines, chat) needs before it's matched or compared.
+---@param value any
+---@param nonEmpty? boolean
+---@return boolean
+function ns.IsText(value, nonEmpty)
+    if issecretvalue and issecretvalue(value) or type(value) ~= "string" then
+        return false
+    end
+    return not nonEmpty or value ~= ""
+end
+
+---Whether a flag from the game is known to be true: false when it's false, nil, or secret. For a
+---check that should do nothing unless it's sure.
+---@param value any
+---@return boolean
+function ns.IsTrue(value)
+    return not (issecretvalue and issecretvalue(value)) and not not value
+end
+
+---Whether a flag from the game may be true: true when it's true or secret. For a check that
+---should hold back unless it's sure the flag is off.
+---@param value any
+---@return boolean
+function ns.IsTrueOrSecret(value)
+    return issecretvalue and issecretvalue(value) or not not value
 end
 
 ---A curve for `UnitHealthPercent(unit, true, curve)` that gives `hurt` below full health and

@@ -61,7 +61,7 @@ local function nameFromSkillLine()
     if C_TradeSkillUI and C_TradeSkillUI.GetProfessionInfoBySkillLineID then
         local info = C_TradeSkillUI.GetProfessionInfoBySkillLineID(COMPREHENSION)
         local name = info and info.professionName
-        if ns.IsReadable(name) and type(name) == "string" and name ~= "" then
+        if ns.IsText(name, true) then
             return name
         end
     end

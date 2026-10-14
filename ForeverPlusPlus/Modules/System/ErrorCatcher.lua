@@ -20,7 +20,6 @@ local C_Timer, error = C_Timer, error
 local seterrorhandler, geterrorhandler = seterrorhandler, geterrorhandler
 local debugstack, debuglocals = debugstack, debuglocals
 local GetCallstackHeight, GetErrorCallstackHeight = GetCallstackHeight, GetErrorCallstackHeight
-local issecretvalue = issecretvalue
 
 local L = ns.L
 
@@ -51,7 +50,7 @@ local window
 
 -- Text that's safe to keep: a secret value or nil becomes `fallback`.
 local function readable(value, fallback)
-    if issecretvalue and issecretvalue(value) then
+    if not ns.IsReadable(value) then
         return fallback
     end
     if value == nil then

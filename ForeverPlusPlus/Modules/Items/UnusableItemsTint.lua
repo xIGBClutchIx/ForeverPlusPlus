@@ -77,7 +77,7 @@ end
 
 local function isUse(text)
     local use = _G.ITEM_SPELL_TRIGGER_ONUSE
-    return use and ns.IsReadable(text) and type(text) == "string" and text:sub(1, #use) == use or false
+    return use and ns.IsText(text) and text:sub(1, #use) == use or false
 end
 
 -- True when a line is red, false when none is, nil while the game has no tooltip for the item

@@ -80,7 +80,7 @@ local function save()
             -- An unreadable type id is left out too, since it could be a whisper's.
             local whisper = not ns.IsReadable(chatTypeID)
                 or (type(chatTypeID) == "number" and whispers[chatTypeID])
-            if not whisper and ns.IsReadable(text) and type(text) == "string"
+            if not whisper and ns.IsText(text)
                 and text ~= L.CHATHISTORY_DIVIDER
                 and ns.IsReadable(r) and ns.IsReadable(g) and ns.IsReadable(b) then
                 lines[#lines + 1] = { text, r, g, b }

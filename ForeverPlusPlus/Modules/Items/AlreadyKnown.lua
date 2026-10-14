@@ -81,7 +81,7 @@ local function tooltipKnown(link)
     local alreadyKnown = _G.ITEM_SPELL_KNOWN
     for i = 1, #lines do
         local text = lines[i].leftText
-        if ns.IsReadable(text) and type(text) == "string"
+        if ns.IsText(text)
             and (text == alreadyKnown or (petKnown and strfind(text, petKnown))) then
             return true
         end

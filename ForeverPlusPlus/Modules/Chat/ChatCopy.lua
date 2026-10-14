@@ -59,7 +59,7 @@ local function chatText()
     for i = total, 1, -1 do
         local text, r, g, b = frame:GetMessageInfo(i)
         local line
-        if ns.IsReadable(text) and type(text) == "string" then
+        if ns.IsText(text) then
             if not (ns.IsReadable(r) and ns.IsReadable(g) and ns.IsReadable(b)) then
                 r, g, b = nil, nil, nil
             end
@@ -326,7 +326,7 @@ local function onStampClick(_, link, _, button, frame)
     local wanted = "|H" .. LINK_PREFIX .. id .. "|h"
     for i = 1, frame:GetNumMessages() do
         local text = frame:GetMessageInfo(i)
-        if ns.IsReadable(text) and type(text) == "string" and find(text, wanted, 1, true) == 1 then
+        if ns.IsText(text) and find(text, wanted, 1, true) == 1 then
             ns.Prompt("CHATCOPY_LINE", L.CHATCOPY_STAMPS_PROMPT, ns.Text.Plain(text))
             return
         end

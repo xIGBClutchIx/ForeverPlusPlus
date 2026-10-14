@@ -74,7 +74,7 @@ function Chat.Transform(frame, test, rewrite)
         return
     end
     frame:TransformMessages(function(message)
-        return ns.IsReadable(message) and type(message) == "string" and test(message)
+        return ns.IsText(message) and test(message)
     end, function(message, ...)
         return rewrite(message), ...
     end)

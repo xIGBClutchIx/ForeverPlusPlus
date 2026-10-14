@@ -22,7 +22,7 @@ local lines -- the log being written: ForeverPlusPlusDB.selfTest.lines
 
 -- A value as text, without touching a secret one.
 local function text(value)
-    if issecretvalue and issecretvalue(value) then
+    if not ns.IsReadable(value) then
         return "<secret>"
     end
     if type(value) == "table" then
@@ -603,7 +603,7 @@ local function onEvent(_, event, ...)
         record("UI_ERROR_MESSAGE " .. join(...))
     elseif event == "CHAT_MSG_SYSTEM" or event == "CHAT_MSG_COMBAT_FACTION_CHANGE" then
         local message = ...
-        if event == "CHAT_MSG_COMBAT_FACTION_CHANGE" or (ns.IsReadable(message) and type(message) == "string"
+        if event == "CHAT_MSG_COMBAT_FACTION_CHANGE" or (ns.IsText(message)
             and (message:find("standing") or message:find("reputation") or message:find("Friendly")
                 or message:find("Honored") or message:find("Revered") or message:find("Exalted"))) then
             record(event .. " " .. text(message))

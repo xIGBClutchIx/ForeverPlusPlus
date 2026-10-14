@@ -294,7 +294,7 @@ end
 local function findNameLine(data, index, line)
     local entry = data.lines[index + 1]
     local text = entry and entry.leftText
-    if readable(text) and type(text) == "string" and isProfessionName(text, line) then
+    if ns.IsText(text) and isProfessionName(text, line) then
         return index + 1
     end
 end
@@ -307,7 +307,7 @@ local function findRequires(data)
     end
     for i = 2, #lines do
         local text = lines[i] and lines[i].leftText
-        if readable(text) and type(text) == "string" and match(clean(text), REQUIRES) then
+        if ns.IsText(text) and match(clean(text), REQUIRES) then
             return i
         end
     end
@@ -325,7 +325,7 @@ local function restyle(tooltip, job)
         local want = clean(job[3])
         local function drawn(fs)
             local text = fs and fs.GetText and fs:GetText()
-            return readable(text) and type(text) == "string" and clean(text) == want
+            return ns.IsText(text) and clean(text) == want
         end
         if not drawn(fontString) then
             fontString = nil
@@ -368,7 +368,7 @@ local function addNodeLines(tooltip, data)
     end
     local first = data.lines[1]
     local text = first and first.leftText
-    if not (readable(text) and type(text) == "string") then
+    if not ns.IsText(text) then
         return
     end
     text = gsub(text, "|n", "\n")
@@ -393,7 +393,7 @@ local function addNodeLines(tooltip, data)
         -- The game's own "Mining" line under a vein: ours takes its place instead of repeating it.
         for i = 2, #data.lines do
             local other = data.lines[i] and data.lines[i].leftText
-            if readable(other) and type(other) == "string" and isProfessionName(other, node[1]) then
+            if ns.IsText(other) and isProfessionName(other, node[1]) then
                 restyling[tooltip] = { i, node[1], other, nil, node[2] }
                 return
             end
@@ -493,10 +493,8 @@ end
 
 -- Creatures ----------------------------------------------------------------------------------
 
--- Whether a unit value is readable and true. Unit state can be secret; then it counts as no.
-local function yes(value)
-    return readable(value) and not not value
-end
+-- Unit state can be secret; then it counts as no (ns.IsTrue).
+local yes = ns.IsTrue
 
 local function canSkin(unit)
     if yes(UnitIsPlayer(unit)) or yes(UnitPlayerControlled(unit)) then
@@ -522,7 +520,7 @@ local function addSkinLine(tooltip)
         return
     end
     local _, unit = tooltip:GetUnit()
-    if not (readable(unit) and type(unit) == "string") or not canSkin(unit) then
+    if not ns.IsText(unit) or not canSkin(unit) then
         return
     end
     -- Blizzard already says what it needs: recolor that once it's drawn, don't add another.
@@ -589,7 +587,7 @@ end
 -- it isn't a lockbox's requirement line. A box we know counts whatever the skill's name says.
 local function learnLockLine(id, lineData)
     local text = lineData and lineData.leftText
-    if not (readable(text) and type(text) == "string") then
+    if not ns.IsText(text) then
         return nil
     end
     local skill, need = ns.GameData.Requires(ns.Text.Plain(text))

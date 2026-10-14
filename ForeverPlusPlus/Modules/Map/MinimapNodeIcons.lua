@@ -308,7 +308,7 @@ local function readMouseover()
     local list
     for _, line in ipairs(lines) do
         local left = line.leftText
-        if readable(left) and type(left) == "string" and left ~= "" then
+        if ns.IsText(left, true) then
             list = list or {}
             addNames(list, left, lineColor(line))
         end
@@ -830,7 +830,7 @@ local function wantsItem(name)
 end
 
 local function onCastSent(_, unit, target)
-    if unit == "player" and target and readable(target) and type(target) == "string" and wantsItem(target) then
+    if unit == "player" and target and ns.IsText(target) and wantsItem(target) then
         pending, pendingAt = target, GetTime()
     end
 end
@@ -838,7 +838,7 @@ end
 -- The item ID in a loot slot, or nil. Probe: GetLootSlotLink is in Mainline's loot API.
 local function slotItem(slot)
     local link = GetLootSlotLink and GetLootSlotLink(slot)
-    if not (link and readable(link) and type(link) == "string") then
+    if not (link and ns.IsText(link)) then
         return nil
     end
     local id = C_Item.GetItemInfoInstant(link)

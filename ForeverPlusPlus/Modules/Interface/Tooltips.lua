@@ -95,7 +95,7 @@ local leftLine = ns.Text.LeftLine
 local function lineText(data, i)
     local lineData = data.lines[i]
     local text = lineData and lineData.leftText
-    if readable(text) and type(text) == "string" then
+    if ns.IsText(text) then
         return text
     end
 end
@@ -188,7 +188,7 @@ local function tooltipUnit(tooltip)
         return nil
     end
     local _, unit = tooltip:GetUnit()
-    if not (readable(unit) and type(unit) == "string") then
+    if not ns.IsText(unit) then
         return nil
     end
     local exists = UnitExists(unit)

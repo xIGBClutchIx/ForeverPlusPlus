@@ -33,7 +33,7 @@ end
 ---@param guid string?
 ---@return boolean
 function Units.IsFriendGUID(guid)
-    if not (readable(guid) and type(guid) == "string" and guid ~= "") then
+    if not ns.IsText(guid, true) then
         return false
     end
     if C_FriendList and C_FriendList.IsFriend and C_FriendList.IsFriend(guid) then
@@ -48,7 +48,7 @@ end
 ---@param guid string?
 ---@return boolean
 function Units.IsGuildmateGUID(guid)
-    if not (IsGuildMember and readable(guid) and type(guid) == "string" and guid ~= "") then
+    if not (IsGuildMember and ns.IsText(guid, true)) then
         return false
     end
     local mate = IsGuildMember(guid)
@@ -93,7 +93,7 @@ end
 -- By name, for events that give a player's name but no unit (a duel or group invite). Names are
 -- compared without any "-Realm" part, and lowercased.
 local function bare(name)
-    if not (readable(name) and type(name) == "string") then
+    if not ns.IsText(name) then
         return nil
     end
     return (name:match("^([^%-]+)") or name):lower()
@@ -194,7 +194,7 @@ function Units.Title(unit)
     local data = C_TooltipInfo.GetUnit(unit)
     local line = data and data.lines and data.lines[2]
     local text = line and line.leftText
-    if not (readable(text) and type(text) == "string") then
+    if not ns.IsText(text) then
         return nil
     end
     text = text:gsub("^<", ""):gsub(">$", "")

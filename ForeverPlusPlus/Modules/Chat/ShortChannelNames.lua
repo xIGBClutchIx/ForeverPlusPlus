@@ -161,7 +161,7 @@ local function rewrite(text)
 end
 
 local function onMessage(frame, text)
-    if not (ns.IsReadable(text) and type(text) == "string") then
+    if not ns.IsText(text) then
         return
     end
     local short = rewrite(text)

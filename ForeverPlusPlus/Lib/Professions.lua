@@ -114,11 +114,11 @@ local function lineName(line)
         local info = C_TradeSkillUI.GetProfessionInfoBySkillLineID(line)
         name = info and info.professionName
     end
-    if not (name and ns.IsReadable(name) and type(name) == "string" and name ~= "")
+    if not (name and ns.IsText(name, true))
         and C_TradeSkillUI and C_TradeSkillUI.GetTradeSkillDisplayName then
         name = C_TradeSkillUI.GetTradeSkillDisplayName(line)
     end
-    if name and ns.IsReadable(name) and type(name) == "string" and name ~= "" then
+    if name and ns.IsText(name, true) then
         lineNames[line] = name
         return name
     end

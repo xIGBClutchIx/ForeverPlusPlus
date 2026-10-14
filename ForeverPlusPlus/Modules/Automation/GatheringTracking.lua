@@ -110,10 +110,8 @@ local function scan()
     return index, ours, any
 end
 
--- Unit state can be secret; when it is, wait.
-local function yes(value)
-    return not ns.IsReadable(value) or not not value
-end
+-- Unit state can be secret; when it is, wait (ns.IsTrueOrSecret).
+local yes = ns.IsTrueOrSecret
 
 -- Whether casting a tracking spell now would fail or get in the way.
 local function busy()

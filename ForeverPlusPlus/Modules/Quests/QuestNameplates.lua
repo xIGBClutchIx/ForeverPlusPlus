@@ -110,7 +110,7 @@ local function indexObjectives()
         local objectives = info and not info.isHeader and C_QuestLog.GetQuestObjectives(info.questID)
         for _, objective in ipairs(objectives or {}) do
             local text, kind = objective.text, objective.type
-            if readable(text) and readable(kind) and type(text) == "string" and type(kind) == "string" then
+            if ns.IsText(text) and ns.IsText(kind) then
                 text = normalize(text)
                 if #text >= 3 then
                     kinds[text] = kind
@@ -200,7 +200,7 @@ local function scan(unit)
     local objectives, order = {}, {} -- quest and objective text -> its members' progress, in tooltip order
     for _, line in ipairs(data.lines) do
         local text, kind = line.leftText, line.type
-        if not (readable(text) and readable(kind) and type(text) == "string") then
+        if not (ns.IsText(text) and readable(kind)) then
             unknown = true
         elseif titleType and kind == titleType then
             inQuest, mine, quest = true, true, quest + 1

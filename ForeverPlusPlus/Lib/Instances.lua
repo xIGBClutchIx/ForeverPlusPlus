@@ -120,7 +120,7 @@ local function fromFinder()
             local info = { GetLFGDungeonInfo(dungeonID) }
             local name, typeID, subtypeID, minLevel, maxLevel = info[1], info[2], info[3], info[4], info[5]
             local maxRecLevel, expansion, mapID = info[8], info[9], info[22]
-            if ns.IsReadable(name) and type(name) == "string" and name ~= "" and typeID == TYPE_DUNGEON
+            if ns.IsText(name, true) and typeID == TYPE_DUNGEON
                 and (subtypeID == SUBTYPE_DUNGEON or subtypeID == SUBTYPE_RAID)
                 and (expansion == nil or expansion == 0) and type(minLevel) == "number" then
                 local id = type(mapID) == "number" and mapID > 0 and mapID or nil

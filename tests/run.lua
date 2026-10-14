@@ -137,6 +137,18 @@ eq(matches("Press %s to submit", "Press [F1] to submit") ~= nil, true, "format p
 eq(ns.IsReadable(5), true, "readable without issecretvalue")
 game.secret = "secret"
 eq(ns.IsReadable("secret"), false, "secret is unreadable")
+eq(ns.IsText("a"), true, "text")
+eq(ns.IsText(""), true, "empty text")
+eq(ns.IsText("", true), false, "empty text when it must not be")
+eq(ns.IsText(5), false, "a number isn't text")
+eq(ns.IsText(nil), false, "nil isn't text")
+eq(ns.IsText("secret"), false, "secret isn't text")
+eq(ns.IsTrue(true), true, "true is true")
+eq(ns.IsTrue(false), false, "false isn't true")
+eq(ns.IsTrue("secret"), false, "secret isn't surely true")
+eq(ns.IsTrueOrSecret(false), false, "false is off")
+eq(ns.IsTrueOrSecret(nil), false, "nil is off")
+eq(ns.IsTrueOrSecret("secret"), true, "secret may be true")
 game.secret = nil
 
 -- WorldMap --------------------------------------------------------------------------------------
