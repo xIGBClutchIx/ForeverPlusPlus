@@ -2,13 +2,12 @@
 -- what needs work. Record times every call into each module's code (Lib/Profiler.lua) until Stop;
 -- the list shows the heaviest modules first, with their milliseconds a second, their worst single
 -- frame, and how often they ran, beside the game's own numbers for Forever++ as a whole. A module
--- with parts has the AddOn List's +/- and folds open to them, each part with a bar against the
--- module's heaviest part; the heaviest module starts open. Memory can only be read for the whole
--- addon. Nothing is timed until Record, and nothing is built until the page is first shown;
+-- with parts has the AddOn List's +/- and folds open to them; the heaviest module starts open.
+-- Memory can only be read for the whole addon. Nothing is timed until Record, and nothing is built until the page is first shown;
 -- `/fpp profile` opens it.
 local _, ns = ...
 
-local ipairs, format, concat, max = ipairs, string.format, table.concat, math.max
+local ipairs, format, concat = ipairs, string.format, table.concat
 local CreateFrame, C_Timer, GameTooltip = CreateFrame, C_Timer, GameTooltip
 local L = ns.L
 local Profiler = ns.Profiler
@@ -21,15 +20,14 @@ local ROW_HEIGHT = 22 -- a module's row
 local PART_HEIGHT = 18 -- a part's row under it
 local INDENT = 20 -- a part's name sits this far in from its module's
 local TOGGLE = 14 -- the +/- button's size
--- Right edges of the three number columns, in from the list's right edge, and the part bar's.
+-- Right edges of the three number columns, in from the list's right edge.
 local COLUMNS = { -200, -100, -4 }
-local BAR_RIGHT, BAR_WIDTH, BAR_HEIGHT = -290, 90, 8
+local NAME_RIGHT = -290 -- where a name stops, clear of the first column
 local REFRESH = 1 -- seconds between updates while the page is open
 
 local PLUS = "Interface\\Buttons\\UI-PlusButton-Up"
 local MINUS = "Interface\\Buttons\\UI-MinusButton-Up"
 local TOGGLE_HIGHLIGHT = "Interface\\Buttons\\UI-PlusButton-Hilight"
-local BAR = "Interface\\TargetingFrame\\UI-StatusBar"
 
 local ui -- the page's parts, once built
 local ticker
@@ -82,17 +80,6 @@ local function buildRow(row)
     row.name:SetJustifyH("LEFT")
     row.name:SetWordWrap(false)
 
-    -- A part's share of its module's heaviest part, as a gold status bar.
-    row.barBack = row:CreateTexture(nil, "ARTWORK")
-    row.barBack:SetColorTexture(0, 0, 0, 0.6)
-    row.barBack:SetSize(BAR_WIDTH, BAR_HEIGHT)
-    row.barBack:SetPoint("RIGHT", row, "RIGHT", BAR_RIGHT, 0)
-    row.bar = row:CreateTexture(nil, "OVERLAY")
-    row.bar:SetTexture(BAR)
-    row.bar:SetVertexColor(1, 0.82, 0)
-    row.bar:SetHeight(BAR_HEIGHT - 2)
-    row.bar:SetPoint("LEFT", row.barBack, "LEFT", 1, 0)
-
     row.numbers = {}
     for i, x in ipairs(COLUMNS) do
         row.numbers[i] = newNumber(row, x)
@@ -121,7 +108,7 @@ local function buildRow(row)
     end)
 end
 
--- Fills a row from its entry: { kind = "module", "part" or "own", result, most }.
+-- Fills a row from its entry: { kind = "module", "part" or "own", result }.
 local function initRow(row, entry)
     if not row.name then
         buildRow(row)
@@ -141,20 +128,13 @@ local function initRow(row, entry)
 
     row.name:ClearAllPoints()
     row.name:SetPoint("LEFT", row, "LEFT", isModule and TOGGLE + 8 or TOGGLE + 8 + INDENT, 0)
-    row.name:SetPoint("RIGHT", row, "RIGHT", BAR_RIGHT - BAR_WIDTH - 8, 0)
+    row.name:SetPoint("RIGHT", row, "RIGHT", NAME_RIGHT, 0)
     -- Gold module names like Settings' labels; parts in white, and what's besides them in gray.
     row.name:SetFontObject(isModule and "GameFontNormal" or "GameFontHighlightSmall")
     row.name:SetText(entry.kind == "own" and L.PROFILER_OWN or nameOf(result.key))
     local nameColor = isModule and NORMAL_FONT_COLOR
         or entry.kind == "own" and GRAY_FONT_COLOR or HIGHLIGHT_FONT_COLOR
     row.name:SetTextColor(nameColor.r, nameColor.g, nameColor.b)
-
-    local barShown = not isModule and not result.counted
-    row.barBack:SetShown(barShown)
-    row.bar:SetShown(barShown and result.total > 0)
-    if barShown and result.total > 0 then
-        row.bar:SetWidth(max(1, (BAR_WIDTH - 2) * result.total / entry.most))
-    end
 
     local numbers = row.numbers
     if result.counted then
@@ -178,19 +158,11 @@ local function entries(results)
     for _, result in ipairs(results) do
         list[#list + 1] = { kind = "module", result = result }
         if result.parts and open[result.key] then
-            local most = 0
             for _, part in ipairs(result.parts) do
-                most = max(most, part.total)
+                list[#list + 1] = { kind = "part", result = part }
             end
             if result.own then
-                most = max(most, result.own.total)
-            end
-            most = max(most, 1e-9)
-            for _, part in ipairs(result.parts) do
-                list[#list + 1] = { kind = "part", result = part, most = most }
-            end
-            if result.own then
-                list[#list + 1] = { kind = "own", result = result.own, most = most }
+                list[#list + 1] = { kind = "own", result = result.own }
             end
         end
     end
