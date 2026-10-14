@@ -710,7 +710,8 @@ local function addOptionRow(view, module, option, byKey, done)
     if hasAtlas("Options_List_Active") then
         highlight:SetAtlas("Options_List_Active")
     else
-        highlight:SetColorTexture(1, 0.82, 0, 0.15)
+        local r, g, b = NORMAL_FONT_COLOR:GetRGB()
+        highlight:SetColorTexture(r, g, b, 0.15)
     end
     highlight:Hide()
     view.found[#view.found + 1] = { row = row, highlight = highlight,

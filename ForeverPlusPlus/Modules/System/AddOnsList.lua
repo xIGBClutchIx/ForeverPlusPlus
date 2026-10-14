@@ -204,7 +204,7 @@ end
 local setsDropdown
 
 local function trim(text)
-    return match(text or "", "^%s*(.-)%s*$")
+    return strtrim(text or "")
 end
 
 local function isOn(index, character)

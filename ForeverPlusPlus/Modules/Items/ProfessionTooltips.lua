@@ -256,7 +256,7 @@ local REQUIRES = "^" .. ns.Text.FormatPattern(ITEM_MIN_SKILL or L.PROFTOOLTIPS_R
 
 -- An object's name without the color codes, icons, and spaces a tooltip may wrap it in.
 local function clean(text)
-    return match(ns.Text.Plain(text), "^%s*(.-)%s*$")
+    return strtrim(ns.Text.Plain(text))
 end
 
 local leftLine = ns.Text.LeftLine

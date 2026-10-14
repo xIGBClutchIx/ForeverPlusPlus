@@ -120,10 +120,11 @@ end
 -- Gold fading out to the right. Probe: SetGradient with colors is Mainline's; without it, a faint
 -- gold line like the one between the list and the pane.
 local function fadeGold(texture)
+    local r, g, b = NORMAL_FONT_COLOR:GetRGB()
     texture:SetColorTexture(1, 1, 1, 1)
     if not (CreateColor and texture.SetGradient and pcall(texture.SetGradient, texture,
-        "HORIZONTAL", CreateColor(1, 0.82, 0, 0.45), CreateColor(1, 0.82, 0, 0))) then
-        texture:SetColorTexture(1, 0.82, 0, 0.25)
+        "HORIZONTAL", CreateColor(r, g, b, 0.45), CreateColor(r, g, b, 0))) then
+        texture:SetColorTexture(r, g, b, 0.25)
     end
 end
 

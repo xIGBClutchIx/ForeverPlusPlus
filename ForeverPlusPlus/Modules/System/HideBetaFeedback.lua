@@ -61,9 +61,11 @@ local function isBlank(text)
     return text == " " or text == ""
 end
 
-local function blank(name, i)
-    _G[name .. "TextLeft" .. i]:SetText("")
-    local right = _G[name .. "TextRight" .. i]
+local function blank(tooltip, i)
+    local left, right = ns.Text.LeftLine(tooltip, i), ns.Text.RightLine(tooltip, i)
+    if left then
+        left:SetText("")
+    end
     if right then
         right:SetText("")
     end
@@ -75,19 +77,19 @@ local function scrub(tooltip)
     if busy or not (module.enabled and module.db.tooltip) or #patterns == 0 then
         return
     end
-    local name = tooltip.GetName and tooltip:GetName()
-    if not name or not tooltip.NumLines then
+    local LeftLine = ns.Text.LeftLine
+    if not tooltip.NumLines then
         return
     end
     local found = false
     for i = tooltip:NumLines(), 1, -1 do
-        local line = _G[name .. "TextLeft" .. i]
+        local line = LeftLine(tooltip, i)
         if line and isReminder(line:GetText()) then
-            blank(name, i)
-            local above = _G[name .. "TextLeft" .. (i - 1)]
+            blank(tooltip, i)
+            local above = LeftLine(tooltip, i - 1)
             local text = above and above:GetText()
             if ns.IsReadable(text) and isBlank(text) then
-                blank(name, i - 1)
+                blank(tooltip, i - 1)
             end
             found = true
         end
@@ -99,9 +101,9 @@ local function scrub(tooltip)
         -- If showing it again made the reporter add its line again, blank that too, without
         -- another Show.
         for i = tooltip:NumLines(), 1, -1 do
-            local line = _G[name .. "TextLeft" .. i]
+            local line = LeftLine(tooltip, i)
             if line and isReminder(line:GetText()) then
-                blank(name, i)
+                blank(tooltip, i)
             end
         end
     end

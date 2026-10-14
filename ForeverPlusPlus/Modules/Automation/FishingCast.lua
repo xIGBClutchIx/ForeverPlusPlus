@@ -10,7 +10,6 @@ local GetTime, InCombatLockdown, CreateFrame = GetTime, InCombatLockdown, Create
 local SetOverrideBindingSpell, ClearOverrideBindings = SetOverrideBindingSpell, ClearOverrideBindings
 local GetInventoryItemID, UnitExists, GetUnitSpeed = GetInventoryItemID, UnitExists, GetUnitSpeed
 local C_Item, C_Spell, C_Timer, WorldFrame = C_Item, C_Spell, C_Timer, WorldFrame
-local UIErrorsFrame = UIErrorsFrame
 local GetMouseFoci, GetMouseFocus, UnitChannelInfo = GetMouseFoci, GetMouseFocus, UnitChannelInfo
 local C_CVar, tonumber, tostring, next, select = C_CVar, tonumber, tostring, next, select
 
@@ -215,9 +214,8 @@ function module:OnEnable()
         end
         lastClick = 0
         -- Combat with a pole still in hand: one red line where Blizzard's own errors show.
-        if module.db.combatWarning and poleEquipped() and UIErrorsFrame then
-            local red = ns.Colors.RED
-            UIErrorsFrame:AddMessage(L.FISHINGCAST_COMBAT_TEXT, red[1], red[2], red[3])
+        if module.db.combatWarning and poleEquipped() then
+            ns.Frames.ErrorMessage(L.FISHINGCAST_COMBAT_TEXT)
         end
     end)
 end

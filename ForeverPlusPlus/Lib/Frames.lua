@@ -36,19 +36,27 @@ function Frames.HasTemplate(name)
         or false
 end
 
----A frame in the box Blizzard draws tooltips in, or the older tooltip backdrop where this client
----doesn't have the template.
+---A frame in one of Blizzard's box templates (a tooltip's, a dialog's border), or the older
+---tooltip backdrop where this client doesn't have the template.
 ---@param parent table
+---@param template string
 ---@return table
-function Frames.TooltipBox(parent)
-    local hasTemplate = Frames.HasTemplate("TooltipBackdropTemplate")
-    local box = CreateFrame("Frame", nil, parent,
-        hasTemplate and "TooltipBackdropTemplate" or "BackdropTemplate")
+function Frames.TemplateBox(parent, template)
+    local hasTemplate = Frames.HasTemplate(template)
+    local box = CreateFrame("Frame", nil, parent, hasTemplate and template or "BackdropTemplate")
     if not hasTemplate and box.SetBackdrop and BACKDROP_TOOLTIP_16_16_5555 then
         box:SetBackdrop(BACKDROP_TOOLTIP_16_16_5555)
         box:SetBackdropColor(0, 0, 0, 0.8)
     end
     return box
+end
+
+---A frame in the box Blizzard draws tooltips in, or the older tooltip backdrop where this client
+---doesn't have the template.
+---@param parent table
+---@return table
+function Frames.TooltipBox(parent)
+    return Frames.TemplateBox(parent, "TooltipBackdropTemplate")
 end
 
 ---Lets Escape close one of our windows, the way Blizzard's own windows close: its name goes in

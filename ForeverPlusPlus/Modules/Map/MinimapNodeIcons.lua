@@ -291,7 +291,7 @@ local function addNames(list, text, r, g, b)
             cg = tonumber(hex:sub(3, 4), 16) / 255
             cb = tonumber(hex:sub(5, 6), 16) / 255
         end
-        local name = match(plain(row), "^%s*(.-)%s*$")
+        local name = strtrim(plain(row))
         if name ~= "" then
             list[#list + 1] = { name = name, gray = isGray(cr, cg, cb), r = cr, g = cg, b = cb }
         end

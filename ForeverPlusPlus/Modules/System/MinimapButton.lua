@@ -9,7 +9,6 @@ local _, ns = ...
 local format, type, tremove, sort = string.format, type, table.remove, table.sort
 local cos, sin, rad, deg, atan2, floor = math.cos, math.sin, math.rad, math.deg, math.atan2, math.floor
 local ipairs, CreateFrame, GetCursorPosition = ipairs, CreateFrame, GetCursorPosition
-local C_XMLUtil = C_XMLUtil
 
 local L = ns.L
 local Errors = ns.Errors
@@ -220,8 +219,7 @@ local function refresh()
         button.count:SetText(count > 0 and count or "")
         -- Blizzard's NEW label, as on new things in its own menus, until the About page is seen.
         local new = ns.WelcomePending()
-        if new and not button.new and C_XMLUtil and C_XMLUtil.GetTemplateInfo
-            and C_XMLUtil.GetTemplateInfo("NewFeatureLabelTemplate") then
+        if new and not button.new and ns.Frames.HasTemplate("NewFeatureLabelTemplate") then
             button.new = CreateFrame("Frame", nil, button, "NewFeatureLabelTemplate")
             button.new:SetPoint("CENTER", button, "TOP", 0, -2)
         end

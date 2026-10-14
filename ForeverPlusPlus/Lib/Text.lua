@@ -27,6 +27,15 @@ function Text.LeftLine(tooltip, i)
     return type(name) == "string" and _G[name .. "TextLeft" .. i] or nil
 end
 
+---A tooltip's right font string on line `i`, or nil for tooltips without named lines.
+---@param tooltip table
+---@param i number
+---@return table?
+function Text.RightLine(tooltip, i)
+    local name = tooltip.GetName and tooltip:GetName()
+    return type(name) == "string" and _G[name .. "TextRight" .. i] or nil
+end
+
 ---A number of seconds for a slider label: "1 Second", "5 Seconds".
 ---@param seconds number
 ---@return string

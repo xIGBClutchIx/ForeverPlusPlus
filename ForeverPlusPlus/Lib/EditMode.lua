@@ -21,7 +21,7 @@ local EditMode = {}
 ns.EditMode = EditMode
 
 local SNAP = 10 -- how close, in pixels, before a frame snaps to a line
-local GOLD = { 1, 0.82, 0 }
+local GOLD = { NORMAL_FONT_COLOR:GetRGB() }
 
 local registered = {} -- frame -> { label, onMove, onChange, scale, reset, selection }
 -- Frames taken off (Unregister) -> their info, so registering one again reuses its selection box
@@ -216,11 +216,11 @@ local KIT_PARTS = { "Corner", "Center" }
 
 -- Whether a look's atlases are there (the corners and the fill; the edges follow them).
 local function hasKit(kit)
-    if not (NineSliceUtil and NineSliceUtil.ApplyLayout and C_Texture and C_Texture.GetAtlasInfo) then
+    if not (NineSliceUtil and NineSliceUtil.ApplyLayout) then
         return false
     end
     for _, part in pairs(KIT_PARTS) do
-        if not C_Texture.GetAtlasInfo(kit .. "-NineSlice-" .. part) then
+        if not ns.Frames.HasAtlas(kit .. "-NineSlice-" .. part) then
             return false
         end
     end
@@ -347,13 +347,7 @@ local function newSlider(parent)
 end
 
 local function newDialog()
-    local hasBorder = ns.Frames.HasTemplate("DialogBorderTranslucentTemplate")
-    local frame = CreateFrame("Frame", nil, UIParent, hasBorder and "DialogBorderTranslucentTemplate"
-        or "BackdropTemplate")
-    if not hasBorder and frame.SetBackdrop and BACKDROP_TOOLTIP_16_16_5555 then
-        frame:SetBackdrop(BACKDROP_TOOLTIP_16_16_5555)
-        frame:SetBackdropColor(0, 0, 0, 0.8)
-    end
+    local frame = ns.Frames.TemplateBox(UIParent, "DialogBorderTranslucentTemplate")
     frame:SetFrameStrata("DIALOG")
     frame:SetSize(320, 130)
     frame:SetClampedToScreen(true)

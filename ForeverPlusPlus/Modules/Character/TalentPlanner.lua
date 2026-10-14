@@ -697,7 +697,7 @@ local function simpleTooltip(owner, title, text)
 end
 
 local function trim(text)
-    return (text or ""):match("^%s*(.-)%s*$")
+    return strtrim(text or "")
 end
 
 -- Adds a plan to this character's list and picks it.
