@@ -542,9 +542,10 @@ local CATEGORIES = {
 }
 sort(CATEGORIES, function(a, b) return strlower(a[2]) < strlower(b[2]) end)
 CATEGORIES[#CATEGORIES + 1] = { "other", L.CATEGORY_OTHER }
-local CATEGORY_NAMES = {}
-for _, group in ipairs(CATEGORIES) do
+local CATEGORY_NAMES, CATEGORY_RANKS = {}, {} -- by `category`: its label, its place in that order
+for i, group in ipairs(CATEGORIES) do
     CATEGORY_NAMES[group[1]] = group[2]
+    CATEGORY_RANKS[group[1]] = i
 end
 
 local function categoryOf(module)
@@ -1730,15 +1731,21 @@ end
 -- `{ entry, name, text }`: the entry from Changelog.lua and what shows of it, `name` in gold
 -- before `text`. As written, the groups are its sections and the names its modules'. With
 -- `byModule`, the groups are its modules', and the names the sections': first those of no one
--- module (General for entries without a name, then Settings and Commands), marked `apart`, then
--- the modules' in alphabetical order.
+-- module (General for entries without a name, then Settings), marked `apart`, then the modules'
+-- by their `category` in the Modules page's order, and alphabetical within it. A name that's no
+-- module's title now (a module since renamed or removed) goes under Other.
 local function noteGroups(release, byModule)
     local groups, byName = {}, {}
-    local apart = {
-        [L.CHANGELOG_GENERAL] = 1,
-        [L.CHANGELOG_SETTINGS] = 2,
-        [L.CHANGELOG_COMMANDS] = 3,
-    }
+    local apart = { [L.CHANGELOG_GENERAL] = 1, [L.CHANGELOG_SETTINGS] = 2 }
+    local categories -- module title -> its category, made only with byModule
+    if byModule then
+        categories = {}
+        for _, module in pairs(ns.modules) do
+            if module.title then
+                categories[module.title] = categoryOf(module)
+            end
+        end
+    end
     for _, section in ipairs(release.sections) do
         local items = {}
         for _, entry in ipairs(section[2]) do
@@ -1748,6 +1755,9 @@ local function noteGroups(release, byModule)
                 local group = byName[heading]
                 if not group then
                     group = { heading, {}, apart = apart[heading] }
+                    if not group.apart then
+                        group.category = categories[heading] or "other"
+                    end
                     byName[heading] = group
                     groups[#groups + 1] = group
                 end
@@ -1762,9 +1772,12 @@ local function noteGroups(release, byModule)
     end
     if byModule then
         sort(groups, function(a, b)
-            local x, y = a.apart or 4, b.apart or 4
+            local x, y = a.apart or 3, b.apart or 3 -- the modules' after General and Settings
             if x ~= y then
                 return x < y
+            end
+            if a.category ~= b.category then
+                return CATEGORY_RANKS[a.category] < CATEGORY_RANKS[b.category]
             end
             return strlower(a[1]) < strlower(b[1])
         end)
@@ -1807,8 +1820,8 @@ end
 -- search finds, then each section's heading in gold over a fading gold line, and its entries after
 -- a dash, their wrapped lines lined up after it and a module's name in gold. Only the entries the
 -- search finds show, under their sections' headings. With `byModule`, the headings are the
--- modules' and the names in gold the sections' (noteGroups), with a gray line under the ones of
--- no one module. `view.search(text)` lays it out for a search (lowercased, nil for none), and
+-- modules' and the names in gold the sections' (noteGroups), with each category's name and a
+-- gray line above its modules. `view.search(text)` lays it out for a search (lowercased, nil for none), and
 -- `view.update` keeps its NEW label.
 local function buildNotes(content, width, release, byModule)
     local view = newStack(content, width, 0)
@@ -1848,30 +1861,33 @@ local function buildNotes(content, width, release, byModule)
     end
 
     local groups = noteGroups(release, byModule)
-    for g, group in ipairs(groups) do
+    local previous
+    for _, group in ipairs(groups) do
         local items = group[2]
-        -- A gray line between the groups of no one module and the modules', while both show.
-        if not group.apart and groups[g - 1] and groups[g - 1].apart then
+        -- Before each category's modules, its name in gray and a gray line after it to the right
+        -- edge, while the search finds something in one of them.
+        local category = group.category
+        if category and category ~= previous then
             local separator = CreateFrame("Frame", nil, view)
-            separator:SetSize(width, 1)
+            local label = separator:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+            label:SetPoint("LEFT", 4, 0)
+            label:SetText(CATEGORY_NAMES[category])
             local line = separator:CreateTexture(nil, "ARTWORK")
-            line:SetPoint("TOPLEFT", 4, 0)
-            line:SetSize(width - 8, 1)
+            line:SetPoint("LEFT", label, "RIGHT", 6, 0)
+            line:SetPoint("RIGHT", -4, 0)
+            line:SetHeight(1)
             line:SetColorTexture(0.5, 0.5, 0.5, 0.5)
+            separator:SetSize(width, label:GetStringHeight())
             addEntry(view, separator, function()
-                local above, below = false, false
                 for _, other in ipairs(groups) do
-                    if anyMatch(other[2]) then
-                        if other.apart then
-                            above = true
-                        else
-                            below = true
-                        end
+                    if other.category == category and anyMatch(other[2]) then
+                        return true
                     end
                 end
-                return above and below
+                return false
             end, 18)
         end
+        previous = category
         local top = CreateFrame("Frame", nil, view)
         top:SetWidth(width)
         local heading = top:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
