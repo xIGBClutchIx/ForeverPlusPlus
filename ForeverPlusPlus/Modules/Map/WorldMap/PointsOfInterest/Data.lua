@@ -2,7 +2,9 @@
 -- down the zone map, as the game's /way coordinates. Leatrix Maps' point list was the reference
 -- for them; Forever's flight masters, boats, and zeppelins are worked out from the client's own
 -- tables for build 70009 (TaxiNodes, and the stops of TaxiPathNode's transport paths, placed with
--- UiMapAssignment), which agree with the Classic ones here to 0.5%. Each point is one of:
+-- UiMapAssignment), which agree with the Classic ones here to 0.5%. The flight points are a seed:
+-- where a flight master's map puts one wins, and ones it lists that aren't here are added (see
+-- learnFlights). Each point is one of:
 --   { "dungeon" or "raid", x, y, instance key }
 --   { "flight", x, y, faction, place }
 --   { "ship" or "zeppelin", x, y, faction, destination place, destination map ID (or this map),

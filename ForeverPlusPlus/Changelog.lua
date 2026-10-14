@@ -78,6 +78,10 @@ ns.changelog = {
                 { L.WORLDMAP_TITLE, "Dungeon levels come from the game's dungeon finder, and "
                     .. "Forever dungeons it lists that Forever++ didn't know get their names and "
                     .. "levels in map tooltips." },
+                { L.WORLDMAP_TITLE, "Zone Info shows the game's own level range for a zone when "
+                    .. "it has one. Points of Interest places flight masters where a flight "
+                    .. "master's map shows them and adds ones its list lacks, and Unexplored Areas "
+                    .. "adds areas its art lacks once one of your characters explores them." },
                 { L.QUESTTRACKER_TITLE, "Font Size is gone: Edit Mode's Text Size sets the "
                     .. "tracker's size." },
                 { L.PROFTOOLTIPS_TITLE, "On a lockbox whose tooltip already says what "

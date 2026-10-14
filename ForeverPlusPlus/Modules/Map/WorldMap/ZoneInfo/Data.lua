@@ -2,7 +2,8 @@
 -- the reference for level ranges and fishing, and the herbs and ores are where Classic has them
 -- (a few rare spawns left out). Forever may move things; fix them here. Each zone is:
 --   { lowest level, highest level, fish = skill, fishHigh = skill, herbs = { ... }, ores = { ... } }
--- Cities have no levels. `fishHigh` is for zones whose coast needs more than their inland water.
+-- Cities have no levels. For a zone that has them, the game's own level range
+-- (C_Map.GetMapLevels) wins when it gives one. `fishHigh` is for zones whose coast needs more than their inland water.
 -- Herbs and ores are item IDs, from the lists below. Who holds each zone (`side`) and its
 -- dungeons (`dungeons`) are added at the end.
 local _, ns = ...
@@ -237,3 +238,6 @@ local DUNGEONS = {
 for mapID, dungeons in pairs(DUNGEONS) do
     internal.zones[mapID].dungeons = dungeons
 end
+
+-- So Self Test lists a zone's map ID the client no longer has.
+ns.GameData.New("zoneInfoZones", internal.zones, { kind = "map", label = "Zone Info zones" })

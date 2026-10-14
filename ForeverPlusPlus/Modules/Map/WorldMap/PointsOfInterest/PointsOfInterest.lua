@@ -300,6 +300,9 @@ end
 -- The map list can't say one is learned: on Forever (2026-09-28) it lists the whole continent
 -- for a zone (36 for Silverpine) and calls ones never visited discovered.
 local function learned(point)
+    if point.node and seenLearned()[point.node] then
+        return true
+    end
     local node = nodeOf(point)
     if not (node and node.nodeID) then
         return nil
@@ -460,6 +463,157 @@ local function translate(fromMap, toMap, x, y)
     return ns.MapPins.Translate(city.zone, toMap, x, y)
 end
 
+-- Flight points a flight master showed --------------------------------------------------------
+-- Data.lua's flight points are the seed (build 70009). A flight master's map lists every flight
+-- point of the continent with its place, so each one seen is saved for the account by node ID:
+-- { map, x, y, faction, name }, x and y in percent on `map`. One on the spot of Data.lua's takes
+-- its place, and one Data.lua lacks (a patch's new flight point) is added.
+local FLIGHTS = ns.GameData.New("flightPoints", {}, { label = "Flight points" })
+
+-- How close (in percent of the flight master's map, a continent) a flight point the game lists is
+-- to one of Data.lua's for the two to be the same.
+local SAME_NODE = 0.6
+
+-- Mainline's Enum.FlightPathFaction (Neutral 0, Horde 1, Alliance 2) as our letters. Probe:
+-- whether Forever's taxi nodes have `faction` is Unverified; without it, the player's side.
+local function nodeFaction(node)
+    local enum = Enum.FlightPathFaction
+    local faction = node.faction
+    if enum and faction ~= nil then
+        if faction == enum.Horde then
+            return "H"
+        elseif faction == enum.Alliance then
+            return "A"
+        elseif faction == enum.Neutral then
+            return "N"
+        end
+    end
+    return ns.WorldMap.PlayerSide()
+end
+
+-- Whether flight points of these two factions can be the same one.
+local function sameSide(a, b)
+    return not a or not b or a == b or a == "N" or b == "N"
+end
+
+local function percent(value)
+    return floor(value * 1000 + 0.5) / 10
+end
+
+-- Data.lua's flight point nearest a spot on the flight master's map: its map and point.
+local function seedFlightNear(taxiMap, x, y, faction)
+    local bestMap, best, bestDistance
+    for fromMap, points in pairs(internal.points) do
+        for _, point in ipairs(points) do
+            if point[1] == "flight" and sameSide(point[4], faction) then
+                local px, py = translate(fromMap, taxiMap, point[2] / 100, point[3] / 100)
+                local distance = px and abs(px - x) + abs(py - y)
+                if distance and distance * 100 < SAME_NODE
+                    and (not bestDistance or distance < bestDistance) then
+                    bestMap, best, bestDistance = fromMap, point, distance
+                end
+            end
+        end
+    end
+    return bestMap, best
+end
+
+-- At a flight master, saves where each flight point on its map is: on the map of Data.lua's flight
+-- point on the same spot, or else on the zone the game says the spot is in.
+local function learnFlights()
+    if not (C_TaxiMap and C_TaxiMap.GetAllTaxiNodes and GetTaxiMapID) then
+        return
+    end
+    local taxiMap = GetTaxiMapID()
+    local changed = false
+    for _, node in ipairs(taxiMap and C_TaxiMap.GetAllTaxiNodes(taxiMap) or {}) do
+        local x, y
+        if node.nodeID and node.position and not node.isMapLayerTransition then
+            x, y = node.position:GetXY()
+        end
+        if x and y and ns.IsReadable(x) and ns.IsReadable(y) then
+            local faction = nodeFaction(node)
+            local mapID = seedFlightNear(taxiMap, x, y, faction)
+            if not mapID and C_Map.GetMapInfoAtPosition then
+                local info = C_Map.GetMapInfoAtPosition(taxiMap, x, y)
+                mapID = info and info.mapID ~= taxiMap and info.mapID
+            end
+            local zx, zy
+            if mapID then
+                zx, zy = ns.MapPins.Translate(taxiMap, mapID, x, y)
+            end
+            if zx and FLIGHTS:Learn(node.nodeID, { map = mapID, x = percent(zx), y = percent(zy),
+                faction = faction, name = node.name }) then
+                changed = true
+            end
+        end
+    end
+    if changed then
+        internal.flightsChanged = true
+    end
+end
+
+-- Each map's points: Data.lua's, with the saved flight points in. Made again once something new
+-- is saved.
+local merged, mergedCount = {}, -1
+
+local function mergeFlights()
+    merged = {}
+    local learnedOn = {} -- map ID -> { node ID -> saved flight point }
+    for nodeID, node in FLIGHTS:Pairs() do
+        if type(node) == "table" and node.map and node.x and node.y then
+            learnedOn[node.map] = learnedOn[node.map] or {}
+            learnedOn[node.map][nodeID] = node
+        end
+    end
+    for mapID, points in pairs(internal.points) do
+        local list, nodes = {}, learnedOn[mapID] or {}
+        for _, point in ipairs(points) do
+            if point[1] == "flight" then
+                local bestID, bestDistance
+                for nodeID, node in pairs(nodes) do
+                    local distance = abs(node.x - point[2]) + abs(node.y - point[3])
+                    if sameSide(point[4], node.faction) and abs(node.x - point[2]) < NEAR
+                        and abs(node.y - point[3]) < NEAR
+                        and (not bestDistance or distance < bestDistance) then
+                        bestID, bestDistance = nodeID, distance
+                    end
+                end
+                if bestID then
+                    local node = nodes[bestID]
+                    nodes[bestID] = nil
+                    point = { "flight", node.x, node.y, point[4], point[5], node = bestID }
+                end
+            end
+            list[#list + 1] = point
+        end
+        merged[mapID] = list
+    end
+    -- The ones left are flight points Data.lua doesn't have.
+    for mapID, nodes in pairs(learnedOn) do
+        for nodeID, node in pairs(nodes) do
+            local list = merged[mapID] or {}
+            merged[mapID] = list
+            list[#list + 1] = { "flight", node.x, node.y, node.faction or "N", node.name or "",
+                node = nodeID }
+        end
+    end
+    mergedCount = FLIGHTS:Learned()
+end
+
+-- Every map's points, by map ID.
+local function allPoints()
+    if internal.flightsChanged or mergedCount ~= FLIGHTS:Learned() then
+        internal.flightsChanged = false
+        mergeFlights()
+    end
+    return merged
+end
+
+local function pointsOf(mapID)
+    return allPoints()[mapID] or {}
+end
+
 -- A capital's icon, in the middle of its own map.
 local function capitalPoint(cityMap)
     return { "capital", 50, 50, cityMap }
@@ -615,7 +769,7 @@ end
 local function fillZone(mapID, add)
     readTaxiNodes(mapID)
     local listed = {} -- this map's dungeons and raids in Data.lua, shown or not
-    for _, point in ipairs(internal.points[mapID] or {}) do
+    for _, point in ipairs(pointsOf(mapID)) do
         if isInstance(point) then
             listed[#listed + 1] = point
         end
@@ -637,7 +791,7 @@ end
 -- the game can place on it.
 local function fillContinent(mapID, add)
     local flights = shows(KINDS.flight, true)
-    for fromMap, points in pairs(internal.points) do
+    for fromMap, points in pairs(allPoints()) do
         if flights then
             readTaxiNodes(fromMap)
         end
@@ -863,7 +1017,10 @@ function module:OnEnable()
     ns.MapPins.OnAcquire(onAcquire)
     ns.MapPins.RefreshMap() -- hide Blizzard's city icons already on it
     -- A flight master's map: which flight points are learned, and new ones learned there.
-    self:On("TAXIMAP_OPENED", rememberLearned)
+    self:On("TAXIMAP_OPENED", function()
+        rememberLearned()
+        learnFlights()
+    end)
     self:On("TAXIMAP_CLOSED", function() layer:Refresh() end)
     -- Only Skyborne can find ley lines.
     if ownKind(true) then

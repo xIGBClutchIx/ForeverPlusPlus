@@ -8,7 +8,7 @@ local _, ns = ...
 local pairs, ipairs, tostring, format, concat = pairs, ipairs, tostring, string.format, table.concat
 local hooksecurefunc, MAP_AREA_LABEL_TYPE = hooksecurefunc, MAP_AREA_LABEL_TYPE
 local min, max, GetLocale = math.min, math.max, GetLocale
-local unpack, ceil = unpack, math.ceil
+local unpack, ceil, type = unpack, math.ceil, type
 local CreateFrame, C_Map, C_Item = CreateFrame, C_Map, C_Item
 
 local L = ns.L
@@ -156,6 +156,21 @@ local function levelText(low, high)
     return color and colored(color, text) or text
 end
 
+-- A zone's level range: the game's (C_Map.GetMapLevels), else Data.lua's. Cities and Moonglade
+-- have none in Data.lua and get none. Probe: whether Forever fills it for its zones is
+-- Unverified, so anything but a range from 1 to 60 counts as none.
+local function levelsOf(mapID, zone)
+    if not zone[1] then
+        return nil
+    end
+    local low, high = C_Map.GetMapLevels and C_Map.GetMapLevels(mapID)
+    if type(low) == "number" and type(high) == "number" and low >= 1 and high >= low
+        and high <= 60 then
+        return low, high
+    end
+    return zone[1], zone[2]
+end
+
 -- Whether the panel is in a right corner, where everything is mirrored: the icons come after
 -- their text and the text lines up on the right.
 local function onRight()
@@ -212,7 +227,7 @@ end
 
 -- Fishing, whether or not the player has it, and Skinning, from the zone's level range, when the
 -- player has it; together in one row.
-local function skillsRow(zone)
+local function skillsRow(zone, low, high)
     local db, parts = module.db, {}
     if visible(db.fishing) and zone.fish then
         local rank, name, own = Professions.Rank(Professions.FISHING)
@@ -220,10 +235,10 @@ local function skillsRow(zone)
             name or L.ZONEINFO_FISHING_NAME, range(rank, zone.fish, zone.fishHigh, true))))
     end
     local rank, name, own = Professions.Rank(Professions.SKINNING)
-    if shows("skinning", rank) and zone[1] then
+    if shows("skinning", rank) and low then
         parts[#parts + 1] = icon(Professions.SKINNING, own, NoBreak(format(L.ZONEINFO_SKILL,
-            name or L.ZONEINFO_SKINNING_NAME, range(rank, Professions.SkinningNeed(zone[1]),
-                Professions.SkinningNeed(zone[2])))))
+            name or L.ZONEINFO_SKINNING_NAME, range(rank, Professions.SkinningNeed(low),
+                Professions.SkinningNeed(high)))))
     end
     if #parts > 0 then
         return concat(parts, "    ")
@@ -302,7 +317,7 @@ end
 
 -- The rows under the zone's name, in order. The zone's dungeons and raids are a row each, as
 -- Points of Interest lists them, so a row never wraps through a name or a level range.
-local function rows(zone)
+local function rows(zone, low, high)
     local list = {}
     local function add(text, indent, gap)
         if text then
@@ -313,7 +328,7 @@ local function rows(zone)
         local color, text = territory(zone)
         add(color and colored(color, text))
     end
-    add(skillsRow(zone))
+    add(skillsRow(zone, low, high))
     for _, gather in ipairs({
         { "herbs", Professions.HERBALISM, zone.herbs, internal.herbs },
         { "ore", Professions.MINING, zone.ores, internal.ores },
@@ -462,10 +477,11 @@ local function draw(mapID)
             title = colored(color, title)
         end
     end
-    if module.db.levels and zone[1] then
-        title = format(L.ZONEINFO_TITLE_LEVELS, title, levelText(zone[1], zone[2]))
+    local low, high = levelsOf(mapID, zone)
+    if module.db.levels and low then
+        title = format(L.ZONEINFO_TITLE_LEVELS, title, levelText(low, high))
     end
-    local list = rows(zone)
+    local list = rows(zone, low, high)
     -- As wide as the longest line, up to MAX_WIDTH; longer lines wrap.
     panel.title:SetWidth(0)
     panel.title:SetText(title)

@@ -5,7 +5,7 @@
 -- frame, under a data provider of our own, on each map's canvas.
 local _, ns = ...
 
-local ceil, ipairs, pairs, setmetatable = math.ceil, ipairs, pairs, setmetatable
+local ceil, ipairs, pairs, setmetatable, type = math.ceil, ipairs, pairs, setmetatable, type
 local CreateFrame, C_Map, C_MapExplorationInfo = CreateFrame, C_Map, C_MapExplorationInfo
 
 local L = ns.L
@@ -81,6 +81,62 @@ local function areaKey(width, height, x, y)
     return ((width * 2048 + height) * 2048 + x) * 2048 + y
 end
 
+-- Areas Data.lua lacks (a patch's new or redrawn ones), saved for the account by map art ID as the
+-- game listed them for a character who had explored them, so every other character sees them
+-- unexplored too. Each is an area as in Data.lua.
+local LEARNED = ns.GameData.New("unexploredAreas", {}, { label = "Unexplored areas" })
+
+-- Data.lua's areas of a map art ID with the saved ones after them.
+local function areasOf(artID)
+    local seed, learned = internal.overlays[artID], LEARNED:Get(artID)
+    if not learned then
+        return seed or {}
+    end
+    local all = {}
+    for _, area in ipairs(seed or {}) do
+        all[#all + 1] = area
+    end
+    for _, area in ipairs(learned) do
+        all[#all + 1] = area
+    end
+    return all
+end
+
+-- Saves the explored areas the game lists that neither Data.lua nor an earlier save has.
+local function learn(artID, textures)
+    if not textures or #textures == 0 then
+        return
+    end
+    local known = {}
+    for _, area in ipairs(areasOf(artID)) do
+        known[areaKey(area[1], area[2], area[3], area[4])] = true
+    end
+    local added = {}
+    for _, info in ipairs(textures) do
+        local width, height, x, y = info.textureWidth, info.textureHeight, info.offsetX, info.offsetY
+        local files = info.fileDataIDs
+        if width and height and x and y and type(files) == "table" and #files > 0
+            and not info.isShownByMouseOver and not known[areaKey(width, height, x, y)] then
+            local area = { width, height, x, y }
+            for _, file in ipairs(files) do
+                area[#area + 1] = file
+            end
+            added[#added + 1] = area
+            known[areaKey(width, height, x, y)] = true
+        end
+    end
+    if #added > 0 then
+        local list = {}
+        for _, area in ipairs(LEARNED:Get(artID) or {}) do
+            list[#list + 1] = area
+        end
+        for _, area in ipairs(added) do
+            list[#list + 1] = area
+        end
+        LEARNED:Learn(artID, list)
+    end
+end
+
 -- A tile's size on the map and in its file, like Blizzard's own explored areas: a full tile fills
 -- its file; the last in a row or column is what's left, in a file rounded up to a power of two.
 local function tileSize(total, tile, index, count)
@@ -152,8 +208,7 @@ function Overlay:Draw()
     local map = self.map
     local mapID = map:GetMapID()
     local artID = mapID and C_Map.GetMapArtID(mapID)
-    local areas = artID and internal.overlays[artID]
-    if not areas then
+    if not artID then
         return
     end
     self.layerIndex = map:GetCanvasContainer():GetCurrentLayerIndex()
@@ -167,6 +222,8 @@ function Overlay:Draw()
     for _, info in ipairs(textures or {}) do
         explored[areaKey(info.textureWidth, info.textureHeight, info.offsetX, info.offsetY)] = true
     end
+    learn(artID, textures)
+    areas = areasOf(artID)
     -- Where Blizzard's explored areas go: above the map art, below every icon.
     local manager = map.GetPinFrameLevelsManager and map:GetPinFrameLevelsManager()
     if manager then

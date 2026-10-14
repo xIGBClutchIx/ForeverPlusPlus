@@ -29,6 +29,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Waylaid Crates**: Item Tooltips' Waylaid Crate Costs option moved here as Bundle Costs, keeping your choice.
 - **World Map**: Coordinates follows Blizzard's coordinate settings under Gameplay > Interface instead of its own checkboxes, which turned them back on at every login.
 - **World Map**: dungeon levels come from the game's dungeon finder, and Forever dungeons it lists that Forever++ didn't know get their names and levels in map tooltips.
+- **World Map**: Zone Info shows the game's own level range for a zone when it has one. Points of Interest places flight masters where a flight master's map shows them and adds ones its list lacks, and Unexplored Areas adds areas its art lacks once one of your characters explores them.
 - **Quest Tracker**: Font Size is gone: Edit Mode's Text Size sets the tracker's size.
 - **Profession Tooltips**: on a lockbox whose tooltip already says what Lockpicking it needs, colors that line instead of adding a second one, and remembers the skill, so a box Forever changed shows the right number.
 - **Settings**: the Modules page has new Character, Quests, System, and Units categories, listed in alphabetical order.
