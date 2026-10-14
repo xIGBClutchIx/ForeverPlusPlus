@@ -37,6 +37,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Chat History**: Lines Saved goes up to 125, about all a chat window holds.
 - **Already Known**: the Loot option also marks known items on group loot rolls, before you choose Need or Greed.
 - **Auto Sell Junk**: Keep Everything Buyable Back sells only as much junk as the buyback list has room for beside what you sold yourself, so an item sold by mistake stays buyable.
+- **Auto Gossip**: learns which kind of NPC an option is for from the window it opens, so a banker, vendor, trainer, or flight master the game marks differently is picked by its own checkbox after you pick it once.
 - **Bag Slot Counter**: the count turns orange when 4 or fewer slots are free. The new Color When Low option sets that number, or turns the colors off.
 - **Currency Bar**: with nothing to show, it says how to track currencies instead of showing an empty box.
 - **Error Catcher**: says on its Settings page, instead of in chat, when another addon such as BugGrabber is catching Lua errors, and leaves Blizzard's error window and blocked action popup to it.

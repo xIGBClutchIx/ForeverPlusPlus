@@ -119,6 +119,7 @@ L.AUTOGOSSIP_PRINT_DESC = "Print every gossip option in chat with its icon and s
 L.AUTOGOSSIP_PRINT_HEADER = "Gossip options (title: %s):" -- NPC's title under the name
 L.AUTOGOSSIP_PRINT_LINE = "  %s  icon=%s status=%s flags=%s  %s" -- id, icon, status, flags, name
 L.AUTOGOSSIP_PRINT_RESULT = "  -> %s" -- the kind picked, or why not (debug codes)
+L.AUTOGOSSIP_PRINT_LEARNED = "Gossip icon %s learned as %s." -- icon file ID, kind (false: ambiguous)
 -- The title under a stable master's name, exactly as the game shows it.
 L.AUTOGOSSIP_TITLE_STABLE = "Stable Master"
 

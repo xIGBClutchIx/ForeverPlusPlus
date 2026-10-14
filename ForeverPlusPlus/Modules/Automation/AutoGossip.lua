@@ -3,7 +3,7 @@
 -- checkbox. Hold the Skip Key (Shift by default) while talking to the NPC to skip it.
 local _, ns = ...
 
-local ipairs, format, tostring = ipairs, string.format, tostring
+local pairs, ipairs, type, format, tostring = pairs, ipairs, type, string.format, tostring
 local C_GossipInfo, Enum = C_GossipInfo, Enum
 local GetTime = GetTime
 
@@ -49,14 +49,22 @@ module.options = {
     },
 }
 
--- The kind of NPC, from the option's gossip icon. These are the Classic GossipFrame icon file
--- IDs; Forever sending the same ones is Unverified (turn on the Debug option to see them).
-local ICONS = {
+-- The kind of NPC, from the option's gossip icon. The seed is the Classic GossipFrame icon file
+-- IDs; Forever sends the same banker, vendor, and taxi ones, the trainer's is Unverified (turn on
+-- the Debug option to see them, and docs/forever-api.md "Gossip" for what was seen). An
+-- icon is also learned from the window its option opens (see "Learning icons" below), so a
+-- different one on Forever is known after the first pick. false: icons seen opening two kinds.
+local SEED = {
     [132050] = "banker", -- BankerGossipIcon
     [132060] = "vendor", -- VendorGossipIcon, also repair vendors
     [132058] = "trainer", -- TrainerGossipIcon
     [132057] = "taxi", -- TaxiGossipIcon
 }
+local ICONS = ns.GameData.New("gossipIcons", SEED, { label = "Gossip icons" })
+
+-- The plain speech-bubble icon (GossipGossipIcon) goes on all sorts of options, so it's never
+-- learned as a service. Forever uses Classic's file ID (an innkeeper's dungeon option).
+local CHAT_ICON = 132053
 
 -- Stable masters have no icon of their own, so they go by the title under the NPC's name.
 -- (Auctioneers on Forever open the auction house without any gossip.)
@@ -70,7 +78,7 @@ local function npcTitle()
 end
 
 local function kindOf(option)
-    return ICONS[option.icon] or TITLES[npcTitle() or ""] or "other"
+    return ICONS:Get(option.icon) or TITLES[npcTitle() or ""] or "other"
 end
 
 -- An option that is safe to pick without asking: available, and with no cost, reward, or spell
@@ -131,8 +139,73 @@ local function skipReason(options)
     end
 end
 
+-- Learning icons --------------------------------------------------------------------------------
+-- An option picked (by us or the player) is remembered with its icon; if one of these windows
+-- opens soon after, that icon is that kind of NPC's.
+local WINDOWS = {
+    BANKFRAME_OPENED = "banker",
+    MERCHANT_SHOW = "vendor",
+    TRAINER_SHOW = "trainer",
+    TAXIMAP_OPENED = "taxi",
+}
+local LEARN_WINDOW = 3 -- seconds from the pick to the window
+
+local shown = {} -- the options of the gossip page on screen
+local picked, pickedAt -- the picked option's icon, and when
+
+local function onPick(option)
+    local icon = option and option.icon
+    if type(icon) == "number" and icon ~= CHAT_ICON then
+        picked, pickedAt = icon, GetTime()
+    else
+        picked = nil
+    end
+end
+
+local function onSelectOption(optionID)
+    for _, option in ipairs(shown) do
+        if option.gossipOptionID == optionID then
+            return onPick(option)
+        end
+    end
+    picked = nil
+end
+
+-- Blizzard's gossip buttons pick by index; match it to the option's orderIndex, never guess.
+local function onSelectOptionByIndex(index)
+    for _, option in ipairs(shown) do
+        if option.orderIndex == index then
+            return onPick(option)
+        end
+    end
+    picked = nil
+end
+
+local function onWindow(event)
+    local icon = picked
+    picked = nil
+    if not icon or GetTime() - pickedAt > LEARN_WINDOW then
+        return
+    end
+    local kind = WINDOWS[event]
+    local known = ICONS:Get(icon)
+    if known == false or known == kind then
+        return
+    end
+    -- One seen opening another kind before is ambiguous; a seed that disagrees was Classic's.
+    if known and SEED[icon] ~= known then
+        ICONS:Learn(icon, false)
+    else
+        ICONS:Learn(icon, kind)
+    end
+    if module.db.printOptions then
+        ns.Print(format(L.AUTOGOSSIP_PRINT_LEARNED, tostring(icon), tostring(ICONS:Get(icon))))
+    end
+end
+
 local function onGossipShow()
     local options = C_GossipInfo.GetOptions() or {}
+    shown, picked = options, nil
     local reason = skipReason(options)
     if module.db.printOptions then
         printOptions(options)
@@ -147,8 +220,14 @@ end
 
 function module:OnEnable()
     self:On("GOSSIP_SHOW", onGossipShow)
+    self:Hook(C_GossipInfo, "SelectOption", onSelectOption)
+    self:Hook(C_GossipInfo, "SelectOptionByIndex", onSelectOptionByIndex)
+    for event in pairs(WINDOWS) do
+        self:On(event, onWindow)
+    end
 end
 
 function module:OnDisable()
     lastPick = 0
+    shown, picked = {}, nil
 end
