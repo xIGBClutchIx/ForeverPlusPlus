@@ -123,7 +123,8 @@ local function showPlain(plain)
 end
 
 local function newWindow()
-    local f = CreateFrame("Frame", nil, UIParent, "BasicFrameTemplateWithInset")
+    -- Named so Escape can close it (ns.Frames.CloseOnEscape).
+    local f = CreateFrame("Frame", "ForeverPlusPlusChatCopy", UIParent, "BasicFrameTemplateWithInset")
     f:SetSize(540, 420)
     f:SetPoint("CENTER")
     f:SetFrameStrata("DIALOG")
@@ -132,6 +133,7 @@ local function newWindow()
     f:EnableMouse(true)
     f:SetScript("OnMouseDown", f.StartMoving)
     f:SetScript("OnMouseUp", f.StopMovingOrSizing)
+    ns.Frames.CloseOnEscape(f)
     if f.SetTitle then
         f:SetTitle(L.CHATCOPY_TITLE)
     elseif f.TitleText then

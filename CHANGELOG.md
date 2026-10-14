@@ -67,6 +67,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Minimap Button**: the right-click menu also turns Auto Decline, Auto Dismount, Auto Gossip, Auto Release, Auto Repair, Auto Screenshot, Minimap Node Icons, Movable Framerate, and Skip Cinematics on and off, and lists its modules in alphabetical order.
 - **Short Channel Names**: the Style dropdown also offers initials ([LFG] for LookingForGroup) and the name without its zone ([General]), alone or after the number. Number and Initials ([1. LFG]) is the new default.
 - **Short Channel Names**: the new Guild, Party, and Raid option (on by default) also shortens [Guild], [Officer], [Party], [Raid], [Raid Warning], and [Instance] to [GD], [O], [P], [R], [RW], and [I].
+- The Error Catcher and Chat Copy windows close with Escape, like Blizzard's windows.
 - Buff Timers, Waypoints, Quest Tracker, Quest Nameplates, Player and NPC Nameplates, and Already Known use less CPU: they look the same and redo their work only when something changed.
 
 ### Fixed

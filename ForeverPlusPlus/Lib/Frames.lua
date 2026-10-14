@@ -1,8 +1,8 @@
 -- Small frame helpers modules share: probing for Blizzard art and templates, the box tooltips are
--- drawn in, red text in the error frame, and running something once after a burst of calls.
+-- drawn in, Escape closing our windows, red text in the error frame, and running something once after a burst of calls.
 local _, ns = ...
 
-local select, CreateFrame, C_Timer = select, CreateFrame, C_Timer
+local select, ipairs, tinsert, CreateFrame, C_Timer = select, ipairs, table.insert, CreateFrame, C_Timer
 
 local Frames = {}
 ns.Frames = Frames
@@ -47,6 +47,24 @@ function Frames.TooltipBox(parent)
         box:SetBackdropColor(0, 0, 0, 0.8)
     end
     return box
+end
+
+---Lets Escape close one of our windows, the way Blizzard's own windows close: its name goes in
+---UISpecialFrames, which the game menu key hides first. Blizzard reads the list through
+---securecall, so our entry taints nothing, and it skips hidden frames, so Escape still opens the
+---game menu while the window is closed. The frame needs a global name.
+---@param frame table a named frame
+function Frames.CloseOnEscape(frame)
+    local name = frame:GetName()
+    if not (name and UISpecialFrames) then
+        return
+    end
+    for _, special in ipairs(UISpecialFrames) do
+        if special == name then
+            return
+        end
+    end
+    tinsert(UISpecialFrames, name)
 end
 
 ---Red text in the middle of the screen, the way the game says "Not enough rage".

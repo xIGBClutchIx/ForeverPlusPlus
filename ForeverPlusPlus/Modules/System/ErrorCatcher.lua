@@ -611,10 +611,13 @@ end
 
 -- Blizzard's window with a portrait, a sunken box, and a strip for buttons at the bottom, as the
 -- game's own lists use. Probe: an older template if this client doesn't have it.
+-- Named so Escape can close it (ns.Frames.CloseOnEscape).
+local WINDOW_NAME = "ForeverPlusPlusErrorCatcher"
+
 local function newFrame()
-    local ok, f = pcall(CreateFrame, "Frame", nil, UIParent, "ButtonFrameTemplate")
+    local ok, f = pcall(CreateFrame, "Frame", WINDOW_NAME, UIParent, "ButtonFrameTemplate")
     if not (ok and f) then
-        f = CreateFrame("Frame", nil, UIParent, "BasicFrameTemplateWithInset")
+        f = CreateFrame("Frame", WINDOW_NAME, UIParent, "BasicFrameTemplateWithInset")
     end
     if f.SetPortraitToAsset then
         pcall(f.SetPortraitToAsset, f, ns.icon)
@@ -651,6 +654,7 @@ local function newWindow()
     f:EnableMouse(true)
     f:SetScript("OnMouseDown", f.StartMoving)
     f:SetScript("OnMouseUp", f.StopMovingOrSizing)
+    ns.Frames.CloseOnEscape(f)
 
     -- Beside the portrait: how many errors, and which sessions the list shows.
     f.summary = f:CreateFontString(nil, "OVERLAY", "GameFontHighlight")

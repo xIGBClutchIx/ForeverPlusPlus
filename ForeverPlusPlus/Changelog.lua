@@ -182,6 +182,8 @@ ns.changelog = {
                 { L.SHORTCHANNELNAMES_TITLE, "The new Guild, Party, and Raid option (on by "
                     .. "default) also shortens [Guild], [Officer], [Party], [Raid], [Raid Warning], "
                     .. "and [Instance] to [GD], [O], [P], [R], [RW], and [I]." },
+                "The Error Catcher and Chat Copy windows close with Escape, like Blizzard's "
+                    .. "windows.",
                 "Buff Timers, Waypoints, Quest Tracker, Quest Nameplates, Player and NPC "
                     .. "Nameplates, and Already Known use less CPU: they look the same and redo "
                     .. "their work only when something changed.",
