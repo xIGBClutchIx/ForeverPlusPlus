@@ -42,7 +42,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Error Catcher**: says on its Settings page, instead of in chat, when another addon such as BugGrabber is catching Lua errors, and leaves Blizzard's error window and blocked action popup to it.
 - **Flight Timer**: the flight map tooltip's Flight Time line looks like the Sell Price line, with the time at the right. The new Tooltip Line option puts it back on one line, white or gray.
 - **Minimap Button**: Shift-click it, instead of Shift-right-click, to see the errors, and Alt-click it to clear this session's. Clear Key is Alt by default and works with a click instead of a right-click.
-- **Minimap Button**: the right-click menu also turns Auto Dismount, Auto Gossip, Auto Release, Auto Repair, and Skip Cinematics on and off, and lists its modules in alphabetical order.
+- **Minimap Button**: the right-click menu also turns Auto Decline, Auto Dismount, Auto Gossip, Auto Release, Auto Repair, and Skip Cinematics on and off, and lists its modules in alphabetical order.
 - **Short Channel Names**: the Style dropdown also offers initials ([LFG] for LookingForGroup) and the name without its zone ([General]), alone or after the number. Number and Initials ([1. LFG]) is the new default.
 - **Short Channel Names**: the new Guild, Party, and Raid option (on by default) also shortens [Guild], [Officer], [Party], [Raid], [Raid Warning], and [Instance] to [GD], [O], [P], [R], [RW], and [I].
 - Buff Timers, Waypoints, Quest Tracker, Quest Nameplates, Player and NPC Nameplates, and Already Known use less CPU: they look the same and redo their work only when something changed.

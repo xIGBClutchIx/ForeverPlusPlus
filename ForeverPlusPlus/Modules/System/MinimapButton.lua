@@ -63,7 +63,7 @@ local MODIFIERS = {
 -- the order holds in every language. One that isn't available on this client (Hide Beta Feedback
 -- off the beta) is left out.
 local QUICK_TOGGLES = {
-    "AutoDismount", "AutoGossip", "AutoQuest", "AutoRelease", "AutoRepair", "AutoSellJunk",
+    "AutoDecline", "AutoDismount", "AutoGossip", "AutoQuest", "AutoRelease", "AutoRepair", "AutoSellJunk",
     "AutoStow", "FastLoot", "FishingCast", "GatheringTracking", "HideBetaFeedback",
     "SkipCinematics",
 }
