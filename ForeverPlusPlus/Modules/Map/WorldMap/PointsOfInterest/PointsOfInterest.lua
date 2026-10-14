@@ -3,15 +3,15 @@
 -- where it is. Every kind has its own checkbox, icon size, and whether it also shows on the
 -- continent and world maps, not just zone maps. Travel points of the other faction are off unless
 -- asked for. Where the points are is in Data.lua, except Skyborne ley lines, saved as they're
--- found.
+-- found. This file has the part, its options, and drawing the points; Flights.lua the flight
+-- points flight masters show, LeyLines.lua the ley lines, and BlizzardIcons.lua hiding the
+-- game's own icons where ours show.
 local _, ns = ...
 
 local ipairs, pairs, format, rawget, unpack, abs = ipairs, pairs, string.format, rawget, unpack,
     math.abs
-local select, type, floor = select, type, math.floor
-local C_Map, C_EncounterJournal, C_TaxiMap, Enum = C_Map, C_EncounterJournal, C_TaxiMap, Enum
-local C_Spell, C_UnitAuras, C_Timer, GetTime = C_Spell, C_UnitAuras, C_Timer, GetTime
-local UnitName, UnitRace, GetRealmName = UnitName, UnitRace, GetRealmName
+local select, floor = select, math.floor
+local C_Map, C_EncounterJournal = C_Map, C_EncounterJournal
 
 local L = ns.L
 
@@ -54,18 +54,9 @@ local module = ns.modules.WorldMap:NewPart({
 })
 ns.modules.WorldMap.perCharacter = { learnedNodes = true }
 
--- Up to 0.8.4 every character's learned flight points were saved for the account, by "Name-Realm".
-ns.MigrateCharacter(2, function(char, db)
-    -- UnitName's second value is a surname on Forever, not a realm.
-    local me = format("%s-%s", UnitName("player") or "", GetRealmName() or "")
-    ns.Store.Claim(char, db, "WorldMap", "learnedNodes", function(entries)
-        local mine = entries[me]
-        entries[me] = nil
-        return mine
-    end)
-end)
--- Shared with Data.lua: `points` (by map ID), `instances` (by key), and `cities` (by map ID).
-local internal = {}
+-- Shared with Data.lua: `points` (by map ID), `instances` (by key), and `cities` (by map ID). And
+-- with this part's other files: the part as `module`, and the helpers they call each other's.
+local internal = { module = module }
 ns.modules.WorldMap.internal.pointsOfInterest = internal
 
 -- A checkbox for a kind with the slider for its size in the same row, and under it whether it
@@ -120,23 +111,6 @@ for _, rows in ipairs({
 end
 module:AddOptions(options)
 
--- The module's only button. This is the last part in the TOC, so it sits right under the ley lines.
-ns.modules.WorldMap.actions = {
-    {
-        name = L.POI_LEYLINES_FORGET,
-        button = L.POI_LEYLINES_FORGET_BUTTON,
-        description = L.POI_LEYLINES_FORGET_DESC,
-        confirm = L.POI_LEYLINES_FORGET_CONFIRM,
-        fn = function()
-            module.db.leyLineSpots = {}
-            if module.enabled then
-                internal.refresh()
-            end
-            ns.Print(L.POI_LEYLINES_FORGET_DONE)
-        end,
-    },
-}
-
 -- Each kind of point: the checkbox, size, and continent settings for it, its normal size in
 -- pixels, and its icon. The boat, zeppelin, graveyard, and town icons are in Retail's atlas list,
 -- but not confirmed on Forever, so the first the client has is chosen the first time the map
@@ -165,6 +139,7 @@ local KINDS = {
 for _, kindInfo in pairs(KINDS) do
     kindInfo.world = kindInfo.show .. "World" -- the kind's On Continent Maps checkbox
 end
+internal.KINDS = KINDS
 
 -- A flight master not learned yet (or not known to be): the flight point icon in its faction's
 -- color, which on Forever is bronze.
@@ -186,6 +161,7 @@ local function atlasOf(kindInfo)
     end
     return kindInfo.atlas
 end
+internal.atlasOf = atlasOf
 
 -- A place name from Data.lua, in the player's language when a locale file translates it
 -- (L["Booty Bay"] = ...). Place names aren't in Locales/enUS/: the English is the name itself.
@@ -197,6 +173,7 @@ end
 local function zoneName(mapID)
     return ns.WorldMap.MapName(mapID, "")
 end
+internal.zoneName = zoneName
 
 -- An instance's name in the player's language, and which entrance it is.
 local function instanceName(instance)
@@ -220,6 +197,7 @@ local function linesOf(...)
     end
     return lines
 end
+internal.linesOf = linesOf
 
 -- The tooltip of a dungeon or raid: one instance (its kind, then its level range colored against
 -- the player's), or a place with several (Blackrock Mountain), a row each. Also the rows alone,
@@ -247,72 +225,7 @@ end
 -- How close (in percent of the map) a point the game knows is to one in Data.lua for the two to
 -- be the same.
 local NEAR = 3
-
--- The game's flight points on the map being drawn. Forever's world map doesn't show them, and its
--- list can't say which are learned (see learned).
-local taxiNodes = {}
-
-local function readTaxiNodes(mapID)
-    taxiNodes = C_TaxiMap and C_TaxiMap.GetTaxiNodesForMap
-        and C_TaxiMap.GetTaxiNodesForMap(mapID) or {}
-end
-
--- The flight points this character has seen as learned at a flight master, by the game's node ID
--- (names repeat: Light's Hope Chapel has one per faction, and the game's names are in the
--- player's language), saved per character. The map list above may not have them on Forever, so
--- this is the other way to know.
-local function seenLearned()
-    return module.db.learnedNodes
-end
-
--- At a flight master, remembers which of the flight points it lists are learned, by node ID.
--- Mainline's C_TaxiMap.GetAllTaxiNodes: ones the master can't fly to are Unreachable.
-local function rememberLearned()
-    if not (C_TaxiMap and C_TaxiMap.GetAllTaxiNodes and GetTaxiMapID and Enum.FlightPathState) then
-        return
-    end
-    local seen = seenLearned()
-    local mapID = GetTaxiMapID()
-    for _, node in ipairs(mapID and C_TaxiMap.GetAllTaxiNodes(mapID) or {}) do
-        if node.nodeID and node.state ~= Enum.FlightPathState.Unreachable then
-            seen[node.nodeID] = true
-        end
-    end
-end
-
--- The game's flight point for one of Data.lua's, by place: the closest on the map. The node
--- carries the ID.
-local function nodeOf(point)
-    local best, bestDistance
-    for _, node in ipairs(taxiNodes) do
-        local x, y = node.position:GetXY()
-        local dx, dy = abs(x * 100 - point[2]), abs(y * 100 - point[3])
-        if dx < NEAR and dy < NEAR and (not bestDistance or dx + dy < bestDistance) then
-            best, bestDistance = node, dx + dy
-        end
-    end
-    return best
-end
-
--- Whether the character has learned the flight master at this point: true when a flight master
--- visit saw its node learned, false when the game's map list calls it undiscovered, else nil.
--- The map list can't say one is learned: on Forever (2026-09-28) it lists the whole continent
--- for a zone (36 for Silverpine) and calls ones never visited discovered.
-local function learned(point)
-    if point.node and seenLearned()[point.node] then
-        return true
-    end
-    local node = nodeOf(point)
-    if not (node and node.nodeID) then
-        return nil
-    end
-    if seenLearned()[node.nodeID] then
-        return true
-    end
-    if node.isUndiscovered then
-        return false
-    end
-end
+internal.NEAR = NEAR
 
 -- Whether a kind shows, on a continent map (`world`) or a zone map.
 local function shows(kindInfo, world)
@@ -320,6 +233,7 @@ local function shows(kindInfo, world)
     local on = db[kindInfo.show]
     return (on == true or on == "ours") and (not world or db[kindInfo.world])
 end
+internal.shows = shows
 
 -- The pin for one point of Data.lua on the map `mapID` it's listed for, or nil when its settings
 -- hide it. `world` when it's being drawn on a continent map.
@@ -350,7 +264,7 @@ local function pinFor(point, mapID, world)
         info.lines = linesOf(L.POI_FLIGHT_MASTER, MapTooltip.Side(point[4]),
             MapTooltip.Detail(zoneName(mapID)))
         -- Learned ones look like the minimap's; the rest keep the bronze flight point icon.
-        local state = learned(point)
+        local state = internal.learned(point)
         if state then
             info.atlas = learnedAtlas(point[4])
         else
@@ -412,6 +326,7 @@ local function placedByUs(name)
     local instance = ns.Instances.ByName(name)
     return instance ~= nil and placed[instance] == true, instance
 end
+internal.placedByUs = placedByUs
 
 -- Dungeon and raid entrances the game itself has for the map (Blizzard's own entrance list, which
 -- its map hides behind a CVar), for ones Data.lua doesn't place, such as Forever's new dungeons.
@@ -461,156 +376,11 @@ local function translate(fromMap, toMap, x, y)
     end
     return ns.MapPins.Translate(city.zone, toMap, x, y)
 end
+internal.translate = translate
 
--- Flight points a flight master showed --------------------------------------------------------
--- Data.lua's flight points are the seed (build 70009). A flight master's map lists every flight
--- point of the continent with its place, so each one seen is saved for the account by node ID:
--- { map, x, y, faction, name }, x and y in percent on `map`. One on the spot of Data.lua's takes
--- its place, and one Data.lua lacks (a patch's new flight point) is added.
-local FLIGHTS = ns.GameData.New("flightPoints", {}, { label = "Flight points" })
-
--- How close (in percent of the flight master's map, a continent) a flight point the game lists is
--- to one of Data.lua's for the two to be the same.
-local SAME_NODE = 0.6
-
--- Mainline's Enum.FlightPathFaction (Neutral 0, Horde 1, Alliance 2) as our letters. Probe:
--- whether Forever's taxi nodes have `faction` is Unverified; without it, the player's side.
-local function nodeFaction(node)
-    local enum = Enum.FlightPathFaction
-    local faction = node.faction
-    if enum and faction ~= nil then
-        if faction == enum.Horde then
-            return "H"
-        elseif faction == enum.Alliance then
-            return "A"
-        elseif faction == enum.Neutral then
-            return "N"
-        end
-    end
-    return ns.WorldMap.PlayerSide()
-end
-
--- Whether flight points of these two factions can be the same one.
-local function sameSide(a, b)
-    return not a or not b or a == b or a == "N" or b == "N"
-end
-
-local function percent(value)
+-- A point on a map (0 to 1) in percent, to a tenth, as saved flight points and ley lines are.
+function internal.percent(value)
     return floor(value * 1000 + 0.5) / 10
-end
-
--- Data.lua's flight point nearest a spot on the flight master's map: its map and point.
-local function seedFlightNear(taxiMap, x, y, faction)
-    local bestMap, best, bestDistance
-    for fromMap, points in pairs(internal.points) do
-        for _, point in ipairs(points) do
-            if point[1] == "flight" and sameSide(point[4], faction) then
-                local px, py = translate(fromMap, taxiMap, point[2] / 100, point[3] / 100)
-                local distance = px and abs(px - x) + abs(py - y)
-                if distance and distance * 100 < SAME_NODE
-                    and (not bestDistance or distance < bestDistance) then
-                    bestMap, best, bestDistance = fromMap, point, distance
-                end
-            end
-        end
-    end
-    return bestMap, best
-end
-
--- At a flight master, saves where each flight point on its map is: on the map of Data.lua's flight
--- point on the same spot, or else on the zone the game says the spot is in.
-local function learnFlights()
-    if not (C_TaxiMap and C_TaxiMap.GetAllTaxiNodes and GetTaxiMapID) then
-        return
-    end
-    local taxiMap = GetTaxiMapID()
-    local changed = false
-    for _, node in ipairs(taxiMap and C_TaxiMap.GetAllTaxiNodes(taxiMap) or {}) do
-        local x, y
-        if node.nodeID and node.position and not node.isMapLayerTransition then
-            x, y = node.position:GetXY()
-        end
-        if x and y and ns.IsReadable(x) and ns.IsReadable(y) then
-            local faction = nodeFaction(node)
-            local mapID = seedFlightNear(taxiMap, x, y, faction)
-            if not mapID and C_Map.GetMapInfoAtPosition then
-                local info = C_Map.GetMapInfoAtPosition(taxiMap, x, y)
-                mapID = info and info.mapID ~= taxiMap and info.mapID
-            end
-            local zx, zy
-            if mapID then
-                zx, zy = ns.MapPins.Translate(taxiMap, mapID, x, y)
-            end
-            if zx and FLIGHTS:Learn(node.nodeID, { map = mapID, x = percent(zx), y = percent(zy),
-                faction = faction, name = node.name }) then
-                changed = true
-            end
-        end
-    end
-    if changed then
-        internal.flightsChanged = true
-    end
-end
-
--- Each map's points: Data.lua's, with the saved flight points in. Made again once something new
--- is saved.
-local merged, mergedCount = {}, -1
-
-local function mergeFlights()
-    merged = {}
-    local learnedOn = {} -- map ID -> { node ID -> saved flight point }
-    for nodeID, node in FLIGHTS:Pairs() do
-        if type(node) == "table" and node.map and node.x and node.y then
-            learnedOn[node.map] = learnedOn[node.map] or {}
-            learnedOn[node.map][nodeID] = node
-        end
-    end
-    for mapID, points in pairs(internal.points) do
-        local list, nodes = {}, learnedOn[mapID] or {}
-        for _, point in ipairs(points) do
-            if point[1] == "flight" then
-                local bestID, bestDistance
-                for nodeID, node in pairs(nodes) do
-                    local distance = abs(node.x - point[2]) + abs(node.y - point[3])
-                    if sameSide(point[4], node.faction) and abs(node.x - point[2]) < NEAR
-                        and abs(node.y - point[3]) < NEAR
-                        and (not bestDistance or distance < bestDistance) then
-                        bestID, bestDistance = nodeID, distance
-                    end
-                end
-                if bestID then
-                    local node = nodes[bestID]
-                    nodes[bestID] = nil
-                    point = { "flight", node.x, node.y, point[4], point[5], node = bestID }
-                end
-            end
-            list[#list + 1] = point
-        end
-        merged[mapID] = list
-    end
-    -- The ones left are flight points Data.lua doesn't have.
-    for mapID, nodes in pairs(learnedOn) do
-        for nodeID, node in pairs(nodes) do
-            local list = merged[mapID] or {}
-            merged[mapID] = list
-            list[#list + 1] = { "flight", node.x, node.y, node.faction or "N", node.name or "",
-                node = nodeID }
-        end
-    end
-    mergedCount = FLIGHTS:Learned()
-end
-
--- Every map's points, by map ID.
-local function allPoints()
-    if internal.flightsChanged or mergedCount ~= FLIGHTS:Learned() then
-        internal.flightsChanged = false
-        mergeFlights()
-    end
-    return merged
-end
-
-local function pointsOf(mapID)
-    return allPoints()[mapID] or {}
 end
 
 -- A capital's icon, in the middle of its own map.
@@ -665,110 +435,11 @@ local function addCity(cityMap, mapID, world, add, listed)
     end
 end
 
--- Ley lines -----------------------------------------------------------------------------------
--- Skyborne racials: High Order Skyborne (Alliance) cast Read Ley Line on a ley line, Windshapers
--- (Horde) cast Skysight on an elemental convergence, and get a 15-minute buff there instead of a
--- few seconds. The server places them: the client's tables don't have them and Wowhead lists them
--- without a place (2026-10-03, build 70205). So a spot is saved where a cast gave the long buff.
-
--- Each kind and the side whose Skyborne use it.
-local SKYBORNE = { leyline = { side = "A" }, convergence = { side = "H" } }
-
--- The casts and the buffs they give, spell ID -> kind. The seed is from the client's SpellName,
--- SpellMisc, and SpellEffect tables (wago.tools, build 70205); a patch's new IDs are learned in
--- play: a cast that a fresh 15-minute buff of a known one follows, and the buff a known cast gives.
-local CASTS = ns.GameData.New("skyborneCasts", {
-    [1259705] = "leyline", -- Read Ley Line
-    [1259686] = "convergence", -- Skysight
-}, { kind = "spell", label = "Skyborne casts" })
-local BUFFS = ns.GameData.New("skyborneBuffs", {
-    [1259691] = "leyline", -- Energized
-    [1259688] = "convergence", -- Elemental Blessing
-}, { kind = "spell", label = "Skyborne buffs" })
-
--- The kind each Skyborne race ID (ChrRaces) uses: 95 High Order, 96 Windshaper. Both share the
--- race file "Skyborne", which decides; the IDs are only for a side the client won't say.
-local RACES = ns.GameData.New("skyborneRaces", { [95] = "leyline", [96] = "convergence" },
-    { label = "Skyborne races" })
-
-local function spellName(id)
-    return C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(id) or nil
-end
-
--- The name of a spell of this kind in `set` that this client has, or nil.
-local function nameOf(set, kindName)
-    for id, kind in set:Pairs() do
-        if kind == kindName then
-            local name = spellName(id)
-            if name then
-                return name
-            end
-        end
-    end
-end
-
--- The kind this character uses, or nil when it isn't Skyborne. With `learn`, a side that decided
--- it is remembered for the race ID.
-local function ownKind(learn)
-    local _, raceFile, raceID = UnitRace("player")
-    if raceFile ~= "Skyborne" then
-        return nil
-    end
-    local side = ns.WorldMap.PlayerSide()
-    for kindName, skyborne in pairs(SKYBORNE) do
-        if skyborne.side == side then
-            if learn then
-                RACES:Learn(raceID, kindName)
-            end
-            return kindName
-        end
-    end
-    return RACES:Get(raceID)
-end
-
--- Whether saved spots of this kind show, on a continent map (`world`) or a zone map.
-local function showsSpot(kindName, world)
-    local db = module.db
-    if db.leyLines == "off" or (world and not db.leyLinesWorld) then
-        return false
-    end
-    return db.leyLines == "everyone" or kindName == ownKind()
-end
-
-local function spotInfo(kindName, fromMap)
-    local kindInfo, skyborne = KINDS[kindName], SKYBORNE[kindName]
-    local cast = nameOf(CASTS, kindName)
-    return {
-        atlas = atlasOf(kindInfo),
-        size = kindInfo.pixels * module.db[kindInfo.size] / 100,
-        title = kindName == "leyline" and L.POI_LEYLINE or L.POI_CONVERGENCE,
-        lines = linesOf(MapTooltip.Side(skyborne.side), MapTooltip.Detail(zoneName(fromMap)),
-            cast and MapTooltip.Note(format(L.POI_LEYLINE_CAST, cast))),
-    }
-end
-
--- The saved spots that fall on the map being drawn, from whichever map each was saved on.
-local function addSpots(mapID, world, add)
-    for fromMap, spots in pairs(module.db.leyLineSpots) do
-        for _, spot in ipairs(spots) do
-            if SKYBORNE[spot[1]] and showsSpot(spot[1], world) then
-                local x, y = spot[2] / 100, spot[3] / 100
-                if fromMap ~= mapID then
-                    x, y = translate(fromMap, mapID, x, y)
-                end
-                if x then
-                    add(x, y, spotInfo(spot[1], fromMap))
-                end
-            end
-        end
-    end
-end
-
 -- A zone map: its own points, and the capitals in it with their dungeons.
 local function fillZone(mapID, add)
-    readTaxiNodes(mapID)
+    internal.readTaxiNodes(mapID)
     local listed = {} -- this map's dungeons and raids in Data.lua, shown or not
-    for _, point in ipairs(pointsOf(mapID)) do
+    for _, point in ipairs(internal.pointsOf(mapID)) do
         if isInstance(point) then
             listed[#listed + 1] = point
         end
@@ -783,16 +454,16 @@ local function fillZone(mapID, add)
         end
     end
     gameEntrances(mapID, listed, add)
-    addSpots(mapID, false, add)
+    internal.addSpots(mapID, false, add)
 end
 
 -- A continent or world map: every kind whose On Continent Maps is on, from every zone and city
 -- the game can place on it.
 local function fillContinent(mapID, add)
     local flights = shows(KINDS.flight, true)
-    for fromMap, points in pairs(allPoints()) do
+    for fromMap, points in pairs(internal.allPoints()) do
         if flights then
-            readTaxiNodes(fromMap)
+            internal.readTaxiNodes(fromMap)
         end
         for _, point in ipairs(points) do
             -- A city's dungeons come with the city, below.
@@ -804,13 +475,14 @@ local function fillContinent(mapID, add)
     for cityMap in pairs(internal.cities) do
         addCity(cityMap, mapID, true, add)
     end
-    addSpots(mapID, true, add)
+    internal.addSpots(mapID, true, add)
 end
 
 local function isContinent(mapID)
     local info = C_Map and C_Map.GetMapInfo and C_Map.GetMapInfo(mapID)
     return ns.WorldMap.IsContinent(info)
 end
+internal.isContinent = isContinent
 
 local function fill(mapID, add)
     if isContinent(mapID) then
@@ -820,186 +492,7 @@ local function fill(mapID, add)
     end
 end
 
--- Blizzard's own icons ------------------------------------------------------------------------
--- Blizzard marks the capitals on continent maps, and may mark dungeon entrances anywhere, with
--- pins of its own. Wherever ours show for the same place, theirs are hidden so there's one icon,
--- not two (Undercity's, and the Ruins of Lordaeron's beside it). Capital Cities set to Off hides
--- Blizzard's too, like Leatrix Maps' Hide Town and City Icons, but told apart by the name
--- instead of the icon's place in its texture.
-
-local cityNames
-
-local function isCity(name)
-    if not cityNames then
-        cityNames = {}
-        for cityMap in pairs(internal.cities) do
-            local cityName = zoneName(cityMap)
-            if cityName ~= "" then
-                cityNames[cityName] = true
-                cityNames[(cityName:gsub(" City$", ""))] = true -- "Stormwind City" as "Stormwind"
-            end
-        end
-    end
-    return cityNames[name] == true or cityNames[(name:gsub("^[Tt]he ", ""))] == true
-end
-
--- Whether ours replace Blizzard's pin with this name on the map now: a city's (ours, or none at
--- all), or a dungeon's or raid's, where its kind shows. Ours show on zone maps whenever their
--- checkbox is on, and on continents with On Continent Maps.
-local function hidesBlizzard(mapID, name)
-    if not module.enabled then
-        return false
-    end
-    local db, world = module.db, isContinent(mapID)
-    if isCity(name) then
-        return db.capitals == "off" or (db.capitals == "ours" and (not world or db.capitalsWorld))
-    end
-    local ours, instance = placedByUs(name)
-    if not instance then
-        return false
-    end
-    local kindInfo = KINDS[instance[5] and "raid" or "dungeon"]
-    if ours then
-        return shows(kindInfo, world) and true or false
-    end
-    -- One we don't place: gameEntrances draws it on zone maps, and on a continent the game's icon
-    -- is the only one.
-    return not world and shows(kindInfo) and true or false
-end
-
--- After the world map acquires a pin of its own. The pin is hidden, not faded, so its tooltip
--- goes too; the map shows it again when it reuses the pin.
-local BLIZZARD_TEMPLATES = { AreaPOIPinTemplate = true, DungeonEntrancePinTemplate = true }
-
-local function onAcquire(map, template, poiInfo)
-    if not BLIZZARD_TEMPLATES[template] or type(poiInfo) ~= "table" or type(poiInfo.name) ~= "string"
-        or not hidesBlizzard(map:GetMapID(), poiInfo.name) then
-        return
-    end
-    for pin in map:EnumeratePinsByTemplate(template) do
-        if pin.poiInfo == poiInfo or pin.dungeonEntranceInfo == poiInfo or pin.name == poiInfo.name then
-            pin:Hide()
-        end
-    end
-end
-
 local layer
-
--- Saving ley lines ----------------------------------------------------------------------------
-
--- How close (in percent of the map) a spot is to a saved one of its kind to be the same.
-local SAME_SPOT = 2
-
--- A buff at least this long (seconds) is the one a spot gives; elsewhere it's 15 or 30 seconds.
-local LONG = 600
-
--- How long (seconds) around a cast a buff may start and still be the one it gave, for lag.
-local FRESH = 1
-
--- The player's long buffs: for each, its spell ID, whether it's a known buff of this kind (by ID,
--- or by name: the 15-minute Energized is in the client's tables, the 15-minute Elemental Blessing
--- isn't, only the 30-second one, so it's taken to share the name), and whether it started with
--- the cast at `castTime`. Secret aura fields are skipped.
-local function longBuffs(kindName, castTime)
-    local found = {}
-    if not (C_UnitAuras and C_UnitAuras.GetAuraDataByIndex) then
-        return found
-    end
-    local names = {}
-    for id, kind in BUFFS:Pairs() do
-        local name = kind == kindName and spellName(id)
-        if name then
-            names[name] = true
-        end
-    end
-    for i = 1, 40 do
-        local aura = C_UnitAuras.GetAuraDataByIndex("player", i, "HELPFUL")
-        if not aura then
-            break
-        end
-        local id, name, duration, expires = aura.spellId, aura.name, aura.duration,
-            aura.expirationTime
-        if ns.IsReadable(id) and ns.IsReadable(name) and ns.IsReadable(duration)
-            and ns.IsReadable(expires) and id and duration and duration >= LONG then
-            found[#found + 1] = {
-                id = id,
-                known = BUFFS:Get(id) == kindName or (name and names[name]) or false,
-                fresh = expires and expires - duration >= castTime - FRESH or false,
-            }
-        end
-    end
-    return found
-end
-
--- Saves where the player stands as a spot of this kind, unless one is already saved there.
-local function saveSpot(kindName)
-    if not module.enabled then
-        return
-    end
-    local mapID, x, y = ns.WorldMap.PlayerPosition()
-    if not mapID then
-        return
-    end
-    x, y = percent(x), percent(y)
-    local all = module.db.leyLineSpots
-    local spots = all[mapID] or {}
-    for _, spot in ipairs(spots) do
-        if spot[1] == kindName and abs(spot[2] - x) < SAME_SPOT and abs(spot[3] - y) < SAME_SPOT then
-            return
-        end
-    end
-    spots[#spots + 1] = { kindName, x, y }
-    all[mapID] = spots
-    module:Print(format(kindName == "leyline" and L.POI_LEYLINE_SAVED or L.POI_CONVERGENCE_SAVED,
-        zoneName(mapID)))
-    layer:Refresh()
-end
-
--- After a cast, once its buff is on: a known cast with a known long buff saves the spot. A known
--- cast whose fresh long buff isn't known teaches that buff, and any other cast that a fresh known
--- long buff follows teaches the cast (a patch's new IDs); both save the spot too. A cast right
--- after a known one teaches nothing, since the buff is the known cast's.
-local lastKnownCast = 0
-
-local function afterCast(spellID, castTime)
-    local kindName = CASTS:Get(spellID)
-    local knownCast = kindName ~= nil
-    if not knownCast and castTime - lastKnownCast < 2 * FRESH + 1 then
-        return
-    end
-    kindName = kindName or ownKind()
-    if not (module.enabled and kindName) then
-        return
-    end
-    local learnBuff
-    for _, buff in ipairs(longBuffs(kindName, castTime)) do
-        if buff.known and (knownCast or buff.fresh) then
-            if not knownCast then
-                CASTS:Learn(spellID, kindName)
-            end
-            saveSpot(kindName)
-            return
-        elseif knownCast and buff.fresh then
-            learnBuff = buff.id
-        end
-    end
-    if learnBuff then
-        BUFFS:Learn(learnBuff, kindName)
-        saveSpot(kindName)
-    end
-end
-
-local function onCast(_, unit, _, spellID)
-    if not (ns.IsReadable(unit) and ns.IsReadable(spellID)) or unit ~= "player" or not spellID then
-        return
-    end
-    local castTime = GetTime()
-    if CASTS:Get(spellID) then
-        lastKnownCast = castTime
-    end
-    -- The buff lands after the cast; give the server a moment.
-    C_Timer.After(1, function() afterCast(spellID, castTime) end)
-end
 
 internal.refresh = function()
     layer:Refresh()
@@ -1008,17 +501,17 @@ end
 function module:OnEnable()
     layer = layer or ns.MapPins.New(fill)
     layer:Enable()
-    ns.MapPins.OnAcquire(onAcquire)
+    ns.MapPins.OnAcquire(internal.onAcquire)
     ns.MapPins.RefreshMap() -- hide Blizzard's city icons already on it
     -- A flight master's map: which flight points are learned, and new ones learned there.
     self:On("TAXIMAP_OPENED", function()
-        rememberLearned()
-        learnFlights()
+        internal.rememberLearned()
+        internal.learnFlights()
     end)
     self:On("TAXIMAP_CLOSED", function() layer:Refresh() end)
     -- Only Skyborne can find ley lines.
-    if ownKind(true) then
-        self:On("UNIT_SPELLCAST_SUCCEEDED", onCast)
+    if internal.ownKind(true) then
+        self:On("UNIT_SPELLCAST_SUCCEEDED", internal.onCast)
     end
 end
 

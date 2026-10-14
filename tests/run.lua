@@ -391,6 +391,28 @@ eq(Plan.FirstLevel(60, 51), 10, "all 51 earned: level 10")
 eq(Plan.PointsAt(60, 5), 51, "never more than 51")
 eq(Plan.PointsAt(30, 5), 26, "talented: 26 points at 30")
 
+-- Rows 90 apart from the top at 100; a node 1 off its row's height stays in it, and a gate
+-- condition the game gave is kept.
+local gated = {
+    top = { y = 100 },
+    nudged = { y = 101 },
+    second = { y = 190 },
+    fourth = { y = 370 },
+    given = { y = 370, req = 7 },
+}
+Plan.RowGates(gated)
+eq(gated.top.req, 0, "row gates: top row needs nothing")
+eq(gated.nudged.req, 0, "row gates: a 1 gap isn't a row")
+eq(gated.second.req, 5, "row gates: second row needs 5")
+eq(gated.fourth.req, 15, "row gates: rows counted by the smallest gap")
+eq(gated.given.req, 7, "row gates: a gate condition is kept")
+local single = { only = { y = 40 } }
+Plan.RowGates(single, 3)
+eq(single.only.req, 0, "row gates: one node is the top row")
+local custom = { a = { y = 0 }, b = { y = 50 } }
+Plan.RowGates(custom, 3)
+eq(custom.b.req, 3, "row gates: points per row can be given")
+
 -- Errors ----------------------------------------------------------------------------------------
 
 local Errors = ns.Errors

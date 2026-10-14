@@ -9,6 +9,7 @@
 local _, ns = ...
 
 local ipairs, max, min, remove, concat = ipairs, math.max, math.min, table.remove, table.concat
+local pairs, floor, sort = pairs, math.floor, table.sort
 local tostring, tonumber = tostring, tonumber
 local gsub, strmatch, gmatch = string.gsub, string.match, string.gmatch
 
@@ -19,6 +20,34 @@ ns.TalentPlan = TalentPlan
 -- Legacy perk Talented starts them earlier but keeps the 51.
 TalentPlan.FIRST_LEVEL = 10
 TalentPlan.MAX_POINTS = 51
+TalentPlan.POINTS_PER_ROW = 5 -- each row opens after 5 more points in its tab
+
+---Fills in the points each node's row needs in its tab, for the nodes the game gave no gate
+---condition (no `req`), from their height: rows count down from the top node, and the gap
+---between rows is the smallest gap between two nodes' heights (more than 1 apart).
+---@param nodes table nodeID -> node with `y` (its height on the tree, growing downward)
+---@param perRow? number points each row adds, POINTS_PER_ROW by default
+function TalentPlan.RowGates(nodes, perRow)
+    perRow = perRow or TalentPlan.POINTS_PER_ROW
+    local ys = {}
+    for _, node in pairs(nodes) do
+        ys[#ys + 1] = node.y or 0
+    end
+    sort(ys)
+    local spacing
+    for i = 2, #ys do
+        local gap = ys[i] - ys[i - 1]
+        if gap > 1 and (not spacing or gap < spacing) then
+            spacing = gap
+        end
+    end
+    for _, node in pairs(nodes) do
+        if not node.req then
+            local row = spacing and floor(((node.y or 0) - ys[1]) / spacing + 0.5) or 0
+            node.req = row * perRow
+        end
+    end
+end
 
 ---Whether one more point can go into a node, after the points counted so far.
 ---@param tree table
