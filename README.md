@@ -42,7 +42,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Recipe Colors | Colors recipes in the professions window by your chance of a skill-up: orange, yellow, green, or gray, with the row's highlight to match. |
 | Combat Alert | Floats a red "Entering Combat" or green "Leaving Combat" line up and away from the middle of the screen, each with its own checkbox, plus how long it stays and an optional sound (move and resize it in Edit Mode). Off by default. |
 | Currency Bar | Shows your gold in a small tooltip-styled box, all three coins always, and optionally the currencies you tick Show on Backpack. Hovering it lists your gold and currencies with what this session gained or spent. Options for the tooltip, the session figures, and a column layout (move and resize it in Edit Mode). Off by default. |
-| Tooltips | Colors unit and item tooltips by class, reaction, or quality, colors the Horde or Alliance line red or blue, and adds player titles and who a unit is targeting. |
+| Tooltips | Colors unit and item tooltips by class, reaction, or quality, colors the Horde or Alliance line red or blue, and adds player titles and who a unit is targeting. Can hide the health bar under unit tooltips (off by default). |
 | **Items** | |
 | Already Known | Marks recipes, mounts, pets, toys, and other items you already know or have with a green check (or tint) on their icon, on merchants, the auction house, bags, mail, the loot window, and loot rolls, each with its own checkbox. |
 | Bag Slot Counter | Shows how many bag slots are free on the backpack button, or each bag's own count on its button, with the reagent bag counted on its own. The count turns orange at 4 or fewer free (or the number you pick) and red at 0. |

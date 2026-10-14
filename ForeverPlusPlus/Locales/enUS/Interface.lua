@@ -50,6 +50,8 @@ L.TOOLTIPS_ANCHOR_CURSOR_DESC = "Show tooltips at your mouse instead of their us
 L.TOOLTIPS_HIDE_IN_COMBAT = "Hide Unit Tooltips in Combat"
 L.TOOLTIPS_HIDE_IN_COMBAT_DESC = "Don't show player and NPC tooltips while you're in combat. Item "
     .. "and spell tooltips still show."
+L.TOOLTIPS_HIDE_HEALTH_BAR = "Hide Health Bar"
+L.TOOLTIPS_HIDE_HEALTH_BAR_DESC = "Hide the green health bar under player and NPC tooltips."
 
 -- RecipeColors
 L.RECIPECOLORS_TITLE = "Recipe Colors"

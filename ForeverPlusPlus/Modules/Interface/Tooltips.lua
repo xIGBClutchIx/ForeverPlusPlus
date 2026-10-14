@@ -37,6 +37,7 @@ local module = ns.NewModule("Tooltips", L.TOOLTIPS_DESC, {
     target = true,
     hideInCombat = false, -- hide unit tooltips while in combat
     anchorCursor = false, -- tooltips at the mouse instead of the bottom right
+    hideHealthBar = false, -- hide the health bar under unit tooltips
 })
 module.title = L.TOOLTIPS_TITLE
 module.category = "interface"
@@ -77,6 +78,8 @@ module.options = {
         section = L.TOOLTIPS_SECTION_BEHAVIOR },
     { key = "hideInCombat", name = L.TOOLTIPS_HIDE_IN_COMBAT, description = L.TOOLTIPS_HIDE_IN_COMBAT_DESC,
         section = L.TOOLTIPS_SECTION_BEHAVIOR },
+    { key = "hideHealthBar", name = L.TOOLTIPS_HIDE_HEALTH_BAR,
+        description = L.TOOLTIPS_HIDE_HEALTH_BAR_DESC, section = L.TOOLTIPS_SECTION_BEHAVIOR, added = "0.9.0" },
 }
 
 local GUILDMATE_COLOR = ns.Colors.GUILD_GREEN -- as on Player Nameplates
@@ -377,9 +380,31 @@ local function onDefaultAnchor(tooltip, parent)
     end
 end
 
+-- Hide Health Bar: GameTooltip.StatusBar hangs under the tooltip and shows, hides, and fills
+-- itself from a unit's GUID on every unit tooltip (GameTooltipUnitHealthBarMixin, with secure
+-- methods because the health may be secret). Fading it leaves all of that to Blizzard: nothing
+-- reads the bar, hooks it, or runs when it shows.
+local function fadeHealthBar(hide)
+    local bar = GameTooltip.StatusBar
+    if bar then
+        bar:SetAlpha(hide and 0 or 1)
+    end
+end
+
 function module:OnEnable()
     self:TooltipPostCall(Enum.TooltipDataType.Unit, onUnit)
     self:TooltipPostCall(Enum.TooltipDataType.Item, onItem)
     -- GameTooltip_SetDefaultAnchor is Blizzard's for every default-placed tooltip.
     self:Hook("GameTooltip_SetDefaultAnchor", onDefaultAnchor)
+    fadeHealthBar(self.db.hideHealthBar)
+end
+
+function module:OnDisable()
+    fadeHealthBar(false)
+end
+
+function module:OnOptionChanged(key)
+    if key == "hideHealthBar" and self.enabled then
+        fadeHealthBar(self.db.hideHealthBar)
+    end
 end
