@@ -28,6 +28,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Waylaid Crates**: Item Tooltips' Waylaid Crate Costs option moved here as Bundle Costs, keeping your choice.
 - **World Map**: Coordinates follows Blizzard's coordinate settings under Gameplay > Interface instead of its own checkboxes, which turned them back on at every login.
 - **Quest Tracker**: Font Size is gone: Edit Mode's Text Size sets the tracker's size.
+- **Profession Tooltips**: on a lockbox whose tooltip already says what Lockpicking it needs, colors that line instead of adding a second one, and remembers the skill, so a box Forever changed shows the right number.
 - **Settings**: the Modules page has new Character, Quests, System, and Units categories, listed in alphabetical order.
 - **Settings**: Hold Shift to Skip and Hold Shift to Watch are now Skip Key and Watch Key dropdowns (Shift, Ctrl, Alt, or None), like Auto Quest's.
 - **Settings**: options look and read the same across modules: Item Tooltips' parts each have an Enabled checkbox, sliders are shorter, buttons that throw away data say Clear, and modules say when a Blizzard setting they need is off.

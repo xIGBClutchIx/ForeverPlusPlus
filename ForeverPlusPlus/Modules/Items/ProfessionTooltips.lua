@@ -135,23 +135,27 @@ local ITEMS = { -- item ID -> { skill line, skill }
     [11370] = { MINE, 230 }, -- Dark Iron Ore
     [10620] = { MINE, 245 }, -- Thorium Ore
     [12365] = { MINE, 245 }, -- Dense Stone
-
-    -- Locked boxes: the Lockpicking skill to open them.
-    [16882] = { LOCK, 1 }, -- Battered Junkbox
-    [16883] = { LOCK, 25 }, -- Worn Junkbox
-    [16884] = { LOCK, 70 }, -- Sturdy Junkbox
-    [16885] = { LOCK, 175 }, -- Heavy Junkbox
-    [6712] = { LOCK, 1 }, -- Practice Lockbox
-    [4632] = { LOCK, 1 }, -- Ornate Bronze Lockbox
-    [4633] = { LOCK, 25 }, -- Heavy Bronze Lockbox
-    [4634] = { LOCK, 70 }, -- Iron Lockbox
-    [4636] = { LOCK, 125 }, -- Strong Iron Lockbox
-    [4637] = { LOCK, 175 }, -- Steel Lockbox
-    [4638] = { LOCK, 225 }, -- Reinforced Steel Lockbox
-    [5758] = { LOCK, 225 }, -- Mithril Lockbox
-    [5759] = { LOCK, 275 }, -- Thorium Lockbox
-    [5760] = { LOCK, 350 }, -- Eternium Lockbox
 }
+
+-- Locked boxes: item ID -> the Lockpicking skill to open them. The seed is from Classic; the
+-- skill in Blizzard's "Requires Lockpicking (25)" line on a box's tooltip is learned over it,
+-- and a box the seed lacks is learned from that line too.
+local LOCKBOXES = ns.GameData.New("lockboxes", {
+    [16882] = 1, -- Battered Junkbox
+    [16883] = 25, -- Worn Junkbox
+    [16884] = 70, -- Sturdy Junkbox
+    [16885] = 175, -- Heavy Junkbox
+    [6712] = 1, -- Practice Lockbox
+    [4632] = 1, -- Ornate Bronze Lockbox
+    [4633] = 25, -- Heavy Bronze Lockbox
+    [4634] = 70, -- Iron Lockbox
+    [4636] = 125, -- Strong Iron Lockbox
+    [4637] = 175, -- Steel Lockbox
+    [4638] = 225, -- Reinforced Steel Lockbox
+    [5758] = 225, -- Mithril Lockbox
+    [5759] = 275, -- Thorium Lockbox
+    [5760] = 350, -- Eternium Lockbox
+}, { kind = "item", label = "Lockboxes" })
 
 -- Blacksmiths make skeleton keys that open locks like Lockpicking: item ID, the skill it opens
 -- up to, and the Blacksmithing skill that makes it. From Classic; fix them here.
@@ -547,21 +551,82 @@ end
 
 -- Items --------------------------------------------------------------------------------------
 
+-- Whether `skill`, the name in Blizzard's requirement line, is Lockpicking, in English or the
+-- client's language (known only to characters who can pick locks).
+local function isLockpicking(skill)
+    if skill == L.PROFTOOLTIPS_LOCKPICKING_NAME then
+        return true
+    end
+    local _, name = Professions.Rank(LOCK)
+    return name ~= nil and skill == name
+end
+
+-- The Lockpicking skill in tooltip line `lineData` of item `id`, learned for the box, or nil when
+-- it isn't a lockbox's requirement line. A box we know counts whatever the skill's name says.
+local function learnLockLine(id, lineData)
+    local text = lineData and lineData.leftText
+    if not (readable(text) and type(text) == "string") then
+        return nil
+    end
+    local skill, need = ns.GameData.Requires(ns.Text.Plain(text))
+    if skill and (LOCKBOXES:Get(id) or isLockpicking(skill)) then
+        LOCKBOXES:Learn(id, need)
+        return need
+    end
+end
+
+-- Blizzard's own "Requires Lockpicking (25)" line on a lockbox: learned, and drawn again in the
+-- difficulty color instead of adding a second line under it.
+local function onItemLine(tooltip, data, lineData)
+    if not module.enabled then
+        return
+    end
+    local id = ItemTooltip.ItemID(data)
+    local need = id and learnLockLine(id, lineData)
+    if not (need and module.db.items) then
+        return
+    end
+    local line, color = skillLine(LOCK, need, L.PROFTOOLTIPS_REQUIRES)
+    if line then
+        addLine(tooltip, line, color)
+        return true
+    end
+end
+
+-- The skill line and skill an item's line is about: a lockbox's Lockpicking, or a herb's or ore's
+-- gathering skill. Nil for a lockbox whose tooltip already says it (onItemLine handles that).
+local function itemNeed(id, data)
+    local lock = LOCKBOXES:Get(id)
+    if lock then
+        if ns.GameData.TooltipRequires(data) then
+            return nil
+        end
+        return LOCK, lock
+    end
+    local item = ITEMS[id]
+    if item then
+        return item[1], item[2]
+    end
+end
+
 local function onItem(tooltip, data)
     if not (module.enabled and module.db.items) then
         return
     end
     local id = ItemTooltip.ItemID(data)
-    local item = id and ITEMS[id]
     local keySkill = id and module.db.blacksmithing and KEY_SKILL[id]
     if keySkill then
         local name = select(2, lockRank())
         addLine(tooltip, format(L.PROFTOOLTIPS_KEY, name or L.PROFTOOLTIPS_LOCKPICKING_NAME, keySkill),
             NORMAL_FONT_COLOR or { r = 1, g = 0.82, b = 0 })
     end
-    if item then
-        local text = item[1] == LOCK and L.PROFTOOLTIPS_REQUIRES or L.PROFTOOLTIPS_GATHERED
-        local line, color = skillLine(item[1], item[2], text)
+    local skillLineID, need = nil, nil
+    if id then
+        skillLineID, need = itemNeed(id, data)
+    end
+    if skillLineID then
+        local text = skillLineID == LOCK and L.PROFTOOLTIPS_REQUIRES or L.PROFTOOLTIPS_GATHERED
+        local line, color = skillLine(skillLineID, need, text)
         if line then
             addLine(tooltip, line, color)
         end
@@ -577,6 +642,7 @@ function module:OnEnable()
     self:TooltipPostCall(types.MinimapMouseover, onObject)
     self:TooltipPostCall(types.Unit, onUnit)
     ItemTooltip.OnInfo(onItem, module)
+    ItemTooltip.ReplaceLine(onItemLine, module)
     -- Pre and line calls can't be removed and have no hook-once helper: hooked once here, they
     -- only keep state for the post calls, and what they add checks module.enabled.
     if preHooked then

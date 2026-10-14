@@ -74,6 +74,9 @@ ns.changelog = {
                     .. "at every login." },
                 { L.QUESTTRACKER_TITLE, "Font Size is gone: Edit Mode's Text Size sets the "
                     .. "tracker's size." },
+                { L.PROFTOOLTIPS_TITLE, "On a lockbox whose tooltip already says what "
+                    .. "Lockpicking it needs, colors that line instead of adding a second one, and "
+                    .. "remembers the skill, so a box Forever changed shows the right number." },
                 { L.CHANGELOG_SETTINGS, "The Modules page has new Character, Quests, System, and "
                     .. "Units categories, listed in alphabetical order." },
                 { L.CHANGELOG_SETTINGS, "Hold Shift to Skip and Hold Shift to Watch are now Skip "
