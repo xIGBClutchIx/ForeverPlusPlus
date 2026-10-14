@@ -659,13 +659,15 @@ end
 
 -- Modules the Developer's Defaults preset turns on, on top of every module's default settings.
 local developerEnables = { "FishingCast", "SkipCinematics", "AutoScreenshot", "CurrencyBar",
-    "HideBetaFeedback", "ShortChannelNames", "EasyDelete", "AutoWeaponBuff", "MinimapNodeIcons" }
+    "HideBetaFeedback", "ShortChannelNames", "EasyDelete", "AutoWeaponBuff", "MinimapNodeIcons",
+    "AutoGossip" }
 
 -- Options the Developer's Defaults preset sets differently from the module's default.
 local developerOptions = {
     WorldMap = { zoneDungeons = "key", fishing = "key" },
     ChatHistory = { divider = true },
     QuestTracker = { sort = "low" },
+    AutoGossip = { other = true },
 }
 
 ---Puts every module's options (`module.options`) back to their defaults, then turns on the

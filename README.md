@@ -13,7 +13,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | **Automation** | |
 | Auto Decline | Turns down duel requests, and optionally party invites, guild invites, and guild charters, and says in chat who asked. Can let friends and guildmates through for duels and party invites. Off by default. |
 | Auto Dismount | Gets you off your mount or stands you up when a spell, flight, loot, or attack fails because you're mounted or sitting. Can also leave shapeshift forms (off by default). |
-| Auto Gossip | When an NPC has only one thing to say and no quests, picks it for you, so the bank, shop, or flight map opens straight away. Hold the Skip Key (Shift, Ctrl, Alt, or none) to choose yourself. |
+| Auto Gossip | When an NPC has only one thing to say and no quests, picks it for you, so the bank, shop, or flight map opens straight away. Hold the Skip Key (Shift, Ctrl, Alt, or none) to choose yourself. Off by default, and so is its Other NPCs option. |
 | Auto Release | Releases your spirit when you die in a battleground, unless you can resurrect yourself or someone is resurrecting you. Hold the Skip Key (an option, None by default) to stay where you fell. Off by default. |
 | Auto Screenshot | Takes a screenshot when you level up, earn an achievement, or defeat a boss, and can for good loot, reputation, PvP ranks, titles, battlegrounds, and deaths. Can hide the interface for the shot, and for the ones you take with the Screenshot key too, and can show your `/played` time when you level up. Off by default. |
 | Auto Repair | Repairs your gear at any merchant who repairs and says in chat what it cost. Hold the Skip Key (Shift, Ctrl, Alt, or none) to skip it. |

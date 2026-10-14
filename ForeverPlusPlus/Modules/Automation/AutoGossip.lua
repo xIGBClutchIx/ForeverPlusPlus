@@ -10,13 +10,13 @@ local GetTime = GetTime
 local L = ns.L
 
 local module = ns.NewModule("AutoGossip", L.AUTOGOSSIP_DESC, {
-    enabled = true,
+    enabled = false,
     banker = true,
     vendor = true,
     trainer = true,
     taxi = true,
     stable = true,
-    other = true,
+    other = false, -- any NPC, so it can pick something the player wanted to read
     skipKey = "shift",
     printOptions = false,
 })
