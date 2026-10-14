@@ -223,7 +223,7 @@ function Overlay:Draw()
         explored[areaKey(info.textureWidth, info.textureHeight, info.offsetX, info.offsetY)] = true
     end
     learn(artID, textures)
-    areas = areasOf(artID)
+    local areas = areasOf(artID)
     -- Where Blizzard's explored areas go: above the map art, below every icon.
     local manager = map.GetPinFrameLevelsManager and map:GetPinFrameLevelsManager()
     if manager then
