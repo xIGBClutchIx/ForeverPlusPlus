@@ -14,7 +14,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Auto Decline | Turns down duel requests, and optionally party invites, guild invites, and guild charters, and says in chat who asked. Can let friends and guildmates through for duels and party invites. Off by default. |
 | Auto Dismount | Gets you off your mount or stands you up when a spell, flight, loot, or attack fails because you're mounted or sitting. Can also leave shapeshift forms (off by default). |
 | Auto Gossip | When an NPC has only one thing to say and no quests, picks it for you, so the bank, shop, or flight map opens straight away. Hold the Skip Key (Shift, Ctrl, Alt, or none) to choose yourself. |
-| Auto Release | Releases your spirit when you die in a battleground, unless you can resurrect yourself or someone is resurrecting you. Off by default. |
+| Auto Release | Releases your spirit when you die in a battleground, unless you can resurrect yourself or someone is resurrecting you. Hold the Skip Key (an option, None by default) to stay where you fell. Off by default. |
 | Auto Screenshot | Takes a screenshot when you level up, earn an achievement, or defeat a boss, and can for good loot, reputation, PvP ranks, titles, battlegrounds, and deaths. Can hide the interface for the shot, and for the ones you take with the Screenshot key too, and can show your `/played` time when you level up. Off by default. |
 | Auto Repair | Repairs your gear at any merchant who repairs and says in chat what it cost. Hold the Skip Key (Shift, Ctrl, Alt, or none) to skip it. |
 | Auto Sell Junk | Sells the gray items in your bags when a merchant opens and says in chat what they sold for. Can stop at what the buyback list has room for, so anything you sold yourself stays buyable. Hold the Skip Key (Shift, Ctrl, Alt, or none) to skip it. Off by default. |
@@ -36,7 +36,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Short Channel Names | Shows chat channels as [1], [G], [LFG] (initials), or [General] (the name without its zone) instead of [1. General], alone or after the number, as number and initials ([3. T], [4. LFG]) by default, and [Guild], [Party], [Raid] and the like as [GD], [P], [R] (an option, on by default). Off by default. |
 | Chat Font | Draws the chat windows in another of the game's fonts (Friz Quadrata, Arial Narrow, Skurri, or Morpheus), keeping their size, and optionally the chat input box too. Unavailable on Korean, Chinese, and Russian clients, whose chat font needs fallbacks. |
 | Persistent Chat | Keeps chat text on screen instead of fading it out after a while. |
-| Chat History | Keeps each chat window's latest lines when you log out or reload and shows them again at login, except whispers. A slider sets how many lines, and a checkbox the line that marks where it ends. |
+| Chat History | Keeps each chat window's latest lines, for each character, when you log out or reload and shows them again at login, except whispers. A slider sets how many lines, and a checkbox the line that marks where it ends. |
 | Social Button | Moves the social (Quick Join) button down beside the chat window's other buttons. |
 | **Interface** | |
 | Recipe Colors | Colors recipes in the professions window by your chance of a skill-up: orange, yellow, green, or gray, with the row's highlight to match. |

@@ -79,6 +79,8 @@ ns.changelog = {
                     .. "and your XP per hour and time to level since you logged in." },
                 { L.XPBARTEXT_TITLE, "The new Green When Quests Level You option (on by default) turns off "
                     .. "the green quest XP text shown once turning those quests in would level you." },
+                { L.AUTORELEASE_TITLE, "The new Skip Key option (None by default) lets you hold "
+                    .. "a key while you're dead to stay where you fell." },
                 { L.CHANGELOG_SETTINGS, "An option you've changed has an undo arrow at the end of "
                     .. "its row that sets it back to its default, and its tooltip says what the "
                     .. "default is." },
@@ -123,6 +125,11 @@ ns.changelog = {
                 { L.CHATCOPY_TITLE, "Copies everything the chat window holds. The Lines slider is "
                     .. "gone, since a window keeps only its last 128 lines." },
                 { L.CHATHISTORY_TITLE, "Lines Saved goes up to 125, about all a chat window holds." },
+                { L.CHATHISTORY_TITLE, "Saves each character's chat on its own, so an alt doesn't "
+                    .. "log in to another character's. The first character you log in with keeps "
+                    .. "the chat saved before." },
+                { L.AUTOSCREENSHOT_TITLE, "Played Time on Level Up sits under Level Up and works "
+                    .. "only while Level Up is on, since it's for that screenshot." },
                 { L.ALREADYKNOWN_TITLE, "The Loot option also marks known items on group loot "
                     .. "rolls, before you choose Need or Greed." },
                 { L.AUTOSELLJUNK_TITLE, "Keep Everything Buyable Back sells only as much junk as "

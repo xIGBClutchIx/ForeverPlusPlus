@@ -1,4 +1,5 @@
--- Chat History: keeps each chat window's latest lines across logging out and reloading. The
+-- Chat History: keeps each chat window's latest lines across logging out and reloading, for each
+-- character on its own. The
 -- lines are read from the windows' own buffers as the game logs out (PLAYER_LOGOUT, which a
 -- reload also sends), so nothing runs while you play, and put back with AddMessage at login.
 -- Colors and links are kept because the lines are saved as they were drawn. A line the game
@@ -6,7 +7,7 @@
 -- plain text that players often share when reporting a bug.
 local _, ns = ...
 
-local ipairs, type, max = ipairs, type, math.max
+local pairs, ipairs, type, max = pairs, ipairs, type, math.max
 local GetChatTypeIndex = GetChatTypeIndex
 
 local L = ns.L
@@ -19,6 +20,21 @@ local module = ns.NewModule("ChatHistory", L.CHATHISTORY_DESC, {
 })
 module.title = L.CHATHISTORY_TITLE
 module.category = "chat"
+-- Each character's own chat, so an alt doesn't log in to another character's.
+module.perCharacter = { saved = true }
+
+-- Up to 0.8.4 the lines were saved for the account. The first character to log in takes them.
+ns.MigrateCharacter(2, function(char, db)
+    ns.Store.Claim(char, db, "ChatHistory", "saved", function(entries)
+        local mine
+        for index, lines in pairs(entries) do
+            mine = mine or {}
+            mine[index] = lines
+            entries[index] = nil
+        end
+        return mine
+    end)
+end)
 
 -- How much is kept, then how it shows.
 module.options = {

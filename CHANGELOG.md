@@ -27,6 +27,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **XP Bar Text**: the new Fill Bar with Ready Quests option (on by default) fills the experience bar on from your XP in green with what your quests ready to turn in will give, like rested XP.
 - **XP Bar Text**: the new Detailed Tooltip option (on by default) adds to the bar's tooltip the XP left to level, your rested XP, the XP of your quests, and your XP per hour and time to level since you logged in.
 - **XP Bar Text**: the new Green When Quests Level You option (on by default) turns off the green quest XP text shown once turning those quests in would level you.
+- **Auto Release**: the new Skip Key option (None by default) lets you hold a key while you're dead to stay where you fell.
 - **Settings**: an option you've changed has an undo arrow at the end of its row that sets it back to its default, and its tooltip says what the default is.
 
 ### Changed
@@ -46,6 +47,8 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Commands**: `/fpp reset` asks first, and module names in `/fpp` match their titles, such as `/fpp toggle BagSlotCounter`.
 - **Chat Copy**: copies everything the chat window holds. The Lines slider is gone, since a window keeps only its last 128 lines.
 - **Chat History**: Lines Saved goes up to 125, about all a chat window holds.
+- **Chat History**: saves each character's chat on its own, so an alt doesn't log in to another character's. The first character you log in with keeps the chat saved before.
+- **Auto Screenshot**: Played Time on Level Up sits under Level Up and works only while Level Up is on, since it's for that screenshot.
 - **Already Known**: the Loot option also marks known items on group loot rolls, before you choose Need or Greed.
 - **Auto Sell Junk**: Keep Everything Buyable Back sells only as much junk as the buyback list has room for beside what you sold yourself, so an item sold by mistake stays buyable.
 - **Auto Gossip**: learns which kind of NPC an option is for from the window it opens, so a banker, vendor, trainer, or flight master the game marks differently is picked by its own checkbox after you pick it once.

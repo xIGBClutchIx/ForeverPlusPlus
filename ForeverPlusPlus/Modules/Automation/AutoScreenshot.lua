@@ -44,11 +44,12 @@ module.options = {
         section = GENERAL },
     { key = "hideOwn", name = L.AUTOSCREENSHOT_HIDE_OWN, description = L.AUTOSCREENSHOT_HIDE_OWN_DESC,
         section = GENERAL, requires = "hideUI", added = "0.8.0" },
-    { key = "playedTime", name = L.AUTOSCREENSHOT_PLAYED_TIME,
-        description = L.AUTOSCREENSHOT_PLAYED_TIME_DESC, section = GENERAL, added = "0.8.0" },
     ns.ChatOption(L.AUTOSCREENSHOT_CHAT_DESC, GENERAL),
     { key = "levelUp", name = L.AUTOSCREENSHOT_LEVEL_UP, description = L.AUTOSCREENSHOT_LEVEL_UP_DESC,
         section = EVENTS },
+    { key = "playedTime", name = L.AUTOSCREENSHOT_PLAYED_TIME,
+        description = L.AUTOSCREENSHOT_PLAYED_TIME_DESC, section = EVENTS, requires = "levelUp",
+        added = "0.8.0" },
     { key = "achievement", name = L.AUTOSCREENSHOT_ACHIEVEMENT,
         description = L.AUTOSCREENSHOT_ACHIEVEMENT_DESC, section = EVENTS },
     { key = "loot", name = L.AUTOSCREENSHOT_LOOT, description = L.AUTOSCREENSHOT_LOOT_DESC,
@@ -365,6 +366,9 @@ end
 local function sync()
     for key, events in pairs(HANDLERS) do
         local on = module.enabled and module.db[key]
+        if key == "playedTime" then
+            on = on and module.db.levelUp -- it's for the level up's screenshot
+        end
         for event, fn in pairs(events) do
             if on and exists(event) then
                 module:On(event, fn)

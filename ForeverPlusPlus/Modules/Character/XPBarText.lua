@@ -54,7 +54,7 @@ module.options = {
     },
     {
         key = "questColor", name = L.XPBARTEXT_QUEST_COLOR, description = L.XPBARTEXT_QUEST_COLOR_DESC,
-        added = "0.9.0", section = L.XPBARTEXT_SECTION_TEXT,
+        added = "0.9.0", section = L.XPBARTEXT_SECTION_TEXT, requires = "quests",
     },
     {
         key = "questBar", name = L.XPBARTEXT_QUEST_BAR, description = L.XPBARTEXT_QUEST_BAR_DESC,

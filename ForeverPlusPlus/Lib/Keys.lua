@@ -1,6 +1,6 @@
 -- The modifier key a module lets the player hold to skip what it does (Auto Quest, Auto Gossip,
--- Auto Repair, Auto Sell Junk) or to let something through (Skip Cinematics), so each offers the
--- same choices under the same names.
+-- Auto Repair, Auto Sell Junk, Auto Release) or to let something through (Skip Cinematics), so
+-- each offers the same choices under the same names.
 local _, ns = ...
 
 local type = type

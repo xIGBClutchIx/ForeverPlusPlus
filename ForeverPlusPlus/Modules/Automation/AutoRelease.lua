@@ -13,6 +13,7 @@ local L = ns.L
 local module = ns.NewModule("AutoRelease", L.AUTORELEASE_DESC, {
     enabled = false,
     delay = 0, -- seconds
+    skipKey = "none",
     chat = true,
 })
 module.title = L.AUTORELEASE_TITLE
@@ -31,8 +32,10 @@ module.options = {
             return ns.Text.Seconds(seconds)
         end,
     },
+    ns.Keys.Option("skipKey", L.SKIP_KEY, L.AUTORELEASE_KEY_DESC),
     ns.ChatOption(L.AUTORELEASE_CHAT_DESC),
 }
+module.options[2].added = "0.9.0" -- the Skip Key
 
 -- Self-resurrect options (soulstone, reincarnation) arrive a moment after PLAYER_DEAD, so even
 -- "right away" waits this long before looking.
@@ -80,6 +83,10 @@ local function release()
     end
     -- Some fights hold you where you fell; the game greys out Release there too.
     if HasNoReleaseAura and HasNoReleaseAura() then
+        return
+    end
+    -- The player chose to stay where they fell; Blizzard's Release button is still there.
+    if ns.Keys.IsDown(module.db.skipKey) then
         return
     end
     if canSelfResurrect() then

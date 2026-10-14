@@ -153,6 +153,7 @@ L.AUTORELEASE_DESC = "Release your spirit when you die in a battleground, unless
 L.AUTORELEASE_DELAY = "Delay"
 L.AUTORELEASE_DELAY_DESC = "How long after dying to wait before releasing."
 L.AUTORELEASE_NOW = "Right Away"
+L.AUTORELEASE_KEY_DESC = "Hold this key while you're dead to stay where you fell."
 L.AUTORELEASE_CHAT_DESC = "Say in chat when your spirit was released, or why it wasn't."
 L.AUTORELEASE_RELEASED = "Released your spirit."
 L.AUTORELEASE_SELF_RES = "Didn't release: you can resurrect yourself."

@@ -61,7 +61,9 @@ for _, args in ipairs({
     module.options[#module.options + 1] = size
 end
 
-local LAST_CLASSIC_QUEST = 9665
+-- The last quest ID of original Classic (inferred from Classic quest data). Nothing in play says
+-- it, so a fix ships as a new seed.
+local CLASSIC_QUESTS = ns.GameData.New("foreverQuestIcons", { lastClassicQuest = 9665 })
 
 -- Blizzard atlases (the Trading Post's infinity sign and the WoW Forever logo), each with its
 -- height and width at 100% as a share of the text's font size. The logo's square art has room
@@ -86,7 +88,7 @@ local function iconFor(fontString, percent)
 end
 
 local function isNew(questID)
-    return type(questID) == "number" and questID > LAST_CLASSIC_QUEST
+    return type(questID) == "number" and questID > CLASSIC_QUESTS:Get("lastClassicQuest")
 end
 
 -- A title without our icon at its end, so a title can be marked again (another icon, or none)
