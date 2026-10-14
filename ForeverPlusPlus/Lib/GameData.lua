@@ -201,6 +201,12 @@ end
 -- Single IDs ------------------------------------------------------------------------------------
 
 local function single(kind, id, label)
+    -- Two modules can depend on the same ID; Self Test lists it once.
+    for _, entry in ipairs(singles) do
+        if entry.kind == kind and entry.id == id then
+            return id
+        end
+    end
     singles[#singles + 1] = { kind = kind, id = id, label = label }
     return id
 end

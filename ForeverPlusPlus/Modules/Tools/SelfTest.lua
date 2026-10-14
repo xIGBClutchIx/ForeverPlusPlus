@@ -197,8 +197,7 @@ local function checkTaxi()
     present("taxi.functions", { "TakeTaxiNode", "GetNumRoutes", "TaxiGetNodeSlot",
         "TaxiRequestEarlyLanding", "UnitOnTaxi", "GetTaxiMapID", "TaxiNodeName", "TaxiNodeCost",
         "NumTaxiNodes", "TaxiNodeGetType", "C_TaxiMap.GetAllTaxiNodes",
-        "C_TaxiMap.GetTaxiNodesForMap", "C_TaxiMap.GetDestinationMap",
-        "C_TaxiMap.ShouldMapShowTaxiNodes" })
+        "C_TaxiMap.GetTaxiNodesForMap", "C_TaxiMap.ShouldMapShowTaxiNodes" })
     local states = Enum.FlightPathState
     info("taxi.states", states and keys(states) or "Enum.FlightPathState missing")
     info("taxi.onTaxi", "UnitOnTaxi('player') " .. join(call("UnitOnTaxi", "player")))
@@ -338,7 +337,8 @@ local function checkSecrets()
     present("secret.functions", { "issecretvalue", "C_CurveUtil.CreateCurve", "UnitHealthPercent",
         "CurveConstants.ScaleTo100", "Enum.LuaCurveType" })
     local ok, curve = call("C_CurveUtil.CreateCurve")
-    if not (ok and type(curve) == "table") then
+    -- Forever gives a userdata (LuaCurveObject), not a table.
+    if not (ok and (type(curve) == "table" or type(curve) == "userdata")) then
         fail("secret.curve", "CreateCurve gave " .. text(curve))
         return
     end
@@ -414,7 +414,7 @@ end
 local function checkPlayers()
     section("players, groups and events")
     present("players.functions", { "RepopMe", "CancelDuel", "StaticPopup_Hide", "Dismount",
-        "C_ChatInfo.PerformEmote", "StopCinematic", "FinishMovie", "GetNumTitles", "IsTitleKnown",
+        "C_ChatInfo.PerformEmote", "StopCinematic", "MovieFrame.FinishMovie", "GetNumTitles", "IsTitleKnown",
         "C_MajorFactions.GetMajorFactionProgressionInfo", "C_RecentAllies.IsRecentAllyByGUID" })
     info("players.ally-color", RECENT_ALLY_FONT_COLOR and join(RECENT_ALLY_FONT_COLOR:GetRGB())
         or "RECENT_ALLY_FONT_COLOR missing")

@@ -43,7 +43,8 @@ module.options = {
 
 local MAINHAND = 16
 local POLE_CLASS, POLE_SUBCLASS = 2, 20 -- weapons: fishing poles
-local FISHING = ns.GameData.Spell(131474, "Fishing") -- 7620 is the older ID for it
+-- Classic's ID: Self Test on build 70338 found Mainline's 131474 isn't in Forever's data.
+local FISHING = ns.GameData.Spell(7620, "Fishing")
 
 local button -- our secure button, made on first enable (a frame can't be removed)
 local lastClick = 0
@@ -76,7 +77,7 @@ local function disarm()
 end
 
 local function arm()
-    local name = C_Spell.GetSpellName(FISHING) or C_Spell.GetSpellName(7620)
+    local name = C_Spell.GetSpellName(FISHING)
     if name then
         SetOverrideBindingSpell(button, true, "BUTTON2", name)
         armed = true
@@ -147,7 +148,7 @@ local function isFishing(spellID)
         return false
     end
     local name = C_Spell.GetSpellName(spellID)
-    return name ~= nil and (name == C_Spell.GetSpellName(FISHING) or name == C_Spell.GetSpellName(7620))
+    return name ~= nil and name == C_Spell.GetSpellName(FISHING)
 end
 
 local function cancelRestore()

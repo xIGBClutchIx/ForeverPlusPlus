@@ -4,14 +4,15 @@
 -- and loot rolls, each with its own checkbox.
 --
 -- "Known" is what the game's own item tooltip says: its "Already known" line, or the pet
--- line's "Collected (1/3)". A pet in the auction house is asked of the pet journal by species.
+-- line's "Collected (1/3)". Forever has no caged battle pets (item 82800, the Pet Cage, isn't in
+-- its data), so auction rows are items only.
 -- Nothing is written onto Blizzard's frames: our own textures sit on the icons, a check mark and
 -- a green tint that multiplies the icon, and the icon's own color is never touched.
 local _, ns = ...
 
 local _G, ipairs, type, strfind = _G, ipairs, type, strfind
 local setmetatable, pairs = setmetatable, pairs
-local C_Item, C_PetJournal, C_Container = C_Item, C_PetJournal, C_Container
+local C_Item, C_Container = C_Item, C_Container
 local C_ToyBox = C_ToyBox
 local C_Timer, GetTime = C_Timer, GetTime
 
@@ -65,7 +66,6 @@ module.options = {
 local TINT = { 0.45, 1, 0.45 }
 local CHECK_TEXTURE = "Interface\\RaidFrame\\ReadyCheck-Ready" -- Blizzard's ready check mark
 local RECHECK = 10 -- seconds an item that isn't known is believed before it's looked at again
-local PET_ITEM_ID = ns.GameData.Item(82800, "Pet Cage") -- a caged pet's stand-in in the auction house
 
 -- Is it known ---------------------------------------------------------------------------------
 
@@ -135,10 +135,6 @@ local function check(key, test, arg)
     return false
 end
 
-local function speciesKnown(speciesID)
-    return C_PetJournal.GetNumCollectedInfo(speciesID) > 0
-end
-
 ---Whether an item link (or "item:123") is one the player already has.
 local function itemKnown(link)
     if not link then
@@ -149,10 +145,6 @@ local function itemKnown(link)
         return false
     end
     return check(itemID, tooltipKnown, link)
-end
-
-local function petKnownBySpecies(speciesID)
-    return speciesID and C_PetJournal and check("pet" .. speciesID, speciesKnown, speciesID) or false
 end
 
 -- Marks -----------------------------------------------------------------------------------------
@@ -244,11 +236,7 @@ local function updateAuction()
         if itemKey and cell and cell.Icon then
             local isKnown = false
             if on and itemKey.itemID then
-                if itemKey.itemID == PET_ITEM_ID then
-                    isKnown = petKnownBySpecies(itemKey.battlePetSpeciesID)
-                else
-                    isKnown = itemKnown("item:" .. itemKey.itemID)
-                end
+                isKnown = itemKnown("item:" .. itemKey.itemID)
             end
             setMark(cell.Icon, isKnown, 12)
         end

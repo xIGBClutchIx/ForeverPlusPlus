@@ -63,7 +63,8 @@ end
 
 -- The last quest ID of original Classic (inferred from Classic quest data). Nothing in play says
 -- it, so a fix ships as a new seed.
-local CLASSIC_QUESTS = ns.GameData.New("foreverQuestIcons", { lastClassicQuest = 9665 })
+local CLASSIC_QUESTS = ns.GameData.New("foreverQuestIcons", { lastClassicQuest = 9665 },
+    { label = "Forever Quest Icons" })
 
 -- Blizzard atlases (the Trading Post's infinity sign and the WoW Forever logo), each with its
 -- height and width at 100% as a share of the text's font size. The logo's square art has room
