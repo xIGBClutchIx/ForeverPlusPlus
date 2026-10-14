@@ -87,12 +87,12 @@ Everything is on by default except where noted. Each module can be turned off, a
 
 ## Use
 
-Open Game Menu > Options > AddOns > Forever++ (or type `/fpp`). It opens on the Modules page: every module with a checkbox, grouped by category, with a search box at the top that narrows the list by name and description and a New checkbox beside it that shows only modules marked NEW; click a module to see what it does and its options beside the list. Console Variables and Profiler are their own pages, Debug has sections for What's New (Show Tags and buttons to reset the version you last saw and the welcome), Diagnostics (copy debug info, print each module's events, and reload), Testing (Self Test, Test Error, and nameplate checks), and Logging (options that print what a module does in chat), and Changelog has what changed in each release (also in [CHANGELOG.md](CHANGELOG.md)). About has the version, links, and commands. The Defaults button at the top right of Modules, Debug, and About offers two choices: Recommended Defaults puts every module's settings back to how they start, and Developer's Defaults does that and also turns on Fishing Cast, Skip Cinematics, Auto Screenshot, Currency Bar, Hide Beta Feedback, Short Channel Names, Easy Delete, and Auto Weapon Buff, and sets World Map's Zone Info Dungeons and Fishing to Hold Detail Key.
+Open Game Menu > Options > AddOns > Forever++ (or type `/fpp`). It opens on the Modules page: every module with a checkbox, grouped by category, with a search box at the top that narrows the list by name, description, and options and a New checkbox beside it that shows only modules marked NEW; click a module to see what it does and its options beside the list. Console Variables and Profiler are their own pages, Debug has sections for What's New (Show Tags and buttons to reset the version you last saw and the welcome), Diagnostics (copy debug info, print each module's events, and reload), Testing (Self Test, Test Error, and nameplate checks), and Logging (options that print what a module does in chat), and Changelog has what changed in each release, with a search box and a By Module checkbox (on by default) that groups the notes under their modules (also in [CHANGELOG.md](CHANGELOG.md)). About has the version, links, and commands. The Defaults button at the top right of Modules, Debug, Changelog, and About offers two choices: Recommended Defaults puts every module's settings back to how they start, and Developer's Defaults does that and also turns on Fishing Cast, Skip Cinematics, Auto Screenshot, Currency Bar, Hide Beta Feedback, Short Channel Names, Easy Delete, Auto Weapon Buff, Minimap Node Icons, and Auto Gossip with its Other NPCs, sets World Map's Zone Info Dungeons and Fishing to Hold Detail Key, turns on Chat History's divider line, and sorts Quest Tracker lowest level first.
 
 | Command | What it does |
 |---|---|
 | `/fpp` | Opens the Forever++ settings (`/forever++` works too). |
-| `/fpp list` | Lists the modules and whether each is on. |
+| `/fpp list` | Lists the modules and whether each is on, and the commands (`/fpp help` too). |
 | `/fpp toggle <module> [option]` | Turns a module on or off, or with an option, flips that checkbox. |
 | `/fpp options <module>` | Lists a module's options and their values. |
 | `/fpp set <module> <option> [value]` | Changes an option: `on`/`off`, a choice such as `/fpp set PlayerNameplates level after`, or a number such as `/fpp set WorldMap dungeonSize 150`. Leave out the value to see the choices. |
@@ -101,6 +101,7 @@ Open Game Menu > Options > AddOns > Forever++ (or type `/fpp`). It opens on the 
 | `/fpp profile` | Opens the Profiler. |
 | `/fpp selftest` | Probes the client APIs Forever++ depends on and records events (flights, deaths, duels) until `/reload`; the log is saved in `ForeverPlusPlusDB.selfTest`. Also a button on the Debug page. |
 | `/fpp errors` | Shows the errors Error Catcher caught. |
+| `/fpp ranks` | Lists the spells on your action bars that have a higher rank you know (Spell Ranks). |
 | `/fpp scan` | Scans the open auction house now. |
 | `/fpp resetprices` | Forgets the saved auction prices. |
 | `/fpp nodes [here]` | Checks what Minimap Node Icons sees on the minimap now: whether tracking is on and which herbs and veins it can read. With `here`, point at a dot and it says where the dot is against where a scan puts it. |
@@ -123,7 +124,7 @@ mklink /J "<WoW folder>\_classic_beta_\Interface\AddOns\ForeverPlusPlus" "<this 
 
 ### Add a module
 
-1. Create `Modules/<Category>/YourThing.lua` (the folder is its category: Automation, Character, Chat, Interface, Items, Map, Quests, System, Units, or Tools) starting with `local _, ns = ...`, and add it to the TOC before `Init.lua`.
+1. Create `Modules/<Category>/YourThing.lua` (the folder is its category: Automation, Character, Chat, Interface, Items, Map, Quests, System, Units, or Tools) starting with `local _, ns = ...`, and add it to the TOC after the other modules, before `Changelog.lua`.
 2. Call `ns.NewModule("YourThing", ns.L.YOURTHING_DESC, { enabled = true, ... })`. The description is its tooltip in Settings, and `module.title = ns.L.YOURTHING_TITLE` is the name shown there. Every string the player sees goes in `Locales/enUS/` (the file for its category), keyed with the module's name.
 3. Do the work in `OnEnable` and undo it in `OnDisable`: modules turn on and off without a reload. A hook can't be removed, so use `self:Hook(object, "Method", fn)` (or `self:Hook("GlobalFunction", fn)`, or `self:HookScript(frame, "OnShow", fn)`): it hooks once and does nothing while the module is off. Events added with `self:On(event, fn)` stop by themselves, so a module that only uses those and hooks needs no `OnDisable`.
 4. Set `module.category` (`automation`, `character`, `chat`, `interface`, `items`, `map`, `quests`, `system`, or `units`). A tool with nothing to turn off sets `module.alwaysOn = true` and gets no checkbox. A module only for some clients gives `module:IsAvailable()`. Set `module.added` to the version it first ships in (`"0.8.0"`) so the Modules page marks it NEW for players updating to that version; an option takes `added` the same way, or `changed` for the version it changed in.
