@@ -1729,8 +1729,8 @@ end
 -- A release's entries in the groups its notes show, `{ heading, items }`, where an item is
 -- `{ entry, name, text }`: the entry from Changelog.lua and what shows of it, `name` in gold
 -- before `text`. As written, the groups are its sections and the names its modules'. With
--- `byModule`, the groups are its modules', in alphabetical order with General (entries without a
--- module) last, and the names the sections'.
+-- `byModule`, the groups are its modules', in alphabetical order after General (entries without
+-- a module), and the names the sections'.
 local function noteGroups(release, byModule)
     local groups, byName = {}, {}
     for _, section in ipairs(release.sections) do
@@ -1757,7 +1757,7 @@ local function noteGroups(release, byModule)
     if byModule then
         sort(groups, function(a, b)
             if a.general ~= b.general then
-                return b.general
+                return a.general
             end
             return strlower(a[1]) < strlower(b[1])
         end)
@@ -1890,7 +1890,7 @@ local function buildChangelog(frame)
     -- Module says.
     local function show(i)
         shown = i
-        local byModule = ns.db.changelogByModule and true or false
+        local byModule = ns.db.changelogByModule ~= false
         for _, row in ipairs(rows) do
             paint(row)
         end
@@ -1963,12 +1963,16 @@ local function buildChangelog(frame)
 
     -- A By Module checkbox left of the search box, like the Modules page's New, that groups the
     -- notes on the right under their modules instead of Added, Changed, and Fixed. Saved for the
-    -- account (ns.db.changelogByModule), off by default.
+    -- account, on by default: ns.db.changelogByModule is false once it's unchecked, nil while on.
     local byModule = newCheckbox(frame, 22, function(checked)
-        ns.db.changelogByModule = checked or nil
+        if checked then
+            ns.db.changelogByModule = nil
+        else
+            ns.db.changelogByModule = false
+        end
         show(shown)
     end)
-    byModule:SetChecked(ns.db.changelogByModule and true or false)
+    byModule:SetChecked(ns.db.changelogByModule ~= false)
     local byModuleText = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     byModuleText:SetText(L.CHANGELOG_BY_MODULE)
     byModuleText:SetPoint("RIGHT", searchBox or defaults, "LEFT", -12, 0)

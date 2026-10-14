@@ -90,7 +90,7 @@ ns.changelog = {
                 { L.CHANGELOG_SETTINGS, "An option you've changed has an undo arrow at the end of "
                     .. "its row that sets it back to its default, and its tooltip says what the "
                     .. "default is." },
-                { L.CHANGELOG_SETTINGS, "The Changelog page has a By Module checkbox (off by "
+                { L.CHANGELOG_SETTINGS, "The Changelog page has a By Module checkbox (on by "
                     .. "default) that groups a release's notes under their modules instead of "
                     .. "Added, Changed, and Fixed." },
             } },
