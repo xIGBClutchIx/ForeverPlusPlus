@@ -1696,12 +1696,12 @@ local function isNewRelease(release)
         or false
 end
 
--- An entry as it shows: its text, after its module's name in gold when it has one.
-local function entryText(entry)
-    if type(entry) == "table" then
-        return format("|cffffd100%s|r: %s", entry[1], entry[2]) -- gold, like GameFontNormal
+-- An item of noteGroups as it shows: its text, after its name in gold when it has one.
+local function itemText(item)
+    if item[2] then
+        return format("|cffffd100%s|r: %s", item[2], item[3]) -- gold, like GameFontNormal
     end
-    return entry
+    return item[3]
 end
 
 -- Whether the search (lowercased, nil for none) finds an entry, by its module's name or its text.
@@ -1724,6 +1724,45 @@ local function countMatches(release, search)
         end
     end
     return count
+end
+
+-- A release's entries in the groups its notes show, `{ heading, items }`, where an item is
+-- `{ entry, name, text }`: the entry from Changelog.lua and what shows of it, `name` in gold
+-- before `text`. As written, the groups are its sections and the names its modules'. With
+-- `byModule`, the groups are its modules', in alphabetical order with General (entries without a
+-- module) last, and the names the sections'.
+local function noteGroups(release, byModule)
+    local groups, byName = {}, {}
+    for _, section in ipairs(release.sections) do
+        local items = {}
+        for _, entry in ipairs(section[2]) do
+            local named = type(entry) == "table"
+            if byModule then
+                local heading = named and entry[1] or L.CHANGELOG_GENERAL
+                local group = byName[heading]
+                if not group then
+                    group = { heading, {}, general = not named }
+                    byName[heading] = group
+                    groups[#groups + 1] = group
+                end
+                group[2][#group[2] + 1] = { entry, section[1], named and entry[2] or entry }
+            else
+                items[#items + 1] = { entry, named and entry[1], named and entry[2] or entry }
+            end
+        end
+        if not byModule then
+            groups[#groups + 1] = { section[1], items }
+        end
+    end
+    if byModule then
+        sort(groups, function(a, b)
+            if a.general ~= b.general then
+                return b.general
+            end
+            return strlower(a[1]) < strlower(b[1])
+        end)
+    end
+    return groups
 end
 
 -- "N changes" for a release's notes.
@@ -1760,9 +1799,10 @@ end
 -- A release's notes, a stack: its title, the NEW label while it's new, and how many changes the
 -- search finds, then each section's heading in gold over a fading gold line, and its entries after
 -- a dash, their wrapped lines lined up after it and a module's name in gold. Only the entries the
--- search finds show, under their sections' headings. `view.search(text)` lays it out for a search
--- (lowercased, nil for none), and `view.update` keeps its NEW label.
-local function buildNotes(content, width, release)
+-- search finds show, under their sections' headings. With `byModule`, the headings are the
+-- modules' and the names in gold the sections' (noteGroups). `view.search(text)` lays it out for a
+-- search (lowercased, nil for none), and `view.update` keeps its NEW label.
+local function buildNotes(content, width, release, byModule)
     local view = newStack(content, width, 0)
     view:SetPoint("TOPLEFT")
     view.top, view.bottom = 4, 12
@@ -1789,27 +1829,27 @@ local function buildNotes(content, width, release)
         count:SetPoint("LEFT", title, "LEFT", x, 0)
     end
 
-    for _, section in ipairs(release.sections) do
-        local entries = section[2]
+    for _, group in ipairs(noteGroups(release, byModule)) do
+        local items = group[2]
         local top = CreateFrame("Frame", nil, view)
         top:SetWidth(width)
         local heading = top:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
         heading:SetPoint("TOPLEFT", 4, 0)
-        heading:SetText(section[1])
+        heading:SetText(group[1])
         local rule = top:CreateTexture(nil, "ARTWORK")
         rule:SetPoint("TOPLEFT", 4, -heading:GetStringHeight() - 6)
         rule:SetSize(min(RULE_WIDTH, width - 8), 1)
         fadeGold(rule)
         top:SetHeight(heading:GetStringHeight() + 6 + 1 + 5)
         addEntry(view, top, function()
-            for _, entry in ipairs(entries) do
-                if entryMatches(entry, search) then
+            for _, item in ipairs(items) do
+                if entryMatches(item[1], search) then
                     return true
                 end
             end
             return false
         end, 18)
-        for _, entry in ipairs(entries) do
+        for _, item in ipairs(items) do
             local row = CreateFrame("Frame", nil, view)
             row:SetWidth(width)
             local dash = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
@@ -1819,9 +1859,9 @@ local function buildNotes(content, width, release)
             line:SetPoint("TOPLEFT", 24, 0)
             line:SetWidth(width - 28)
             line:SetJustifyH("LEFT")
-            line:SetText(entryText(entry))
+            line:SetText(itemText(item))
             row:SetHeight(line:GetStringHeight())
-            addEntry(view, row, function() return entryMatches(entry, search) end, 8)
+            addEntry(view, row, function() return entryMatches(item[1], search) end, 8)
         end
     end
 
@@ -1837,7 +1877,8 @@ local function buildChangelog(frame)
     ns.AddPageTitle(frame, L.CHANGELOG)
     local split = newSplit(frame, CHANGELOG_LIST_WIDTH)
     local releases = ns.changelog or {}
-    local rows, views, updates = {}, {}, {}
+    local rows, updates = {}, {}
+    local views = { [false] = {}, [true] = {} } -- by byModule, then release
     local shown -- the release on the right
     local search -- the search, lowercased, or nil while the box is empty
 
@@ -1845,23 +1886,27 @@ local function buildChangelog(frame)
         return countMatches(releases[i], search) > 0
     end
 
-    -- Shows release `i` on the right (nil for none), laid out for the search.
+    -- Shows release `i` on the right (nil for none), laid out for the search and grouped as By
+    -- Module says.
     local function show(i)
         shown = i
+        local byModule = ns.db.changelogByModule and true or false
         for _, row in ipairs(rows) do
             paint(row)
         end
-        for other, view in pairs(views) do
-            view:SetShown(other == i)
+        for mode, list in pairs(views) do
+            for other, view in pairs(list) do
+                view:SetShown(mode == byModule and other == i)
+            end
         end
         if not i then
             split.paneContent:SetHeight(1)
             return
         end
-        local view = views[i]
+        local view = views[byModule][i]
         if not view then
-            view = buildNotes(split.paneContent, split.paneWidth, releases[i])
-            views[i] = view
+            view = buildNotes(split.paneContent, split.paneWidth, releases[i], byModule)
+            views[byModule][i] = view
             updates[#updates + 1] = view.update
             view.update()
         end
@@ -1898,7 +1943,7 @@ local function buildChangelog(frame)
     -- the search finds something in, and stays on the one shown while it's one of them, or else
     -- shows the first.
     local defaults = addPageDefaults(frame)
-    addSearchBox(frame, defaults, L.CHANGELOG_SEARCH, function(text)
+    local searchBox = addSearchBox(frame, defaults, L.CHANGELOG_SEARCH, function(text)
         search = text ~= "" and strlower(text) or nil
         empty.text:SetText(format(L.CHANGELOG_NO_MATCH, text))
         layoutStack(split.list)
@@ -1915,6 +1960,21 @@ local function buildChangelog(frame)
         end
         show(first)
     end)
+
+    -- A By Module checkbox left of the search box, like the Modules page's New, that groups the
+    -- notes on the right under their modules instead of Added, Changed, and Fixed. Saved for the
+    -- account (ns.db.changelogByModule), off by default.
+    local byModule = newCheckbox(frame, 22, function(checked)
+        ns.db.changelogByModule = checked or nil
+        show(shown)
+    end)
+    byModule:SetChecked(ns.db.changelogByModule and true or false)
+    local byModuleText = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    byModuleText:SetText(L.CHANGELOG_BY_MODULE)
+    byModuleText:SetPoint("RIGHT", searchBox or defaults, "LEFT", -12, 0)
+    byModule:SetPoint("RIGHT", byModuleText, "LEFT", -2, 0)
+    -- Clicking the word clicks the box, like Blizzard's checkboxes with a label.
+    byModule:SetHitRectInsets(0, -(ns.Text.Width(byModuleText) + 2), 0, 0)
 
     -- The NEW labels follow the version last seen, which the Modules page moves on.
     local function refresh()

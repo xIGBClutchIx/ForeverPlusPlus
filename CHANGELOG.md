@@ -31,6 +31,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **XP Bar Text**: the new Green When Quests Level You option (on by default) turns off the green quest XP text shown once turning those quests in would level you.
 - **Auto Release**: the new Skip Key option (None by default) lets you hold a key while you're dead to stay where you fell.
 - **Settings**: an option you've changed has an undo arrow at the end of its row that sets it back to its default, and its tooltip says what the default is.
+- **Settings**: the Changelog page has a By Module checkbox (off by default) that groups a release's notes under their modules instead of Added, Changed, and Fixed.
 
 ### Changed
 

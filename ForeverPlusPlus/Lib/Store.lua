@@ -8,7 +8,8 @@
 --       unclaimed = { [module] = { [key] = table } }, -- per-character data from version 1, until
 --                                                     -- each character logs in and takes its own
 --       gameData = { [set] = { values, build } },     -- what play taught Lib/GameData.lua
---       seenVersion, seenModules, welcome, showTags, selfTest, ...   -- the core's own
+--       seenVersion, seenModules, welcome, showTags, changelogByModule, selfTest, ...
+--                                                     -- the core's own
 --   }
 --   ForeverPlusPlusCharDB = { version = 4, data = { [module] = { [key] = table } } }
 --
