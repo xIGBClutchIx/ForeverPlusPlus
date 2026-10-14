@@ -8,7 +8,7 @@ local _, ns = ...
 
 local ipairs, floor, format, max, min = ipairs, math.floor, string.format, math.max, math.min
 local C_TaxiMap, Enum, GetTime, UnitOnTaxi = C_TaxiMap, Enum, GetTime, UnitOnTaxi
-local CreateFrame, UIParent, GameTooltip = CreateFrame, UIParent, GameTooltip
+local CreateFrame, UIParent, GameTooltip, PlaySound = CreateFrame, UIParent, GameTooltip, PlaySound
 
 local L = ns.L
 
@@ -17,6 +17,7 @@ local module = ns.NewModule("FlightTimer", L.FLIGHTTIMER_DESC, {
     bar = true,
     tooltip = true,
     tooltipStyle = "double", -- "double" (label left, time right), "line", or "gray" (one line)
+    landingSound = false,
     scale = 100, -- percent
     x = 0, -- the bar's offset from the center of the screen
     y = 250,
@@ -38,11 +39,16 @@ module.options = {
             { "gray", L.FLIGHTTIMER_STYLE_GRAY },
         },
     },
+    {
+        key = "landingSound", name = L.FLIGHTTIMER_LANDING_SOUND,
+        description = L.FLIGHTTIMER_LANDING_SOUND_DESC, added = "0.9.0",
+    },
 }
 
 local WIDTH, HEIGHT = 208, 16 -- about Blizzard's cast bar
 local TOO_SHORT = 3 -- seconds; anything shorter wasn't a flight
 local WAIT = 10 -- seconds to wait for a flight to start after asking for it
+local LANDING = 5 -- seconds before landing that Sound on Landing plays
 
 local clock = ns.Text.Clock
 
@@ -158,6 +164,29 @@ local function finish()
     cancel()
 end
 
+-- The ready check's sound on the Master channel, so it's heard with sound effects off and, when
+-- Sound in Background is on, while tabbed out.
+local function playLanding()
+    local kit = SOUNDKIT and SOUNDKIT.READY_CHECK
+    if kit and PlaySound then
+        PlaySound(kit, "Master")
+    end
+end
+
+-- Sound on Landing: once, a few seconds before a flight of known length lands. A flight too short
+-- for that would play it at takeoff, so it stays quiet.
+local function checkLanding(now)
+    if flight.warned or not (flight.total and module.db.landingSound) then
+        return
+    end
+    if flight.total <= LANDING * 2 then
+        flight.warned = true
+    elseif flight.total - (now - flight.started) <= LANDING then
+        flight.warned = true
+        playLanding()
+    end
+end
+
 local function tick()
     if not flight then
         cancel()
@@ -177,7 +206,10 @@ local function tick()
     end
     if not UnitOnTaxi("player") then
         finish()
-    elseif bar:IsShown() then
+        return
+    end
+    checkLanding(now)
+    if bar:IsShown() then
         showFlight()
     end
 end

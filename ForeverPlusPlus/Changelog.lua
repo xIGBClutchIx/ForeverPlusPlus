@@ -29,6 +29,9 @@ ns.changelog = {
                 { L.ITEMTOOLTIPS_TITLE, "The new Repair Cost line (off by default) shows what "
                     .. "repairing damaged gear costs, on gear you wear or carry, without a "
                     .. "merchant's repair cursor." },
+                { L.FLIGHTTIMER_TITLE, "The new Sound on Landing option (off by default) plays "
+                    .. "the ready check sound a few seconds before you land, on a flight you've "
+                    .. "taken before, so you can tab out on long flights." },
                 { L.FOREVERQUESTICONS_TITLE, "The new Quest Details option (on by default) puts the "
                     .. "icon after the quest's name at the top of its details, in the quest window "
                     .. "and on the map." },
