@@ -15,6 +15,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Profiler**: a new page in Settings (`/fpp profile`) that records how much CPU each module takes, heaviest first, beside Forever++'s total CPU and memory. A module made of parts folds open to show what each part takes. Nothing is timed until you press Record.
 - **Quest Levels**: a new module that shows a quest's level before its name, like the quest log's [12], in a quest giver's list and at the top of the quest's details. On by default.
 - **Quest Tracker**: the new Current Zone Only option (off by default) tracks only the quests of the zone you're in, and tracks the others again when you get there. The quest your map follows always shows.
+- **Talent Planner**: the new Level-Up Reminder option (off by default) says in chat which talent your plan takes next when you gain a talent point.
 - **Waylaid Crates**: a new module for filling Waylaid Crates. Its Waylaid Crates entry in the auction house's categories lists every item your crates still need, less what's already in your bags and bank.
 - **Waypoints**: the new Follow Selected Quest option (on by default) points the arrow to the quest selected on the map instead of your map pin, and back to the pin when no quest is selected. Its Show Quest Name option (on by default) shows the quest's name under the distance.
 - **Waypoints**: the new Point to Corpse option (on by default) points the arrow to your corpse while you're a ghost, ahead of a quest or your map pin, and back to them once you're alive.

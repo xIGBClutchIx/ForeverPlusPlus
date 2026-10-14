@@ -44,6 +44,8 @@ ns.changelog = {
                 { L.QUESTTRACKER_TITLE, "The new Current Zone Only option (off by default) tracks "
                     .. "only the quests of the zone you're in, and tracks the others again when you "
                     .. "get there. The quest your map follows always shows." },
+                { L.TALENTPLANNER_TITLE, "The new Level-Up Reminder option (off by default) says "
+                    .. "in chat which talent your plan takes next when you gain a talent point." },
                 { L.WAYLAIDCRATES_TITLE, "A new module for filling Waylaid Crates. Its Waylaid "
                     .. "Crates entry in the auction house's categories lists every item your crates "
                     .. "still need, less what's already in your bags and bank." },

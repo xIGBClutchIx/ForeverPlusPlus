@@ -2,7 +2,7 @@
 -- adds a point to a saved plan instead of learning it, in the order clicked, and a level box limits
 -- the plan to the points a character has at that level (the beta stops at 30). Out of planning, the
 -- plan's next talent glows when you have a point to spend, and talent tooltips say at which levels
--- the plan takes it. Blizzard's tree still draws the talents; while planning, our own buttons sit
+-- the plan takes it, and Level-Up Reminder names it in chat when a point comes. Blizzard's tree still draws the talents; while planning, our own buttons sit
 -- over its buttons (theirs go transparent) and show the plan's ranks with Blizzard's own art. The
 -- tree's data comes from C_Traits (docs/forever-api.md, Talents); nothing here learns a talent.
 local _, ns = ...
@@ -13,7 +13,7 @@ local max, min, floor, setmetatable, tremove = math.max, math.min, math.floor, s
     table.remove
 local CreateFrame, C_Traits, C_Spell, UnitLevel, UnitGUID, IsShiftKeyDown, PlaySound = CreateFrame,
     C_Traits, C_Spell, UnitLevel, UnitGUID, IsShiftKeyDown, PlaySound
-local GameTooltip, EventRegistry = GameTooltip, EventRegistry
+local GameTooltip, EventRegistry, C_Timer = GameTooltip, EventRegistry, C_Timer
 
 local L = ns.L
 local Plan = ns.TalentPlan
@@ -24,6 +24,8 @@ local module = ns.NewModule("TalentPlanner", L.TALENTPLANNER_DESC, {
     enabled = true,
     glow = true, -- the plan's next talent glows
     tooltip = true, -- talent tooltips say when the plan takes them
+    reminder = false, -- a chat line naming the plan's next talent when a point comes
+    chat = true,
     -- Saved per character: spec tab -> { active = index, list = { { name, level, picks }, ... } },
     -- where picks are nodeIDs in order and level is the plan's level cap.
     builds = {},
@@ -56,7 +58,11 @@ end)
 module.options = {
     { key = "glow", name = L.TALENTPLANNER_GLOW, description = L.TALENTPLANNER_GLOW_DESC },
     { key = "tooltip", name = L.TALENTPLANNER_TOOLTIP, description = L.TALENTPLANNER_TOOLTIP_DESC },
+    { key = "reminder", name = L.TALENTPLANNER_REMINDER, description = L.TALENTPLANNER_REMINDER_DESC,
+        added = "0.9.0" },
+    ns.ChatOption(L.TALENTPLANNER_CHAT_DESC),
 }
+module.options[#module.options].requires = "reminder"
 
 local ADDON = "Blizzard_PlayerSpells" -- the talent window's load-on-demand addon
 local POINTS_PER_ROW = 5 -- Classic: each row opens after 5 more points in its tab
@@ -90,9 +96,10 @@ local function maxLevel()
     return level and readable(level) and level > 0 and level or 60
 end
 
--- Points spent and unspent in the shown tree, staged changes included.
-local function currency()
-    local info = C_Traits.GetTreeCurrencyInfo(tree.configID, tree.treeID, false)
+-- Points spent and unspent in a tree (the shown one by default), staged changes included.
+local function currency(t)
+    t = t or tree
+    local info = C_Traits.GetTreeCurrencyInfo(t.configID, t.treeID, false)
     local points = info and info[1]
     if not points then
         return 0, 0
@@ -114,8 +121,8 @@ local function talentedRanks()
     return ranks and readable(ranks) and ranks or 0
 end
 
-local function firstLevel()
-    local spent, unspent = currency()
+local function firstLevel(t)
+    local spent, unspent = currency(t)
     return Plan.FirstLevel(UnitLevel("player"), spent + unspent, talentedRanks())
 end
 
@@ -152,12 +159,10 @@ local function pointsOf(plan)
     return Plan.PointsAt(plan.level, firstLevel())
 end
 
--- Reads the shown tree from C_Traits. A node's tab is whichever of its groups is a tab
+-- Reads a tree from C_Traits. A node's tab is whichever of its groups is a tab
 -- (docs/forever-api.md). The points a row needs come from the node's gate condition, or else
 -- from its row, counted from the tree's top.
-local function buildTree()
-    local configID = frame:GetConfigID()
-    local treeID = frame:GetTalentTreeID()
+local function buildTree(configID, treeID)
     if not (configID and treeID) then
         return nil
     end
@@ -236,12 +241,12 @@ local function buildTree()
     return built
 end
 
--- A node's name, icon, and spell, read when first needed.
-local function describe(node)
+-- A node's name, icon, and spell, read when first needed, from its tree (the shown one by default).
+local function describe(node, t)
     if node.name then
         return node
     end
-    local entry = C_Traits.GetEntryInfo(tree.configID, node.entryID)
+    local entry = C_Traits.GetEntryInfo((t or tree).configID, node.entryID)
     local def = entry and entry.definitionID and C_Traits.GetDefinitionInfo(entry.definitionID)
     local spellID = def and (def.overriddenSpellID or def.spellID)
     node.name = def and def.overrideName and def.overrideName ~= "" and def.overrideName
@@ -640,7 +645,7 @@ refresh = function()
         return
     end
     local inspecting = frame.IsInspecting and frame:IsInspecting()
-    tree = not inspecting and buildTree() or nil
+    tree = not inspecting and buildTree(frame:GetConfigID(), frame:GetTalentTreeID()) or nil
     if not (tree and #tree.order > 0) then
         planning = false
         clearPlanVisuals()
@@ -952,6 +957,69 @@ local function createUI()
     ui.glow = glow
 end
 
+-- Level-Up Reminder ---------------------------------------------------------------------------
+
+local earned -- talent points earned (spent and unspent) when last counted, to notice a new one
+
+-- The active spec group, as the talent window's primary and secondary tabs. Probe: Mainline's
+-- names. That their numbers match the window's tab keys, which plans are saved by, is Unverified.
+local function activeGroup()
+    local get = C_SpecializationInfo and C_SpecializationInfo.GetActiveSpecGroup or GetActiveSpecGroup
+    local group = get and get()
+    return group and readable(group) and group or 1
+end
+
+-- The player's own talent tree, read without the talent window (docs/forever-api.md, Talents).
+local function activeTree()
+    local configID = C_ClassTalents and C_ClassTalents.GetActiveConfigID
+        and C_ClassTalents.GetActiveConfigID()
+    local info = configID and C_Traits.GetConfigInfo and C_Traits.GetConfigInfo(configID)
+    return buildTree(configID, info and info.treeIDs and info.treeIDs[1])
+end
+
+-- Counts the points earned, and when there's a new one, names the plan's next talent in chat.
+local function checkPoints()
+    if not (module.enabled and module.db.reminder) then
+        earned = nil
+        return
+    end
+    local t = activeTree()
+    if not t then
+        return
+    end
+    local spent, unspent = currency(t)
+    if not (readable(spent) and readable(unspent)) then
+        return
+    end
+    local gained = earned and spent + unspent > earned
+    earned = spent + unspent
+    if not gained or unspent <= 0 then
+        return
+    end
+    local builds = module.db.builds[activeGroup()]
+    local plan = builds and builds.list[builds.active]
+    local index, id = Plan.Next(plan and plan.picks or {}, t.ranks)
+    if not (index and t.nodes[id] and index <= Plan.PointsAt(plan.level, firstLevel(t))) then
+        return
+    end
+    local rank = 0
+    for i = 1, index do
+        if plan.picks[i] == id then
+            rank = rank + 1
+        end
+    end
+    local node = describe(t.nodes[id], t)
+    module:Print(format(L.TALENTPLANNER_REMINDER_LINE, withIcon(node), rank, node.max))
+end
+
+-- Talent points come a moment after the level does.
+local function onLevelUp()
+    refresh()
+    if module.db.reminder then
+        C_Timer.After(1, checkPoints)
+    end
+end
+
 -- Hooks ---------------------------------------------------------------------------------------
 
 local function onButtonsUpdated()
@@ -1023,8 +1091,10 @@ function module:OnEnable()
         and C_Traits.GetGroupDisplayInfoByTreeID) then
         return
     end
-    self:On("PLAYER_LEVEL_UP", refresh)
+    self:On("PLAYER_LEVEL_UP", onLevelUp)
     self:On("TRAIT_CONFIG_UPDATED", refresh)
+    self:On("TRAIT_CONFIG_UPDATED", checkPoints)
+    checkPoints()
     ns.AddOns.WhenLoaded(ADDON, start)
 end
 
@@ -1040,9 +1110,14 @@ function module:OnDisable()
         ui.bar:Hide()
     end
     planning = false
+    earned = nil
     clearPlanVisuals()
 end
 
-function module:OnOptionChanged()
+function module:OnOptionChanged(key)
+    if key == "reminder" then
+        earned = nil
+        checkPoints()
+    end
     refresh()
 end
