@@ -164,8 +164,9 @@ local function refresh()
         return
     end
     if not known then
+        local result = Profiler.Call(PART_SCAN, scanBoth)
         local complete
-        known, complete = Profiler.Call(PART_SCAN, scanBoth)
+        known, complete = result[1], result[2]
         -- Usable as it is; when data was still loading, SPELL_DATA_LOAD_RESULT scans again.
         module.incomplete = not complete
     end
