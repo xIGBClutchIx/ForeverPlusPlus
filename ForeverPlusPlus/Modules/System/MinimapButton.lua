@@ -72,7 +72,7 @@ local KEY_ACTIONS = {
         run = function() Errors.Toggle() end },
     { setting = "clearModifier", hint = L.MINIMAPBUTTON_HINT_CLEAR,
         run = function() Errors.ClearSession() end },
-    { setting = "clearAllKey", hint = L.MINIMAPBUTTON_HINT_CLEAR_ALL, danger = true,
+    { setting = "clearAllKey", hint = L.MINIMAPBUTTON_HINT_CLEAR_ALL,
         run = function() Errors.ClearAll() end },
 }
 
@@ -168,10 +168,10 @@ local function addCount(label, count, color)
     end
 end
 
--- A hint row: what it does in white (red when it throws data away), and the click for it in
--- green, as Blizzard's own hints.
-local function addHint(action, click, danger)
-    local color = danger and RED or WHITE
+-- A hint row: what it does, and the click for it in green, as Blizzard's own hints. The main
+-- clicks are white; `minor` ones (errors, moving the button) are gray, so the main ones stand out.
+local function addHint(action, click, minor)
+    local color = minor and GRAY or WHITE
     GameTooltip:AddDoubleLine(action, click, color[1], color[2], color[3], GREEN[1], GREEN[2],
         GREEN[3])
 end
@@ -197,12 +197,12 @@ local function showTooltip(owner, drag)
             if key ~= "none" and KEY_NAMES[key] then
                 -- The key in gold; |r goes back to the line's green.
                 addHint(action.hint, format(L.MINIMAPBUTTON_KEY_LEFT_CLICK, GOLD_CODE
-                    .. KEY_NAMES[key] .. "|r"), action.danger)
+                    .. KEY_NAMES[key] .. "|r"), true)
             end
         end
     end
     if drag then
-        addHint(L.MINIMAPBUTTON_HINT_MOVE, L.MINIMAPBUTTON_LEFT_DRAG)
+        addHint(L.MINIMAPBUTTON_HINT_MOVE, L.MINIMAPBUTTON_LEFT_DRAG, true)
     end
     GameTooltip:Show()
 end
