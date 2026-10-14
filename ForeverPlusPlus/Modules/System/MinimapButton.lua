@@ -137,8 +137,6 @@ local function quickMenu(owner)
                 end
             end
         end
-        root:CreateDivider()
-        root:CreateButton(L.MINIMAPBUTTON_HINT_SETTINGS, function() ns.OpenSettings() end)
     end)
 end
 
