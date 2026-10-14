@@ -5,7 +5,7 @@
 -- Blizzard's NEW label, and its first click opens the About page instead, once; no popup at login.
 local _, ns = ...
 
-local format, type, tremove = string.format, type, table.remove
+local format, type, tremove, sort = string.format, type, table.remove, table.sort
 local cos, sin, rad, deg, atan2, floor = math.cos, math.sin, math.rad, math.deg, math.atan2, math.floor
 local ipairs, CreateFrame, GetCursorPosition = ipairs, CreateFrame, GetCursorPosition
 local C_XMLUtil = C_XMLUtil
@@ -59,30 +59,42 @@ local MODIFIERS = {
     alt = { name = L.KEY_ALT, down = IsAltKeyDown },
 }
 
--- The modules the right-click menu turns on and off, in this order. One that isn't available on
--- this client (Hide Beta Feedback off the beta) is left out.
+-- The modules the right-click menu turns on and off, listed by title in alphabetical order, so
+-- the order holds in every language. One that isn't available on this client (Hide Beta Feedback
+-- off the beta) is left out.
 local QUICK_TOGGLES = {
-    "FastLoot", "AutoQuest", "AutoSellJunk", "AutoStow", "FishingCast", "GatheringTracking",
-    "HideBetaFeedback",
+    "AutoDismount", "AutoGossip", "AutoQuest", "AutoRelease", "AutoRepair", "AutoSellJunk",
+    "AutoStow", "FastLoot", "FishingCast", "GatheringTracking", "HideBetaFeedback",
+    "SkipCinematics",
 }
+
+local function byTitle(a, b)
+    return a.title < b.title
+end
 
 -- Turned on and off through Core, as the Modules page does, so Settings and /fpp follow along.
 local function quickMenu(owner)
     if not (MenuUtil and MenuUtil.CreateContextMenu) then
         return
     end
+    local entries = {}
+    for _, name in ipairs(QUICK_TOGGLES) do
+        local other = ns.modules[name]
+        if other and not other.unavailable then
+            entries[#entries + 1] = { name = name, module = other, title = other.title or name }
+        end
+    end
+    sort(entries, byTitle)
     MenuUtil.CreateContextMenu(owner, function(_, root)
         root:CreateTitle(ns.title)
-        for _, name in ipairs(QUICK_TOGGLES) do
-            local other = ns.modules[name]
-            if other and not other.unavailable then
-                root:CreateCheckbox(other.title or name,
-                    function() return other.db.enabled end,
-                    function()
-                        ns.SetEnabled(name, not other.db.enabled)
-                        ns.RefreshSetting(name)
-                    end)
-            end
+        for _, entry in ipairs(entries) do
+            local name, other = entry.name, entry.module
+            root:CreateCheckbox(entry.title,
+                function() return other.db.enabled end,
+                function()
+                    ns.SetEnabled(name, not other.db.enabled)
+                    ns.RefreshSetting(name)
+                end)
         end
     end)
 end
