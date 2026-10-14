@@ -13,9 +13,8 @@
 -- on every cooldown update, which would wipe a color we set.
 local _, ns = ...
 
-local _G, ipairs, pairs, type, wipe, select = _G, ipairs, pairs, type, wipe, select
-local setmetatable = setmetatable
-local C_Item, C_Container, C_Timer = C_Item, C_Container, C_Timer
+local _G, type, wipe, select = _G, type, wipe, select
+local C_Item, C_Container = C_Item, C_Container
 
 local L = ns.L
 local ItemButtons = ns.ItemButtons
@@ -138,31 +137,13 @@ end
 
 -- Tints -----------------------------------------------------------------------------------------
 
-local tints = setmetatable({}, { __mode = "k" }) -- icon texture -> our tint texture
+local tints = ItemButtons.Overlays(function(icon)
+    return ItemButtons.Tint(icon, TINT)
+end)
 
--- Shows or hides our tint over an icon. Does nothing for an icon that was never tinted.
+-- Shows or hides our tint over an icon.
 local function setTint(icon, on)
-    if not icon then
-        return
-    end
-    local tint = tints[icon]
-    if not on then
-        if tint then
-            tint:Hide()
-        end
-        return
-    end
-    if not tint then
-        tint = ItemButtons.Tint(icon, TINT)
-        tints[icon] = tint
-    end
-    tint:Show()
-end
-
-local function clearTints()
-    for icon in pairs(tints) do
-        setTint(icon, false)
-    end
+    tints:Set(icon, on)
 end
 
 -- Bags ------------------------------------------------------------------------------------------
@@ -173,12 +154,6 @@ local function updateBag(frame)
         local link = on and C_Container.GetContainerItemLink(bag, slot)
         setTint(icon, link and unusable(link))
     end)
-end
-
-local function hookBags()
-    for _, frame in ipairs(ItemButtons.Frames()) do
-        module:Hook(frame, "UpdateItems", updateBag)
-    end
 end
 
 -- Bank ------------------------------------------------------------------------------------------
@@ -223,108 +198,40 @@ end
 
 -- The buyback tab reuses the same buttons, and Blizzard tints those itself.
 local function clearMerchant()
-    for i = 1, _G.MERCHANT_ITEMS_PER_PAGE or 10 do
-        setTint(ItemButtons.MerchantIcon(i), false)
-    end
+    ItemButtons.EachMerchantItem(function(icon)
+        setTint(icon, false)
+    end)
 end
 
 -- Auction house ---------------------------------------------------------------------------------
 
--- The browse list's rows as we see them, never Blizzard's category tables: adding to those
--- taints the auction house.
-local function browseList()
-    local frame = _G.AuctionHouseFrame
-    local list = frame and frame.BrowseResultsFrame
-    return list and list.ItemList and list.ItemList.ScrollBox
-end
-
 local function updateAuction()
-    local box = browseList()
-    if not (box and box.ScrollTarget) then
-        return
-    end
     local on = module.db.auction
-    for _, row in ipairs({ box.ScrollTarget:GetChildren() }) do
-        local itemKey = row.rowData and row.rowData.itemKey
-        local cell = row.cells and row.cells[2]
-        if itemKey and cell and cell.Icon then
-            setTint(cell.Icon, on and itemKey.itemID and unusable("item:" .. itemKey.itemID))
-        end
-    end
-end
-
-local function hookAuction()
-    local box = browseList()
-    if box and type(box.Update) == "function" then
-        module:Hook(box, "Update", updateAuction)
-        updateAuction()
-    end
+    ItemButtons.EachAuctionRow(function(icon, itemID)
+        setTint(icon, on and itemID and unusable("item:" .. itemID))
+    end)
 end
 
 -- Loot ------------------------------------------------------------------------------------------
 
-local lootHooked = false
-
 -- Blizzard tints a slot you can't loot (locked) red itself, so ours isn't laid on top of it.
-local function onLootFrame(_, frame, elementData)
-    if not module.enabled then
-        return
-    end
-    local item = frame.Item
-    local icon = item and (item.icon or item.Icon)
-    local slot = elementData and elementData.slotIndex
-    local link
-    if module.db.loot and type(slot) == "number" and _G.GetLootSlotLink then
-        local locked = _G.GetLootSlotInfo and select(6, _G.GetLootSlotInfo(slot))
-        link = not locked and _G.GetLootSlotLink(slot)
-    end
-    setTint(icon, link and unusable(link))
+local function tintLoot(icon, slot, link)
+    local locked = slot and _G.GetLootSlotInfo and select(6, _G.GetLootSlotInfo(slot))
+    setTint(icon, module.db.loot and link and not locked and unusable(link))
 end
 
--- Once: the callback can't come off, so it checks module.enabled. Probe: the scroll box and the
--- callback are Mainline's, as Already Known uses them.
 local function hookLoot()
-    local box = _G.LootFrame and _G.LootFrame.ScrollBox
-    if lootHooked or not (box and _G.ScrollUtil and _G.ScrollUtil.AddAcquiredFrameCallback) then
-        return
-    end
-    lootHooked = true
-    _G.ScrollUtil.AddAcquiredFrameCallback(box, onLootFrame, module, true)
+    ItemButtons.HookLoot(module, tintLoot)
 end
 
--- Loot rolls: GroupLootFrame1..4, each showing its rollID's item on IconFrame.Icon.
-local ROLL_FRAMES = _G.NUM_GROUP_LOOT_FRAMES or 4
-
-local function updateRoll(frame)
-    local icon = frame.IconFrame and frame.IconFrame.Icon
-    local rollID = frame.rollID
-    local link = module.db.loot and rollID and _G.GetLootRollItemLink and _G.GetLootRollItemLink(rollID)
-    setTint(icon, link and unusable(link))
-end
-
-local function updateRolls()
-    for i = 1, ROLL_FRAMES do
-        local frame = _G["GroupLootFrame" .. i]
-        if frame and frame:IsShown() then
-            updateRoll(frame)
-        end
-    end
-end
-
-local function hookRolls()
-    for i = 1, ROLL_FRAMES do
-        module:HookScript(_G["GroupLootFrame" .. i], "OnShow", updateRoll)
-    end
+local function tintRoll(icon, link)
+    setTint(icon, module.db.loot and link and unusable(link))
 end
 
 -- Module ----------------------------------------------------------------------------------------
 
 local function refresh()
-    for _, frame in ipairs(ItemButtons.Frames()) do
-        if frame:IsShown() then
-            updateBag(frame)
-        end
-    end
+    ItemButtons.EachOpenBag(updateBag)
     local bank = _G.BankFrame
     if bank and bank:IsShown() then
         updateBank()
@@ -334,35 +241,24 @@ local function refresh()
         updateMerchant()
     end
     updateAuction()
-    local loot = _G.LootFrame
-    if lootHooked and loot and loot:IsShown() and loot.ScrollBox.ForEachFrame then
-        loot.ScrollBox:ForEachFrame(function(frame, elementData)
-            onLootFrame(nil, frame, elementData)
-        end)
-    end
-    updateRolls()
+    ItemButtons.EachLootSlot(tintLoot)
+    ItemButtons.EachRoll(tintRoll)
 end
 
-local refreshTimer, forget
+local forget
 
 -- Item data arrives a little after a window opens, and what you can use changes as you level
 -- and train: look again shortly, once for a burst of events. The answers are forgotten then
 -- too, not at the event, since the tooltip can still say the old level for a moment.
-local function refreshSoon()
-    if refreshTimer then
-        return
+local refreshSoon, cancelRefresh = ns.Frames.Coalesce(function()
+    if forget then
+        forget = false
+        wipe(results)
     end
-    refreshTimer = C_Timer.NewTimer(0.5, function()
-        refreshTimer = nil
-        if forget then
-            forget = false
-            wipe(results)
-        end
-        if module.enabled then
-            refresh()
-        end
-    end)
-end
+    if module.enabled then
+        refresh()
+    end
+end, 0.5)
 
 local function onPlayerChanged()
     forget = true
@@ -380,11 +276,11 @@ end
 function module:OnEnable()
     self:Hook("MerchantFrame_UpdateMerchantInfo", updateMerchant)
     self:Hook("MerchantFrame_UpdateBuybackInfo", clearMerchant)
-    hookBags()
+    ItemButtons.HookBags(self, updateBag)
     hookBank()
     hookLoot()
-    hookRolls()
-    ns.AddOns.WhenLoaded("Blizzard_AuctionHouseUI", hookAuction)
+    ItemButtons.HookRolls(self, tintRoll)
+    ItemButtons.HookAuction(self, updateAuction)
     self:On("LOOT_OPENED", hookLoot)
     self:On("GET_ITEM_INFO_RECEIVED", onItemInfo) -- items without a tooltip yet weren't kept
     self:On("PLAYER_LEVEL_UP", onPlayerChanged)
@@ -394,14 +290,12 @@ function module:OnEnable()
 end
 
 function module:OnDisable()
-    ns.AddOns.Cancel("Blizzard_AuctionHouseUI", hookAuction)
-    if refreshTimer then
-        refreshTimer:Cancel()
-        refreshTimer = nil
-    end
+    ItemButtons.CancelAuction(updateAuction)
+    cancelRefresh()
+    forget = false
     wipe(results) -- you may level while it's off
     wipe(waiting)
-    clearTints()
+    tints:HideAll()
 end
 
 function module:OnOptionChanged()

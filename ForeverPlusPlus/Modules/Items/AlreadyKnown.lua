@@ -10,11 +10,10 @@
 -- a green tint that multiplies the icon, and the icon's own color is never touched.
 local _, ns = ...
 
-local _G, ipairs, type, strfind = _G, ipairs, type, strfind
-local setmetatable, pairs = setmetatable, pairs
+local _G, type, strfind = _G, type, strfind
 local C_Item, C_Container = C_Item, C_Container
 local C_ToyBox = C_ToyBox
-local C_Timer, GetTime = C_Timer, GetTime
+local GetTime = GetTime
 
 local L = ns.L
 local ItemButtons = ns.ItemButtons
@@ -149,55 +148,32 @@ end
 
 -- Marks -----------------------------------------------------------------------------------------
 
-local marks = setmetatable({}, { __mode = "k" }) -- icon texture -> { check = texture, tint = texture }
-
 -- Our own textures over the icon, never its color: Blizzard colors icons itself (red for an item
 -- you can't use), and putting a color back would wipe Blizzard's.
---
--- Shows or clears our mark on an icon, as the Mark option says. Does nothing for an icon that
--- was never marked. `size` is the mark's size, chosen per place since the icons differ.
+local tints = ItemButtons.Overlays(function(icon)
+    return ItemButtons.Tint(icon, TINT)
+end)
+local checks = ItemButtons.Overlays(function(icon)
+    local check = icon:GetParent():CreateTexture(nil, "OVERLAY", nil, 7)
+    check:SetTexture(CHECK_TEXTURE)
+    check:SetPoint("BOTTOMLEFT", icon, "BOTTOMLEFT", 1, 1)
+    return check
+end)
+
+-- Shows or clears our mark on an icon, as the Mark option says. `size` is the check mark's size,
+-- chosen per place since the icons differ.
 local function setMark(icon, on, size)
-    if not icon then
-        return
-    end
-    local state = marks[icon]
-    if not on and not state then
-        return
-    end
-    if not state then
-        state = {}
-        marks[icon] = state
-    end
     local style = module.db.style
-    if on and style ~= "check" then
-        local tint = state.tint
-        if not tint then
-            tint = ItemButtons.Tint(icon, TINT)
-            state.tint = tint
-        end
-        tint:Show()
-    elseif state.tint then
-        state.tint:Hide()
-    end
-    if on and style ~= "tint" then
-        local check = state.check
-        if not check then
-            check = icon:GetParent():CreateTexture(nil, "OVERLAY", nil, 7)
-            check:SetTexture(CHECK_TEXTURE)
-            check:SetPoint("BOTTOMLEFT", icon, "BOTTOMLEFT", 1, 1)
-            state.check = check
-        end
+    tints:Set(icon, on and style ~= "check")
+    local check = checks:Set(icon, on and style ~= "tint")
+    if check then
         check:SetSize(size, size)
-        check:Show()
-    elseif state.check then
-        state.check:Hide()
     end
 end
 
 local function clearMarks()
-    for icon in pairs(marks) do
-        setMark(icon, false)
-    end
+    tints:HideAll()
+    checks:HideAll()
 end
 
 -- Merchants -------------------------------------------------------------------------------------
@@ -211,44 +187,18 @@ end
 
 -- The buyback tab reuses the same buttons.
 local function clearMerchant()
-    for i = 1, _G.MERCHANT_ITEMS_PER_PAGE or 10 do
-        setMark(ItemButtons.MerchantIcon(i), false)
-    end
+    ItemButtons.EachMerchantItem(function(icon)
+        setMark(icon, false)
+    end)
 end
 
 -- Auction house ---------------------------------------------------------------------------------
 
-local function browseList()
-    local frame = _G.AuctionHouseFrame
-    local results = frame and frame.BrowseResultsFrame
-    return results and results.ItemList and results.ItemList.ScrollBox
-end
-
 local function updateAuction()
-    local box = browseList()
-    if not (box and box.ScrollTarget) then
-        return
-    end
     local on = module.db.auction
-    for _, row in ipairs({ box.ScrollTarget:GetChildren() }) do
-        local itemKey = row.rowData and row.rowData.itemKey
-        local cell = row.cells and row.cells[2]
-        if itemKey and cell and cell.Icon then
-            local isKnown = false
-            if on and itemKey.itemID then
-                isKnown = itemKnown("item:" .. itemKey.itemID)
-            end
-            setMark(cell.Icon, isKnown, 12)
-        end
-    end
-end
-
-local function hookAuction()
-    local box = browseList()
-    if box and type(box.Update) == "function" then
-        module:Hook(box, "Update", updateAuction)
-        updateAuction()
-    end
+    ItemButtons.EachAuctionRow(function(icon, itemID)
+        setMark(icon, on and itemID and itemKnown("item:" .. itemID), 12)
+    end)
 end
 
 -- Bags ------------------------------------------------------------------------------------------
@@ -259,17 +209,6 @@ local function updateBag(frame)
         local link = on and C_Container.GetContainerItemLink(bag, slot)
         setMark(icon, link and itemKnown(link), 14)
     end)
-end
-
-local function hookBags()
-    for _, frame in ipairs(ItemButtons.Frames()) do
-        if type(frame.UpdateItems) == "function" then
-            module:Hook(frame, "UpdateItems", updateBag)
-            if frame:IsShown() then
-                updateBag(frame)
-            end
-        end
-    end
 end
 
 -- Mail ------------------------------------------------------------------------------------------
@@ -320,56 +259,17 @@ end
 
 -- Loot ------------------------------------------------------------------------------------------
 
-local lootHooked = false
-
-local function onLootFrame(_, frame, elementData)
-    if not module.enabled then
-        return
-    end
-    local item = frame.Item
-    local icon = item and (item.icon or item.Icon)
-    local slot = elementData and elementData.slotIndex
-    local getLink = _G.GetLootSlotLink
-    local link = module.db.loot and getLink and type(slot) == "number" and getLink(slot)
-    setMark(icon, link and itemKnown(link), 14)
+local function markLoot(icon, _, link)
+    setMark(icon, module.db.loot and link and itemKnown(link), 14)
 end
 
--- Once: the callback can't come off, so it checks module.enabled. Probe: the scroll box and the
--- callback are Mainline's, and this is unverified on Forever.
 local function hookLoot()
-    local box = _G.LootFrame and _G.LootFrame.ScrollBox
-    if lootHooked or not (box and _G.ScrollUtil and _G.ScrollUtil.AddAcquiredFrameCallback) then
-        return
-    end
-    lootHooked = true
-    _G.ScrollUtil.AddAcquiredFrameCallback(box, onLootFrame, module, true)
+    ItemButtons.HookLoot(module, markLoot)
 end
 
--- Loot rolls: GroupLootFrame1..4 (Mainline's, which Forever loads), each showing its rollID's item
--- on IconFrame.Icon. Marked as the frame shows, before the player picks Need.
-local ROLL_FRAMES = _G.NUM_GROUP_LOOT_FRAMES or 4
-
-local function updateRoll(frame)
-    local icon = frame.IconFrame and frame.IconFrame.Icon
-    local rollID = frame.rollID
-    local getLink = _G.GetLootRollItemLink
-    local link = module.db.loot and rollID and getLink and getLink(rollID)
-    setMark(icon, link and itemKnown(link), 14)
-end
-
-local function updateRolls()
-    for i = 1, ROLL_FRAMES do
-        local frame = _G["GroupLootFrame" .. i]
-        if frame and frame:IsShown() then
-            updateRoll(frame)
-        end
-    end
-end
-
-local function hookRolls()
-    for i = 1, ROLL_FRAMES do
-        module:HookScript(_G["GroupLootFrame" .. i], "OnShow", updateRoll)
-    end
+-- Loot rolls are marked as the frame shows, before the player picks Need.
+local function markRoll(icon, link)
+    setMark(icon, module.db.loot and link and itemKnown(link), 14)
 end
 
 -- Module ----------------------------------------------------------------------------------------
@@ -380,20 +280,20 @@ local function refresh()
         updateMerchant()
     end
     updateAuction()
-    for _, frame in ipairs(ItemButtons.Frames()) do
-        if frame:IsShown() then
-            updateBag(frame)
-        end
-    end
+    ItemButtons.EachOpenBag(updateBag)
     local mail = _G.MailFrame
     if mail and mail:IsShown() then
         updateInbox()
         updateOpenMail()
     end
-    updateRolls()
+    ItemButtons.EachRoll(markRoll)
 end
 
-local refreshTimer
+local refreshSoon, cancelRefresh = ns.Frames.Coalesce(function()
+    if module.enabled then
+        refresh()
+    end
+end, 0.5)
 
 -- Item data arrives a little after a window opens; look again once it has. This fires for every
 -- item the game loads (the auction house loads hundreds), so only for an item we couldn't answer
@@ -407,15 +307,7 @@ local function onItemInfo(_, itemID)
     if itemID then
         waiting[itemID] = nil
     end
-    if refreshTimer then
-        return
-    end
-    refreshTimer = C_Timer.NewTimer(0.5, function()
-        refreshTimer = nil
-        if module.enabled then
-            refresh()
-        end
-    end)
+    refreshSoon()
 end
 
 function module:OnEnable()
@@ -423,21 +315,18 @@ function module:OnEnable()
     self:Hook("MerchantFrame_UpdateBuybackInfo", clearMerchant)
     self:Hook("InboxFrame_Update", updateInbox)
     self:Hook("OpenMail_Update", updateOpenMail)
-    hookBags()
+    ItemButtons.HookBags(self, updateBag)
     hookLoot()
-    hookRolls()
-    ns.AddOns.WhenLoaded("Blizzard_AuctionHouseUI", hookAuction)
+    ItemButtons.HookRolls(self, markRoll)
+    ItemButtons.HookAuction(self, updateAuction)
     self:On("LOOT_OPENED", hookLoot)
     self:On("GET_ITEM_INFO_RECEIVED", onItemInfo)
     refresh()
 end
 
 function module:OnDisable()
-    ns.AddOns.Cancel("Blizzard_AuctionHouseUI", hookAuction)
-    if refreshTimer then
-        refreshTimer:Cancel()
-        refreshTimer = nil
-    end
+    ItemButtons.CancelAuction(updateAuction)
+    cancelRefresh()
     clearMarks()
 end
 

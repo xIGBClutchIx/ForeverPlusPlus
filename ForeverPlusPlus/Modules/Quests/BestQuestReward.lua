@@ -8,7 +8,7 @@
 -- texture on the button's icon; nothing is written onto Blizzard's frames.
 local _, ns = ...
 
-local _G, setmetatable, pairs, ipairs, select, type = _G, setmetatable, pairs, ipairs, select, type
+local _G, ipairs, select, type = _G, ipairs, select, type
 local C_Item = C_Item
 
 local L = ns.L
@@ -20,32 +20,19 @@ module.category = "quests"
 local COIN_TEXTURE = "Interface\\MoneyFrame\\UI-GoldIcon"
 local COIN_SIZE = 16
 
-local coins = setmetatable({}, { __mode = "k" }) -- reward button -> our coin texture
+-- Our coin on a reward button, by its icon.
+local coins = ns.ItemButtons.Overlays(function(button)
+    local icon = button.Icon or button.icon or button
+    local coin = button:CreateTexture(nil, "OVERLAY", nil, 7)
+    coin:SetTexture(COIN_TEXTURE)
+    coin:SetSize(COIN_SIZE, COIN_SIZE)
+    coin:SetPoint("TOPLEFT", icon, "TOPLEFT", -3, 3)
+    return coin
+end)
 local waiting -- the rewards frame whose items weren't cached, until GET_ITEM_INFO_RECEIVED
 
 local function setCoin(button, on)
-    local coin = coins[button]
-    if not on then
-        if coin then
-            coin:Hide()
-        end
-        return
-    end
-    if not coin then
-        local icon = button.Icon or button.icon or button
-        coin = button:CreateTexture(nil, "OVERLAY", nil, 7)
-        coin:SetTexture(COIN_TEXTURE)
-        coin:SetSize(COIN_SIZE, COIN_SIZE)
-        coin:SetPoint("TOPLEFT", icon, "TOPLEFT", -3, 3)
-        coins[button] = coin
-    end
-    coin:Show()
-end
-
-local function clearCoins()
-    for button in pairs(coins) do
-        setCoin(button, false)
-    end
+    coins:Set(button, on)
 end
 
 -- How many of the choice you get and its item ID, from the quest log or the quest giver.
@@ -152,5 +139,5 @@ end
 
 function module:OnDisable()
     waiting = nil
-    clearCoins()
+    coins:HideAll()
 end
