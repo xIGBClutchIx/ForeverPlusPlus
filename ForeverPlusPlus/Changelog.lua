@@ -110,8 +110,9 @@ ns.changelog = {
                     .. "the errors, and Alt-click it to clear this session's. Clear Key is Alt by "
                     .. "default and works with a click instead of a right-click." },
                 { L.MINIMAPBUTTON_TITLE, "The right-click menu also turns Auto Decline, Auto "
-                    .. "Dismount, Auto Gossip, Auto Release, Auto Repair, and Skip Cinematics on "
-                    .. "and off, and lists its modules in alphabetical order." },
+                    .. "Dismount, Auto Gossip, Auto Release, Auto Repair, Auto Screenshot, Minimap "
+                    .. "Node Icons, Movable Framerate, and Skip Cinematics on and off, and lists "
+                    .. "its modules in alphabetical order." },
                 { L.SHORTCHANNELNAMES_TITLE, "The Style dropdown also offers initials ([LFG] for "
                     .. "LookingForGroup) and the name without its zone ([General]), alone or after "
                     .. "the number. Number and Initials ([1. LFG]) is the new default." },
