@@ -203,6 +203,11 @@ L.AUTOWEAPONBUFF_PRINT_DESC = "Print in chat, each time you right-click a weapon
 -- debug codes: item link, item kind (sharp, blunt, melee, pole), slot picked (16, 17, or nil)
 L.AUTOWEAPONBUFF_PRINT_LINE = "Weapon buff: %s kind=%s -> slot %s"
 
+-- ComprehendScrolls
+L.COMPREHENDSCROLLS_TITLE = "Comprehend Scrolls"
+L.COMPREHENDSCROLLS_DESC = "Right-click a Mage's scroll in your bags to cast Comprehend Scroll on "
+    .. "it, without opening the spellbook first. Not in combat."
+
 -- AutoScreenshot
 L.AUTOSCREENSHOT_TITLE = "Auto Screenshot"
 L.AUTOSCREENSHOT_DESC = "Take a screenshot when you level up, earn an achievement, or defeat a "

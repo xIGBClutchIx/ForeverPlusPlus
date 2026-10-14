@@ -34,6 +34,7 @@ Lib\Nameplates.lua
 Lib\Units.lua
 Lib\ItemTooltip.lua
 Lib\ItemButtons.lua
+Lib\BagClicks.lua
 Lib\Prices.lua
 Lib\Professions.lua
 Lib\PlateLabel.lua
@@ -84,6 +85,7 @@ Modules\Automation\SkipCinematics.lua
 Modules\Automation\AutoDismount.lua
 Modules\Automation\FishingCast.lua
 Modules\Automation\AutoWeaponBuff.lua
+Modules\Automation\ComprehendScrolls.lua
 Modules\Automation\AutoScreenshot.lua
 Modules\Character\SpellRanks.lua
 Modules\Character\BuffTimers.lua
