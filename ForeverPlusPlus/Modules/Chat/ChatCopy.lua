@@ -298,14 +298,14 @@ local function linkPending()
     end
 end
 
+local linkSoon = ns.Frames.Coalesce(linkPending)
+
 local function onMessage(frame)
     if not stampsOn then
         return
     end
-    if not next(pending) then
-        C_Timer.After(0, linkPending)
-    end
     pending[frame] = true
+    linkSoon()
 end
 
 ---Shows the chat line that has a stamp link in a popup, as plain text ready to copy.

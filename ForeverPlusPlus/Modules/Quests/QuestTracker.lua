@@ -384,7 +384,7 @@ end
 -- First came out highest first), so the first sort checks which end it goes to and learns.
 
 local SORT_DELAY = 0.2 -- seconds; one sort after a burst of quest log events
-local sortPending, sortAfterCombat = false, false
+local sortAfterCombat = false
 local sortGaveUp = false -- the client kept neither order, so stop trying until turned on again
 local addsToTop = true -- AddQuestWatch puts the quest first rather than last
 local addEndKnown = false -- a sort has shown which end it goes to
@@ -502,16 +502,7 @@ local function sortWatches()
     end)
 end
 
-function requestSort()
-    if sortPending then
-        return
-    end
-    sortPending = true
-    C_Timer.After(SORT_DELAY, function()
-        sortPending = false
-        Profiler.Call(PART_SORT, sortWatches)
-    end)
-end
+requestSort = ns.Frames.Coalesce(function() Profiler.Call(PART_SORT, sortWatches) end, SORT_DELAY)
 
 local function onCombatEnd()
     if sortAfterCombat then
@@ -762,9 +753,7 @@ function module:OnEnable()
         self:Hook(frame, "Update", onUpdate)
     else
         -- Mainline's tracker has Update; this covers a client where it doesn't.
-        local function later()
-            C_Timer.After(0, onUpdate)
-        end
+        local later = ns.Frames.Coalesce(onUpdate)
         self:On("QUEST_LOG_UPDATE", later)
         self:On("QUEST_WATCH_LIST_CHANGED", later)
     end

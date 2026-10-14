@@ -6,7 +6,7 @@ local _, ns = ...
 
 local _G, type, pairs, ipairs, setmetatable = _G, type, pairs, ipairs, setmetatable
 local find = string.find
-local hooksecurefunc, C_Timer = hooksecurefunc, C_Timer
+local hooksecurefunc = hooksecurefunc
 
 local L = ns.L
 
@@ -298,10 +298,9 @@ local function showQuestFeedback()
     end
 end
 
-local function onQuestEvent()
-    -- The reporter adds its widgets as the window opens; look once it has.
-    C_Timer.After(0, hideQuestFeedback)
-end
+-- The reporter adds its widgets as the window opens; look once it has, once for the event and the
+-- window's OnShow together.
+local onQuestEvent = ns.Frames.Coalesce(hideQuestFeedback)
 
 local function hookQuestMap()
     module:HookScript(_G.QuestMapFrame, "OnShow", onQuestEvent)

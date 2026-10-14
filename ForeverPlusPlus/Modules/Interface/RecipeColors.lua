@@ -173,9 +173,12 @@ local function hook()
     return true
 end
 
+-- Once for a burst: the list update comes many times as the window fills.
+local catchUpSoon = ns.Frames.Coalesce(catchUp)
+
 local function onEvent()
     if hook() then
-        C_Timer.After(0, catchUp)
+        catchUpSoon()
     end
 end
 

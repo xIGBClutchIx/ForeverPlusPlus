@@ -8,8 +8,8 @@ local _, ns = ...
 local ipairs, pairs, setmetatable, tonumber, unpack, floor, max = ipairs, pairs, setmetatable, tonumber,
     unpack, math.floor, math.max
 local tostring = tostring
-local CreateFrame, C_Timer, C_TooltipInfo, C_QuestLog, UnitName = CreateFrame, C_Timer, C_TooltipInfo,
-    C_QuestLog, UnitName
+local CreateFrame, C_TooltipInfo, C_QuestLog, UnitName = CreateFrame, C_TooltipInfo, C_QuestLog,
+    UnitName
 
 local L = ns.L
 local Nameplates = ns.Nameplates
@@ -359,22 +359,13 @@ local function update(unit, frame)
     place(box, frame, current, needed, kind, percent)
 end
 
-local pending = false
-
 -- Quest events come in bursts, so the plates are refreshed once after they settle.
-local function refreshSoon()
-    if pending then
-        return
+local refreshSoon = ns.Frames.Coalesce(function()
+    kinds = nil -- the quest log changed: index its objectives again
+    if module.enabled then
+        Nameplates.ForEach(update)
     end
-    pending = true
-    C_Timer.After(0.2, function()
-        pending = false
-        kinds = nil -- the quest log changed: index its objectives again
-        if module.enabled then
-            Nameplates.ForEach(update)
-        end
-    end)
-end
+end, 0.2)
 
 function module:OnEnable()
     kinds = nil

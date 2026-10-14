@@ -9,7 +9,7 @@
 -- Blizzard's bags get no overlays.
 local _, ns = ...
 
-local C_Container, C_Timer = C_Container, C_Timer
+local C_Container = C_Container
 local CreateFrame, InCombatLockdown, IsModifierKeyDown = CreateFrame, InCombatLockdown, IsModifierKeyDown
 local GameTooltip, UIParent = GameTooltip, UIParent
 local pairs, setmetatable, _G = pairs, setmetatable, _G
@@ -152,11 +152,7 @@ end
 ---Updates the overlays on the next frame, once however many times it's called before then (bags
 ---call UpdateItems once per bag).
 function Set:Refresh()
-    if self.pending then
-        return
-    end
-    self.pending = true
-    C_Timer.After(0, self.update)
+    self.refresh()
 end
 
 ---Starts laying overlays; call from the module's OnEnable. Hooks and events go through the
@@ -193,13 +189,9 @@ end
 ---@return table set
 function BagClicks.New(module, match, click)
     local set = setmetatable({ module = module, match = match, click = click, active = {}, spare = {} }, Set)
-    set.update = function()
-        set.pending = false
+    set.refresh = ns.Frames.Coalesce(function()
         set:Update()
-    end
-    set.refresh = function()
-        set:Refresh()
-    end
+    end)
     set.clear = function()
         set:Clear()
     end
