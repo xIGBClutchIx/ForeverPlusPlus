@@ -16,6 +16,9 @@ ns.changelog = {
                 { L.ADDONSLIST_TITLE, "The new AddOn Sets option (off by default) adds a Sets "
                     .. "dropdown beside Disable All, to save which addons are on under a name and "
                     .. "turn that set back on later." },
+                { L.AUTODECLINE_TITLE, "The new Guild Invites and Guild Charters options (off "
+                    .. "by default) turn down guild invites and requests to sign a guild charter, "
+                    .. "even from friends and guildmates." },
                 { L.COMPREHENDSCROLLS_TITLE, "A new module for Mages: right-click a scroll you "
                     .. "read with Comprehension in your bags to cast Comprehend Scroll on it, "
                     .. "without opening the spellbook. Not in combat. On by default; it does "

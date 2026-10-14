@@ -7,6 +7,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Added
 
 - **AddOns List**: the new AddOn Sets option (off by default) adds a Sets dropdown beside Disable All, to save which addons are on under a name and turn that set back on later.
+- **Auto Decline**: the new Guild Invites and Guild Charters options (off by default) turn down guild invites and requests to sign a guild charter, even from friends and guildmates.
 - **Comprehend Scrolls**: a new module for Mages: right-click a scroll you read with Comprehension in your bags to cast Comprehend Scroll on it, without opening the spellbook. Not in combat. On by default; it does nothing for characters without the spell.
 - **Item Tooltips**: the new Repair Cost line (off by default) shows what repairing damaged gear costs, on gear you wear or carry, without a merchant's repair cursor.
 - **Forever Quest Icons**: the new Quest Details option (on by default) puts the icon after the quest's name at the top of its details, in the quest window and on the map.
