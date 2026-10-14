@@ -55,7 +55,7 @@ for _, file in ipairs({ "Core", "Map" }) do
 end
 ITEM_MIN_SKILL = "Requires %s (%d)"
 for _, file in ipairs({ "Secret", "Colors", "Text", "GameData", "WorldMap", "Instances", "Chat",
-    "TalentPlan", "Errors", "Prices", "Store", "Keys" }) do
+    "TalentPlan", "Errors", "Prices", "Store", "Keys", "Professions" }) do
     load("ForeverPlusPlus/Lib/" .. file .. ".lua")
 end
 
@@ -582,6 +582,25 @@ eq(byKey.lfgd4 and byKey.lfgd4[5], true, "finder: a raid without an instance ID"
 eq(Instances.ByName("Random Classic Dungeon"), nil, "finder: random dungeons are left out")
 eq(Instances.ByName("Retail Dungeon"), nil, "finder: later expansions are left out")
 GetLFDChoiceOrder, GetLFGDungeonInfo = nil, nil
+
+-- Herbs and veins: the seed, and what tooltips and loot teach.
+local Professions = ns.Professions
+eq(Professions.Node("Peacebloom")[3], 2447, "nodes: seed read")
+eq(Professions.GatheringLine("Mining"), Professions.MINING, "nodes: English skill name")
+eq(Professions.GatheringLine("Skinning"), nil, "nodes: not a gathering line")
+eq(Professions.LearnRequirement("Friedenskraut", "Herbalism", 1), true, "nodes: learn a new name")
+eq(Professions.Node("Friedenskraut")[1], Professions.HERBALISM, "nodes: learned skill line")
+eq(Professions.Node("Friedenskraut")[3], nil, "nodes: learned without an item")
+eq(Professions.LearnRequirement("Friedenskraut", "Herbalism", 1), false, "nodes: same again is no change")
+eq(Professions.LearnRequirement("Copper Vein", "Mining", 1), false, "nodes: seed's requirement isn't saved")
+eq(Professions.LearnNodeItem("Friedenskraut", 2447), true, "nodes: learn its item")
+eq(Professions.Node("Friedenskraut")[2], 1, "nodes: item keeps the skill")
+eq(Professions.LearnNodeItem("Copper Vein", 2835), false, "nodes: a known item stays")
+eq(Professions.LearnRequirement("Copper Vein", "Mining", 5), true, "nodes: a changed requirement wins")
+eq(Professions.Node("Copper Vein")[3], 2770, "nodes: and keeps the seed's item")
+Professions.ForgetNodes()
+eq(Professions.Node("Friedenskraut"), nil, "nodes: forget")
+eq(Professions.Node("Copper Vein")[2], 1, "nodes: forget restores the seed")
 ns.db = savedDB
 
 -- Done ------------------------------------------------------------------------------------------

@@ -3,7 +3,7 @@
 -- module first asks.
 local _, ns = ...
 
-local type = type
+local type, ipairs, select = type, ipairs, select
 local GetProfessions, GetProfessionInfo = GetProfessions, GetProfessionInfo
 
 local Professions = {
@@ -31,10 +31,11 @@ Professions.TRIVIAL = GRAY -- what Difficulty gives once gathering no longer rai
 
 local HERB, MINE = Professions.HERBALISM, Professions.MINING
 
--- Herbs and veins by their name in the world (English): the skill line that gathers them, the
--- skill it takes, from Classic, and the item they give first. Forever may change some; fix them
--- here.
-Professions.NODES = { -- object name -> { skill line, skill, item ID }
+-- Herbs and veins by their name in the world: the skill line that gathers them, the skill it
+-- takes, and the item they give first. The seed is Classic's, in English; the game teaches the
+-- rest (Professions.LearnRequirement, LearnNodeItem), so other languages and Forever's changes
+-- fill in as the player meets them. A learned node may lack its skill or its item.
+local NODES = ns.GameData.New("professionNodes", { -- object name -> { skill line, skill, item ID }
     ["Peacebloom"] = { HERB, 1, 2447 },
     ["Silverleaf"] = { HERB, 1, 765 },
     ["Earthroot"] = { HERB, 15, 2449 },
@@ -87,7 +88,92 @@ Professions.NODES = { -- object name -> { skill line, skill, item ID }
     ["Hakkari Thorium Vein"] = { MINE, 275, 10620 },
     ["Small Obsidian Chunk"] = { MINE, 305, 22202 },
     ["Large Obsidian Chunk"] = { MINE, 305, 22203 },
-}
+}, { label = "Herbs and veins" })
+
+---The herb or vein named `name` (as the world writes it): { skill line, skill, item ID }, any of
+---which may be nil for one learned in game, or nil for a name that isn't a node.
+---@param name string
+---@return table? node
+function Professions.Node(name)
+    return NODES:Get(name)
+end
+
+-- The gathering skill lines a node's requirement can name, and their English names (the seed's
+-- language) for when the client can't say its own.
+local GATHERING = { HERB, MINE }
+local ENGLISH = { [HERB] = "Herbalism", [MINE] = "Mining" }
+local lineNames = {} -- skill line -> its name in the client's language, once read
+
+local function lineName(line)
+    if lineNames[line] then
+        return lineNames[line]
+    end
+    local name
+    -- Probes: both are Mainline's; the second needs no profession info loaded.
+    if C_TradeSkillUI and C_TradeSkillUI.GetProfessionInfoBySkillLineID then
+        local info = C_TradeSkillUI.GetProfessionInfoBySkillLineID(line)
+        name = info and info.professionName
+    end
+    if not (name and ns.IsReadable(name) and type(name) == "string" and name ~= "")
+        and C_TradeSkillUI and C_TradeSkillUI.GetTradeSkillDisplayName then
+        name = C_TradeSkillUI.GetTradeSkillDisplayName(line)
+    end
+    if name and ns.IsReadable(name) and type(name) == "string" and name ~= "" then
+        lineNames[line] = name
+        return name
+    end
+end
+
+---The gathering skill line (Herbalism or Mining) named `skill` in the client's language, or nil.
+---@param skill string
+---@return number? line
+function Professions.GatheringLine(skill)
+    for _, line in ipairs(GATHERING) do
+        if skill == ENGLISH[line] or skill == lineName(line) or skill == select(2, Professions.Rank(line)) then
+            return line
+        end
+    end
+end
+
+---Learns what Blizzard's "Requires Herbalism (75)" line under node `name` says: the skill line
+---and skill it takes. Does nothing when `skill` isn't Herbalism or Mining, or it's known already.
+---@param name string
+---@param skill string the profession as the line names it
+---@param need number
+---@return boolean changed
+function Professions.LearnRequirement(name, skill, need)
+    local line = type(name) == "string" and name ~= "" and type(need) == "number"
+        and Professions.GatheringLine(skill)
+    if not line then
+        return false
+    end
+    local node = NODES:Get(name)
+    if node and node[1] == line and node[2] == need then
+        return false
+    end
+    return NODES:Learn(name, { line, need, node and node[3] })
+end
+
+---Learns the item node `name` gives, from the loot window after gathering it. Keeps a known
+---item: a vein gives stone too, and which comes first can vary.
+---@param name string
+---@param item number item ID
+---@return boolean changed
+function Professions.LearnNodeItem(name, item)
+    if type(name) ~= "string" or name == "" or type(item) ~= "number" then
+        return false
+    end
+    local node = NODES:Get(name)
+    if node and node[3] then
+        return false
+    end
+    return NODES:Learn(name, { node and node[1], node and node[2], item })
+end
+
+---Forgets every herb and vein learned in game; the seed stays.
+function Professions.ForgetNodes()
+    NODES:Forget()
+end
 
 ---How hard gathering something that needs `need` is at skill `rank`, as a color (r, g, b): red
 ---can't yet, then orange (a skill point every time), yellow (often), green (sometimes), and gray
@@ -158,7 +244,7 @@ end
 -- Lockpicking isn't a profession in the list above: rogues have it as a skill they learn with
 -- Pick Lock, and, as in Classic, it's five times their level up to 300. Probe: the spell book
 -- call is Mainline's, the plain global is Classic's.
-local PICK_LOCK = 1804
+local PICK_LOCK = ns.GameData.Spell(1804, "Pick Lock")
 local LOCKPICKING_CAP = 300
 
 local function knowsPickLock()

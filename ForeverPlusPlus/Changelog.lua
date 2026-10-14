@@ -122,6 +122,9 @@ ns.changelog = {
                 { L.FLIGHTTIMER_TITLE, "The flight map tooltip's Flight Time line looks like the "
                     .. "Sell Price line, with the time at the right. The new Tooltip Line option "
                     .. "puts it back on one line, white or gray." },
+                { L.PROFTOOLTIPS_TITLE, "Learns herbs and veins it doesn't know, and a skill "
+                    .. "Forever changed, from the game's own \"Requires Herbalism\" line, so it "
+                    .. "works in any language." },
                 { L.MINIMAPBUTTON_TITLE, "Shift-click it, instead of Shift-right-click, to see "
                     .. "the errors, and Alt-click it to clear this session's. Clear Key is Alt by "
                     .. "default and works with a click instead of a right-click." },

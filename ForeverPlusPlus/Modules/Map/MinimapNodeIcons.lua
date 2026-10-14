@@ -20,9 +20,11 @@
 -- and tooltip (which the icons let through) are the player's; icons keep moving meanwhile.
 -- Where the player's spot can't be read (an instance), icons sit where the dots answered.
 --
--- Names are matched in English through Professions.NODES. Any other name is learned the first
--- time the player gathers it: the spell's target, then the first item in the loot window; a
--- learned node has no known skill, so it's never tinted. Ideas from NodeSight; none of its code.
+-- Names are matched through Professions.Node: Classic's English names, and those learned in game.
+-- A node whose item isn't known gets it the first time the player gathers it: the spell's target,
+-- then the first item in the loot window. Its skill is learned from Blizzard's "Requires Herbalism
+-- (N)" line where the minimap's tooltip shows one under its name (or Profession Tooltips sees one);
+-- until then it's never tinted. Ideas from NodeSight; none of its code.
 local _, ns = ...
 
 local ipairs, type, pcall, floor, tonumber = ipairs, type, pcall, math.floor, tonumber
@@ -32,13 +34,14 @@ local CreateFrame, Minimap, GetTime, C_Timer = CreateFrame, Minimap, GetTime, C_
 local GetCursorPosition, GetPlayerFacing, GetCVarBool = GetCursorPosition, GetPlayerFacing, GetCVarBool
 local C_Map, C_Minimap, C_TooltipInfo, C_Item = C_Map, C_Minimap, C_TooltipInfo, C_Item
 local InCombatLockdown = InCombatLockdown
-local GetNumLootItems, GetLootSlotInfo = GetNumLootItems, GetLootSlotInfo
+local GetNumLootItems, GetLootSlotInfo, GetLootSlotLink = GetNumLootItems, GetLootSlotInfo, GetLootSlotLink
 
 local L = ns.L
 local readable = ns.IsReadable
 local plain = ns.Text.Plain
 local Professions = ns.Professions
-local NODES = Professions.NODES
+local Node = Professions.Node
+local Requires = ns.GameData.Requires
 
 local module = ns.NewModule("MinimapNodeIcons", L.MINIMAPNODEICONS_DESC, {
     enabled = false,
@@ -49,7 +52,8 @@ local module = ns.NewModule("MinimapNodeIcons", L.MINIMAPNODEICONS_DESC, {
     gray = false, -- gray once gathering no longer raises the skill
     detail = "medium", -- a key of STEPS
     chat = true,
-    -- Node name -> icon, for names not in NODES, from what gathering them gave. Data, not a setting.
+    -- Node name -> icon, for nodes whose item couldn't be read from the loot window (and every
+    -- one learned before items were). Data, not a setting.
     learned = {},
     -- { space = a key of SPACES }, once a pass has found a node with it. Data, not a setting.
     calibration = {},
@@ -94,6 +98,7 @@ module.actions = {
         confirm = L.MINIMAPNODEICONS_CLEAR_CONFIRM,
         fn = function()
             module.db.learned = {}
+            Professions.ForgetNodes()
             ns.Print(L.MINIMAPNODEICONS_CLEAR_DONE)
         end,
     },
@@ -105,7 +110,8 @@ function module:IsAvailable()
         and C_TooltipInfo.GetMinimapMouseover and true or false
 end
 
-local HERBS, MINERALS = 2383, 2580 -- Find Herbs, Find Minerals
+local HERBS = ns.GameData.Spell(2383, "Find Herbs")
+local MINERALS = ns.GameData.Spell(2580, "Find Minerals")
 
 -- Its parts' own rows on the Profiler page, so its time can be told apart. Off, Profiler.Call
 -- just calls through. Probes are only counted (PART_ASK), not timed: a stopwatch around each of
@@ -137,20 +143,17 @@ local NONE = {}
 
 -- The icon for a node's name, or nil for a name that isn't a node we know.
 local function iconFor(name)
-    local learned = module.db.learned[name]
-    if learned then
-        return learned
-    end
-    local node = NODES[name]
-    return node and C_Item.GetItemIconByID(node[3])
+    local node = Node(name)
+    local icon = node and node[3] and C_Item.GetItemIconByID(node[3])
+    return icon or module.db.learned[name]
 end
 
 -- How the player's skill stands against the node named `name`: "low" when it's too low to gather
 -- (or they lack the profession), "gray" when gathering it no longer raises the skill, else nil,
 -- as for a node whose skill isn't known.
 local function standing(name)
-    local node = NODES[name]
-    if not node then
+    local node = Node(name)
+    if not (node and node[1] and node[2]) then
         return nil
     end
     local rank = Professions.Rank(node[1])
@@ -650,13 +653,22 @@ local function find(count, v)
     local last = count and min(pass.index + count - 1, #list) or #list
     for i = pass.index, last do
         local right, up = list[i][1], list[i][2]
-        for _, entry in ipairs(probe(right, up, pass.space) or NONE) do
+        local found = probe(right, up, pass.space) or NONE
+        for k, entry in ipairs(found) do
             local icon = iconFor(entry.name)
             if icon then
                 pass.hits[#pass.hits + 1] = { name = entry.name, icon = icon, right = right, up = up,
                     gray = entry.gray }
             else
-                seen[entry.name] = true
+                -- Blizzard's "Requires Herbalism (75)" under a name says what that node takes.
+                local skill, need = Requires(entry.name)
+                if skill then
+                    if k > 1 then
+                        Professions.LearnRequirement(found[k - 1].name, skill, need)
+                    end
+                else
+                    seen[entry.name] = true
+                end
             end
         end
         if blocked then
@@ -807,10 +819,30 @@ end
 
 local pending, pendingAt -- the name the player last cast a spell at, and when
 
+-- Whether `name` is a node whose item isn't known: one the minimap showed without an icon, or one
+-- learned from its requirement line alone.
+local function wantsItem(name)
+    if seen[name] then
+        return true
+    end
+    local node = Node(name)
+    return node and not node[3] or false
+end
+
 local function onCastSent(_, unit, target)
-    if unit == "player" and target and readable(target) and seen[target] then
+    if unit == "player" and target and readable(target) and type(target) == "string" and wantsItem(target) then
         pending, pendingAt = target, GetTime()
     end
+end
+
+-- The item ID in a loot slot, or nil. Probe: GetLootSlotLink is in Mainline's loot API.
+local function slotItem(slot)
+    local link = GetLootSlotLink and GetLootSlotLink(slot)
+    if not (link and readable(link) and type(link) == "string") then
+        return nil
+    end
+    local id = C_Item.GetItemInfoInstant(link)
+    return readable(id) and type(id) == "number" and id or nil
 end
 
 local function onLootOpened()
@@ -822,7 +854,11 @@ local function onLootOpened()
     for slot = 1, GetNumLootItems() do
         local icon = GetLootSlotInfo(slot)
         if icon and readable(icon) then
-            module.db.learned[name] = icon
+            -- The item, for every module and character; its icon alone when the link can't be read.
+            local item = slotItem(slot)
+            if not (item and Professions.LearnNodeItem(name, item)) then
+                module.db.learned[name] = icon
+            end
             seen[name] = nil
             return
         end

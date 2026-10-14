@@ -46,6 +46,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Currency Bar**: with nothing to show, it says how to track currencies instead of showing an empty box.
 - **Error Catcher**: says on its Settings page, instead of in chat, when another addon such as BugGrabber is catching Lua errors, and leaves Blizzard's error window and blocked action popup to it.
 - **Flight Timer**: the flight map tooltip's Flight Time line looks like the Sell Price line, with the time at the right. The new Tooltip Line option puts it back on one line, white or gray.
+- **Profession Tooltips**: learns herbs and veins it doesn't know, and a skill Forever changed, from the game's own "Requires Herbalism" line, so it works in any language.
 - **Minimap Button**: Shift-click it, instead of Shift-right-click, to see the errors, and Alt-click it to clear this session's. Clear Key is Alt by default and works with a click instead of a right-click.
 - **Minimap Button**: the right-click menu also turns Auto Decline, Auto Dismount, Auto Gossip, Auto Release, Auto Repair, Auto Screenshot, Minimap Node Icons, Movable Framerate, and Skip Cinematics on and off, and lists its modules in alphabetical order.
 - **Short Channel Names**: the Style dropdown also offers initials ([LFG] for LookingForGroup) and the name without its zone ([General]), alone or after the number. Number and Initials ([1. LFG]) is the new default.

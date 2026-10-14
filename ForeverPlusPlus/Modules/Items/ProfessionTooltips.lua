@@ -6,7 +6,9 @@
 -- GatherSkillTooltip; none of its code.
 --
 -- Fishing isn't here: in Classic what a pool or a fish needs depends on the zone, not on it.
--- Node names are matched in English; another language needs its own names in NODES.
+-- Herb and vein names start in English (Lib/Professions); a name in another language, or one a
+-- patch changed, is learned from Blizzard's "Requires Herbalism (N)" line the first time its
+-- tooltip shows one.
 local _, ns = ...
 
 local type, ipairs, setmetatable = type, ipairs, setmetatable
@@ -79,14 +81,22 @@ module.options = {
 }
 
 -- Data ---------------------------------------------------------------------------------------
--- The skill each gathers at, from Classic. Forever may change some; fix them here, and herbs and
--- veins in Lib/Professions, which Minimap Node Icons shares.
+-- The skill each gathers at, from Classic. Forever may change some; fix them here. Herbs and
+-- veins are in Lib/Professions, which Minimap Node Icons shares and which learns them in game.
 
 local NODES = setmetatable({ -- object name -> { skill line, skill }
     -- Locked chests in the world; add more (and doors) here as they're confirmed in game.
     ["Solid Chest"] = { LOCK, 1 },
     ["Large Solid Chest"] = { LOCK, 1 },
-}, { __index = Professions.NODES })
+}, {
+    -- Herbs and veins, seeded and learned, once their skill is known.
+    __index = function(_, name)
+        local node = Professions.Node(name)
+        if node and node[1] and node[2] then
+            return node
+        end
+    end,
+})
 
 local ITEMS = { -- item ID -> { skill line, skill }
     [2447] = { HERB, 1 }, -- Peacebloom
@@ -361,6 +371,12 @@ local function addNodeLines(tooltip, data)
     end
     text = gsub(text, "|n", "\n")
     if not find(text, "\n", 1, true) then
+        -- Blizzard's own requirement line names the profession and skill in the client's
+        -- language: what a herb or vein needs is learned from it, for every language and patch.
+        local skill, need = ns.GameData.TooltipRequires(data)
+        if skill then
+            Professions.LearnRequirement(clean(text), skill, need)
+        end
         local node = NODES[clean(text)]
         if not node then
             return
@@ -394,8 +410,14 @@ local function addNodeLines(tooltip, data)
     while i <= #raw do
         local part = raw[i]
         parts[#parts + 1] = part
-        local node = NODES[clean(part)]
         local nextPart = raw[i + 1]
+        if nextPart then
+            local skill, need = ns.GameData.Requires(clean(nextPart))
+            if skill then
+                Professions.LearnRequirement(clean(part), skill, need)
+            end
+        end
+        local node = NODES[clean(part)]
         local color, plain, rank, skillName = nil, nil, nil, nil
         if node and nextPart then
             color, plain, _, rank, skillName = requiresColor(nextPart, node[1])
