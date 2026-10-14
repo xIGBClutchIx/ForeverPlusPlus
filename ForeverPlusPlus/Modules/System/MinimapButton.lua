@@ -59,14 +59,13 @@ local button
 local compartment -- our entry in the addon compartment, while it's there
 
 -- What a click does with a key held, while Error Catcher is on: the first whose key is held wins,
--- so showing the errors beats clearing them when two share a key. `count` hides the tooltip's
--- hint while there's nothing to clear.
+-- so showing the errors beats clearing them when two share a key.
 local KEY_ACTIONS = {
     { setting = "errorsKey", hint = L.MINIMAPBUTTON_HINT_ERRORS,
         run = function() Errors.Toggle() end },
-    { setting = "clearModifier", hint = L.MINIMAPBUTTON_HINT_CLEAR, count = Errors.SessionCount,
+    { setting = "clearModifier", hint = L.MINIMAPBUTTON_HINT_CLEAR,
         run = function() Errors.ClearSession() end },
-    { setting = "clearAllKey", hint = L.MINIMAPBUTTON_HINT_CLEAR_ALL, count = Errors.SavedCount,
+    { setting = "clearAllKey", hint = L.MINIMAPBUTTON_HINT_CLEAR_ALL,
         run = function() Errors.ClearAll() end },
 }
 
@@ -158,18 +157,18 @@ local function showTooltip(owner, drag)
         GameTooltip:AddLine(" ")
     end
     addHint(ns.WelcomePending() and L.MINIMAPBUTTON_HINT_WELCOME or L.MINIMAPBUTTON_HINT_SETTINGS,
-        L.MINIMAPBUTTON_CLICK)
+        L.MINIMAPBUTTON_LEFT_CLICK)
     addHint(L.MINIMAPBUTTON_HINT_TOGGLES, L.MINIMAPBUTTON_RIGHT_CLICK)
     if errors then
         for _, action in ipairs(KEY_ACTIONS) do
             local key = module.db[action.setting]
-            if key ~= "none" and KEY_NAMES[key] and (not action.count or action.count() > 0) then
-                addHint(action.hint, format(L.MINIMAPBUTTON_KEY_CLICK, KEY_NAMES[key]))
+            if key ~= "none" and KEY_NAMES[key] then
+                addHint(action.hint, format(L.MINIMAPBUTTON_KEY_LEFT_CLICK, KEY_NAMES[key]))
             end
         end
     end
     if drag then
-        addHint(L.MINIMAPBUTTON_HINT_MOVE, L.MINIMAPBUTTON_DRAG)
+        addHint(L.MINIMAPBUTTON_HINT_MOVE, L.MINIMAPBUTTON_LEFT_DRAG)
     end
     GameTooltip:Show()
 end

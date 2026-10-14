@@ -106,10 +106,10 @@ L.MINIMAPBUTTON_HINT_ERRORS = "Show Errors"
 L.MINIMAPBUTTON_HINT_CLEAR = "Clear Session Errors"
 L.MINIMAPBUTTON_HINT_CLEAR_ALL = "Clear All Errors"
 L.MINIMAPBUTTON_HINT_MOVE = "Move Button"
-L.MINIMAPBUTTON_CLICK = "Click"
+L.MINIMAPBUTTON_LEFT_CLICK = "Left-Click"
 L.MINIMAPBUTTON_RIGHT_CLICK = "Right-Click"
-L.MINIMAPBUTTON_KEY_CLICK = "%s-Click" -- a key, such as Shift
-L.MINIMAPBUTTON_DRAG = "Drag"
+L.MINIMAPBUTTON_KEY_LEFT_CLICK = "%s-Left-Click" -- a key, such as Shift
+L.MINIMAPBUTTON_LEFT_DRAG = "Left-Drag"
 L.MINIMAPBUTTON_ERRORS_KEY = "Show Errors Key"
 L.MINIMAPBUTTON_ERRORS_KEY_DESC = "The key to hold while clicking the button to show the "
     .. "errors, while Error Catcher is on."
