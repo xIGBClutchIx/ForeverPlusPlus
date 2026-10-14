@@ -108,6 +108,35 @@ function Frames.Coalesce(fn, delay)
     return queue, cancel
 end
 
+---An OnUpdate script that calls `fn(frame)` at most every `interval` seconds: look a few times a
+---second instead of every frame.
+---@param interval number seconds
+---@param fn fun(frame: table)
+---@return fun(frame: table, delta: number)
+function Frames.Throttled(interval, fn)
+    local elapsed = 0
+    return function(frame, delta)
+        elapsed = elapsed + delta
+        if elapsed >= interval then
+            elapsed = 0
+            fn(frame)
+        end
+    end
+end
+
+---A hidden frame that calls `fn()` every `interval` seconds while it's shown, charged to `module`
+---on the Profiler page. Show it to start watching and hide it to stop.
+---@param module table
+---@param interval number seconds
+---@param fn function
+---@return table frame
+function Frames.Watcher(module, interval, fn)
+    local frame = CreateFrame("Frame", nil, UIParent)
+    frame:Hide()
+    frame:SetScript("OnUpdate", ns.Profiler.Wrap(module, Frames.Throttled(interval, fn)))
+    return frame
+end
+
 local Timer = {}
 Timer.__index = Timer
 

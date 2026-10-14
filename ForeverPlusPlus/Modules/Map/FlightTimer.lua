@@ -314,9 +314,7 @@ module.actions = {
 function module:OnEnable()
     if not bar then
         bar = newBar()
-        watcher = CreateFrame("Frame", nil, UIParent)
-        watcher:Hide()
-        watcher:SetScript("OnUpdate", ns.Profiler.Wrap(self, ns.WorldMap.Throttled(0.1, tick)))
+        watcher = ns.Frames.Watcher(self, 0.1, tick)
     end
     place()
     self:On("TAXIMAP_OPENED", readNodes)

@@ -510,9 +510,7 @@ local function syncArrow()
     if module.enabled and module.db.arrow then
         if not frame then
             frame = newFrame()
-            watcher = CreateFrame("Frame", nil, UIParent)
-            watcher:Hide()
-            watcher:SetScript("OnUpdate", ns.Profiler.Wrap(module, WorldMap.Throttled(INTERVAL, update)))
+            watcher = ns.Frames.Watcher(module, INTERVAL, update)
         end
         place()
         module:On("USER_WAYPOINT_UPDATED", waypointChanged)

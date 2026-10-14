@@ -593,7 +593,7 @@ local function recordTooltip(tooltip)
     end
 end
 
-local wasOnTaxi, taxiStart, elapsed = false, nil, 0
+local wasOnTaxi, taxiStart = false, nil
 local EVENT_ARGS = 4
 
 local function onEvent(_, event, ...)
@@ -619,12 +619,7 @@ local function onEvent(_, event, ...)
     end
 end
 
-local function onUpdate(_, delta)
-    elapsed = elapsed + delta
-    if elapsed < 0.5 then
-        return
-    end
-    elapsed = 0
+local onUpdate = ns.Frames.Throttled(0.5, function()
     local now = UnitOnTaxi("player") and true or false
     if now ~= wasOnTaxi then
         wasOnTaxi = now
@@ -635,7 +630,7 @@ local function onUpdate(_, delta)
             record(format("UnitOnTaxi became false after %.1f seconds", GetTime() - (taxiStart or GetTime())))
         end
     end
-end
+end)
 
 local function startRecorder()
     if recorder then
