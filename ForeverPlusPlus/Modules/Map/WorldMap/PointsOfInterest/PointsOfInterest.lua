@@ -10,7 +10,7 @@ local ipairs, pairs, format, rawget, unpack, abs = ipairs, pairs, string.format,
     math.abs
 local select, type, floor = select, type, math.floor
 local C_Map, C_EncounterJournal, C_TaxiMap, Enum = C_Map, C_EncounterJournal, C_TaxiMap, Enum
-local C_Spell, C_UnitAuras, C_Timer = C_Spell, C_UnitAuras, C_Timer
+local C_Spell, C_UnitAuras, C_Timer, GetTime = C_Spell, C_UnitAuras, C_Timer, GetTime
 local UnitName, UnitRace, GetRealmName = UnitName, UnitRace, GetRealmName
 
 local L = ns.L
@@ -518,29 +518,59 @@ end
 -- few seconds. The server places them: the client's tables don't have them and Wowhead lists them
 -- without a place (2026-10-03, build 70205). So a spot is saved where a cast gave the long buff.
 
--- Each kind: the cast, the spell whose name the buff has, and the side whose Skyborne use it.
--- From the client's SpellName, SpellMisc, and SpellEffect tables (wago.tools, build 70205).
-local SKYBORNE = {
-    leyline = { cast = 1259705, buff = 1259691, side = "A" }, -- Read Ley Line, Energized
-    convergence = { cast = 1259686, buff = 1259688, side = "H" }, -- Skysight, Elemental Blessing
-}
+-- Each kind and the side whose Skyborne use it.
+local SKYBORNE = { leyline = { side = "A" }, convergence = { side = "H" } }
 
--- The kind each Skyborne race uses, by race ID (ChrRaces): 95 High Order, 96 Windshaper.
-local RACES = { [95] = "leyline", [96] = "convergence" }
+-- The casts and the buffs they give, spell ID -> kind. The seed is from the client's SpellName,
+-- SpellMisc, and SpellEffect tables (wago.tools, build 70205); a patch's new IDs are learned in
+-- play: a cast that a fresh 15-minute buff of a known one follows, and the buff a known cast gives.
+local CASTS = ns.GameData.New("skyborneCasts", {
+    [1259705] = "leyline", -- Read Ley Line
+    [1259686] = "convergence", -- Skysight
+}, { kind = "spell", label = "Skyborne casts" })
+local BUFFS = ns.GameData.New("skyborneBuffs", {
+    [1259691] = "leyline", -- Energized
+    [1259688] = "convergence", -- Elemental Blessing
+}, { kind = "spell", label = "Skyborne buffs" })
+
+-- The kind each Skyborne race ID (ChrRaces) uses: 95 High Order, 96 Windshaper. Both share the
+-- race file "Skyborne", which decides; the IDs are only for a side the client won't say.
+local RACES = ns.GameData.New("skyborneRaces", { [95] = "leyline", [96] = "convergence" },
+    { label = "Skyborne races" })
 
 local function spellName(id)
     return C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(id) or nil
 end
 
--- The kind this character uses, or nil when it isn't Skyborne.
-local function ownKind()
+-- The name of a spell of this kind in `set` that this client has, or nil.
+local function nameOf(set, kindName)
+    for id, kind in set:Pairs() do
+        if kind == kindName then
+            local name = spellName(id)
+            if name then
+                return name
+            end
+        end
+    end
+end
+
+-- The kind this character uses, or nil when it isn't Skyborne. With `learn`, a side that decided
+-- it is remembered for the race ID.
+local function ownKind(learn)
     local _, raceFile, raceID = UnitRace("player")
-    if RACES[raceID] then
-        return RACES[raceID]
+    if raceFile ~= "Skyborne" then
+        return nil
     end
-    if raceFile == "Skyborne" then
-        return ns.WorldMap.PlayerSide() == "H" and "convergence" or "leyline"
+    local side = ns.WorldMap.PlayerSide()
+    for kindName, skyborne in pairs(SKYBORNE) do
+        if skyborne.side == side then
+            if learn then
+                RACES:Learn(raceID, kindName)
+            end
+            return kindName
+        end
     end
+    return RACES:Get(raceID)
 end
 
 -- Whether saved spots of this kind show, on a continent map (`world`) or a zone map.
@@ -554,7 +584,7 @@ end
 
 local function spotInfo(kindName, fromMap)
     local kindInfo, skyborne = KINDS[kindName], SKYBORNE[kindName]
-    local cast = spellName(skyborne.cast)
+    local cast = nameOf(CASTS, kindName)
     return {
         atlas = atlasOf(kindInfo),
         size = kindInfo.pixels * module.db[kindInfo.size] / 100,
@@ -710,32 +740,47 @@ local SAME_SPOT = 2
 -- A buff at least this long (seconds) is the one a spot gives; elsewhere it's 15 or 30 seconds.
 local LONG = 600
 
--- Whether the player has the long buff of this kind, found by its name: the 15-minute Energized
--- is in the client's tables, the 15-minute Elemental Blessing isn't (only the 30-second one), so
--- that one is assumed to share the name. Unverified in game. Secret aura fields count as no.
-local function hasLongBuff(kindName)
-    local name = spellName(SKYBORNE[kindName].buff)
-    if not (name and C_UnitAuras and C_UnitAuras.GetAuraDataByIndex) then
-        return false
+-- How long (seconds) around a cast a buff may start and still be the one it gave, for lag.
+local FRESH = 1
+
+-- The player's long buffs: for each, its spell ID, whether it's a known buff of this kind (by ID,
+-- or by name: the 15-minute Energized is in the client's tables, the 15-minute Elemental Blessing
+-- isn't, only the 30-second one, so it's taken to share the name), and whether it started with
+-- the cast at `castTime`. Secret aura fields are skipped.
+local function longBuffs(kindName, castTime)
+    local found = {}
+    if not (C_UnitAuras and C_UnitAuras.GetAuraDataByIndex) then
+        return found
+    end
+    local names = {}
+    for id, kind in BUFFS:Pairs() do
+        local name = kind == kindName and spellName(id)
+        if name then
+            names[name] = true
+        end
     end
     for i = 1, 40 do
         local aura = C_UnitAuras.GetAuraDataByIndex("player", i, "HELPFUL")
         if not aura then
-            return false
+            break
         end
-        local auraName, duration = aura.name, aura.duration
-        if ns.IsReadable(auraName) and ns.IsReadable(duration) and auraName == name
-            and duration and duration >= LONG then
-            return true
+        local id, name, duration, expires = aura.spellId, aura.name, aura.duration,
+            aura.expirationTime
+        if ns.IsReadable(id) and ns.IsReadable(name) and ns.IsReadable(duration)
+            and ns.IsReadable(expires) and id and duration and duration >= LONG then
+            found[#found + 1] = {
+                id = id,
+                known = BUFFS:Get(id) == kindName or (name and names[name]) or false,
+                fresh = expires and expires - duration >= castTime - FRESH or false,
+            }
         end
     end
-    return false
+    return found
 end
 
--- After a cast: when it gave the long buff, saves where the player stands, unless a spot of the
--- kind is already saved there.
+-- Saves where the player stands as a spot of this kind, unless one is already saved there.
 local function saveSpot(kindName)
-    if not (module.enabled and hasLongBuff(kindName)) then
+    if not module.enabled then
         return
     end
     local mapID = C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit("player")
@@ -762,16 +807,50 @@ local function saveSpot(kindName)
     layer:Refresh()
 end
 
-local function onCast(_, unit, _, spellID)
-    if not (ns.IsReadable(unit) and ns.IsReadable(spellID)) or unit ~= "player" then
+-- After a cast, once its buff is on: a known cast with a known long buff saves the spot. A known
+-- cast whose fresh long buff isn't known teaches that buff, and any other cast that a fresh known
+-- long buff follows teaches the cast (a patch's new IDs); both save the spot too. A cast right
+-- after a known one teaches nothing, since the buff is the known cast's.
+local lastKnownCast = 0
+
+local function afterCast(spellID, castTime)
+    local kindName = CASTS:Get(spellID)
+    local knownCast = kindName ~= nil
+    if not knownCast and castTime - lastKnownCast < 2 * FRESH + 1 then
         return
     end
-    for kindName, skyborne in pairs(SKYBORNE) do
-        if spellID == skyborne.cast then
-            -- The buff lands after the cast; give the server a moment.
-            C_Timer.After(1, function() saveSpot(kindName) end)
+    kindName = kindName or ownKind()
+    if not (module.enabled and kindName) then
+        return
+    end
+    local learnBuff
+    for _, buff in ipairs(longBuffs(kindName, castTime)) do
+        if buff.known and (knownCast or buff.fresh) then
+            if not knownCast then
+                CASTS:Learn(spellID, kindName)
+            end
+            saveSpot(kindName)
+            return
+        elseif knownCast and buff.fresh then
+            learnBuff = buff.id
         end
     end
+    if learnBuff then
+        BUFFS:Learn(learnBuff, kindName)
+        saveSpot(kindName)
+    end
+end
+
+local function onCast(_, unit, _, spellID)
+    if not (ns.IsReadable(unit) and ns.IsReadable(spellID)) or unit ~= "player" or not spellID then
+        return
+    end
+    local castTime = GetTime()
+    if CASTS:Get(spellID) then
+        lastKnownCast = castTime
+    end
+    -- The buff lands after the cast; give the server a moment.
+    C_Timer.After(1, function() afterCast(spellID, castTime) end)
 end
 
 internal.refresh = function()
@@ -787,7 +866,7 @@ function module:OnEnable()
     self:On("TAXIMAP_OPENED", rememberLearned)
     self:On("TAXIMAP_CLOSED", function() layer:Refresh() end)
     -- Only Skyborne can find ley lines.
-    if ownKind() then
+    if ownKind(true) then
         self:On("UNIT_SPELLCAST_SUCCEEDED", onCast)
     end
 end
