@@ -195,8 +195,7 @@ end
 
 -- A zone's name in the player's language, from the game.
 local function zoneName(mapID)
-    local info = C_Map and C_Map.GetMapInfo and C_Map.GetMapInfo(mapID)
-    return info and info.name or ""
+    return ns.WorldMap.MapName(mapID, "")
 end
 
 -- An instance's name in the player's language, and which entrance it is.
@@ -937,16 +936,11 @@ local function saveSpot(kindName)
     if not module.enabled then
         return
     end
-    local mapID = C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit("player")
-    local position = mapID and C_Map.GetPlayerMapPosition and C_Map.GetPlayerMapPosition(mapID, "player")
-    if not position then
+    local mapID, x, y = ns.WorldMap.PlayerPosition()
+    if not mapID then
         return
     end
-    local x, y = position:GetXY()
-    if not (ns.IsReadable(x) and ns.IsReadable(y) and x and y) then
-        return
-    end
-    x, y = floor(x * 1000 + 0.5) / 10, floor(y * 1000 + 0.5) / 10
+    x, y = percent(x), percent(y)
     local all = module.db.leyLineSpots
     local spots = all[mapID] or {}
     for _, spot in ipairs(spots) do

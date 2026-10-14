@@ -160,6 +160,53 @@ eq(WorldMap.IsContinent({ mapType = 3 }), false, "zone")
 eq(WorldMap.IsContinent({ mapType = 0 }), false, "cosmic off by default")
 eq(WorldMap.IsContinent({ mapType = 0 }, true), true, "cosmic when asked")
 eq(WorldMap.IsContinent(nil), false, "no info")
+
+-- A map tree: Azeroth (world) > Kalimdor (continent) > Durotar (zone) > a cave (dungeon).
+local maps = {
+    [947] = { mapID = 947, name = "Azeroth", mapType = 1, parentMapID = 0 },
+    [12] = { mapID = 12, name = "Kalimdor", mapType = 2, parentMapID = 947 },
+    [1411] = { mapID = 1411, name = "Durotar", mapType = 3, parentMapID = 12 },
+    [9001] = { mapID = 9001, name = "Cave", mapType = 4, parentMapID = 1411 },
+}
+local here = { mapID = 1411, x = 0.25, y = 0.75 }
+C_Map = {
+    GetMapInfo = function(id)
+        return maps[id]
+    end,
+    GetBestMapForUnit = function()
+        return here.mapID
+    end,
+    GetPlayerMapPosition = function(id)
+        return id == here.mapID and { x = here.x, y = here.y } or nil
+    end,
+}
+local walked = {}
+for mapID in WorldMap.Up(9001) do
+    walked[#walked + 1] = mapID
+end
+eq(table.concat(walked, ","), "9001,1411,12", "Up stops at the continent")
+walked = {}
+for mapID in WorldMap.Up(947) do
+    walked[#walked + 1] = mapID
+end
+eq(table.concat(walked, ","), "947", "Up from the world is just the world")
+walked = {}
+for mapID, info in WorldMap.Up(5) do
+    walked[#walked + 1] = mapID .. (info and "" or "?")
+end
+eq(table.concat(walked, ","), "5?", "Up stops at a map without info")
+eq(WorldMap.Up(nil)(), nil, "Up from no map")
+eq(WorldMap.Root(9001), 947, "Root")
+eq(WorldMap.Root(5), nil, "Root of an unknown map")
+eq(WorldMap.MapName(1411, "?"), "Durotar", "MapName")
+eq(WorldMap.MapName(5, "?"), "?", "MapName fallback")
+local id, x, y = WorldMap.PlayerPosition()
+eq(id == 1411 and x == 0.25 and y == 0.75, true, "PlayerPosition on the player's map")
+eq(WorldMap.PlayerPosition(12), nil, "PlayerPosition off the map")
+game.secret = 0.25
+eq(WorldMap.PlayerPosition(), nil, "PlayerPosition while secret")
+game.secret = nil
+C_Map = nil
 eq(WorldMap.PlayerSide(), "H", "Horde side")
 player.faction = "Alliance"
 eq(WorldMap.PlayerSide(), "A", "Alliance side")

@@ -355,15 +355,10 @@ end
 
 -- The zone in Data.lua a map is, or is inside (a cave or a town's own map), or nil.
 local function zoneOf(mapID)
-    while mapID and mapID > 0 do
-        if internal.zones[mapID] then
-            return mapID
+    for each in ns.WorldMap.Up(mapID) do
+        if internal.zones[each] then
+            return each
         end
-        local info = C_Map.GetMapInfo(mapID)
-        if not info or isContinent(info) then
-            return nil
-        end
-        mapID = info.parentMapID
     end
 end
 

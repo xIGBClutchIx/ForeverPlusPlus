@@ -63,16 +63,7 @@ end
 
 -- The top map above the player's (the world or Azeroth), under which every zone is.
 local function rootMap()
-    local mapID = C_Map.GetBestMapForUnit("player")
-    local info = mapID and C_Map.GetMapInfo(mapID)
-    while info and info.parentMapID and info.parentMapID ~= 0 do
-        local parent = C_Map.GetMapInfo(info.parentMapID)
-        if not parent then
-            break
-        end
-        info = parent
-    end
-    return info and info.mapID or AZEROTH
+    return WorldMap.Root(C_Map.GetBestMapForUnit("player")) or AZEROTH
 end
 
 -- The map called `name`: a zone before any other kind of map with that name, then the first
@@ -104,8 +95,7 @@ local function findMap(name)
 end
 
 local function mapName(mapID)
-    local info = C_Map.GetMapInfo(mapID)
-    return info and info.name or ("#" .. mapID)
+    return WorldMap.MapName(mapID, "#" .. mapID)
 end
 
 -- The words typed, with commas as spaces so "45.2, 67.8" reads like "45.2 67.8".
@@ -224,18 +214,12 @@ local function questPoint(questID)
     if not C_QuestLog.GetQuestsOnMap then
         return nil
     end
-    local mapID = C_Map.GetBestMapForUnit("player")
-    while mapID and mapID ~= 0 do
+    for mapID in WorldMap.Up(C_Map.GetBestMapForUnit("player")) do
         for _, quest in ipairs(C_QuestLog.GetQuestsOnMap(mapID) or {}) do
             if quest.questID == questID and quest.x and quest.y then
                 return { uiMapID = mapID, position = { x = quest.x, y = quest.y } }
             end
         end
-        local info = C_Map.GetMapInfo(mapID)
-        if not info or (info.mapType and info.mapType <= continentType) then
-            return nil
-        end
-        mapID = info.parentMapID
     end
     return nil
 end
@@ -252,17 +236,11 @@ local function corpsePoint()
     if not (C_DeathInfo and C_DeathInfo.GetCorpseMapPosition) then
         return nil
     end
-    local mapID = C_Map.GetBestMapForUnit("player")
-    while mapID and mapID ~= 0 do
+    for mapID in WorldMap.Up(C_Map.GetBestMapForUnit("player")) do
         local position = C_DeathInfo.GetCorpseMapPosition(mapID)
         if position then
             return { uiMapID = mapID, position = position }
         end
-        local info = C_Map.GetMapInfo(mapID)
-        if not info or (info.mapType and info.mapType <= continentType) then
-            return nil
-        end
-        mapID = info.parentMapID
     end
     return nil
 end
@@ -314,9 +292,7 @@ local function route(point)
     if C_Map.GetWorldPosFromMapPos then
         continent, world = C_Map.GetWorldPosFromMapPos(pinMap, point.position)
     end
-    local mapID = pinMap
-    while mapID and mapID ~= 0 do
-        local info = C_Map.GetMapInfo(mapID)
+    for mapID, info in WorldMap.Up(pinMap) do
         if not info or (info.mapType and info.mapType < continentType) then
             break -- past the continent: another continent's pin has no direction from here
         end
@@ -330,7 +306,6 @@ local function route(point)
         end
         local width, height = C_Map.GetMapWorldSize(mapID)
         steps[#steps + 1] = { mapID = mapID, target = target, width = width, height = height }
-        mapID = info.parentMapID
     end
     return steps
 end
@@ -346,11 +321,10 @@ local function toward(point)
         steps, stepsFor = route(point), point
     end
     for _, step in ipairs(steps) do
-        local here = C_Map.GetPlayerMapPosition(step.mapID, "player")
-        if here then
+        local _, px, py = WorldMap.PlayerPosition(step.mapID)
+        if px then
             local target, width, height = step.target, step.width, step.height
-            local px, py = here.x, here.y
-            if target and ns.IsReadable(px) and ns.IsReadable(width) and width > 0 and height > 0
+            if target and ns.IsReadable(width) and width > 0 and height > 0
                 and not (px == 0 and py == 0) then
                 -- Read x and y, not GetXY: on Forever the waypoint's position is a plain table.
                 local tx, ty = target.x, target.y

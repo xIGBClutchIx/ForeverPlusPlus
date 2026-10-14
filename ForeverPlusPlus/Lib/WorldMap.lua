@@ -78,6 +78,77 @@ function WorldMap.IsContinent(info, cosmic)
     return kind == types.Continent or kind == types.World or (cosmic and kind == types.Cosmic) or false
 end
 
+-- The map tree --------------------------------------------------------------------------------
+
+---Walks up the map tree from `mapID` to its continent: `for mapID, info in WorldMap.Up(id)`
+---gives each map and its `C_Map.GetMapInfo`, the continent (or the world, or a map without info)
+---last.
+---@param mapID number?
+---@return function iterator
+function WorldMap.Up(mapID)
+    local continent = Enum and Enum.UIMapType and Enum.UIMapType.Continent or 2
+    local done = false
+    return function()
+        if done or not mapID or mapID == 0 then
+            return nil
+        end
+        local current = mapID
+        local info = C_Map.GetMapInfo(current)
+        if not info or (info.mapType and info.mapType <= continent) then
+            done = true
+        else
+            mapID = info.parentMapID
+        end
+        return current, info
+    end
+end
+
+---The top map above `mapID` (the world, or Azeroth), under which every zone is.
+---@param mapID number?
+---@return number?
+function WorldMap.Root(mapID)
+    local info = mapID and C_Map.GetMapInfo(mapID)
+    while info and info.parentMapID and info.parentMapID ~= 0 do
+        local parent = C_Map.GetMapInfo(info.parentMapID)
+        if not parent then
+            break
+        end
+        info = parent
+    end
+    return info and info.mapID or nil
+end
+
+---A map's name, or `fallback` for a map the game doesn't know.
+---@param mapID number
+---@param fallback? string
+---@return string?
+function WorldMap.MapName(mapID, fallback)
+    local info = mapID and C_Map.GetMapInfo(mapID)
+    return info and info.name or fallback
+end
+
+---Where the player stands on `mapID` (the map they're on, by default): the map and x, y from 0
+---to 1. Nil when it can't be read, as in an instance or while it's secret.
+---@param mapID? number
+---@return number? mapID
+---@return number? x
+---@return number? y
+function WorldMap.PlayerPosition(mapID)
+    if not (C_Map and C_Map.GetPlayerMapPosition) then
+        return nil
+    end
+    mapID = mapID or (C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit("player"))
+    if not (ns.IsReadable(mapID) and mapID) then
+        return nil
+    end
+    local position = C_Map.GetPlayerMapPosition(mapID, "player")
+    local x, y = position and position.x, position and position.y
+    if not (ns.IsReadable(x) and ns.IsReadable(y) and x and y) then
+        return nil
+    end
+    return mapID, x, y
+end
+
 -- Directions ----------------------------------------------------------------------------------
 
 ---How far and which way one spot on a map is from another, for an arrow. Spots are 0 to 1 across

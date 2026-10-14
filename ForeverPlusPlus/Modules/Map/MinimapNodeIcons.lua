@@ -172,13 +172,8 @@ end
 local view = {}
 
 local function readView()
-    local mapID = C_Map.GetBestMapForUnit("player")
-    if not (mapID and readable(mapID)) then
-        return nil
-    end
-    local pos = C_Map.GetPlayerMapPosition(mapID, "player")
-    local x, y = pos and pos.x, pos and pos.y
-    if not (x and y and readable(x) and readable(y)) then
+    local mapID, x, y = ns.WorldMap.PlayerPosition()
+    if not mapID then
         return nil
     end
     local width, height = C_Map.GetMapWorldSize(mapID)
