@@ -25,6 +25,7 @@ local module = ns.NewModule("QuestTracker", L.QUESTTRACKER_DESC, {
     border = false,
     padding = 10,
     fade = false,
+    fadeOpacity = 30, -- percent: the tracker's alpha in combat with Fade in Combat
     sort = "off", -- or "low" / "high": which level comes first
     zone = false,
     hidden = {}, -- [questID] = true: quests Current Zone Only untracked on this character
@@ -110,10 +111,18 @@ module.options = {
         name = L.QUESTTRACKER_FADE,
         description = L.QUESTTRACKER_FADE_DESC,
         section = COMBAT,
+        slider = "fadeOpacity",
+    },
+    {
+        key = "fadeOpacity",
+        name = L.QUESTTRACKER_FADE_OPACITY,
+        description = L.QUESTTRACKER_FADE_OPACITY_DESC,
+        section = COMBAT,
+        requires = "fade",
+        added = "0.9.0",
+        min = 0, max = 80, step = 10, format = "%d%%",
     },
 }
-
-local FADED = 0.3 -- the tracker's alpha in combat with Fade in Combat
 
 -- Font objects the tracker is known to use, set before its first layout when they exist. The
 -- tracker's text is searched for more as it updates.
@@ -361,7 +370,7 @@ local function setFaded(on)
         return
     end
     faded = on
-    tracker():SetAlpha(on and FADED or 1)
+    tracker():SetAlpha(on and module.db.fadeOpacity / 100 or 1)
 end
 
 -- Sorting -----------------------------------------------------------------------------------------
@@ -792,6 +801,10 @@ function module:OnOptionChanged(key)
         fitBox()
     elseif key == "fade" then
         setFaded(InCombatLockdown())
+    elseif key == "fadeOpacity" then
+        if faded then
+            tracker():SetAlpha(self.db.fadeOpacity / 100)
+        end
     elseif key == "sort" then
         setSorting(self.db.sort ~= "off")
     elseif key == "zone" then
