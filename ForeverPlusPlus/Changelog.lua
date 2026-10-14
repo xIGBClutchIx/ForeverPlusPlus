@@ -24,7 +24,7 @@ ns.changelog = {
                     .. "and on the map." },
                 { L.MINIMAPNODEICONS_TITLE, "A new module that puts the herb's or ore's own icon "
                     .. "on each tracking dot on the minimap while Find Herbs or Find Minerals is "
-                    .. "on. On by default. Its Tint Unusable option (off by default) turns an icon "
+                    .. "on. Off by default. Its Tint Unusable option (off by default) turns an icon "
                     .. "red while your skill is too low to gather it, and Gray Out Trivial (off by "
                     .. "default) turns it gray once gathering it no longer raises your skill." },
                 { L.NPCNAMEPLATES_TITLE, "The new Skip Pets, Skip Totems, and Skip Companions "

@@ -41,7 +41,7 @@ local Professions = ns.Professions
 local NODES = Professions.NODES
 
 local module = ns.NewModule("MinimapNodeIcons", L.MINIMAPNODEICONS_DESC, {
-    enabled = true,
+    enabled = false,
     size = 8, -- icon size on the minimap
     border = true, -- a gold ring around each icon
     levels = true, -- gray while the minimap names the node in gray (another level)
