@@ -62,7 +62,9 @@ function Profiler.Call(key, fn, ...)
     if not Profiler.recording then
         return (fn(...))
     end
-    if type(key) == "table" and key.module then
+    -- A part of a module (module:NewPart) is a row of its own under the module, like
+    -- Profiler.Part; any other owner that stands in for a module is charged to the module.
+    if type(key) == "table" and key.module and not key.key then
         key = key.module
     end
     depth = depth + 1
@@ -81,7 +83,7 @@ function Profiler.Call(key, fn, ...)
     s.total = s.total + own
     s.frame = s.frame + own
     s.calls = s.calls + 1
-    local g = entry(groups, key.parent or key)
+    local g = entry(groups, key.parent or key.module or key)
     g.total = g.total + own
     g.frame = g.frame + own
     return result
@@ -93,16 +95,24 @@ end
 function Profiler.Count(key)
     local s = entry(stats, key)
     s.calls = s.calls + 1
-    entry(groups, key.parent or key)
+    entry(groups, key.parent or key.module or key)
 end
 
 ---A key for one part of a module's work, listed on the page under its module, so a heavy module
----can show which of its parts the time goes to. The module's row adds up its parts.
+---can show which of its parts the time goes to. The module's row adds up its parts. A module's
+---parts made with module:NewPart get rows of their own without this.
 ---@param module table
 ---@param label string
 ---@return table key for Profiler.Call
 function Profiler.Part(module, label)
     return { parent = module, label = label }
+end
+
+---The module a key belongs to: itself, or the module of a part.
+---@param key table
+---@return table
+function Profiler.ModuleOf(key)
+    return key.parent or key.module or key
 end
 
 ---A function that calls `fn` and, while recording, charges it to `key`: for a module's OnUpdate
@@ -187,7 +197,8 @@ function Profiler.Results()
         byKey[key] = result
     end
     for key, s in pairs(stats) do
-        local result = key.parent and byKey[key.parent]
+        local parent = key.parent or key.module
+        local result = parent and byKey[parent]
         if result then
             result.parts = result.parts or {}
             result.parts[#result.parts + 1] = row(key, s, seconds, s.calls)

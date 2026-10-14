@@ -252,8 +252,14 @@ end
 
 local fitBox
 local SETTLE = 0.2 -- seconds; when to fit once more after a change
-local fitSoon = ns.Frames.Coalesce(function() fitBox() end)
-local fitSettled = ns.Frames.Coalesce(function() fitBox() end, SETTLE)
+-- Its parts' own rows on the Profiler page: styling fonts, fitting the box, and sorting.
+local Profiler = ns.Profiler
+local PART_FONTS = Profiler.Part(module, L.QUESTTRACKER_PART_FONTS)
+local PART_FIT = Profiler.Part(module, L.QUESTTRACKER_PART_FIT)
+local PART_SORT = Profiler.Part(module, L.QUESTTRACKER_PART_SORT)
+
+local fitSoon = ns.Frames.Coalesce(function() Profiler.Call(PART_FIT, fitBox) end)
+local fitSettled = ns.Frames.Coalesce(function() Profiler.Call(PART_FIT, fitBox) end, SETTLE)
 -- How far the header art and the quests' map buttons reach past the tracker's left edge (about
 -- 5 pixels in game), so the padding on the left measures from them whether sections are open or
 -- not. Measured from what's drawn, the buttons' glow made it jump.
@@ -341,9 +347,9 @@ end
 local function onUpdate()
     local db = module.db
     if db.font ~= "default" or db.outline ~= "default" then
-        findFonts(tracker(), 4)
+        Profiler.Call(PART_FONTS, findFonts, tracker(), 4)
     end
-    fitBox()
+    Profiler.Call(PART_FIT, fitBox)
     fitSettled()
 end
 
@@ -495,7 +501,7 @@ function requestSort()
     sortPending = true
     C_Timer.After(SORT_DELAY, function()
         sortPending = false
-        sortWatches()
+        Profiler.Call(PART_SORT, sortWatches)
     end)
 end
 

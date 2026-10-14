@@ -317,9 +317,21 @@ local function place(box, frame, current, needed, kind, percent)
     box:Show()
 end
 
+-- The tooltip reads' own row on the Profiler page. Profiler.Call keeps one result, so the
+-- scan's four come back in a table.
+local Profiler = ns.Profiler
+local PART_SCAN = Profiler.Part(module, L.QUESTNAMEPLATES_PART_SCAN)
+local scanned = {}
+
+local function scanInto(unit)
+    scanned[1], scanned[2], scanned[3], scanned[4] = scan(unit)
+    return scanned
+end
+
 local function update(unit, frame)
     local box = indicators[frame]
-    local current, needed, kind, percent = scan(unit)
+    local read = Profiler.Call(PART_SCAN, scanInto, unit)
+    local current, needed, kind, percent = read[1], read[2], read[3], read[4]
     if current == nil then
         return
     end

@@ -108,6 +108,9 @@ end
 local known = {} -- key -> true, once known (you don't forget a recipe)
 local checked = {} -- key -> GetTime() it was last found not known
 local waiting = {} -- itemID -> true while the game has no tooltip for it yet
+-- The lookups' own row on the Profiler page: reading an item's tooltip is the costly part.
+local Profiler = ns.Profiler
+local PART_LOOKUP = Profiler.Part(module, L.ALREADYKNOWN_PART_LOOKUP)
 
 -- Whether `test(arg)` says known, remembering it so a full bag isn't looked up on every update.
 -- Not known is remembered only briefly, since learning something makes it known.
@@ -120,7 +123,7 @@ local function check(key, test, arg)
     if last and now - last < RECHECK then
         return false
     end
-    local result = test(arg)
+    local result = Profiler.Call(PART_LOOKUP, test, arg)
     if result then
         known[key] = true
         return true

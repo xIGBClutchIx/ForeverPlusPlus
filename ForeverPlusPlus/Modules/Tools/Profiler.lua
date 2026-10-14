@@ -29,7 +29,19 @@ local function nameOf(key)
     if key == Profiler.SHARED then
         return L.PROFILER_SHARED
     end
-    return key.label or key.title or key.name or "?"
+    if key.label then
+        return key.label
+    end
+    -- A module's part (module:NewPart): the name of its checkbox option.
+    if key.module and key.key then
+        for _, option in ipairs(key.module.options or {}) do
+            if option.key == key.key then
+                return option.name
+            end
+        end
+        return key.key
+    end
+    return key.title or key.name or "?"
 end
 
 local function newText(parent, template, x, y, justify)

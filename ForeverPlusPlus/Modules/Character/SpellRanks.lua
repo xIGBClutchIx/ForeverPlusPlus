@@ -148,13 +148,24 @@ local function mark(button, on)
     frame.badge:SetShown(not tint)
 end
 
+-- The spellbook scan's own row on the Profiler page. Profiler.Call keeps one result, so the
+-- scan's two come back as a pair.
+local Profiler = ns.Profiler
+local PART_SCAN = Profiler.Part(module, L.SPELLRANKS_PART_SCAN)
+local scanned = {}
+
+local function scanBoth()
+    scanned[1], scanned[2] = scan()
+    return scanned
+end
+
 local function refresh()
     if not module.enabled then
         return
     end
     if not known then
         local complete
-        known, complete = scan()
+        known, complete = Profiler.Call(PART_SCAN, scanBoth)
         -- Usable as it is; when data was still loading, SPELL_DATA_LOAD_RESULT scans again.
         module.incomplete = not complete
     end

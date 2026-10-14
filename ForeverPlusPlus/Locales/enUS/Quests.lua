@@ -8,6 +8,10 @@ end
 
 -- QuestTracker
 L.QUESTTRACKER_TITLE = "Quest Tracker"
+-- Its rows on the Profiler page.
+L.QUESTTRACKER_PART_FONTS = "styling fonts"
+L.QUESTTRACKER_PART_FIT = "fitting the box"
+L.QUESTTRACKER_PART_SORT = "sorting quests"
 -- Headers over its options in Settings
 L.QUESTTRACKER_SECTION_TEXT = "Text"
 L.QUESTTRACKER_SECTION_BOX = "Background"
@@ -121,3 +125,4 @@ L.QUESTNAMEPLATES_SIDE_LEFT = "Left of Bar"
 L.QUESTNAMEPLATES_SIDE_RIGHT = "Right of Bar"
 L.QUESTNAMEPLATES_SIZE = "Size"
 L.QUESTNAMEPLATES_SIZE_DESC = "How big the icon and its text are."
+L.QUESTNAMEPLATES_PART_SCAN = "reading unit tooltips" -- its row on the Profiler page

@@ -107,6 +107,16 @@ end
 
 local HERBS, MINERALS = 2383, 2580 -- Find Herbs, Find Minerals
 
+-- Its parts' own rows on the Profiler page, so its time can be told apart. Off, Profiler.Call
+-- just calls through. Probes are only counted (PART_ASK), not timed: a stopwatch around each of
+-- hundreds a second costs more than the probe.
+local Profiler = ns.Profiler
+local PART_VIEW = Profiler.Part(module, L.MINIMAPNODEICONS_PART_VIEW)
+local PART_FOLLOW = Profiler.Part(module, L.MINIMAPNODEICONS_PART_FOLLOW)
+local PART_FIND = Profiler.Part(module, L.MINIMAPNODEICONS_PART_FIND)
+local PART_ASK = Profiler.Part(module, L.MINIMAPNODEICONS_PART_ASK)
+local PART_DRAW = Profiler.Part(module, L.MINIMAPNODEICONS_PART_DRAW)
+
 local TICK = 0.1 -- seconds between rounds of probes; icons are drawn every frame regardless
 local STILL_FOLLOW = 0.33 -- seconds between rounds of following while standing still: dots don't move
 local STEPS = { low = 8, medium = 6, high = 4 } -- minimap units between finding probes
@@ -307,6 +317,9 @@ end
 -- there, as readMouseover does. Call between startProbing and stopProbing.
 local function probe(right, up, space)
     local x, y = (SPACES[space] or SPACES.cursor)(right, up)
+    if Profiler.recording then
+        Profiler.Count(PART_ASK)
+    end
     local ok, err = pcall(Minimap.UpdateMouseoverAtPoint, Minimap, x, y)
     if not ok then
         blocked = true
@@ -757,15 +770,15 @@ local function tick(v)
     sinceFollow = sinceFollow + TICK
     if not still() or sinceFollow >= STILL_FOLLOW then
         sinceFollow = 0
-        followAll(v, space)
+        Profiler.Call(PART_FOLLOW, followAll, v, space)
     end
     if not blocked then
         if findAll then
             findAll = false
             pass = nil
-            find(nil, v)
+            Profiler.Call(PART_FIND, find, nil, v)
         else
-            find(PER_TICK, v)
+            Profiler.Call(PART_FIND, find, PER_TICK, v)
         end
     end
     stopProbing()
@@ -776,7 +789,7 @@ local function onUpdate(_, elapsed)
         hidePins()
         return
     end
-    local v = readView()
+    local v = Profiler.Call(PART_VIEW, readView)
     -- A new zone map: the nodes' spots were on the old one.
     if v and v.mapID ~= nodesMap then
         nodes, nodesMap, pass, findAll = {}, v.mapID, nil, true
@@ -787,7 +800,7 @@ local function onUpdate(_, elapsed)
         sinceTick = 0
         tick(v)
     end
-    draw(v)
+    Profiler.Call(PART_DRAW, draw, v)
 end
 
 -- Learning names ----------------------------------------------------------------------------------

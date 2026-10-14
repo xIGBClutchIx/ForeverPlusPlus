@@ -101,6 +101,10 @@ local function tooltipUnusable(link)
     return false
 end
 
+-- The lookups' own row on the Profiler page: reading an item's tooltip is the costly part.
+local Profiler = ns.Profiler
+local PART_LOOKUP = Profiler.Part(module, L.UNUSABLEITEMSTINT_PART_LOOKUP)
+
 local results = {} -- itemID -> true (can't use) or false, until the player changes
 local waiting = {} -- itemID -> true while the game has no tooltip for it yet
 
@@ -115,7 +119,7 @@ local function unusable(link)
     end
     local result = results[itemID]
     if result == nil then
-        result = tooltipUnusable(link)
+        result = Profiler.Call(PART_LOOKUP, tooltipUnusable, link)
         results[itemID] = result
         if result == nil then
             waiting[itemID] = true

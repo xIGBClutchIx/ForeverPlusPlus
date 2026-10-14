@@ -59,6 +59,7 @@ L.AUCTIONPRICES_RESET_COMMAND = "forget the saved auction prices"
 
 -- AlreadyKnown
 L.ALREADYKNOWN_TITLE = "Already Known"
+L.ALREADYKNOWN_PART_LOOKUP = "reading item tooltips" -- its row on the Profiler page
 L.ALREADYKNOWN_DESC = "Mark recipes, mounts, pets, toys, and other items you already know or "
     .. "have with a green check on their icon."
 L.ALREADYKNOWN_SECTION_LOOK = "Look"
@@ -83,6 +84,7 @@ L.ALREADYKNOWN_LOOT = "Loot"
 L.ALREADYKNOWN_LOOT_DESC = "Mark known items in the loot window and on loot rolls."
 
 L.UNUSABLEITEMSTINT_TITLE = "Unusable Items Tint"
+L.UNUSABLEITEMSTINT_PART_LOOKUP = "reading item tooltips" -- its row on the Profiler page
 L.UNUSABLEITEMSTINT_DESC = "Tint red the items you can't use, because of your class, armor or weapon "
     .. "skill, level, or profession, in your bags, the bank, and at merchants, the way merchants "
     .. "tint them. It goes by the red lines in the item's tooltip."

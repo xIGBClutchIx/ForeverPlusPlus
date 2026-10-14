@@ -88,6 +88,7 @@ L.TALENTPLANNER_DELETE_CONFIRM = "Delete this talent plan?"
 
 -- SpellRanks
 L.SPELLRANKS_TITLE = "Spell Ranks"
+L.SPELLRANKS_PART_SCAN = "scanning the spellbook" -- its row on the Profiler page
 L.SPELLRANKS_DESC = "Mark the spells on your action bars that have a higher rank you already "
     .. "know, and say the best rank in their tooltips. /fpp ranks lists them."
 L.SPELLRANKS_STYLE = "Mark Style"
