@@ -21,9 +21,10 @@ local internal = ns.modules.WorldMap.internal.pointsOfInterest
 
 local Instances = ns.Instances.byKey
 
--- One entrance of an instance with several, told apart by `name`.
+-- One entrance of an instance with several, told apart by `name`. It reads the instance's entry,
+-- so levels the dungeon finder corrects reach it.
 local function part(instance, name)
-    return { instance[1], instance[2], instance[3], instance[4], instance[5], part = name }
+    return setmetatable({ part = name }, { __index = instance })
 end
 
 -- Dungeons and raids: the ones in Lib/Instances.lua, and the entrances and places only the map

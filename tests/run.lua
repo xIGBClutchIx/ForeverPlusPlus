@@ -552,6 +552,36 @@ eq(GameData.Requires("Requires Level 20"), nil, "game data: other lines aren't r
 eq(select(3, GameData.TooltipRequires({ lines = { { leftText = "Requires Mining (1)" },
     { leftText = "|cffff2020Requires Mining (65)|r" } } })), 2,
     "game data: tooltip requirement skips the title and color codes")
+
+-- Instances from the dungeon finder: { name, typeID, subtypeID, minLevel, maxLevel, maxRecLevel,
+-- expansion, instance ID } by finder ID, spread into GetLFGDungeonInfo's order.
+local finder = {
+    [1] = { "The Deadmines", 1, 1, 18, 23, 23, 0, 36 },
+    [2] = { "Blackrock Depths", 1, 1, 10, 60, 60, 0, 230 }, -- a whole bracket
+    [3] = { "Drowned City", 1, 1, 40, 60, 45, 0, 3100 },
+    [4] = { "Sunken Vault", 1, 3, 60, 60, 60, 0, nil },
+    [5] = { "Random Classic Dungeon", 6, 1, 15, 60, 60, 0, nil },
+    [6] = { "Retail Dungeon", 1, 1, 70, 80, 80, 10, 2600 },
+}
+GetLFDChoiceOrder = function()
+    return { -1, 1, 2, 3, 4, 5, 6 }
+end
+GetLFGDungeonInfo = function(id)
+    local d = finder[id]
+    return d[1], d[2], d[3], d[4], d[5], nil, nil, d[6], d[7], nil, nil, nil, nil, nil, nil, nil, nil,
+        nil, nil, nil, nil, d[8]
+end
+local byKey = Instances.byKey
+eq(Instances.Levels(byKey.deadmines, true), "18-23", "finder: levels replace the seed's")
+eq(Instances.Levels(byKey.brd, true), "52-60", "finder: a whole bracket keeps the seed's")
+eq(ns.db.gameData.instances.values[36].low, 18, "finder: learned for the account")
+eq(ns.db.gameData.instances.values[230], nil, "finder: the seed's levels aren't saved")
+eq(Instances.ByName("drowned city"), byKey.lfg3100, "finder: adds a dungeon the seed lacks")
+eq(Instances.Levels(byKey.lfg3100, true), "40-45", "finder: a new dungeon's levels")
+eq(byKey.lfgd4 and byKey.lfgd4[5], true, "finder: a raid without an instance ID")
+eq(Instances.ByName("Random Classic Dungeon"), nil, "finder: random dungeons are left out")
+eq(Instances.ByName("Retail Dungeon"), nil, "finder: later expansions are left out")
+GetLFDChoiceOrder, GetLFGDungeonInfo = nil, nil
 ns.db = savedDB
 
 -- Done ------------------------------------------------------------------------------------------

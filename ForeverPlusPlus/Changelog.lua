@@ -72,6 +72,9 @@ ns.changelog = {
                 { L.WORLDMAP_TITLE, "Coordinates follows Blizzard's coordinate settings under "
                     .. "Gameplay > Interface instead of its own checkboxes, which turned them back on "
                     .. "at every login." },
+                { L.WORLDMAP_TITLE, "Dungeon levels come from the game's dungeon finder, and "
+                    .. "Forever dungeons it lists that Forever++ didn't know get their names and "
+                    .. "levels in map tooltips." },
                 { L.QUESTTRACKER_TITLE, "Font Size is gone: Edit Mode's Text Size sets the "
                     .. "tracker's size." },
                 { L.PROFTOOLTIPS_TITLE, "On a lockbox whose tooltip already says what "
