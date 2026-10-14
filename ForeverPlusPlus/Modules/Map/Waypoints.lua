@@ -4,7 +4,8 @@
 -- turns toward the waypoint as you turn, with the distance under it, for the pin set by /way or
 -- by clicking the map, or with Follow Selected Quest, for the quest selected on the map, or with
 -- Point to Corpse, for the player's corpse while they're a ghost. It reads only the player's own
--- position and facing, never another unit's.
+-- position and facing, never another unit's. Clear Pin on Arrival takes the pin away once the
+-- arrow says the player has reached it.
 local _, ns = ...
 
 local ipairs, tonumber, format, floor = ipairs, tonumber, string.format, math.floor
@@ -23,6 +24,7 @@ local module = ns.NewModule("Waypoints", L.WAYPOINTS_DESC, {
     quest = true,
     questName = true,
     corpse = true,
+    clearOnArrival = false,
     scale = 100, -- percent
     x = 0, -- the arrow's offset from the center of the screen
     y = 530,
@@ -40,6 +42,8 @@ module.options = {
         requires = "quest", added = "0.9.0" },
     { key = "corpse", name = L.WAYPOINTS_CORPSE, description = L.WAYPOINTS_CORPSE_DESC,
         requires = "arrow", added = "0.9.0" },
+    { key = "clearOnArrival", name = L.WAYPOINTS_CLEAR_ON_ARRIVAL,
+        description = L.WAYPOINTS_CLEAR_ON_ARRIVAL_DESC, requires = "arrow", added = "0.9.0" },
 }
 
 -- /way ----------------------------------------------------------------------------------------
@@ -270,7 +274,8 @@ local cachedCorpse, corpseCheckedAt = nil, nil
 local cachedWaypoint, waypointRead = nil, false
 
 -- What the arrow points at: the corpse while following it, then the selected quest when it has a
--- spot, otherwise the map pin. The second value is the line to show under the distance, if any.
+-- spot, otherwise the map pin. The second value is the line to show under the distance, if any,
+-- and the third whether it's the map pin.
 local function destination()
     if followCorpse() then
         local now = GetTime()
@@ -296,7 +301,7 @@ local function destination()
         waypointRead = true
         cachedWaypoint = C_Map.GetUserWaypoint and C_Map.GetUserWaypoint()
     end
-    return cachedWaypoint
+    return cachedWaypoint, nil, cachedWaypoint ~= nil
 end
 
 -- The maps a point can be pointed at on, from its own up to its continent, each with the point's
@@ -360,12 +365,13 @@ end
 
 -- How far the target is from the player in yards, its direction counter-clockwise from north,
 -- and the line to show under the distance (destination), or nil when the game can't say (no target,
--- in an instance, another continent). Works on the target's own map, or the first map above it
--- the player is also on, so a pin in the next zone still points the right way.
+-- in an instance, another continent), and whether the target is the map pin. Works on the
+-- target's own map, or the first map above it the player is also on, so a pin in the next zone
+-- still points the right way.
 local function locate()
-    local point, title = destination()
+    local point, title, isPin = destination()
     local yards, angle = toward(point)
-    return yards, angle, title
+    return yards, angle, title, isPin
 end
 
 -- The arrow -----------------------------------------------------------------------------------
@@ -412,12 +418,24 @@ end
 -- What the arrow's two lines say now, so they're only set when that changes.
 local shownYards, shownTitle
 
+-- Whether the arrow has pointed to the map pin from farther than ARRIVED since it was set, so
+-- Clear Pin on Arrival doesn't take away a pin dropped where the player stands.
+local headedToPin = false
+
 -- Turns the arrow toward the waypoint, or takes it down when there's no direction to give.
 local function update()
     if ns.EditMode.IsActive() then
         return -- the sample stays put while it's being placed
     end
-    local yards, angle, title = locate()
+    local yards, angle, title, isPin = locate()
+    if isPin and yards then
+        if yards >= ARRIVED then
+            headedToPin = true
+        elseif headedToPin and module.db.clearOnArrival then
+            headedToPin = false
+            C_Map.ClearUserWaypoint() -- USER_WAYPOINT_UPDATED refreshes the arrow
+        end
+    end
     local facing = GetPlayerFacing and GetPlayerFacing()
     if not yards or yards < ARRIVED or not (facing and ns.IsReadable(facing)) then
         frame:Hide()
@@ -465,6 +483,12 @@ local function refresh()
     end
 end
 
+-- A new pin, or none: the player hasn't headed to it yet.
+local function waypointChanged()
+    headedToPin = false
+    refresh()
+end
+
 -- Edit Mode -----------------------------------------------------------------------------------
 
 -- In Edit Mode the arrow shows pointing ahead, so it can be placed.
@@ -491,11 +515,11 @@ local function syncArrow()
             watcher:SetScript("OnUpdate", ns.Profiler.Wrap(module, WorldMap.Throttled(INTERVAL, update)))
         end
         place()
-        module:On("USER_WAYPOINT_UPDATED", refresh)
+        module:On("USER_WAYPOINT_UPDATED", waypointChanged)
         module:On("PLAYER_ENTERING_WORLD", refresh)
         ns.EditMode.RegisterModule(module, frame, L.WAYPOINTS_ARROW, place, sample)
     elseif frame then
-        module:Off("USER_WAYPOINT_UPDATED", refresh)
+        module:Off("USER_WAYPOINT_UPDATED", waypointChanged)
         module:Off("PLAYER_ENTERING_WORLD", refresh)
         ns.EditMode.Unregister(frame)
     end

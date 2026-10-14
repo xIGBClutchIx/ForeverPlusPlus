@@ -71,6 +71,8 @@ ns.changelog = {
                 { L.WAYPOINTS_TITLE, "The new Point to Corpse option (on by default) points the "
                     .. "arrow to your corpse while you're a ghost, ahead of a quest or your map "
                     .. "pin, and back to them once you're alive." },
+                { L.WAYPOINTS_TITLE, "The new Clear Pin on Arrival option (off by default) takes "
+                    .. "your map pin away once you reach it." },
                 { L.XPBARTEXT_TITLE, "The new Fill Bar with Ready Quests option (on by default) fills the "
                     .. "experience bar on from your XP in green with what your quests ready to turn "
                     .. "in will give, like rested XP." },

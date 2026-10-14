@@ -226,6 +226,9 @@ L.WAYPOINTS_CORPSE_DESC = "While you're a ghost, the arrow points to your corpse
     .. "quest or your map pin, the same spot as the game's own tombstone marker, and goes back to "
     .. "them once you're alive."
 L.WAYPOINTS_CORPSE_LABEL = "Your Corpse" -- shown under the arrow while it points to the corpse
+L.WAYPOINTS_CLEAR_ON_ARRIVAL = "Clear Pin on Arrival"
+L.WAYPOINTS_CLEAR_ON_ARRIVAL_DESC = "Takes your map pin away once you reach it. Quests and your "
+    .. "corpse are left alone."
 L.WAYPOINTS_USAGE = "/way [zone] x y, such as /way 45.2 67.8 or /way Elwynn Forest 45 67. "
     .. "/way clear takes the pin away."
 L.WAYPOINTS_SET = "Waypoint set in %s at %.1f, %.1f." -- zone, x, y
