@@ -106,6 +106,9 @@ ns.changelog = {
                 { L.FLIGHTTIMER_TITLE, "The flight map tooltip's Flight Time line looks like the "
                     .. "Sell Price line, with the time at the right. The new Tooltip Line option "
                     .. "puts it back on one line, white or gray." },
+                { L.MINIMAPBUTTON_TITLE, "Shift-click it, instead of Shift-right-click, to see "
+                    .. "the errors, and Alt-click it to clear this session's. Clear Key is Alt by "
+                    .. "default and works with a click instead of a right-click." },
                 { L.SHORTCHANNELNAMES_TITLE, "The Style dropdown also offers initials ([LFG] for "
                     .. "LookingForGroup) and the name without its zone ([General]), alone or after "
                     .. "the number. Number and Initials ([1. LFG]) is the new default." },

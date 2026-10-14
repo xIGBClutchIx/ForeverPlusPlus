@@ -10,7 +10,7 @@ end
 L.ERRORCATCHER_TITLE = "Error Catcher"
 L.ERRORCATCHER_DESC = "Catch Lua errors and blocked actions quietly instead of in Blizzard's "
     .. "error window, and read them later in a window you can copy from, with /fpp errors or "
-    .. "a Shift-right-click on the Forever++ minimap button."
+    .. "a Shift-click on the Forever++ minimap button."
 L.ERRORCATCHER_CHAT_DESC = "Say in chat when an error is caught."
 L.ERRORCATCHER_SHOW = "Errors"
 L.ERRORCATCHER_SHOW_BUTTON = "Show"
@@ -87,8 +87,8 @@ L.ADDONSLIST_SETS_MISSING = "Addons in the AddOn set %s that aren't installed: %
 -- MinimapButton
 L.MINIMAPBUTTON_TITLE = "Minimap Button"
 L.MINIMAPBUTTON_DESC = "A Forever++ button on the minimap, in the addon compartment, or both. "
-    .. "Click it for settings, right-click it for quick toggles, and Shift-right-click it for "
-    .. "caught errors."
+    .. "Click it for settings, right-click it for quick toggles, and Shift-click it for caught "
+    .. "errors."
 L.MINIMAPBUTTON_WHERE = "Show In"
 L.MINIMAPBUTTON_WHERE_DESC = "Where the button goes: on the minimap, in the addon compartment "
     .. "under it, or both. Drag the minimap button to move it around the minimap."
@@ -101,12 +101,12 @@ L.MINIMAPBUTTON_TIP_SAVED = "Saved errors: %d"
 L.MINIMAPBUTTON_TIP_SETTINGS = "Click to open Forever++ settings."
 L.MINIMAPBUTTON_TIP_WELCOME = "Click to see what Forever++ is."
 L.MINIMAPBUTTON_TIP_TOGGLES = "Right-click for quick toggles."
-L.MINIMAPBUTTON_TIP_ERRORS = "Shift-right-click to show the errors."
+L.MINIMAPBUTTON_TIP_ERRORS = "Shift-click to show the errors."
 L.MINIMAPBUTTON_TIP_DRAG = "Drag to move the button."
-L.MINIMAPBUTTON_TIP_CLEAR = "%s-right-click to clear this session's errors." -- a key, such as Ctrl
+L.MINIMAPBUTTON_TIP_CLEAR = "%s-click to clear this session's errors." -- a key, such as Alt
 L.MINIMAPBUTTON_CLEAR_KEY = "Clear Key"
-L.MINIMAPBUTTON_CLEAR_KEY_DESC = "The key to hold while right-clicking the button to clear "
-    .. "this session's errors, while Error Catcher is on. A Shift-right-click shows them."
+L.MINIMAPBUTTON_CLEAR_KEY_DESC = "The key to hold while clicking the button to clear this "
+    .. "session's errors, while Error Catcher is on. A Shift-click shows them."
 
 -- Commands
 L.COMMANDS_TITLE = "Commands"
