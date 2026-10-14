@@ -105,9 +105,11 @@ end
 local function spotInfo(kindName, fromMap)
     local kindInfo, skyborne = KINDS[kindName], SKYBORNE[kindName]
     local cast = nameOf(CASTS, kindName)
+    -- Ley Line Icon picks the minimap's portal or the ball; convergences are always a ball.
+    local look = module.db.leyLineIcon == "portal" and kindInfo.portal or kindInfo
     return {
-        atlas = atlasOf(kindInfo),
-        size = kindInfo.pixels * module.db[kindInfo.size] / 100,
+        atlas = atlasOf(look),
+        size = look.pixels * module.db[kindInfo.size] / 100,
         title = kindName == "leyline" and L.POI_LEYLINE or L.POI_CONVERGENCE,
         lines = linesOf(MapTooltip.Side(skyborne.side), MapTooltip.Detail(zoneName(fromMap)),
             cast and MapTooltip.Note(format(L.POI_LEYLINE_CAST, cast))),

@@ -44,6 +44,7 @@ local module = ns.modules.WorldMap:NewPart({
     leyLines = "skyborne", -- who sees ley lines: "skyborne" (their own kind), "everyone", or "off"
     leyLineSize = 80,
     leyLinesWorld = false,
+    leyLineIcon = "portal", -- "portal" (the minimap's blue portal) or "orb" (the purple ball)
     chat = true, -- say so in chat when a ley line is saved
     -- Flight points this character has seen learned at a flight master, by node ID. Data, not a
     -- setting, saved per character.
@@ -101,6 +102,14 @@ for _, rows in ipairs({
             { "off", L.POI_LEYLINES_OFF },
         },
     }, select(2, kind("leyLines", "leyLineSize")) },
+    { section = OTHER, {
+        key = "leyLineIcon", name = L.POI_LEYLINE_ICON, description = L.POI_LEYLINE_ICON_DESC,
+        requires = "leyLines", added = "0.9.0",
+        choices = {
+            { "portal", L.POI_LEYLINE_ICON_PORTAL },
+            { "orb", L.POI_LEYLINE_ICON_ORB },
+        },
+    } },
     -- Said when a ley line is saved, so with them.
     { section = OTHER, ns.ChatOption(L.POI_CHAT_DESC) },
 }) do
@@ -128,10 +137,14 @@ local KINDS = {
     -- A glowing spirit, so it isn't mistaken for the corpse marker; the tombstone if it's missing.
     spirit = { show = "spiritHealers", size = "spiritSize", pixels = 22,
         atlases = { "poi-soulspiritghost", "poi-graveyard-neutral", "Vehicle-TempleofKotmogu-GreenBall" } },
-    -- Skyborne spots: ley lines purple, like the game's own ley line icon, convergences orange.
-    -- Both are Kotmogu balls like the cyan and green ones, but Unverified on Forever.
+    -- Skyborne spots: ley lines purple, convergences orange. Both are Kotmogu balls like the cyan
+    -- and green ones, but Unverified on Forever. With Ley Line Icon on Portal (`portal`), a ley
+    -- line is the blue portal the minimap shows for one, PortalBlue in the minimap's object icons
+    -- (UiTextureAtlasMember, wago.tools, build 70205).
     leyline = { show = "leyLines", size = "leyLineSize", pixels = 18,
-        atlases = { "Vehicle-TempleofKotmogu-PurpleBall", "Vehicle-TempleofKotmogu-CyanBall" } },
+        atlases = { "Vehicle-TempleofKotmogu-PurpleBall", "Vehicle-TempleofKotmogu-CyanBall" },
+        portal = { pixels = 20,
+            atlases = { "PortalBlue", "Vehicle-TempleofKotmogu-PurpleBall" } } },
     convergence = { show = "leyLines", size = "leyLineSize", pixels = 18,
         atlases = { "Vehicle-TempleofKotmogu-OrangeBall", "Vehicle-TempleofKotmogu-PurpleBall",
             "Vehicle-TempleofKotmogu-CyanBall" } },
