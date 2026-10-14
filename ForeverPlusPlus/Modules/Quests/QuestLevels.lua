@@ -7,20 +7,45 @@
 -- The tag is Blizzard's own, QuestUtilsOverrides.GetQuestTitlePrefix: on Forever (Camelot) that's
 -- "[12] ", with a + for elite quests. Blizzard measures a greeting row's height before it sets the
 -- title, so a title the tag pushes onto another line can crowd the row below.
+--
+-- Color by Difficulty colors only the tag we add, with Blizzard's GetQuestDifficultyColor (the
+-- quest log's gray through red); Blizzard's prefix function and its other callers are untouched.
 local _, ns = ...
 
 local setmetatable, select, type, sub, hooksecurefunc = setmetatable, select, type, string.sub,
     hooksecurefunc
+local GetQuestDifficultyColor = GetQuestDifficultyColor
 
 local L = ns.L
+local Colors = ns.Colors
 
-local module = ns.NewModule("QuestLevels", L.QUESTLEVELS_DESC, { enabled = true })
+local module = ns.NewModule("QuestLevels", L.QUESTLEVELS_DESC, { enabled = true, color = false })
 module.title = L.QUESTLEVELS_TITLE
 module.category = "quests"
 module.added = "0.9.0"
+module.options = {
+    { key = "color", name = L.QUESTLEVELS_COLOR, description = L.QUESTLEVELS_COLOR_DESC },
+}
 
--- What a tag looks like, to take ours off a title again.
+-- What a tag looks like, plain or colored, to take ours off a title again.
 local TAG_PATTERN = "^%[%d+%+?%] "
+local COLORED_TAG_PATTERN = "^|c%x%x%x%x%x%x%x%x%[%d+%+?%]|r "
+
+-- A title without our tag.
+local function untagged(text)
+    return (text:gsub(TAG_PATTERN, ""):gsub(COLORED_TAG_PATTERN, ""))
+end
+
+-- Blizzard's tag in the color of the quest's level against the player's, with the space after it
+-- left uncolored. Probe: GetQuestDifficultyColor is FrameXML's.
+local function colorTag(prefix, level)
+    local color = GetQuestDifficultyColor and GetQuestDifficultyColor(level)
+    if not color then
+        return prefix
+    end
+    local tag, space = prefix:match("^(.-)(%s*)$")
+    return Colors.Text(color, tag) .. space
+end
 
 ---The tag for a quest, such as "[12] ", or nil while its level isn't known.
 ---@param questID number?
@@ -40,22 +65,30 @@ local function prefixFor(questID, level)
     end
     local blizzard = QuestUtilsOverrides and QuestUtilsOverrides.GetQuestTitlePrefix
     -- Mainline's version gives nil unless its Show Quest Level setting is on; this module is ours.
-    return blizzard and blizzard({ questID = questID, difficultyLevel = level }) or "[" .. level .. "] "
+    local prefix = blizzard and blizzard({ questID = questID, difficultyLevel = level })
+        or "[" .. level .. "] "
+    if module.db.color then
+        prefix = colorTag(prefix, level)
+    end
+    return prefix
 end
 
--- Puts the tag before a title's text, once.
+-- Puts the tag before a title's text, once, replacing a tag of ours from before an option changed.
 local function tagText(fontString, prefix)
     local text = fontString and fontString:GetText()
     if prefix and type(text) == "string" and sub(text, 1, #prefix) ~= prefix then
-        fontString:SetText(prefix .. text)
+        fontString:SetText(prefix .. untagged(text))
     end
 end
 
 -- Takes our tag off a title.
 local function untagText(fontString)
     local text = fontString and fontString:GetText()
-    if type(text) == "string" and text:find(TAG_PATTERN) then
-        fontString:SetText((text:gsub(TAG_PATTERN, "")))
+    if type(text) == "string" then
+        local plain = untagged(text)
+        if plain ~= text then
+            fontString:SetText(plain)
+        end
     end
 end
 
@@ -90,7 +123,7 @@ local function tagGreeting(button, text)
     local prefix = prefixFor(greetingQuest(button))
     if prefix and sub(text, 1, #prefix) ~= prefix then
         busy = true
-        button:SetText(prefix .. text)
+        button:SetText(prefix .. untagged(text))
         busy = false
     end
 end
@@ -164,5 +197,10 @@ end
 
 -- Hooks stop by themselves; what's open gets its plain titles back.
 function module:OnDisable()
+    refresh()
+end
+
+-- Color by Difficulty: what's open gets its tags again, colored or plain.
+function module:OnOptionChanged()
     refresh()
 end

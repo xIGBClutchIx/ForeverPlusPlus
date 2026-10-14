@@ -53,7 +53,8 @@ ns.changelog = {
                     .. "takes. Nothing is timed until you press Record." },
                 { L.QUESTLEVELS_TITLE, "A new module that shows a quest's level before its name, "
                     .. "like the quest log's [12], in a quest giver's list and at the top of the "
-                    .. "quest's details. On by default." },
+                    .. "quest's details. On by default. Its Color by Difficulty option (off by "
+                    .. "default) colors the level gray through red by how it compares with yours." },
                 { L.QUESTTRACKER_TITLE, "The new Current Zone Only option (off by default) tracks "
                     .. "only the quests of the zone you're in, and tracks the others again when you "
                     .. "get there. The quest your map follows always shows." },

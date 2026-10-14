@@ -56,6 +56,9 @@ L.QUESTTRACKER_FADE_OPACITY_DESC = "How visible the tracker stays while you're i
 L.QUESTLEVELS_TITLE = "Quest Levels"
 L.QUESTLEVELS_DESC = "Show a quest's level before its name, like the quest log's [12], in a quest "
     .. "giver's list and at the top of the quest's details."
+L.QUESTLEVELS_COLOR = "Color by Difficulty"
+L.QUESTLEVELS_COLOR_DESC = "Color the level gray through red by how it compares with yours, like "
+    .. "the quest log's colors."
 
 -- ForeverQuestIcons
 L.FOREVERQUESTICONS_TITLE = "Forever Quest Icons"
