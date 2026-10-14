@@ -7,7 +7,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Added
 
 - **AddOns List**: the new AddOn Sets option (off by default) adds a Sets dropdown beside Disable All, to save which addons are on under a name and turn that set back on later.
-- **Comprehend Scrolls**: a new module for Mages: right-click a scroll you read with Comprehension in your bags to cast Comprehend Scroll on it, without opening the spellbook. Not in combat. Off by default.
+- **Comprehend Scrolls**: a new module for Mages: right-click a scroll you read with Comprehension in your bags to cast Comprehend Scroll on it, without opening the spellbook. Not in combat. On by default, and only Mages see it.
 - **Item Tooltips**: the new Repair Cost line (off by default) shows what repairing damaged gear costs, on gear you wear or carry, without a merchant's repair cursor.
 - **Forever Quest Icons**: the new Quest Details option (on by default) puts the icon after the quest's name at the top of its details, in the quest window and on the map.
 - **Minimap Node Icons**: a new module that puts the herb's or ore's own icon on each tracking dot on the minimap while Find Herbs or Find Minerals is on. Off by default. Its Tint Unusable option (off by default) turns an icon red while your skill is too low to gather it, and Gray Out Trivial (off by default) turns it gray once gathering it no longer raises your skill.

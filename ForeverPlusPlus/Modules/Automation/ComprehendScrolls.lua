@@ -7,15 +7,18 @@
 -- casts the spell and then targets its bag slot through Blizzard's own `target-bag` and
 -- `target-slot` attributes. Not in combat, when the bags work as Blizzard's. A scroll that needs
 -- more skill than the player has is still tried, so the game says why it can't be read.
+--
+-- On by default, but only Mages have it: other classes don't see it in Settings, and a Mage
+-- who hasn't learned the spell gets no overlays.
 local _, ns = ...
 
 local C_SpellBook = C_SpellBook
-local IsSpellKnown = IsSpellKnown
+local IsSpellKnown, UnitClass = IsSpellKnown, UnitClass
 
 local L = ns.L
 
 local module = ns.NewModule("ComprehendScrolls", L.COMPREHENDSCROLLS_DESC, {
-    enabled = false,
+    enabled = true,
 })
 module.title = L.COMPREHENDSCROLLS_TITLE
 module.category = "automation"
@@ -35,7 +38,8 @@ local SCROLLS = {
 }
 
 function module:IsAvailable()
-    return ns.BagClicks.IsAvailable()
+    local _, class = UnitClass("player")
+    return class == "MAGE" and ns.BagClicks.IsAvailable()
 end
 
 local function known()
