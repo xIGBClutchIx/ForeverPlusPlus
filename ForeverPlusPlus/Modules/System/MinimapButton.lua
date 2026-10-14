@@ -10,6 +10,8 @@ local format, type, tremove, sort = string.format, type, table.remove, table.sor
 local cos, sin, rad, deg, atan2, floor = math.cos, math.sin, math.rad, math.deg, math.atan2, math.floor
 local ipairs, CreateFrame, GetCursorPosition = ipairs, CreateFrame, GetCursorPosition
 local C_XMLUtil = C_XMLUtil
+local RED = RED_FONT_COLOR and { RED_FONT_COLOR:GetRGB() } or { 1, 0.1, 0.1 }
+local WHITE = { 1, 1, 1 }
 
 local L = ns.L
 local Errors = ns.Errors
@@ -57,12 +59,14 @@ local button
 local compartment -- our entry in the addon compartment, while it's there
 
 -- What a click does with a key held, while Error Catcher is on: the first whose key is held wins,
--- so showing the errors beats clearing them when two share a key.
+-- so showing the errors beats clearing them when two share a key. `count` hides the tooltip's
+-- hint while there's nothing to clear.
 local KEY_ACTIONS = {
-    { setting = "errorsKey", tip = "MINIMAPBUTTON_TIP_ERRORS", run = function() Errors.Toggle() end },
-    { setting = "clearModifier", tip = "MINIMAPBUTTON_TIP_CLEAR",
+    { setting = "errorsKey", hint = L.MINIMAPBUTTON_HINT_ERRORS,
+        run = function() Errors.Toggle() end },
+    { setting = "clearModifier", hint = L.MINIMAPBUTTON_HINT_CLEAR, count = Errors.SessionCount,
         run = function() Errors.ClearSession() end },
-    { setting = "clearAllKey", tip = "MINIMAPBUTTON_TIP_CLEAR_ALL",
+    { setting = "clearAllKey", hint = L.MINIMAPBUTTON_HINT_CLEAR_ALL, count = Errors.SavedCount,
         run = function() Errors.ClearAll() end },
 }
 
@@ -131,29 +135,41 @@ local function onClick(owner, mouse)
     end
 end
 
--- The tooltip. `drag` adds the line about dragging, which only the minimap button does.
+-- A count row: a white label, and the count at the right, red once there are any.
+local function addCount(label, count)
+    local color = count > 0 and RED or WHITE
+    GameTooltip:AddDoubleLine(label, count, 1, 1, 1, color[1], color[2], color[3])
+end
+
+-- A hint row: what it does in green, as Blizzard's own hints, and the click for it in white.
+local function addHint(action, click)
+    GameTooltip:AddDoubleLine(action, click, 0.1, 1, 0.1, 1, 1, 1)
+end
+
+-- The tooltip: the error counts, then a hint for each click. `drag` adds the hint about dragging,
+-- which only the minimap button does.
 local function showTooltip(owner, drag)
     GameTooltip:SetOwner(owner, "ANCHOR_LEFT")
     GameTooltip:SetText(ns.title)
     local errors = Errors.IsOn()
     if errors then
-        GameTooltip:AddLine(format(L.MINIMAPBUTTON_TIP_SESSION, Errors.SessionCount()), 1, 1, 1)
-        GameTooltip:AddLine(format(L.MINIMAPBUTTON_TIP_SAVED, Errors.SavedCount()), 1, 1, 1)
+        addCount(L.MINIMAPBUTTON_TIP_SESSION, Errors.SessionCount())
+        addCount(L.MINIMAPBUTTON_TIP_SAVED, Errors.SavedCount())
         GameTooltip:AddLine(" ")
     end
-    GameTooltip:AddLine(ns.WelcomePending() and L.MINIMAPBUTTON_TIP_WELCOME
-        or L.MINIMAPBUTTON_TIP_SETTINGS, 0.1, 1, 0.1)
-    GameTooltip:AddLine(L.MINIMAPBUTTON_TIP_TOGGLES, 0.1, 1, 0.1)
+    addHint(ns.WelcomePending() and L.MINIMAPBUTTON_HINT_WELCOME or L.MINIMAPBUTTON_HINT_SETTINGS,
+        L.MINIMAPBUTTON_CLICK)
+    addHint(L.MINIMAPBUTTON_HINT_TOGGLES, L.MINIMAPBUTTON_RIGHT_CLICK)
     if errors then
         for _, action in ipairs(KEY_ACTIONS) do
-            local name = KEY_NAMES[module.db[action.setting]]
-            if name and module.db[action.setting] ~= "none" then
-                GameTooltip:AddLine(format(L[action.tip], name), 0.1, 1, 0.1)
+            local key = module.db[action.setting]
+            if key ~= "none" and KEY_NAMES[key] and (not action.count or action.count() > 0) then
+                addHint(action.hint, format(L.MINIMAPBUTTON_KEY_CLICK, KEY_NAMES[key]))
             end
         end
     end
     if drag then
-        GameTooltip:AddLine(L.MINIMAPBUTTON_TIP_DRAG, 0.1, 1, 0.1)
+        addHint(L.MINIMAPBUTTON_HINT_MOVE, L.MINIMAPBUTTON_DRAG)
     end
     GameTooltip:Show()
 end

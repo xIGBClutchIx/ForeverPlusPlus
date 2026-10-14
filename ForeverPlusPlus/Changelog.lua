@@ -168,6 +168,10 @@ ns.changelog = {
                     .. "the errors, Ctrl-click it to clear this session's, and the new Alt-click "
                     .. "clears every saved error after asking. Each key is an option: Show Errors "
                     .. "Key, Clear Session Key (once Clear Key), and Clear All Key." },
+                { L.MINIMAPBUTTON_TITLE, "A tidier tooltip: the error counts with the number at "
+                    .. "the right, red once there are any, then each click's action with its "
+                    .. "click beside it, leaving out a key set to None and the clear hints while "
+                    .. "there's nothing to clear." },
                 { L.MINIMAPBUTTON_TITLE, "The right-click menu also turns Auto Decline, Auto "
                     .. "Dismount, Auto Gossip, Auto Release, Auto Repair, Auto Screenshot, Minimap "
                     .. "Node Icons, Movable Framerate, and Skip Cinematics on and off, and lists "
