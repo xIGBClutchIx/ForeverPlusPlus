@@ -494,25 +494,28 @@ local function checkUI()
         "C_Traits", "C_TooltipInfo.GetUnit", "C_NamePlate.GetNamePlates", "C_DamageMeter" })
 end
 
+-- How many entries each module's collected data holds (its defaults that are tables: prices,
+-- times, learned flight points), whatever the module, so nothing here knows another module.
 local function checkSaved()
     section("this addon's saved data")
-    local map = ns.modules.WorldMap
-    if map and map.db then
-        local count = 0
-        for _ in pairs(map.db.learnedNodes or {}) do
-            count = count + 1
+    for _, name in ipairs(ns.order) do
+        local other = ns.modules[name]
+        local keys = {}
+        for key, default in pairs(other.defaults or {}) do
+            if type(default) == "table" then
+                keys[#keys + 1] = key
+            end
         end
-        info("saved.learned-nodes", count .. " learned flight points saved for this character")
-    end
-    local timer = ns.modules.FlightTimer
-    if timer and timer.db then
-        local count = 0
-        for _ in pairs(timer.db.times or {}) do
-            count = count + 1
+        sort(keys)
+        for _, key in ipairs(keys) do
+            local count = 0
+            for _ in pairs(other.db[key] or {}) do
+                count = count + 1
+            end
+            info("saved." .. name .. "." .. key, count .. " entries"
+                .. (other.perCharacter and other.perCharacter[key] and " for this character" or ""))
         end
-        info("saved.flight-times", count .. " flight times saved")
     end
-    info("saved.zone-info", "corner " .. text(map and map.db and map.db.corner))
 end
 
 -- Things only the player can do -----------------------------------------------------------------
