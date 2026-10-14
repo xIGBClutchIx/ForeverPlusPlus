@@ -1729,10 +1729,16 @@ end
 -- A release's entries in the groups its notes show, `{ heading, items }`, where an item is
 -- `{ entry, name, text }`: the entry from Changelog.lua and what shows of it, `name` in gold
 -- before `text`. As written, the groups are its sections and the names its modules'. With
--- `byModule`, the groups are its modules', in alphabetical order after General (entries without
--- a module), and the names the sections'.
+-- `byModule`, the groups are its modules', and the names the sections': first those of no one
+-- module (General for entries without a name, then Settings and Commands), marked `apart`, then
+-- the modules' in alphabetical order.
 local function noteGroups(release, byModule)
     local groups, byName = {}, {}
+    local apart = {
+        [L.CHANGELOG_GENERAL] = 1,
+        [L.CHANGELOG_SETTINGS] = 2,
+        [L.CHANGELOG_COMMANDS] = 3,
+    }
     for _, section in ipairs(release.sections) do
         local items = {}
         for _, entry in ipairs(section[2]) do
@@ -1741,7 +1747,7 @@ local function noteGroups(release, byModule)
                 local heading = named and entry[1] or L.CHANGELOG_GENERAL
                 local group = byName[heading]
                 if not group then
-                    group = { heading, {}, general = not named }
+                    group = { heading, {}, apart = apart[heading] }
                     byName[heading] = group
                     groups[#groups + 1] = group
                 end
@@ -1756,8 +1762,9 @@ local function noteGroups(release, byModule)
     end
     if byModule then
         sort(groups, function(a, b)
-            if a.general ~= b.general then
-                return a.general
+            local x, y = a.apart or 4, b.apart or 4
+            if x ~= y then
+                return x < y
             end
             return strlower(a[1]) < strlower(b[1])
         end)
@@ -1800,8 +1807,9 @@ end
 -- search finds, then each section's heading in gold over a fading gold line, and its entries after
 -- a dash, their wrapped lines lined up after it and a module's name in gold. Only the entries the
 -- search finds show, under their sections' headings. With `byModule`, the headings are the
--- modules' and the names in gold the sections' (noteGroups). `view.search(text)` lays it out for a
--- search (lowercased, nil for none), and `view.update` keeps its NEW label.
+-- modules' and the names in gold the sections' (noteGroups), with a gray line under the ones of
+-- no one module. `view.search(text)` lays it out for a search (lowercased, nil for none), and
+-- `view.update` keeps its NEW label.
 local function buildNotes(content, width, release, byModule)
     local view = newStack(content, width, 0)
     view:SetPoint("TOPLEFT")
@@ -1829,8 +1837,41 @@ local function buildNotes(content, width, release, byModule)
         count:SetPoint("LEFT", title, "LEFT", x, 0)
     end
 
-    for _, group in ipairs(noteGroups(release, byModule)) do
+    -- Whether the search finds one of a group's items.
+    local function anyMatch(items)
+        for _, item in ipairs(items) do
+            if entryMatches(item[1], search) then
+                return true
+            end
+        end
+        return false
+    end
+
+    local groups = noteGroups(release, byModule)
+    for g, group in ipairs(groups) do
         local items = group[2]
+        -- A gray line between the groups of no one module and the modules', while both show.
+        if not group.apart and groups[g - 1] and groups[g - 1].apart then
+            local separator = CreateFrame("Frame", nil, view)
+            separator:SetSize(width, 1)
+            local line = separator:CreateTexture(nil, "ARTWORK")
+            line:SetPoint("TOPLEFT", 4, 0)
+            line:SetSize(width - 8, 1)
+            line:SetColorTexture(0.5, 0.5, 0.5, 0.5)
+            addEntry(view, separator, function()
+                local above, below = false, false
+                for _, other in ipairs(groups) do
+                    if anyMatch(other[2]) then
+                        if other.apart then
+                            above = true
+                        else
+                            below = true
+                        end
+                    end
+                end
+                return above and below
+            end, 18)
+        end
         local top = CreateFrame("Frame", nil, view)
         top:SetWidth(width)
         local heading = top:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
@@ -1841,14 +1882,7 @@ local function buildNotes(content, width, release, byModule)
         rule:SetSize(min(RULE_WIDTH, width - 8), 1)
         fadeGold(rule)
         top:SetHeight(heading:GetStringHeight() + 6 + 1 + 5)
-        addEntry(view, top, function()
-            for _, item in ipairs(items) do
-                if entryMatches(item[1], search) then
-                    return true
-                end
-            end
-            return false
-        end, 18)
+        addEntry(view, top, function() return anyMatch(items) end, 18)
         for _, item in ipairs(items) do
             local row = CreateFrame("Frame", nil, view)
             row:SetWidth(width)
