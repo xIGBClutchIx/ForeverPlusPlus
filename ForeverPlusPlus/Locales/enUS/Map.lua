@@ -217,6 +217,11 @@ L.WAYPOINTS_QUEST_NAME = "Show Quest Name"
 L.WAYPOINTS_QUEST_NAME_DESC = "Show the quest's name under the distance while the arrow points "
     .. "to a quest."
 L.WAYPOINTS_QUEST_NAME_SAMPLE = "Quest Name" -- shown under the arrow in Edit Mode
+L.WAYPOINTS_CORPSE = "Point to Corpse"
+L.WAYPOINTS_CORPSE_DESC = "While you're a ghost, the arrow points to your corpse instead of a "
+    .. "quest or your map pin, the same spot as the game's own tombstone marker, and goes back to "
+    .. "them once you're alive."
+L.WAYPOINTS_CORPSE_LABEL = "Your Corpse" -- shown under the arrow while it points to the corpse
 L.WAYPOINTS_USAGE = "/way [zone] x y, such as /way 45.2 67.8 or /way Elwynn Forest 45 67. "
     .. "/way clear takes the pin away."
 L.WAYPOINTS_SET = "Waypoint set in %s at %.1f, %.1f." -- zone, x, y

@@ -51,6 +51,9 @@ ns.changelog = {
                     .. "the arrow to the quest selected on the map instead of your map pin, and "
                     .. "back to the pin when no quest is selected. Its Show Quest Name option (on "
                     .. "by default) shows the quest's name under the distance." },
+                { L.WAYPOINTS_TITLE, "The new Point to Corpse option (off by default) points the "
+                    .. "arrow to your corpse while you're a ghost, ahead of a quest or your map "
+                    .. "pin, and back to them once you're alive." },
                 { L.XPBARTEXT_TITLE, "The new Fill Bar with Ready Quests option (on by default) fills the "
                     .. "experience bar on from your XP in green with what your quests ready to turn "
                     .. "in will give, like rested XP." },

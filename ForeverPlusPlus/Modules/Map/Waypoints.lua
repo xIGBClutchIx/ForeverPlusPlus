@@ -2,14 +2,16 @@
 -- game draws its pin and its marker in the world; a command another addon already has (TomTom's
 -- /way) is left to that addon (Lib/Slash). The Arrow option adds a small arrow on screen that
 -- turns toward the waypoint as you turn, with the distance under it, for the pin set by /way or
--- by clicking the map, or with Follow Selected Quest, for the quest selected on the map. It reads
--- only the player's own position and facing, never another unit's.
+-- by clicking the map, or with Follow Selected Quest, for the quest selected on the map, or with
+-- Point to Corpse, for the player's corpse while they're a ghost. It reads only the player's own
+-- position and facing, never another unit's.
 local _, ns = ...
 
 local ipairs, tonumber, format, floor = ipairs, tonumber, string.format, math.floor
 local tconcat = table.concat
 local CreateFrame, UIParent, C_Map, C_QuestLog = CreateFrame, UIParent, C_Map, C_QuestLog
-local GetPlayerFacing, GetTime = GetPlayerFacing, GetTime
+local GetPlayerFacing, GetTime, UnitIsGhost = GetPlayerFacing, GetTime, UnitIsGhost
+local C_DeathInfo = C_DeathInfo
 
 local L = ns.L
 local WorldMap = ns.WorldMap
@@ -20,6 +22,7 @@ local module = ns.NewModule("Waypoints", L.WAYPOINTS_DESC, {
     arrow = true,
     quest = true,
     questName = true,
+    corpse = false,
     scale = 100, -- percent
     x = 0, -- the arrow's offset from the center of the screen
     y = 530,
@@ -35,6 +38,8 @@ module.options = {
         requires = "arrow", added = "0.9.0" },
     { key = "questName", name = L.WAYPOINTS_QUEST_NAME, description = L.WAYPOINTS_QUEST_NAME_DESC,
         requires = "quest", added = "0.9.0" },
+    { key = "corpse", name = L.WAYPOINTS_CORPSE, description = L.WAYPOINTS_CORPSE_DESC,
+        requires = "arrow", added = "0.9.0" },
 }
 
 -- /way ----------------------------------------------------------------------------------------
@@ -231,14 +236,51 @@ local function questPoint(questID)
     return nil
 end
 
--- The quest point is looked up again each QUEST_INTERVAL, not every turn of the arrow, and the
--- map pin once each time it changes (refresh).
+-- Whether the arrow should point to the corpse: a ghost with Point to Corpse on.
+local function followCorpse()
+    return module.db.corpse and UnitIsGhost("player") and true or false
+end
+
+-- Where the player's corpse is, as a point like the map pin's: on the player's map or the first
+-- map above it that has it (a corpse in the next zone), up to the continent. Blizzard's map draws
+-- its tombstone from the same call.
+local function corpsePoint()
+    if not (C_DeathInfo and C_DeathInfo.GetCorpseMapPosition) then
+        return nil
+    end
+    local mapID = C_Map.GetBestMapForUnit("player")
+    while mapID and mapID ~= 0 do
+        local position = C_DeathInfo.GetCorpseMapPosition(mapID)
+        if position then
+            return { uiMapID = mapID, position = position }
+        end
+        local info = C_Map.GetMapInfo(mapID)
+        if not info or (info.mapType and info.mapType <= continentType) then
+            return nil
+        end
+        mapID = info.parentMapID
+    end
+    return nil
+end
+
+-- The quest point and the corpse are looked up again each QUEST_INTERVAL, not every turn of the
+-- arrow, and the map pin once each time it changes (refresh).
 local cachedQuest, cachedPoint, cachedTitle, checkedAt = nil, nil, nil, 0
+local cachedCorpse, corpseCheckedAt = nil, nil
 local cachedWaypoint, waypointRead = nil, false
 
--- What the arrow points at: the selected quest when it has a spot, otherwise the map pin. The
--- second value is the quest's name when it's the quest.
+-- What the arrow points at: the corpse while following it, then the selected quest when it has a
+-- spot, otherwise the map pin. The second value is the line to show under the distance, if any.
 local function destination()
+    if followCorpse() then
+        local now = GetTime()
+        if not corpseCheckedAt or now - corpseCheckedAt >= QUEST_INTERVAL then
+            cachedCorpse, corpseCheckedAt = corpsePoint(), now
+        end
+        if cachedCorpse then
+            return cachedCorpse, L.WAYPOINTS_CORPSE_LABEL
+        end
+    end
     local questID = selectedQuest()
     if questID then
         local now = GetTime()
@@ -247,7 +289,7 @@ local function destination()
             cachedTitle = C_QuestLog.GetTitleForQuestID and C_QuestLog.GetTitleForQuestID(questID)
         end
         if cachedPoint then
-            return cachedPoint, cachedTitle
+            return cachedPoint, module.db.questName and cachedTitle or nil
         end
     end
     if not waypointRead then
@@ -317,7 +359,7 @@ local function toward(point)
 end
 
 -- How far the target is from the player in yards, its direction counter-clockwise from north,
--- and the quest's name when it's the selected quest, or nil when the game can't say (no target,
+-- and the line to show under the distance (destination), or nil when the game can't say (no target,
 -- in an instance, another continent). Works on the target's own map, or the first map above it
 -- the player is also on, so a pin in the next zone still points the right way.
 local function locate()
@@ -387,7 +429,7 @@ local function update()
         shownYards = rounded
         frame.distance:SetText(distanceText(yards))
     end
-    title = module.db.questName and title or ""
+    title = title or ""
     if title ~= shownTitle then
         shownTitle = title
         frame.quest:SetText(title)
@@ -399,15 +441,17 @@ local function arrowWanted()
     if not (module.enabled and module.db.arrow) then
         return false
     end
-    return selectedQuest() ~= nil or (C_Map.HasUserWaypoint and C_Map.HasUserWaypoint()) or false
+    return followCorpse() or selectedQuest() ~= nil
+        or (C_Map.HasUserWaypoint and C_Map.HasUserWaypoint()) or false
 end
 
--- Runs the watcher only while there is a waypoint or a selected quest to point at.
+-- Runs the watcher only while there is a corpse, a waypoint, or a selected quest to point at.
 local function refresh()
     if not frame then
         return
     end
     cachedQuest = nil -- look the quest up again: the selection or the quest may have changed
+    corpseCheckedAt = nil -- and the corpse
     waypointRead = false -- and the map pin
     shownYards, shownTitle = nil, nil
     if arrowWanted() then
@@ -461,6 +505,14 @@ local function syncArrow()
     elseif frame then
         module:Off("SUPER_TRACKING_CHANGED", refresh)
     end
+    -- Releasing to a ghost is PLAYER_ALIVE; being brought back as one is PLAYER_UNGHOST.
+    if module.enabled and module.db.arrow and module.db.corpse then
+        module:On("PLAYER_ALIVE", refresh)
+        module:On("PLAYER_UNGHOST", refresh)
+    elseif frame then
+        module:Off("PLAYER_ALIVE", refresh)
+        module:Off("PLAYER_UNGHOST", refresh)
+    end
     refresh()
 end
 
@@ -477,7 +529,7 @@ end
 function module:OnOptionChanged(option)
     if option == "way" then
         syncWay()
-    elseif option == "arrow" or option == "quest" then
+    elseif option == "arrow" or option == "quest" or option == "corpse" then
         syncArrow()
     end
 end
