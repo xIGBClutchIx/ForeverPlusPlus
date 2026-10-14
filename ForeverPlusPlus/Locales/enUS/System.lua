@@ -88,7 +88,7 @@ L.ADDONSLIST_SETS_MISSING = "Addons in the AddOn set %s that aren't installed: %
 L.MINIMAPBUTTON_TITLE = "Minimap Button"
 L.MINIMAPBUTTON_DESC = "A Forever++ button on the minimap, in the addon compartment, or both. "
     .. "Click it for settings, right-click it for quick toggles, and Shift-click it for caught "
-    .. "errors."
+    .. "errors, Ctrl-click to clear this session's, or Alt-click to clear them all."
 L.MINIMAPBUTTON_WHERE = "Show In"
 L.MINIMAPBUTTON_WHERE_DESC = "Where the button goes: on the minimap, in the addon compartment "
     .. "under it, or both. Drag the minimap button to move it around the minimap."
@@ -101,12 +101,19 @@ L.MINIMAPBUTTON_TIP_SAVED = "Saved errors: %d"
 L.MINIMAPBUTTON_TIP_SETTINGS = "Click to open Forever++ settings."
 L.MINIMAPBUTTON_TIP_WELCOME = "Click to see what Forever++ is."
 L.MINIMAPBUTTON_TIP_TOGGLES = "Right-click for quick toggles."
-L.MINIMAPBUTTON_TIP_ERRORS = "Shift-click to show the errors."
+L.MINIMAPBUTTON_TIP_ERRORS = "%s-click to show the errors." -- a key, such as Shift
 L.MINIMAPBUTTON_TIP_DRAG = "Drag to move the button."
-L.MINIMAPBUTTON_TIP_CLEAR = "%s-click to clear this session's errors." -- a key, such as Alt
-L.MINIMAPBUTTON_CLEAR_KEY = "Clear Key"
+L.MINIMAPBUTTON_TIP_CLEAR = "%s-click to clear this session's errors." -- a key, such as Ctrl
+L.MINIMAPBUTTON_TIP_CLEAR_ALL = "%s-click to clear all saved errors." -- a key, such as Alt
+L.MINIMAPBUTTON_ERRORS_KEY = "Show Errors Key"
+L.MINIMAPBUTTON_ERRORS_KEY_DESC = "The key to hold while clicking the button to show the "
+    .. "errors, while Error Catcher is on."
+L.MINIMAPBUTTON_CLEAR_KEY = "Clear Session Key"
 L.MINIMAPBUTTON_CLEAR_KEY_DESC = "The key to hold while clicking the button to clear this "
-    .. "session's errors, while Error Catcher is on. A Shift-click shows them."
+    .. "session's errors, while Error Catcher is on."
+L.MINIMAPBUTTON_CLEAR_ALL_KEY = "Clear All Key"
+L.MINIMAPBUTTON_CLEAR_ALL_KEY_DESC = "The key to hold while clicking the button to clear every "
+    .. "saved error, from every session, while Error Catcher is on. It asks first."
 
 -- Commands
 L.COMMANDS_TITLE = "Commands"

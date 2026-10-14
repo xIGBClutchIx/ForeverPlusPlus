@@ -773,6 +773,9 @@ local provider = {
     end,
     toggle = toggleWindow,
     clearSession = clearSession,
+    clearAll = function()
+        ns.Confirm("ERRORCATCHER_CLEAR", L.ERRORCATCHER_CLEAR_CONFIRM, clear)
+    end,
 }
 
 module.options = {

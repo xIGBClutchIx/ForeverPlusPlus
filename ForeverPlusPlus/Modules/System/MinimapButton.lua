@@ -1,7 +1,8 @@
 -- Minimap Button: Forever++'s button on the minimap, in the addon compartment, or both. A click
 -- opens Forever++ settings and a right-click a menu of quick module toggles; while Error Catcher
--- is on, a Shift-click shows its errors and the button shows how many this session caught
--- (through ns.Errors, never Error Catcher itself). After a fresh install the button wears
+-- is on, a click with a key held shows its errors, clears this session's, or clears them all (each
+-- key is an option), and the button shows how many this session caught (through ns.Errors, never
+-- Error Catcher itself). After a fresh install the button wears
 -- Blizzard's NEW label, and its first click opens the About page instead, once; no popup at login.
 local _, ns = ...
 
@@ -9,15 +10,18 @@ local format, type, tremove, sort = string.format, type, table.remove, table.sor
 local cos, sin, rad, deg, atan2, floor = math.cos, math.sin, math.rad, math.deg, math.atan2, math.floor
 local ipairs, CreateFrame, GetCursorPosition = ipairs, CreateFrame, GetCursorPosition
 local C_XMLUtil = C_XMLUtil
-local IsControlKeyDown, IsShiftKeyDown, IsAltKeyDown = IsControlKeyDown, IsShiftKeyDown, IsAltKeyDown
 
 local L = ns.L
 local Errors = ns.Errors
+local Keys = ns.Keys
 
 local module = ns.NewModule("MinimapButton", L.MINIMAPBUTTON_DESC, {
     enabled = true,
     where = "minimap", -- minimap, compartment, or both
-    clearModifier = "alt", -- held with a click to clear this session's errors
+    -- Keys held with a click, while Error Catcher is on.
+    errorsKey = "shift", -- shows the errors
+    clearModifier = "ctrl", -- clears this session's errors
+    clearAllKey = "alt", -- clears every saved error, after asking
     -- Data, not settings: a table, so presets leave it alone.
     saved = {
         angle = 200, -- the button's place around the minimap, in degrees
@@ -52,12 +56,21 @@ end)
 local button
 local compartment -- our entry in the addon compartment, while it's there
 
--- The keys that, held with a click, clear this session's errors. Not Shift: a Shift-click shows
--- them.
-local MODIFIERS = {
-    ctrl = { name = L.KEY_CTRL, down = IsControlKeyDown },
-    alt = { name = L.KEY_ALT, down = IsAltKeyDown },
+-- What a click does with a key held, while Error Catcher is on: the first whose key is held wins,
+-- so showing the errors beats clearing them when two share a key.
+local KEY_ACTIONS = {
+    { setting = "errorsKey", tip = "MINIMAPBUTTON_TIP_ERRORS", run = function() Errors.Toggle() end },
+    { setting = "clearModifier", tip = "MINIMAPBUTTON_TIP_CLEAR",
+        run = function() Errors.ClearSession() end },
+    { setting = "clearAllKey", tip = "MINIMAPBUTTON_TIP_CLEAR_ALL",
+        run = function() Errors.ClearAll() end },
 }
+
+-- A key's name for the tooltip, such as Ctrl, from the dropdown's choices.
+local KEY_NAMES = {}
+for _, choice in ipairs(Keys.CHOICES) do
+    KEY_NAMES[choice[1]] = choice[2]
+end
 
 -- The modules the right-click menu turns on and off, listed by title in alphabetical order, so
 -- the order holds in every language. One that isn't available on this client (Hide Beta Feedback
@@ -105,14 +118,12 @@ local function onClick(owner, mouse)
         return
     end
     if Errors.IsOn() then
-        -- Clearing needs the key held, so it's never an accident.
-        local modifier = MODIFIERS[module.db.clearModifier]
-        if modifier and modifier.down() then
-            Errors.ClearSession()
-            return
-        elseif IsShiftKeyDown() then
-            Errors.Toggle()
-            return
+        -- Clearing needs a key held, so it's never an accident.
+        for _, action in ipairs(KEY_ACTIONS) do
+            if Keys.IsDown(module.db[action.setting]) then
+                action.run()
+                return
+            end
         end
     end
     if not (ns.WelcomePending() and ns.OpenAbout()) then
@@ -134,10 +145,11 @@ local function showTooltip(owner, drag)
         or L.MINIMAPBUTTON_TIP_SETTINGS, 0.1, 1, 0.1)
     GameTooltip:AddLine(L.MINIMAPBUTTON_TIP_TOGGLES, 0.1, 1, 0.1)
     if errors then
-        GameTooltip:AddLine(L.MINIMAPBUTTON_TIP_ERRORS, 0.1, 1, 0.1)
-        local modifier = MODIFIERS[module.db.clearModifier]
-        if modifier then
-            GameTooltip:AddLine(format(L.MINIMAPBUTTON_TIP_CLEAR, modifier.name), 0.1, 1, 0.1)
+        for _, action in ipairs(KEY_ACTIONS) do
+            local name = KEY_NAMES[module.db[action.setting]]
+            if name and module.db[action.setting] ~= "none" then
+                GameTooltip:AddLine(format(L[action.tip], name), 0.1, 1, 0.1)
+            end
         end
     end
     if drag then
@@ -317,18 +329,17 @@ module.options = {
             { "both", L.MINIMAPBUTTON_WHERE_BOTH },
         },
     },
-    {
-        key = "clearModifier",
-        name = L.MINIMAPBUTTON_CLEAR_KEY,
-        description = L.MINIMAPBUTTON_CLEAR_KEY_DESC,
-        changed = "0.9.0", -- a click instead of a right-click, and Alt by default
-        choices = {
-            { "ctrl", L.KEY_CTRL },
-            { "alt", L.KEY_ALT },
-            { "none", L.KEY_NONE },
-        },
-    },
+    Keys.Option("errorsKey", L.MINIMAPBUTTON_ERRORS_KEY, L.MINIMAPBUTTON_ERRORS_KEY_DESC),
+    -- Changed: a click instead of a right-click, and Shift is a choice.
+    Keys.Option("clearModifier", L.MINIMAPBUTTON_CLEAR_KEY, L.MINIMAPBUTTON_CLEAR_KEY_DESC, nil,
+        "0.9.0"),
+    Keys.Option("clearAllKey", L.MINIMAPBUTTON_CLEAR_ALL_KEY, L.MINIMAPBUTTON_CLEAR_ALL_KEY_DESC),
 }
+for _, option in ipairs(module.options) do
+    if option.key == "errorsKey" or option.key == "clearAllKey" then
+        option.added = "0.9.0"
+    end
+end
 
 local function onChanged()
     if module.enabled then
