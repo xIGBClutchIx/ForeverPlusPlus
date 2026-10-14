@@ -372,7 +372,8 @@ Debug page > Self Test > Run (or `/fpp selftest`) probes the "Unverified" items 
 
 Results of the 2026-10-14 run (build 70338, out of combat, no flight master open) **[in-game]**:
 
-- `C_CurveUtil.CreateCurve()` returns a userdata (`LuaCurveObject`), not a table. The step curve and `UnitHealthPercent` with it are still unchecked, since the probe stopped there.
+- `C_CurveUtil.CreateCurve()` returns a userdata (`LuaCurveObject`), not a table. A second run (at a flight master, out of combat) built the step curve and fed `UnitHealthPercent(unit, true, curve)` into `SetAlpha` without error; in combat is still unchecked.
+- At a flight master (map 1463), `C_TaxiMap.GetAllTaxiNodes` nodes have `isMapLayerTransition name nodeID position slotIndex state useSpecialIcon`, and `state` is `Enum.FlightPathState` (Current 0, Reachable 1, Unreachable 2): 1, 10, and 7 of 18. `TAXIMAP_CLOSED` fires three times when the map closes.
 - Spell 131474 (Mainline's Fishing) and item 82800 (the Pet Cage) aren't in Forever's data. Classic's Fishing is 7620. Forever has no caged battle pets.
 - `C_TaxiMap.GetDestinationMap` isn't there. Nothing uses it.
 - Every other seeded item, spell, and map ID the addon ships was found: lockboxes, weapon buffs, Comprehend Scroll items, Zone Info's maps, Skyborne spells, Pick Lock, Find Herbs, Find Minerals, Comprehend Scroll, and Azeroth (947).
