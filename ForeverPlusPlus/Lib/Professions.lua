@@ -90,12 +90,49 @@ local NODES = ns.GameData.New("professionNodes", { -- object name -> { skill lin
     ["Large Obsidian Chunk"] = { MINE, 305, 22203 },
 }, { label = "Herbs and veins" })
 
+-- The stone a vein gives besides its ore, which no node lists as its item: item ID -> the Mining
+-- skill of the lowest vein that gives it. Classic's values.
+local STONES = ns.GameData.New("miningStones", {
+    [2835] = 1, -- Rough Stone
+    [2836] = 65, -- Coarse Stone
+    [2838] = 125, -- Heavy Stone
+    [7912] = 175, -- Solid Stone
+    [12365] = 245, -- Dense Stone
+}, { kind = "item", label = "Stones from veins" })
+
+local itemSkills -- item ID -> { skill line, skill }, built from the nodes when first asked
+
 ---The herb or vein named `name` (as the world writes it): { skill line, skill, item ID }, any of
 ---which may be nil for one learned in game, or nil for a name that isn't a node.
 ---@param name string
 ---@return table? node
 function Professions.Node(name)
     return NODES:Get(name)
+end
+
+---The gathering skill an item comes from: the skill line and the skill of the lowest herb or vein
+---that gives it (the nodes, seeded and learned, and the stones veins give), or nil.
+---@param itemID number
+---@return number? line
+---@return number? skill
+function Professions.ItemSkill(itemID)
+    if not itemSkills then
+        itemSkills = {}
+        for _, node in NODES:Pairs() do
+            local line, skill, item = node[1], node[2], node[3]
+            local known = item and itemSkills[item]
+            if line and skill and item and not (known and known[2] <= skill) then
+                itemSkills[item] = { line, skill }
+            end
+        end
+        for item, skill in STONES:Pairs() do
+            itemSkills[item] = itemSkills[item] or { MINE, skill }
+        end
+    end
+    local entry = itemSkills[itemID]
+    if entry then
+        return entry[1], entry[2]
+    end
 end
 
 -- The gathering skill lines a node's requirement can name, and their English names (the seed's
@@ -151,6 +188,7 @@ function Professions.LearnRequirement(name, skill, need)
     if node and node[1] == line and node[2] == need then
         return false
     end
+    itemSkills = nil
     return NODES:Learn(name, { line, need, node and node[3] })
 end
 
@@ -167,12 +205,14 @@ function Professions.LearnNodeItem(name, item)
     if node and node[3] then
         return false
     end
+    itemSkills = nil
     return NODES:Learn(name, { node and node[1], node and node[2], item })
 end
 
 ---Forgets every herb and vein learned in game; the seed stays.
 function Professions.ForgetNodes()
     NODES:Forget()
+    itemSkills = nil
 end
 
 ---How hard gathering something that needs `need` is at skill `rank`, as a color (r, g, b): red

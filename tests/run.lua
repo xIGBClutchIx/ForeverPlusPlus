@@ -657,9 +657,18 @@ eq(Professions.Node("Friedenskraut")[2], 1, "nodes: item keeps the skill")
 eq(Professions.LearnNodeItem("Copper Vein", 2835), false, "nodes: a known item stays")
 eq(Professions.LearnRequirement("Copper Vein", "Mining", 5), true, "nodes: a changed requirement wins")
 eq(Professions.Node("Copper Vein")[3], 2770, "nodes: and keeps the seed's item")
+local function itemSkill(id)
+    local line, skill = Professions.ItemSkill(id)
+    return line and (line .. ":" .. skill) or "nil"
+end
+eq(itemSkill(2770), Professions.MINING .. ":5", "items: a learned requirement reaches the item")
 Professions.ForgetNodes()
 eq(Professions.Node("Friedenskraut"), nil, "nodes: forget")
 eq(Professions.Node("Copper Vein")[2], 1, "nodes: forget restores the seed")
+eq(itemSkill(2447), Professions.HERBALISM .. ":1", "items: herb")
+eq(itemSkill(10620), Professions.MINING .. ":245", "items: the lowest vein that gives it")
+eq(itemSkill(2835), Professions.MINING .. ":1", "items: a stone")
+eq(itemSkill(2589), "nil", "items: not gathered")
 ns.db = savedDB
 
 -- Done ------------------------------------------------------------------------------------------

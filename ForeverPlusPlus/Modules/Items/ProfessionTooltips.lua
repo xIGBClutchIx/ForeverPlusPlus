@@ -98,55 +98,6 @@ local NODES = setmetatable({ -- object name -> { skill line, skill }
     end,
 })
 
-local ITEMS = { -- item ID -> { skill line, skill }
-    [2447] = { HERB, 1 }, -- Peacebloom
-    [765] = { HERB, 1 }, -- Silverleaf
-    [2449] = { HERB, 15 }, -- Earthroot
-    [785] = { HERB, 50 }, -- Mageroyal
-    [2450] = { HERB, 70 }, -- Briarthorn
-    [3820] = { HERB, 85 }, -- Stranglekelp
-    [2453] = { HERB, 100 }, -- Bruiseweed
-    [3355] = { HERB, 115 }, -- Wild Steelbloom
-    [3369] = { HERB, 120 }, -- Grave Moss
-    [3356] = { HERB, 125 }, -- Kingsblood
-    [3357] = { HERB, 150 }, -- Liferoot
-    [3818] = { HERB, 160 }, -- Fadeleaf
-    [3821] = { HERB, 170 }, -- Goldthorn
-    [3358] = { HERB, 185 }, -- Khadgar's Whisker
-    [3819] = { HERB, 195 }, -- Wintersbite
-    [4625] = { HERB, 205 }, -- Firebloom
-    [8831] = { HERB, 210 }, -- Purple Lotus
-    [8836] = { HERB, 220 }, -- Arthas' Tears
-    [8838] = { HERB, 230 }, -- Sungrass
-    [8839] = { HERB, 235 }, -- Blindweed
-    [8845] = { HERB, 245 }, -- Ghost Mushroom
-    [8846] = { HERB, 250 }, -- Gromsblood
-    [13464] = { HERB, 260 }, -- Golden Sansam
-    [13463] = { HERB, 270 }, -- Dreamfoil
-    [13465] = { HERB, 280 }, -- Mountain Silversage
-    [13466] = { HERB, 285 }, -- Plaguebloom
-    [13467] = { HERB, 290 }, -- Icecap
-    [13468] = { HERB, 300 }, -- Black Lotus
-
-    [2770] = { MINE, 1 }, -- Copper Ore
-    [2835] = { MINE, 1 }, -- Rough Stone
-    [2771] = { MINE, 65 }, -- Tin Ore
-    [2836] = { MINE, 65 }, -- Coarse Stone
-    [3340] = { MINE, 65 }, -- Incendicite Ore
-    [2775] = { MINE, 75 }, -- Silver Ore
-    [4278] = { MINE, 75 }, -- Lesser Bloodstone Ore
-    [2772] = { MINE, 125 }, -- Iron Ore
-    [2838] = { MINE, 125 }, -- Heavy Stone
-    [5833] = { MINE, 150 }, -- Indurium Ore
-    [2776] = { MINE, 155 }, -- Gold Ore
-    [3858] = { MINE, 175 }, -- Mithril Ore
-    [7912] = { MINE, 175 }, -- Solid Stone
-    [7911] = { MINE, 230 }, -- Truesilver Ore
-    [11370] = { MINE, 230 }, -- Dark Iron Ore
-    [10620] = { MINE, 245 }, -- Thorium Ore
-    [12365] = { MINE, 245 }, -- Dense Stone
-}
-
 -- Locked boxes: item ID -> the Lockpicking skill to open them. The seed is from Classic; the
 -- skill in Blizzard's "Requires Lockpicking (25)" line on a box's tooltip is learned over it,
 -- and a box the seed lacks is learned from that line too.
@@ -625,10 +576,7 @@ local function itemNeed(id, data)
         end
         return LOCK, lock
     end
-    local item = ITEMS[id]
-    if item then
-        return item[1], item[2]
-    end
+    return Professions.ItemSkill(id)
 end
 
 local function onItem(tooltip, data)
