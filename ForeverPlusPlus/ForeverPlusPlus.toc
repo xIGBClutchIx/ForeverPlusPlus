@@ -50,6 +50,7 @@ Lib\EditMode.lua
 Lib\Chat.lua
 Lib\TalentPlan.lua
 Lib\Slash.lua
+Lib\SettingsKit.lua
 Modules\System\ErrorCatcher.lua
 Modules\Units\PlayerNameplates.lua
 Modules\Units\NpcNameplates.lua
@@ -125,5 +126,8 @@ Modules\Map\HideFilterReset.lua
 Modules\Map\Waypoints.lua
 Modules\Map\MinimapNodeIcons.lua
 Changelog.lua
-Settings.lua
+Settings\Settings.lua
+Settings\Debug.lua
+Settings\Changelog.lua
+Settings\About.lua
 Init.lua

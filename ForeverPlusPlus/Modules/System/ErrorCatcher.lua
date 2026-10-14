@@ -811,7 +811,7 @@ local function testError()
     end)
 end
 
--- On the Debug page (Settings.lua). Works with the module off too, to see Blizzard's handler.
+-- On the Debug page (Settings/Debug.lua). Works with the module off too, to see Blizzard's handler.
 module.debugActions = {
     {
         name = L.ERRORCATCHER_TEST,

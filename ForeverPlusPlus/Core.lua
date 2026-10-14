@@ -367,7 +367,7 @@ end
 ---off, so a module that only does those needs no `OnDisable`; anything else `OnEnable` changes
 ---(a frame, a CVar, a timer) `OnDisable` must put back. Set
 ---`module.title` for a friendlier name in Settings (the name stays the /fpp key), and
----`module.category` for its group on the Modules page (see Settings.lua). A tool with
+---`module.category` for its group on the Modules page (see Settings/Settings.lua). A tool with
 ---nothing to turn off sets `module.alwaysOn`: it has no toggle and stays on. A module only for
 ---some clients gives `module:IsAvailable()`; when it returns false at login, the module stays off
 ---and out of Settings and /fpp list. A default that is a table is data the module collects, not a
@@ -501,8 +501,8 @@ function ns.OnWelcomed(fn)
     welcomed[#welcomed + 1] = fn
 end
 
----Marks the About page seen (false, from Settings.lua when it's first shown), or offers it again
----as on a fresh install, keeping every setting (true, from the Debug page).
+---Marks the About page seen (false, from Settings/About.lua when it's first shown), or offers it
+---again as on a fresh install, keeping every setting (true, from the Debug page).
 ---@param pending boolean
 function ns.SetWelcome(pending)
     if ns.WelcomePending() == pending then
@@ -584,9 +584,9 @@ function ns.Start()
     addCoreSteps()
     local fresh = Store.Upgrade(ns.db, ns.charDB)
     -- The last version whose Modules page the player has seen all of, and the version each module
-    -- clicked since was seen in; Settings.lua marks what's added or changed after them as new. A
-    -- fresh install has nothing to catch up on; saved settings from before this was kept have
-    -- seen none of them.
+    -- clicked since was seen in; Settings/Settings.lua marks what's added or changed after them as
+    -- new. A fresh install has nothing to catch up on; saved settings from before this was kept
+    -- have seen none of them.
     ns.version = ns.Metadata("Version")
     if type(ns.db.seenVersion) ~= "string" then
         ns.db.seenVersion = fresh and ns.version or "0"

@@ -25,17 +25,30 @@
 --     About          what the addon is, how many modules are on, the version, links, and the /fpp
 --                    commands, with the Defaults button at the top right like Modules
 -- Without subpages (an older Settings API), the Modules page is the only page.
+-- This file has the Modules page and what the pages share; Debug.lua, Changelog.lua and About.lua
+-- draw the others, through `S` (ns.SettingsUI). The pieces a drawn page is made of are in
+-- Lib/SettingsKit.lua.
 local _, ns = ...
 
 local ipairs, pairs, next, format, type, sort = ipairs, pairs, next, string.format, type, table.sort
 local strlower, concat = string.lower, table.concat
 local min, max, pcall, tostring = math.min, math.max, pcall, tostring
-local InCombatLockdown, CreateFrame, GetBuildInfo = InCombatLockdown, CreateFrame, GetBuildInfo
+local InCombatLockdown, CreateFrame = InCombatLockdown, CreateFrame
 local wipe = wipe
-local GameTooltip = GameTooltip
 local C_Timer = C_Timer
 local L = ns.L
 local hasTemplate, hasAtlas = ns.Frames.HasTemplate, ns.Frames.HasAtlas
+local Kit = ns.SettingsKit
+local showTooltip, addTooltip = Kit.ShowTooltip, Kit.AddTooltip
+local newCheckbox, newButton = Kit.NewCheckbox, Kit.NewButton
+local newStack, addEntry, layoutStack = Kit.NewStack, Kit.AddEntry, Kit.Layout
+local newSplit, paint, hover = Kit.NewSplit, Kit.Paint, Kit.Hover
+local newListButton, newEmptyRow, addSearchBox = Kit.NewListButton, Kit.NewEmptyRow, Kit.AddSearchBox
+
+-- What the Settings files share. Debug.lua, Changelog.lua and About.lua load after this one and add
+-- the functions that draw their pages (S.AddDebugPage, S.BuildChangelog, S.BuildAbout).
+local S = {}
+ns.SettingsUI = S
 
 local settings = {} -- module name -> its Blizzard setting objects, to refresh after /fpp changes
 local modulesCategory -- the Modules page, the top Forever++ entry, for /fpp
@@ -84,30 +97,10 @@ local function addCanvasPage(category, name, build)
     return Settings.RegisterCanvasLayoutSubcategory(category, canvasFrame(build), name)
 end
 
----Puts a page's title and the divider under it at the top of a drawn page, like Blizzard's own
----Settings pages.
----@param frame table the page
----@param text string
-function ns.AddPageTitle(frame, text)
-    local title = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightHuge")
-    title:SetPoint("TOPLEFT", 7, -22)
-    title:SetText(text)
-    local divider = frame:CreateTexture(nil, "ARTWORK")
-    divider:SetAtlas("Options_HorizontalDivider", true)
-    divider:SetPoint("TOP", 0, -50)
-end
+S.open = open
 
--- A scrolling area for a drawn page. Probe: fall back to the older template if Mainline's (the
--- thin scroll bar) isn't on this client.
-local function newScroll(parent)
-    local template = "ScrollFrameTemplate"
-    if not hasTemplate(template) then
-        template = "UIPanelScrollFrameTemplate"
-    end
-    return CreateFrame("ScrollFrame", nil, parent, template)
-end
-
-local function track(module, setting)
+-- Keeps a module's Blizzard setting, to refresh it after /fpp changes.
+function S.track(module, setting)
     local list = settings[module.name] or {}
     settings[module.name] = list
     list[#list + 1] = setting
@@ -137,6 +130,7 @@ local function change(fn)
         fn()
     end
 end
+S.change = change
 
 local function release(apply)
     local list = held
@@ -161,6 +155,7 @@ local function askDefaults()
     ns.ConfirmChoice("DEFAULTS_CHOICE", L.DEFAULTS_ASK, L.DEFAULTS_DEVELOPER,
         ns.ApplyDeveloperDefaults, L.DEFAULTS_RECOMMENDED, function() ns.ApplyPreset() end)
 end
+S.askDefaults = askDefaults
 
 -- NEW labels ----------------------------------------------------------------------------------
 -- A module added (`added`) after the version the player last saw it in gets Blizzard's NEW label
@@ -195,6 +190,7 @@ local function lastRelease(before)
     end
     return "0"
 end
+S.lastRelease = lastRelease
 
 -- A version after the one module `name` was last seen in, and not after this one (still
 -- unreleased). With Show Tags on, any version after the last release.
@@ -245,6 +241,7 @@ local function newLabel(parent, text, room)
         return shown and 6 + tag or 0
     end
 end
+S.newLabel = newLabel
 
 -- An update that keeps a NEW label just after `text` while `key` (a module's name, or one of its
 -- options) is marked, or `other` (the slider in an option's row, or the module in the list).
@@ -279,6 +276,7 @@ local function markNew()
         wipe(ns.db.seenModules)
     end
 end
+S.markNew = markNew
 
 -- Saves that the player has seen the module they were looking at, once they move on from it, and
 -- drops its labels.
@@ -321,17 +319,20 @@ end
 -- Options -------------------------------------------------------------------------------------
 -- The pieces both the Modules page and the Debug page use for a module's options.
 
--- The slider's value as its label shows it: `option.format` (a format string, such as "%d%%", or
--- a function of the value, for labels like "Never" at 0), or the number.
+-- A slider option's value as its label shows it: `option.format` (a format string, such as "%d%%",
+-- or a function of the value, for labels like "Never" at 0), or the number.
+local function sliderText(option, value)
+    if type(option.format) == "function" then
+        return option.format(value)
+    end
+    return format(option.format or "%s", value)
+end
+
 local function sliderOptions(option)
     local options = Settings.CreateSliderOptions(option.min, option.max, option.step or 1)
     if MinimalSliderWithSteppersMixin and MinimalSliderWithSteppersMixin.Label then
-        local label = option.format
         options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, function(value)
-            if type(label) == "function" then
-                return label(value)
-            end
-            return format(label or "%s", value)
+            return sliderText(option, value)
         end)
     end
     return options
@@ -349,181 +350,7 @@ local function actionFn(module, action, i)
         ns.Confirm(key, action.confirm, action.fn)
     end
 end
-
--- Debug page ----------------------------------------------------------------------------------
--- Options marked `debug = true`, as Blizzard settings rows, under the section headers they name.
-
--- Greys a row out while the module is off, so it shows nothing on it applies. Probe:
--- AddModifyPredicate is Mainline's; ManiaTip uses it on Forever.
-local function greyWhenOff(initializer, module)
-    if initializer and initializer.AddModifyPredicate then
-        initializer:AddModifyPredicate(function() return module.db.enabled end)
-    end
-end
-
--- The Blizzard setting behind one of a module's options, read and written through the module.
-local function optionSetting(category, module, option)
-    local varType = option.choices and Settings.VarType.String or Settings.VarType.Boolean
-    local setting = Settings.RegisterProxySetting(category,
-        format("ForeverPlusPlus_%s_%s", module.name, option.key), varType,
-        option.name, module.defaults[option.key],
-        function() return module.db[option.key] end,
-        function(value)
-            change(function()
-                ns.SetOption(module.name, option.key, value)
-            end)
-        end)
-    track(module, setting)
-    return setting
-end
-
--- A debug option: a checkbox, or a dropdown when it lists `choices` (debug options are only
--- these), greyed out while the module is off.
-local function addOption(category, module, option)
-    local choices = option.choices
-    local initializer
-    if option.min then
-        return -- a slider isn't one of these; it stays at its default rather than show as a checkbox
-    elseif choices then
-        if not (Settings.CreateDropdown and Settings.CreateControlTextContainer) then
-            return -- Probe: dropdowns are Mainline's; leave the option at its default without one.
-        end
-        initializer = Settings.CreateDropdown(category, optionSetting(category, module, option),
-            function()
-                local container = Settings.CreateControlTextContainer()
-                for _, choice in ipairs(choices) do
-                    container:Add(choice[1], choice[2])
-                end
-                return container:GetData()
-            end, option.description)
-    else
-        initializer = Settings.CreateCheckbox(category, optionSetting(category, module, option),
-            option.description)
-    end
-    greyWhenOff(initializer, module)
-end
-
-local function addHeader(layout, text)
-    if layout and CreateSettingsListSectionHeaderInitializer then
-        layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(text))
-    end
-end
-
--- The Debug page's sections, in order. Forever++'s own rows and modules' debug options and buttons
--- name one with `section`; a module's rows that name none of these go under its title, after them.
-local DEBUG_SECTIONS = {
-    L.DEBUG_SECTION_NEW, L.DEBUG_SECTION_DIAGNOSTICS, L.DEBUG_SECTION_TESTING, L.DEBUG_SECTION_LOGGING,
-}
-
-local function debugSection(row)
-    for _, section in ipairs(DEBUG_SECTIONS) do
-        if row.section == section then
-            return section
-        end
-    end
-end
-
--- Whether a module has debug options or buttons in `section` (nil: in none of the Debug page's).
-local function hasDebugRows(module, section)
-    for _, option in ipairs(module.options or {}) do
-        if option.debug and debugSection(option) == section then
-            return true
-        end
-    end
-    for _, action in ipairs(module.debugActions or {}) do
-        if debugSection(action) == section then
-            return true
-        end
-    end
-    return false
-end
-
--- A module's debug options in `section` (nil: in none of the Debug page's), in the order it lists
--- them.
-local function addDebugOptions(category, module, section)
-    for _, option in ipairs(module.options or {}) do
-        if option.debug and debugSection(option) == section then
-            addOption(category, module, option)
-        end
-    end
-end
-
--- Show Tags: every module and option added or changed since the last release marked NEW on the
--- Modules page, and kept marked, to check how they look. Live: the marks are made again and the
--- page redrawn.
-local function addShowTags(category)
-    local setting = Settings.RegisterProxySetting(category, "ForeverPlusPlus_ShowTags",
-        Settings.VarType.Boolean, L.SETTINGS_SHOW_TAGS, false,
-        function() return ns.db.showTags and true or false end,
-        function(value)
-            change(function()
-                ns.db.showTags = value or nil
-                markNew()
-                refreshAll()
-            end)
-        end)
-    Settings.CreateCheckbox(category, setting, L.SETTINGS_SHOW_TAGS_DESC)
-end
-
--- A module's debug buttons in `section` (`module.debugActions`, the same shape as `actions`), after
--- its options there. Greyed out while the module is off, unless the button is for that too
--- (`whileOff`).
-local function addDebugActions(layout, module, section)
-    if not (layout and CreateSettingsButtonInitializer) then
-        return -- Probe: the button row is Mainline's Settings.
-    end
-    for i, action in ipairs(module.debugActions or {}) do
-        if debugSection(action) == section then
-            local initializer = CreateSettingsButtonInitializer(action.name, action.button,
-                actionFn(module, action, i), action.description, true)
-            if not action.whileOff then
-                greyWhenOff(initializer, module)
-            end
-            layout:AddInitializer(initializer)
-        end
-    end
-end
-
--- Defaults button -----------------------------------------------------------------------------
--- Blizzard's Defaults button, at the top right of a settings list, asks "These Settings" or "All
--- Settings", and All Settings resets the whole game. On our list page (Debug) our own Defaults
--- button sits over it instead, with our popup (askDefaults). Blizzard's is faded out underneath
--- (never changed otherwise), and ours shows and hides with it, since Blizzard hides it while
--- searching. The Modules, Changelog and About pages are drawn by us and have their own.
-
-local ourPages = {} -- category -> true, for the list pages that are ours
-local defaultsButton -- ours, while it's made
-
-local function onOurPage()
-    return SettingsPanel and SettingsPanel.GetCurrentCategory
-        and ourPages[SettingsPanel:GetCurrentCategory()] or false
-end
-
-local function updateDefaults(blizzard)
-    local ours = onOurPage() and blizzard:IsShown()
-    defaultsButton:SetShown(ours and true or false)
-    blizzard:SetAlpha(ours and 0 or 1)
-end
-
--- Probe: the list header's DefaultsButton, GetSettingsList, and the Settings.CategoryChanged event
--- are Mainline's (the `forever` UI source has them); without them Blizzard's button stays as is.
-local function addDefaultsButton()
-    local list = SettingsPanel and SettingsPanel.GetSettingsList and SettingsPanel:GetSettingsList()
-    local blizzard = list and list.Header and list.Header.DefaultsButton
-    if not (blizzard and EventRegistry and EventRegistry.RegisterCallback) then
-        return
-    end
-    defaultsButton = CreateFrame("Button", nil, list.Header, "UIPanelButtonTemplate")
-    defaultsButton:SetAllPoints(blizzard)
-    defaultsButton:SetFrameLevel(blizzard:GetFrameLevel() + 5)
-    defaultsButton:SetText(SETTINGS_DEFAULTS or L.HOME_DEFAULTS)
-    defaultsButton:SetScript("OnClick", askDefaults)
-    defaultsButton:Hide()
-    blizzard:HookScript("OnShow", function() updateDefaults(blizzard) end)
-    blizzard:HookScript("OnHide", function() updateDefaults(blizzard) end)
-    EventRegistry:RegisterCallback("Settings.CategoryChanged", function() updateDefaults(blizzard) end,
-        defaultsButton)
-end
+S.actionFn = actionFn
 
 -- Module categories ---------------------------------------------------------------------------
 
@@ -551,6 +378,7 @@ end
 local function categoryOf(module)
     return CATEGORY_NAMES[module.category] and module.category or "other"
 end
+S.CATEGORY_NAMES, S.CATEGORY_RANKS, S.categoryOf = CATEGORY_NAMES, CATEGORY_RANKS, categoryOf
 
 -- Modules page --------------------------------------------------------------------------------
 -- A page we draw ourselves, built the first time it's shown: under the title, a search box and
@@ -562,8 +390,7 @@ end
 -- ns.RefreshSetting, which puts that module back to what's saved wherever it shows, so /fpp and
 -- the page agree.
 
-local LIST_LEFT, LIST_WIDTH, LIST_ROW = 7, 186, 20 -- the module list and its rows (and the
-                                                    -- Changelog page's)
+local LIST_WIDTH = 186 -- the module list
 local ROW_HEIGHT = 26 -- an option's row, as in Blizzard's lists
 local INDENT = 15 -- an option under another (`requires`)
 local CONTROL_LEFT = 150 -- where an option's control starts, after its name
@@ -619,80 +446,13 @@ local function bind(name, fn)
     fn()
 end
 
-local function showTooltip(owner, title, text)
-    GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
-    GameTooltip:SetText(title, 1, 1, 1)
-    if text and text ~= "" then
-        GameTooltip:AddLine(text, 1, 0.82, 0, true) -- gold, like Blizzard's settings tooltips
-    end
-    GameTooltip:Show()
-end
-
--- The tooltip a row shows over itself and its controls, as Blizzard's settings rows do.
-local function addTooltip(row, title, text, ...)
-    if not text or text == "" then
-        return
-    end
-    local function enter()
-        showTooltip(row, title, text)
-    end
-    local function leave()
-        if GameTooltip:GetOwner() == row then
-            GameTooltip:Hide()
-        end
-    end
-    for _, frame in ipairs({ row, ... }) do
-        frame:HookScript("OnEnter", enter)
-        frame:HookScript("OnLeave", leave)
-    end
-end
-
--- A checkbox like the Settings panel's (its minimal art), calling `onClick(checked)`. Probe: the
--- art is Mainline's; without it, the older gold check.
-local function newCheckbox(parent, size, onClick)
-    local box
-    if hasAtlas("checkbox-minimal") then
-        box = CreateFrame("CheckButton", nil, parent)
-        box:SetSize(size, size)
-        box:SetNormalAtlas("checkbox-minimal")
-        box:SetPushedAtlas("checkbox-minimal")
-        local check = box:CreateTexture(nil, "ARTWORK")
-        check:SetAtlas("checkmark-minimal")
-        check:SetAllPoints()
-        box:SetCheckedTexture(check)
-        local grey = box:CreateTexture(nil, "ARTWORK")
-        grey:SetAtlas("checkmark-minimal-disabled")
-        grey:SetAllPoints()
-        box:SetDisabledCheckedTexture(grey)
-    else
-        box = CreateFrame("CheckButton", nil, parent, "UICheckButtonTemplate")
-        box:SetSize(size, size)
-    end
-    box:SetScript("OnClick", function(self)
-        local checked = self:GetChecked() and true or false
-        if PlaySound and SOUNDKIT then
-            PlaySound(checked and SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON
-                or SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF)
-        end
-        onClick(checked)
-    end)
-    return box
-end
-
-local function newButton(parent, text, width, fn)
-    local button = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
-    button:SetSize(width, 22)
-    button:SetText(text)
-    button:SetScript("OnClick", function() fn() end)
-    return button
-end
-
 -- Our Defaults button (askDefaults) at the top right of a page we draw: Modules, Changelog, About.
 local function addPageDefaults(frame)
     local button = newButton(frame, SETTINGS_DEFAULTS or L.HOME_DEFAULTS, 96, askDefaults)
     button:SetPoint("TOPRIGHT", -10, -18)
     return button
 end
+S.addPageDefaults = addPageDefaults
 
 local function setEnabled(name, on)
     ns.SetEnabled(name, on)
@@ -786,134 +546,6 @@ local function optionText(option)
     return strlower(format("%s\n%s", option.name or "", option.description or ""))
 end
 
--- Stacks ----------------------------------------------------------------------------------------
--- A stack is a frame whose entries ({ frame, shown, gap }) sit one under the other, `top` down
--- from its top, each only while its `shown()` is true. The module list is one, and so are the
--- module's rows on the right.
-
-local function newStack(parent, width, gap)
-    local stack = CreateFrame("Frame", nil, parent)
-    stack:SetWidth(width)
-    stack.entries, stack.gap, stack.top, stack.bottom = {}, gap, 0, 0
-    return stack
-end
-
-local function addEntry(stack, frame, shown, gap)
-    stack.entries[#stack.entries + 1] = { frame = frame, shown = shown, gap = gap }
-end
-
-local function layoutStack(stack)
-    local y, any = -stack.top, false
-    for _, entry in ipairs(stack.entries) do
-        local shown = not entry.shown or entry.shown() and true or false
-        entry.frame:SetShown(shown)
-        if shown then
-            if any then
-                y = y - (entry.gap or stack.gap)
-            end
-            entry.frame:ClearAllPoints()
-            entry.frame:SetPoint("TOPLEFT", 0, y)
-            y = y - entry.frame:GetHeight()
-            any = true
-        end
-    end
-    stack:SetHeight(max(-y + stack.bottom, 1))
-end
-
--- Split pages ------------------------------------------------------------------------------------
--- The Modules and Changelog pages (and Console Variables, through ns.Split): under the title, a
--- narrow list on the left with rows like the Settings sidebar's, a faint gold line, and a pane on
--- the right for what's selected, each side scrolling on its own.
-
--- A list `listWidth` wide and a pane right of it and its scroll bar, as `split.listScroll` and
--- `split.list` (a stack), and `split.pane` and `split.paneContent` (`split.paneWidth` wide). With
--- `scrollBox`, the pane is a WowScrollBoxList instead, with `split.scrollBar` and no paneContent,
--- for a page with too many rows to make a frame for each.
-local function newSplit(frame, listWidth, scrollBox)
-    local width = frame:GetWidth()
-    width = width > 0 and width or 615
-    local paneLeft = LIST_LEFT + listWidth + 41
-    local split = {}
-
-    local list = newScroll(frame)
-    list:SetPoint("TOPLEFT", LIST_LEFT, -60)
-    list:SetPoint("BOTTOMLEFT", LIST_LEFT, 8)
-    list:SetWidth(listWidth)
-    split.listScroll = list
-    split.list = newStack(list, listWidth, 2)
-    split.list.bottom = 8
-    list:SetScrollChild(split.list)
-
-    local line = frame:CreateTexture(nil, "ARTWORK")
-    line:SetColorTexture(1, 0.82, 0, 0.25)
-    line:SetWidth(1)
-    line:SetPoint("TOPLEFT", paneLeft - 12, -66)
-    line:SetPoint("BOTTOMLEFT", paneLeft - 12, 14)
-
-    local pane
-    if scrollBox then
-        pane = CreateFrame("Frame", nil, frame, "WowScrollBoxList")
-        split.scrollBar = CreateFrame("EventFrame", nil, frame, "MinimalScrollBar")
-        split.scrollBar:SetPoint("TOPLEFT", pane, "TOPRIGHT", 8, 0)
-        split.scrollBar:SetPoint("BOTTOMLEFT", pane, "BOTTOMRIGHT", 8, 0)
-    else
-        pane = newScroll(frame)
-    end
-    pane:SetPoint("TOPLEFT", paneLeft, -60)
-    pane:SetPoint("BOTTOMRIGHT", -32, 8)
-    split.pane, split.paneWidth = pane, width - paneLeft - 32
-    if not scrollBox then
-        split.paneContent = CreateFrame("Frame", nil, pane)
-        split.paneContent:SetWidth(split.paneWidth)
-        pane:SetScrollChild(split.paneContent)
-    end
-    return split
-end
-
--- Blizzard's sidebar highlight while a list row is selected or under the mouse.
-local function paint(row)
-    local atlas
-    if row.isSelected() then
-        atlas = "Options_List_Active"
-    elseif row.over then
-        atlas = "Options_List_Hover"
-    end
-    if atlas and hasAtlas(atlas) then
-        row.highlight:SetAtlas(atlas)
-        row.highlight:Show()
-    else
-        row.highlight:Hide()
-    end
-end
-
-local function hover(row, over)
-    row.over = over
-    paint(row)
-end
-
--- A row of a split page's list, lit while `isSelected()` is true and under the mouse.
-local function newListButton(list, isSelected)
-    local row = CreateFrame("Button", nil, list)
-    row:SetSize(list:GetWidth(), LIST_ROW)
-    row.isSelected = isSelected
-    row.highlight = row:CreateTexture(nil, "BACKGROUND")
-    row.highlight:SetAllPoints()
-    row:SetScript("OnEnter", function() hover(row, true) end)
-    row:SetScript("OnLeave", function() hover(row, false) end)
-    return row
-end
-
--- A split page's list row in grey for when it lists nothing, with its `text` set by the page.
-local function newEmptyRow(list, width)
-    local empty = CreateFrame("Frame", nil, list)
-    empty:SetSize(width, 40)
-    empty.text = empty:CreateFontString(nil, "OVERLAY", "GameFontDisable")
-    empty.text:SetPoint("TOPLEFT", 2, -4)
-    empty.text:SetWidth(width - 4)
-    empty.text:SetJustifyH("LEFT")
-    return empty
-end
-
 -- The selected module's rows -------------------------------------------------------------------
 -- A view is a stack of the module's rows: a name on the left and its control after. Its
 -- `updates` put its controls back to what's saved.
@@ -953,9 +585,7 @@ local function sliderWidth(row, option, room, left)
     local measure = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     local widest = 0
     for _, value in ipairs({ option.min, option.max }) do
-        local text = type(option.format) == "function" and option.format(value)
-            or format(option.format or "%s", value)
-        measure:SetText(text)
+        measure:SetText(sliderText(option, value))
         widest = max(widest, ns.Text.Width(measure))
     end
     measure:Hide()
@@ -969,8 +599,7 @@ local RESET_SIZE = 20
 local function defaultText(module, option)
     local value = module.defaults[option.key]
     if option.min then
-        return type(option.format) == "function" and option.format(value)
-            or format(option.format or "%s", value)
+        return sliderText(option, value)
     elseif option.choices then
         for _, choice in ipairs(option.choices) do
             if choice[1] == value then
@@ -1037,11 +666,7 @@ local function addResetButton(view, row, module, option, pair, on)
         end
         showTooltip(self, L.SETTINGS_RESET, format(L.SETTINGS_RESET_TO, text))
     end)
-    button:SetScript("OnLeave", function(self)
-        if GameTooltip:GetOwner() == self then
-            GameTooltip:Hide()
-        end
-    end)
+    button:SetScript("OnLeave", Kit.HideTooltip)
     view.updates[#view.updates + 1] = function()
         button:SetShown(changed())
         button:SetEnabled(on())
@@ -1281,7 +906,7 @@ local function buildView(name)
                 showTooltip(hit, title, module.description)
             end
         end)
-        hit:SetScript("OnLeave", function() GameTooltip:Hide() end)
+        hit:SetScript("OnLeave", Kit.HideTooltip)
     end
     view.top = 4 + heading:GetStringHeight() + 4 + group:GetStringHeight() + 10 + height + 6
     view.bottom = 12
@@ -1428,45 +1053,6 @@ function refreshAll()
     relayout()
 end
 
--- A search box at the top of a page we draw, left of `anchor` (its Defaults button) or at the top
--- right without one, with `instructions` in gray while it's empty. It calls `onChange(text)` with
--- the text, trimmed, as it's typed. Blizzard's own search, at the top left of the panel, finds
--- settings across every addon, not what our pages list. Probe: SearchBoxTemplate is Mainline's.
-local function addSearchBox(frame, anchor, instructions, onChange)
-    if not hasTemplate("SearchBoxTemplate") then
-        return
-    end
-    local box = CreateFrame("EditBox", nil, frame, "SearchBoxTemplate")
-    box:SetSize(200, 20)
-    if anchor then
-        box:SetPoint("RIGHT", anchor, "LEFT", -12, 0)
-    else
-        box:SetPoint("TOPRIGHT", -12, -19) -- where the Defaults button would be
-    end
-    box:SetAutoFocus(false)
-    if box.Instructions then
-        box.Instructions:SetText(instructions)
-    end
-    -- After the template's own OnTextChanged, which shows the clear button and the gray text.
-    box:HookScript("OnTextChanged", function(self)
-        onChange((self:GetText():match("^%s*(.-)%s*$")))
-    end)
-    return box
-end
-
--- For a tool page (`BuildPage`) to look like the split pages: `New(frame, listWidth, scrollBox)`,
--- `ListButton(list, isSelected)` and `Paint(row)` after the selection changes, `AddEntry(stack,
--- frame, shown, gap)` and `Layout(stack)` for the list, and `AddSearchBox(frame, nil,
--- instructions, onChange)` for the search box at the top right (nil without the template).
-ns.Split = {
-    New = newSplit,
-    ListButton = newListButton,
-    Paint = paint,
-    AddEntry = addEntry,
-    Layout = layoutStack,
-    AddSearchBox = addSearchBox,
-}
-
 -- The Modules page's search: the list narrows to the modules whose title or description has the
 -- text, or an option's name or description, and those options are highlighted on the right.
 local function searchModules(text)
@@ -1482,16 +1068,10 @@ local function addNewOnly(frame, anchor)
     if not newOrder then
         return
     end
-    local box = newCheckbox(frame, 22, function(checked)
+    local box = Kit.AddLabeledCheck(frame, anchor, L.SETTINGS_NEW_ONLY, function(checked)
         newOnly = checked or nil
         relayout()
     end)
-    local text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    text:SetText(L.SETTINGS_NEW_ONLY)
-    text:SetPoint("RIGHT", anchor, "LEFT", -12, 0)
-    box:SetPoint("RIGHT", text, "LEFT", -2, 0)
-    -- Clicking the word clicks the box, like Blizzard's checkboxes with a label.
-    box:SetHitRectInsets(0, -(ns.Text.Width(text) + 2), 0, 0)
     SettingsPanel:HookScript("OnShow", function()
         box:SetChecked(false)
         if newOnly then
@@ -1503,7 +1083,7 @@ local function addNewOnly(frame, anchor)
 end
 
 local function buildModules(frame)
-    ns.AddPageTitle(frame, L.MODULES)
+    Kit.AddPageTitle(frame, L.MODULES)
     page = newSplit(frame, LIST_WIDTH)
     page.rows, page.views = {}, {}
 
@@ -1543,509 +1123,27 @@ local function buildModules(frame)
     frame:HookScript("OnShow", refreshAll)
 end
 
--- About page ----------------------------------------------------------------------------------
--- What the addon is, how many modules are on, links, and the /fpp commands, with the Defaults
--- button at the top right like the Modules page. Built the first time it's shown; the module
--- count updates each time.
-
-local WEBSITE = "https://github.com/xIGBClutchIx/ForeverPlusPlus"
-local ISSUES = WEBSITE .. "/issues"
-
-local metadata = ns.Metadata
-
--- A gold label at the left of a row, for a value beside it.
-local function addLabel(frame, y, text)
-    local label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    label:SetPoint("TOPLEFT", 16, y)
-    label:SetWidth(110)
-    label:SetJustifyH("LEFT")
-    label:SetText(text)
-    return label
+-- Redraws the Modules page, for Show Tags on the Debug page.
+function S.refreshAll()
+    refreshAll()
 end
 
--- A link can't be clicked in the game, so it sits in a read-only box, selected on click, to copy.
-local function addLink(frame, y, label, url)
-    local left = addLabel(frame, y, label)
-    local box = CreateFrame("EditBox", nil, frame, "InputBoxTemplate")
-    box:SetSize(360, 20)
-    box:SetPoint("LEFT", left, "RIGHT", 14, 0)
-    box:SetAutoFocus(false)
-    box:SetText(url)
-    box:SetCursorPosition(0)
-    box:SetScript("OnEditFocusGained", function(self) self:HighlightText() end)
-    box:SetScript("OnEditFocusLost", function(self) self:HighlightText(0, 0) end)
-    box:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
-    -- Typing can't change it.
-    box:SetScript("OnTextChanged", function(self, user)
-        if user then
-            self:SetText(url)
-            self:HighlightText()
-        end
-    end)
-    box:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-        GameTooltip:SetText(L.HOME_COPY, nil, nil, nil, nil, true)
-        GameTooltip:Show()
-    end)
-    box:SetScript("OnLeave", function() GameTooltip:Hide() end)
-end
-
-local function addHeading(frame, y, text)
-    local heading = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
-    heading:SetPoint("TOPLEFT", 16, y)
-    heading:SetText(text)
-end
-
--- How many modules the player can turn on, and how many are on.
-local function countModules()
-    local on, total = 0, 0
-    for _, name in ipairs(ns.order) do
-        local module = ns.modules[name]
-        if not (module.unavailable or module.alwaysOn) then
-            total = total + 1
-            if module.db.enabled then
-                on = on + 1
-            end
+-- Puts the version last seen back to the release before this one, so the Modules page marks what a
+-- player updating from it would see, and opens it the way it would open for them: on the first
+-- module with a marked option. A module's marks go once it's been clicked, as they do after an
+-- update. Once this version is released it's the last release itself, so it can't be the one.
+function S.resetSeen()
+    ns.db.seenVersion = lastRelease(ns.version)
+    wipe(ns.db.seenModules)
+    markNew()
+    if page then
+        selected = firstNew()
+        refreshAll()
+        if selected then
+            selectModule(selected)
         end
     end
-    return on, total
-end
-
-local function buildAbout(frame)
-    ns.AddPageTitle(frame, L.ABOUT)
-    -- The NEW tag on the Minimap Button can go. On every show, since Reset Welcome sets it again.
-    ns.SetWelcome(false)
-    frame:HookScript("OnShow", function() ns.SetWelcome(false) end)
-    addPageDefaults(frame)
-
-    local icon = frame:CreateTexture(nil, "ARTWORK")
-    icon:SetSize(64, 64)
-    icon:SetPoint("TOPLEFT", 16, -64)
-    icon:SetTexture(ns.icon)
-
-    local welcome = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    welcome:SetPoint("TOPLEFT", icon, "TOPRIGHT", 12, -4)
-    welcome:SetText(format(L.HOME_WELCOME, ns.title))
-
-    local tagline = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    tagline:SetPoint("TOPLEFT", welcome, "BOTTOMLEFT", 0, -6)
-    tagline:SetText(metadata("Notes") ~= "" and metadata("Notes") or L.HOME_TAGLINE)
-
-    local version = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-    version:SetPoint("TOPLEFT", tagline, "BOTTOMLEFT", 0, -6)
-    version:SetText(format(L.HOME_VERSION, ns.version, metadata("Author")))
-
-    -- Under the version, since the command list below grows with every module.
-    local gameVersion, build, _, interface = GetBuildInfo()
-    local game = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-    game:SetPoint("TOPLEFT", version, "BOTTOMLEFT", 0, -2)
-    game:SetText(format(L.HOME_GAME_BUILD, gameVersion, build, interface))
-
-    local y = -144
-    local intro = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    intro:SetPoint("TOPLEFT", 16, y)
-    intro:SetWidth(560)
-    intro:SetJustifyH("LEFT")
-    intro:SetText(L.HOME_INTRO)
-    y = y - intro:GetStringHeight() - 14
-
-    local status = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    status:SetPoint("TOPLEFT", 16, y)
-    local function update()
-        status:SetText(format(L.HOME_MODULES_ON, countModules()))
-    end
-    update()
-    frame:HookScript("OnShow", update) -- after /fpp or the Modules page changed some
-
-    y = y - 52
-    addHeading(frame, y, L.HOME_LINKS)
-    y = y - 26
-    addLink(frame, y, L.HOME_WEBSITE, WEBSITE)
-    y = y - 24
-    addLink(frame, y, L.HOME_ISSUES, ISSUES)
-    y = y - 22
-    local requests = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    requests:SetPoint("TOPLEFT", 16, y)
-    requests:SetText(L.HOME_REQUESTS)
-
-    y = y - 30
-    addHeading(frame, y, L.HOME_COMMANDS)
-    y = y - 24
-    for _, line in ipairs(ns.Commands()) do
-        local command = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-        command:SetPoint("TOPLEFT", 16, y)
-        command:SetText(line[1])
-        local description = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-        description:SetPoint("TOPLEFT", 250, y)
-        description:SetText(line[2])
-        y = y - 16
-    end
-end
-
--- Changelog page ------------------------------------------------------------------------------
--- The release notes from Changelog.lua as a split page, like the Modules page: the releases on the
--- left (Unreleased first, then newest first) with their dates, and the selected one's notes on the
--- right. A release newer than the version the player last saw on the Modules page gets the NEW
--- label. Built the first time it's shown, on the newest.
-
-local CHANGELOG_LIST_WIDTH = 140 -- the release list, narrower than the module list
-local RULE_WIDTH = 260 -- the gold line under a section's heading
-
--- Whether a release is newer than the version the player last saw. Unreleased notes always are.
-local function isNewRelease(release)
-    return not release.date or ns.Text.NewerVersion(release.version, ns.db.seenVersion) and true
-        or false
-end
-
--- An item of noteGroups as it shows: its text, after its name in gold when it has one.
-local function itemText(item)
-    if item[2] then
-        return format("|cffffd100%s|r: %s", item[2], item[3]) -- gold, like GameFontNormal
-    end
-    return item[3]
-end
-
--- Whether the search (lowercased, nil for none) finds an entry, by its module's name or its text.
-local function entryMatches(entry, search)
-    if not search then
-        return true
-    end
-    local text = type(entry) == "table" and format("%s: %s", entry[1], entry[2]) or entry
-    return strlower(text):find(search, 1, true) ~= nil
-end
-
--- How many of a release's entries the search finds (all of them without one).
-local function countMatches(release, search)
-    local count = 0
-    for _, section in ipairs(release.sections) do
-        for _, entry in ipairs(section[2]) do
-            if entryMatches(entry, search) then
-                count = count + 1
-            end
-        end
-    end
-    return count
-end
-
--- A release's entries in the groups its notes show, `{ heading, items }`, where an item is
--- `{ entry, name, text }`: the entry from Changelog.lua and what shows of it, `name` in gold
--- before `text`. As written, the groups are its sections and the names its modules'. With
--- `byModule`, the groups are its modules', and the names the sections': first those of no one
--- module (General for entries without a name, then Settings), marked `apart`, then the modules'
--- by their `category` in the Modules page's order, and alphabetical within it. A name that's no
--- module's title now (a module since renamed or removed) goes under Other.
-local function noteGroups(release, byModule)
-    local groups, byName = {}, {}
-    local apart = { [L.CHANGELOG_GENERAL] = 1, [L.CHANGELOG_SETTINGS] = 2 }
-    local categories -- module title -> its category, made only with byModule
-    if byModule then
-        categories = {}
-        for _, module in pairs(ns.modules) do
-            if module.title then
-                categories[module.title] = categoryOf(module)
-            end
-        end
-    end
-    for _, section in ipairs(release.sections) do
-        local items = {}
-        for _, entry in ipairs(section[2]) do
-            local named = type(entry) == "table"
-            if byModule then
-                local heading = named and entry[1] or L.CHANGELOG_GENERAL
-                local group = byName[heading]
-                if not group then
-                    group = { heading, {}, apart = apart[heading] }
-                    if not group.apart then
-                        group.category = categories[heading] or "other"
-                    end
-                    byName[heading] = group
-                    groups[#groups + 1] = group
-                end
-                group[2][#group[2] + 1] = { entry, section[1], named and entry[2] or entry }
-            else
-                items[#items + 1] = { entry, named and entry[1], named and entry[2] or entry }
-            end
-        end
-        if not byModule then
-            groups[#groups + 1] = { section[1], items }
-        end
-    end
-    if byModule then
-        sort(groups, function(a, b)
-            local x, y = a.apart or 3, b.apart or 3 -- the modules' after General and Settings
-            if x ~= y then
-                return x < y
-            end
-            if a.category ~= b.category then
-                return CATEGORY_RANKS[a.category] < CATEGORY_RANKS[b.category]
-            end
-            return strlower(a[1]) < strlower(b[1])
-        end)
-    end
-    return groups
-end
-
--- "N changes" for a release's notes.
-local function countText(count)
-    return count == 1 and L.CHANGELOG_ONE_CHANGE or format(L.CHANGELOG_CHANGES, count)
-end
-
--- Gold fading out to the right. Probe: SetGradient with colors is Mainline's; without it, a faint
--- gold line like the one between the list and the pane.
-local function fadeGold(texture)
-    texture:SetColorTexture(1, 1, 1, 1)
-    if not (CreateColor and texture.SetGradient and pcall(texture.SetGradient, texture,
-        "HORIZONTAL", CreateColor(1, 0.82, 0, 0.45), CreateColor(1, 0.82, 0, 0))) then
-        texture:SetColorTexture(1, 0.82, 0, 0.25)
-    end
-end
-
--- A release's row in the list: its version, the NEW label while it's new, and its date (MM-DD) in
--- gray at the right. Returns the row and an update for its label.
-local function newReleaseRow(list, release, isSelected)
-    local row = newListButton(list, isSelected)
-    local date = row:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-    date:SetPoint("RIGHT", -6, 0)
-    date:SetText(release.date and release.date:sub(6) or "")
-    local text = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    text:SetPoint("LEFT", 8, 0)
-    text:SetJustifyH("LEFT")
-    text:SetWordWrap(false)
-    text:SetText(release.version)
-    local mark = newLabel(row, text, row:GetWidth() - 18 - ns.Text.Width(date))
-    return row, function() mark(isNewRelease(release)) end
-end
-
--- A release's notes, a stack: its title, the NEW label while it's new, and how many changes the
--- search finds, then each section's heading in gold over a fading gold line, and its entries after
--- a dash, their wrapped lines lined up after it and a module's name in gold. Only the entries the
--- search finds show, under their sections' headings. With `byModule`, the headings are the
--- modules' and the names in gold the sections' (noteGroups), with each category's name and a
--- gray line above its modules. `view.search(text)` lays it out for a search (lowercased, nil for
--- none), and `view.update` keeps its NEW label.
-local function buildNotes(content, width, release, byModule)
-    local view = newStack(content, width, 0)
-    view:SetPoint("TOPLEFT")
-    view.top, view.bottom = 4, 12
-    local search
-
-    local header = CreateFrame("Frame", nil, view)
-    header:SetWidth(width)
-    local title = header:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
-    title:SetPoint("TOPLEFT", 4, 0)
-    title:SetJustifyH("LEFT")
-    title:SetWordWrap(false)
-    -- Unreleased notes have no date.
-    title:SetText(release.date and format(L.CHANGELOG_RELEASE, release.version, release.date)
-        or release.version)
-    header:SetHeight(title:GetStringHeight())
-    addEntry(view, header)
-    local count = header:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-    count:SetText(countText(countMatches(release)))
-    local mark = newLabel(header, title, width - 18 - ns.Text.Width(count))
-    function view.update()
-        local after = mark(isNewRelease(release))
-        local x = min(ns.Text.Width(title), title:GetWidth()) + after + 10
-        count:ClearAllPoints()
-        count:SetPoint("LEFT", title, "LEFT", x, 0)
-    end
-
-    -- Whether the search finds one of a group's items.
-    local function anyMatch(items)
-        for _, item in ipairs(items) do
-            if entryMatches(item[1], search) then
-                return true
-            end
-        end
-        return false
-    end
-
-    local groups = noteGroups(release, byModule)
-    local previous
-    for _, group in ipairs(groups) do
-        local items = group[2]
-        -- Before each category's modules, its name in gray and a gray line after it to the right
-        -- edge, while the search finds something in one of them.
-        local category = group.category
-        if category and category ~= previous then
-            local separator = CreateFrame("Frame", nil, view)
-            local label = separator:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-            label:SetPoint("LEFT", 4, 0)
-            label:SetText(CATEGORY_NAMES[category])
-            local line = separator:CreateTexture(nil, "ARTWORK")
-            line:SetPoint("LEFT", label, "RIGHT", 6, 0)
-            line:SetPoint("RIGHT", -4, 0)
-            line:SetHeight(1)
-            line:SetColorTexture(0.5, 0.5, 0.5, 0.5)
-            separator:SetSize(width, label:GetStringHeight())
-            addEntry(view, separator, function()
-                for _, other in ipairs(groups) do
-                    if other.category == category and anyMatch(other[2]) then
-                        return true
-                    end
-                end
-                return false
-            end, 18)
-        end
-        previous = category
-        local top = CreateFrame("Frame", nil, view)
-        top:SetWidth(width)
-        local heading = top:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-        heading:SetPoint("TOPLEFT", 4, 0)
-        heading:SetText(group[1])
-        local rule = top:CreateTexture(nil, "ARTWORK")
-        rule:SetPoint("TOPLEFT", 4, -heading:GetStringHeight() - 6)
-        rule:SetSize(min(RULE_WIDTH, width - 8), 1)
-        fadeGold(rule)
-        top:SetHeight(heading:GetStringHeight() + 6 + 1 + 5)
-        addEntry(view, top, function() return anyMatch(items) end, 18)
-        for _, item in ipairs(items) do
-            local row = CreateFrame("Frame", nil, view)
-            row:SetWidth(width)
-            local dash = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-            dash:SetPoint("TOPLEFT", 12, 0)
-            dash:SetText("-")
-            local line = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-            line:SetPoint("TOPLEFT", 24, 0)
-            line:SetWidth(width - 28)
-            line:SetJustifyH("LEFT")
-            line:SetText(itemText(item))
-            row:SetHeight(line:GetStringHeight())
-            addEntry(view, row, function() return entryMatches(item[1], search) end, 8)
-        end
-    end
-
-    function view.search(text)
-        search = text
-        count:SetText(countText(countMatches(release, search)))
-        layoutStack(view)
-    end
-    return view
-end
-
-local function buildChangelog(frame)
-    ns.AddPageTitle(frame, L.CHANGELOG)
-    local split = newSplit(frame, CHANGELOG_LIST_WIDTH)
-    local releases = ns.changelog or {}
-    local rows, updates = {}, {}
-    local views = { [false] = {}, [true] = {} } -- by byModule, then release
-    local shown -- the release on the right
-    local search -- the search, lowercased, or nil while the box is empty
-
-    local function matches(i)
-        return countMatches(releases[i], search) > 0
-    end
-
-    -- Shows release `i` on the right (nil for none), laid out for the search and grouped as By
-    -- Module says.
-    local function show(i)
-        shown = i
-        local byModule = ns.db.changelogByModule ~= false
-        for _, row in ipairs(rows) do
-            paint(row)
-        end
-        for mode, list in pairs(views) do
-            for other, view in pairs(list) do
-                view:SetShown(mode == byModule and other == i)
-            end
-        end
-        if not i then
-            split.paneContent:SetHeight(1)
-            return
-        end
-        local view = views[byModule][i]
-        if not view then
-            view = buildNotes(split.paneContent, split.paneWidth, releases[i], byModule)
-            views[byModule][i] = view
-            updates[#updates + 1] = view.update
-            view.update()
-        end
-        view.search(search)
-        split.paneContent:SetHeight(view:GetHeight())
-        split.pane:SetVerticalScroll(0)
-    end
-
-    -- "No changes match" while the search finds nothing.
-    local empty = newEmptyRow(split.list, CHANGELOG_LIST_WIDTH)
-    addEntry(split.list, empty, function()
-        for i in ipairs(releases) do
-            if matches(i) then
-                return false
-            end
-        end
-        return true
-    end)
-
-    for i, release in ipairs(releases) do
-        local row, update = newReleaseRow(split.list, release, function() return shown == i end)
-        row:SetScript("OnClick", function()
-            if shown ~= i then
-                show(i)
-            end
-        end)
-        rows[i] = row
-        updates[#updates + 1] = update
-        addEntry(split.list, row, function() return matches(i) end)
-    end
-    layoutStack(split.list)
-
-    -- Defaults and the search box at the top, as on the Modules page. The list keeps the releases
-    -- the search finds something in, and stays on the one shown while it's one of them, or else
-    -- shows the first.
-    local defaults = addPageDefaults(frame)
-    local searchBox = addSearchBox(frame, defaults, L.CHANGELOG_SEARCH, function(text)
-        search = text ~= "" and strlower(text) or nil
-        empty.text:SetText(format(L.CHANGELOG_NO_MATCH, text))
-        layoutStack(split.list)
-        if shown and matches(shown) then
-            show(shown)
-            return
-        end
-        local first
-        for i in ipairs(releases) do
-            if matches(i) then
-                first = i
-                break
-            end
-        end
-        show(first)
-    end)
-
-    -- A By Module checkbox left of the search box, like the Modules page's New, that groups the
-    -- notes on the right under their modules instead of Added, Changed, and Fixed. Saved for the
-    -- account, on by default: ns.db.changelogByModule is false once it's unchecked, nil while on.
-    local byModule = newCheckbox(frame, 22, function(checked)
-        if checked then
-            ns.db.changelogByModule = nil
-        else
-            ns.db.changelogByModule = false
-        end
-        show(shown)
-    end)
-    byModule:SetChecked(ns.db.changelogByModule ~= false)
-    local byModuleText = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    byModuleText:SetText(L.CHANGELOG_BY_MODULE)
-    byModuleText:SetPoint("RIGHT", searchBox or defaults, "LEFT", -12, 0)
-    byModule:SetPoint("RIGHT", byModuleText, "LEFT", -2, 0)
-    -- Clicking the word clicks the box, like Blizzard's checkboxes with a label.
-    byModule:SetHitRectInsets(0, -(ns.Text.Width(byModuleText) + 2), 0, 0)
-
-    -- The NEW labels follow the version last seen, which the Modules page moves on.
-    local function refresh()
-        for _, update in ipairs(updates) do
-            update()
-        end
-    end
-    refresh()
-    if releases[1] then
-        show(1)
-    end
-    -- Again a frame later: on the first visit the release with a NEW label stayed blank until the
-    -- page was shown again, as if its text wasn't measured yet while the page was being built.
-    if C_Timer then
-        C_Timer.After(0, refresh)
-    end
-    frame:HookScript("OnShow", refresh)
+    open(modulesCategory)
 end
 
 -- Module names in the order their titles sort in the player's language, whatever order the TOC
@@ -2063,132 +1161,7 @@ local function byTitle()
     sort(names, function(a, b) return key(a) < key(b) end)
     return names
 end
-
--- Debug page tools ----------------------------------------------------------------------------
--- Forever++'s own rows on the Debug page, and the page itself.
-
--- Puts the version last seen back to the release before this one, so the Modules page marks what a
--- player updating from it would see, and opens it the way it would open for them: on the first
--- module with a marked option. A module's marks go once it's been clicked, as they do after an
--- update. Once this version is released it's the last release itself, so it can't be the one.
-local function resetSeen()
-    ns.db.seenVersion = lastRelease(ns.version)
-    wipe(ns.db.seenModules)
-    markNew()
-    if page then
-        selected = firstNew()
-        refreshAll()
-        if selected then
-            selectModule(selected)
-        end
-    end
-    open(modulesCategory)
-end
-
--- One line for a bug report: the addon and client, and the modules on.
-local function debugInfo()
-    local gameVersion, build, _, interface = GetBuildInfo()
-    local on = ns.ModulesOn()
-    return format(L.DEBUG_INFO_LINE, ns.version, tostring(gameVersion), tostring(build),
-        tostring(interface), GetLocale(), #on, concat(on, ", "))
-end
-
--- How many hooks a module has made (`module:Hook`, `HookScript`, `TooltipPostCall`). They stay but
--- do nothing while the module is off.
-local function hookCount(module)
-    local count = 0
-    for _, byMethod in pairs(module.hooked or {}) do
-        for _, byFn in pairs(byMethod) do
-            for _ in pairs(byFn) do
-                count = count + 1
-            end
-        end
-    end
-    return count
-end
-
--- Prints each module's events (`module:On`) and hooks, to check a module that's off listens to
--- nothing. A module that's off but still has events is printed in red.
-local function printEvents()
-    local leaks = 0
-    for _, name in ipairs(byTitle()) do
-        local module = ns.modules[name]
-        local list = {}
-        for _, entry in ipairs(module.events or {}) do
-            list[#list + 1] = entry[1]
-        end
-        local hooks = hookCount(module)
-        if #list > 0 or (module.enabled and hooks > 0) then
-            local line = format(L.DEBUG_EVENTS_LINE, module.title or name,
-                ns.StateText(module.enabled), #list, #list > 0 and concat(list, ", ") or "-", hooks)
-            if not module.enabled and #list > 0 then
-                leaks = leaks + 1
-                line = "|cffdd4444" .. line .. "|r"
-            end
-            ns.Print(line)
-        end
-    end
-    ns.Print(leaks > 0 and format(L.DEBUG_EVENTS_LEAKS, leaks) or L.DEBUG_EVENTS_CLEAN)
-end
-
-local DEBUG_TOOLS = {
-    { name = L.DEBUG_RESET_SEEN, button = L.DEBUG_RESET_SEEN_BUTTON,
-        description = L.DEBUG_RESET_SEEN_DESC, fn = resetSeen, section = L.DEBUG_SECTION_NEW },
-    { name = L.DEBUG_RESET_WELCOME, button = L.DEBUG_RESET_WELCOME_BUTTON,
-        description = L.DEBUG_RESET_WELCOME_DESC, section = L.DEBUG_SECTION_NEW,
-        fn = function()
-            ns.SetWelcome(true)
-            ns.Print(L.DEBUG_RESET_WELCOME_DONE)
-        end },
-    { name = L.DEBUG_INFO, button = L.DEBUG_INFO_BUTTON, description = L.DEBUG_INFO_DESC,
-        section = L.DEBUG_SECTION_DIAGNOSTICS,
-        fn = function() ns.Prompt("DEBUG_INFO", L.DEBUG_INFO_PROMPT, debugInfo()) end },
-    { name = L.DEBUG_EVENTS, button = L.DEBUG_EVENTS_BUTTON, description = L.DEBUG_EVENTS_DESC,
-        fn = printEvents, section = L.DEBUG_SECTION_DIAGNOSTICS },
-    { name = L.DEBUG_RELOAD, button = L.DEBUG_RELOAD_BUTTON, description = L.DEBUG_RELOAD_DESC,
-        fn = function() ReloadUI() end, section = L.DEBUG_SECTION_DIAGNOSTICS },
-}
-
--- Forever++'s own rows in `section`: Show Tags first in What's New, then its buttons there.
-local function addDebugTools(category, layout, section)
-    if section == L.DEBUG_SECTION_NEW then
-        addShowTags(category)
-    end
-    if not (layout and CreateSettingsButtonInitializer) then
-        return -- Probe: the button row is Mainline's Settings.
-    end
-    for _, tool in ipairs(DEBUG_TOOLS) do
-        if tool.section == section then
-            layout:AddInitializer(CreateSettingsButtonInitializer(tool.name, tool.button, tool.fn,
-                tool.description, true))
-        end
-    end
-end
-
--- The Debug page: a header for each section, with Forever++'s own rows and then each module's
--- (by title) under it, and after them a header for each module with rows in no section.
-local function buildDebug(category, layout, order)
-    local function addRows(module, section)
-        addDebugOptions(category, module, section)
-        addDebugActions(layout, module, section)
-    end
-    for _, section in ipairs(DEBUG_SECTIONS) do
-        addHeader(layout, section)
-        addDebugTools(category, layout, section)
-        for _, name in ipairs(order) do
-            if hasDebugRows(ns.modules[name], section) then
-                addRows(ns.modules[name], section)
-            end
-        end
-    end
-    for _, name in ipairs(order) do
-        local module = ns.modules[name]
-        if hasDebugRows(module, nil) then
-            addHeader(layout, module.title or name)
-            addRows(module, nil)
-        end
-    end
-end
+S.byTitle = byTitle
 
 ---Adds the Forever++ pages to Settings > AddOns (called once, after ns.Start).
 function ns.RegisterSettings()
@@ -2246,13 +1219,11 @@ function ns.RegisterSettings()
             end)
         end
     end
-    local debugPage, debugLayout = Settings.RegisterVerticalLayoutSubcategory(category, L.DEBUG)
-    buildDebug(debugPage, debugLayout, order)
-    addCanvasPage(category, L.CHANGELOG, buildChangelog)
-    aboutCategory = addCanvasPage(category, L.ABOUT, buildAbout)
+    S.AddDebugPage(category, order)
+    addCanvasPage(category, L.CHANGELOG, S.BuildChangelog)
+    aboutCategory = addCanvasPage(category, L.ABOUT, S.BuildAbout)
     Settings.RegisterAddOnCategory(category)
-    ourPages[debugPage] = true
-    addDefaultsButton()
+    S.AddDefaultsButton()
 end
 
 ---Opens the Forever++ Modules page in Settings, or a module: its own page, or the Modules page

@@ -223,7 +223,7 @@ end
 local function choose(key)
     selected = key
     for _, row in ipairs(ui.groupRows) do
-        ns.Split.Paint(row)
+        ns.SettingsKit.Paint(row)
     end
     refresh(true)
 end
@@ -231,7 +231,7 @@ end
 -- A group's row in the list: its name, and how many of its CVars match the search in gray at the
 -- right.
 local function newGroupRow(list, group)
-    local row = ns.Split.ListButton(list, function() return selected == group.key end)
+    local row = ns.SettingsKit.NewListButton(list, function() return selected == group.key end)
     row.group = group
     row.count = row:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
     row.count:SetPoint("RIGHT", -6, 0)
@@ -382,18 +382,18 @@ end
 -- the page is open, to follow changes made anywhere (the game's own settings, other addons).
 local onCVarUpdate = ns.Frames.Coalesce(refresh)
 
----Draws the page the first time it's shown (called by Settings.lua).
+---Draws the page the first time it's shown (called by Settings/Settings.lua).
 ---@param frame table the empty page
 function module:BuildPage(frame)
     loadAll()
     ui = { groupRows = {} }
 
-    ns.AddPageTitle(frame, module.title)
-    local split = ns.Split.New(frame, LIST_WIDTH, true)
+    ns.SettingsKit.AddPageTitle(frame, module.title)
+    local split = ns.SettingsKit.NewSplit(frame, LIST_WIDTH, true)
 
     -- In the title row at the top right. No Defaults button here: it resets Forever++'s settings,
     -- not console variables, so on this page it reads as the wrong thing.
-    ui.search = ns.Split.AddSearchBox(frame, nil, L.CONSOLEVARIABLES_SEARCH, function(text)
+    ui.search = ns.SettingsKit.AddSearchBox(frame, nil, L.CONSOLEVARIABLES_SEARCH, function(text)
         search = text
         refresh()
     end)
@@ -404,9 +404,9 @@ function module:BuildPage(frame)
     for _, group in ipairs(groups) do
         local row = newGroupRow(split.list, group)
         ui.groupRows[#ui.groupRows + 1] = row
-        ns.Split.AddEntry(split.list, row)
+        ns.SettingsKit.AddEntry(split.list, row)
     end
-    ns.Split.Layout(split.list)
+    ns.SettingsKit.Layout(split.list)
 
     local scrollBox = split.pane
     ui.scrollBox = scrollBox

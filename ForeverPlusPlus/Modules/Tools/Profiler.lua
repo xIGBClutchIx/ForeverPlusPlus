@@ -234,11 +234,11 @@ local function newText(parent, template, x, y)
     return text
 end
 
----Draws the page the first time it's shown (called by Settings.lua).
+---Draws the page the first time it's shown (called by Settings/Settings.lua).
 ---@param frame table the empty page
 function module:BuildPage(frame)
     ui = { refreshList = refreshList }
-    ns.AddPageTitle(frame, module.title)
+    ns.SettingsKit.AddPageTitle(frame, module.title)
 
     ui.reset = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
     ui.reset:SetSize(96, 22)
