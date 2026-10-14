@@ -146,6 +146,8 @@ ns.changelog = {
                 { L.AUTOGOSSIP_TITLE, "Learns which kind of NPC an option is for from the "
                     .. "window it opens, so a banker, vendor, trainer, or flight master the game "
                     .. "marks differently is picked by its own checkbox after you pick it once." },
+                { L.AUTOGOSSIP_TITLE, "Also picks an NPC's one service when its other options "
+                    .. "are only small talk, so weapon masters open their training." },
                 { L.BAGSLOTCOUNTER_TITLE, "The count turns orange when 4 or fewer slots are free. "
                     .. "The new Color When Low option sets that number, or turns the colors off." },
                 { L.CURRENCYBAR_TITLE, "With nothing to show, it says how to track currencies "

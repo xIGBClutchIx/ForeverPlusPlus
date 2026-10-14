@@ -95,8 +95,9 @@ L.AUTODISMOUNT_UNSHIFT_DESC = "Leave a shapeshift form, like a druid's Bear or C
 
 -- AutoGossip
 L.AUTOGOSSIP_TITLE = "Auto Gossip"
-L.AUTOGOSSIP_DESC = "When an NPC has only one thing to say and no quests, pick it for you, so "
-    .. "the bank, shop, or flight map opens straight away."
+L.AUTOGOSSIP_DESC = "When an NPC has only one thing to say, or one service beside small talk, "
+    .. "and no quests, pick it for you, so the bank, shop, trainer, or flight map opens straight "
+    .. "away."
 L.AUTOGOSSIP_SECTION_GENERAL = "General"
 L.AUTOGOSSIP_SECTION_NPCS = "Pick For"
 L.AUTOGOSSIP_BANKER = "Bankers"

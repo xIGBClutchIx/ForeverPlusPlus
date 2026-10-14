@@ -1,5 +1,5 @@
--- Auto Gossip: when an NPC's gossip has exactly one option and no quests, pick it, so a banker,
--- vendor, trainer, flight master and the rest open straight away. Each kind of NPC has its own
+-- Auto Gossip: when an NPC's gossip has exactly one option (or one service beside plain chat) and
+-- no quests, pick it, so a banker, vendor, trainer, flight master and the rest open straight away. Each kind of NPC has its own
 -- checkbox. Hold the Skip Key (Shift by default) while talking to the NPC to skip it.
 local _, ns = ...
 
@@ -50,8 +50,8 @@ module.options = {
 }
 
 -- The kind of NPC, from the option's gossip icon. The seed is the Classic GossipFrame icon file
--- IDs; Forever sends the same banker, vendor, and taxi ones, the trainer's is Unverified (turn on
--- the Debug option to see them, and docs/forever-api.md "Gossip" for what was seen). An
+-- IDs; Forever sends the same ones (turn on the Debug option to see them, and docs/forever-api.md
+-- "Gossip" for what was seen). An
 -- icon is also learned from the window its option opens (see "Learning icons" below), so a
 -- different one on Forever is known after the first pick. false: icons seen opening two kinds.
 local SEED = {
@@ -112,23 +112,47 @@ end
 local REPICK_DELAY = 1
 local lastPick = 0
 
--- Why the only option isn't picked, or nil to pick it.
+-- The option to pick: the only one, or the one service option among plain chat ones. A weapon
+-- master on Forever offers "What can other weapon masters teach?" (the plain icon) beside its
+-- training, and that chat shouldn't keep the trainer from opening. An innkeeper's vendor and
+-- hearthstone options are two services, so it's left alone.
+local function choose(options)
+    if #options == 1 then
+        return options[1]
+    end
+    local service
+    for _, option in ipairs(options) do
+        if option.icon ~= CHAT_ICON then
+            if service then
+                return nil
+            end
+            service = option
+        end
+    end
+    if service and kindOf(service) ~= "other" then
+        return service
+    end
+end
+
+-- Why no option is picked, or nil and the option to pick.
 local function skipReason(options)
     if GetTime() - lastPick < REPICK_DELAY then
         return "just picked"
     elseif ns.Keys.IsDown(module.db.skipKey) then
         return "skip key"
-    elseif #options ~= 1 then
+    end
+    local option = choose(options)
+    if not option then
         return "options"
     end
     local available = C_GossipInfo.GetAvailableQuests() or {}
     local active = C_GossipInfo.GetActiveQuests() or {}
     if #available > 0 or #active > 0 then
         return "quests"
-    elseif not isSafe(options[1]) then
+    elseif not isSafe(option) then
         return "not safe"
     end
-    local kind = kindOf(options[1])
+    local kind = kindOf(option)
     if not module.db[kind] then
         return kind .. " off"
     end
@@ -137,6 +161,7 @@ local function skipReason(options)
     if kind == "other" and C_GossipInfo.ForceGossip and C_GossipInfo.ForceGossip() then
         return "ForceGossip"
     end
+    return nil, option
 end
 
 -- Learning icons --------------------------------------------------------------------------------
@@ -206,16 +231,16 @@ end
 local function onGossipShow()
     local options = C_GossipInfo.GetOptions() or {}
     shown, picked = options, nil
-    local reason = skipReason(options)
+    local reason, option = skipReason(options)
     if module.db.printOptions then
         printOptions(options)
-        ns.Print(format(L.AUTOGOSSIP_PRINT_RESULT, reason or kindOf(options[1])))
+        ns.Print(format(L.AUTOGOSSIP_PRINT_RESULT, reason or kindOf(option)))
     end
     if reason then
         return
     end
     lastPick = GetTime()
-    C_GossipInfo.SelectOption(options[1].gossipOptionID)
+    C_GossipInfo.SelectOption(option.gossipOptionID)
 end
 
 function module:OnEnable()
