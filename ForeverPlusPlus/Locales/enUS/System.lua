@@ -98,6 +98,7 @@ L.MINIMAPBUTTON_WHERE_BOTH = "Both"
 L.MINIMAPBUTTON_COMPARTMENT_COUNT = "%s (%d)" -- Forever++, errors this session
 L.MINIMAPBUTTON_TIP_SESSION = "Errors This Session"
 L.MINIMAPBUTTON_TIP_SAVED = "Saved Errors"
+L.MINIMAPBUTTON_TIP_NONE = "None" -- a count of 0 errors
 -- The right-click menu's groups.
 L.MINIMAPBUTTON_GROUP_LOOT = "Vendors and Loot"
 L.MINIMAPBUTTON_GROUP_NPCS = "NPCs and Quests"

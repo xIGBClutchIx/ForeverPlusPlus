@@ -10,13 +10,19 @@ local format, type, tremove, sort = string.format, type, table.remove, table.sor
 local cos, sin, rad, deg, atan2, floor = math.cos, math.sin, math.rad, math.deg, math.atan2, math.floor
 local ipairs, CreateFrame, GetCursorPosition = ipairs, CreateFrame, GetCursorPosition
 local C_XMLUtil = C_XMLUtil
-local RED = RED_FONT_COLOR and { RED_FONT_COLOR:GetRGB() } or { 1, 0.1, 0.1 }
-local WHITE = { 1, 1, 1 }
 
 local L = ns.L
 local Errors = ns.Errors
 local Keys = ns.Keys
 local Colors = ns.Colors
+
+-- The tooltip's colors, Blizzard's where it has them.
+local RED = RED_FONT_COLOR and { RED_FONT_COLOR:GetRGB() } or { 1, 0.1, 0.1 }
+local GOLD = NORMAL_FONT_COLOR and { NORMAL_FONT_COLOR:GetRGB() } or { 1, 0.82, 0 }
+local GREEN = { 0.1, 1, 0.1 } -- Blizzard's hint green
+local WHITE = { 1, 1, 1 }
+local GRAY = Colors.GRAY
+local GOLD_CODE = Colors.Code(GOLD[1], GOLD[2], GOLD[3])
 
 local module = ns.NewModule("MinimapButton", L.MINIMAPBUTTON_DESC, {
     enabled = true,
@@ -66,7 +72,7 @@ local KEY_ACTIONS = {
         run = function() Errors.Toggle() end },
     { setting = "clearModifier", hint = L.MINIMAPBUTTON_HINT_CLEAR,
         run = function() Errors.ClearSession() end },
-    { setting = "clearAllKey", hint = L.MINIMAPBUTTON_HINT_CLEAR_ALL,
+    { setting = "clearAllKey", hint = L.MINIMAPBUTTON_HINT_CLEAR_ALL, danger = true,
         run = function() Errors.ClearAll() end },
 }
 
@@ -90,7 +96,7 @@ local QUICK_GROUPS = {
         "MovableFramerate" } },
 }
 
-local GROUP_COLOR = Colors.Code(Colors.GRAY[1], Colors.GRAY[2], Colors.GRAY[3])
+local GROUP_COLOR = Colors.Code(GRAY[1], GRAY[2], GRAY[3])
 
 local function byTitle(a, b)
     return a.title < b.title
@@ -155,26 +161,33 @@ local function onClick(owner, mouse)
     end
 end
 
--- A count row: a white label, and the count at the right, red once there are any.
-local function addCount(label, count)
-    local color = count > 0 and RED or WHITE
-    GameTooltip:AddDoubleLine(label, count, 1, 1, 1, color[1], color[2], color[3])
+-- A count row: a white label, and the count at the right in `color`, or a gray None at 0.
+local function addCount(label, count, color)
+    if count > 0 then
+        GameTooltip:AddDoubleLine(label, count, 1, 1, 1, color[1], color[2], color[3])
+    else
+        GameTooltip:AddDoubleLine(label, L.MINIMAPBUTTON_TIP_NONE, 1, 1, 1, GRAY[1], GRAY[2], GRAY[3])
+    end
 end
 
--- A hint row: what it does in green, as Blizzard's own hints, and the click for it in white.
-local function addHint(action, click)
-    GameTooltip:AddDoubleLine(action, click, 0.1, 1, 0.1, 1, 1, 1)
+-- A hint row: what it does in white (red when it throws data away), and the click for it in
+-- green, as Blizzard's own hints.
+local function addHint(action, click, danger)
+    local color = danger and RED or WHITE
+    GameTooltip:AddDoubleLine(action, click, color[1], color[2], color[3], GREEN[1], GREEN[2],
+        GREEN[3])
 end
 
--- The tooltip: the error counts, then a hint for each click. `drag` adds the hint about dragging,
--- which only the minimap button does.
+-- The tooltip: the version, the error counts, then a hint for each click. `drag` adds the hint
+-- about dragging, which only the minimap button does.
 local function showTooltip(owner, drag)
     GameTooltip:SetOwner(owner, "ANCHOR_LEFT")
-    GameTooltip:SetText(ns.title)
+    GameTooltip:AddDoubleLine(ns.title, ns.version, GOLD[1], GOLD[2], GOLD[3], GRAY[1], GRAY[2],
+        GRAY[3])
     local errors = Errors.IsOn()
     if errors then
-        addCount(L.MINIMAPBUTTON_TIP_SESSION, Errors.SessionCount())
-        addCount(L.MINIMAPBUTTON_TIP_SAVED, Errors.SavedCount())
+        addCount(L.MINIMAPBUTTON_TIP_SESSION, Errors.SessionCount(), RED)
+        addCount(L.MINIMAPBUTTON_TIP_SAVED, Errors.SavedCount(), GOLD)
         GameTooltip:AddLine(" ")
     end
     addHint(ns.WelcomePending() and L.MINIMAPBUTTON_HINT_WELCOME or L.MINIMAPBUTTON_HINT_SETTINGS,
@@ -184,7 +197,9 @@ local function showTooltip(owner, drag)
         for _, action in ipairs(KEY_ACTIONS) do
             local key = module.db[action.setting]
             if key ~= "none" and KEY_NAMES[key] then
-                addHint(action.hint, format(L.MINIMAPBUTTON_KEY_LEFT_CLICK, KEY_NAMES[key]))
+                -- The key in gold; |r goes back to the line's green.
+                addHint(action.hint, format(L.MINIMAPBUTTON_KEY_LEFT_CLICK, GOLD_CODE
+                    .. KEY_NAMES[key] .. "|r"), action.danger)
             end
         end
     end
