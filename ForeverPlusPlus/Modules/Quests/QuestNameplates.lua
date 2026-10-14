@@ -174,8 +174,8 @@ end
 -- The first objective of this unit's quests that isn't done, as `current, needed, kind, percent`
 -- (`kind` is the quest log's objective type, or false when it can't be matched; `percent` when it's
 -- a percentage, out of 100), or `current, needed, "done", percent` when all it lists are done,
--- `false` when it has none, or nil when the game won't
--- say (secret values in combat or an instance), so the plate keeps what it shows.
+-- `false` when it has none, or nil when the game won't say (secret values in combat or an
+-- instance), so the plate keeps what it shows.
 -- In a group the tooltip puts a QuestPlayer line with a name (the player's own too) before each
 -- member's objectives; lines before any name are the player's.
 local function scan(unit)

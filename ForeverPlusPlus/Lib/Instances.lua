@@ -207,8 +207,8 @@ end
 ns.Instances.ICON_SIZE = 14 -- pixels, the icon before an instance in a tooltip or panel
 
 ---One instance as a row: its icon, its name, and its level range, the same in every tooltip and
----panel that lists instances. The parts are held together with no-break spaces so a row that
----wraps never splits the name or the levels.
+---panel that lists instances. The name's spaces are no-break spaces, so a row that wraps breaks
+---between the parts, never inside the name.
 ---@param instance table an entry of `byKey`, or one shaped like it
 ---@param name string? shown instead of the instance's own name (for one of its entrances)
 ---@return string

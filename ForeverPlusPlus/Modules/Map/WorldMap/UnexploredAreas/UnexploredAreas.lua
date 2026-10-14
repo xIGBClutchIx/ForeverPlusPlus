@@ -181,7 +181,7 @@ function Overlay:Texture()
     return texture
 end
 
--- One area of Data.lua, in its tiles.
+-- One area (as in Data.lua), in its tiles.
 function Overlay:Add(area, tileWidth, tileHeight, r, g, b)
     local width, height, x, y = area[1], area[2], area[3], area[4]
     local wide, tall = ceil(width / tileWidth), ceil(height / tileHeight)

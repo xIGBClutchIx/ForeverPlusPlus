@@ -1,7 +1,8 @@
 -- Waylaid Crates' auction house category: a Waylaid Crates row at the top or bottom of the auction
 -- house's category list that fills Blizzard's browse list with every item the crates in your bags
 -- still need, one row each, the way the Favorites star lists your favorites. What's still needed
--- is every crate's bundles added up, less what's already in your bags and bank. Items are found by name.
+-- is every crate's bundles added up, less what's already in your bags and bank. Items are found
+-- by name.
 --
 -- The rows come from C_AuctionHouse.SearchForItemKeys: Blizzard's browse list shows whatever
 -- browse results arrive, whoever asked for them. A real category would mean adding to Blizzard's

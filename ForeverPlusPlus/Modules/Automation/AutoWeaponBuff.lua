@@ -202,7 +202,8 @@ end
 
 -- Overlays ------------------------------------------------------------------------------------
 
--- An overlay for each item with a weapon that takes it, or none when Warn says so.
+-- An overlay for each item a worn weapon takes, and with Warn on, for one no weapon takes (to say
+-- so).
 local function match(itemID)
     local entry = BUFFS:Get(itemID)
     if entry and (fits(entry, MAINHAND) or fits(entry, OFFHAND) or module.db.warnNoFit and noneFits(entry)) then

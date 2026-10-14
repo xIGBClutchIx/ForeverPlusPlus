@@ -367,7 +367,7 @@ end
 ---off, so a module that only does those needs no `OnDisable`; anything else `OnEnable` changes
 ---(a frame, a CVar, a timer) `OnDisable` must put back. Set
 ---`module.title` for a friendlier name in Settings (the name stays the /fpp key), and
----`module.category` for its group on the main Settings page (see Settings.lua). A tool with
+---`module.category` for its group on the Modules page (see Settings.lua). A tool with
 ---nothing to turn off sets `module.alwaysOn`: it has no toggle and stays on. A module only for
 ---some clients gives `module:IsAvailable()`; when it returns false at login, the module stays off
 ---and out of Settings and /fpp list. A default that is a table is data the module collects, not a

@@ -3,7 +3,8 @@
 -- (a few rare spawns left out). Forever may move things; fix them here. Each zone is:
 --   { lowest level, highest level, fish = skill, fishHigh = skill, herbs = { ... }, ores = { ... } }
 -- Cities have no levels. For a zone that has them, the game's own level range
--- (C_Map.GetMapLevels) wins when it gives one. `fishHigh` is for zones whose coast needs more than their inland water.
+-- (C_Map.GetMapLevels) wins when it gives one. `fishHigh` is for zones whose coast needs more
+-- than their inland water.
 -- Herbs and ores are item IDs, from the lists below. Who holds each zone (`side`) and its
 -- dungeons (`dungeons`) are added at the end.
 local _, ns = ...
@@ -13,8 +14,7 @@ local pairs, ipairs = pairs, ipairs
 local internal = ns.modules.WorldMap.internal.zoneInfo
 
 -- Herbs and ores: item ID -> { skill needed to gather, short English name }. Other languages
--- use the game's item name.
--- The skills match Profession Tooltips.
+-- use the game's item name. The skills match Lib/Professions.lua's herbs and veins.
 internal.herbs = {
     [2447] = { 1, "Peacebloom" },
     [765] = { 1, "Silverleaf" },

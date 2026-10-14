@@ -269,8 +269,9 @@ local function nodeLine(text)
     end
 end
 
--- The color for Blizzard's requirement line `text` for skill line `line`, and its text without
--- codes; nil when `text` isn't such a line, or the option is off or the profession not shown.
+-- For Blizzard's requirement line `text` of skill line `line`: its color (nil when the option is
+-- off or the profession not shown), its text without codes, true, and the player's rank and
+-- profession name. Nothing when `text` isn't such a line.
 local function requiresColor(text, line)
     local plain = clean(text)
     local _, digits = match(plain, REQUIRES)
@@ -313,7 +314,8 @@ local function findRequires(data)
 end
 
 -- Recolors Blizzard's requirement line on `tooltip`, once it's drawn: `job` is { index, skill
--- line, text }.
+-- line, text, index of a bare name line under it?, skill? }. With a skill, the line at index is a
+-- bare profession name line that ours replaces.
 local function restyle(tooltip, job)
     local fontString = leftLine(tooltip, job[1])
     if job[5] then

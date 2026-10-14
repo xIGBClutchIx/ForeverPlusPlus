@@ -2,8 +2,8 @@
 -- opens Forever++ settings and a right-click a menu of quick module toggles; while Error Catcher
 -- is on, a click with a key held shows its errors, clears this session's, or clears them all (each
 -- key is an option), and the button shows how many this session caught (through ns.Errors, never
--- Error Catcher itself). After a fresh install the button wears
--- Blizzard's NEW label, and its first click opens the About page instead, once; no popup at login.
+-- Error Catcher itself). After a fresh install the button wears Blizzard's NEW label, and its
+-- first click opens the About page instead, once; no popup at login.
 local _, ns = ...
 
 local format, type, tremove, sort = string.format, type, table.remove, table.sort

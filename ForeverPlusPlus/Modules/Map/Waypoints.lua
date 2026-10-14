@@ -363,11 +363,11 @@ local function toward(point)
     return nil
 end
 
--- How far the target is from the player in yards, its direction counter-clockwise from north,
--- and the line to show under the distance (destination), or nil when the game can't say (no target,
--- in an instance, another continent), and whether the target is the map pin. Works on the
--- target's own map, or the first map above it the player is also on, so a pin in the next zone
--- still points the right way.
+-- How far the target is from the player in yards and its direction counter-clockwise from north
+-- (nil when the game can't say: no target, in an instance, another continent), then the line to
+-- show under the distance and whether the target is the map pin. Works on the target's own map,
+-- or the first map above it the player is also on, so a pin in the next zone still points the
+-- right way.
 local function locate()
     local point, title, isPin = destination()
     local yards, angle = toward(point)
@@ -529,7 +529,7 @@ local function syncArrow()
     elseif frame then
         module:Off("SUPER_TRACKING_CHANGED", refresh)
     end
-    -- Releasing to a ghost is PLAYER_ALIVE; being brought back as one is PLAYER_UNGHOST.
+    -- Releasing to a ghost is PLAYER_ALIVE; coming back to life from one is PLAYER_UNGHOST.
     if module.enabled and module.db.arrow and module.db.corpse then
         module:On("PLAYER_ALIVE", refresh)
         module:On("PLAYER_UNGHOST", refresh)

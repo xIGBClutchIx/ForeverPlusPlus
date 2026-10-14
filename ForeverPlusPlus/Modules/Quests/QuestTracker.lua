@@ -349,10 +349,9 @@ function fitBox()
     box:Show()
 end
 
--- After the tracker lays itself out: style fonts it has started using, and fit the box.
--- After each tracker update. At Blizzard's font and outline there's nothing to style, so its text
--- isn't searched. The box is fitted now, so it never trails a frame behind, and once more as the
--- tracker settles; not again next frame as well (requestFit), since nothing moved since now.
+-- After each tracker update: style fonts it has started using, and fit the box. At Blizzard's
+-- font and outline there's nothing to style, so its text isn't searched. The box is fitted now,
+-- so it never trails a frame behind, and once more as the tracker settles; not again next frame as well (requestFit), since nothing moved since now.
 local function onUpdate()
     local db = module.db
     if db.font ~= "default" or db.outline ~= "default" then
@@ -543,9 +542,9 @@ end
 -- or logout keeps them). A quest's zone is its quest log header, as the log groups them. A header
 -- that names no map or instance (a class, a profession, a holiday) goes by the zone of the quest's
 -- objective on the map instead, and shows when the map doesn't know it. The quest the map and
--- arrow follow always shows. It filters once each time you
--- arrive in a zone, so a quest tracked by hand stays until you leave. Out of combat only, like
--- sorting; Sort by Level then sorts what's left as the watch list changes.
+-- arrow follow always shows. It filters once each time you arrive in a zone, so a quest tracked
+-- by hand stays until you leave. Out of combat only, like sorting; Sort by Level then sorts
+-- what's left as the watch list changes.
 
 local AZEROTH = 947 -- Forever's Azeroth map, over every zone and instance
 local mapNames -- lowercase name -> true for every map under Azeroth, made when first needed

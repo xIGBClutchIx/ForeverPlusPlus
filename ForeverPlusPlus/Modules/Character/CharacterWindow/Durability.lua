@@ -2,7 +2,7 @@
 -- that shows how worn it is, green when whole through yellow to red when broken. Left column items
 -- get it on their right side and right column items on their left, so it faces the character
 -- model; the weapons along the bottom get a flat bar under them, since the gap between them is too
--- narrow. Items without durability get no bar. CharacterFrame.lua turns them on and off.
+-- narrow. Items without durability get no bar. CharacterWindow.lua turns them on and off.
 local _, ns = ...
 
 local _G, pairs, CreateFrame = _G, pairs, CreateFrame

@@ -186,8 +186,8 @@ end
 
 ---What was recorded, heaviest first: a row for each module (Profiler.SHARED for shared code)
 ---with its parts' time added in, and the parts in `parts`, heaviest first, with the module's own
----time besides them as `own` (nil without parts). A row is { key, total, peak, perSecond,
----callsPerSecond }, times in ms; a part's key has `label`.
+---time beside them as `own` (nil without parts). A row is { key, total, peak, perSecond,
+---callsPerSecond, counted }, times in ms; a part's key has `label`.
 ---@return table[]
 function Profiler.Results()
     local seconds = Profiler.Elapsed() or 0

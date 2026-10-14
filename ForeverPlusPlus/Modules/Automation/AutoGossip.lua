@@ -1,6 +1,7 @@
 -- Auto Gossip: when an NPC's gossip has exactly one option (or one service beside plain chat) and
--- no quests, pick it, so a banker, vendor, trainer, flight master and the rest open straight away. Each kind of NPC has its own
--- checkbox. Hold the Skip Key (Shift by default) while talking to the NPC to skip it.
+-- no quests, pick it, so a banker, vendor, trainer, flight master and the rest open straight
+-- away. Each kind of NPC has its own checkbox. Hold the Skip Key (Shift by default) while talking
+-- to the NPC to skip it.
 local _, ns = ...
 
 local pairs, ipairs, type, format, tostring = pairs, ipairs, type, string.format, tostring
@@ -51,9 +52,9 @@ module.options = {
 
 -- The kind of NPC, from the option's gossip icon. The seed is the Classic GossipFrame icon file
 -- IDs; Forever sends the same ones (turn on the Debug option to see them, and docs/forever-api.md
--- "Gossip" for what was seen). An
--- icon is also learned from the window its option opens (see "Learning icons" below), so a
--- different one on Forever is known after the first pick. false: icons seen opening two kinds.
+-- "Gossip" for what was seen). An icon is also learned from the window its option opens (see
+-- "Learning icons" below), so a different one on Forever is known after the first pick. false:
+-- icons seen opening two kinds.
 local SEED = {
     [132050] = "banker", -- BankerGossipIcon
     [132060] = "vendor", -- VendorGossipIcon, also repair vendors

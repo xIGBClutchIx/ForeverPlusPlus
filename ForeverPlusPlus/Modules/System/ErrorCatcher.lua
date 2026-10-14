@@ -1,9 +1,9 @@
 -- Error Catcher: catches Lua errors, blocked and forbidden actions, and Lua warnings instead of
 -- Blizzard's error window and popup, saves them with the session they happened in, and shows
--- them in a window (`/fpp errors`, or a Shift-click on the Minimap Button module's button, through
--- ns.Errors): a list of errors on the left, the one picked on the right, and a button that selects a bug report with
--- the client, addon version, and modules on, ready to copy. An error that happens again is counted instead of
--- kept twice.
+-- them in a window (`/fpp errors`, or a click with a key held on the Minimap Button module's
+-- button, through ns.Errors): a list of errors on the left, the one picked on the right, and a
+-- button that selects a bug report with the client, addon version, and modules on, ready to copy.
+-- An error that happens again is counted instead of kept twice.
 --
 -- The error handler goes in when this file loads, not in OnEnable, so errors while the addons
 -- after this one load are caught too. Whether the module is on is only known once saved

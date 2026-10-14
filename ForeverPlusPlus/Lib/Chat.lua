@@ -1,6 +1,6 @@
 -- Chat helpers the Chat modules share: the chat windows, rewriting their lines, chat lines in their
--- colors for an edit box, and the column
--- of small buttons beside the main chat window (Blizzard's menu and channel buttons, then ours).
+-- colors for an edit box, and the column of small buttons beside the main chat window (Blizzard's
+-- menu and channel buttons, then ours).
 local _, ns = ...
 
 local _G, ipairs, type, tonumber, gsub = _G, ipairs, type, tonumber, string.gsub

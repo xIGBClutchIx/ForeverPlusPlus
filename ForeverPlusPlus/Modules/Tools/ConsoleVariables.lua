@@ -277,7 +277,7 @@ local function showTooltip(row)
 end
 
 -- The row and its box and button all highlight the row and show its tooltip: moving onto a child
--- frame is a leave for the row, which used to drop the highlight over the box and the button.
+-- frame is a leave for the row, which would drop the highlight over the box and the button.
 local function enterRow(row)
     row.highlight:Show()
     showTooltip(row)
@@ -315,7 +315,7 @@ local function buildRow(row)
     row.value:SetPoint("RIGHT", row.reset, "LEFT", -GAP, 0)
     row.value:SetAutoFocus(false)
     -- Our own box, so its Enter script is ours to set. Read the text before clearing focus: losing
-    -- focus puts the current value back in the box, which used to undo every edit.
+    -- focus puts the current value back in the box, which would undo the edit.
     row.value:SetScript("OnEnterPressed", function(self)
         local text = strtrim(self:GetText() or "")
         local value = read(row.entry.name)

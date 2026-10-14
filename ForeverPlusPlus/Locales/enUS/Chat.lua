@@ -1,4 +1,4 @@
--- English text for the Chat modules.
+-- English text for the chat modules. Locales/enUS/Core.lua says how locale files work.
 local _, ns = ...
 
 local L = ns.NewLocale("enUS")

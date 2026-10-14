@@ -62,7 +62,7 @@ L.OPTION_STATE_ALLOWED = "%s %s is |cffffd100%s|r (%s)." -- module, option, valu
 L.CHAT_MESSAGES = "Chat Messages" -- a module's checkbox for what it says in chat by itself
 
 -- Settings
--- The main Settings page's groups of modules.
+-- The Modules page's groups of modules.
 L.CATEGORY_AUTOMATION = "Automation"
 L.CATEGORY_CHARACTER = "Character"
 L.CATEGORY_CHAT = "Chat"

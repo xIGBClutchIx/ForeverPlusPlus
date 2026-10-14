@@ -1,12 +1,11 @@
 -- Edit Mode for our own frames, made to look and work like Blizzard's own system frames: while
 -- the player is in Blizzard's Edit Mode, a frame registered here gets the same blue selection box,
--- which turns gold when clicked, and can be dragged with snapping to the screen's middle and
--- edges and to the other frames, and opens a small settings dialog (scale and reset position)
--- like the one Blizzard's frames open; while it's open, the arrow keys nudge the frame a pixel
--- (ten with Shift). Blizzard's Edit
--- Mode has no way for an addon to add a frame to its layouts (that needs its protected system
--- code), so the position is the module's, not part of an Edit Mode layout. Nothing is hooked until
--- a module registers a frame.
+-- which turns gold when clicked. It drags with snapping to the screen's middle and edges and to
+-- our other frames, and opens a small settings dialog and a right-click menu (scale and reset
+-- position) like Blizzard's; while the dialog is up, the arrow keys nudge the frame a pixel (ten
+-- with Shift). Edit Mode has no way for an addon to add a frame to its layouts (that needs its
+-- protected system code), so the position is the module's, not part of an Edit Mode layout.
+-- Nothing is hooked until a module registers a frame.
 local _, ns = ...
 
 local pairs, type, pcall, setmetatable = pairs, type, pcall, setmetatable
@@ -483,6 +482,7 @@ function refreshDialog()
     dialog:Show()
 end
 
+---Redraws the settings dialog for the selected frame, after its scale or place changed.
 function EditMode.Refresh()
     if selected then
         refreshDialog()

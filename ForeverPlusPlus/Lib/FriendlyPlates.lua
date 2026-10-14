@@ -1,5 +1,5 @@
 -- Friendly nameplates that always show the unit's name, and the health bar only while it's hurt or
--- in combat. Built on Blizzard's own nameplates: the bar and Blizzard's name fade, and our label
+-- in combat. Built on Blizzard's own nameplates: the bar fades, Blizzard's name hides, and our label
 -- (ns.PlateLabel) shows instead. Player Nameplates and NPC Nameplates each run one of these for
 -- their own kind of unit:
 --
@@ -50,8 +50,8 @@ local function hasEvent(event)
     return not (C_EventUtils and C_EventUtils.IsEventValid) or C_EventUtils.IsEventValid(event)
 end
 
--- Blizzard sets the name text (with surname) itself; our label copies it as it changes, and the
--- icons beside Blizzard's name move to where the new text ends.
+-- Blizzard sets the name text (with surname) itself; our label copies it and lays itself out
+-- again as it changes.
 local function onNameSet(fontString)
     local entry = mirrored[fontString]
     if entry then
@@ -190,7 +190,7 @@ end
 
 ---Friendly plates for one module (see the top of this file).
 ---@param module table
----@param spec table players, cvars, style
+---@param spec table players, cvars, style, and optional OnEnable and Skip
 ---@return table plates
 function FriendlyPlates.New(module, spec)
     local self = setmetatable({ module = module, spec = spec, style = spec.style, records = {} }, Plates)
@@ -228,14 +228,15 @@ function FriendlyPlates.New(module, spec)
             self:Remove(unit)
         end
     end
-    -- Group or friends changed: the icons may need to come or go.
+    -- Group, friends, or guild changed: the icons and colors may need to change.
     self.onSocialChange = function()
         for unit in pairs(self.records) do
             self:Layout(unit)
         end
     end
     -- The module's turning on and off and option changes are the same for every plate module. It
-    -- keeps its own if it already has one, and `spec.OnEnable(module)` adds to turning on.
+    -- keeps its own OnDisable and OnOptionChanged if it has them, and `spec.OnEnable(module)` adds
+    -- to turning on.
     function module.OnEnable(mod)
         self:Enable()
         if spec.OnEnable then
@@ -328,7 +329,7 @@ function Plates:Layout(unit)
     end
 end
 
--- Fades the bar (and Blizzard's name and level with it) in when the unit is hurt or in combat,
+-- Fades the bar (and Blizzard's level with it) in when the unit is hurt or in combat,
 -- and our label in when it isn't.
 function Plates:Fade(unit)
     local record = self.records[unit]

@@ -249,8 +249,8 @@ end
 -- be the same.
 local NEAR = 3
 
--- The game's flight points on the map being drawn, with whether this character has learned each.
--- Probe: Forever's world map doesn't show them, so whether it lists them is Unverified.
+-- The game's flight points on the map being drawn. Forever's world map doesn't show them, and its
+-- list can't say which are learned (see learned).
 local taxiNodes = {}
 
 local function readTaxiNodes(mapID)

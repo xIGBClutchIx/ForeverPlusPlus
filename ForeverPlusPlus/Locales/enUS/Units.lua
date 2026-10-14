@@ -1,4 +1,5 @@
--- English text for the unit modules: class colors, friendly nameplates, and the two plate modules. Locales/enUS/Core.lua says how locale files work.
+-- English text for the unit modules: class colors, friendly nameplates, and the two plate modules.
+-- Locales/enUS/Core.lua says how locale files work.
 local _, ns = ...
 
 local L = ns.NewLocale("enUS")
@@ -43,7 +44,7 @@ L.CLASSCOLORS_TOT = "Target of Target"
 L.CLASSCOLORS_TOT_DESC = "The small frames for your target's target and your focus's target."
 
 -- Friendly nameplates (Lib/PlateLabel.lua and both plate modules)
-L.PLATES_BLIZZARD_OFF = "Blizzard's nameplates are off" -- a gray row atop the page, with a button
+L.PLATES_BLIZZARD_OFF = "Blizzard's nameplates are off" -- a gray row atop the module's options, with a button
 -- Headers over the plate modules' options in Settings
 L.PLATES_SECTION_GENERAL = "General"
 L.PLATES_SECTION_NAME = "Name"

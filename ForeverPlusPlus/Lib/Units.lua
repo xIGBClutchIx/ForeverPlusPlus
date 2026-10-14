@@ -1,6 +1,6 @@
 -- Who a unit is to the player: in their group, on their friends list, a recent ally, in their guild,
--- someone's pet or summon, and an NPC's title. Friends and guildmates can also be checked by name. Identity can be secret (mostly in instances), and a value we can't read counts
--- as "no".
+-- someone's pet or summon, and an NPC's title. Friends and guildmates can also be checked by name.
+-- Identity can be secret (mostly in instances), and a value we can't read counts as "no".
 local _, ns = ...
 
 local UnitInParty, UnitInRaid, UnitGUID, UnitIsInMyGuild = UnitInParty, UnitInRaid, UnitGUID, UnitIsInMyGuild
@@ -55,7 +55,7 @@ function Units.IsGuildmateGUID(guid)
     return readable(mate) and mate and true or false
 end
 
--- Fire when the recent allies list loads or changes. We can't ask for the list ourselves:
+-- Events for when the recent allies list loads or changes. We can't ask for the list ourselves:
 -- TryRequestRecentAlliesData is protected on Forever, so we use whatever the client has loaded
 -- (it loads when the Recent Allies tab opens) and recolor when these fire.
 Units.RECENT_ALLY_EVENTS = { "RECENT_ALLIES_CACHE_UPDATE", "RECENT_ALLIES_DATA_READY" }

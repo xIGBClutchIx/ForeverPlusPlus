@@ -67,10 +67,11 @@ local function nameFromSkillLine()
     end
 end
 
--- Reads a bag item's "Requires <skill> (N)" line. A known scroll teaches the skill's name, in case
--- the skill line didn't; with the name, any other item that needs it is learned as a scroll.
+-- Set below; readTooltip refreshes it.
 local overlays
 
+-- Reads a bag item's "Requires <skill> (N)" line. A known scroll teaches the skill's name, in case
+-- the skill line didn't; with the name, any other item that needs it is learned as a scroll.
 local function readTooltip(itemID, bag, slot)
     local data = C_TooltipInfo and C_TooltipInfo.GetBagItem and C_TooltipInfo.GetBagItem(bag, slot)
     if not data then

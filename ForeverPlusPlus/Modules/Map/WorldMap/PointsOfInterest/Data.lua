@@ -44,7 +44,7 @@ internal.instances = setmetatable({
 
 -- The capital cities, by city map ID: the zone around each (where its icon and its dungeons also
 -- show, placed by where the game says the city sits on the zone's map) and its faction. A city
--- can give that place (left, right, top, bottom, from 0 to 1) for when the game doesn't: the
+-- can give that place as `rect` (left, right, top, bottom, 0 to 1) for when the game doesn't: the
 -- Undercity's is worked out from the two maps' spirit healer and their crossings to each other,
 -- which agree to 0.3%.
 internal.cities = {

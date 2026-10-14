@@ -232,7 +232,7 @@ function TalentPlan.Decode(text)
             picks[#picks + 1] = tonumber(id)
         end
     end
-    -- Encode leaves "|" out of names, so a pasted one can't carry colors, textures, or links.
+    -- Dropped as in Encode, so a pasted name can't carry colors, textures, or links.
     name = gsub(name, "|", "")
     return { treeID = tonumber(treeID), level = tonumber(level), name = name, picks = picks }
 end

@@ -1,6 +1,7 @@
 -- Hide Beta Feedback: takes the beta's "Press F6 to submit an issue for this Item" line off
 -- tooltips and hides its floating bug report button. F6 still reports an issue; only the
--- reminder, the button, and the feedback buttons on quest windows go. Off by default, so players keep sending beta feedback.
+-- reminder, the button, and the feedback buttons on quest windows go. Off by default, so players
+-- keep sending beta feedback.
 local _, ns = ...
 
 local _G, type, pairs, ipairs, setmetatable = _G, type, pairs, ipairs, setmetatable

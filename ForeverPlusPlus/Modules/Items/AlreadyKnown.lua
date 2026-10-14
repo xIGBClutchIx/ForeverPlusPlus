@@ -154,7 +154,7 @@ local marks = setmetatable({}, { __mode = "k" }) -- icon texture -> { check = te
 -- Our own textures over the icon, never its color: Blizzard colors icons itself (red for an item
 -- you can't use), and putting a color back would wipe Blizzard's.
 --
--- Shows or clears our mark on an icon, as the Look option says. Does nothing for an icon that
+-- Shows or clears our mark on an icon, as the Mark option says. Does nothing for an icon that
 -- was never marked. `size` is the mark's size, chosen per place since the icons differ.
 local function setMark(icon, on, size)
     if not icon then

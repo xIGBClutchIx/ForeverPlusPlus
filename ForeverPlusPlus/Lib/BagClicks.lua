@@ -183,9 +183,9 @@ end
 ---A set of overlays for one module.
 ---`match(itemID, bag, slot)` says which items get one: any value but nil or false, handed back to
 ---`click`. `click(overlay, value, bag, slot, down)` runs on a plain right-click out of combat
----when nothing else wants it (no merchant, bank, mail, trade, or auction house), on press and on
----release. It sets the overlay's secure attributes for that click (`type2` and what goes with
----it, all cleared to nothing before it runs) and returns true when it took the click; false sends
+---when nothing else wants it (no merchant, bank, mail, trade, auction house, or guild bank), on
+---press and on release. It sets the overlay's secure attributes for that click (`type2`, cleared
+---before it runs, and what goes with it) and returns true when it took the click; false sends
 ---the click to Blizzard's bag button as usual.
 ---@param module table
 ---@param match fun(itemID: number, bag: number, slot: number): any

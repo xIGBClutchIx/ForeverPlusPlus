@@ -1,8 +1,8 @@
--- Price lines in item tooltips, kept together where Blizzard puts the sell price. Modules add a
--- line with `OnPrices`, and one module may redraw the sell price line itself with
--- `ReplaceSellPrice`, and any other line with `ReplaceLine`. Lines go right after the sell
--- price, or at the end when the item has none. Other lines about the item (`OnInfo`) go just
--- above them. Nothing is hooked until a module first calls in.
+-- Our lines in item tooltips, kept together where Blizzard puts the sell price. Modules add price
+-- lines with `OnPrices`: right after the sell price, or after the item's last line of data when
+-- it has none. Other lines about the item (`OnInfo`) go just above them. One module may redraw
+-- the sell price line itself with `ReplaceSellPrice`, and any module another of Blizzard's lines
+-- with `ReplaceLine`. Nothing is hooked until a module first calls in.
 local _, ns = ...
 
 local ipairs, next, setmetatable, format, type = ipairs, next, setmetatable, string.format, type

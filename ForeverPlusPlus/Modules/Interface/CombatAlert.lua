@@ -44,12 +44,12 @@ local function newFrame()
     local f = CreateFrame("Frame", nil, UIParent)
     f:SetSize(WIDTH, HEIGHT)
     f:SetFrameStrata("HIGH")
-    -- The big gold font Blizzard uses for zone names and the like.
     -- The text sits in a child that takes the scale, so the frame's own size and position stay
     -- in screen units for Edit Mode.
     f.inner = CreateFrame("Frame", nil, f)
     f.inner:SetSize(WIDTH, HEIGHT)
     f.inner:SetPoint("CENTER") -- a scaled frame scales about its center, so keep it centered
+    -- The big gold font Blizzard uses for zone names and the like.
     f.text = f.inner:CreateFontString(nil, "OVERLAY", "GameFontNormalHuge")
     f.text:SetPoint("CENTER")
     f.text:SetShadowOffset(1, -1)

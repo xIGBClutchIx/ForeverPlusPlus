@@ -1,7 +1,7 @@
 -- Forever Quest Icons: a small icon after the name of quests that are new to Forever, the ones
 -- that weren't in original Classic, in the quest log on the world map, the objective tracker, a
--- quest giver's list of quests, and the title of a quest's details, each with its own checkbox. Idea from ForeverQuestTint; none of
--- its code.
+-- quest giver's list of quests, and the title of a quest's details, each with its own checkbox.
+-- Idea from ForeverQuestTint; none of its code.
 --
 -- New quests are told apart by ID. Every quest of original Classic has an ID of 9665 or less
 -- (inferred from Classic quest data), so a higher ID is a quest Forever added.

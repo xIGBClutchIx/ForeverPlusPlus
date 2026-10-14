@@ -135,13 +135,14 @@ local colored = ns.Colors.Text
 
 -- Text ----------------------------------------------------------------------------------------
 
--- The panel is a title and up to three short rows, each led by its profession's icon:
+-- The panel is a title and short rows: the profession ones each led by its icon, then the zone's
+-- dungeons and raids:
 --   Silverpine Forest  10-20
 --   [fishing] Fishing 1    [skinning] Skinning 1-100
 --   [herbalism] Peacebloom, Silverleaf, Earthroot
 --   [mining] Copper, Tin, Silver
 
--- Each profession's icon, for when the player doesn't have it (Fishing still shows then).
+-- Each profession's icon, for when the player doesn't have it (a row set to Always still shows).
 local ICONS = {
     [Professions.FISHING] = "Interface\\Icons\\Trade_Fishing",
     [Professions.SKINNING] = "Interface\\Icons\\INV_Misc_Pelt_Wolf_01",
@@ -225,8 +226,8 @@ local function range(rank, low, high, fishing)
     return text
 end
 
--- Fishing, whether or not the player has it, and Skinning, from the zone's level range, when the
--- player has it; together in one row.
+-- Fishing, and Skinning from the zone's level range, each as its setting says; together in one
+-- row.
 local function skillsRow(zone, low, high)
     local db, parts = module.db, {}
     if visible(db.fishing) and zone.fish then
@@ -259,8 +260,8 @@ local function itemName(id, name)
     return own or name
 end
 
--- The zone's herbs or ores, each colored by how hard it is at the player's skill, or nil when the
--- player doesn't have the profession or `key`'s checkbox is off.
+-- The zone's herbs or ores, each colored by how hard it is at the player's skill, or nil when
+-- `key`'s setting hides them (see shows) or the zone has none.
 local function gatherRow(key, line, ids, items)
     local rank, _, own = Professions.Rank(line)
     if not (shows(key, rank) and ids and #ids > 0) then
@@ -424,7 +425,7 @@ local COORDS_BOTTOM, COORDS_ROW = 2, 15
 -- How far up the panel sits in the bottom left corner: over Blizzard's coordinates when they
 -- show. By the checkboxes, not the rows, so the panel doesn't jump as the cursor row comes and
 -- goes. Not when something has faded Blizzard's panel out to show the coordinates elsewhere
--- (such as our Coordinates module in the title bar): only the panel's own state is read.
+-- (such as our Coordinates part in the title bar): only the panel's own state is read.
 local function bottomLeftOffset()
     local blizzard = ns.WorldMap.CoordsPanel()
     if blizzard and not (blizzard:IsShown() and blizzard:GetAlpha() > 0) then

@@ -1,5 +1,6 @@
 -- Small frame helpers modules share: probing for Blizzard art and templates, the box tooltips are
--- drawn in, Escape closing our windows, red text in the error frame, and running something once after a burst of calls.
+-- drawn in, Escape closing our windows, red text in the error frame, and running something once
+-- after a burst of calls.
 local _, ns = ...
 
 local select, ipairs, tinsert, CreateFrame, C_Timer = select, ipairs, table.insert, CreateFrame, C_Timer

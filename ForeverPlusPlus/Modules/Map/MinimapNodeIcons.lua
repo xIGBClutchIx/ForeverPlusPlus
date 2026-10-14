@@ -113,9 +113,9 @@ end
 local HERBS = ns.GameData.Spell(2383, "Find Herbs")
 local MINERALS = ns.GameData.Spell(2580, "Find Minerals")
 
--- Its parts' own rows on the Profiler page, so its time can be told apart. Off, Profiler.Call
--- just calls through. Probes are only counted (PART_ASK), not timed: a stopwatch around each of
--- hundreds a second costs more than the probe.
+-- Its parts' own rows on the Profiler page, so its time can be told apart. While not recording,
+-- Profiler.Call just calls through. Probes are only counted (PART_ASK), not timed: a stopwatch
+-- around each of hundreds a second costs more than the probe.
 local Profiler = ns.Profiler
 local PART_VIEW = Profiler.Part(module, L.MINIMAPNODEICONS_PART_VIEW)
 local PART_FOLLOW = Profiler.Part(module, L.MINIMAPNODEICONS_PART_FOLLOW)

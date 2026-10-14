@@ -1,4 +1,5 @@
--- English text for the map modules and the map helpers. Locales/enUS/Core.lua says how locale files work.
+-- English text for the map modules and the map helpers. Locales/enUS/Core.lua says how locale
+-- files work.
 local _, ns = ...
 
 local L = ns.NewLocale("enUS")

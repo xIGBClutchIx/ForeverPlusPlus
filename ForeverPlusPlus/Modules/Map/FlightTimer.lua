@@ -84,16 +84,14 @@ local function key(from, to)
     return from .. ">" .. to
 end
 
--- How long the flight from one node to another takes, if it has been flown: seconds. Each way and
--- each route is its own time, since flights differ both ways and a chained flight isn't the sum of
--- its stops.
+-- How long the flight from one node to another takes, in seconds, if it has been flown.
 local function estimate(from, to)
     return module.db.times[key(from, to)]
 end
 
 -- The flight underway ---------------------------------------------------------------------------
 
-local flight -- { from, to, total, name, asked, started, aborted } from asking a flight master to go
+local flight -- { from, to, total, name, asked, started, aborted, warned }, once one is asked for
 
 local bar, watcher
 

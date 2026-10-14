@@ -153,8 +153,9 @@ local SHOW_FRIENDLY = { "nameplateShowFriendlyPlayers", "nameplateShowFriends" }
 module.notice = ns.CVars.OffNotice(module, SHOW_FRIENDLY, L.PLATES_BLIZZARD_OFF,
     L.PLAYERNAMEPLATES_BLIZZARD_OFF_DESC)
 
-local plates -- set below; the recent allies list may load after login (or change): recolor
+local plates -- set below
 
+-- The recent allies list may load after login, or change: recolor.
 local function onRecentAllies()
     if module.db.recentAllies ~= "off" then
         plates:Refresh()

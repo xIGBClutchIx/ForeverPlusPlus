@@ -1,6 +1,7 @@
 -- Currency Bar: a small box, drawn like a Blizzard tooltip, that shows your gold and the
 -- currencies you have ticked "Show on Backpack" in the Currency tab, so they are in view without
--- opening a window. Hovering it lists your gold and currencies with what this session gained or spent. Which currencies show is Blizzard's own choice, not ours. Move it in Edit Mode.
+-- opening a window. Hovering it lists your gold and currencies with what this session gained or
+-- spent. Which currencies show is Blizzard's own choice, not ours. Move it in Edit Mode.
 local _, ns = ...
 
 local GetMoney, C_CurrencyInfo, GameTooltip = GetMoney, C_CurrencyInfo, GameTooltip

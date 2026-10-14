@@ -1,7 +1,7 @@
 -- Item Tooltips' auction prices: scans the auction house when it opens and shows the lowest
--- buyout in item tooltips, under the sell price. Like the sell price, it counts the stack (Shift for one), or
--- the other way round. In the professions window, it adds up what a recipe's reagents cost
--- against what the crafted items are worth.
+-- buyout in item tooltips, under the sell price. Like the sell price, it counts the stack (Shift
+-- for one), or the other way round. In the professions window, it adds up what a recipe's
+-- reagents cost against what the crafted items are worth.
 --
 -- The scan is an empty browse search paged to the end, the same one Auctionator's default scan
 -- uses on Forever. C_AuctionHouse.ReplicateItems is in the client too, but it's unproven here,
@@ -101,7 +101,7 @@ local function house()
     local key = format("%s-%s", GetRealmName(), faction or "")
     local data = module.db.houses[key]
     if not (data and data.items) then
-        data = { scannedAt = 0, items = {} } -- new, or saved before items kept their own age
+        data = { scannedAt = 0, items = {} } -- first visit to this auction house
         module.db.houses[key] = data
     end
     if faction then
@@ -125,10 +125,9 @@ local function getIndicator()
         indicator = CreateFrame("Frame", nil, parent)
         indicator:SetSize(1, 20)
         indicator:SetPoint("TOPRIGHT", parent, "TOPRIGHT", -30, -1)
-        -- Above the window's border and title art, which are child frames with their own fixed
-        -- levels, well above the window's (parent + 100 drew under them). A level over the title
-        -- bar, as Coordinates does on the map, not a strata, so it stays with the window instead
-        -- of floating over others.
+        -- Above the window's border and title art, which are child frames with fixed levels well
+        -- above the window's. A level over the title bar, as Coordinates does on the map, not a
+        -- strata, so it stays with the window instead of floating over others.
         local title = parent.TitleContainer
         indicator:SetFrameLevel((title or parent):GetFrameLevel() + (title and 1 or 500))
         indicator.text = indicator:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
@@ -218,10 +217,10 @@ end
 local open = false -- the auction house is open
 
 -- The scan shares the server's query throttle with everything the player does in the auction
--- house. Paging nonstop starved Blizzard's own queries, so the Sell tab's list never loaded and
--- posts could fail. Now it keeps one request out at a time, sends only when the throttle is
--- ready, gives way for a moment after each of Blizzard's own queries, and pauses while an item
--- sits in the sell box, so the list and the post go through first. Browsing tabs with nothing
+-- house. Paging nonstop starves Blizzard's own queries, so the Sell tab's list never loads and
+-- posts can fail. So it keeps one request out at a time, sends only when the throttle is ready,
+-- gives way for a moment after each of Blizzard's own queries, and pauses while an item sits in
+-- the sell box, so the list and the post go through first. Browsing tabs with nothing
 -- to sell doesn't stop it.
 local YIELD = 2 -- seconds the scan waits after one of Blizzard's own queries
 

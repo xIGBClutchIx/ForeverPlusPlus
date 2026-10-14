@@ -6,8 +6,8 @@
 --
 -- A plate module decides what goes in the label through a `style` (see ns.FriendlyPlates):
 --   style.db               its settings: level ("before"/"after"/"off"), nameSize (a percent of
---                          Blizzard's name size), centerLine, and with
---                          icons, socialIcons, groupIcon ("role"/"looking"), iconSide
+--                          Blizzard's name size), centerLine, and for the icons
+--                          socialIcons, groupIcon ("role"/"looking"), iconSide
 --                          ("after"/"before" the name) and testIcons
 --   style.NameColor(unit)  r, g, b for the name
 --   style.BarNameColor(unit)  r, g, b for the name while the bar is up (optional; NameColor)
@@ -212,7 +212,7 @@ end
 local function createLabel(frame)
     local label = CreateFrame("Frame", nil, frame)
     label:SetAllPoints(frame)
-    -- Empty frames to center on: the bar's row, and the cast bar's (see placeRow).
+    -- Empty frames to center on: the bar's row (see placeRow), and the cast bar's (placeSubtitle).
     label.row = CreateFrame("Frame", nil, label)
     label.castRow = CreateFrame("Frame", nil, label)
     -- Debug (Show Plate Center): a thin line down the middle of the row, on a frame of its own so
@@ -237,7 +237,7 @@ local function createLabel(frame)
     label.level = CreateFrame("Frame", nil, label)
     label.level.text = label.level:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     label.level.text:SetPoint("CENTER")
-    -- One set of icons for each view: beside our name, and beside Blizzard's while the bar is up.
+    -- One set of icons for each view: beside our name, and beside our bar-view name.
     label.icons = createIcons(label)
     label.barIcons = createIcons(label.barFrame)
     return label
@@ -305,12 +305,10 @@ local function copyBadge(label, levelFrame)
     end
 end
 
--- Use the font Blizzard's name is drawn with right now. Its font object can be a different size
--- (nameplates set the size on the string), which made our copy come out small.
--- Blizzard also shrinks the font of a long name to fit its plate, so copying each plate's size
--- made long names tiny. Every label uses the largest size seen instead: the normal one. When the
--- player changes a nameplate setting (its size among them) it's measured again, so a smaller
--- size takes effect too.
+-- Use the size Blizzard's name is drawn at, not its font object's (nameplates set the size on the
+-- string). Blizzard shrinks a long name's font to fit its plate, so every label uses the largest
+-- size seen: the normal one. A nameplate CVar change (plate size among them) measures it again,
+-- so a smaller size takes effect too.
 local fullSize = 0
 local watchingSize = false
 
@@ -406,7 +404,6 @@ end
 local function placeRow(label, record, style)
     local row = label.row
     span(row, record.container, label)
-    -- Debug: a thin line through the plate's center, to check the centering in game.
     label.centerLine:SetShown(style.db.centerLine)
     return row
 end

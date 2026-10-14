@@ -2,26 +2,26 @@
 -- templates so they look like any other options page. Few entries, so the sidebar stays short:
 --   Forever++        the Modules page: every module (the only place modules turn on and off) in
 --                    a list on the left, with a checkbox each, under a label per
---                    `module.category`. Clicking one shows
---                    it on the right: its title, category and description, its Enabled
---                    checkbox, its `notice` (a warning) while that applies, then its options
---                    (checkboxes, dropdowns and sliders) and buttons (from `module.actions`),
---                    greyed out while it's off. An option can sit under another (`requires`).
---                    A module made of parts (`module:NewPart`) has a section for each, headed by
---                    the part's Enabled checkbox, with the part's options greyed out while it's off.
---                    `alwaysOn` modules (tools) aren't listed. A search box at the top narrows
---                    the list to modules by title and description, or by an option's name or
---                    description, and highlights those options. A module or option added
---                    since the player last looked (`added`), or an option changed since then
---                    (`changed`), is marked NEW
+--                    `module.category`. Clicking one shows it on the right: its title, category
+--                    and description, its Enabled checkbox, its `notice` (a warning) while that
+--                    applies, then its options (checkboxes, dropdowns and sliders) and buttons
+--                    (from `module.actions`), greyed out while it's off. An option can sit under
+--                    another (`requires`). A module made of parts (`module:NewPart`) has a
+--                    section for each, headed by the part's Enabled checkbox, with the part's
+--                    options greyed out while it's off. `alwaysOn` modules (tools) aren't
+--                    listed. A search box at the top narrows the list to modules by title and
+--                    description, or by an option's name or description, and highlights those
+--                    options; a New checkbox beside it lists only modules marked NEW. A module
+--                    or option added since the player last looked (`added`), or an option
+--                    changed since then (`changed`), is marked NEW
 --     <Tool>         a page a module draws itself (`BuildPage`)
 --     Debug          sections of Forever++'s own rows and modules' options marked `debug = true`
 --                    and buttons from `module.debugActions`, each placed by its `section`: What's
 --                    New (Show Tags, Reset Seen Version, Reset Welcome), Diagnostics (Copy Debug
 --                    Info, Print Module Events, Reload UI), Testing, and Logging
 --     Changelog      the releases in Changelog.lua in a list like the Modules page's, with the
---                    selected one's notes beside it, and a search box and the Defaults button
---                    at the top like Modules
+--                    selected one's notes beside it, and a By Module checkbox, a search box and
+--                    the Defaults button at the top like Modules
 --     About          what the addon is, how many modules are on, the version, links, and the /fpp
 --                    commands, with the Defaults button at the top right like Modules
 -- Without subpages (an older Settings API), the Modules page is the only page.
@@ -66,7 +66,7 @@ end
 -- A frame for a page drawn by `build(frame)` instead of from settings, such as a list. Settings
 -- needs the frame now, so it starts empty and is filled the first time it's shown. It starts
 -- hidden: a new frame is shown, and Settings showing a frame that already is doesn't fire OnShow,
--- so the page stayed empty until the player left it and came back.
+-- which would leave the page empty until the player left it and came back.
 local function canvasFrame(build)
     local frame = CreateFrame("Frame")
     frame:Hide()
@@ -122,7 +122,7 @@ end
 local held -- changes held back while Blizzard sets defaults, to apply or drop after
 
 -- Probe: CheckIsSettingDefaults is Mainline's (the `forever` UI source has it); without it,
--- changes apply at once, as before.
+-- changes apply at once.
 local function settingDefaults()
     return SettingsPanel and SettingsPanel.CheckIsSettingDefaults
         and SettingsPanel:CheckIsSettingDefaults() and true or false
@@ -338,12 +338,12 @@ local function sliderOptions(option)
 end
 
 -- A module's button `action` (`{ name, button, description, fn }`, and `confirm`, a question to
--- ask before `fn` runs, with `key` naming its popup) as the function its button calls.
+-- ask before `fn` runs, with `key` naming its popup so a command can ask the same one) as the
+-- function its button calls.
 local function actionFn(module, action, i)
     if not action.confirm then
         return action.fn
     end
-    -- Asks first (ns.Confirm), in a popup named by `key`, so a command can ask the same one.
     local key = action.key or format("%s_ACTION%d", module.name:upper(), i)
     return function()
         ns.Confirm(key, action.confirm, action.fn)
@@ -489,7 +489,7 @@ end
 -- Settings", and All Settings resets the whole game. On our list page (Debug) our own Defaults
 -- button sits over it instead, with our popup (askDefaults). Blizzard's is faded out underneath
 -- (never changed otherwise), and ours shows and hides with it, since Blizzard hides it while
--- searching. The Modules and About pages are drawn by us and have their own.
+-- searching. The Modules, Changelog and About pages are drawn by us and have their own.
 
 local ourPages = {} -- category -> true, for the list pages that are ours
 local defaultsButton -- ours, while it's made
@@ -1430,8 +1430,8 @@ end
 
 -- A search box at the top of a page we draw, left of `anchor` (its Defaults button) or at the top
 -- right without one, with `instructions` in gray while it's empty. It calls `onChange(text)` with
--- the text, trimmed, as it's typed. Blizzard's own search, at the top left of the panel, finds settings across every
--- addon, not what our pages list. Probe: SearchBoxTemplate is Mainline's.
+-- the text, trimmed, as it's typed. Blizzard's own search, at the top left of the panel, finds
+-- settings across every addon, not what our pages list. Probe: SearchBoxTemplate is Mainline's.
 local function addSearchBox(frame, anchor, instructions, onChange)
     if not hasTemplate("SearchBoxTemplate") then
         return
@@ -1821,8 +1821,8 @@ end
 -- a dash, their wrapped lines lined up after it and a module's name in gold. Only the entries the
 -- search finds show, under their sections' headings. With `byModule`, the headings are the
 -- modules' and the names in gold the sections' (noteGroups), with each category's name and a
--- gray line above its modules. `view.search(text)` lays it out for a search (lowercased, nil for none), and
--- `view.update` keeps its NEW label.
+-- gray line above its modules. `view.search(text)` lays it out for a search (lowercased, nil for
+-- none), and `view.update` keeps its NEW label.
 local function buildNotes(content, width, release, byModule)
     local view = newStack(content, width, 0)
     view:SetPoint("TOPLEFT")
@@ -2048,9 +2048,8 @@ local function buildChangelog(frame)
     frame:HookScript("OnShow", refresh)
 end
 
--- Module names in the order their titles sort in the player's language, so the list and pages
--- read alphabetically whatever order the TOC loads them in. Modules this client doesn't get are
--- left out.
+-- Module names in the order their titles sort in the player's language, whatever order the TOC
+-- loads them in. Modules this client doesn't get are left out.
 local function byTitle()
     local names = {}
     for _, name in ipairs(ns.order) do
@@ -2094,7 +2093,7 @@ local function debugInfo()
         tostring(interface), GetLocale(), #on, concat(on, ", "))
 end
 
--- How many hooks a module has made (`module:Hook`, `module:HookScript`). They stay once made but
+-- How many hooks a module has made (`module:Hook`, `HookScript`, `TooltipPostCall`). They stay but
 -- do nothing while the module is off.
 local function hookCount(module)
     local count = 0

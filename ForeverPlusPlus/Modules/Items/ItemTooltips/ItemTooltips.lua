@@ -1,8 +1,8 @@
 -- Item Tooltips: lines in item tooltips, each with its own checkbox: the vendor price of the whole
 -- stack (SellPrice.lua), what damaged gear costs to repair (RepairCost.lua), how many you own
--- (ItemCount.lua), and the lowest auction house buyout,
--- with crafting costs in the professions window (AuctionPrices.lua). This file has the settings
--- every line shares; each line is a part of the module (`module:NewPart`) with its own.
+-- (ItemCount.lua), and the lowest auction house buyout, with crafting costs in the professions
+-- window (AuctionPrices.lua). This file has the settings every line shares; each line is a part
+-- of the module (`module:NewPart`) with its own.
 local _, ns = ...
 
 local L = ns.L

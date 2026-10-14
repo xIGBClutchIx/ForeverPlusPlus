@@ -1,6 +1,6 @@
 -- Character Window's equipped weapon skills: on the Skills tab, the bars of the weapon skills for
 -- the weapons in the main hand, off hand, and ranged slots are green instead of Blizzard's blue,
--- in the list and in the selected skill's details. CharacterFrame.lua turns them on and off.
+-- in the list and in the selected skill's details. CharacterWindow.lua turns them on and off.
 local _, ns = ...
 
 local _G, type = _G, type

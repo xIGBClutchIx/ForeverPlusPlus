@@ -1,7 +1,7 @@
 -- Chat History: keeps each chat window's latest lines across logging out and reloading, for each
--- character on its own. The
--- lines are read from the windows' own buffers as the game logs out (PLAYER_LOGOUT, which a
--- reload also sends), so nothing runs while you play, and put back with AddMessage at login.
+-- character on its own. The lines are read from the windows' own buffers as the game logs out
+-- (PLAYER_LOGOUT, which a reload also sends), so nothing runs while you play, and put back with
+-- AddMessage at login.
 -- Colors and links are kept because the lines are saved as they were drawn. A line the game
 -- marks secret can't be read, so it isn't saved. Whispers aren't saved either: SavedVariables are
 -- plain text that players often share when reporting a bug.

@@ -1,6 +1,7 @@
 -- The modifier key a module lets the player hold to skip what it does (Auto Quest, Auto Gossip,
--- Auto Repair, Auto Sell Junk, Auto Release) or to let something through (Skip Cinematics), so
--- each offers the same choices under the same names.
+-- Auto Repair, Auto Sell Junk, Auto Release), to let something through (Skip Cinematics), or to
+-- pick another action (Minimap Button, World Map), so each offers the same choices under the
+-- same names.
 local _, ns = ...
 
 local type = type
@@ -28,7 +29,8 @@ function Keys.IsDown(key)
     return down ~= nil and down() and true or false
 end
 
----A dropdown option for the key, `key = "skipKey"` and Shift by default in the module's defaults.
+---A dropdown option for the key setting `key` (such as "skipKey"); its default, such as "shift",
+---goes in the module's defaults.
 ---@param key string the setting
 ---@param name string
 ---@param description string

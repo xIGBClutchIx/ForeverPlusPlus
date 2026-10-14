@@ -3,8 +3,8 @@
 -- the list shows the heaviest modules first, with their milliseconds a second, their worst single
 -- frame, and how often they ran, beside the game's own numbers for Forever++ as a whole. A module
 -- with parts has the AddOn List's +/- and folds open to them; the heaviest module starts open.
--- Memory can only be read for the whole addon. Nothing is timed until Record, and nothing is built until the page is first shown;
--- `/fpp profile` opens it.
+-- Memory can only be read for the whole addon. Nothing is timed until Record, and nothing is
+-- built until the page is first shown; `/fpp profile` opens it.
 local _, ns = ...
 
 local ipairs, format, concat = ipairs, string.format, table.concat

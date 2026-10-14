@@ -206,7 +206,7 @@ function Professions.SkinningNeed(level)
     return level * 5
 end
 
-local known -- skill line -> { rank, name }, or nil until read
+local known -- skill line -> { rank, name, icon }, or nil until read
 local listening = false
 
 local function readable(value)
