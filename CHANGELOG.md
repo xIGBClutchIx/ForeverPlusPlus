@@ -10,6 +10,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Auto Decline**: the new Guild Invites and Guild Charters options (off by default) turn down guild invites and requests to sign a guild charter, even from friends and guildmates.
 - **Comprehend Scrolls**: a new module for Mages: right-click a scroll you read with Comprehension in your bags to cast Comprehend Scroll on it, without opening the spellbook. Not in combat. On by default; it does nothing for characters without the spell.
 - **Combat Alert**: the new Play Sound option (off by default) plays the raid warning sound as you enter combat and a soft chime as you leave, for when you're looking somewhere else.
+- **Fishing Cast**: the new Louder Bobber option (off by default) turns sound effects up and music down while you fish, so the splash is easy to hear, and puts your own volumes back after you stop, even after a reload or disconnect mid-cast.
 - **Item Tooltips**: the new Repair Cost line (off by default) shows what repairing damaged gear costs, on gear you wear or carry, without a merchant's repair cursor.
 - **Flight Timer**: the new Sound on Landing option (off by default) plays the ready check sound a few seconds before you land, on a flight you've taken before, so you can tab out on long flights.
 - **Forever Quest Icons**: the new Quest Details option (on by default) puts the icon after the quest's name at the top of its details, in the quest window and on the map.

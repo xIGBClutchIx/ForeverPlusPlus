@@ -193,6 +193,8 @@ L.FISHINGCAST_MS = "%d ms" -- milliseconds
 L.FISHINGCAST_COMBAT = "Combat Warning"
 L.FISHINGCAST_COMBAT_DESC = "Warn once when combat starts while a fishing pole is equipped."
 L.FISHINGCAST_COMBAT_TEXT = "You have a fishing pole equipped."
+L.FISHINGCAST_LOUDER = "Louder Bobber"
+L.FISHINGCAST_LOUDER_DESC = "While you fish, turn sound effects up and music down so the splash is easy to hear. Your own volumes come back after you stop."
 
 
 -- AutoWeaponBuff

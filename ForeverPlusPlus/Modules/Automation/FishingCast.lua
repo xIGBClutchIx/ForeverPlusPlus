@@ -3,6 +3,7 @@
 -- temporary override binding for the right mouse button on our own secure button, which casts the
 -- spell when the click goes through. That can't be changed in combat, so nothing is armed then,
 -- and the binding comes off again on the next click so a right-click on the bobber still loots.
+-- Louder Bobber turns sound effects up and music down while any Fishing cast channels.
 local _, ns = ...
 
 local GetTime, InCombatLockdown, CreateFrame = GetTime, InCombatLockdown, CreateFrame
@@ -11,6 +12,7 @@ local GetInventoryItemID, UnitExists, GetUnitSpeed = GetInventoryItemID, UnitExi
 local C_Item, C_Spell, C_Timer, WorldFrame = C_Item, C_Spell, C_Timer, WorldFrame
 local UIErrorsFrame = UIErrorsFrame
 local GetMouseFoci, GetMouseFocus, UnitChannelInfo = GetMouseFoci, GetMouseFocus, UnitChannelInfo
+local C_CVar, tonumber, tostring, next, select = C_CVar, tonumber, tostring, next, select
 
 local L = ns.L
 
@@ -18,9 +20,14 @@ local module = ns.NewModule("FishingCast", L.FISHINGCAST_DESC, {
     enabled = false,
     speed = 400, -- milliseconds allowed between the two clicks
     combatWarning = true,
+    louderBobber = false,
+    saved = {}, -- CVar -> the player's own value while Louder Bobber has changed it
 })
 module.title = L.FISHINGCAST_TITLE
 module.category = "automation"
+-- A /reload, logout, or disconnect mid-cast leaves the changed volumes behind: put them back at
+-- login if the module is off then (OnEnable does it when it's on).
+ns.CVars.Track(module)
 
 module.options = {
     {
@@ -30,6 +37,8 @@ module.options = {
         min = 200, max = 600, step = 50, format = function(ms) return L.FISHINGCAST_MS:format(ms) end,
     },
     { key = "combatWarning", name = L.FISHINGCAST_COMBAT, description = L.FISHINGCAST_COMBAT_DESC },
+    { key = "louderBobber", name = L.FISHINGCAST_LOUDER, description = L.FISHINGCAST_LOUDER_DESC,
+        added = "0.9.0" },
 }
 
 local MAINHAND = 16
@@ -121,7 +130,78 @@ local function onCastStart(_, unit)
     end
 end
 
+-- Louder Bobber -------------------------------------------------------------------------------------
+-- While Fishing channels, sound effects go to full and music drops, so the splash is easy to hear.
+-- The player's own values come back a moment after the cast ends, so a quick recast doesn't make
+-- the music swell and fade between casts.
+
+local SFX_ON, SFX_VOLUME = "Sound_EnableSFX", "Sound_SFXVolume"
+local MUSIC_VOLUME = "Sound_MusicVolume"
+local QUIET_MUSIC = 0.1
+local RESTORE_DELAY = 5 -- seconds after a cast ends before the volumes go back
+
+local restoreTimer
+
+local function isFishing(spellID)
+    if not spellID or not ns.IsReadable(spellID) then
+        return false
+    end
+    local name = C_Spell.GetSpellName(spellID)
+    return name ~= nil and (name == C_Spell.GetSpellName(FISHING) or name == C_Spell.GetSpellName(7620))
+end
+
+local function cancelRestore()
+    if restoreTimer then
+        restoreTimer:Cancel()
+        restoreTimer = nil
+    end
+end
+
+local function restoreSound()
+    cancelRestore()
+    ns.CVars.RestoreAll(module.db.saved)
+end
+
+local function louder()
+    cancelRestore()
+    local saved = module.db.saved
+    ns.CVars.Set(saved, SFX_ON, "1")
+    ns.CVars.Set(saved, SFX_VOLUME, "1")
+    -- Only ever lower the music: a player who keeps it quieter keeps their value.
+    local music = tonumber(C_CVar.GetCVar(MUSIC_VOLUME) or "")
+    if music and music > QUIET_MUSIC then
+        ns.CVars.Set(saved, MUSIC_VOLUME, tostring(QUIET_MUSIC))
+    end
+end
+
+local function onChannelStart(_, unit, _, spellID)
+    if unit == "player" and module.db.louderBobber and isFishing(spellID) then
+        louder()
+    end
+end
+
+local function onChannelStop(_, unit)
+    if unit == "player" and next(module.db.saved) ~= nil then
+        cancelRestore()
+        restoreTimer = C_Timer.NewTimer(RESTORE_DELAY, restoreSound)
+    end
+end
+
+function module:OnOptionChanged(key)
+    if key == "louderBobber" then
+        if self.db.louderBobber and UnitChannelInfo("player") then
+            onChannelStart(nil, "player", nil, select(8, UnitChannelInfo("player")))
+        elseif not self.db.louderBobber then
+            restoreSound()
+        end
+    end
+end
+
 function module:OnEnable()
+    -- Not fishing now, so anything still saved is left from a reload or disconnect mid-cast.
+    restoreSound()
+    self:On("UNIT_SPELLCAST_CHANNEL_START", onChannelStart)
+    self:On("UNIT_SPELLCAST_CHANNEL_STOP", onChannelStop)
     if not button then
         button = CreateFrame("Button", nil, UIParent, "SecureActionButtonTemplate")
     end
@@ -149,4 +229,5 @@ function module:OnDisable()
     if armed then
         ns.AfterCombat(disarm)
     end
+    restoreSound()
 end

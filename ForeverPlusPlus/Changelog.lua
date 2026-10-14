@@ -26,6 +26,10 @@ ns.changelog = {
                 { L.COMBATALERT_TITLE, "The new Play Sound option (off by default) plays the "
                     .. "raid warning sound as you enter combat and a soft chime as you leave, for "
                     .. "when you're looking somewhere else." },
+                { L.FISHINGCAST_TITLE, "The new Louder Bobber option (off by default) turns sound "
+                    .. "effects up and music down while you fish, so the splash is easy to hear, "
+                    .. "and puts your own volumes back after you stop, even after a reload or "
+                    .. "disconnect mid-cast." },
                 { L.ITEMTOOLTIPS_TITLE, "The new Repair Cost line (off by default) shows what "
                     .. "repairing damaged gear costs, on gear you wear or carry, without a "
                     .. "merchant's repair cursor." },
