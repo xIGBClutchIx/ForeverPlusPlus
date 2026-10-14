@@ -16,6 +16,7 @@ local WHITE = { 1, 1, 1 }
 local L = ns.L
 local Errors = ns.Errors
 local Keys = ns.Keys
+local Colors = ns.Colors
 
 local module = ns.NewModule("MinimapButton", L.MINIMAPBUTTON_DESC, {
     enabled = true,
@@ -75,17 +76,37 @@ for _, choice in ipairs(Keys.CHOICES) do
     KEY_NAMES[choice[1]] = choice[2]
 end
 
--- The modules the right-click menu turns on and off, listed by title in alphabetical order, so
--- the order holds in every language. One that isn't available on this client (Hide Beta Feedback
--- off the beta) is left out.
-local QUICK_TOGGLES = {
-    "AutoDecline", "AutoDismount", "AutoGossip", "AutoQuest", "AutoRelease", "AutoRepair",
-    "AutoScreenshot", "AutoSellJunk", "AutoStow", "FastLoot", "FishingCast", "GatheringTracking",
-    "HideBetaFeedback", "MinimapNodeIcons", "MovableFramerate", "SkipCinematics",
+-- The modules the right-click menu turns on and off, grouped by what you're doing rather than by
+-- the Modules page's categories, where nearly all of them are Automation. Each group lists its
+-- modules by title in alphabetical order, so the order holds in every language. One that isn't
+-- available on this client (Hide Beta Feedback off the beta) is left out, and so is a group left
+-- empty.
+local QUICK_GROUPS = {
+    { L.MINIMAPBUTTON_GROUP_LOOT, { "AutoRepair", "AutoSellJunk", "AutoStow", "FastLoot" } },
+    { L.MINIMAPBUTTON_GROUP_NPCS, { "AutoGossip", "AutoQuest", "SkipCinematics" } },
+    { L.MINIMAPBUTTON_GROUP_WORLD, { "AutoDismount", "AutoRelease", "FishingCast",
+        "GatheringTracking", "MinimapNodeIcons" } },
+    { L.MINIMAPBUTTON_GROUP_OTHER, { "AutoDecline", "AutoScreenshot", "HideBetaFeedback",
+        "MovableFramerate" } },
 }
+
+local GROUP_COLOR = Colors.Code(Colors.GRAY[1], Colors.GRAY[2], Colors.GRAY[3])
 
 local function byTitle(a, b)
     return a.title < b.title
+end
+
+-- Each group's modules this client has, sorted by title.
+local function quickEntries(names)
+    local entries = {}
+    for _, name in ipairs(names) do
+        local other = ns.modules[name]
+        if other and not other.unavailable then
+            entries[#entries + 1] = { name = name, module = other, title = other.title or name }
+        end
+    end
+    sort(entries, byTitle)
+    return entries
 end
 
 -- Turned on and off through Core, as the Modules page does, so Settings and /fpp follow along.
@@ -93,25 +114,25 @@ local function quickMenu(owner)
     if not (MenuUtil and MenuUtil.CreateContextMenu) then
         return
     end
-    local entries = {}
-    for _, name in ipairs(QUICK_TOGGLES) do
-        local other = ns.modules[name]
-        if other and not other.unavailable then
-            entries[#entries + 1] = { name = name, module = other, title = other.title or name }
-        end
-    end
-    sort(entries, byTitle)
     MenuUtil.CreateContextMenu(owner, function(_, root)
         root:CreateTitle(ns.title)
-        for _, entry in ipairs(entries) do
-            local name, other = entry.name, entry.module
-            root:CreateCheckbox(entry.title,
-                function() return other.db.enabled end,
-                function()
-                    ns.SetEnabled(name, not other.db.enabled)
-                    ns.RefreshSetting(name)
-                end)
+        for _, group in ipairs(QUICK_GROUPS) do
+            local entries = quickEntries(group[2])
+            if #entries > 0 then
+                root:CreateTitle(GROUP_COLOR .. group[1] .. "|r")
+                for _, entry in ipairs(entries) do
+                    local name, other = entry.name, entry.module
+                    root:CreateCheckbox(entry.title,
+                        function() return other.db.enabled end,
+                        function()
+                            ns.SetEnabled(name, not other.db.enabled)
+                            ns.RefreshSetting(name)
+                        end)
+                end
+            end
         end
+        root:CreateDivider()
+        root:CreateButton(L.MINIMAPBUTTON_HINT_SETTINGS, function() ns.OpenSettings() end)
     end)
 end
 
