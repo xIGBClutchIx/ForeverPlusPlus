@@ -1,0 +1,43 @@
+name: Bug report
+description: Something in Forever++ is broken or acting strange.
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Forever++ version
+      description: Shown on the About page in Forever++ settings, or in the CurseForge app.
+      placeholder: "1.2.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What went wrong, and what you expected instead. Screenshots help.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: How do we make it happen?
+      description: The steps that lead to the problem, if you know them.
+      placeholder: |
+        1. Turn on ...
+        2. Open ...
+        3. See ...
+
+  - type: textarea
+    id: errors
+    attributes:
+      label: Errors
+      description: Type `/fpp errors` in game, click Copy Bug Report, and paste it here. Leave it empty if there were none.
+      render: text
+
+  - type: textarea
+    id: addons
+    attributes:
+      label: Other addons
+      description: Other addons you have on, if any. It helps to know whether the problem still happens with only Forever++ on.

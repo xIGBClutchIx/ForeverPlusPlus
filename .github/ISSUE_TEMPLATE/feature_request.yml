@@ -1,0 +1,23 @@
+name: Feature request
+description: An idea for a new module, or a change to one that's already there.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like?
+      description: Describe the change and where in the game you'd see it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why?
+      description: What it would help with, or what bugs you about how things work now.
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Anything like it?
+      description: Another addon, or a version of WoW, that already does this. Screenshots or links help.
