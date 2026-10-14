@@ -1,5 +1,6 @@
--- Unusable Items Tint: tints red the icons of items you can't use, in your bags, the bank, and
--- at merchants, the way Blizzard tints them in a merchant's list.
+-- Unusable Items Tint: tints red the icons of items you can't use, in your bags, the bank, at
+-- merchants, in the auction house, and in the loot window and loot rolls, the way Blizzard tints
+-- them in a merchant's list.
 --
 -- "Can't use" is what the game's own item tooltip says: any line in Blizzard's red, such as a
 -- class, armor or weapon type, level, profession skill, or reputation you don't have. That
@@ -12,7 +13,7 @@
 -- on every cooldown update, which would wipe a color we set.
 local _, ns = ...
 
-local _G, ipairs, pairs, type, wipe = _G, ipairs, pairs, type, wipe
+local _G, ipairs, pairs, type, wipe, select = _G, ipairs, pairs, type, wipe, select
 local setmetatable = setmetatable
 local C_Item, C_Container, C_Timer = C_Item, C_Container, C_Timer
 
@@ -24,6 +25,8 @@ local module = ns.NewModule("UnusableItemsTint", L.UNUSABLEITEMSTINT_DESC, {
     bags = true,
     bank = true,
     merchant = true,
+    auction = false,
+    loot = false,
 })
 module.title = L.UNUSABLEITEMSTINT_TITLE
 module.category = "items"
@@ -33,6 +36,11 @@ module.options = {
     { key = "bags", name = L.UNUSABLEITEMSTINT_BAGS, description = L.UNUSABLEITEMSTINT_BAGS_DESC },
     { key = "bank", name = L.UNUSABLEITEMSTINT_BANK, description = L.UNUSABLEITEMSTINT_BANK_DESC },
     { key = "merchant", name = L.UNUSABLEITEMSTINT_MERCHANT, description = L.UNUSABLEITEMSTINT_MERCHANT_DESC },
+    {
+        key = "auction", name = L.UNUSABLEITEMSTINT_AUCTION, description = L.UNUSABLEITEMSTINT_AUCTION_DESC,
+        added = "0.9.0",
+    },
+    { key = "loot", name = L.UNUSABLEITEMSTINT_LOOT, description = L.UNUSABLEITEMSTINT_LOOT_DESC, added = "0.9.0" },
 }
 
 local TINT = { 0.9, 0, 0 } -- Blizzard's merchant tint for an item you can't use
@@ -220,6 +228,95 @@ local function clearMerchant()
     end
 end
 
+-- Auction house ---------------------------------------------------------------------------------
+
+-- The browse list's rows as we see them, never Blizzard's category tables: adding to those
+-- taints the auction house.
+local function browseList()
+    local frame = _G.AuctionHouseFrame
+    local list = frame and frame.BrowseResultsFrame
+    return list and list.ItemList and list.ItemList.ScrollBox
+end
+
+local function updateAuction()
+    local box = browseList()
+    if not (box and box.ScrollTarget) then
+        return
+    end
+    local on = module.db.auction
+    for _, row in ipairs({ box.ScrollTarget:GetChildren() }) do
+        local itemKey = row.rowData and row.rowData.itemKey
+        local cell = row.cells and row.cells[2]
+        if itemKey and cell and cell.Icon then
+            setTint(cell.Icon, on and itemKey.itemID and unusable("item:" .. itemKey.itemID))
+        end
+    end
+end
+
+local function hookAuction()
+    local box = browseList()
+    if box and type(box.Update) == "function" then
+        module:Hook(box, "Update", updateAuction)
+        updateAuction()
+    end
+end
+
+-- Loot ------------------------------------------------------------------------------------------
+
+local lootHooked = false
+
+-- Blizzard tints a slot you can't loot (locked) red itself, so ours isn't laid on top of it.
+local function onLootFrame(_, frame, elementData)
+    if not module.enabled then
+        return
+    end
+    local item = frame.Item
+    local icon = item and (item.icon or item.Icon)
+    local slot = elementData and elementData.slotIndex
+    local link
+    if module.db.loot and type(slot) == "number" and _G.GetLootSlotLink then
+        local locked = _G.GetLootSlotInfo and select(6, _G.GetLootSlotInfo(slot))
+        link = not locked and _G.GetLootSlotLink(slot)
+    end
+    setTint(icon, link and unusable(link))
+end
+
+-- Once: the callback can't come off, so it checks module.enabled. Probe: the scroll box and the
+-- callback are Mainline's, as Already Known uses them.
+local function hookLoot()
+    local box = _G.LootFrame and _G.LootFrame.ScrollBox
+    if lootHooked or not (box and _G.ScrollUtil and _G.ScrollUtil.AddAcquiredFrameCallback) then
+        return
+    end
+    lootHooked = true
+    _G.ScrollUtil.AddAcquiredFrameCallback(box, onLootFrame, module, true)
+end
+
+-- Loot rolls: GroupLootFrame1..4, each showing its rollID's item on IconFrame.Icon.
+local ROLL_FRAMES = _G.NUM_GROUP_LOOT_FRAMES or 4
+
+local function updateRoll(frame)
+    local icon = frame.IconFrame and frame.IconFrame.Icon
+    local rollID = frame.rollID
+    local link = module.db.loot and rollID and _G.GetLootRollItemLink and _G.GetLootRollItemLink(rollID)
+    setTint(icon, link and unusable(link))
+end
+
+local function updateRolls()
+    for i = 1, ROLL_FRAMES do
+        local frame = _G["GroupLootFrame" .. i]
+        if frame and frame:IsShown() then
+            updateRoll(frame)
+        end
+    end
+end
+
+local function hookRolls()
+    for i = 1, ROLL_FRAMES do
+        module:HookScript(_G["GroupLootFrame" .. i], "OnShow", updateRoll)
+    end
+end
+
 -- Module ----------------------------------------------------------------------------------------
 
 local function refresh()
@@ -236,6 +333,14 @@ local function refresh()
     if merchant and merchant:IsShown() and (merchant.selectedTab or 1) == 1 then
         updateMerchant()
     end
+    updateAuction()
+    local loot = _G.LootFrame
+    if lootHooked and loot and loot:IsShown() and loot.ScrollBox.ForEachFrame then
+        loot.ScrollBox:ForEachFrame(function(frame, elementData)
+            onLootFrame(nil, frame, elementData)
+        end)
+    end
+    updateRolls()
 end
 
 local refreshTimer, forget
@@ -277,6 +382,10 @@ function module:OnEnable()
     self:Hook("MerchantFrame_UpdateBuybackInfo", clearMerchant)
     hookBags()
     hookBank()
+    hookLoot()
+    hookRolls()
+    ns.AddOns.WhenLoaded("Blizzard_AuctionHouseUI", hookAuction)
+    self:On("LOOT_OPENED", hookLoot)
     self:On("GET_ITEM_INFO_RECEIVED", onItemInfo) -- items without a tooltip yet weren't kept
     self:On("PLAYER_LEVEL_UP", onPlayerChanged)
     self:On("SKILL_LINES_CHANGED", onPlayerChanged)
@@ -285,6 +394,7 @@ function module:OnEnable()
 end
 
 function module:OnDisable()
+    ns.AddOns.Cancel("Blizzard_AuctionHouseUI", hookAuction)
     if refreshTimer then
         refreshTimer:Cancel()
         refreshTimer = nil

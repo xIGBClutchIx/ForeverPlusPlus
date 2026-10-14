@@ -95,6 +95,10 @@ L.UNUSABLEITEMSTINT_BANK_DESC = "Tint items you can't use in the bank."
 L.UNUSABLEITEMSTINT_MERCHANT = "Merchants"
 L.UNUSABLEITEMSTINT_MERCHANT_DESC = "Tint items a merchant sells that you can't use, where the "
     .. "merchant doesn't already, such as gear above your level."
+L.UNUSABLEITEMSTINT_AUCTION = "Auction House"
+L.UNUSABLEITEMSTINT_AUCTION_DESC = "Tint items you can't use in the auction house's search results."
+L.UNUSABLEITEMSTINT_LOOT = "Loot"
+L.UNUSABLEITEMSTINT_LOOT_DESC = "Tint items you can't use in the loot window and on loot rolls."
 
 -- ItemCount
 L.ITEMCOUNT_TITLE = "Item Count"

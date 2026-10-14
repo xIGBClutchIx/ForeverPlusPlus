@@ -21,6 +21,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Quest Tracker**: the new Current Zone Only option (off by default) tracks only the quests of the zone you're in, and tracks the others again when you get there. The quest your map follows always shows.
 - **Talent Planner**: the new Level-Up Reminder option (off by default) says in chat which talent your plan takes next when you gain a talent point.
 - **Tooltips**: the new Hide Health Bar option (off by default) hides the green health bar under player and NPC tooltips.
+- **Unusable Items Tint**: the new Auction House and Loot options (off by default) tint red the items you can't use in the auction house's search results, and in the loot window and on loot rolls.
 - **Waylaid Crates**: a new module for filling Waylaid Crates. Its Waylaid Crates entry in the auction house's categories lists every item your crates still need, less what's already in your bags and bank.
 - **Waypoints**: the new Follow Selected Quest option (on by default) points the arrow to the quest selected on the map instead of your map pin, and back to the pin when no quest is selected. Its Show Quest Name option (on by default) shows the quest's name under the distance.
 - **Waypoints**: the new Point to Corpse option (on by default) points the arrow to your corpse while you're a ghost, ahead of a quest or your map pin, and back to them once you're alive.

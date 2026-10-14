@@ -61,6 +61,9 @@ ns.changelog = {
                     .. "in chat which talent your plan takes next when you gain a talent point." },
                 { L.TOOLTIPS_TITLE, "The new Hide Health Bar option (off by default) hides the "
                     .. "green health bar under player and NPC tooltips." },
+                { L.UNUSABLEITEMSTINT_TITLE, "The new Auction House and Loot options (off by "
+                    .. "default) tint red the items you can't use in the auction house's search "
+                    .. "results, and in the loot window and on loot rolls." },
                 { L.WAYLAIDCRATES_TITLE, "A new module for filling Waylaid Crates. Its Waylaid "
                     .. "Crates entry in the auction house's categories lists every item your crates "
                     .. "still need, less what's already in your bags and bank." },
