@@ -1,13 +1,15 @@
 -- Profiler: a page under Forever++ in Settings that shows how much CPU each module takes, to find
 -- what needs work. Record times every call into each module's code (Lib/Profiler.lua) until Stop;
 -- the list shows the heaviest modules first, with their milliseconds a second, their worst single
--- frame, and how often they ran, beside the game's own numbers for Forever++ as a whole. Memory
--- can only be read for the whole addon. Nothing is timed until Record, and nothing is built until
--- the page is first shown; `/fpp profile` opens it.
+-- frame, and how often they ran, beside the game's own numbers for Forever++ as a whole. A module
+-- with parts has the AddOn List's +/- and folds open to them, each part with a bar against the
+-- module's heaviest part; the heaviest module starts open. Memory can only be read for the whole
+-- addon. Nothing is timed until Record, and nothing is built until the page is first shown;
+-- `/fpp profile` opens it.
 local _, ns = ...
 
-local ipairs, format, concat = ipairs, string.format, table.concat
-local CreateFrame, C_Timer = CreateFrame, C_Timer
+local ipairs, format, concat, max = ipairs, string.format, table.concat, math.max
+local CreateFrame, C_Timer, GameTooltip = CreateFrame, C_Timer, GameTooltip
 local L = ns.L
 local Profiler = ns.Profiler
 
@@ -15,15 +17,24 @@ local module = ns.NewModule("Profiler", L.PROFILER_DESC, { enabled = true })
 module.title = L.PROFILER_TITLE
 module.alwaysOn = true -- a tool page; it costs nothing until it records
 
-local ROWS = 20 -- the heaviest modules shown, as many as fit on the page
-local ROW_HEIGHT = 18
-local NAME_WIDTH = 280 -- the name column
-local COLUMNS = { 400, 510, 610 } -- right edges of the three number columns, from the left
-local INDENT = 16 -- a module's parts sit this far in, under it
+local ROW_HEIGHT = 22 -- a module's row
+local PART_HEIGHT = 18 -- a part's row under it
+local INDENT = 20 -- a part's name sits this far in from its module's
+local TOGGLE = 14 -- the +/- button's size
+-- Right edges of the three number columns, in from the list's right edge, and the part bar's.
+local COLUMNS = { -200, -100, -4 }
+local BAR_RIGHT, BAR_WIDTH, BAR_HEIGHT = -290, 90, 8
 local REFRESH = 1 -- seconds between updates while the page is open
+
+local PLUS = "Interface\\Buttons\\UI-PlusButton-Up"
+local MINUS = "Interface\\Buttons\\UI-MinusButton-Up"
+local TOGGLE_HIGHLIGHT = "Interface\\Buttons\\UI-PlusButton-Hilight"
+local BAR = "Interface\\TargetingFrame\\UI-StatusBar"
 
 local ui -- the page's parts, once built
 local ticker
+local open = setmetatable({}, { __mode = "k" }) -- module key -> true while it's unfolded
+local opened = false -- the heaviest module has been opened by itself once
 
 local function nameOf(key)
     if key == Profiler.SHARED then
@@ -44,46 +55,164 @@ local function nameOf(key)
     return key.title or key.name or "?"
 end
 
-local function newText(parent, template, x, y, justify)
-    local text = parent:CreateFontString(nil, "OVERLAY", template)
-    if justify == "RIGHT" then
-        text:SetPoint("TOPRIGHT", parent, "TOPLEFT", x, y)
-    else
-        text:SetPoint("TOPLEFT", parent, "TOPLEFT", x, y)
-    end
-    text:SetJustifyH(justify or "LEFT")
+-- Rows ------------------------------------------------------------------------------------------
+
+local function newNumber(row, x)
+    local text = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    text:SetPoint("RIGHT", row, "RIGHT", x, 0)
+    text:SetJustifyH("RIGHT")
     return text
 end
 
--- A row of the list: the module's name, then its three numbers.
-local function newRow(parent, y, template)
-    local row = { name = newText(parent, template, 10, y), y = y }
-    row.name:SetWidth(NAME_WIDTH)
+local function buildRow(row)
+    row.highlight = row:CreateTexture(nil, "BACKGROUND")
+    row.highlight:SetAllPoints()
+    row.highlight:SetColorTexture(1, 1, 1, 0.08)
+    row.highlight:Hide()
+
+    row.toggle = CreateFrame("Button", nil, row)
+    row.toggle:SetSize(TOGGLE, TOGGLE)
+    row.toggle:SetPoint("LEFT", 2, 0)
+    row.toggle:SetHighlightTexture(TOGGLE_HIGHLIGHT, "ADD")
+    row.toggle:SetScript("OnClick", function()
+        row:Click()
+    end)
+
+    row.name = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    row.name:SetJustifyH("LEFT")
     row.name:SetWordWrap(false)
+
+    -- A part's share of its module's heaviest part, as a gold status bar.
+    row.barBack = row:CreateTexture(nil, "ARTWORK")
+    row.barBack:SetColorTexture(0, 0, 0, 0.6)
+    row.barBack:SetSize(BAR_WIDTH, BAR_HEIGHT)
+    row.barBack:SetPoint("RIGHT", row, "RIGHT", BAR_RIGHT, 0)
+    row.bar = row:CreateTexture(nil, "OVERLAY")
+    row.bar:SetTexture(BAR)
+    row.bar:SetVertexColor(1, 0.82, 0)
+    row.bar:SetHeight(BAR_HEIGHT - 2)
+    row.bar:SetPoint("LEFT", row.barBack, "LEFT", 1, 0)
+
+    row.numbers = {}
     for i, x in ipairs(COLUMNS) do
-        row[i] = newText(parent, template, x, y, "RIGHT")
+        row.numbers[i] = newNumber(row, x)
     end
-    return row
+
+    row:SetScript("OnEnter", function(self)
+        self.highlight:Show()
+        if self.entry and self.entry.result.counted then
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:SetText(self.name:GetText(), 1, 1, 1)
+            GameTooltip:AddLine(L.PROFILER_COUNTED, nil, nil, nil, true)
+            GameTooltip:Show()
+        end
+    end)
+    row:SetScript("OnLeave", function(self)
+        self.highlight:Hide()
+        GameTooltip:Hide()
+    end)
+    row:SetScript("OnClick", function(self)
+        local entry = self.entry
+        if entry and entry.kind == "module" and entry.result.parts then
+            local key = entry.result.key
+            open[key] = not open[key] or nil
+            ui.refreshList()
+        end
+    end)
 end
 
-local function setRow(row, name, a, b, c)
-    row.name:SetText(name or "")
-    row[1]:SetText(a or "")
-    row[2]:SetText(b or "")
-    row[3]:SetText(c or "")
-end
+-- Fills a row from its entry: { kind = "module", "part" or "own", result, most }.
+local function initRow(row, entry)
+    if not row.name then
+        buildRow(row)
+    end
+    row.entry = entry
+    local result = entry.result
+    local isModule = entry.kind == "module"
+    row:SetHeight(isModule and ROW_HEIGHT or PART_HEIGHT)
 
--- A module's row in white, or (`part`) one of its parts indented under it in gray.
-local function showResult(row, result, part)
-    local x = part and 10 + INDENT or 10
-    row.name:SetPoint("TOPLEFT", row.name:GetParent(), "TOPLEFT", x, row.y)
-    row.name:SetWidth(NAME_WIDTH - (x - 10))
-    local color = part and GRAY_FONT_COLOR or HIGHLIGHT_FONT_COLOR
-    for _, text in ipairs({ row.name, row[1], row[2], row[3] }) do
+    local hasParts = isModule and result.parts ~= nil
+    row.toggle:SetShown(hasParts)
+    if hasParts then
+        local texture = open[result.key] and MINUS or PLUS
+        row.toggle:SetNormalTexture(texture)
+        row.toggle:SetPushedTexture(texture)
+    end
+
+    row.name:ClearAllPoints()
+    row.name:SetPoint("LEFT", row, "LEFT", isModule and TOGGLE + 8 or TOGGLE + 8 + INDENT, 0)
+    row.name:SetPoint("RIGHT", row, "RIGHT", BAR_RIGHT - BAR_WIDTH - 8, 0)
+    -- Gold module names like Settings' labels; parts in white, and what's besides them in gray.
+    row.name:SetFontObject(isModule and "GameFontNormal" or "GameFontHighlightSmall")
+    row.name:SetText(entry.kind == "own" and L.PROFILER_OWN or nameOf(result.key))
+    local nameColor = isModule and NORMAL_FONT_COLOR
+        or entry.kind == "own" and GRAY_FONT_COLOR or HIGHLIGHT_FONT_COLOR
+    row.name:SetTextColor(nameColor.r, nameColor.g, nameColor.b)
+
+    local barShown = not isModule and not result.counted
+    row.barBack:SetShown(barShown)
+    row.bar:SetShown(barShown and result.total > 0)
+    if barShown and result.total > 0 then
+        row.bar:SetWidth(max(1, (BAR_WIDTH - 2) * result.total / entry.most))
+    end
+
+    local numbers = row.numbers
+    if result.counted then
+        numbers[1]:SetText("")
+        numbers[2]:SetText("")
+    else
+        numbers[1]:SetText(format("%.3f", result.perSecond))
+        numbers[2]:SetText(format("%.2f", result.peak))
+    end
+    numbers[3]:SetText(format("%.1f", result.callsPerSecond))
+    local color = isModule and HIGHLIGHT_FONT_COLOR or GRAY_FONT_COLOR
+    for _, text in ipairs(numbers) do
+        text:SetFontObject(isModule and "GameFontHighlight" or "GameFontHighlightSmall")
         text:SetTextColor(color.r, color.g, color.b)
     end
-    setRow(row, part == "own" and L.PROFILER_OWN or nameOf(result.key), format("%.3f", result.perSecond),
-        format("%.2f", result.peak), format("%.1f", result.callsPerSecond))
+end
+
+-- The list's entries: each module, and while it's unfolded its parts and what it did besides.
+local function entries(results)
+    local list = {}
+    for _, result in ipairs(results) do
+        list[#list + 1] = { kind = "module", result = result }
+        if result.parts and open[result.key] then
+            local most = 0
+            for _, part in ipairs(result.parts) do
+                most = max(most, part.total)
+            end
+            if result.own then
+                most = max(most, result.own.total)
+            end
+            most = max(most, 1e-9)
+            for _, part in ipairs(result.parts) do
+                list[#list + 1] = { kind = "part", result = part, most = most }
+            end
+            if result.own then
+                list[#list + 1] = { kind = "own", result = result.own, most = most }
+            end
+        end
+    end
+    return list
+end
+
+-- Page --------------------------------------------------------------------------------------------
+
+local function refreshList()
+    local results = Profiler.Results()
+    -- The heaviest module with parts starts open, once, so the page shows what parts look like.
+    if not opened then
+        for _, result in ipairs(results) do
+            if result.parts then
+                open[result.key] = true
+                opened = true
+                break
+            end
+        end
+    end
+    ui.scrollBox:SetDataProvider(CreateDataProvider(entries(results)), ScrollBoxConstants.RetainScrollPosition)
+    ui.empty:SetShown(#results == 0)
 end
 
 local function refresh()
@@ -110,32 +239,7 @@ local function refresh()
         parts[#parts + 1] = format(L.PROFILER_ADDON_MEMORY, memory / 1024)
     end
     ui.addon:SetText(#parts > 0 and concat(parts, "  ") or "")
-
-    -- Each module, then its parts under it and what it did besides them.
-    local results = Profiler.Results()
-    local lines = {}
-    for _, result in ipairs(results) do
-        lines[#lines + 1] = { result }
-        for _, part in ipairs(result.parts or {}) do
-            lines[#lines + 1] = { part, true }
-        end
-        if result.own then
-            lines[#lines + 1] = { result.own, "own" }
-        end
-    end
-    for i, row in ipairs(ui.rows) do
-        local line = lines[i]
-        if line then
-            showResult(row, line[1], line[2])
-        else
-            setRow(row)
-        end
-    end
-    ui.empty:SetShown(#results == 0)
-    ui.more:SetShown(#lines > ROWS)
-    if #lines > ROWS then
-        ui.more:SetText(format(L.PROFILER_MORE, #lines - ROWS))
-    end
+    refreshList()
 end
 
 local function startTicker()
@@ -151,10 +255,17 @@ local function stopTicker()
     end
 end
 
+local function newText(parent, template, x, y)
+    local text = parent:CreateFontString(nil, "OVERLAY", template)
+    text:SetPoint("TOPLEFT", parent, "TOPLEFT", x, y)
+    text:SetJustifyH("LEFT")
+    return text
+end
+
 ---Draws the page the first time it's shown (called by Settings.lua).
 ---@param frame table the empty page
 function module:BuildPage(frame)
-    ui = { rows = {} }
+    ui = { refreshList = refreshList }
     ns.AddPageTitle(frame, module.title)
 
     ui.reset = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
@@ -180,20 +291,38 @@ function module:BuildPage(frame)
 
     ui.status = newText(frame, "GameFontHighlight", 10, -62)
     ui.addon = newText(frame, "GameFontHighlight", 10, -82)
-    -- Under the totals, where it's always on the page however tall Settings is.
     ui.note = newText(frame, "GameFontDisableSmall", 10, -104)
-    ui.note:SetWidth(COLUMNS[3] - 10)
+    ui.note:SetPoint("RIGHT", -40, 0)
     ui.note:SetText(L.PROFILER_NOTE)
 
-    local top = -142
-    local header = newRow(frame, top, "GameFontNormal")
-    setRow(header, L.PROFILER_MODULE, L.PROFILER_PER_SECOND, L.PROFILER_PEAK, L.PROFILER_CALLS)
-    for i = 1, ROWS do
-        ui.rows[i] = newRow(frame, top - i * ROW_HEIGHT, "GameFontHighlightSmall")
+    -- The list: a scroll box like Console Variables', its column titles just above it.
+    local scrollBox = CreateFrame("Frame", nil, frame, "WowScrollBoxList")
+    scrollBox:SetPoint("TOPLEFT", 10, -158)
+    scrollBox:SetPoint("BOTTOMRIGHT", -32, 8)
+    local scrollBar = CreateFrame("EventFrame", nil, frame, "MinimalScrollBar")
+    scrollBar:SetPoint("TOPLEFT", scrollBox, "TOPRIGHT", 8, 0)
+    scrollBar:SetPoint("BOTTOMLEFT", scrollBox, "BOTTOMRIGHT", 8, 0)
+    local view = CreateScrollBoxListLinearView()
+    view:SetElementExtentCalculator(function(_, entry)
+        return entry.kind == "module" and ROW_HEIGHT or PART_HEIGHT
+    end)
+    view:SetElementInitializer("Button", initRow)
+    ScrollUtil.InitScrollBoxListWithScrollBar(scrollBox, scrollBar, view)
+    ui.scrollBox = scrollBox
+
+    local titles = { L.PROFILER_PER_SECOND, L.PROFILER_PEAK, L.PROFILER_CALLS }
+    local moduleTitle = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    moduleTitle:SetPoint("BOTTOMLEFT", scrollBox, "TOPLEFT", TOGGLE + 8, 4)
+    moduleTitle:SetText(L.PROFILER_MODULE)
+    for i, x in ipairs(COLUMNS) do
+        local title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        title:SetPoint("BOTTOMRIGHT", scrollBox, "TOPRIGHT", x, 4)
+        title:SetText(titles[i])
     end
-    ui.empty = newText(frame, "GameFontDisable", 10, top - ROW_HEIGHT)
+
+    ui.empty = scrollBox:CreateFontString(nil, "OVERLAY", "GameFontDisable")
+    ui.empty:SetPoint("TOPLEFT", 6, -6)
     ui.empty:SetText(L.PROFILER_EMPTY)
-    ui.more = newText(frame, "GameFontDisableSmall", 10, top - (ROWS + 1) * ROW_HEIGHT)
 
     frame:HookScript("OnShow", function()
         refresh()

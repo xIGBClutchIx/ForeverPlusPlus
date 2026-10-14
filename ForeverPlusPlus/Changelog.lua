@@ -32,7 +32,8 @@ ns.changelog = {
                     .. "companions with Blizzard's own nameplate instead of a name and title." },
                 { L.PROFILER_TITLE, "A new page in Settings (/fpp profile) that records how "
                     .. "much CPU each module takes, heaviest first, beside Forever++'s total CPU "
-                    .. "and memory. Nothing is timed until you press Record." },
+                    .. "and memory. A module made of parts folds open to show what each part "
+                    .. "takes. Nothing is timed until you press Record." },
                 { L.QUESTLEVELS_TITLE, "A new module that shows a quest's level before its name, "
                     .. "like the quest log's [12], in a quest giver's list and at the top of the "
                     .. "quest's details. On by default." },

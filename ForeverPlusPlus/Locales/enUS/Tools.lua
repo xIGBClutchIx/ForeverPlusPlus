@@ -71,6 +71,7 @@ L.PROFILER_CALLS = "Calls a second"
 L.PROFILER_SHARED = "Shared code" -- time in Forever++'s libraries not traced to one module
 L.PROFILER_OWN = "everything else" -- under a module's parts: its time outside them
 L.PROFILER_EMPTY = "Nothing recorded yet."
-L.PROFILER_MORE = "%d more not shown." -- number of modules
+L.PROFILER_COUNTED = "Counted, not timed: a stopwatch around each of thousands a second would cost "
+    .. "more than the call." -- a part's tooltip on the Profiler page
 L.PROFILER_NOTE = "Only Forever++'s own code is timed, and timing it adds a little cost of its own "
     .. "while recording. Memory can only be read for the whole addon, not for each module."

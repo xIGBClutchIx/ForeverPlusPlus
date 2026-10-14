@@ -76,7 +76,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Player Nameplates | Always shows friendly players' names with their guild, with a name size slider, a choice of where buffs sit, and an icon (or light blue name) for recent allies. The health bar appears only when they're hurt or in combat. |
 | **Tools** | |
 | Console Variables | A page in Settings to browse and change the game's console variables (CVars). |
-| Profiler | A page in Settings that records how much CPU each module takes, heaviest first, beside Forever++'s total CPU and memory. Nothing is timed until you press Record. |
+| Profiler | A page in Settings that records how much CPU each module takes, heaviest first, beside Forever++'s total CPU and memory. A module made of parts folds open to show what each part takes. Nothing is timed until you press Record. |
 
 ## Install
 

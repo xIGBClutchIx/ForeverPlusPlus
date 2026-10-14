@@ -95,6 +95,7 @@ end
 function Profiler.Count(key)
     local s = entry(stats, key)
     s.calls = s.calls + 1
+    s.counted = true
     entry(groups, key.parent or key.module or key)
 end
 
@@ -179,6 +180,7 @@ local function row(key, s, seconds, calls)
         key = key, total = s.total, peak = s.frame > s.peak and s.frame or s.peak,
         perSecond = seconds > 0 and s.total / seconds or 0,
         callsPerSecond = seconds > 0 and calls / seconds or 0,
+        counted = s.counted, -- only counted (Profiler.Count): it has calls but no time
     }
 end
 
