@@ -667,10 +667,42 @@ local function startRecorder()
     end)
 end
 
+-- Game data: the IDs the addon ships (ns.GameData), and what play has taught it since.
+local function checkGameData()
+    section("game data")
+    local report, singles = ns.GameData.Audit()
+    for _, set in ipairs(report) do
+        local id = "data." .. set.label
+        local learned = format("%d seeded, %d learned%s", set.size, set.learned,
+            set.build and (" (build " .. text(set.build) .. ")") or "")
+        if not set.kind then
+            info(id, learned)
+        elseif #set.missing == 0 then
+            pass(id, learned .. "; every " .. set.kind .. " ID found")
+        else
+            local missing = {}
+            for i, key in ipairs(set.missing) do
+                missing[i] = text(key)
+            end
+            fail(id, learned .. "; no such " .. set.kind .. ": " .. tconcat(missing, " "))
+        end
+    end
+    for _, entry in ipairs(singles) do
+        local id = format("data.%s.%s", entry.kind, text(entry.id))
+        if entry.found == nil then
+            skip(id, entry.label .. ": couldn't check")
+        elseif entry.found then
+            pass(id, entry.label)
+        else
+            fail(id, entry.label .. " isn't in this client")
+        end
+    end
+end
+
 -- Running it ---------------------------------------------------------------------------------
 
 local CHECKS = { checkClient, checkSettings, checkFrames, checkCVars, checkTaxi, checkMap,
-    checkSecrets, checkItems, checkPlayers, checkUI, checkSaved }
+    checkSecrets, checkItems, checkPlayers, checkUI, checkSaved, checkGameData }
 
 ---Runs every probe and writes the results to the saved log, starting the recorder.
 ---@return number count how many lines it wrote
@@ -701,6 +733,18 @@ module.debugActions = {
         button = L.SELFTEST_BUTTON,
         description = L.SELFTEST_BUTTON_DESC,
         fn = module.Run,
+        section = L.DEBUG_SECTION_TESTING,
+    },
+    {
+        name = L.SELFTEST_GAMEDATA,
+        button = L.SELFTEST_GAMEDATA_BUTTON,
+        description = L.SELFTEST_GAMEDATA_DESC,
+        fn = function()
+            ns.Confirm("SELFTEST_GAMEDATA", L.SELFTEST_GAMEDATA_CONFIRM, function()
+                ns.GameData.ForgetAll()
+                ns.Print(L.SELFTEST_GAMEDATA_DONE)
+            end)
+        end,
         section = L.DEBUG_SECTION_TESTING,
     },
 }

@@ -13,7 +13,8 @@ local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
 
 local L = ns.L
 
-local HERBS, MINERALS = 2383, 2580 -- Find Herbs, Find Minerals
+local HERBS = ns.GameData.Spell(2383, "Find Herbs")
+local MINERALS = ns.GameData.Spell(2580, "Find Minerals")
 
 -- Which spells each `track` choice uses, the one to turn back on first before the other.
 local SPELLS = {

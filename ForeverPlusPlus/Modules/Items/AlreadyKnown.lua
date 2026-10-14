@@ -65,7 +65,7 @@ module.options = {
 local TINT = { 0.45, 1, 0.45 }
 local CHECK_TEXTURE = "Interface\\RaidFrame\\ReadyCheck-Ready" -- Blizzard's ready check mark
 local RECHECK = 10 -- seconds an item that isn't known is believed before it's looked at again
-local PET_ITEM_ID = 82800 -- the stand-in item for a caged pet in the auction house
+local PET_ITEM_ID = ns.GameData.Item(82800, "Pet Cage") -- a caged pet's stand-in in the auction house
 
 -- Is it known ---------------------------------------------------------------------------------
 

@@ -34,7 +34,7 @@ module.options = {
 
 local MAINHAND = 16
 local POLE_CLASS, POLE_SUBCLASS = 2, 20 -- weapons: fishing poles
-local FISHING = 131474 -- the Fishing spell; 7620 is the older ID for it
+local FISHING = ns.GameData.Spell(131474, "Fishing") -- 7620 is the older ID for it
 
 local button -- our secure button, made on first enable (a frame can't be removed)
 local lastClick = 0

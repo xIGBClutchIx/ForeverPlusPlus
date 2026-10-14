@@ -50,6 +50,12 @@ L.SELFTEST_BUTTON = "Run"
 L.SELFTEST_BUTTON_DESC = "Probe the client APIs Forever++ relies on, then record flights, deaths and "
     .. "other events until you /reload. The results are saved to Forever++'s SavedVariables file."
 L.SELFTEST_DONE = "Self test wrote %d lines. Type /reload to save them." -- number of lines
+L.SELFTEST_GAMEDATA = "Learned Game Data"
+L.SELFTEST_GAMEDATA_BUTTON = "Forget"
+L.SELFTEST_GAMEDATA_DESC = "Forget the item, spell, and map facts Forever++ learned in play, going back "
+    .. "to what it ships with. They're learned again as you play."
+L.SELFTEST_GAMEDATA_CONFIRM = "Forget all game data Forever++ learned in play?"
+L.SELFTEST_GAMEDATA_DONE = "Learned game data forgotten."
 
 -- Profiler
 L.PROFILER_TITLE = "Profiler"

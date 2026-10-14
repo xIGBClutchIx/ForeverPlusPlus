@@ -53,7 +53,8 @@ end
 for _, file in ipairs({ "Core", "Map" }) do
     load("ForeverPlusPlus/Locales/enUS/" .. file .. ".lua")
 end
-for _, file in ipairs({ "Secret", "Colors", "Text", "WorldMap", "Instances", "Chat",
+ITEM_MIN_SKILL = "Requires %s (%d)"
+for _, file in ipairs({ "Secret", "Colors", "Text", "GameData", "WorldMap", "Instances", "Chat",
     "TalentPlan", "Errors", "Prices", "Store", "Keys" }) do
     load("ForeverPlusPlus/Lib/" .. file .. ".lua")
 end
@@ -514,6 +515,44 @@ eq(oldDB.settings.BagSlotCounter.position, "top", "store: a write after tidy is 
 eq(type(view.seen.list), "table", "store: data after tidy is made again")
 view.banks.x = 1
 eq(oldDB.data.BagSlotCounter.banks.x, 1, "store: data made again is saved")
+
+-- GameData --------------------------------------------------------------------------------------
+
+local GameData = ns.GameData
+local savedDB = ns.db
+ns.db = nil -- before the saved variables load
+local nodes = GameData.New("testNodes", { Peacebloom = { 182, 1 } })
+eq(nodes:Get("Peacebloom")[2], 1, "game data: seed read")
+eq(nodes:Get("Dreamfoil"), nil, "game data: unknown is nil")
+eq(nodes:Learn("Dreamfoil", { 182, 270 }), true, "game data: learning something new changes it")
+eq(nodes:Get("Dreamfoil")[2], 270, "game data: learned before login is kept in memory")
+ns.db = {}
+eq(nodes:Get("Dreamfoil")[2], 270, "game data: early learning moves to the saved table")
+eq(ns.db.gameData.testNodes.values.Dreamfoil[2], 270, "game data: saved by set name")
+eq(nodes:Learn("Dreamfoil", { 182, 270 }), false, "game data: learning the same is no change")
+eq(nodes:Learn("Peacebloom", { 182, 5 }), true, "game data: learned overrides the seed")
+eq(nodes:Get("Peacebloom")[2], 5, "game data: learned wins")
+nodes:Learn("Peacebloom", { 182, 1 })
+eq(ns.db.gameData.testNodes.values.Peacebloom, nil, "game data: learning the seed's value drops ours")
+local seen = 0
+for _ in nodes:Pairs() do
+    seen = seen + 1
+end
+eq(seen, 2, "game data: pairs merges seed and learned")
+eq(nodes:Learned(), 1, "game data: learned count")
+local empty = GameData.New("testEmpty", { [1] = true })
+eq(empty:Get(1), true, "game data: a set that learned nothing reads its seed")
+eq(ns.db.gameData.testEmpty, nil, "game data: and saves nothing")
+GameData.ForgetAll()
+eq(nodes:Get("Dreamfoil"), nil, "game data: forget all")
+eq(GameData.Spell(1804, "Pick Lock"), 1804, "game data: single ID passes through")
+eq(GameData.Requires("Requires Herbalism (75)"), "Herbalism", "game data: requires skill")
+eq(select(2, GameData.Requires("Requires Herbalism (75)")), 75, "game data: requires rank")
+eq(GameData.Requires("Requires Level 20"), nil, "game data: other lines aren't requirements")
+eq(select(3, GameData.TooltipRequires({ lines = { { leftText = "Requires Mining (1)" },
+    { leftText = "|cffff2020Requires Mining (65)|r" } } })), 2,
+    "game data: tooltip requirement skips the title and color codes")
+ns.db = savedDB
 
 -- Done ------------------------------------------------------------------------------------------
 

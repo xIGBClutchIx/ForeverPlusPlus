@@ -46,7 +46,7 @@ module.options = {
 
 -- Forever's Azeroth map (Classic map IDs: Kalimdor 1414, Eastern Kingdoms 1415), for finding a
 -- zone by name where the player has no map, like in a dungeon.
-local AZEROTH = 947
+local AZEROTH = ns.GameData.Map(947, "Azeroth")
 
 local function canWaypoint()
     return C_Map and C_Map.SetUserWaypoint and C_Map.CanSetUserWaypointOnMap and true or false
