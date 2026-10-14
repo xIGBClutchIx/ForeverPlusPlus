@@ -7,7 +7,7 @@ local _, ns = ...
 -- player pressing the key.
 local GetSheathState, ToggleSheath = GetSheathState, ToggleSheath
 local UnitAffectingCombat, UnitIsDeadOrGhost = UnitAffectingCombat, UnitIsDeadOrGhost
-local UnitCastingInfo, UnitChannelInfo, C_Timer = UnitCastingInfo, UnitChannelInfo, C_Timer
+local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
 local IsInInstance = IsInInstance
 
 local L = ns.L
@@ -38,17 +38,13 @@ module.options = {
 local SHEATHED = 1
 local RETRY = 1 -- seconds to wait while casting before trying again
 
-local timer -- the pending stow, or nil
+local timer = ns.Frames.Timer() -- the pending stow
 
 local function cancel()
-    if timer then
-        timer:Cancel()
-        timer = nil
-    end
+    timer:Cancel()
 end
 
 local function stow()
-    timer = nil
     if UnitAffectingCombat("player") or UnitIsDeadOrGhost("player")
         or GetSheathState() == SHEATHED then
         return
@@ -56,7 +52,7 @@ local function stow()
     -- Sheathing mid-cast can interrupt it; wait for the cast to finish. The player's own cast,
     -- out of combat, isn't secret.
     if UnitCastingInfo("player") or UnitChannelInfo("player") then
-        timer = C_Timer.NewTimer(RETRY, stow)
+        timer:Start(RETRY, stow)
         return
     end
     ToggleSheath()
@@ -73,7 +69,7 @@ local function onCombatEnd()
     if module.db.outsideOnly and inInstance() then
         return
     end
-    timer = C_Timer.NewTimer(module.db.delay, stow)
+    timer:Start(module.db.delay, stow)
 end
 
 function module:OnEnable()

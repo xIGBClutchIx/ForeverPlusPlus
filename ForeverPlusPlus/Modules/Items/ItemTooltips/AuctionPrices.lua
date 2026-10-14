@@ -114,7 +114,8 @@ end
 -- A spinner and a line of text in the auction house's title bar while a scan runs, then
 -- "Prices updated" for a few seconds. Our own frame, parented to Blizzard's window.
 
-local indicator, hideTimer
+local indicator
+local hideTimer = ns.Frames.Timer()
 
 local function getIndicator()
     local parent = _G.AuctionHouseFrame
@@ -152,28 +153,21 @@ local function showIndicator(text, busy, stay)
         end
         return
     end
-    if hideTimer then
-        hideTimer:Cancel()
-        hideTimer = nil
-    end
+    hideTimer:Cancel()
     frame.text:SetText(text)
     if frame.spinner then
         frame.spinner:SetShown(busy)
     end
     frame:Show()
     if not busy and not stay then
-        hideTimer = C_Timer.NewTimer(4, function()
-            hideTimer = nil
+        hideTimer:Start(4, function()
             frame:Hide()
         end)
     end
 end
 
 local function hideIndicator()
-    if hideTimer then
-        hideTimer:Cancel()
-        hideTimer = nil
-    end
+    hideTimer:Cancel()
     if indicator then
         indicator:Hide()
     end
@@ -228,17 +222,14 @@ local sent = false -- the scan's browse query has gone out
 local waiting -- what the next step waits on: "server", "throttle", or "blocked"
 local ownQuery = false -- set while sending the scan's own browse query
 local lastQuery = 0 -- GetTime() of Blizzard's last query of its own
-local blockTimer
+local blockTimer = ns.Frames.Timer()
 local onThrottleReady
 
 local function stopScan()
     scanning, sent, waiting = false, false, nil
     seen, seenCount = nil, nil
     ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
-    if blockTimer then
-        blockTimer:Cancel()
-        blockTimer = nil
-    end
+    blockTimer:Cancel()
 end
 
 -- An item is in the sell box on the Sell tab, so a post is coming. Probed: when the window's
@@ -259,7 +250,6 @@ local step
 -- Paused for the sell box or giving way: look again shortly. The timer runs only while a scan
 -- is held back.
 local function onBlockTimer()
-    blockTimer = nil
     if waiting == "blocked" then
         step()
     end
@@ -278,8 +268,8 @@ function step()
         if sell then
             showIndicator(format(L.AUCTIONPRICES_PAUSED, seenCount), false, true)
         end
-        if not blockTimer then
-            blockTimer = C_Timer.NewTimer(sell and 1 or wait, onBlockTimer)
+        if not blockTimer:IsPending() then
+            blockTimer:Start(sell and 1 or wait, onBlockTimer)
         end
         return
     end

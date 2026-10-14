@@ -6,7 +6,7 @@ local _, ns = ...
 local select = select
 local IsInInstance, UnitIsDead, UnitIsGhost = IsInInstance, UnitIsDead, UnitIsGhost
 local UnitHasIncomingResurrection, HasNoReleaseAura = UnitHasIncomingResurrection, HasNoReleaseAura
-local RepopMe, C_DeathInfo, C_Timer = RepopMe, C_DeathInfo, C_Timer
+local RepopMe, C_DeathInfo = RepopMe, C_DeathInfo
 
 local L = ns.L
 
@@ -41,14 +41,11 @@ module.options[2].added = "0.9.0" -- the Skip Key
 -- "right away" waits this long before looking.
 local MIN_WAIT = 0.5 -- seconds
 
-local timer -- the pending release, or nil
+local timer = ns.Frames.Timer() -- the pending release
 local offered = false -- someone offered a resurrection since this death
 
 local function cancel()
-    if timer then
-        timer:Cancel()
-        timer = nil
-    end
+    timer:Cancel()
 end
 
 local function inBattleground()
@@ -77,7 +74,6 @@ local function resurrectionComing()
 end
 
 local function release()
-    timer = nil
     if not (UnitIsDead("player") and not UnitIsGhost("player") and inBattleground()) then
         return
     end
@@ -108,7 +104,7 @@ local function onDead()
         return
     end
     local delay = module.db.delay
-    timer = C_Timer.NewTimer(delay > MIN_WAIT and delay or MIN_WAIT, release)
+    timer:Start(delay > MIN_WAIT and delay or MIN_WAIT, release)
 end
 
 local function onResurrectRequest()

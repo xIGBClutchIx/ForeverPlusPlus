@@ -1,9 +1,10 @@
 -- Small frame helpers modules share: probing for Blizzard art and templates, the box tooltips are
--- drawn in, Escape closing our windows, red text in the error frame, and running something once
--- after a burst of calls.
+-- drawn in, Escape closing our windows, red text in the error frame, running something once
+-- after a burst of calls, and a timer that waits for one run at a time.
 local _, ns = ...
 
 local select, ipairs, tinsert, CreateFrame, C_Timer = select, ipairs, table.insert, CreateFrame, C_Timer
+local setmetatable = setmetatable
 
 local Frames = {}
 ns.Frames = Frames
@@ -105,4 +106,44 @@ function Frames.Coalesce(fn, delay)
         end
     end
     return queue, cancel
+end
+
+local Timer = {}
+Timer.__index = Timer
+
+---Runs `fn` in `seconds`, in place of the run waiting, if any.
+---@param seconds number
+---@param fn function
+function Timer:Start(seconds, fn)
+    self:Cancel()
+    local handle
+    handle = C_Timer.NewTimer(seconds, function()
+        if self.handle == handle then
+            self.handle = nil
+        end
+        fn()
+    end)
+    self.handle = handle
+end
+
+---Drops the run waiting, if any.
+function Timer:Cancel()
+    if self.handle then
+        self.handle:Cancel()
+        self.handle = nil
+    end
+end
+
+---Whether a run is waiting.
+---@return boolean
+function Timer:IsPending()
+    return self.handle ~= nil
+end
+
+---A timer that waits for one run at a time: `Start(seconds, fn)` replaces the run waiting,
+---`Cancel()` drops it (for OnDisable), and `IsPending()` says whether one is waiting. `fn` can
+---start it again.
+---@return table timer
+function Frames.Timer()
+    return setmetatable({}, Timer)
 end

@@ -88,21 +88,20 @@ local PVP_RANK_FACTION = 2800
 
 -- Taking a picture ----------------------------------------------------------------------------
 
-local timer -- the pending shot, or nil
+local timer = ns.Frames.Timer() -- the pending shot
 local reason -- what the last shot was for, for chat; nil for the player's own
 local hidden = false -- the interface is hidden for a shot and must come back
 local busy = false -- a shot is on its way, until the game says it's taken or failed
-local fallback -- ends the shot if the game never reports it, so the next one isn't blocked
+-- Ends the shot if the game never reports it, so the next one isn't blocked. Its own timer, so a
+-- later shot isn't shown the interface by this one's.
+local fallback = ns.Frames.Timer()
 local showUI, onShot
 
 -- The shot is over (taken, failed, or never reported): the next one may start.
 local function finish()
     ns.Off("SCREENSHOT_SUCCEEDED", onShot)
     ns.Off("SCREENSHOT_FAILED", onShot)
-    if fallback then
-        fallback:Cancel()
-        fallback = nil
-    end
+    fallback:Cancel()
     busy = false
     showUI()
 end
@@ -140,11 +139,7 @@ local function take(why)
     reason = why
     ns.On("SCREENSHOT_SUCCEEDED", onShot)
     ns.On("SCREENSHOT_FAILED", onShot)
-    -- A handle, not C_Timer.After, so a later shot isn't shown the interface by this one's timer.
-    fallback = C_Timer.NewTimer(UI_BACK, function()
-        fallback = nil
-        finish()
-    end)
+    fallback:Start(UI_BACK, finish)
     -- Hiding the interface in combat can be blocked, and so can showing it again, so only out of
     -- combat. If the player hid it themselves (Alt-Z), it's already out of the way.
     if module.db.hideUI and not InCombatLockdown() and UIParent:IsShown() then
@@ -160,11 +155,10 @@ end
 -- Asks for a shot a moment from now. Things that happen together (a level up that also earns an
 -- achievement) share one shot, named for the first.
 local function request(why)
-    if timer or not module.enabled then
+    if timer:IsPending() or not module.enabled then
         return
     end
-    timer = C_Timer.NewTimer(DELAY, function()
-        timer = nil
+    timer:Start(DELAY, function()
         take(why)
     end)
 end
@@ -390,10 +384,7 @@ function module:OnEnable()
 end
 
 function module:OnDisable()
-    if timer then
-        timer:Cancel()
-        timer = nil
-    end
+    timer:Cancel()
     finish()
     bindKeys()
 end

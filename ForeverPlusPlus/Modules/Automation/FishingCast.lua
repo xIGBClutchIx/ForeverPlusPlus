@@ -141,7 +141,7 @@ local MUSIC_VOLUME = "Sound_MusicVolume"
 local QUIET_MUSIC = 0.1
 local RESTORE_DELAY = 5 -- seconds after a cast ends before the volumes go back
 
-local restoreTimer
+local restoreTimer = ns.Frames.Timer()
 
 local function isFishing(spellID)
     if not spellID or not ns.IsReadable(spellID) then
@@ -152,10 +152,7 @@ local function isFishing(spellID)
 end
 
 local function cancelRestore()
-    if restoreTimer then
-        restoreTimer:Cancel()
-        restoreTimer = nil
-    end
+    restoreTimer:Cancel()
 end
 
 local function restoreSound()
@@ -183,8 +180,7 @@ end
 
 local function onChannelStop(_, unit)
     if unit == "player" and next(module.db.saved) ~= nil then
-        cancelRestore()
-        restoreTimer = C_Timer.NewTimer(RESTORE_DELAY, restoreSound)
+        restoreTimer:Start(RESTORE_DELAY, restoreSound)
     end
 end
 
