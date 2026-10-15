@@ -4,7 +4,8 @@
 -- Blizzard's windows (the world map, bags, character window, talents): a window opened from addon
 -- code runs its setup tainted, and Blizzard's own code then errors on secret values (the player
 -- frame's health text did). So it asks the player to open each one and takes the shot once it's
--- open. It does the rest itself: an item tooltip, the minimap button's tooltip, and Settings
+-- open. It does the rest itself: an item tooltip, the minimap button's tooltip, our own Whisper
+-- Window on a made-up conversation, and Settings
 -- (opened through the client, which doesn't taint). A scene left unopened is skipped and named in
 -- chat at the end. `/fpp shots wait` takes the screen as it is after a countdown, for what needs
 -- the world (nameplates, a merchant, the waypoint arrow, a right-click menu). Nothing runs until
@@ -65,6 +66,8 @@ local function bestStack()
 end
 
 -- The scenes ------------------------------------------------------------------------------------
+
+local whisperTest -- the whispers scene's test conversation, and whether the scene made it
 -- Each has an `id` for `/fpp shots <id>`, a `name`, the `modules` it shows (module -> options to
 -- set for the shot), `isShown()` (the shot waits for it, and a scene that isn't on screen isn't
 -- pictured), and how long to `wait` to draw. A scene we set up has `open()` (returns why it
@@ -154,6 +157,49 @@ local SCENES = {
             return planner.IsPlanning and planner.IsPlanning()
         end,
         readyText = L.SCREENSHOTS_PLAN_TALENTS,
+    },
+    {
+        -- Our own window, so we open it. The conversation is the Debug page's made-up one, never a
+        -- real player's; it's forgotten again after the shot unless it was there before.
+        id = "whispers",
+        name = L.SCREENSHOTS_SCENE_WHISPERS,
+        modules = { WhisperWindow = {} },
+        open = function()
+            local whispers = ns.modules.WhisperWindow
+            local internal = whispers.internal
+            local function testOne()
+                for _, conversation in pairs(internal.Conversations()) do
+                    if conversation.test then
+                        return conversation
+                    end
+                end
+            end
+            local conversation = testOne()
+            whisperTest = { made = not conversation }
+            if not conversation then
+                whispers.debugActions[1].fn()
+                conversation = testOne()
+            end
+            if not conversation then
+                return L.SCREENSHOTS_NO_WINDOW
+            end
+            whisperTest.conversation = conversation
+            internal.Open(conversation)
+        end,
+        isShown = function()
+            local internal = ns.modules.WhisperWindow.internal
+            return internal.IsShown()
+        end,
+        close = function()
+            local internal = ns.modules.WhisperWindow.internal
+            if internal.IsShown() then
+                internal.Toggle()
+            end
+            if whisperTest and whisperTest.made and whisperTest.conversation then
+                internal.Remove(whisperTest.conversation)
+            end
+            whisperTest = nil
+        end,
     },
     {
         -- Last, since it stays open for the player to close.
