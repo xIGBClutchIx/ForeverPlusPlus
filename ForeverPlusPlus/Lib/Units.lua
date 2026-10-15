@@ -1,5 +1,6 @@
 -- Who a unit is to the player: in their group, on their friends list, a recent ally, in their guild,
--- someone's pet or summon, and an NPC's title. Friends and guildmates can also be checked by name.
+-- someone's pet or summon, and an NPC's title. Friends and guildmates can also be checked by name,
+-- and what's known of a player (class, race, level, zone) gathered from their GUID and the lists.
 -- Identity can be secret (mostly in instances), and a value we can't read counts as "no".
 local _, ns = ...
 
@@ -8,6 +9,7 @@ local C_FriendList, C_BattleNet, C_TooltipInfo, type = C_FriendList, C_BattleNet
 local C_RecentAllies, C_GuildInfo, IsInGuild, IsGuildMember = C_RecentAllies, C_GuildInfo, IsInGuild, IsGuildMember
 local BNGetNumFriends, GetNumGuildMembers, GetGuildRosterInfo = BNGetNumFriends, GetNumGuildMembers, GetGuildRosterInfo
 local UnitPlayerControlled, UnitCreatureType, UnitIsOtherPlayersPet = UnitPlayerControlled, UnitCreatureType, UnitIsOtherPlayersPet
+local GetPlayerInfoByGUID, UnitTokenFromGUID, UnitLevel = GetPlayerInfoByGUID, UnitTokenFromGUID, UnitLevel
 
 local readable = ns.IsReadable
 
@@ -148,6 +150,85 @@ function Units.IsGuildmateName(name)
         end
     end
     return false
+end
+
+-- What the game can tell about another player -------------------------------------------------
+
+local function readNumber(value)
+    if readable(value) and type(value) == "number" and value > 0 then
+        return value
+    end
+end
+
+local function readText(value)
+    if ns.IsText(value, true) then
+        return value
+    end
+end
+
+---What the game knows about a player who isn't on screen, from their GUID (class and race, once
+---the client has seen them), a unit it can see (target, mouseover, group) for their level, and the
+---friends list and guild roster for their level, zone, and whether they're online. Any of it can
+---be missing: someone who's neither a friend, a guildmate, nor near has no level or zone.
+---@param guid string?
+---@param name string? matched against the lists when the GUID isn't there or doesn't match
+---@return { class: string?, classToken: string?, race: string?, level: number?, zone: string?, online: boolean?, friend: boolean, guild: boolean }
+function Units.PlayerDetails(guid, name)
+    local d = { friend = false, guild = false }
+    local hasGuid = ns.IsText(guid, true)
+    local want = bare(name)
+    local function matches(otherGuid, otherName)
+        if hasGuid and ns.IsText(otherGuid, true) then
+            return otherGuid == guid
+        end
+        return want ~= nil and bare(otherName) == want
+    end
+    if hasGuid then
+        if GetPlayerInfoByGUID then
+            local class, token, race = GetPlayerInfoByGUID(guid)
+            d.class, d.classToken, d.race = readText(class), readText(token), readText(race)
+        end
+        d.friend = Units.IsFriendGUID(guid)
+        d.guild = Units.IsGuildmateGUID(guid)
+        -- Probe: UnitTokenFromGUID is Mainline's.
+        local unit = UnitTokenFromGUID and UnitTokenFromGUID(guid)
+        if readText(unit) then
+            d.level = readNumber(UnitLevel(unit))
+            d.online = true
+        end
+    end
+    if C_FriendList and C_FriendList.GetNumFriends and C_FriendList.GetFriendInfoByIndex then
+        for i = 1, C_FriendList.GetNumFriends() or 0 do
+            local info = C_FriendList.GetFriendInfoByIndex(i)
+            if info and matches(info.guid, info.name) then
+                d.friend = true
+                d.online = info.connected and true or false
+                if d.online then
+                    d.level = d.level or readNumber(info.level)
+                    d.zone = readText(info.area)
+                end
+                d.class = d.class or readText(info.className)
+                break
+            end
+        end
+    end
+    if IsInGuild() and GetNumGuildMembers and GetGuildRosterInfo then
+        for i = 1, (GetNumGuildMembers()) do
+            local rosterName, _, _, level, class, zone, _, _, online, _, token, _, _, _, _, _, rosterGuid =
+                GetGuildRosterInfo(i)
+            if matches(rosterGuid, rosterName) then
+                d.guild = true
+                d.online = online and true or false
+                d.level = d.level or readNumber(level)
+                d.class, d.classToken = d.class or readText(class), d.classToken or readText(token)
+                if d.online then
+                    d.zone = d.zone or readText(zone)
+                end
+                break
+            end
+        end
+    end
+    return d
 end
 
 -- Creature types that are always someone's summon (UnitCreatureType's second value on Mainline).

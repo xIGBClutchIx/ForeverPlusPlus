@@ -315,6 +315,7 @@
     "wipe",
     "GetPlayerInfoByGUID",
     "Ambiguate",
+    "UnitTokenFromGUID",
     "BNSendWhisper",
     "SendChatMessage",
     "C_PartyInfo",

@@ -58,6 +58,8 @@ local function lineColor(conversation, kind)
     return chatColor(kind == "in" and "WHISPER" or "WHISPER_INFORM")
 end
 
+local GRAY = "|cff808080"
+
 -- A conversation's name in its class color, when its class is known.
 local function coloredName(conversation)
     local color = conversation.class and Colors.ClassToken(conversation.class)
@@ -67,14 +69,53 @@ local function coloredName(conversation)
     return conversation.display
 end
 
+-- Your name as the other side sees it: with your surname (UnitName's second value on Forever, not
+-- a realm), in your class color.
 local function playerName()
-    local name = UnitName("player")
-    return ns.IsText(name, true) and name or L.WHISPERWINDOW_YOU
+    local name, surname = UnitName("player")
+    if not ns.IsText(name, true) then
+        return L.WHISPERWINDOW_YOU
+    end
+    if ns.IsText(surname, true) then
+        name = format(L.WHISPERWINDOW_FULL_NAME, name, surname)
+    end
+    local color = Colors.Class("player")
+    return color and Colors.Text(color, name) or name
+end
+
+-- The line under the name: level, race, and class, then zone, then friend, guild, or offline,
+-- as far as the game knows (internal.Details).
+local function detailsText(conversation)
+    local d = internal.Details(conversation)
+    local who = {}
+    if d.level then
+        who[#who + 1] = format(L.WHISPERWINDOW_LEVEL, d.level)
+    end
+    who[#who + 1] = d.race
+    if d.class then
+        local color = conversation.class and Colors.ClassToken(conversation.class)
+        who[#who + 1] = color and Colors.Text(color, d.class) or d.class
+    end
+    local parts = {}
+    if #who > 0 then
+        parts[#parts + 1] = table.concat(who, " ")
+    end
+    parts[#parts + 1] = d.character and format(L.WHISPERWINDOW_PLAYING, d.character)
+    parts[#parts + 1] = d.zone
+    local tags = {}
+    tags[#tags + 1] = d.friend and L.WHISPERWINDOW_FRIEND or nil
+    tags[#tags + 1] = d.guild and L.WHISPERWINDOW_GUILD or nil
+    tags[#tags + 1] = d.online == false and L.WHISPERWINDOW_OFFLINE or nil
+    if #tags > 0 then
+        parts[#parts + 1] = GRAY .. table.concat(tags, ", ") .. "|r"
+    end
+    if #parts == 0 then
+        return GRAY .. L.WHISPERWINDOW_UNKNOWN .. "|r"
+    end
+    return table.concat(parts, "  -  ")
 end
 
 -- The messages ----------------------------------------------------------------------------------
-
-local GRAY = "|cff808080"
 
 local function stamp(seconds)
     if date("%Y-%m-%d", seconds) == date("%Y-%m-%d") then
@@ -99,10 +140,12 @@ local function showMessages()
     local conversation = selected
     if not conversation then
         f.name:SetText(L.WHISPERWINDOW_NONE)
+        f.details:SetText("")
         f.invite:Hide()
         f.edit:Hide()
         return
     end
+    f.details:SetText(detailsText(conversation)) -- first: it may learn the class
     f.name:SetText(coloredName(conversation))
     f.invite:SetShown(not conversation.bnet)
     f.edit:Show()
@@ -110,6 +153,25 @@ local function showMessages()
         f.messages:AddMessage(messageLine(conversation, message), lineColor(conversation, message.kind))
     end
     f.messages:ScrollToBottom()
+end
+
+-- The friends list or guild roster changed: the line under the name again, after a burst.
+local refreshDetails = Frames.Coalesce(function()
+    if internal.IsShown() and selected then
+        window.details:SetText(detailsText(selected))
+        window.name:SetText(coloredName(selected))
+    end
+end, 0.5)
+
+local DETAIL_EVENTS = { "FRIENDLIST_UPDATE", "GUILD_ROSTER_UPDATE", "GROUP_ROSTER_UPDATE",
+    "BN_FRIEND_INFO_CHANGED" }
+
+-- Asks the server for fresh friend and guild info; refreshDetails runs when it comes.
+local function askForDetails()
+    if C_FriendList and C_FriendList.ShowFriends then
+        C_FriendList.ShowFriends()
+    end
+    ns.Units.RequestGuildRoster()
 end
 
 -- The list --------------------------------------------------------------------------------------
@@ -142,6 +204,9 @@ local function pick(conversation, focus)
     internal.MarkRead(conversation) -- redraws the list when it was unread
     markRows()
     showMessages()
+    if conversation and not conversation.bnet then
+        askForDetails()
+    end
     if focus and conversation then
         window.edit:SetFocus()
     end
@@ -434,12 +499,17 @@ local function newWindow()
     f.name:SetPoint("RIGHT", f.invite, "LEFT", -8, 0)
     f.name:SetJustifyH("LEFT")
     f.name:SetWordWrap(false)
+    f.details = details:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    f.details:SetPoint("TOPLEFT", f.name, "BOTTOMLEFT", 0, -6)
+    f.details:SetPoint("RIGHT", -12, 0)
+    f.details:SetJustifyH("LEFT")
+    f.details:SetWordWrap(false)
 
     local line = details:CreateTexture(nil, "ARTWORK")
     line:SetColorTexture(1, 1, 1, 0.1)
     line:SetHeight(1)
-    line:SetPoint("TOPLEFT", 8, -32)
-    line:SetPoint("TOPRIGHT", -8, -32)
+    line:SetPoint("TOPLEFT", 8, -48)
+    line:SetPoint("TOPRIGHT", -8, -48)
 
     f.messages = newMessages(details)
     f.messages:SetPoint("TOPLEFT", line, "BOTTOMLEFT", 4, -4)
@@ -577,6 +647,11 @@ end
 
 function internal.EnableWindow()
     showButton()
+    for _, event in ipairs(DETAIL_EVENTS) do
+        if ns.HasEvent(event) then
+            module:On(event, refreshDetails)
+        end
+    end
     module:Hook("ChatEdit_InsertLink", insertLink)
     if ChatFrameUtil then
         module:Hook(ChatFrameUtil, "InsertLink", insertLink)

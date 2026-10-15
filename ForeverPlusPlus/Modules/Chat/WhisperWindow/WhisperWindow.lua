@@ -259,6 +259,42 @@ function internal.Start(name)
     return conversation
 end
 
+---What's known of the player behind a conversation: class, race, level, and zone (see
+---ns.Units.PlayerDetails), with the class, race, and level last seen kept on the conversation for
+---when the game can't say now. A Battle.net friend's character comes from Battle.net.
+---@param conversation table
+---@return table details
+function internal.Details(conversation)
+    local d
+    if conversation.bnet then
+        d = { friend = true, guild = false }
+        local id = bnetId(conversation)
+        local info = id and C_BattleNet and C_BattleNet.GetAccountInfoByID
+            and C_BattleNet.GetAccountInfoByID(id)
+        local game = info and info.gameAccountInfo
+        if game and game.isOnline then
+            d.online = true
+            d.character = ns.IsText(game.characterName, true) and game.characterName or nil
+            d.class = ns.IsText(game.className, true) and game.className or nil
+            d.race = ns.IsText(game.raceName, true) and game.raceName or nil
+            d.level = type(game.characterLevel) == "number" and game.characterLevel > 0
+                and game.characterLevel or nil
+            d.zone = ns.IsText(game.areaName, true) and game.areaName or nil
+        end
+    else
+        d = ns.Units.PlayerDetails(conversation.guid, conversation.name)
+        if d.classToken then
+            conversation.class = d.classToken
+        end
+    end
+    -- Kept for next time; the zone isn't, since it's stale as soon as they move.
+    conversation.race = d.race or conversation.race
+    conversation.level = d.level or conversation.level
+    conversation.className = d.class or conversation.className
+    d.race, d.level, d.class = conversation.race, conversation.level, conversation.className
+    return d
+end
+
 -- Sending ---------------------------------------------------------------------------------------
 
 ---Whether the game holds back chat right now (Midnight's chat lockdown, in some instances).
@@ -363,7 +399,9 @@ local function onWhisper(event, text, sender, _, _, _, _, _, _, _, _, _, guid, b
         return
     end
     local incoming = INCOMING[event]
-    if incoming and not conversation.bnet then
+    -- Both ways: a whisper you send carries the GUID of whom it went to.
+    if not conversation.bnet and ns.IsText(guid, true) then
+        conversation.guid = guid
         conversation.class = classOf(guid) or conversation.class
     end
     add(conversation, incoming and "in" or "out", text)
