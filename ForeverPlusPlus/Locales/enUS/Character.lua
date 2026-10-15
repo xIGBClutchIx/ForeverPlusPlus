@@ -17,7 +17,7 @@ L.CHARACTERWINDOW_SIDETABS_DESC = "Move the Equipment, Titles, and Pet tabs besi
     .. "They work like the other tabs: pick the Character tab to go back to the stats."
 L.CHARACTERWINDOW_COLORTITLE = "Colored Title"
 L.CHARACTERWINDOW_COLORTITLE_DESC = "Show your level, in gold, before your name, in your class color, "
-    .. "in the window's title."
+    .. "in the window's title, in place of the game's level line at the top of the window."
 L.CHARACTERWINDOW_TITLE_FORMAT = "%s %s"
 L.CHARACTERWINDOW_DURABILITY = "Durability Bars"
 L.CHARACTERWINDOW_DURABILITY_DESC = "A small bar beside each item with how worn it is, from green "

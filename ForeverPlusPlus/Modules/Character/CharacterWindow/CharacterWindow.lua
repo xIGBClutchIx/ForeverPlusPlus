@@ -103,14 +103,24 @@ local function restoreTitle()
     _G.CharacterFrame:UpdateTitle()
 end
 
+-- Blizzard's "Level 18 Mage" line on the strip over the model says what the title already does,
+-- so it goes while the title shows the level. Blizzard shows and hides it for the pet pane (whose
+-- own line stays), so it's faded instead.
+local function updateLevelLine()
+    local line = _G.PaperDollLevelInfo
+    if line then
+        line:SetAlpha(module.enabled and module.db.colorTitle and 0 or 1)
+    end
+end
+
 -- Header ---------------------------------------------------------------------------------------
 
 local function collapsed()
     return _G.CharacterFrame:IsRightPaneCollapsed()
 end
 
--- The tab row goes. The level lines stay: they sit on the strip over the model, and Blizzard
--- swaps the player's for the pet's itself.
+-- The tab row goes. The level lines stay where they are, on the strip over the model, and
+-- Blizzard swaps the player's for the pet's itself.
 local function updateHeader()
     if module.db.sideTabs then
         _G.PaperDollSidebarTabs:Hide()
@@ -344,6 +354,7 @@ local function start()
     applyHeader()
     refreshTabs()
     updateTitle()
+    updateLevelLine()
 end
 
 local function onPortrait()
@@ -403,6 +414,7 @@ function module:OnEnable()
         applyHeader()
         refreshTabs()
         updateTitle()
+        updateLevelLine()
         internal.updateDurability()
         internal.updateWeaponSkills()
     else
@@ -423,6 +435,7 @@ function module:OnDisable()
     end
     _G.CharacterFrame.ModeTabs.CharacterTab:SetChecked(_G.PaperDollFrame:IsShown())
     restoreTitle()
+    updateLevelLine()
 end
 
 function module:OnOptionChanged(key)
@@ -445,5 +458,6 @@ function module:OnOptionChanged(key)
         else
             restoreTitle()
         end
+        updateLevelLine()
     end
 end

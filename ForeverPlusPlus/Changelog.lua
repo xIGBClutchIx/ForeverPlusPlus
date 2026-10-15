@@ -100,6 +100,9 @@ ns.changelog = {
             { L.CHANGELOG_CHANGED, {
                 { L.AUTOGOSSIP_TITLE, "Off by default for new installs, and so is Other NPCs. "
                     .. "If you already use it, it stays as you had it." },
+                { L.CHARACTERWINDOW_TITLE, "With Colored Title on, the game's own \"Level 18 "
+                    .. "Mage\" line at the top of the window is hidden, since the title already "
+                    .. "shows your level. Your pet's line on the pet pane stays." },
                 { L.AUTOWEAPONBUFF_TITLE, "An item it doesn't know yet, or a stone on a fist "
                     .. "weapon, works from a right-click too once you've put it on that kind of "
                     .. "weapon by hand, for every character." },
