@@ -409,3 +409,13 @@ function module:OnOptionChanged(key)
         update()
     end
 end
+
+---Shows the minimap button's tooltip as hovering it does, for the Screenshots tool's picture.
+---@return boolean shown false while the button isn't on the minimap
+function module.ShowTooltip()
+    if not (module.enabled and button and button:IsShown()) then
+        return false
+    end
+    showTooltip(button, true)
+    return true
+end

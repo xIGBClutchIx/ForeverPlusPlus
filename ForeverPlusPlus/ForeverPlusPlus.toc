@@ -58,6 +58,7 @@ Modules\Quests\QuestNameplates.lua
 Modules\Tools\ConsoleVariables.lua
 Modules\Tools\SelfTest.lua
 Modules\Tools\Profiler.lua
+Modules\Tools\Screenshots.lua
 Modules\Automation\FastLoot.lua
 Modules\Automation\AutoRepair.lua
 Modules\Automation\AutoSellJunk.lua
