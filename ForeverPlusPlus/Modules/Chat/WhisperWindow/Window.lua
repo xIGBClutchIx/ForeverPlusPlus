@@ -529,6 +529,7 @@ end
 ---@param conversation? table
 function internal.Changed(conversation)
     updateButton()
+    ns.Whispers.Changed() -- the minimap button's tooltip
     if not internal.IsShown() then
         return
     end
@@ -548,9 +549,12 @@ function internal.EnableWindow()
     if ChatFrameUtil then
         module:Hook(ChatFrameUtil, "InsertLink", insertLink)
     end
+    -- What the minimap button opens and counts, through ns.Whispers.
+    ns.Whispers.Provide({ toggle = internal.Toggle, unread = internal.UnreadTotal })
 end
 
 function internal.DisableWindow()
+    ns.Whispers.Provide(nil)
     showButton()
     if window then
         window:Hide()

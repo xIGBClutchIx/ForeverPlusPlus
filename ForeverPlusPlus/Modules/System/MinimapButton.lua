@@ -1,5 +1,6 @@
 -- Minimap Button: Forever++'s button on the minimap, in the addon compartment, or both. A click
--- opens Forever++ settings and a right-click a menu of quick module toggles; while Error Catcher
+-- opens Forever++ settings (Whisper Window instead while it's on, through ns.Whispers, with
+-- Settings on Shift-Right-click) and a right-click a menu of quick module toggles; while Error Catcher
 -- is on, a click with a key held shows its errors, clears this session's, or clears them all (each
 -- key is an option), and the button shows how many this session caught (through ns.Errors, never
 -- Error Catcher itself). After a fresh install the button wears Blizzard's NEW label, and its
@@ -12,6 +13,7 @@ local ipairs, CreateFrame, GetCursorPosition = ipairs, CreateFrame, GetCursorPos
 
 local L = ns.L
 local Errors = ns.Errors
+local Whispers = ns.Whispers
 local Keys = ns.Keys
 local Colors = ns.Colors
 
@@ -139,9 +141,21 @@ local function quickMenu(owner)
     end)
 end
 
+local function openSettings()
+    if not (ns.WelcomePending() and ns.OpenAbout()) then
+        ns.OpenSettings()
+    end
+end
+
+-- Left-click opens Whisper Window while it's on and Settings while it's off; Shift-Right-click
+-- always opens Settings, so Settings has one click that never moves.
 local function onClick(owner, mouse)
     if mouse == "RightButton" then
-        quickMenu(owner)
+        if IsShiftKeyDown() then
+            openSettings()
+        else
+            quickMenu(owner)
+        end
         return
     end
     if Errors.IsOn() then
@@ -153,9 +167,11 @@ local function onClick(owner, mouse)
             end
         end
     end
-    if not (ns.WelcomePending() and ns.OpenAbout()) then
-        ns.OpenSettings()
+    if Whispers.IsOn() and not ns.WelcomePending() then
+        Whispers.Toggle()
+        return
     end
+    openSettings()
 end
 
 -- A count row: a white label, and the count at the right in `color`, or a gray None at 0.
@@ -181,15 +197,29 @@ local function showTooltip(owner, drag)
     GameTooltip:SetOwner(owner, "ANCHOR_LEFT")
     GameTooltip:AddDoubleLine(ns.title, ns.version, GOLD[1], GOLD[2], GOLD[3], GRAY[1], GRAY[2],
         GRAY[3])
-    local errors = Errors.IsOn()
+    local errors, whispers = Errors.IsOn(), Whispers.IsOn()
     if errors then
         addCount(L.MINIMAPBUTTON_TIP_SESSION, Errors.SessionCount(), RED)
         addCount(L.MINIMAPBUTTON_TIP_SAVED, Errors.SavedCount(), GOLD)
+    end
+    if whispers then
+        addCount(L.MINIMAPBUTTON_TIP_WHISPERS, Whispers.Unread(), GOLD)
+    end
+    if errors or whispers then
         GameTooltip:AddLine(" ")
     end
-    addHint(ns.WelcomePending() and L.MINIMAPBUTTON_HINT_WELCOME or L.MINIMAPBUTTON_HINT_SETTINGS,
-        L.MINIMAPBUTTON_LEFT_CLICK)
+    local welcome = ns.WelcomePending()
+    if welcome then
+        addHint(L.MINIMAPBUTTON_HINT_WELCOME, L.MINIMAPBUTTON_LEFT_CLICK)
+    elseif whispers then
+        addHint(L.MINIMAPBUTTON_HINT_WHISPERS, L.MINIMAPBUTTON_LEFT_CLICK)
+    else
+        addHint(L.MINIMAPBUTTON_HINT_SETTINGS, L.MINIMAPBUTTON_LEFT_CLICK)
+    end
     addHint(L.MINIMAPBUTTON_HINT_TOGGLES, L.MINIMAPBUTTON_RIGHT_CLICK)
+    if whispers and not welcome then
+        addHint(L.MINIMAPBUTTON_HINT_SETTINGS, L.MINIMAPBUTTON_SHIFT_RIGHT_CLICK)
+    end
     if errors then
         for _, action in ipairs(KEY_ACTIONS) do
             local key = module.db[action.setting]
