@@ -87,8 +87,7 @@ L.ADDONSLIST_SETS_MISSING = "Addons in the AddOn set %s that aren't installed: %
 -- MinimapButton
 L.MINIMAPBUTTON_TITLE = "Minimap Button"
 L.MINIMAPBUTTON_DESC = "A Forever++ button on the minimap, in the addon compartment, or both. "
-    .. "Click it for settings (for the Whisper Window while that's on, with settings on "
-    .. "Shift-right-click), right-click it for quick toggles, and Shift-click it for caught "
+    .. "Click it for settings, right-click it for quick toggles, and Shift-click it for caught "
     .. "errors, Ctrl-click to clear this session's, or Alt-click to clear them all."
 L.MINIMAPBUTTON_WHERE = "Show In"
 L.MINIMAPBUTTON_WHERE_DESC = "Where the button goes: on the minimap, in the addon compartment "
@@ -99,8 +98,7 @@ L.MINIMAPBUTTON_WHERE_BOTH = "Both"
 L.MINIMAPBUTTON_COMPARTMENT_COUNT = "%s (%d)" -- Forever++, errors this session
 L.MINIMAPBUTTON_TIP_SESSION = "Errors This Session"
 L.MINIMAPBUTTON_TIP_SAVED = "Saved Errors"
-L.MINIMAPBUTTON_TIP_WHISPERS = "Unread Whispers"
-L.MINIMAPBUTTON_TIP_NONE = "None" -- a count of 0 errors or whispers
+L.MINIMAPBUTTON_TIP_NONE = "None" -- a count of 0 errors
 -- The right-click menu's groups.
 L.MINIMAPBUTTON_GROUP_LOOT = "Vendors and Loot"
 L.MINIMAPBUTTON_GROUP_NPCS = "NPCs and Quests"
@@ -110,14 +108,12 @@ L.MINIMAPBUTTON_GROUP_OTHER = "Other"
 L.MINIMAPBUTTON_HINT_SETTINGS = "Open Settings"
 L.MINIMAPBUTTON_HINT_WELCOME = "About Forever++"
 L.MINIMAPBUTTON_HINT_TOGGLES = "Quick Toggles"
-L.MINIMAPBUTTON_HINT_WHISPERS = "Open Whispers"
 L.MINIMAPBUTTON_HINT_ERRORS = "Show Errors"
 L.MINIMAPBUTTON_HINT_CLEAR = "Clear Session Errors"
 L.MINIMAPBUTTON_HINT_CLEAR_ALL = "Clear All Errors"
 L.MINIMAPBUTTON_HINT_MOVE = "Move Button"
 L.MINIMAPBUTTON_LEFT_CLICK = "Left-Click"
 L.MINIMAPBUTTON_RIGHT_CLICK = "Right-Click"
-L.MINIMAPBUTTON_SHIFT_RIGHT_CLICK = "Shift-Right-Click"
 L.MINIMAPBUTTON_KEY_LEFT_CLICK = "%s-Left-Click" -- a key, such as Shift
 L.MINIMAPBUTTON_LEFT_DRAG = "Left-Drag"
 L.MINIMAPBUTTON_ERRORS_KEY = "Show Errors Key"

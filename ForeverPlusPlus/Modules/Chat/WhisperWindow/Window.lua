@@ -513,8 +513,16 @@ local function showButton()
         if not button then
             button = ns.Chat.NewButton(ICON, internal.Toggle, L.WHISPERWINDOW_TOOLTIP,
                 L.WHISPERWINDOW_TOOLTIP_DESC)
-            button.count = button:CreateFontString(nil, "OVERLAY", "NumberFontNormalSmall")
-            button.count:SetPoint("BOTTOMRIGHT", -2, 2)
+            -- In Blizzard's gold, as its own chat buttons' icons are.
+            local gold = NORMAL_FONT_COLOR
+            if gold then
+                button.icon:SetVertexColor(gold.r, gold.g, gold.b)
+            else
+                button.icon:SetVertexColor(1, 0.82, 0)
+            end
+            -- The whispers waiting, at the corner like the minimap button's error count.
+            button.count = button:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
+            button.count:SetPoint("BOTTOMRIGHT", 0, 0)
         end
         button:Show()
         ns.Chat.AddButton(module.name, button, 30)
@@ -529,7 +537,6 @@ end
 ---@param conversation? table
 function internal.Changed(conversation)
     updateButton()
-    ns.Whispers.Changed() -- the minimap button's tooltip
     if not internal.IsShown() then
         return
     end
@@ -549,12 +556,9 @@ function internal.EnableWindow()
     if ChatFrameUtil then
         module:Hook(ChatFrameUtil, "InsertLink", insertLink)
     end
-    -- What the minimap button opens and counts, through ns.Whispers.
-    ns.Whispers.Provide({ toggle = internal.Toggle, unread = internal.UnreadTotal })
 end
 
 function internal.DisableWindow()
-    ns.Whispers.Provide(nil)
     showButton()
     if window then
         window:Hide()

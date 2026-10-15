@@ -197,9 +197,6 @@ ns.changelog = {
                     .. "Node Icons, Movable Framerate, and Skip Cinematics on and off, grouped by "
                     .. "what you're doing (Vendors and Loot, NPCs and Quests, Out in the World, and "
                     .. "Other)." },
-                { L.MINIMAPBUTTON_TITLE, "While Whisper Window is on, a click opens it instead "
-                    .. "of Settings, and Shift-right-click opens Settings. The tooltip counts "
-                    .. "unread whispers." },
                 { L.SHORTCHANNELNAMES_TITLE, "The Style dropdown also offers initials ([LFG] for "
                     .. "LookingForGroup) and the name without its zone ([General]), alone or after "
                     .. "the number. Number and Initials ([1. LFG]) is the new default." },
