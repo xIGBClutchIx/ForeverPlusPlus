@@ -312,6 +312,10 @@ end
 ---@param text string
 ---@return boolean
 function internal.Send(conversation, text)
+    if conversation.test then
+        add(conversation, "out", text) -- the Debug page's made-up player: nothing goes out
+        return true
+    end
     if chatLocked() then
         ns.Frames.ErrorMessage(L.WHISPERWINDOW_LOCKED)
         return false
@@ -333,7 +337,7 @@ end
 ---Invites the player of a conversation to the group.
 ---@param conversation table
 function internal.Invite(conversation)
-    if conversation.bnet then
+    if conversation.bnet or conversation.test then
         return
     end
     if C_PartyInfo and C_PartyInfo.InviteUnit then
@@ -481,6 +485,47 @@ local function updateFilter()
 end
 
 -- The module ------------------------------------------------------------------------------------
+
+-- A made-up conversation, to see the window without anyone to whisper. Its player is a Night Elf
+-- Druid nobody can be: the key can't collide with a real name, and a reply to it goes nowhere.
+local TEST_KEY = "test:whisperwindow"
+local TEST_LINES = {
+    { "in", "Hey, are you still looking for a healer for Deadmines?" },
+    { "out", "Yes! We have a tank and two DPS so far." },
+    { "in", "Great, I'm level 19, is that okay?" },
+    { "out", "Perfect, sending an invite now." },
+    { "in", "Thanks! Heading to Westfall." },
+}
+
+local function testConversation()
+    local conversations = internal.Conversations()
+    conversations[TEST_KEY] = nil
+    local conversation = newConversation(TEST_KEY, L.WHISPERWINDOW_TEST_NAME,
+        L.WHISPERWINDOW_TEST_NAME)
+    conversation.test = true
+    conversation.class, conversation.className = "DRUID", L.WHISPERWINDOW_TEST_CLASS
+    conversation.race, conversation.level = L.WHISPERWINDOW_TEST_RACE, 19
+    local start = time() - #TEST_LINES * 60
+    for i, line in ipairs(TEST_LINES) do
+        add(conversation, line[1], line[2])
+        conversation.messages[#conversation.messages].time = start + i * 60
+    end
+    -- As a real whisper would: opened, or left unread for the chat button to count.
+    if module.db.openOnWhisper or internal.IsShown() then
+        internal.Open(conversation)
+    end
+end
+
+-- On the Debug page (Settings/Debug.lua).
+module.debugActions = {
+    {
+        name = L.WHISPERWINDOW_TEST,
+        button = L.WHISPERWINDOW_TEST_BUTTON,
+        description = L.WHISPERWINDOW_TEST_DESC,
+        fn = testConversation,
+        section = L.DEBUG_SECTION_TESTING,
+    },
+}
 
 module.actions = {
     {
