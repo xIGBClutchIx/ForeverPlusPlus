@@ -26,6 +26,9 @@ L.FONT_ARIALN = "Arial Narrow"
 L.FONT_SKURRI = "Skurri"
 L.FONT_MORPHEUS = "Morpheus"
 
+-- Lib/Frames.lua: our windows' titles
+L.FRAMES_WINDOW_TITLE = "%s %s" -- the addon's name (in gray), the window's title
+
 -- Lib/Keys.lua: modifier keys, in every key dropdown
 L.KEY_SHIFT = "Shift"
 L.KEY_CTRL = "Ctrl"

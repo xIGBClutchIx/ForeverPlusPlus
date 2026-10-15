@@ -5,7 +5,7 @@
 local _, ns = ...
 
 local select, ipairs, tinsert, CreateFrame, C_Timer = select, ipairs, table.insert, CreateFrame, C_Timer
-local pcall, UIParent = pcall, UIParent
+local pcall, UIParent, format = pcall, UIParent, string.format
 local setmetatable, type, InCombatLockdown = setmetatable, type, InCombatLockdown
 
 local Frames = {}
@@ -92,17 +92,21 @@ function Frames.PortraitWindow(name, title)
     end
     if f.SetPortraitToAsset then
         pcall(f.SetPortraitToAsset, f, ns.icon)
-        -- Blizzard's portrait is 62 pixels square with its round mask inset 2 left and right and
-        -- 4 at the bottom, so the circle's center is 31 across and 29 down. The icon's emblem is
-        -- about 52 of its 64 pixels wide, centered 32 across and 30 down. Show it 54 pixels wide
-        -- with its center half a pixel left of the circle's, where the ring's opening sits, and
-        -- the icon's dark square border falls outside the circle.
+        -- Blizzard's portrait is 62 pixels square. The icon's emblem is about 52 of its 64 pixels
+        -- wide, centered 32 across and 30 down; show it 54 pixels wide, so the icon's dark square
+        -- border falls outside the circle. Centered at 30.5 across and 29 down (from the round
+        -- mask's insets), it sat about a pixel high and a quarter left of the ring in game
+        -- (2026-10-15, measured on a screenshot), so it's centered at 30.75 across and 30 down.
         if f.SetPortraitTexCoord then
             local perPixel = 52 / 64 / 54
-            local left, top = 32 / 64 - 30.5 * perPixel, 30.25 / 64 - 29 * perPixel
+            local left, top = 32 / 64 - 30.75 * perPixel, 30.25 / 64 - 30 * perPixel
             pcall(f.SetPortraitTexCoord, f, left, left + 62 * perPixel, top, top + 62 * perPixel)
         end
     end
+    -- The addon's name in gray before the title, so the window says whose it is.
+    local gray = ns.Colors.GRAY
+    title = format(ns.L.FRAMES_WINDOW_TITLE, ns.Colors.Code(gray[1], gray[2], gray[3]) .. ns.title
+        .. "|r", title)
     if f.SetTitle then
         f:SetTitle(title)
     elseif f.TitleText then
