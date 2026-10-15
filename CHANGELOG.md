@@ -90,6 +90,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Class Colors**: turning name backgrounds off puts back the target frame's own color.
 - **Auto Weapon Buff**: right-clicking a stone or oil in your bags at the guild bank deposits it instead of putting it on your weapon.
 - **Auto Decline**: Allow Friends and Guild lets party invites from guildmates through even before your guild roster has loaded.
+- **World Map**: Points of Interest no longer causes an error each time a Skyborne casts a spell in combat. A Read Ley Line or Skysight cast in combat saves its spot once combat ends.
 
 ## 0.8.4 (2026-10-11)
 

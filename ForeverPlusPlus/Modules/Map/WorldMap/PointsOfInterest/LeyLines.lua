@@ -2,9 +2,9 @@
 -- one, drawing the saved ones, and the button that forgets them.
 local _, ns = ...
 
-local ipairs, pairs, format, abs = ipairs, pairs, string.format, math.abs
+local ipairs, pairs, pcall, format, abs = ipairs, pairs, pcall, string.format, math.abs
 local C_Spell, C_UnitAuras, C_Timer, GetTime = C_Spell, C_UnitAuras, C_Timer, GetTime
-local UnitRace = UnitRace
+local UnitRace, InCombatLockdown = UnitRace, InCombatLockdown
 
 local L = ns.L
 local MapTooltip = ns.MapTooltip
@@ -147,12 +147,14 @@ local FRESH = 1
 -- The player's long buffs: for each, its spell ID, whether it's a known buff of this kind (by ID,
 -- or by name: the 15-minute Energized is in the client's tables, the 15-minute Elemental Blessing
 -- isn't, only the 30-second one, so it's taken to share the name), and whether it started with
--- the cast at `castTime`. Secret aura fields are skipped.
+-- the cast at `castTime`. Secret aura fields are skipped; the caller checks ns.AurasReadable
+-- first, and a read that throws anyway ends the scan.
 local function longBuffs(kindName, castTime)
     local found = {}
     if not (C_UnitAuras and C_UnitAuras.GetAuraDataByIndex) then
         return found
     end
+    local getAura = C_UnitAuras.GetAuraDataByIndex
     local names = {}
     for id, kind in BUFFS:Pairs() do
         local name = kind == kindName and spellName(id)
@@ -161,8 +163,8 @@ local function longBuffs(kindName, castTime)
         end
     end
     for i = 1, 40 do
-        local aura = C_UnitAuras.GetAuraDataByIndex("player", i, "HELPFUL")
-        if not aura then
+        local ok, aura = pcall(getAura, "player", i, "HELPFUL")
+        if not (ok and aura) then
             break
         end
         local id, name, duration, expires = aura.spellId, aura.name, aura.duration,
@@ -179,13 +181,11 @@ local function longBuffs(kindName, castTime)
     return found
 end
 
--- Saves where the player stands as a spot of this kind, unless one is already saved there.
-local function saveSpot(kindName)
-    if not module.enabled then
-        return
-    end
-    local mapID, x, y = ns.WorldMap.PlayerPosition()
-    if not mapID then
+-- Saves `where` (the player's map and spot at the cast) as a spot of this kind, unless one is
+-- already saved there.
+local function saveSpot(kindName, where)
+    local mapID, x, y = where[1], where[2], where[3]
+    if not (module.enabled and mapID) then
         return
     end
     x, y = percent(x), percent(y)
@@ -207,9 +207,12 @@ end
 -- cast whose fresh long buff isn't known teaches that buff, and any other cast that a fresh known
 -- long buff follows teaches the cast (a patch's new IDs); both save the spot too. A cast right
 -- after a known one teaches nothing, since the buff is the known cast's.
+-- While auras are secret (in combat) reading them throws, so a known cast waits for combat to
+-- end, with the spot it was cast on; any other cast is skipped, as it's only for learning.
 local lastKnownCast = 0
+local waiting -- the latest known cast waiting for combat to end, or nil
 
-local function afterCast(spellID, castTime)
+local function afterCast(spellID, castTime, where)
     local kindName = CASTS:Get(spellID)
     local knownCast = kindName ~= nil
     if not knownCast and castTime - lastKnownCast < 2 * FRESH + 1 then
@@ -219,13 +222,30 @@ local function afterCast(spellID, castTime)
     if not (module.enabled and kindName) then
         return
     end
+    if not ns.AurasReadable() then
+        if knownCast and InCombatLockdown() then
+            local first = not waiting
+            waiting = { spellID, castTime, where }
+            if first then
+                ns.AfterCombat(function()
+                    local cast = waiting
+                    waiting = nil
+                    -- Still secret out of combat (an instance): give up rather than wait more.
+                    if ns.AurasReadable() then
+                        afterCast(cast[1], cast[2], cast[3])
+                    end
+                end)
+            end
+        end
+        return
+    end
     local learnBuff
     for _, buff in ipairs(longBuffs(kindName, castTime)) do
         if buff.known and (knownCast or buff.fresh) then
             if not knownCast then
                 CASTS:Learn(spellID, kindName)
             end
-            saveSpot(kindName)
+            saveSpot(kindName, where)
             return
         elseif knownCast and buff.fresh then
             learnBuff = buff.id
@@ -233,7 +253,7 @@ local function afterCast(spellID, castTime)
     end
     if learnBuff then
         BUFFS:Learn(learnBuff, kindName)
-        saveSpot(kindName)
+        saveSpot(kindName, where)
     end
 end
 
@@ -245,6 +265,8 @@ function internal.onCast(_, unit, _, spellID)
     if CASTS:Get(spellID) then
         lastKnownCast = castTime
     end
+    -- Where the cast was, in case its buff can only be read after combat, when they've moved on.
+    local where = { ns.WorldMap.PlayerPosition() }
     -- The buff lands after the cast; give the server a moment.
-    C_Timer.After(1, function() afterCast(spellID, castTime) end)
+    C_Timer.After(1, function() afterCast(spellID, castTime, where) end)
 end

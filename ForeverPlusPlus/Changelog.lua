@@ -232,6 +232,9 @@ ns.changelog = {
                     .. "bank deposits it instead of putting it on your weapon." },
                 { L.AUTODECLINE_TITLE, "Allow Friends and Guild lets party invites from "
                     .. "guildmates through even before your guild roster has loaded." },
+                { L.WORLDMAP_TITLE, "Points of Interest no longer causes an error each time a "
+                    .. "Skyborne casts a spell in combat. A Read Ley Line or Skysight cast in "
+                    .. "combat saves its spot once combat ends." },
             } },
         },
     },

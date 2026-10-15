@@ -4,6 +4,7 @@ local _, ns = ...
 
 local type = type
 local issecretvalue, C_CurveUtil, UnitHealthPercent, Enum = issecretvalue, C_CurveUtil, UnitHealthPercent, Enum
+local C_Secrets = C_Secrets
 
 ---Whether a value can be tested, compared, or used in Lua. Secret values can't; treat them as
 ---unknown and pass them only to widget setters.
@@ -39,6 +40,14 @@ end
 ---@return boolean
 function ns.IsTrueOrSecret(value)
     return issecretvalue and issecretvalue(value) or not not value
+end
+
+---Whether auras can be read now. While the client makes them secret (in combat, mostly),
+---reading one from addon code throws instead of giving back a secret value, so check this first.
+---@return boolean
+function ns.AurasReadable()
+    local secret = C_Secrets and C_Secrets.ShouldAurasBeSecret and C_Secrets.ShouldAurasBeSecret()
+    return not ns.IsTrueOrSecret(secret)
 end
 
 ---A curve for `UnitHealthPercent(unit, true, curve)` that gives `hurt` below full health and
