@@ -74,6 +74,8 @@ end
 -- Each row's options go under its `section`, a smaller header in the part's section in Settings.
 local options = {}
 local INSTANCES, TRAVEL, OTHER = L.POI_SECTION_INSTANCES, L.POI_SECTION_TRAVEL, L.POI_SECTION_OTHER
+local chat = ns.ChatOption(L.POI_CHAT_DESC)
+chat.requires = "leyLines"
 for _, rows in ipairs({
     { section = INSTANCES, kind("dungeons", "dungeonSize", L.POI_DUNGEONS, L.POI_DUNGEONS_DESC) },
     { section = INSTANCES, kind("raids", "raidSize", L.POI_RAIDS, L.POI_RAIDS_DESC) },
@@ -110,8 +112,8 @@ for _, rows in ipairs({
             { "orb", L.POI_LEYLINE_ICON_ORB },
         },
     } },
-    -- Said when a ley line is saved, so with them.
-    { section = OTHER, ns.ChatOption(L.POI_CHAT_DESC) },
+    -- Said only when a ley line is saved, so under them.
+    { section = OTHER, chat },
 }) do
     for _, option in ipairs(rows) do
         option.section = rows.section
