@@ -65,6 +65,7 @@ local ADDON = "Blizzard_UIPanels_Game"
 local STATS = 1 -- Blizzard's PAPERDOLL_SIDEBARS index for the stats; every other one gets a side tab
 local SPACING = 2 -- between side tabs, ours included, as Blizzard spaces its own
 local BOTTOM = 6 -- kept clear above the bottom of the window
+local MODEL_RAISE = 20 -- how far the character moves up while the level strip is gone
 
 local started
 local tabs = {} -- sidebar index -> our side tab, from STATS + 1 to numSidebars
@@ -123,6 +124,11 @@ local function updateLevelLine()
     local controls, pane = scene.ControlFrame, _G.CharacterFrameLeftPaneHost
     if controls and pane then
         controls:SetPoint("TOP", pane, "TOP", 0, hide and -6 or -40)
+    end
+    -- And the character moves up into the room the strip leaves. Blizzard never translates this
+    -- scene's view (its panning moves the camera), so 0, 0 puts it back.
+    if scene.SetViewTranslation then
+        scene:SetViewTranslation(0, hide and MODEL_RAISE or 0)
     end
     if hide then
         scene:SetPoint("TOPLEFT", host, "TOPLEFT")

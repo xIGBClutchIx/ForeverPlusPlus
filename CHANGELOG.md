@@ -37,7 +37,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Changed
 
 - **Auto Gossip**: off by default for new installs, and so is Other NPCs. If you already use it, it stays as you had it.
-- **Character Window**: with Colored Title on, the game's own "Level 18 Mage" line at the top of the window is hidden, since the title already shows your level, and your character's background fills the empty strip it sat on, with the zoom and rotate buttons moved up into it. Your pet's line on the pet pane stays.
+- **Character Window**: with Colored Title on, the game's own "Level 18 Mage" line at the top of the window is hidden, since the title already shows your level, and your character's background fills the empty strip it sat on, with the zoom and rotate buttons and your character moved up into it. Your pet's line on the pet pane stays.
 - **Auto Weapon Buff**: an item it doesn't know yet, or a stone on a fist weapon, works from a right-click too once you've put it on that kind of weapon by hand, for every character.
 - **Quest Tracker**: Fade in Combat has a Combat Opacity slider, from 0 to 80%, for how faint the tracker gets in combat. It starts at 30%, as before.
 - **Waylaid Crates**: Item Tooltips' Waylaid Crate Costs option moved here as Bundle Costs, keeping your choice.

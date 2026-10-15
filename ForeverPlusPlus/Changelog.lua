@@ -103,8 +103,8 @@ ns.changelog = {
                 { L.CHARACTERWINDOW_TITLE, "With Colored Title on, the game's own \"Level 18 "
                     .. "Mage\" line at the top of the window is hidden, since the title already "
                     .. "shows your level, and your character's background fills the empty strip it "
-                    .. "sat on, with the zoom and rotate buttons moved up into it. Your pet's line "
-                    .. "on the pet pane stays." },
+                    .. "sat on, with the zoom and rotate buttons and your character moved up into "
+                    .. "it. Your pet's line on the pet pane stays." },
                 { L.AUTOWEAPONBUFF_TITLE, "An item it doesn't know yet, or a stone on a fist "
                     .. "weapon, works from a right-click too once you've put it on that kind of "
                     .. "weapon by hand, for every character." },
