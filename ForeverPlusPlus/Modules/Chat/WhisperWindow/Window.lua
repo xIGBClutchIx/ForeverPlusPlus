@@ -671,6 +671,16 @@ local function updateButton()
     end
     local unread = internal.UnreadTotal()
     button.count:SetText(unread > 0 and unread or "")
+    -- It pulses while whispers wait, like Blizzard's chat tabs with new messages.
+    if unread > 0 then
+        button.glow:Show()
+        if not button.pulse:IsPlaying() then
+            button.pulse:Play()
+        end
+    else
+        button.pulse:Stop()
+        button.glow:Hide()
+    end
 end
 
 local function showButton()
@@ -689,6 +699,20 @@ local function showButton()
             -- The whispers waiting, at the corner like the minimap button's error count.
             button.count = button:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
             button.count:SetPoint("BOTTOMRIGHT", 0, 0)
+            -- The button's own highlight, glowing in and out while whispers wait.
+            local glow = button:CreateTexture(nil, "OVERLAY")
+            glow:SetAllPoints()
+            glow:SetAtlas("chatframe-button-highlight")
+            glow:SetBlendMode("ADD")
+            glow:Hide()
+            local pulse = glow:CreateAnimationGroup()
+            pulse:SetLooping("BOUNCE")
+            local fade = pulse:CreateAnimation("Alpha")
+            fade:SetFromAlpha(0.1)
+            fade:SetToAlpha(1)
+            fade:SetDuration(0.8)
+            fade:SetSmoothing("IN_OUT")
+            button.glow, button.pulse = glow, pulse
         end
         button:Show()
         ns.Chat.AddButton(module.name, button, 30)
