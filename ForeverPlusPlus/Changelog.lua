@@ -16,6 +16,10 @@ ns.changelog = {
                 { L.QUESTTRACKER_TITLE, "The background is a little darker by default, at 40% "
                     .. "opacity instead of 30%. If you set its Opacity yourself, it stays as you "
                     .. "set it." },
+                { L.CHANGELOG_SETTINGS, "Option names on the Modules page have more room and a "
+                    .. "smaller indent under the option they depend on, so they wrap less. When "
+                    .. "a NEW label doesn't fit after a name, it sits after the option's checkbox "
+                    .. "instead of squeezing the name." },
             } },
             { L.CHANGELOG_FIXED, {
                 { L.SPELLRANKS_TITLE, "The warning badge on a lower-rank spell sits fully inside "

@@ -211,13 +211,16 @@ local function since(version, name)
         and true or false
 end
 
-local TAG_PADDING = 14 -- the room a label takes after its text, besides its own text
+local TAG_GAP = 6 -- between a text's end and its label
+local TAG_PADDING = 8 -- the room a label takes after its text, besides its own text
 
 -- A function that shows a NEW label just after `text`, a font string, or hides it: the text at most
--- `room` wide, less the label's room while it shows. It returns how far past the text's end the
--- label reaches (0 while hidden), for something after it. The label is made the first time it's
--- needed, so it can come and go with Show Tags.
-local function newLabel(parent, text, room)
+-- `room` wide, less the label's room while it shows. With `after` (an option's checkbox), a label
+-- that wouldn't fit on the text's line goes just after that instead, so the text keeps its room and
+-- stays on one line. It returns how far past the text's end the label reaches (0 while hidden or
+-- after `after`), for something after it. The label is made the first time it's needed, so it can
+-- come and go with Show Tags.
+local function newLabel(parent, text, room, after)
     local label
     return function(shown)
         if shown and not label and canLabel() then
@@ -229,24 +232,32 @@ local function newLabel(parent, text, room)
         elseif shown then
             tag = 26
         end
-        text:SetWidth(min(ns.Text.Width(text) + 2, room - (shown and tag + TAG_PADDING or 0)))
+        local full = ns.Text.Width(text)
+        local beside = shown and after and full + tag + TAG_PADDING > room
+        local inline = shown and not beside
+        text:SetWidth(min(full + 2, room - (inline and tag + TAG_PADDING or 0)))
         if label then
-            -- The text's width, unless it's cut short, then half the label's text: the template
-            -- centers its text on the frame.
-            local width = min(ns.Text.Width(text), text:GetWidth())
+            -- Half the label's text past where it starts: the template centers its text on the
+            -- frame. On the text's line, it starts after the text, or where it's cut short.
             label:ClearAllPoints()
-            label:SetPoint("CENTER", text, "LEFT", width + 6 + tag / 2, 0)
+            if beside then
+                label:SetPoint("CENTER", after, "RIGHT", TAG_GAP + tag / 2, 0)
+            else
+                local width = min(full, text:GetWidth())
+                label:SetPoint("CENTER", text, "LEFT", width + TAG_GAP + tag / 2, 0)
+            end
             label:SetShown(shown and true or false)
         end
-        return shown and 6 + tag or 0
+        return inline and TAG_GAP + tag or 0
     end
 end
 S.newLabel = newLabel
 
 -- An update that keeps a NEW label just after `text` while `key` (a module's name, or one of its
--- options) is marked, or `other` (the slider in an option's row, or the module in the list).
-local function newMark(parent, text, room, key, other)
-    local show = newLabel(parent, text, room)
+-- options) is marked, or `other` (the slider in an option's row, or the module in the list). With
+-- `after`, as newLabel.
+local function newMark(parent, text, room, key, other, after)
+    local show = newLabel(parent, text, room, after)
     return function()
         show(newRows[key] or (other and newRows[other]))
     end
@@ -392,8 +403,8 @@ S.CATEGORY_NAMES, S.CATEGORY_RANKS, S.categoryOf = CATEGORY_NAMES, CATEGORY_RANK
 
 local LIST_WIDTH = 186 -- the module list
 local ROW_HEIGHT = 26 -- an option's row, as in Blizzard's lists
-local INDENT = 15 -- an option under another (`requires`)
-local CONTROL_LEFT = 150 -- where an option's control starts, after its name
+local INDENT = 10 -- an option under another (`requires`)
+local CONTROL_LEFT = 165 -- where an option's control starts, after its name
 local DESCRIPTION_LINES = 4 -- the room a description always takes, so the options stay put
 
 local listed = {} -- the names of the modules on the page, by category, then title
@@ -716,19 +727,24 @@ local function addOptionRow(view, module, option, byKey, done)
     highlight:Hide()
     view.found[#view.found + 1] = { row = row, highlight = highlight,
         text = optionText(option) .. (pair and "\n" .. optionText(pair) or "") }
-    -- The name wraps narrower while it's marked NEW, so the row's height follows it. A slider in
-    -- the row has no name of its own here, so its mark goes on the row's.
-    local mark = newMark(row, label, CONTROL_LEFT - 8 - indent, option, pair)
+    local paired = pair and pair.min
+    local box
+    if paired or not (option.min or option.choices) then
+        box = newCheckbox(row, 30, function(checked) setOption(module, option, checked) end)
+        box:SetPoint("LEFT", CONTROL_LEFT, 0)
+    end
+    -- The name wraps narrower while it's marked NEW, so the row's height follows it, unless the
+    -- mark fits after a lone checkbox instead. A slider in the row has no name of its own here, so
+    -- its mark goes on the row's.
+    local mark = newMark(row, label, CONTROL_LEFT - 8 - indent, option, pair,
+        not paired and box or nil)
     updates[#updates + 1] = function()
         mark()
         row:SetHeight(max(ROW_HEIGHT, label:GetStringHeight() + 8))
     end
     local room = view:GetWidth() - CONTROL_LEFT - RESET_SIZE
-    local paired = pair and pair.min
     addResetButton(view, row, module, option, paired and pair or nil, on)
-    if paired or not (option.min or option.choices) then
-        local box = newCheckbox(row, 30, function(checked) setOption(module, option, checked) end)
-        box:SetPoint("LEFT", CONTROL_LEFT, 0)
+    if box then
         updates[#updates + 1] = function()
             box:SetChecked(module.db[option.key] and true or false)
             box:SetEnabled(on())
