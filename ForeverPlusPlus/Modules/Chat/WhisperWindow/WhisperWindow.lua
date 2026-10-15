@@ -520,10 +520,7 @@ local function testConversation()
         add(conversation, line[1], line[2])
         conversation.messages[#conversation.messages].time = start + i * 60
     end
-    -- As a real whisper would: opened, or left unread for the chat button to count.
-    if module.db.openOnWhisper or internal.IsShown() then
-        internal.Open(conversation)
-    end
+    -- Never opened: left unread, so the chat button's count can be checked.
 end
 
 -- On the Debug page (Settings/Debug.lua).
