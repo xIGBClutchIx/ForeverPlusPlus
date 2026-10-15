@@ -148,12 +148,35 @@ local function pick(conversation, focus)
 end
 
 local function confirmRemove(conversation)
+    -- internal.Remove closes it on the right too (internal.Changed sees it's gone).
     ns.Confirm("WHISPERWINDOW_REMOVE", L.WHISPERWINDOW_REMOVE_CONFIRM, function()
-        if selected == conversation then
-            selected = nil
-        end
         internal.Remove(conversation)
     end, conversation.display)
+end
+
+-- The small X on a row: removes its conversation at once. Dim until the mouse is on it, so the
+-- list stays quiet. Probe: Mainline's close button without scripts, the older one elsewhere.
+local function newRemoveButton(row)
+    local template = Frames.HasTemplate("UIPanelCloseButtonNoScripts") and "UIPanelCloseButtonNoScripts"
+        or "UIPanelCloseButton"
+    local b = CreateFrame("Button", nil, row, template)
+    b:SetSize(20, 20)
+    b:SetPoint("TOPRIGHT", 0, 0)
+    b:SetAlpha(0.5)
+    b:SetScript("OnClick", function()
+        internal.Remove(row.conversation)
+    end)
+    b:SetScript("OnEnter", function(self)
+        self:SetAlpha(1)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:SetText(L.WHISPERWINDOW_REMOVE)
+        GameTooltip:Show()
+    end)
+    b:SetScript("OnLeave", function(self)
+        self:SetAlpha(0.5)
+        GameTooltip_Hide()
+    end)
+    return b
 end
 
 -- The right-click menu on a row. Probe: Mainline's menus.
@@ -182,8 +205,9 @@ local function buildRow(row)
     row.name:SetPoint("TOPLEFT", 8, -6)
     row.name:SetJustifyH("LEFT")
     row.name:SetWordWrap(false)
+    row.remove = newRemoveButton(row)
     row.info = row:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-    row.info:SetPoint("TOPRIGHT", -6, -6)
+    row.info:SetPoint("TOPRIGHT", row.remove, "TOPLEFT", 0, -6)
     row.name:SetPoint("RIGHT", row.info, "LEFT", -4, 0)
     row.preview = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     row.preview:SetPoint("BOTTOMLEFT", 8, 6)
@@ -484,7 +508,7 @@ function internal.Open(conversation, focus)
     ensureWindow()
     window:Show()
     refreshList()
-    pick(conversation or (selected and internal.Conversations()[selected.key] and selected)
+    pick(conversation or (selected and internal.Conversations()[selected.key] == selected and selected)
         or firstToOpen(), focus)
 end
 
@@ -540,7 +564,8 @@ function internal.Changed(conversation)
     if not internal.IsShown() then
         return
     end
-    if selected and not internal.Conversations()[selected.key] then
+    -- The open conversation was removed (or cleared, from Settings): close it on the right.
+    if selected and internal.Conversations()[selected.key] ~= selected then
         selected = nil
         showMessages()
     end
