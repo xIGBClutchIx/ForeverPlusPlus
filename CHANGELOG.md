@@ -26,7 +26,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Waypoints**: the new Follow Selected Quest option (on by default) points the arrow to the quest selected on the map instead of your map pin, and back to the pin when no quest is selected. Its Show Quest Name option (on by default) shows the quest's name under the distance.
 - **Waypoints**: the new Point to Corpse option (on by default) points the arrow to your corpse while you're a ghost, ahead of a quest or your map pin, and back to them once you're alive.
 - **Waypoints**: the new Clear Pin on Arrival option (off by default) takes your map pin away once you reach it.
-- **World Map**: Points of Interest's new Ley Line Icon option (Portal by default) draws ley lines as the blue portal the minimap shows for one, or as the purple orb they were before.
+- **World Map**: Points of Interest's new Ley Line Icon option (Portal by default) draws ley lines as the blue swirl the minimap shows for one, or as the purple orb they were before.
 - **XP Bar Text**: the new Fill Bar with Ready Quests option (on by default) fills the experience bar on from your XP in green with what your quests ready to turn in will give, like rested XP.
 - **XP Bar Text**: the new Detailed Tooltip option (on by default) adds to the bar's tooltip the XP left to level, your rested XP, the XP of your quests, and your XP per hour and time to level since you logged in.
 - **XP Bar Text**: the new Green When Quests Level You option (on by default) turns off the green quest XP text shown once turning those quests in would level you.

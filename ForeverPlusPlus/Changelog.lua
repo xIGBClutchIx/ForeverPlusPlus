@@ -78,7 +78,7 @@ ns.changelog = {
                 { L.WAYPOINTS_TITLE, "The new Clear Pin on Arrival option (off by default) takes "
                     .. "your map pin away once you reach it." },
                 { L.WORLDMAP_TITLE, "Points of Interest's new Ley Line Icon option (Portal by "
-                    .. "default) draws ley lines as the blue portal the minimap shows for one, or "
+                    .. "default) draws ley lines as the blue swirl the minimap shows for one, or "
                     .. "as the purple orb they were before." },
                 { L.XPBARTEXT_TITLE, "The new Fill Bar with Ready Quests option (on by default) fills the "
                     .. "experience bar on from your XP in green with what your quests ready to turn "

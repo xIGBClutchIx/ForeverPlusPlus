@@ -44,7 +44,7 @@ local module = ns.modules.WorldMap:NewPart({
     leyLines = "skyborne", -- who sees ley lines: "skyborne" (their own kind), "everyone", or "off"
     leyLineSize = 80,
     leyLinesWorld = false,
-    leyLineIcon = "portal", -- "portal" (the minimap's blue portal) or "orb" (the purple ball)
+    leyLineIcon = "portal", -- "portal" (the minimap's blue swirl) or "orb" (the purple ball)
     chat = true, -- say so in chat when a ley line is saved
     -- Flight points this character has seen learned at a flight master, by node ID. Data, not a
     -- setting, saved per character.
@@ -141,12 +141,13 @@ local KINDS = {
         atlases = { "poi-soulspiritghost", "poi-graveyard-neutral", "Vehicle-TempleofKotmogu-GreenBall" } },
     -- Skyborne spots: ley lines purple, convergences orange. Both are Kotmogu balls like the cyan
     -- and green ones, but Unverified on Forever. With Ley Line Icon on Portal (`portal`), a ley
-    -- line is the blue portal the minimap shows for one, PortalBlue in the minimap's object icons
-    -- (UiTextureAtlasMember, wago.tools, build 70205).
+    -- line is a blue swirl like the one the minimap shows for one: the teleportation network's
+    -- swirl in the minimap's object icons (UiTextureAtlasMember, wago.tools, build 70338).
+    -- PortalBlue, tried first, didn't look like the minimap's (2026-10-14, Cameron).
     leyline = { show = "leyLines", size = "leyLineSize", pixels = 18,
         atlases = { "Vehicle-TempleofKotmogu-PurpleBall", "Vehicle-TempleofKotmogu-CyanBall" },
         portal = { pixels = 20,
-            atlases = { "PortalBlue", "Vehicle-TempleofKotmogu-PurpleBall" } } },
+            atlases = { "teleportationnetwork-32x32", "Vehicle-TempleofKotmogu-PurpleBall" } } },
     convergence = { show = "leyLines", size = "leyLineSize", pixels = 18,
         atlases = { "Vehicle-TempleofKotmogu-OrangeBall", "Vehicle-TempleofKotmogu-PurpleBall",
             "Vehicle-TempleofKotmogu-CyanBall" } },
