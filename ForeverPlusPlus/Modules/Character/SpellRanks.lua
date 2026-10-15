@@ -50,6 +50,9 @@ local DELAY = 0.2 -- seconds to wait for a burst of changes to settle
 local ALERT_ATLAS = "services-icon-warning" -- Blizzard's yellow warning triangle, when it exists
 local ALERT_FILE = "Interface\\DialogFrame\\DialogAlertIcon" -- and its older art
 local BADGE_SIZE = 16
+-- Levels above the button: past its cooldown, flash, and the other child frames Blizzard stacks
+-- on it, so the mark is never drawn under them.
+local LEVELS_ABOVE = 20
 
 local known -- spell name -> the highest rank known, or nil until scanned
 local marks = setmetatable({}, { __mode = "k" }) -- button -> our overlay frame
@@ -119,7 +122,7 @@ local function overlay(button)
     end
     frame = CreateFrame("Frame", nil, button)
     frame:SetAllPoints()
-    frame:SetFrameLevel(button:GetFrameLevel() + 5)
+    frame:SetFrameLevel(button:GetFrameLevel() + LEVELS_ABOVE)
     frame:EnableMouse(false)
     frame.tint = frame:CreateTexture(nil, "OVERLAY")
     frame.tint:SetPoint("TOPLEFT", 2, -2)
@@ -127,7 +130,8 @@ local function overlay(button)
     frame.tint:SetColorTexture(1, 0.1, 0.1, 0.4)
     frame.badge = frame:CreateTexture(nil, "OVERLAY", nil, 2)
     frame.badge:SetSize(BADGE_SIZE, BADGE_SIZE)
-    frame.badge:SetPoint("TOPRIGHT", 2, 2)
+    -- Inside the button's corner: past its edge, the next button over draws on top of it.
+    frame.badge:SetPoint("TOPRIGHT", -1, -1)
     if Frames.HasAtlas(ALERT_ATLAS) then
         frame.badge:SetAtlas(ALERT_ATLAS)
     else

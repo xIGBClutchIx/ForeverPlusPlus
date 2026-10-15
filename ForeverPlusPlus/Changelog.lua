@@ -10,6 +10,16 @@ local L = ns.L
 
 ns.changelog = {
     {
+        version = L.CHANGELOG_UNRELEASED,
+        sections = {
+            { L.CHANGELOG_FIXED, {
+                { L.SPELLRANKS_TITLE, "The warning badge on a lower-rank spell sits fully inside "
+                    .. "the button's corner and draws above its icon, border, and cooldown, "
+                    .. "instead of being cut off." },
+            } },
+        },
+    },
+    {
         version = "0.9.0",
         date = "2026-10-14",
         sections = {

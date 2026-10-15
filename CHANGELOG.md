@@ -2,6 +2,12 @@
 
 What changed in each release of Forever++. The same notes show in game under Settings > AddOns > Forever++ > Changelog, from [`ForeverPlusPlus/Changelog.lua`](ForeverPlusPlus/Changelog.lua); change both together.
 
+## Unreleased
+
+### Fixed
+
+- **Spell Ranks**: the warning badge on a lower-rank spell sits fully inside the button's corner and draws above its icon, border, and cooldown, instead of being cut off.
+
 ## 0.9.0 (2026-10-14)
 
 ### Added
