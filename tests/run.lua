@@ -132,6 +132,27 @@ eq(matches("Collected (%d/%d)", "Collected (1/3)") ~= nil, true, "format pattern
 eq(matches("Collected (%d/%d)", "Collected (a/3)"), nil, "format pattern %d needs digits")
 eq(matches("Press %s to submit", "Press [F1] to submit") ~= nil, true, "format pattern escapes")
 
+local split = ns.Text.Split("short one", 20)
+eq(#split, 1, "split leaves a short message whole")
+eq(split[1], "short one", "split short text")
+split = ns.Text.Split("aaaa bbbb cccc dddd", 10)
+eq(#split, 2, "split long text in two")
+eq(split[1], "aaaa bbbb", "split between words")
+eq(split[2], "cccc dddd", "split rest")
+split = ns.Text.Split("abcdefghijkl", 5)
+eq(split[1], "abcde", "split a long word at the limit")
+eq(#split, 3, "split a long word in pieces")
+local link = "|cff1eff00|Hitem:123|h[Sword]|h|r"
+split = ns.Text.Split("buy " .. link .. " now", 35) -- the link is 33 bytes
+eq(split[1], "buy", "split keeps a link whole")
+eq(split[2], link, "split puts the link in one piece")
+eq(split[3], "now", "split after the link")
+split = ns.Text.Split("buy " .. link, 20)
+eq(split[2], link, "split keeps a link longer than the limit whole")
+for i, piece in ipairs(ns.Text.Split(("word "):rep(200), 255)) do
+    eq(#piece <= 255, true, "split piece " .. i .. " fits")
+end
+
 -- Secret ----------------------------------------------------------------------------------------
 
 eq(ns.IsReadable(5), true, "readable without issecretvalue")

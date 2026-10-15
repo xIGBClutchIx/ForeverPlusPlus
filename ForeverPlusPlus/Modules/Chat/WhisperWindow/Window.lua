@@ -6,6 +6,7 @@
 local _, ns = ...
 
 local ipairs, format, date, time, pcall, type = ipairs, string.format, date, time, pcall, type
+local setmetatable = setmetatable
 local CreateFrame, UIParent, GameTooltip, GetTime = CreateFrame, UIParent, GameTooltip, GetTime
 local strtrim = strtrim
 
@@ -147,6 +148,8 @@ local function showMessages()
     end
     f.details:SetText(detailsText(conversation)) -- first: it may learn the class
     f.name:SetText(coloredName(conversation))
+    f.edit.hint:SetText(format(L.WHISPERWINDOW_REPLY_HINT, conversation.display))
+    f.edit.hint:SetShown((f.edit:GetText() or "") == "")
     f.invite:SetShown(not conversation.bnet)
     f.edit:Show()
     for _, message in ipairs(conversation.messages) do
@@ -178,11 +181,11 @@ end
 
 local function summary()
     local unread = internal.UnreadTotal()
+    local count = #list == 1 and L.WHISPERWINDOW_SUMMARY_ONE or format(L.WHISPERWINDOW_SUMMARY, #list)
     if unread > 0 then
-        window.summary:SetText(format(L.WHISPERWINDOW_SUMMARY_UNREAD, #list, unread))
-    else
-        window.summary:SetText(format(L.WHISPERWINDOW_SUMMARY, #list))
+        count = format(L.WHISPERWINDOW_SUMMARY_UNREAD, count, unread)
     end
+    window.summary:SetText(count)
 end
 
 local function markRows()
@@ -199,8 +202,15 @@ local function refreshList()
 end
 
 -- Opens a conversation on the right, read. `focus` puts the cursor in the reply box.
+local drafts = setmetatable({}, { __mode = "k" }) -- conversation -> what's typed in its reply box
+
 local function pick(conversation, focus)
+    local edit = window.edit
+    if selected then
+        drafts[selected] = edit:GetText()
+    end
     selected = conversation
+    edit:SetText(conversation and drafts[conversation] or "")
     internal.MarkRead(conversation) -- redraws the list when it was unread
     markRows()
     showMessages()
@@ -219,27 +229,34 @@ local function confirmRemove(conversation)
     end, conversation.display)
 end
 
--- The small X on a row: removes its conversation at once. Dim until the mouse is on it, so the
--- list stays quiet. Probe: Mainline's close button without scripts, the older one elsewhere.
+-- The X shows only while the mouse is on its row, in place of the time, so the name keeps its
+-- room. Moving onto the X leaves the row, so both ask whether the mouse is still on either.
+local function updateHover(row)
+    local over = row:IsMouseOver() or row.remove:IsMouseOver()
+    row.remove:SetShown(over)
+    row.info:SetShown(not over)
+end
+
+-- The small X on a row: removes its conversation at once. Probe: Mainline's close button without
+-- scripts, the older one elsewhere.
 local function newRemoveButton(row)
     local template = Frames.HasTemplate("UIPanelCloseButtonNoScripts") and "UIPanelCloseButtonNoScripts"
         or "UIPanelCloseButton"
     local b = CreateFrame("Button", nil, row, template)
     b:SetSize(20, 20)
-    b:SetPoint("TOPRIGHT", 0, 0)
-    b:SetAlpha(0.5)
+    b:SetPoint("TOPRIGHT", -2, -1)
+    b:Hide()
     b:SetScript("OnClick", function()
         internal.Remove(row.conversation)
     end)
     b:SetScript("OnEnter", function(self)
-        self:SetAlpha(1)
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         GameTooltip:SetText(L.WHISPERWINDOW_REMOVE)
         GameTooltip:Show()
     end)
-    b:SetScript("OnLeave", function(self)
-        self:SetAlpha(0.5)
+    b:SetScript("OnLeave", function()
         GameTooltip_Hide()
+        updateHover(row)
     end)
     return b
 end
@@ -272,8 +289,10 @@ local function buildRow(row)
     row.name:SetWordWrap(false)
     row.remove = newRemoveButton(row)
     row.info = row:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-    row.info:SetPoint("TOPRIGHT", row.remove, "TOPLEFT", 0, -6)
+    row.info:SetPoint("TOPRIGHT", -6, -6)
     row.name:SetPoint("RIGHT", row.info, "LEFT", -4, 0)
+    row:SetScript("OnEnter", updateHover)
+    row:SetScript("OnLeave", updateHover)
     row.preview = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     row.preview:SetPoint("BOTTOMLEFT", 8, 6)
     row.preview:SetPoint("BOTTOMRIGHT", -6, 6)
@@ -304,8 +323,13 @@ local function initRow(row, conversation)
         row.info:SetText(ns.Text.Ago(time() - (conversation.last or time())))
     end
     local last = conversation.messages[#conversation.messages]
-    row.preview:SetText(last and ns.Text.Plain(last.text) or "")
+    local preview = last and ns.Text.Plain(last.text) or ""
+    if last and last.kind == "out" then
+        preview = format(L.WHISPERWINDOW_PREVIEW_YOU, preview)
+    end
+    row.preview:SetText(preview)
     row.selected:SetShown(conversation == selected)
+    updateHover(row) -- a recycled row may still show the X
 end
 
 -- Opacity ---------------------------------------------------------------------------------------
@@ -401,6 +425,11 @@ local function addResizeGrip(f)
     grip:HookScript("OnMouseUp", savePlace)
 end
 
+-- What you sent this session, newest last, for Up and Down in the reply box like the chat's.
+local sent = {}
+local MAX_SENT = 30
+local sentIndex -- the one shown, while stepping through them
+
 local function send(edit)
     local text = strtrim(edit:GetText() or "")
     if text == "" or not selected then
@@ -408,8 +437,40 @@ local function send(edit)
         return
     end
     if internal.Send(selected, text) then
+        if sent[#sent] ~= text then
+            sent[#sent + 1] = text
+            if #sent > MAX_SENT then
+                table.remove(sent, 1)
+            end
+        end
+        sentIndex = nil
         edit:SetText("")
     end
+end
+
+local function stepSent(edit, key)
+    if #sent == 0 or (key ~= "UP" and key ~= "DOWN") then
+        return
+    end
+    if key == "UP" then
+        sentIndex = math.max(1, (sentIndex or #sent + 1) - 1)
+    elseif sentIndex then
+        sentIndex = sentIndex + 1
+        if sentIndex > #sent then
+            sentIndex = nil
+            edit:SetText("")
+            return
+        end
+    else
+        return
+    end
+    edit:SetText(sent[sentIndex])
+    edit:SetCursorPosition(#sent[sentIndex])
+end
+
+-- The gray "Whisper Bob" in the reply box (set by showMessages), only while it's empty.
+local function updateHint(edit)
+    edit.hint:SetShown((edit:GetText() or "") == "")
 end
 
 local function newMessages(parent)
@@ -532,10 +593,15 @@ local function newWindow()
     edit:SetPoint("BOTTOMLEFT", details, "BOTTOMLEFT", 8, -24)
     edit:SetPoint("BOTTOMRIGHT", details, "BOTTOMRIGHT", -20, -24)
     edit:SetAutoFocus(false)
-    edit:SetMaxLetters(255)
+    -- Longer than one whisper is fine: internal.Send splits it.
+    edit:SetMaxLetters(internal.MAX_TEXT)
     edit:SetFontObject(ChatFontNormal)
     edit:SetScript("OnEnterPressed", send)
     edit:SetScript("OnEscapePressed", edit.ClearFocus)
+    edit:SetScript("OnArrowPressed", stepSent)
+    edit:SetScript("OnTextChanged", updateHint)
+    edit.hint = edit:CreateFontString(nil, "ARTWORK", "GameFontDisable")
+    edit.hint:SetPoint("LEFT", 2, 0)
     f.edit = edit
 
     f:HookScript("OnShow", function()
@@ -553,8 +619,14 @@ end
 
 local function ensureWindow()
     if not window then
+        local ticked = GetTime()
         watcher = Frames.Watcher(module, 0.1, function()
             updateAlpha()
+            -- The list's "5m ago" times move on.
+            if GetTime() - ticked >= 30 then
+                ticked = GetTime()
+                refreshList()
+            end
         end)
         newWindow()
     end

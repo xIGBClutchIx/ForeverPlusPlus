@@ -1,10 +1,16 @@
 -- Small text helpers modules share: measuring a font string, lines of a tooltip, and how long as
--- words ("3 Seconds", "12m ago"), comparing version strings, text without its escape codes, and
--- the client's format strings as patterns.
+-- words ("3 Seconds", "12m ago"), comparing version strings, text without its escape codes, the
+-- client's format strings as patterns, and a long chat message cut into ones the game will send.
 local _, ns = ...
 
 local format, floor, max, type, _G = string.format, math.floor, math.max, type, _G
 local gmatch, gsub, tonumber = string.gmatch, string.gsub, tonumber
+local find, sub, ipairs = string.find, string.sub, ipairs
+
+-- Probe: WoW's strtrim, or the same in plain Lua (for tests/run.lua).
+local strtrim = strtrim or function(text)
+    return (gsub(text, "^%s*(.-)%s*$", "%1"))
+end
 
 local L = ns.L
 
@@ -126,4 +132,71 @@ function Text.FormatPattern(formatString, capture)
     local pattern = gsub(formatString, "%%%d+%$", "%%")
     pattern = gsub(pattern, "[%^%$%(%)%.%[%]%*%+%-%?]", "%%%0")
     return (gsub(pattern, "%%([sd])", capture and CAPTURES or MATCHES))
+end
+
+-- Where the links are in a chat message: { start, finish } byte ranges a cut mustn't fall inside,
+-- each with the color code before it and the |r after it.
+local function linkSpans(text)
+    local spans, from = {}, 1
+    while true do
+        local s, e = find(text, "|H.-|h.-|h", from)
+        if not s then
+            return spans
+        end
+        local colorStart = find(sub(text, 1, s - 1), "|c%x%x%x%x%x%x%x%x$")
+            or find(sub(text, 1, s - 1), "|cn[^:|]*:$")
+        s = colorStart or s
+        if sub(text, e + 1, e + 2) == "|r" then
+            e = e + 2
+        end
+        spans[#spans + 1] = { s, e }
+        from = e + 1
+    end
+end
+
+---A chat message cut into pieces of at most `limit` bytes, the way to send one longer than the
+---game allows: between words where it can, and never inside a link.
+---@param text string
+---@param limit number
+---@return string[]
+function Text.Split(text, limit)
+    local pieces = {}
+    text = strtrim(text)
+    while #text > limit do
+        local spans = linkSpans(text)
+        -- Whether cutting before byte i would cut through a link.
+        local function inside(i)
+            for _, span in ipairs(spans) do
+                if span[1] < i and i <= span[2] then
+                    return true
+                end
+            end
+            return false
+        end
+        local cut
+        for i = limit + 1, 2, -1 do
+            if sub(text, i, i) == " " and not inside(i) then
+                cut = i
+                break
+            end
+        end
+        if not cut then
+            cut = limit + 1
+            while cut > 2 and inside(cut) do
+                cut = cut - 1
+            end
+            -- A link longer than the limit on its own: kept whole, past the limit.
+            for _, span in ipairs(spans) do
+                if span[1] < cut and cut <= span[2] then
+                    cut = span[2] + 1
+                end
+            end
+        end
+        pieces[#pieces + 1] = strtrim(sub(text, 1, cut - 1))
+        text = strtrim(sub(text, cut))
+    end
+    if text ~= "" then
+        pieces[#pieces + 1] = text
+    end
+    return pieces
 end

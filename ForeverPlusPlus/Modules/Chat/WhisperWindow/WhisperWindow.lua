@@ -37,7 +37,9 @@ local internal = module.internal
 
 local MAX_MESSAGES = 200 -- kept per conversation, the oldest go first
 local MAX_CONVERSATIONS = 50 -- the ones quiet longest go first
+local MAX_WHISPER = 255 -- bytes the game sends in one whisper
 internal.MAX_MESSAGES = MAX_MESSAGES
+internal.MAX_TEXT = 1000 -- bytes the reply box takes, sent as several whispers past MAX_WHISPER
 
 local WINDOW = L.WHISPERWINDOW_SECTION_WINDOW
 local OPACITY = L.WHISPERWINDOW_SECTION_OPACITY
@@ -312,8 +314,12 @@ end
 ---@param text string
 ---@return boolean
 function internal.Send(conversation, text)
+    -- One whisper holds 255 bytes; a longer message goes as several, cut between words.
+    local pieces = ns.Text.Split(text, MAX_WHISPER)
     if conversation.test then
-        add(conversation, "out", text) -- the Debug page's made-up player: nothing goes out
+        for _, piece in ipairs(pieces) do
+            add(conversation, "out", piece) -- the Debug page's made-up player: nothing goes out
+        end
         return true
     end
     if chatLocked() then
@@ -326,11 +332,15 @@ function internal.Send(conversation, text)
             add(conversation, "info", L.WHISPERWINDOW_BNET_OFFLINE)
             return false
         end
-        BNSendWhisper(id, text)
+        for _, piece in ipairs(pieces) do
+            BNSendWhisper(id, piece)
+        end
         return true
     end
     local send = C_ChatInfo and C_ChatInfo.SendChatMessage or SendChatMessage
-    send(text, "WHISPER", nil, conversation.name)
+    for _, piece in ipairs(pieces) do
+        send(piece, "WHISPER", nil, conversation.name)
+    end
     return true
 end
 
@@ -574,10 +584,16 @@ function module:OnOptionChanged(key)
     end
 end
 
-ns.AddCommand("whispers", "", L.WHISPERWINDOW_COMMAND, function()
-    if module.enabled then
-        internal.Toggle()
-    else
+-- /fpp whispers opens or closes the window; /fpp whispers Bob opens it on Bob, ready to type.
+ns.AddCommand("whispers", L.WHISPERWINDOW_COMMAND_USAGE, L.WHISPERWINDOW_COMMAND, function(rest)
+    if not module.enabled then
         ns.Print(L.WHISPERWINDOW_OFF)
+        return
+    end
+    local name = strtrim(rest or "")
+    if name ~= "" then
+        internal.Open(internal.Start(name), true)
+    else
+        internal.Toggle()
     end
 end)
