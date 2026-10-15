@@ -473,8 +473,9 @@ function module.Run(rest)
     end
     queue, step, taken, skipped, current, waited = scenes, 0, 0, {}, nil, 0
     ns.On("PLAYER_REGEN_DISABLED", stop)
-    -- PNG at full quality for the gallery; the player's own format comes back at the end.
-    ns.CVars.Set(cvars, "screenshotFormat", "png")
+    -- JPG at full quality for the gallery: a 2560x1440 PNG is 4 to 5 MB, over CurseForge's 2 MB
+    -- limit. The player's own format comes back at the end.
+    ns.CVars.Set(cvars, "screenshotFormat", "jpg")
     ns.CVars.Set(cvars, "screenshotQuality", "10")
     if seconds then
         ns.Print(format(L.SCREENSHOTS_WAIT, seconds))
