@@ -215,9 +215,9 @@ local TAG_GAP = 6 -- between a text's end and its label
 local TAG_PADDING = 8 -- the room a label takes after its text, besides its own text
 
 -- A function that shows a NEW label just after `text`, a font string, or hides it: the text at most
--- `room` wide, less the label's room while it shows. With `after` (an option's checkbox), a label
--- that wouldn't fit on the text's line goes just after that instead, so the text keeps its room and
--- stays on one line. It returns how far past the text's end the label reaches (0 while hidden or
+-- `room` wide, less the label's room while it shows. With `after` (an option's checkbox), the label
+-- goes just after that instead, so the text keeps its room and the labels line up beside their
+-- checkboxes. It returns how far past the text's end the label reaches (0 while hidden or
 -- after `after`), for something after it. The label is made the first time it's needed, so it can
 -- come and go with Show Tags.
 local function newLabel(parent, text, room, after)
@@ -233,7 +233,7 @@ local function newLabel(parent, text, room, after)
             tag = 26
         end
         local full = ns.Text.Width(text)
-        local beside = shown and after and full + tag + TAG_PADDING > room
+        local beside = shown and after
         local inline = shown and not beside
         text:SetWidth(min(full + 2, room - (inline and tag + TAG_PADDING or 0)))
         if label then
@@ -734,7 +734,7 @@ local function addOptionRow(view, module, option, byKey, done)
         box:SetPoint("LEFT", CONTROL_LEFT, 0)
     end
     -- The name wraps narrower while it's marked NEW, so the row's height follows it, unless the
-    -- mark fits after a lone checkbox instead. A slider in the row has no name of its own here, so
+    -- mark goes after a lone checkbox instead. A slider in the row has no name of its own here, so
     -- its mark goes on the row's.
     local mark = newMark(row, label, CONTROL_LEFT - 8 - indent, option, pair,
         not paired and box or nil)

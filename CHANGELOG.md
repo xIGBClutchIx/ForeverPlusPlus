@@ -7,7 +7,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Changed
 
 - **Quest Tracker**: the background is a little darker by default, at 40% opacity instead of 30%. If you set its Opacity yourself, it stays as you set it.
-- **Settings**: option names on the Modules page have more room and a smaller indent under the option they depend on, so they wrap less. When a NEW label doesn't fit after a name, it sits after the option's checkbox instead of squeezing the name.
+- **Settings**: option names on the Modules page have more room and a smaller indent under the option they depend on, so they wrap less. An option's NEW label sits just after its checkbox instead of squeezing its name.
 
 ### Fixed
 
