@@ -4,6 +4,10 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ## Unreleased
 
+### Changed
+
+- **Quest Tracker**: the background is a little darker by default, at 40% opacity instead of 30%. If you set its Opacity yourself, it stays as you set it.
+
 ### Fixed
 
 - **Spell Ranks**: the warning badge on a lower-rank spell sits fully inside the button's corner and draws above its icon, border, and cooldown, instead of being cut off.

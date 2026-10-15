@@ -12,6 +12,11 @@ ns.changelog = {
     {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
+            { L.CHANGELOG_CHANGED, {
+                { L.QUESTTRACKER_TITLE, "The background is a little darker by default, at 40% "
+                    .. "opacity instead of 30%. If you set its Opacity yourself, it stays as you "
+                    .. "set it." },
+            } },
             { L.CHANGELOG_FIXED, {
                 { L.SPELLRANKS_TITLE, "The warning badge on a lower-rank spell sits fully inside "
                     .. "the button's corner and draws above its icon, border, and cooldown, "
