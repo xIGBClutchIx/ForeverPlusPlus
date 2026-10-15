@@ -103,13 +103,27 @@ local function restoreTitle()
     _G.CharacterFrame:UpdateTitle()
 end
 
--- Blizzard's "Level 18 Mage" line on the strip over the model says what the title already does,
--- so it goes while the title shows the level. Blizzard shows and hides it for the pet pane (whose
--- own line stays), so it's faded instead.
+-- Blizzard's "Level 18 Mage" line on the rock strip over the model says what the title already
+-- does, so while the title shows the level the line goes, and so does the strip: the model's
+-- background runs up to the top of the pane in its place. Blizzard shows and hides the line for
+-- the pet pane (whose own line stays), so it's faded instead.
 local function updateLevelLine()
-    local line = _G.PaperDollLevelInfo
+    local hide = module.enabled and module.db.colorTitle
+    local line, paperDoll = _G.PaperDollLevelInfo, _G.PaperDollFrame
     if line then
-        line:SetAlpha(module.enabled and module.db.colorTitle and 0 or 1)
+        line:SetAlpha(hide and 0 or 1)
+    end
+    local host, scene = paperDoll.TopBackgroundStripHost, paperDoll.CharacterModelScene
+    if not (host and host.TopBackgroundStrip and scene) then
+        return
+    end
+    host:SetAlpha(hide and 0 or 1)
+    if hide then
+        scene:SetPoint("TOPLEFT", host, "TOPLEFT")
+        scene:SetPoint("TOPRIGHT", host, "TOPRIGHT")
+    else
+        scene:SetPoint("TOPLEFT", host.TopBackgroundStrip, "BOTTOMLEFT")
+        scene:SetPoint("TOPRIGHT", host.TopBackgroundStrip, "BOTTOMRIGHT")
     end
 end
 
