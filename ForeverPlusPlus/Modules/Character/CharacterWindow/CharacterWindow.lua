@@ -118,6 +118,12 @@ local function updateLevelLine()
         return
     end
     host:SetAlpha(hide and 0 or 1)
+    -- The zoom and rotate buttons move up into the strip's place too, level with the arrow
+    -- that folds the stats away: 6 below the top of the pane instead of Blizzard's 40.
+    local controls, pane = scene.ControlFrame, _G.CharacterFrameLeftPaneHost
+    if controls and pane then
+        controls:SetPoint("TOP", pane, "TOP", 0, hide and -6 or -40)
+    end
     if hide then
         scene:SetPoint("TOPLEFT", host, "TOPLEFT")
         scene:SetPoint("TOPRIGHT", host, "TOPRIGHT")
