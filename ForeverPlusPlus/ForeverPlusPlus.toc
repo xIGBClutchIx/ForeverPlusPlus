@@ -117,6 +117,8 @@ Modules\Chat\ChatFont.lua
 Modules\Chat\PersistentChat.lua
 Modules\Chat\ChatHistory.lua
 Modules\Chat\SocialButton.lua
+Modules\Chat\WhisperWindow\WhisperWindow.lua
+Modules\Chat\WhisperWindow\Window.lua
 Modules\Units\ClassColors.lua
 Modules\Map\WorldMap\WorldMap.lua
 Modules\Map\WorldMap\Coordinates.lua

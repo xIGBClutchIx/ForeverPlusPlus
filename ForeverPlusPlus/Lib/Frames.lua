@@ -1,10 +1,12 @@
 -- Small frame helpers modules share: probing for Blizzard art and templates, the box tooltips are
 -- drawn in, Escape closing our windows, red text in the error frame, running something once
--- after a burst of calls, and a timer that waits for one run at a time.
+-- after a burst of calls, a timer that waits for one run at a time, and whether the player is in
+-- combat or moving.
 local _, ns = ...
 
 local select, ipairs, tinsert, CreateFrame, C_Timer = select, ipairs, table.insert, CreateFrame, C_Timer
-local setmetatable = setmetatable
+local pcall, UIParent = pcall, UIParent
+local setmetatable, type, InCombatLockdown = setmetatable, type, InCombatLockdown
 
 local Frames = {}
 ns.Frames = Frames
@@ -77,6 +79,70 @@ function Frames.CloseOnEscape(frame)
     tinsert(UISpecialFrames, name)
 end
 
+---One of our windows in Blizzard's frame with a portrait (the addon's icon), a sunken box, and a
+---strip for buttons at the bottom, as the game's own lists use. Probe: an older template if this
+---client doesn't have it. Named, so Escape can close it (Frames.CloseOnEscape).
+---@param name string the window's global name
+---@param title string
+---@return table frame
+function Frames.PortraitWindow(name, title)
+    local ok, f = pcall(CreateFrame, "Frame", name, UIParent, "ButtonFrameTemplate")
+    if not (ok and f) then
+        f = CreateFrame("Frame", name, UIParent, "BasicFrameTemplateWithInset")
+    end
+    if f.SetPortraitToAsset then
+        pcall(f.SetPortraitToAsset, f, ns.icon)
+        -- Blizzard's portrait is 62 pixels square with its round mask inset 2 left and right and
+        -- 4 at the bottom, so the circle's center is 31 across and 29 down. The icon's emblem is
+        -- about 52 of its 64 pixels wide, centered 32 across and 30 down. Show it 54 pixels wide
+        -- with its center half a pixel left of the circle's, where the ring's opening sits, and
+        -- the icon's dark square border falls outside the circle.
+        if f.SetPortraitTexCoord then
+            local perPixel = 52 / 64 / 54
+            local left, top = 32 / 64 - 30.5 * perPixel, 30.25 / 64 - 29 * perPixel
+            pcall(f.SetPortraitTexCoord, f, left, left + 62 * perPixel, top, top + 62 * perPixel)
+        end
+    end
+    if f.SetTitle then
+        f:SetTitle(title)
+    elseif f.TitleText then
+        f.TitleText:SetText(title)
+    end
+    return f
+end
+
+---Blizzard's sunken box behind a list or text, or a plain frame where the template is missing.
+---@param parent table
+---@return table
+function Frames.Inset(parent)
+    local ok, inset = pcall(CreateFrame, "Frame", nil, parent, "InsetFrameTemplate")
+    if ok and inset then
+        return inset
+    end
+    return CreateFrame("Frame", nil, parent)
+end
+
+---A list row's highlight or selection: Blizzard's Settings list atlas where it exists, a plain
+---tint where not.
+---@param row table
+---@param layer string
+---@param atlas string such as "Options_List_Active" or "Options_List_Hover"
+---@param r number
+---@param g number
+---@param b number
+---@param a number
+---@return table texture
+function Frames.RowTexture(row, layer, atlas, r, g, b, a)
+    local texture = row:CreateTexture(nil, layer)
+    texture:SetAllPoints()
+    if Frames.HasAtlas(atlas) then
+        texture:SetAtlas(atlas)
+    else
+        texture:SetColorTexture(r, g, b, a)
+    end
+    return texture
+end
+
 ---Red text in the middle of the screen, the way the game says "Not enough rage".
 ---@param text string?
 function Frames.ErrorMessage(text)
@@ -143,6 +209,23 @@ function Frames.Watcher(module, interval, fn)
     frame:Hide()
     frame:SetScript("OnUpdate", ns.Profiler.Wrap(module, Frames.Throttled(interval, fn)))
     return frame
+end
+
+---What the player is busy with, for a window that fades while they play: "combat" in combat,
+---"moving" while they move (or fall, or fly), or nil when they stand still. A speed the game
+---hides counts as standing still.
+---@return string?
+function Frames.PlayerActivity()
+    if InCombatLockdown() then
+        return "combat"
+    end
+    local speed = GetUnitSpeed and GetUnitSpeed("player")
+    if ns.IsReadable(speed) and type(speed) == "number" and speed > 0 then
+        return "moving"
+    end
+    if IsFalling and ns.IsTrue(IsFalling()) then
+        return "moving"
+    end
 end
 
 local Timer = {}

@@ -1,0 +1,567 @@
+-- Whisper Window's window, drawn like Error Catcher's: the conversations on the left, newest first,
+-- and the one picked on the right, in Blizzard's whisper colors, with a box under it to reply in.
+-- It can be dragged and resized, and remembers where. It fades while the player moves or fights
+-- (each its own opacity), and comes back while the mouse is over it or the reply box is in use.
+-- A button in the column beside the chat window opens it and counts the unread whispers.
+local _, ns = ...
+
+local ipairs, format, date, time, pcall, type = ipairs, string.format, date, time, pcall, type
+local CreateFrame, UIParent, GameTooltip, GetTime = CreateFrame, UIParent, GameTooltip, GetTime
+local strtrim = strtrim
+
+local L = ns.L
+local Frames, Colors = ns.Frames, ns.Colors
+local module = ns.modules.WhisperWindow
+local internal = module.internal
+
+local WINDOW_NAME = "ForeverPlusPlusWhisperWindow" -- named so Escape closes it
+local WIDTH, HEIGHT = 640, 400
+local MIN_WIDTH, MIN_HEIGHT, MAX_WIDTH, MAX_HEIGHT = 480, 260, 1200, 900
+local LIST_WIDTH = 200
+local ROW_HEIGHT = 38
+local ICON = "Interface\\ChatFrame\\UI-ChatWhisperIcon"
+
+local window, button, watcher
+local selected -- the conversation open on the right
+local list = {} -- the conversations the list shows
+
+---Whether the window is open.
+---@return boolean
+function internal.IsShown()
+    return window ~= nil and window:IsShown()
+end
+
+---Whether the player is reading a conversation now: it's open in the window.
+---@param conversation table
+---@return boolean
+function internal.IsReading(conversation)
+    return internal.IsShown() and selected == conversation
+end
+
+-- Colors ----------------------------------------------------------------------------------------
+
+-- Blizzard's color for a kind of chat line (ChatTypeInfo), white where it's missing.
+local function chatColor(chatType)
+    local info = ChatTypeInfo and ChatTypeInfo[chatType]
+    if info and type(info.r) == "number" then
+        return info.r, info.g, info.b
+    end
+    return 1, 1, 1
+end
+
+local function lineColor(conversation, kind)
+    if kind == "info" then
+        return chatColor("SYSTEM")
+    elseif conversation.bnet then
+        return chatColor(kind == "in" and "BN_WHISPER" or "BN_WHISPER_INFORM")
+    end
+    return chatColor(kind == "in" and "WHISPER" or "WHISPER_INFORM")
+end
+
+-- A conversation's name in its class color, when its class is known.
+local function coloredName(conversation)
+    local color = conversation.class and Colors.ClassToken(conversation.class)
+    if color then
+        return Colors.Text(color, conversation.display)
+    end
+    return conversation.display
+end
+
+local function playerName()
+    local name = UnitName("player")
+    return ns.IsText(name, true) and name or L.WHISPERWINDOW_YOU
+end
+
+-- The messages ----------------------------------------------------------------------------------
+
+local GRAY = "|cff808080"
+
+local function stamp(seconds)
+    if date("%Y-%m-%d", seconds) == date("%Y-%m-%d") then
+        return date("%H:%M", seconds)
+    end
+    return date("%m-%d %H:%M", seconds)
+end
+
+-- A message as a line in the message frame, in its color, with its time and who said it.
+local function messageLine(conversation, message)
+    local when = GRAY .. "[" .. stamp(message.time or time()) .. "]|r"
+    if message.kind == "info" then
+        return format(L.WHISPERWINDOW_INFO_LINE, when, message.text)
+    end
+    local who = message.kind == "in" and coloredName(conversation) or playerName()
+    return format(L.WHISPERWINDOW_LINE, when, who, message.text)
+end
+
+local function showMessages()
+    local f = window
+    f.messages:Clear()
+    local conversation = selected
+    if not conversation then
+        f.name:SetText(L.WHISPERWINDOW_NONE)
+        f.invite:Hide()
+        f.edit:Hide()
+        return
+    end
+    f.name:SetText(coloredName(conversation))
+    f.invite:SetShown(not conversation.bnet)
+    f.edit:Show()
+    for _, message in ipairs(conversation.messages) do
+        f.messages:AddMessage(messageLine(conversation, message), lineColor(conversation, message.kind))
+    end
+    f.messages:ScrollToBottom()
+end
+
+-- The list --------------------------------------------------------------------------------------
+
+local function summary()
+    local unread = internal.UnreadTotal()
+    if unread > 0 then
+        window.summary:SetText(format(L.WHISPERWINDOW_SUMMARY_UNREAD, #list, unread))
+    else
+        window.summary:SetText(format(L.WHISPERWINDOW_SUMMARY, #list))
+    end
+end
+
+local function markRows()
+    window.scrollBox:ForEachFrame(function(row)
+        row.selected:SetShown(row.conversation == selected)
+    end)
+end
+
+local function refreshList()
+    list = internal.Sorted()
+    window.scrollBox:SetDataProvider(CreateDataProvider(list), ScrollBoxConstants.RetainScrollPosition)
+    markRows()
+    summary()
+end
+
+-- Opens a conversation on the right, read. `focus` puts the cursor in the reply box.
+local function pick(conversation, focus)
+    selected = conversation
+    internal.MarkRead(conversation) -- redraws the list when it was unread
+    markRows()
+    showMessages()
+    if focus and conversation then
+        window.edit:SetFocus()
+    end
+end
+
+local function confirmRemove(conversation)
+    ns.Confirm("WHISPERWINDOW_REMOVE", L.WHISPERWINDOW_REMOVE_CONFIRM, function()
+        if selected == conversation then
+            selected = nil
+        end
+        internal.Remove(conversation)
+    end, conversation.display)
+end
+
+-- The right-click menu on a row. Probe: Mainline's menus.
+local function rowMenu(row)
+    if not (MenuUtil and MenuUtil.CreateContextMenu) then
+        return
+    end
+    local conversation = row.conversation
+    MenuUtil.CreateContextMenu(row, function(_, root)
+        root:CreateTitle(conversation.display)
+        if not conversation.bnet then
+            root:CreateButton(L.WHISPERWINDOW_INVITE, function()
+                internal.Invite(conversation)
+            end)
+        end
+        root:CreateButton(L.WHISPERWINDOW_REMOVE, function()
+            confirmRemove(conversation)
+        end)
+    end)
+end
+
+local function buildRow(row)
+    row.selected = Frames.RowTexture(row, "BACKGROUND", "Options_List_Active", 1, 0.82, 0, 0.15)
+    row:SetHighlightTexture(Frames.RowTexture(row, "HIGHLIGHT", "Options_List_Hover", 1, 1, 1, 0.08))
+    row.name = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    row.name:SetPoint("TOPLEFT", 8, -6)
+    row.name:SetJustifyH("LEFT")
+    row.name:SetWordWrap(false)
+    row.info = row:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    row.info:SetPoint("TOPRIGHT", -6, -6)
+    row.name:SetPoint("RIGHT", row.info, "LEFT", -4, 0)
+    row.preview = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    row.preview:SetPoint("BOTTOMLEFT", 8, 6)
+    row.preview:SetPoint("BOTTOMRIGHT", -6, 6)
+    row.preview:SetJustifyH("LEFT")
+    row.preview:SetWordWrap(false)
+    row:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+    row:SetScript("OnClick", function(self, mouse)
+        if mouse == "RightButton" then
+            rowMenu(self)
+        else
+            pick(self.conversation, true)
+        end
+    end)
+end
+
+local function initRow(row, conversation)
+    if not row.name then
+        buildRow(row)
+    end
+    row.conversation = conversation
+    row.name:SetText(coloredName(conversation))
+    local unread = conversation.unread or 0
+    if unread > 0 then
+        row.info:SetFontObject("GameFontGreenSmall")
+        row.info:SetText(format(L.WHISPERWINDOW_UNREAD, unread))
+    else
+        row.info:SetFontObject("GameFontDisableSmall")
+        row.info:SetText(ns.Text.Ago(time() - (conversation.last or time())))
+    end
+    local last = conversation.messages[#conversation.messages]
+    row.preview:SetText(last and ns.Text.Plain(last.text) or "")
+    row.selected:SetShown(conversation == selected)
+end
+
+-- Opacity ---------------------------------------------------------------------------------------
+
+local shownAlpha
+
+-- The opacity for what the player is doing; full while the mouse is over it or they type in it.
+local function updateAlpha()
+    local db = module.db
+    local alpha = db.alpha
+    if not (window:IsMouseOver() or window.edit:HasFocus()) then
+        local activity = Frames.PlayerActivity()
+        if activity == "combat" then
+            alpha = db.combatAlpha
+        elseif activity == "moving" then
+            alpha = db.movingAlpha
+        end
+    end
+    if alpha ~= shownAlpha then
+        shownAlpha = alpha
+        window:SetAlpha(alpha / 100)
+    end
+end
+
+-- Linking items ---------------------------------------------------------------------------------
+-- Shift-clicking an item puts its link in the chat's edit box; while the reply box is in use it
+-- goes there instead. Blizzard's code finds no chat box open and does nothing, then this runs.
+
+local lastLink, lastLinkTime
+
+local function insertLink(link)
+    if not (window and window:IsShown() and window.edit:HasFocus() and ns.IsText(link, true)) then
+        return
+    end
+    -- Both hooks may run for one click, when one calls the other.
+    local now = GetTime()
+    if link == lastLink and now == lastLinkTime then
+        return
+    end
+    lastLink, lastLinkTime = link, now
+    window.edit:Insert(link)
+end
+
+-- The window ------------------------------------------------------------------------------------
+
+local function newButton(parent, text, width)
+    local b = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
+    b:SetSize(width, 22)
+    b:SetText(text)
+    return b
+end
+
+local function savePlace()
+    -- Saved here, not in the game's layout cache, which a moved named frame would go into.
+    if window.SetUserPlaced then
+        window:SetUserPlaced(false)
+    end
+    local point, _, relativePoint, x, y = window:GetPoint(1)
+    local layout = module.db.layout
+    layout.point, layout.relativePoint, layout.x, layout.y = point, relativePoint, x, y
+    layout.width, layout.height = window:GetWidth(), window:GetHeight()
+end
+
+local function place()
+    local layout = module.db.layout
+    window:ClearAllPoints()
+    if layout.point then
+        window:SetPoint(layout.point, UIParent, layout.relativePoint or layout.point, layout.x or 0,
+            layout.y or 0)
+    else
+        window:SetPoint("CENTER")
+    end
+    local width = layout.width and math.max(MIN_WIDTH, math.min(MAX_WIDTH, layout.width)) or WIDTH
+    local height = layout.height and math.max(MIN_HEIGHT, math.min(MAX_HEIGHT, layout.height)) or HEIGHT
+    window:SetSize(width, height)
+end
+
+-- Blizzard's resize grip in the bottom right corner. Probe: Mainline's template.
+local function addResizeGrip(f)
+    f:SetResizable(true)
+    if f.SetResizeBounds then
+        f:SetResizeBounds(MIN_WIDTH, MIN_HEIGHT, MAX_WIDTH, MAX_HEIGHT)
+    end
+    if not Frames.HasTemplate("PanelResizeButtonTemplate") then
+        return
+    end
+    local grip = CreateFrame("Button", nil, f, "PanelResizeButtonTemplate")
+    grip:SetPoint("BOTTOMRIGHT", -2, 2)
+    grip:SetFrameLevel(f:GetFrameLevel() + 10)
+    if grip.Init then
+        pcall(grip.Init, grip, f, MIN_WIDTH, MIN_HEIGHT, MAX_WIDTH, MAX_HEIGHT)
+    end
+    grip:HookScript("OnMouseUp", savePlace)
+end
+
+local function send(edit)
+    local text = strtrim(edit:GetText() or "")
+    if text == "" or not selected then
+        edit:ClearFocus()
+        return
+    end
+    if internal.Send(selected, text) then
+        edit:SetText("")
+    end
+end
+
+local function newMessages(parent)
+    local messages = CreateFrame("ScrollingMessageFrame", nil, parent)
+    messages:SetFontObject(ChatFontNormal)
+    messages:SetJustifyH("LEFT")
+    messages:SetFading(false)
+    messages:SetMaxLines(internal.MAX_MESSAGES + 20)
+    messages:SetHyperlinksEnabled(true)
+    messages:EnableMouseWheel(true)
+    messages:SetScript("OnMouseWheel", function(self, delta)
+        if delta > 0 then
+            self:ScrollUp()
+        else
+            self:ScrollDown()
+        end
+    end)
+    messages:SetScript("OnHyperlinkClick", function(self, link, text, mouse)
+        if SetItemRef then
+            SetItemRef(link, text, mouse, self)
+        end
+    end)
+    messages:SetScript("OnHyperlinkEnter", function(self, link)
+        GameTooltip:SetOwner(self, "ANCHOR_CURSOR")
+        if pcall(GameTooltip.SetHyperlink, GameTooltip, link) then
+            GameTooltip:Show()
+        else
+            GameTooltip:Hide()
+        end
+    end)
+    messages:SetScript("OnHyperlinkLeave", GameTooltip_Hide)
+    return messages
+end
+
+local function newWindow()
+    local f = Frames.PortraitWindow(WINDOW_NAME, L.WHISPERWINDOW_WINDOW_TITLE)
+    window = f
+    f:SetFrameStrata("HIGH")
+    f:SetToplevel(true)
+    f:SetClampedToScreen(true)
+    f:SetMovable(true)
+    f:EnableMouse(true)
+    f:SetScript("OnMouseDown", f.StartMoving)
+    f:SetScript("OnMouseUp", function(self)
+        self:StopMovingOrSizing()
+        savePlace()
+    end)
+    Frames.CloseOnEscape(f)
+    addResizeGrip(f)
+
+    f.summary = f:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    f.summary:SetPoint("TOPLEFT", 66, -38)
+
+    -- The conversations, on the left.
+    local listInset = Frames.Inset(f)
+    listInset:SetPoint("TOPLEFT", 4, -60)
+    listInset:SetPoint("BOTTOMLEFT", 4, 28)
+    listInset:SetWidth(LIST_WIDTH)
+
+    local scrollBox = CreateFrame("Frame", nil, listInset, "WowScrollBoxList")
+    scrollBox:SetPoint("TOPLEFT", 3, -3)
+    scrollBox:SetPoint("BOTTOMRIGHT", -18, 3)
+    local scrollBar = CreateFrame("EventFrame", nil, listInset, "MinimalScrollBar")
+    scrollBar:SetPoint("TOPLEFT", scrollBox, "TOPRIGHT", 6, -2)
+    scrollBar:SetPoint("BOTTOMLEFT", scrollBox, "BOTTOMRIGHT", 6, 2)
+    local view = CreateScrollBoxListLinearView()
+    view:SetElementExtent(ROW_HEIGHT)
+    view:SetElementInitializer("Button", initRow)
+    ScrollUtil.InitScrollBoxListWithScrollBar(scrollBox, scrollBar, view)
+    f.scrollBox = scrollBox
+
+    -- The conversation, on the right.
+    local details = f.Inset or Frames.Inset(f)
+    details:ClearAllPoints()
+    details:SetPoint("TOPLEFT", listInset, "TOPRIGHT", 2, 0)
+    details:SetPoint("BOTTOMRIGHT", -6, 28)
+
+    f.invite = newButton(details, L.WHISPERWINDOW_INVITE, 110)
+    f.invite:SetPoint("TOPRIGHT", -8, -6)
+    f.invite:SetScript("OnClick", function()
+        if selected then
+            internal.Invite(selected)
+        end
+    end)
+    f.name = details:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    f.name:SetPoint("TOPLEFT", 12, -10)
+    f.name:SetPoint("RIGHT", f.invite, "LEFT", -8, 0)
+    f.name:SetJustifyH("LEFT")
+    f.name:SetWordWrap(false)
+
+    local line = details:CreateTexture(nil, "ARTWORK")
+    line:SetColorTexture(1, 1, 1, 0.1)
+    line:SetHeight(1)
+    line:SetPoint("TOPLEFT", 8, -32)
+    line:SetPoint("TOPRIGHT", -8, -32)
+
+    f.messages = newMessages(details)
+    f.messages:SetPoint("TOPLEFT", line, "BOTTOMLEFT", 4, -4)
+    f.messages:SetPoint("BOTTOMRIGHT", -10, 6)
+
+    -- The strip at the bottom: New Whisper under the list, the reply box under the conversation.
+    f.new = newButton(f, L.WHISPERWINDOW_NEW, 130)
+    f.new:SetPoint("BOTTOMLEFT", 4, 4)
+    f.new:SetScript("OnClick", function()
+        ns.Prompt("WHISPERWINDOW_NEW", L.WHISPERWINDOW_NEW_PROMPT, "", function(name)
+            name = strtrim(name or "")
+            if name ~= "" then
+                internal.Open(internal.Start(name), true)
+            end
+        end)
+    end)
+
+    local edit = CreateFrame("EditBox", nil, f, "InputBoxTemplate")
+    edit:SetHeight(20)
+    edit:SetPoint("BOTTOMLEFT", details, "BOTTOMLEFT", 8, -24)
+    edit:SetPoint("BOTTOMRIGHT", details, "BOTTOMRIGHT", -20, -24)
+    edit:SetAutoFocus(false)
+    edit:SetMaxLetters(255)
+    edit:SetFontObject(ChatFontNormal)
+    edit:SetScript("OnEnterPressed", send)
+    edit:SetScript("OnEscapePressed", edit.ClearFocus)
+    f.edit = edit
+
+    f:HookScript("OnShow", function()
+        shownAlpha = nil
+        watcher:Show()
+    end)
+    f:HookScript("OnHide", function()
+        watcher:Hide()
+        f.edit:ClearFocus()
+    end)
+    place()
+    f:Hide()
+    return f
+end
+
+local function ensureWindow()
+    if not window then
+        watcher = Frames.Watcher(module, 0.1, function()
+            updateAlpha()
+        end)
+        newWindow()
+    end
+end
+
+-- The conversation to open with nothing asked for: one with unread whispers, or the latest.
+local function firstToOpen()
+    local sorted = internal.Sorted()
+    for _, conversation in ipairs(sorted) do
+        if (conversation.unread or 0) > 0 then
+            return conversation
+        end
+    end
+    return sorted[1]
+end
+
+---Opens the window on a conversation (or the one waiting most, without one).
+---@param conversation? table
+---@param focus? boolean put the cursor in the reply box
+function internal.Open(conversation, focus)
+    ensureWindow()
+    window:Show()
+    refreshList()
+    pick(conversation or (selected and internal.Conversations()[selected.key] and selected)
+        or firstToOpen(), focus)
+end
+
+---Opens or closes the window.
+function internal.Toggle()
+    if internal.IsShown() then
+        window:Hide()
+    else
+        internal.Open()
+    end
+end
+
+-- The chat button ---------------------------------------------------------------------------------
+
+local function updateButton()
+    if not button then
+        return
+    end
+    local unread = internal.UnreadTotal()
+    button.count:SetText(unread > 0 and unread or "")
+end
+
+local function showButton()
+    local on = module.enabled and module.db.chatButton and ns.Chat.Anchor() ~= nil
+    if on then
+        if not button then
+            button = ns.Chat.NewButton(ICON, internal.Toggle, L.WHISPERWINDOW_TOOLTIP,
+                L.WHISPERWINDOW_TOOLTIP_DESC)
+            button.count = button:CreateFontString(nil, "OVERLAY", "NumberFontNormalSmall")
+            button.count:SetPoint("BOTTOMRIGHT", -2, 2)
+        end
+        button:Show()
+        ns.Chat.AddButton(module.name, button, 30)
+        updateButton()
+    elseif button then
+        ns.Chat.RemoveButton(module.name)
+        button:Hide()
+    end
+end
+
+---Something in a conversation changed (nil: the list itself), so what shows it redraws.
+---@param conversation? table
+function internal.Changed(conversation)
+    updateButton()
+    if not internal.IsShown() then
+        return
+    end
+    if selected and not internal.Conversations()[selected.key] then
+        selected = nil
+        showMessages()
+    end
+    refreshList()
+    if conversation and conversation == selected then
+        showMessages()
+    end
+end
+
+function internal.EnableWindow()
+    showButton()
+    module:Hook("ChatEdit_InsertLink", insertLink)
+    if ChatFrameUtil then
+        module:Hook(ChatFrameUtil, "InsertLink", insertLink)
+    end
+end
+
+function internal.DisableWindow()
+    showButton()
+    if window then
+        window:Hide()
+    end
+end
+
+function internal.OptionChanged(key)
+    if key == "chatButton" then
+        showButton()
+    elseif window and window:IsShown() then
+        shownAlpha = nil
+        updateAlpha()
+    end
+end

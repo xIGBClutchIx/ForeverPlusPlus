@@ -1,10 +1,10 @@
 -- Chat helpers the Chat modules share: the chat windows, rewriting their lines, chat lines in their
--- colors for an edit box, and the column of small buttons beside the main chat window (Blizzard's
--- menu and channel buttons, then ours).
+-- colors for an edit box, filters that hide lines, and the column of small buttons beside the main
+-- chat window (Blizzard's menu and channel buttons, then ours).
 local _, ns = ...
 
 local _G, ipairs, type, tonumber, gsub = _G, ipairs, type, tonumber, string.gsub
-local setmetatable = setmetatable
+local setmetatable, CreateFrame, UIParent = setmetatable, CreateFrame, UIParent
 local byte, find, match, sub = string.byte, string.find, string.match, string.sub
 local min, concat = math.min, table.concat
 
@@ -261,12 +261,88 @@ function Chat.ColoredOffset(text, offset)
     return (walk(text, nil, offset))
 end
 
+-- Message filters --------------------------------------------------------------------------------
+-- A filter decides, for each chat window, whether a chat event's line shows there: it returns
+-- true to hide it. Probe: ChatFrameUtil's on Mainline, the older global on other clients.
+
+local function filterApi(utilName, globalName)
+    local util = _G.ChatFrameUtil
+    if type(util) == "table" and type(util[utilName]) == "function" then
+        return util[utilName]
+    end
+    local legacy = _G[globalName]
+    if type(legacy) == "function" then
+        return legacy
+    end
+end
+
+---Hides chat lines of `event` for which `fn(frame, event, ...)` returns true, in every chat
+---window. Adding the same `fn` twice changes nothing. Returns false on a client without filters.
+---@param event string such as "CHAT_MSG_WHISPER"
+---@param fn function
+---@return boolean
+function Chat.AddFilter(event, fn)
+    local add = filterApi("AddMessageEventFilter", "ChatFrame_AddMessageEventFilter")
+    if not add then
+        return false
+    end
+    add(event, fn)
+    return true
+end
+
+---Takes away a filter added with Chat.AddFilter.
+---@param event string
+---@param fn function
+function Chat.RemoveFilter(event, fn)
+    local remove = filterApi("RemoveMessageEventFilter", "ChatFrame_RemoveMessageEventFilter")
+    if remove then
+        remove(event, fn)
+    end
+end
+
 -- The button column ----------------------------------------------------------------------------
 -- Each module that adds a button gives it a key and an order; they stack under Blizzard's own
 -- buttons, lowest order first, so two modules never put theirs in the same spot.
 
 local column = {} -- { key, button, order }, sorted by order
 local laying
+
+---A small button in the art of Blizzard's chat menu and channel buttons, with an icon on it, for
+---the column (Chat.AddButton). It sits in the chat window's button frame, so it fades with them.
+---@param texture string the icon's texture path
+---@param onClick function
+---@param title string the tooltip's first line
+---@param text string the tooltip's description
+---@return table button with `.icon`
+function Chat.NewButton(texture, onClick, title, text)
+    local frame = _G.ChatFrame1
+    local b = CreateFrame("Button", nil, frame and (frame.buttonFrame or frame.ButtonFrame) or UIParent)
+    local template = Chat.Anchor()
+    b:SetSize(template and template:GetWidth() or 32, template and template:GetHeight() or 32)
+    b:SetNormalAtlas("chatframe-button-up")
+    b:SetPushedAtlas("chatframe-button-down")
+    b:SetHighlightAtlas("chatframe-button-highlight")
+    local icon = b:CreateTexture(nil, "OVERLAY")
+    icon:SetTexture(texture)
+    icon:SetSize(16, 16)
+    icon:SetPoint("CENTER")
+    b.icon = icon
+    b:SetScript("OnMouseDown", function()
+        icon:SetPoint("CENTER", 1, -1)
+    end)
+    b:SetScript("OnMouseUp", function()
+        icon:SetPoint("CENTER", 0, 0)
+    end)
+    b:SetScript("OnClick", onClick)
+    b:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:SetText(title)
+        GameTooltip:AddLine(text, 1, 1, 1, true)
+        GameTooltip:Show()
+    end)
+    b:SetScript("OnLeave", GameTooltip_Hide)
+    return b
+end
 
 ---The last of Blizzard's own chat buttons, which ours go under.
 ---@return table?

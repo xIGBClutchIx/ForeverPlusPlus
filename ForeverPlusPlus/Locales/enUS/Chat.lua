@@ -75,3 +75,54 @@ L.CHATFONT_INPUT_DESC = "Use the font for the text you type into the chat box to
 L.PERSISTENTCHAT_TITLE = "Persistent Chat"
 L.PERSISTENTCHAT_DESC = "Keep chat text on screen instead of fading it out after a while. Turning "
     .. "this off gives Blizzard's fading back."
+
+-- WhisperWindow
+L.WHISPERWINDOW_TITLE = "Whisper Window"
+L.WHISPERWINDOW_DESC = "Keep whispers in a window of their own, a conversation per person, with a "
+    .. "box to reply in. Conversations are saved for each character."
+L.WHISPERWINDOW_WINDOW_TITLE = "Whispers"
+L.WHISPERWINDOW_SECTION_WINDOW = "Window"
+L.WHISPERWINDOW_SECTION_OPACITY = "Opacity"
+L.WHISPERWINDOW_OPEN = "Open for Whispers"
+L.WHISPERWINDOW_OPEN_DESC = "Open the window when a whisper comes in, or when you send one from "
+    .. "chat. In combat, it waits until combat ends."
+L.WHISPERWINDOW_HIDE = "Hide Whispers in Chat"
+L.WHISPERWINDOW_HIDE_DESC = "Leave whispers, and away and busy replies, out of the chat windows "
+    .. "once the Whisper Window has them. A whisper the game hides the text of still shows in chat."
+L.WHISPERWINDOW_BUTTON = "Chat Button"
+L.WHISPERWINDOW_BUTTON_DESC = "Add a button beside the chat window that opens the Whisper Window "
+    .. "and counts unread whispers."
+L.WHISPERWINDOW_ALPHA = "Opacity"
+L.WHISPERWINDOW_ALPHA_DESC = "How solid the window is while you stand still, and while the mouse "
+    .. "is over it or you type in it."
+L.WHISPERWINDOW_MOVING = "While Moving"
+L.WHISPERWINDOW_MOVING_DESC = "How solid the window is while you move, out of combat."
+L.WHISPERWINDOW_COMBAT = "In Combat"
+L.WHISPERWINDOW_COMBAT_DESC = "How solid the window is in combat."
+L.WHISPERWINDOW_SHOW = "Whispers"
+L.WHISPERWINDOW_SHOW_BUTTON = "Show"
+L.WHISPERWINDOW_SHOW_DESC = "Open the Whisper Window."
+L.WHISPERWINDOW_CLEAR = "Clear"
+L.WHISPERWINDOW_CLEAR_NAME = "Saved Conversations"
+L.WHISPERWINDOW_CLEAR_DESC = "Forget every conversation of this character."
+L.WHISPERWINDOW_CLEAR_CONFIRM = "Forget every conversation of this character?"
+L.WHISPERWINDOW_COMMAND = "open the Whisper Window"
+L.WHISPERWINDOW_OFF = "Whisper Window is off. Turn it on in /fpp."
+L.WHISPERWINDOW_TOOLTIP = "Whispers"
+L.WHISPERWINDOW_TOOLTIP_DESC = "Open your conversations."
+L.WHISPERWINDOW_SUMMARY = "%d conversations" -- how many
+L.WHISPERWINDOW_SUMMARY_UNREAD = "%d conversations, %d unread" -- how many, unread whispers
+L.WHISPERWINDOW_UNREAD = "%d new" -- unread whispers in a conversation
+L.WHISPERWINDOW_NONE = "No conversation picked."
+L.WHISPERWINDOW_YOU = "You"
+L.WHISPERWINDOW_LINE = "%s %s: %s" -- time, who, the whisper
+L.WHISPERWINDOW_INFO_LINE = "%s %s" -- time, what happened
+L.WHISPERWINDOW_AFK = "Away: %s" -- the away message
+L.WHISPERWINDOW_DND = "Busy: %s" -- the busy message
+L.WHISPERWINDOW_INVITE = "Invite"
+L.WHISPERWINDOW_REMOVE = "Remove Conversation"
+L.WHISPERWINDOW_REMOVE_CONFIRM = "Forget your conversation with %s?" -- name
+L.WHISPERWINDOW_NEW = "New Whisper"
+L.WHISPERWINDOW_NEW_PROMPT = "Whisper who?"
+L.WHISPERWINDOW_LOCKED = "Chat is restricted here right now."
+L.WHISPERWINDOW_BNET_OFFLINE = "This Battle.net friend isn't online."

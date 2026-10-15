@@ -204,33 +204,8 @@ local function toggle()
 end
 
 local function newButton()
-    -- In the chat window's button frame, so it fades along with Blizzard's buttons.
-    local b = CreateFrame("Button", nil, ChatFrame1.buttonFrame or ChatFrame1.ButtonFrame or UIParent)
-    local template = Chat.Anchor()
-    b:SetSize(template and template:GetWidth() or 32, template and template:GetHeight() or 32)
-    -- The same button art as Blizzard's menu and channel buttons.
-    b:SetNormalAtlas("chatframe-button-up")
-    b:SetPushedAtlas("chatframe-button-down")
-    b:SetHighlightAtlas("chatframe-button-highlight")
-    local icon = b:CreateTexture(nil, "OVERLAY")
-    icon:SetTexture("Interface\\Buttons\\UI-GuildButton-PublicNote-Up")
-    icon:SetSize(16, 16)
-    icon:SetPoint("CENTER")
-    b:SetScript("OnMouseDown", function()
-        icon:SetPoint("CENTER", 1, -1)
-    end)
-    b:SetScript("OnMouseUp", function()
-        icon:SetPoint("CENTER", 0, 0)
-    end)
-    b:SetScript("OnClick", toggle)
-    b:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-        GameTooltip:SetText(L.CHATCOPY_TOOLTIP)
-        GameTooltip:AddLine(L.CHATCOPY_TOOLTIP_DESC, 1, 1, 1, true)
-        GameTooltip:Show()
-    end)
-    b:SetScript("OnLeave", GameTooltip_Hide)
-    return b
+    return Chat.NewButton("Interface\\Buttons\\UI-GuildButton-PublicNote-Up", toggle,
+        L.CHATCOPY_TOOLTIP, L.CHATCOPY_TOOLTIP_DESC)
 end
 
 -- Click Timestamps ----------------------------------------------------------------------------

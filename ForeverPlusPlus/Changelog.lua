@@ -77,6 +77,18 @@ ns.changelog = {
                     .. "pin, and back to them once you're alive." },
                 { L.WAYPOINTS_TITLE, "The new Clear Pin on Arrival option (off by default) takes "
                     .. "your map pin away once you reach it." },
+                { L.WHISPERWINDOW_TITLE, "A new module that keeps whispers in a window of their "
+                    .. "own, styled like Error Catcher's: your conversations on the left, newest "
+                    .. "first with unread counts, and the one you pick on the right in Blizzard's "
+                    .. "whisper colors, with a box to reply in (Shift-click an item to link it). "
+                    .. "Whispers you send from chat, Battle.net whispers, away and busy replies, and "
+                    .. "\"no player named\" errors go into their conversation too, and "
+                    .. "conversations are saved for each character. New Whisper starts one, "
+                    .. "right-click a conversation to invite or remove it, and /fpp whispers or a "
+                    .. "button beside the chat window opens it. Off by default. Its options open the "
+                    .. "window for whispers (on by default), hide whispers in chat (off by default), "
+                    .. "show the chat button (on by default), and set how solid the window is while "
+                    .. "you stand still, move, and fight." },
                 { L.WORLDMAP_TITLE, "Points of Interest's new Ley Line Icon option (Portal by "
                     .. "default) draws ley lines as the blue swirl the minimap shows for one, or "
                     .. "as the purple orb they were before." },

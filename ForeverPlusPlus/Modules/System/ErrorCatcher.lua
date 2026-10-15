@@ -15,7 +15,7 @@ local _, ns = ...
 local format, tostring, pcall, select, ipairs = string.format, tostring, pcall, select, ipairs
 local min = math.min
 local concat, tremove, wipe, time, date = table.concat, table.remove, wipe, time, date
-local CreateFrame, UIParent, GetTime = CreateFrame, UIParent, GetTime
+local CreateFrame, GetTime = CreateFrame, GetTime
 local C_Timer, error = C_Timer, error
 local seterrorhandler, geterrorhandler = seterrorhandler, geterrorhandler
 local debugstack, debuglocals = debugstack, debuglocals
@@ -541,26 +541,7 @@ local function newFilter(parent)
     return b
 end
 
--- Blizzard's sunken box behind a list or text, or a plain frame where the template is missing.
-local function newInset(parent)
-    local ok, inset = pcall(CreateFrame, "Frame", nil, parent, "InsetFrameTemplate")
-    if ok and inset then
-        return inset
-    end
-    return CreateFrame("Frame", nil, parent)
-end
-
--- A list highlight: Blizzard's Settings list atlas where it exists, a plain tint where not.
-local function rowTexture(row, layer, atlas, r, g, b, a)
-    local texture = row:CreateTexture(nil, layer)
-    texture:SetAllPoints()
-    if ns.Frames.HasAtlas(atlas) then
-        texture:SetAtlas(atlas)
-    else
-        texture:SetColorTexture(r, g, b, a)
-    end
-    return texture
-end
+local newInset, rowTexture = ns.Frames.Inset, ns.Frames.RowTexture
 
 local ROW_HEIGHT = 38
 
@@ -608,35 +589,11 @@ local function copyReport()
     window.hint:SetText(L.ERRORCATCHER_COPY_HINT)
 end
 
--- Blizzard's window with a portrait, a sunken box, and a strip for buttons at the bottom, as the
--- game's own lists use. Probe: an older template if this client doesn't have it.
 -- Named so Escape can close it (ns.Frames.CloseOnEscape).
 local WINDOW_NAME = "ForeverPlusPlusErrorCatcher"
 
 local function newFrame()
-    local ok, f = pcall(CreateFrame, "Frame", WINDOW_NAME, UIParent, "ButtonFrameTemplate")
-    if not (ok and f) then
-        f = CreateFrame("Frame", WINDOW_NAME, UIParent, "BasicFrameTemplateWithInset")
-    end
-    if f.SetPortraitToAsset then
-        pcall(f.SetPortraitToAsset, f, ns.icon)
-        -- Blizzard's portrait is 62 pixels square with its round mask inset 2 left and right and
-        -- 4 at the bottom, so the circle's center is 31 across and 29 down. The icon's emblem is
-        -- about 52 of its 64 pixels wide, centered 32 across and 30 down. Show it 54 pixels wide
-        -- with its center half a pixel left of the circle's, where the ring's opening sits, and
-        -- the icon's dark square border falls outside the circle.
-        if f.SetPortraitTexCoord then
-            local perPixel = 52 / 64 / 54
-            local left, top = 32 / 64 - 30.5 * perPixel, 30.25 / 64 - 29 * perPixel
-            pcall(f.SetPortraitTexCoord, f, left, left + 62 * perPixel, top, top + 62 * perPixel)
-        end
-    end
-    if f.SetTitle then
-        f:SetTitle(L.ERRORCATCHER_TITLE)
-    elseif f.TitleText then
-        f.TitleText:SetText(L.ERRORCATCHER_TITLE)
-    end
-    return f
+    return ns.Frames.PortraitWindow(WINDOW_NAME, L.ERRORCATCHER_TITLE)
 end
 
 local LIST_WIDTH = 270
