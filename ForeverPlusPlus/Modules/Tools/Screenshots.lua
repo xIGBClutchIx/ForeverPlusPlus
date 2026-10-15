@@ -30,8 +30,21 @@ local GAP = 0.5 -- seconds between one scene's shot and the next scene
 local SHOT_TIMEOUT = 5 -- seconds to wait for the game to say a shot was saved
 local CAPTURED_WAIT = 4 -- seconds at most to wait for "Screen captured" to fade
 
+-- IsVisible, not IsShown: a tab like the paper doll stays "shown" inside a closed window.
 local function shown(frame)
-    return frame and frame:IsShown() and true or false
+    return frame and frame:IsVisible() and true or false
+end
+
+local function bagsShown()
+    if shown(ContainerFrameCombinedBags) then
+        return true
+    end
+    for i = 1, NUM_CONTAINER_FRAMES or 13 do
+        if shown(_G["ContainerFrame" .. i]) then
+            return true
+        end
+    end
+    return false
 end
 
 -- The bag slot holding the biggest stack that sells, for a Sell Price line worth showing.
@@ -55,7 +68,9 @@ end
 -- Each has an `id` for `/fpp shots <id>`, a `name`, the `modules` it shows (module -> options to
 -- set for the shot), `isShown()` (the shot waits for it, and a scene that isn't on screen isn't
 -- pictured), and how long to `wait` to draw. A scene we set up has `open()` (returns why it
--- can't, or nil) and `close()`; one the player opens has `binding`, the key binding that opens it.
+-- can't, or nil) and `close()`; one the player opens has `binding`, the key binding that opens it,
+-- and may have `closeFirst` (the name of what's in the way, or nil: the shot waits for it to
+-- close) and `ready()` with `readyText` (a step inside the window the shot waits for).
 
 local SCENES = {
     {
@@ -111,6 +126,8 @@ local SCENES = {
         name = L.SCREENSHOTS_SCENE_CHARACTER,
         modules = { CharacterWindow = {} },
         binding = "TOGGLECHARACTER0",
+        -- The last scene's bags would cover the stats.
+        closeFirst = function() return bagsShown() and L.SCREENSHOTS_YOUR_BAGS or nil end,
         isShown = function() return shown(PaperDollFrame) end,
     },
     {
@@ -130,6 +147,13 @@ local SCENES = {
         isShown = function()
             return shown(PlayerSpellsFrame) and shown(PlayerSpellsFrame.TalentsFrame)
         end,
+        -- The picture is the planner, not the plain tree. The player clicks our button: entering
+        -- plan mode from here would start an empty plan for them.
+        ready = function()
+            local planner = ns.modules.TalentPlanner
+            return planner.IsPlanning and planner.IsPlanning()
+        end,
+        readyText = L.SCREENSHOTS_PLAN_TALENTS,
     },
     {
         -- Last, since it stays open for the player to close.
@@ -191,6 +215,7 @@ local timer = ns.Frames.Timer()
 local cvars = {} -- the player's screenshot CVars, put back at the end
 local queue, step, taken, skipped, current
 local waited = 0 -- seconds spent waiting on the player, or on "Screen captured" to fade
+local hinted = false -- whether the scene's `readyText` was said
 local nextScene, onShot, stop
 
 -- Puts away what the scene on screen set up, and the modules it turned on.
@@ -222,7 +247,8 @@ local function skip(scene, why)
 end
 
 local function shoot()
-    if current.isShown and not current.isShown() then
+    -- The player may have closed it, or left plan mode, while it drew.
+    if (current.isShown and not current.isShown()) or (current.ready and not current.ready()) then
         skip(current, L.SCREENSHOTS_NO_WINDOW)
         return
     end
@@ -251,15 +277,23 @@ function onShot(event)
     timer:Start(GAP, nextScene)
 end
 
--- Waits for the player to open the scene's window, then gives it time to draw.
+-- Waits for the player to open the scene's window (with nothing in the way and its step done),
+-- then gives it time to draw.
 local function waitForPlayer()
-    if current.isShown() then
+    local open = current.isShown()
+    local inTheWay = current.closeFirst and current.closeFirst()
+    local ready = not current.ready or current.ready()
+    if open and not inTheWay and ready then
         waited = 0
         timer:Start(current.wait or DRAW_WAIT, shoot)
     elseif waited >= OPEN_TIMEOUT then
         waited = 0
-        skip(current, L.SCREENSHOTS_NOT_OPENED)
+        skip(current, open and L.SCREENSHOTS_NOT_READY or L.SCREENSHOTS_NOT_OPENED)
     else
+        if open and not ready and not hinted then
+            hinted = true
+            ns.Print(current.readyText)
+        end
         waited = waited + POLL
         timer:Start(POLL, waitForPlayer)
     end
@@ -267,6 +301,13 @@ end
 
 -- "Open the Bags (B)." with the key the player has bound, if any.
 local function askToOpen(scene)
+    local inTheWay = scene.closeFirst and scene.closeFirst()
+    if inTheWay then
+        ns.Print(format(L.SCREENSHOTS_CLOSE_FIRST, inTheWay))
+    end
+    if scene.isShown() then
+        return
+    end
     local key = scene.binding and GetBindingKey and GetBindingKey(scene.binding)
     if key then
         ns.Print(format(L.SCREENSHOTS_OPEN_KEY, scene.name, GetBindingText and GetBindingText(key) or key))
@@ -295,10 +336,8 @@ function nextScene()
         end
     end
     if not scene.open then
-        if not scene.isShown() then
-            askToOpen(scene)
-        end
-        waited = 0
+        askToOpen(scene)
+        waited, hinted = 0, false
         waitForPlayer()
         return
     end

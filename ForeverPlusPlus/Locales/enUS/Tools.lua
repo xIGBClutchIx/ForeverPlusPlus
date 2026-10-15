@@ -66,7 +66,8 @@ L.SCREENSHOTS_COMMAND = "take a screenshot of each scene, or of one (tooltip, mi
 L.SCREENSHOTS_BUTTON = "Take"
 L.SCREENSHOTS_BUTTON_DESC = "Take a screenshot of each Forever++ scene in turn: it shows an item "
     .. "tooltip, the minimap button's tooltip, and Settings itself, and asks you to open the world "
-    .. "map, your bags, the character window, and talents, taking each picture once it's open. "
+    .. "map, your bags, the character window, and talents in plan mode, taking each picture once "
+    .. "it's ready. "
     .. "Modules a picture shows are on just for its shot. Keep the mouse over an empty part of the "
     .. "screen."
 L.SCREENSHOTS_START = "Taking %d screenshots. Keep the mouse over an empty part of the screen, and "
@@ -75,6 +76,10 @@ L.SCREENSHOTS_CLOSE_SETTINGS = "Close Settings to start."
 L.SCREENSHOTS_OPEN = "Open %s." -- scene name
 L.SCREENSHOTS_OPEN_KEY = "Open %s (%s)." -- scene name, its key
 L.SCREENSHOTS_NOT_OPENED = "it wasn't opened"
+L.SCREENSHOTS_NOT_READY = "it wasn't ready in time"
+L.SCREENSHOTS_CLOSE_FIRST = "Close %s first." -- what's in the way
+L.SCREENSHOTS_YOUR_BAGS = "your bags"
+L.SCREENSHOTS_PLAN_TALENTS = "Click Plan Talents at the bottom of the talent window."
 L.SCREENSHOTS_WAIT = "Taking a screenshot in %d seconds." -- seconds
 L.SCREENSHOTS_DONE = "Took %d screenshots. They're in the game's Screenshots folder." -- number
 L.SCREENSHOTS_SKIPPED = "Skipped %s: %s." -- scene name, why

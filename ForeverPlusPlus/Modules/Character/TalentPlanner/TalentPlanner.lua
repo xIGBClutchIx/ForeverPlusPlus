@@ -121,6 +121,13 @@ local function setPlanning(on)
 end
 internal.setPlanning = setPlanning
 
+---Whether the talent window is open in plan mode, for the Screenshots tool's picture.
+---@return boolean
+function module.IsPlanning()
+    local frame = internal.frame
+    return module.enabled and internal.planning and frame and frame:IsVisible() and true or false
+end
+
 -- Hooks ---------------------------------------------------------------------------------------
 
 local function onButtonsUpdated()
