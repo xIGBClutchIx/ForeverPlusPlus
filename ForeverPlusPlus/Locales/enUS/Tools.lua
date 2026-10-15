@@ -61,15 +61,20 @@ L.SELFTEST_GAMEDATA_DONE = "Learned game data forgotten."
 L.SCREENSHOTS_TITLE = "Screenshots"
 L.SCREENSHOTS_DESC = "Take screenshots of Forever++ in the game's own windows, one after another, "
     .. "for its pages and posts."
-L.SCREENSHOTS_COMMAND = "take a screenshot of each scene, or of one (map, tooltip, bags, character, "
-    .. "skills, talents, settings, minimap), or of the screen as it is after a wait"
+L.SCREENSHOTS_COMMAND = "take a screenshot of each scene, or of one (tooltip, minimap, map, bags, "
+    .. "character, skills, talents, settings), or of the screen as it is after a wait"
 L.SCREENSHOTS_BUTTON = "Take"
-L.SCREENSHOTS_BUTTON_DESC = "Open the world map, an item tooltip, your bags, the character window, "
-    .. "talents, Settings, and the minimap button's tooltip one at a time, take a screenshot of each, "
-    .. "and put everything back. Modules a picture shows are on just for its shot. Keep the mouse "
-    .. "still over an empty part of the screen until it's done."
-L.SCREENSHOTS_START = "Taking %d screenshots. Keep the mouse still over an empty part of the "
-    .. "screen." -- number
+L.SCREENSHOTS_BUTTON_DESC = "Take a screenshot of each Forever++ scene in turn: it shows an item "
+    .. "tooltip, the minimap button's tooltip, and Settings itself, and asks you to open the world "
+    .. "map, your bags, the character window, and talents, taking each picture once it's open. "
+    .. "Modules a picture shows are on just for its shot. Keep the mouse over an empty part of the "
+    .. "screen."
+L.SCREENSHOTS_START = "Taking %d screenshots. Keep the mouse over an empty part of the screen, and "
+    .. "open each window when asked." -- number
+L.SCREENSHOTS_CLOSE_SETTINGS = "Close Settings to start."
+L.SCREENSHOTS_OPEN = "Open %s." -- scene name
+L.SCREENSHOTS_OPEN_KEY = "Open %s (%s)." -- scene name, its key
+L.SCREENSHOTS_NOT_OPENED = "it wasn't opened"
 L.SCREENSHOTS_WAIT = "Taking a screenshot in %d seconds." -- seconds
 L.SCREENSHOTS_DONE = "Took %d screenshots. They're in the game's Screenshots folder." -- number
 L.SCREENSHOTS_SKIPPED = "Skipped %s: %s." -- scene name, why
@@ -79,7 +84,6 @@ L.SCREENSHOTS_BUSY = "Screenshots are already being taken."
 L.SCREENSHOTS_UNKNOWN = "There's no scene called \"%s\". Scenes: %s." -- what was typed, the list
 L.SCREENSHOTS_FAILED = "the game couldn't save it"
 L.SCREENSHOTS_NO_WINDOW = "its window didn't open"
-L.SCREENSHOTS_NO_ZONE = "there's no map for where you are"
 L.SCREENSHOTS_NO_SKILLS = "this client has no Skills tab"
 L.SCREENSHOTS_NO_BUTTON = "the minimap button isn't on the minimap"
 L.SCREENSHOTS_NO_MODULE = "this client doesn't have %s" -- module name
@@ -87,7 +91,7 @@ L.SCREENSHOTS_SCENE_MAP = "World Map"
 L.SCREENSHOTS_SCENE_TOOLTIP = "Item Tooltip"
 L.SCREENSHOTS_SCENE_BAGS = "Bags"
 L.SCREENSHOTS_SCENE_CHARACTER = "Character Window"
-L.SCREENSHOTS_SCENE_SKILLS = "Skills"
+L.SCREENSHOTS_SCENE_SKILLS = "the Character Window's Skills tab"
 L.SCREENSHOTS_SCENE_TALENTS = "Talents"
 L.SCREENSHOTS_SCENE_SETTINGS = "Settings"
 L.SCREENSHOTS_SCENE_MINIMAP = "Minimap Button"

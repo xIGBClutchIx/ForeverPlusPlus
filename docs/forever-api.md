@@ -149,6 +149,7 @@ Forever inherits Midnight's addon restrictions. `AGENTS.md` has the rules for wr
 
 ## Secure code and Blizzard systems
 
+- Opening a Blizzard window from addon code runs its setup tainted. `ToggleCharacter("PaperDollFrame", true)` from a `C_Timer` callback errored in `TextStatusBar.lua:110` "attempt to compare a secret number value (execution tainted by 'ForeverPlusPlus')": the Camelot `CharacterFrame` OnShow calls the player frame's `ShowStatusBarText`, which compares secret health values. **[in-game]** (2026-10-15, Screenshots tool) So don't open the world map, bags, character window, or talents from addon code (`ToggleCharacter`, `OpenWorldMap`, `OpenAllBags`, `ShowUIPanel`); let the player open them. Settings opened with `C_SettingsUtil.OpenSettingsPanel` goes through the client, which is meant to avoid that.
 - `C_EditMode`, `C_CurveUtil`, and `C_EncodingUtil` exist. **[in-game]** (2026-09-23)
 - Secure snippets (`WrapScript`, `_onstate-*`, `RunAttribute`) failed before build 70009 because `loadstring_untainted` was deleted too early. Build 70009 fixed the load order. **[web]** (forever-addon-kit, forever-bugs #74) Confirmed: a `SecureHandlerBaseTemplate` frame's `Execute(f, "return 42")` returned `true 42`. **[in-game]** (2026-09-25, build 70009)
   - Never probe `loadstring_untainted` to decide whether snippets work: it is nil after load on every client, Retail included.

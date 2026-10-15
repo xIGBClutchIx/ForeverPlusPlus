@@ -1,12 +1,14 @@
 -- Screenshots: a Debug page button (and `/fpp shots`) that takes the addon's gallery pictures from
--- the real game: it opens one window at a time (the world map, an item tooltip, the bags, the
--- character window, talents, Settings, the minimap button's tooltip), waits for it to draw, takes
--- a screenshot, and puts it away again. The modules a scene shows are turned on just for its shot
--- and put back after, through Core as the Modules page does. A scene that can't be set up honestly
--- (no Skills tab, the window didn't open) is skipped and named in chat at the end. `/fpp shots
--- wait` takes the screen as it is after a countdown, for what needs the world (nameplates, a
--- merchant, the waypoint arrow, a right-click menu). Nothing runs until it's asked for, and never
--- in combat.
+-- the real game, one scene at a time: it turns on the modules a scene shows, waits for the scene
+-- to be on screen and drawn, takes a screenshot, and puts the modules back. Our code never opens
+-- Blizzard's windows (the world map, bags, character window, talents): a window opened from addon
+-- code runs its setup tainted, and Blizzard's own code then errors on secret values (the player
+-- frame's health text did). So it asks the player to open each one and takes the shot once it's
+-- open. It does the rest itself: an item tooltip, the minimap button's tooltip, and Settings
+-- (opened through the client, which doesn't taint). A scene left unopened is skipped and named in
+-- chat at the end. `/fpp shots wait` takes the screen as it is after a countdown, for what needs
+-- the world (nameplates, a merchant, the waypoint arrow, a right-click menu). Nothing runs until
+-- it's asked for, and never in combat.
 local _, ns = ...
 
 local ipairs, pairs, pcall, type, tostring, tonumber = ipairs, pairs, pcall, type, tostring, tonumber
@@ -21,26 +23,15 @@ module.alwaysOn = true -- a tool, not a change to the game
 
 -- The tooltip's item when nothing in the bags sells.
 local LINEN_CLOTH = ns.GameData.Item(2589, "Linen Cloth")
-local START_WAIT = 1 -- seconds for Settings to close before the first scene
+local POLL = 0.25 -- seconds between looks for a window the player opens
+local OPEN_TIMEOUT = 45 -- seconds to wait for the player to open a window
 local DRAW_WAIT = 1.5 -- seconds for a scene to draw before its shot
-local GAP = 0.5 -- seconds between putting one scene away and opening the next
+local GAP = 0.5 -- seconds between one scene's shot and the next scene
 local SHOT_TIMEOUT = 5 -- seconds to wait for the game to say a shot was saved
 local CAPTURED_WAIT = 4 -- seconds at most to wait for "Screen captured" to fade
 
--- Blizzard windows ------------------------------------------------------------------------------
-
 local function shown(frame)
     return frame and frame:IsShown() and true or false
-end
-
-local function hide(frame)
-    if shown(frame) then
-        HideUIPanel(frame)
-    end
-end
-
-local function closeSettings()
-    hide(SettingsPanel)
 end
 
 -- The bag slot holding the biggest stack that sells, for a Sell Price line worth showing.
@@ -62,30 +53,11 @@ end
 
 -- The scenes ------------------------------------------------------------------------------------
 -- Each has an `id` for `/fpp shots <id>`, a `name`, the `modules` it shows (module -> options to
--- set for the shot), `open()` (returns why it can't, or nil), `close()`, `isShown()` (checked
--- before the shot, so a window that didn't open isn't pictured), and how long to `wait` to draw.
+-- set for the shot), `isShown()` (the shot waits for it, and a scene that isn't on screen isn't
+-- pictured), and how long to `wait` to draw. A scene we set up has `open()` (returns why it
+-- can't, or nil) and `close()`; one the player opens has `binding`, the key binding that opens it.
 
 local SCENES = {
-    {
-        id = "map",
-        name = L.SCREENSHOTS_SCENE_MAP,
-        modules = { WorldMap = { pointsOfInterest = true, zoneInfo = true, hover = false } },
-        wait = 2,
-        open = function()
-            local mapID = C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit("player")
-            if not (mapID and WorldMapFrame) then
-                return L.SCREENSHOTS_NO_ZONE
-            end
-            if OpenWorldMap then
-                OpenWorldMap(mapID)
-            else
-                ShowUIPanel(WorldMapFrame)
-                WorldMapFrame:SetMapID(mapID)
-            end
-        end,
-        isShown = function() return shown(WorldMapFrame) end,
-        close = function() hide(WorldMapFrame) end,
-    },
     {
         id = "tooltip",
         name = L.SCREENSHOTS_SCENE_TOOLTIP,
@@ -107,75 +79,6 @@ local SCENES = {
         close = function() GameTooltip:Hide() end,
     },
     {
-        id = "bags",
-        name = L.SCREENSHOTS_SCENE_BAGS,
-        modules = { AlreadyKnown = {}, UnusableItemsTint = {}, BagSlotCounter = {} },
-        open = function()
-            OpenAllBags()
-        end,
-        isShown = function() return shown(ContainerFrameCombinedBags) or shown(ContainerFrame1) end,
-        close = function() CloseAllBags() end,
-    },
-    {
-        id = "character",
-        name = L.SCREENSHOTS_SCENE_CHARACTER,
-        modules = { CharacterWindow = {} },
-        open = function()
-            ToggleCharacter("PaperDollFrame", true)
-        end,
-        isShown = function() return shown(PaperDollFrame) end,
-        close = function() hide(CharacterFrame) end,
-    },
-    {
-        id = "skills",
-        name = L.SCREENSHOTS_SCENE_SKILLS,
-        modules = { CharacterWindow = {} },
-        open = function()
-            if not SkillsFrame then -- Forever only: the Classic Skills tab
-                return L.SCREENSHOTS_NO_SKILLS
-            end
-            ToggleCharacter("SkillsFrame", true)
-        end,
-        isShown = function() return shown(SkillsFrame) end,
-        close = function() hide(CharacterFrame) end,
-    },
-    {
-        id = "talents",
-        name = L.SCREENSHOTS_SCENE_TALENTS,
-        modules = { TalentPlanner = {} },
-        wait = 2,
-        open = function()
-            local addon = "Blizzard_PlayerSpells" -- the talent window, load on demand
-            if C_AddOns and C_AddOns.LoadAddOn and not ns.AddOns.IsLoaded(addon) then
-                C_AddOns.LoadAddOn(addon)
-            end
-            if PlayerSpellsUtil and PlayerSpellsUtil.OpenToClassTalentsTab then
-                PlayerSpellsUtil.OpenToClassTalentsTab()
-            elseif PlayerSpellsFrame then
-                ShowUIPanel(PlayerSpellsFrame)
-            else
-                return L.SCREENSHOTS_NO_WINDOW
-            end
-        end,
-        isShown = function()
-            return shown(PlayerSpellsFrame) and shown(PlayerSpellsFrame.TalentsFrame)
-        end,
-        close = function() hide(PlayerSpellsFrame) end,
-    },
-    {
-        id = "settings",
-        name = L.SCREENSHOTS_SCENE_SETTINGS,
-        modules = { WorldMap = {} },
-        wait = 2.5,
-        open = function()
-            if not ns.OpenSettings("WorldMap") then
-                return L.SCREENSHOTS_NO_WINDOW
-            end
-        end,
-        isShown = function() return shown(SettingsPanel) end,
-        close = closeSettings,
-    },
-    {
         id = "minimap",
         name = L.SCREENSHOTS_SCENE_MINIMAP,
         modules = { MinimapButton = { where = "minimap" } },
@@ -187,6 +90,59 @@ local SCENES = {
         end,
         isShown = function() return shown(GameTooltip) end,
         close = function() GameTooltip:Hide() end,
+    },
+    {
+        id = "map",
+        name = L.SCREENSHOTS_SCENE_MAP,
+        modules = { WorldMap = { pointsOfInterest = true, zoneInfo = true, hover = false } },
+        binding = "TOGGLEWORLDMAP",
+        wait = 2,
+        isShown = function() return shown(WorldMapFrame) end,
+    },
+    {
+        id = "bags",
+        name = L.SCREENSHOTS_SCENE_BAGS,
+        modules = { AlreadyKnown = {}, UnusableItemsTint = {}, BagSlotCounter = {} },
+        binding = "OPENALLBAGS",
+        isShown = function() return shown(ContainerFrameCombinedBags) or shown(ContainerFrame1) end,
+    },
+    {
+        id = "character",
+        name = L.SCREENSHOTS_SCENE_CHARACTER,
+        modules = { CharacterWindow = {} },
+        binding = "TOGGLECHARACTER0",
+        isShown = function() return shown(PaperDollFrame) end,
+    },
+    {
+        id = "skills",
+        name = L.SCREENSHOTS_SCENE_SKILLS,
+        modules = { CharacterWindow = {} },
+        -- Forever only: the Classic Skills tab. Its key binding varies, so none is named.
+        isShown = function() return shown(SkillsFrame) end,
+        unavailable = function() return not SkillsFrame and L.SCREENSHOTS_NO_SKILLS end,
+    },
+    {
+        id = "talents",
+        name = L.SCREENSHOTS_SCENE_TALENTS,
+        modules = { TalentPlanner = {} },
+        binding = "TOGGLETALENTS",
+        wait = 2,
+        isShown = function()
+            return shown(PlayerSpellsFrame) and shown(PlayerSpellsFrame.TalentsFrame)
+        end,
+    },
+    {
+        -- Last, since it stays open for the player to close.
+        id = "settings",
+        name = L.SCREENSHOTS_SCENE_SETTINGS,
+        modules = { WorldMap = {} },
+        wait = 2.5,
+        open = function()
+            if not ns.OpenSettings("WorldMap") then
+                return L.SCREENSHOTS_NO_WINDOW
+            end
+        end,
+        isShown = function() return shown(SettingsPanel) end,
     },
 }
 
@@ -234,14 +190,15 @@ end
 local timer = ns.Frames.Timer()
 local cvars = {} -- the player's screenshot CVars, put back at the end
 local queue, step, taken, skipped, current
+local waited = 0 -- seconds spent waiting on the player, or on "Screen captured" to fade
 local nextScene, onShot, stop
 
--- Puts the scene on screen away, and the modules it turned on.
+-- Puts away what the scene on screen set up, and the modules it turned on.
 local function closeScene()
-    if current then
+    if current and current.close then
         pcall(current.close)
-        current = nil
     end
+    current = nil
     putBack()
 end
 
@@ -264,20 +221,18 @@ local function skip(scene, why)
     timer:Start(GAP, nextScene)
 end
 
-local held = 0 -- seconds this shot has waited for the last one's "Screen captured" to go
-
 local function shoot()
     if current.isShown and not current.isShown() then
         skip(current, L.SCREENSHOTS_NO_WINDOW)
         return
     end
     -- Blizzard's "Screen captured" from the last shot would be in this one.
-    if shown(ActionStatus) and held < CAPTURED_WAIT then
-        held = held + 0.25
-        timer:Start(0.25, shoot)
+    if shown(ActionStatus) and waited < CAPTURED_WAIT then
+        waited = waited + POLL
+        timer:Start(POLL, shoot)
         return
     end
-    held = 0
+    waited = 0
     ns.On("SCREENSHOT_SUCCEEDED", onShot)
     ns.On("SCREENSHOT_FAILED", onShot)
     timer:Start(SHOT_TIMEOUT, function() onShot("SCREENSHOT_FAILED") end)
@@ -296,6 +251,30 @@ function onShot(event)
     timer:Start(GAP, nextScene)
 end
 
+-- Waits for the player to open the scene's window, then gives it time to draw.
+local function waitForPlayer()
+    if current.isShown() then
+        waited = 0
+        timer:Start(current.wait or DRAW_WAIT, shoot)
+    elseif waited >= OPEN_TIMEOUT then
+        waited = 0
+        skip(current, L.SCREENSHOTS_NOT_OPENED)
+    else
+        waited = waited + POLL
+        timer:Start(POLL, waitForPlayer)
+    end
+end
+
+-- "Open the Bags (B)." with the key the player has bound, if any.
+local function askToOpen(scene)
+    local key = scene.binding and GetBindingKey and GetBindingKey(scene.binding)
+    if key then
+        ns.Print(format(L.SCREENSHOTS_OPEN_KEY, scene.name, GetBindingText and GetBindingText(key) or key))
+    else
+        ns.Print(format(L.SCREENSHOTS_OPEN, scene.name))
+    end
+end
+
 function nextScene()
     step = step + 1
     local scene = queue[step]
@@ -304,13 +283,27 @@ function nextScene()
         return
     end
     current = scene
+    local why = scene.unavailable and scene.unavailable()
+    if why then
+        skip(scene, why)
+        return
+    end
     for name, options in pairs(scene.modules or {}) do
         if not use(name, options) then
             skip(scene, format(L.SCREENSHOTS_NO_MODULE, name))
             return
         end
     end
-    local ok, why = pcall(scene.open)
+    if not scene.open then
+        if not scene.isShown() then
+            askToOpen(scene)
+        end
+        waited = 0
+        waitForPlayer()
+        return
+    end
+    local ok
+    ok, why = pcall(scene.open)
     if not ok or why then
         skip(scene, why and tostring(why) or L.SCREENSHOTS_NO_WINDOW)
         return
@@ -318,7 +311,7 @@ function nextScene()
     timer:Start(scene.wait or DRAW_WAIT, shoot)
 end
 
--- Combat started: stop, and put everything away once it's over (some windows can't close in it).
+-- Combat started: stop, and put the modules back once it's over.
 function stop()
     timer:Cancel()
     ns.Off("SCREENSHOT_SUCCEEDED", onShot)
@@ -333,6 +326,20 @@ function stop()
         closeScene()
         finish()
     end)
+end
+
+-- Settings is open when the run starts from the Debug page; the player closes it (closing it from
+-- our code would taint it), then the scenes start.
+local function waitForSettings()
+    if not shown(SettingsPanel) then
+        waited = 0
+        timer:Start(GAP, nextScene)
+    elseif waited >= OPEN_TIMEOUT then
+        finish()
+    else
+        waited = waited + POLL
+        timer:Start(POLL, waitForSettings)
+    end
 end
 
 local function scenesText()
@@ -353,8 +360,8 @@ local function pick(rest)
     end
     if word == "wait" then
         local seconds = max(1, min(30, floor(tonumber(number) or 5)))
-        return { { name = L.SCREENSHOTS_SCENE_SCREEN, wait = seconds, open = function() end,
-            close = function() end } }, seconds
+        return { { name = L.SCREENSHOTS_SCENE_SCREEN, wait = seconds, open = function() end } },
+            seconds
     end
     for _, scene in ipairs(SCENES) do
         if scene.id == word then
@@ -379,23 +386,21 @@ function module.Run(rest)
     if not scenes then
         return
     end
-    queue, step, taken, skipped, current = scenes, 0, 0, {}, nil
+    queue, step, taken, skipped, current, waited = scenes, 0, 0, {}, nil, 0
     ns.On("PLAYER_REGEN_DISABLED", stop)
     -- PNG at full quality for the gallery; the player's own format comes back at the end.
     ns.CVars.Set(cvars, "screenshotFormat", "png")
     ns.CVars.Set(cvars, "screenshotQuality", "10")
-    held = 0
     if seconds then
         ns.Print(format(L.SCREENSHOTS_WAIT, seconds))
         nextScene()
         return
     end
     ns.Print(format(L.SCREENSHOTS_START, #scenes))
-    -- Not from inside the Debug page's click: Settings closes first, then the scenes start.
-    timer:Start(0.1, function()
-        closeSettings()
-        timer:Start(START_WAIT, nextScene)
-    end)
+    if shown(SettingsPanel) then
+        ns.Print(L.SCREENSHOTS_CLOSE_SETTINGS)
+    end
+    waitForSettings()
 end
 
 -- Shown on the Debug page (Settings/Debug.lua).
