@@ -141,13 +141,13 @@ local KINDS = {
         atlases = { "poi-soulspiritghost", "poi-graveyard-neutral", "Vehicle-TempleofKotmogu-GreenBall" } },
     -- Skyborne spots: ley lines purple, convergences orange. Both are Kotmogu balls like the cyan
     -- and green ones, but Unverified on Forever. With Ley Line Icon on Portal (`portal`), a ley
-    -- line is a blue swirl like the one the minimap shows for one: the teleportation network's
-    -- swirl in the minimap's object icons (UiTextureAtlasMember, wago.tools, build 70338).
-    -- PortalBlue, tried first, didn't look like the minimap's (2026-10-14, Cameron).
+    -- line is the blue swirl the minimap shows for one, MagePortalAlliance in the minimap's object
+    -- icons (UiTextureAtlasMember, wago.tools, build 70338; Cameron picked it, 2026-10-14). The
+    -- same on either side: the minimap's icon is the ley line's own, not the player's faction's.
     leyline = { show = "leyLines", size = "leyLineSize", pixels = 18,
         atlases = { "Vehicle-TempleofKotmogu-PurpleBall", "Vehicle-TempleofKotmogu-CyanBall" },
         portal = { pixels = 20,
-            atlases = { "teleportationnetwork-32x32", "Vehicle-TempleofKotmogu-PurpleBall" } } },
+            atlases = { "MagePortalAlliance", "Vehicle-TempleofKotmogu-PurpleBall" } } },
     convergence = { show = "leyLines", size = "leyLineSize", pixels = 18,
         atlases = { "Vehicle-TempleofKotmogu-OrangeBall", "Vehicle-TempleofKotmogu-PurpleBall",
             "Vehicle-TempleofKotmogu-CyanBall" } },
