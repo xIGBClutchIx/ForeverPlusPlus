@@ -270,23 +270,43 @@ local function bagGear()
     return found
 end
 
+-- The link an item GUID stands for, so a comparison answer can be read.
+local function linkOf(guid)
+    if not ns.IsText(guid) then
+        return "?"
+    end
+    local ok, link = call("C_Item.GetItemLinkByGUID", guid)
+    return ok and text(link) or "error " .. text(link)
+end
+
+-- A comparison item (`item` or one of `additionalItems`): its fields, and the link its GUID means.
+local function dumpComparisonItem(label, entry)
+    dump(label, entry)
+    if type(entry) == "table" and ns.IsReadable(entry) then
+        add(label .. " link: " .. linkOf(entry.guid))
+    end
+end
+
 -- The comparison item as the API might want it: a hyperlink, then a GUID.
 local function compareWith(label, item)
     local okInfo, info = call("C_TooltipComparison.GetItemComparisonInfo", { hyperlink = item.link })
     if okInfo then
         dump(label .. " compare(link)", info)
         if type(info) == "table" then
-            dump(label .. " compare(link).item", info.item)
+            dumpComparisonItem(label .. " compare(link).item", info.item)
             local extra = ns.IsReadable(info.additionalItems) and info.additionalItems
             for i, other in ipairs(type(extra) == "table" and extra or {}) do
-                dump(format("%s compare(link).additionalItems[%d]", label, i), other)
+                dumpComparisonItem(format("%s compare(link).additionalItems[%d]", label, i), other)
             end
         end
     else
         add(label .. " compare(link): error " .. text(info))
     end
-    local okLoc, location = call("ItemLocation.CreateFromBagAndSlot", item.bag, item.slot)
-    local okGuid, guid = false, "no location"
+    -- The location is made with a colon: ItemLocation is a mixin, not a namespace.
+    local okLoc, location = pcall(function()
+        return _G.ItemLocation and _G.ItemLocation:CreateFromBagAndSlot(item.bag, item.slot)
+    end)
+    local okGuid, guid = false, okLoc and "no location" or "error " .. text(location)
     if okLoc and location then
         okGuid, guid = call("C_Item.GetItemGUID", location)
     end
@@ -296,7 +316,7 @@ local function compareWith(label, item)
         if okG then
             dump(label .. " compare(guid)", infoG)
             if type(infoG) == "table" then
-                dump(label .. " compare(guid).item", infoG.item)
+                dumpComparisonItem(label .. " compare(guid).item", infoG.item)
             end
         else
             add(label .. " compare(guid): error " .. text(infoG))
@@ -441,12 +461,14 @@ local function checkArt()
     end
     local ok, err = pcall(function()
         for _, button in frame:EnumerateValidItems() do
-            local icon = button.UpgradeIcon
-            add("bag button UpgradeIcon: " .. text(icon and "yes" or "no"))
-            if icon and icon.GetAtlas then
-                add("bag button UpgradeIcon atlas: " .. text(icon:GetAtlas()))
+            if button then -- closed bags can list a slot with no button
+                local icon = button.UpgradeIcon
+                add("bag button UpgradeIcon: " .. text(icon and "yes" or "no"))
+                if icon and icon.GetAtlas then
+                    add("bag button UpgradeIcon atlas: " .. text(icon:GetAtlas()))
+                end
+                return
             end
-            return
         end
         add("bag button: none to look at")
     end)
