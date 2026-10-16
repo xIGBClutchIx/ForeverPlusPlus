@@ -15,7 +15,7 @@ local _, ns = ...
 
 local _G, ipairs, type, wipe, select, tonumber = _G, ipairs, type, wipe, select, tonumber
 local format, floor, huge = string.format, math.floor, math.huge
-local C_Container, C_AddOns, UnitClass = C_Container, C_AddOns, UnitClass
+local C_Container, C_AddOns, C_Item, UnitClass = C_Container, C_AddOns, C_Item, UnitClass
 
 local L = ns.L
 local ItemButtons, ItemStats, Equipment, Talents = ns.ItemButtons, ns.ItemStats, ns.Equipment, ns.Talents
@@ -470,10 +470,22 @@ local function round(number)
     return floor(number + 0.5)
 end
 
--- The item a tooltip shows, by its link.
+-- The item a tooltip shows, by its full link (suffix and enchant included): the data's link, or
+-- the one its GUID names (the character sheet's tooltips carry a GUID), or else the bare item.
+-- Nil for an item that's worn, which is no upgrade over itself and no downgrade either.
 local function tooltipLink(data)
+    local guid = ns.IsText(data.guid, true) and data.guid
+    if guid and Equipment.IsWornGUID(guid) then
+        return nil
+    end
     if ns.IsText(data.hyperlink, true) then
         return data.hyperlink
+    end
+    if guid and C_Item.GetItemLinkByGUID then
+        local ok, link = pcall(C_Item.GetItemLinkByGUID, guid)
+        if ok and ns.IsText(link, true) then
+            return link
+        end
     end
     local id = ItemTooltip.ItemID(data)
     return id and ("item:" .. id) or nil

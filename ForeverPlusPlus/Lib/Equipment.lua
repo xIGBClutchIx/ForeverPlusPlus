@@ -61,16 +61,45 @@ function Equipment.Worn(slot)
     return ns.IsText(link, true) and link or nil
 end
 
----Whether this exact item (by link) is worn.
+---The part of a link that names the item with its suffix and enchant (`item:6541::...:12734`),
+---without the color, the name, or trailing empty fields, so two links to the same item read the
+---same whoever made them (a tooltip's and GetInventoryItemLink's differ in their tails). A
+---string that isn't a link is returned as it is.
+---@param link string
+---@return string
+function Equipment.LinkKey(link)
+    local key = type(link) == "string" and link:match("item:[^|]+")
+    if not key then
+        return link
+    end
+    return (key:gsub(":+$", ""))
+end
+
+---Whether this exact item (by link, suffix and enchant included) is worn.
 ---@param link string
 ---@return boolean
 function Equipment.IsWorn(link)
+    local key = Equipment.LinkKey(link)
     for slot = 1, 19 do
-        if Equipment.Worn(slot) == link then
+        local worn = Equipment.Worn(slot)
+        if worn and Equipment.LinkKey(worn) == key then
             return true
         end
     end
     return false
+end
+
+---Whether the item with this GUID is worn: its location is an equipment slot. False when the
+---client can't say.
+---@param guid string
+---@return boolean
+function Equipment.IsWornGUID(guid)
+    if not (ns.IsText(guid, true) and C_Item and C_Item.GetItemLocation) then
+        return false
+    end
+    local ok, location = pcall(C_Item.GetItemLocation, guid)
+    return ok and type(location) == "table" and location.IsEquipmentSlot
+        and ns.IsTrue(location:IsEquipmentSlot()) or false
 end
 
 ---The item type (INVTYPE_*) of what's worn in a slot, or nil.

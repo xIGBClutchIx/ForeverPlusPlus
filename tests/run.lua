@@ -802,6 +802,16 @@ eq(#rivals[1], 0, "rivals: an empty slot is an empty alternative")
 eq(#Equipment.RuleRivals("INVTYPE_TABARD", wornOf), 0, "rivals: not gear, no alternatives")
 eq(Equipment.IsWorn("main"), true, "worn: by link")
 eq(Equipment.IsWorn("other"), false, "worn: not by link")
+eq(Equipment.LinkKey("|cnIQ2:|Hitem:6541::::::::19:1482:::1:12734::::::|h[Willow Gloves of Magic]|h|r"),
+    "item:6541::::::::19:1482:::1:12734", "link key: the item with its suffix, without the tail")
+eq(Equipment.LinkKey("item:6541::::::::19:1482:::1:12734:::::"), "item:6541::::::::19:1482:::1:12734",
+    "link key: a bare link reads the same")
+eq(Equipment.LinkKey("item:6541") == Equipment.LinkKey("item:6541::::::::19:1482:::1:12734"), false,
+    "link key: the base item isn't the suffixed one")
+game.worn[10] = "|cnIQ2:|Hitem:6541::::::::19:1482:::1:12734::::::|h[Willow Gloves of Magic]|h|r"
+eq(Equipment.IsWorn("item:6541::::::::19:1482:::1:12734:::::"), true, "worn: a tooltip's link to the worn item")
+eq(Equipment.IsWorn("item:6541"), false, "worn: not the base item")
+eq(Equipment.IsWornGUID("Item-4618-0-4000000081C35317"), false, "worn guid: nothing without the item API")
 eq(Equipment.Worn(11), "ring1", "worn: a slot's link")
 eq(Equipment.CanDualWield(), false, "dual wield: off")
 eq(Equipment.CanUse("item:1", 10), true, "can use: a level 30 can wear level 10 gear")
