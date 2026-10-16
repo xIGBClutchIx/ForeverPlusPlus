@@ -134,10 +134,13 @@ module.notice = {
 }
 
 local ATLAS = "bags-greenarrow" -- the arrow Blizzard's bag buttons keep hidden
--- A red arrow pointing down for a downgrade in text: the main menu button's download indicator
--- (Blizzard_MicroMenu, MainMenuBarMicroButtons.lua). On icons the green arrow is turned over
--- and tinted instead, which text can't do.
+-- A red arrow pointing down for a downgrade in text, where the green arrow can't be turned over
+-- or tinted: Blizzard's old streaming indicator, a plain red arrow down, when the client still
+-- has the file (probe: GetFileIDFromPath is Mainline's), else the main menu button's download
+-- indicator atlas (Blizzard_MicroMenu, MainMenuBarMicroButtons.lua).
+local DOWN_FILE = "Interface\\Buttons\\UI-MicroStream-Red"
 local DOWN_ATLAS = "UI-HUD-MicroMenu-StreamDLRed-Up"
+local TEXT_ARROW = 14 -- the arrows' size in a tooltip's name line, about the name's height
 local GREEN = { 0.1, 1, 0.1 } -- Blizzard's green font color
 local RED = { 1, 0.125, 0.125 } -- Blizzard's red font color, for downgrades
 local PI = math.pi
@@ -294,7 +297,7 @@ local rewardArrows = ItemButtons.Overlays(function(button)
     return makeMark(button.Icon or button.icon or button)
 end)
 
-local hasArt, hasDownArt -- whether this client has the atlases (checked at enable)
+local hasArt, hasDownArt, hasDownFile -- whether this client has the art (checked at enable)
 
 -- Where the percentage goes for each corner the arrow can sit in: toward the icon's middle, so
 -- under an arrow at the top and over one at the bottom. The last two values are also the way
@@ -498,10 +501,15 @@ end
 -- go in.
 local function upgradeText(result)
     if not result.upgrade then
-        local arrow = hasDownArt and format("|A:%s:0:0|a ", DOWN_ATLAS) or ""
+        local arrow = ""
+        if hasDownFile then
+            arrow = format("|T%s:%d:%d|t ", DOWN_FILE, TEXT_ARROW, TEXT_ARROW)
+        elseif hasDownArt then
+            arrow = format("|A:%s:%d:%d|a ", DOWN_ATLAS, TEXT_ARROW, TEXT_ARROW)
+        end
         return arrow .. format(L.UPGRADEARROWS_PERCENT, result.percent), RED
     end
-    local text = hasArt and format("|A:%s:0:0|a", ATLAS) or ""
+    local text = hasArt and format("|A:%s:%d:%d|a", ATLAS, TEXT_ARROW, TEXT_ARROW) or ""
     if result.percent then
         text = text .. " " .. format(L.UPGRADEARROWS_PERCENT, result.percent)
     elseif text == "" then
@@ -628,6 +636,11 @@ end
 function module:OnEnable()
     hasArt = ns.Frames.HasAtlas(ATLAS)
     hasDownArt = ns.Frames.HasAtlas(DOWN_ATLAS)
+    local getFileID = _G.GetFileIDFromPath
+    local ok, fileID = pcall(function()
+        return getFileID and getFileID(DOWN_FILE)
+    end)
+    hasDownFile = ok and ns.IsReadable(fileID) and type(fileID) == "number" and fileID > 0
     updateProfile()
     self:Hook("MerchantFrame_UpdateMerchantInfo", updateMerchant)
     self:Hook("MerchantFrame_UpdateBuybackInfo", clearMerchant)
