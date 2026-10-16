@@ -18,6 +18,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Fixed
 
 - **Item Tooltips**: the Auction Prices scan no longer spins forever when the auction house stops answering partway: it asks again, then finishes with the prices it has.
+- **Item Tooltips**: an auction price over 214,748 gold no longer causes an error when it's saved.
 - **Spell Ranks**: the warning badge on a lower-rank spell sits fully inside the button's corner and draws above its icon, border, and cooldown, instead of being cut off.
 
 ## 0.9.0 (2026-10-14)

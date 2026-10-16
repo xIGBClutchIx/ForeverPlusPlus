@@ -20,7 +20,8 @@ local EPOCH = 1700000000 -- 2023-11-14, before any price was saved
 ---@param seenAt number time()
 ---@return string
 function Prices.Pack(copper, seenAt)
-    return format("%d,%d", floor(copper + 0.5), floor((seenAt - EPOCH) / 60))
+    -- %.0f, since the game's %d overflows past 2^31 copper (214,748g) and listings go higher.
+    return format("%.0f,%d", floor(copper + 0.5), floor((seenAt - EPOCH) / 60))
 end
 
 ---The price and the time (to the minute) a saved string holds, or nil for none.

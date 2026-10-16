@@ -54,6 +54,8 @@ ns.changelog = {
                 { L.ITEMTOOLTIPS_TITLE, "The Auction Prices scan no longer spins forever when the "
                     .. "auction house stops answering partway: it asks again, then finishes with "
                     .. "the prices it has." },
+                { L.ITEMTOOLTIPS_TITLE, "An auction price over 214,748 gold no longer causes an "
+                    .. "error when it's saved." },
                 { L.SPELLRANKS_TITLE, "The warning badge on a lower-rank spell sits fully inside "
                     .. "the button's corner and draws above its icon, border, and cooldown, "
                     .. "instead of being cut off." },
