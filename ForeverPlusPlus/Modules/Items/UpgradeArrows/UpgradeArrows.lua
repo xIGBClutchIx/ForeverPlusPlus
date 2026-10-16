@@ -33,6 +33,8 @@ local module = ns.NewModule("UpgradeArrows", L.UPGRADEARROWS_DESC, {
     tooltip = "name", -- the arrow and percentage "name" (beside the item's name), on a "line" of their own, or "off"
     scores = false,
     downgrades = true, -- a red arrow down on gear worse than what you wear
+    higher = true, -- judge gear you're up to `ahead` levels too low for, to grow into
+    ahead = 5,
     bags = true,
     bank = true,
     merchant = true,
@@ -70,6 +72,15 @@ module.options = {
     {
         key = "downgrades", name = L.UPGRADEARROWS_DOWNGRADES, description = L.UPGRADEARROWS_DOWNGRADES_DESC,
         section = L.UPGRADEARROWS_SECTION_GENERAL,
+    },
+    {
+        key = "higher", name = L.UPGRADEARROWS_HIGHER, description = L.UPGRADEARROWS_HIGHER_DESC,
+        section = L.UPGRADEARROWS_SECTION_GENERAL, slider = "ahead",
+    },
+    {
+        key = "ahead", name = L.UPGRADEARROWS_AHEAD, description = L.UPGRADEARROWS_AHEAD_DESC,
+        section = L.UPGRADEARROWS_SECTION_GENERAL, requires = "higher",
+        min = 1, max = 20, step = 1, format = L.UPGRADEARROWS_AHEAD_FORMAT,
     },
     {
         key = "corner", name = L.UPGRADEARROWS_CORNER, description = L.UPGRADEARROWS_CORNER_DESC,
@@ -192,7 +203,8 @@ local function compute(link)
         end
         return nil
     end
-    if not Equipment.Slots(info.slot) or not Equipment.CanUse(link, info.minLevel)
+    local ahead = module.db.higher and module.db.ahead or 0
+    if not Equipment.Slots(info.slot) or not Equipment.CanUse(link, info.minLevel, ahead)
         or Equipment.IsWorn(link) then
         return false
     end
@@ -676,6 +688,8 @@ function module:OnOptionChanged(key)
     end
     if key == "profile" or key == "threshold" then
         updateProfile()
+        forgetScores()
+    elseif key == "higher" or key == "ahead" then
         forgetScores()
     end
     refreshSoon()

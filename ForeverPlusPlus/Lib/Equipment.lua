@@ -122,11 +122,12 @@ end
 ---and its level requirement against the character's level. True when the client can't say.
 ---@param link string
 ---@param minLevel? number the item's level requirement
+---@param ahead? number levels below the requirement the character may still be (gear to grow into)
 ---@return boolean
-function Equipment.CanUse(link, minLevel)
+function Equipment.CanUse(link, minLevel, ahead)
     if minLevel and minLevel > 0 then
         local level = UnitLevel and UnitLevel("player")
-        if ns.IsReadable(level) and type(level) == "number" and level < minLevel then
+        if ns.IsReadable(level) and type(level) == "number" and level + (ahead or 0) < minLevel then
             return false
         end
     end
