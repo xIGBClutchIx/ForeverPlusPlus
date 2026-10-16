@@ -28,16 +28,17 @@ local module = ns.NewModule("UpgradeArrows", L.UPGRADEARROWS_DESC, {
     corner = "TOPRIGHT", -- where the arrow sits on an icon
     downCorner = "TOPLEFT", -- where a downgrade's arrow sits
     size = 18, -- the arrow's size on a bag icon, in pixels
+    padding = 0, -- how far the arrow sits in from its corner, in pixels
     percent = false, -- the percentage beside the arrow on icons (the tooltip has it)
     tooltip = "name", -- the arrow and percentage "name" (beside the item's name), on a "line" of their own, or "off"
     scores = false,
-    downgrades = false, -- a red arrow down on gear worse than what you wear
+    downgrades = true, -- a red arrow down on gear worse than what you wear
     bags = true,
     bank = true,
     merchant = true,
     loot = true,
     quests = true,
-    auction = false,
+    auction = true,
     weights = {}, -- data: profile key -> { stat -> weight }, what the player changed
 })
 module.title = L.UPGRADEARROWS_TITLE
@@ -104,6 +105,10 @@ module.options = {
     {
         key = "size", name = L.UPGRADEARROWS_SIZE, description = L.UPGRADEARROWS_SIZE_DESC,
         section = L.UPGRADEARROWS_SECTION_ARROW, min = 12, max = 32, step = 2, format = "%d px",
+    },
+    {
+        key = "padding", name = L.UPGRADEARROWS_PADDING, description = L.UPGRADEARROWS_PADDING_DESC,
+        section = L.UPGRADEARROWS_SECTION_ARROW, min = 0, max = 10, step = 1, format = "%d px",
     },
     {
         key = "percent", name = L.UPGRADEARROWS_PERCENT_ICON, description = L.UPGRADEARROWS_PERCENT_ICON_DESC,
@@ -292,7 +297,8 @@ end)
 local hasArt, hasDownArt -- whether this client has the atlases (checked at enable)
 
 -- Where the percentage goes for each corner the arrow can sit in: toward the icon's middle, so
--- under an arrow at the top and over one at the bottom.
+-- under an arrow at the top and over one at the bottom. The last two values are also the way
+-- "in" from that corner, for the Padding option.
 local TEXT_ANCHORS = {
     TOPRIGHT = { "TOPRIGHT", "BOTTOMRIGHT", -1, 1 },
     TOPLEFT = { "TOPLEFT", "BOTTOMLEFT", 1, 1 },
@@ -314,8 +320,11 @@ local function setArrow(set, key, result, size)
     local corner = down and module.db.downCorner or module.db.corner
     corner = TEXT_ANCHORS[corner] and corner or "TOPRIGHT"
     local arrow, text = mark.arrow, mark.text
+    local anchor = TEXT_ANCHORS[corner]
+    local padding = module.db.padding or 0
+    -- In from the corner: right and down from the top left, left and up from the bottom right.
     arrow:ClearAllPoints()
-    arrow:SetPoint(corner, mark.icon, corner, 0, 0)
+    arrow:SetPoint(corner, mark.icon, corner, anchor[3] * padding, -anchor[4] * padding)
     arrow:SetSize(size, size)
     arrow:SetDesaturated(down)
     arrow:SetRotation(down and PI or 0)
@@ -327,7 +336,6 @@ local function setArrow(set, key, result, size)
     text:SetTextColor(color[1], color[2], color[3])
     local percent = module.db.percent and type(result) == "table" and result.percent
     if percent then
-        local anchor = TEXT_ANCHORS[corner]
         text:SetText(format(L.UPGRADEARROWS_PERCENT, percent))
         text:ClearAllPoints()
         text:SetPoint(anchor[1], arrow, anchor[2], anchor[3], anchor[4])
