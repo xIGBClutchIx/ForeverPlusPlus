@@ -27,8 +27,8 @@ local module = ns.NewModule("UpgradeArrows", L.UPGRADEARROWS_DESC, {
     threshold = 0, -- percent an item must beat what you wear by
     corner = "TOPRIGHT", -- where the arrow sits on an icon
     size = 18, -- the arrow's size on a bag icon, in pixels
-    percent = false, -- the percentage under the arrow on icons (the tooltip always has it)
-    tooltip = true,
+    percent = false, -- the percentage beside the arrow on icons (the tooltip has it)
+    tooltip = "name", -- the arrow and percentage "name" (beside the item's name), on a "line" of their own, or "off"
     scores = false,
     bags = true,
     bank = true,
@@ -65,10 +65,15 @@ module.options = {
     {
         key = "tooltip", name = L.UPGRADEARROWS_TOOLTIP, description = L.UPGRADEARROWS_TOOLTIP_DESC,
         section = L.UPGRADEARROWS_SECTION_GENERAL,
+        choices = {
+            { "name", L.UPGRADEARROWS_TOOLTIP_NAME },
+            { "line", L.UPGRADEARROWS_TOOLTIP_LINE },
+            { "off", L.UPGRADEARROWS_TOOLTIP_OFF },
+        },
     },
     {
         key = "scores", name = L.UPGRADEARROWS_SCORES, description = L.UPGRADEARROWS_SCORES_DESC,
-        section = L.UPGRADEARROWS_SECTION_GENERAL, requires = "tooltip",
+        section = L.UPGRADEARROWS_SECTION_GENERAL,
     },
     {
         key = "corner", name = L.UPGRADEARROWS_CORNER, description = L.UPGRADEARROWS_CORNER_DESC,
@@ -76,6 +81,8 @@ module.options = {
         choices = {
             { "TOPRIGHT", L.UPGRADEARROWS_CORNER_TOPRIGHT },
             { "TOPLEFT", L.UPGRADEARROWS_CORNER_TOPLEFT },
+            { "BOTTOMRIGHT", L.UPGRADEARROWS_CORNER_BOTTOMRIGHT },
+            { "BOTTOMLEFT", L.UPGRADEARROWS_CORNER_BOTTOMLEFT },
         },
     },
     {
@@ -254,27 +261,33 @@ end)
 
 local hasArt -- whether this client has the atlas (checked at enable)
 
+-- Where the percentage goes for each corner the arrow can sit in: toward the icon's middle, so
+-- under an arrow at the top and over one at the bottom.
+local TEXT_ANCHORS = {
+    TOPRIGHT = { "TOPRIGHT", "BOTTOMRIGHT", -1, 1 },
+    TOPLEFT = { "TOPLEFT", "BOTTOMLEFT", 1, 1 },
+    BOTTOMRIGHT = { "BOTTOMRIGHT", "TOPRIGHT", -1, -1 },
+    BOTTOMLEFT = { "BOTTOMLEFT", "TOPLEFT", 1, -1 },
+}
+
 -- Shows the mark for an upgrade's `result` on an icon (or clears it), the arrow `size` wide in
--- the corner the Arrow options pick, with the percentage under it when there is one.
+-- the corner the Arrow options pick, with the percentage beside it when there is one.
 local function setArrow(set, key, result, size)
     local mark = set:Set(key, hasArt and result)
     if not mark then
         return
     end
-    local corner = module.db.corner
+    local corner = TEXT_ANCHORS[module.db.corner] and module.db.corner or "TOPRIGHT"
     local arrow, text = mark.arrow, mark.text
     arrow:ClearAllPoints()
     arrow:SetPoint(corner, mark.icon, corner, 0, 0)
     arrow:SetSize(size, size)
     local percent = module.db.percent and type(result) == "table" and result.percent
     if percent then
+        local anchor = TEXT_ANCHORS[corner]
         text:SetText(format(L.UPGRADEARROWS_PERCENT, percent))
         text:ClearAllPoints()
-        if corner == "TOPLEFT" then
-            text:SetPoint("TOPLEFT", arrow, "BOTTOMLEFT", 1, 1)
-        else
-            text:SetPoint("TOPRIGHT", arrow, "BOTTOMRIGHT", -1, 1)
-        end
+        text:SetPoint(anchor[1], arrow, anchor[2], anchor[3], anchor[4])
         text:Show()
     else
         text:Hide()
@@ -430,10 +443,21 @@ local function tooltipLink(data)
     return id and ("item:" .. id) or nil
 end
 
+-- The arrow (when the client has the art) and the percentage, for a tooltip.
+local function upgradeText(result)
+    local text = hasArt and format("|A:%s:0:0|a", ATLAS) or ""
+    if result.percent then
+        text = text .. " " .. format(L.UPGRADEARROWS_PERCENT, result.percent)
+    elseif text == "" then
+        text = L.UPGRADEARROWS_EMPTY_SLOT
+    end
+    return text
+end
+
 -- Draws the name line again with the arrow and the percentage at its right, in green, and
 -- returns true so Blizzard's is skipped. The name keeps its quality color.
 local function onNameLine(tooltip, data, lineData)
-    if not (module.enabled and module.db.tooltip and profile) then
+    if not (module.enabled and module.db.tooltip == "name" and profile) then
         return
     end
     local lines = ns.IsReadable(data.lines) and data.lines
@@ -448,10 +472,7 @@ local function onNameLine(tooltip, data, lineData)
     if not result then
         return
     end
-    local right = hasArt and format("|A:%s:0:0|a", ATLAS) or ""
-    if result.percent then
-        right = right .. " " .. format(L.UPGRADEARROWS_PERCENT, result.percent)
-    end
+    local right = upgradeText(result)
     local r, g, b = 1, 1, 1
     local color = lineData.leftColor
     if ns.IsReadable(color) and type(color) == "table" and color.GetRGB then
@@ -461,13 +482,21 @@ local function onNameLine(tooltip, data, lineData)
     return true
 end
 
--- The Score line, among our other lines about the item.
+-- The Upgrade line (when the arrow goes on a line of its own) and the Score line, among our
+-- other lines about the item.
 local function onTooltip(tooltip, data)
-    if not (module.enabled and module.db.tooltip and module.db.scores and profile) then
+    local ownLine = module.db.tooltip == "line"
+    if not (module.enabled and profile and (ownLine or module.db.scores)) then
         return
     end
     local result = evaluate(tooltipLink(data))
     if not result then
+        return
+    end
+    if ownLine and result.upgrade then
+        ItemTooltip.AddInfo(tooltip, L.UPGRADEARROWS_LINE, upgradeText(result), "right", GREEN)
+    end
+    if not module.db.scores then
         return
     end
     local text
