@@ -30,6 +30,7 @@ local module = ns.NewModule("UpgradeArrows", L.UPGRADEARROWS_DESC, {
     percent = false, -- the percentage beside the arrow on icons (the tooltip has it)
     tooltip = "name", -- the arrow and percentage "name" (beside the item's name), on a "line" of their own, or "off"
     scores = false,
+    downgrades = false, -- a red arrow down on gear worse than what you wear
     bags = true,
     bank = true,
     merchant = true,
@@ -76,6 +77,10 @@ module.options = {
         section = L.UPGRADEARROWS_SECTION_GENERAL,
     },
     {
+        key = "downgrades", name = L.UPGRADEARROWS_DOWNGRADES, description = L.UPGRADEARROWS_DOWNGRADES_DESC,
+        section = L.UPGRADEARROWS_SECTION_GENERAL,
+    },
+    {
         key = "corner", name = L.UPGRADEARROWS_CORNER, description = L.UPGRADEARROWS_CORNER_DESC,
         section = L.UPGRADEARROWS_SECTION_ARROW,
         choices = {
@@ -114,6 +119,8 @@ module.notice = {
 
 local ATLAS = "bags-greenarrow" -- the arrow Blizzard's bag buttons keep hidden
 local GREEN = { 0.1, 1, 0.1 } -- Blizzard's green font color
+local RED = { 1, 0.125, 0.125 } -- Blizzard's red font color, for downgrades
+local PI = math.pi
 
 -- The profile ---------------------------------------------------------------------------------
 
@@ -202,8 +209,12 @@ local function compute(link)
         end
     end
     rival = rival or 0
-    local upgrade, percent = ItemStats.Compare(score, rival, module.db.threshold)
-    return { upgrade = upgrade, percent = percent, score = score, rival = rival }
+    local threshold = module.db.threshold
+    local upgrade, percent = ItemStats.Compare(score, rival, threshold)
+    -- A downgrade is worse by more than the threshold too; nothing is a downgrade against an
+    -- empty slot.
+    local downgrade = not upgrade and percent ~= nil and percent < -threshold
+    return { upgrade = upgrade, downgrade = downgrade, percent = percent, score = score, rival = rival }
 end
 
 -- An item's result, kept per link until something it depends on changes.
@@ -221,10 +232,14 @@ local function evaluate(link)
     return result
 end
 
--- An item's result when it's an upgrade, else false.
-local function upgradeOf(link)
+-- An item's result when it gets a mark: an upgrade, or a downgrade while Show Downgrades is on.
+-- Else false.
+local function markOf(link)
     local result = link and evaluate(link)
-    return result and result.upgrade and result or false
+    if result and (result.upgrade or (result.downgrade and module.db.downgrades)) then
+        return result
+    end
+    return false
 end
 
 local function forgetScores()
@@ -282,6 +297,18 @@ local function setArrow(set, key, result, size)
     arrow:ClearAllPoints()
     arrow:SetPoint(corner, mark.icon, corner, 0, 0)
     arrow:SetSize(size, size)
+    -- A downgrade's arrow is the same art turned over and made red: desaturated first, since
+    -- a tint multiplies the green.
+    local down = type(result) == "table" and not result.upgrade
+    local color = down and RED or GREEN
+    arrow:SetDesaturated(down)
+    arrow:SetRotation(down and PI or 0)
+    if down then
+        arrow:SetVertexColor(color[1], color[2], color[3])
+    else
+        arrow:SetVertexColor(1, 1, 1)
+    end
+    text:SetTextColor(color[1], color[2], color[3])
     local percent = module.db.percent and type(result) == "table" and result.percent
     if percent then
         local anchor = TEXT_ANCHORS[corner]
@@ -311,7 +338,7 @@ local function updateBag(frame)
     local on = module.db.bags
     ItemButtons.EachBagButton(frame, function(_, icon, bag, slot)
         local link = on and C_Container.GetContainerItemLink(bag, slot)
-        setArrow(arrows, icon, link and upgradeOf(link), sizeAt(1))
+        setArrow(arrows, icon, link and markOf(link), sizeAt(1))
     end)
 end
 
@@ -327,7 +354,7 @@ local function updateBank()
         if on and button.GetBankTabID and button.GetContainerSlotID then
             link = C_Container.GetContainerItemLink(button:GetBankTabID(), button:GetContainerSlotID())
         end
-        setArrow(arrows, button.icon, link and upgradeOf(link), sizeAt(1))
+        setArrow(arrows, button.icon, link and markOf(link), sizeAt(1))
     end
 end
 
@@ -342,7 +369,7 @@ local function updateMerchant()
     local on = module.db.merchant
     ItemButtons.EachMerchantItem(function(icon, index)
         local link = on and _G.GetMerchantItemLink(index)
-        setArrow(arrows, icon, link and upgradeOf(link), sizeAt(1))
+        setArrow(arrows, icon, link and markOf(link), sizeAt(1))
     end)
 end
 
@@ -360,14 +387,14 @@ end
 local function updateAuction()
     local on = module.db.auction
     ItemButtons.EachAuctionRow(function(icon, itemID)
-        setArrow(arrows, icon, on and itemID and upgradeOf("item:" .. itemID), sizeAt(0.6))
+        setArrow(arrows, icon, on and itemID and markOf("item:" .. itemID), sizeAt(0.6))
     end)
 end
 
 -- Loot ------------------------------------------------------------------------------------------
 
 local function markLoot(icon, _, link)
-    setArrow(arrows, icon, module.db.loot and link and upgradeOf(link), sizeAt(0.9))
+    setArrow(arrows, icon, module.db.loot and link and markOf(link), sizeAt(0.9))
 end
 
 local function hookLoot()
@@ -375,7 +402,7 @@ local function hookLoot()
 end
 
 local function markRoll(icon, link)
-    setArrow(arrows, icon, module.db.loot and link and upgradeOf(link), sizeAt(0.9))
+    setArrow(arrows, icon, module.db.loot and link and markOf(link), sizeAt(0.9))
 end
 
 -- Quest rewards ---------------------------------------------------------------------------------
@@ -443,15 +470,20 @@ local function tooltipLink(data)
     return id and ("item:" .. id) or nil
 end
 
--- The arrow (when the client has the art) and the percentage, for a tooltip.
+-- The arrow (when the client has the art) and the percentage, for a tooltip, and the color they
+-- go in. A downgrade has no arrow in text, since an atlas in text can't be turned over or
+-- tinted; its red percentage says it.
 local function upgradeText(result)
+    if not result.upgrade then
+        return format(L.UPGRADEARROWS_PERCENT, result.percent), RED
+    end
     local text = hasArt and format("|A:%s:0:0|a", ATLAS) or ""
     if result.percent then
         text = text .. " " .. format(L.UPGRADEARROWS_PERCENT, result.percent)
     elseif text == "" then
         text = L.UPGRADEARROWS_EMPTY_SLOT
     end
-    return text
+    return text, GREEN
 end
 
 -- Draws the name line again with the arrow and the percentage at its right, in green, and
@@ -468,17 +500,17 @@ local function onNameLine(tooltip, data, lineData)
     if not ns.IsText(name, true) then
         return
     end
-    local result = upgradeOf(tooltipLink(data))
+    local result = markOf(tooltipLink(data))
     if not result then
         return
     end
-    local right = upgradeText(result)
+    local right, tint = upgradeText(result)
     local r, g, b = 1, 1, 1
     local color = lineData.leftColor
     if ns.IsReadable(color) and type(color) == "table" and color.GetRGB then
         r, g, b = color:GetRGB()
     end
-    tooltip:AddDoubleLine(name, right, r, g, b, GREEN[1], GREEN[2], GREEN[3])
+    tooltip:AddDoubleLine(name, right, r, g, b, tint[1], tint[2], tint[3])
     return true
 end
 
@@ -493,8 +525,9 @@ local function onTooltip(tooltip, data)
     if not result then
         return
     end
-    if ownLine and result.upgrade then
-        ItemTooltip.AddInfo(tooltip, L.UPGRADEARROWS_LINE, upgradeText(result), "right", GREEN)
+    if ownLine and (result.upgrade or (result.downgrade and module.db.downgrades)) then
+        local text, tint = upgradeText(result)
+        ItemTooltip.AddInfo(tooltip, L.UPGRADEARROWS_LINE, text, "right", tint)
     end
     if not module.db.scores then
         return

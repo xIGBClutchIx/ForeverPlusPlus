@@ -282,6 +282,9 @@ L.UPGRADEARROWS_DESC = "Put Blizzard's green arrow on gear that beats what you w
     .. "loot rolls, on quest rewards, and in the auction house, with the upgrade in the item's tooltip."
 L.UPGRADEARROWS_PART_SCORE = "scoring items" -- its row on the Profiler page
 L.UPGRADEARROWS_SECTION_GENERAL = "Weights"
+L.UPGRADEARROWS_DOWNGRADES = "Show Downgrades"
+L.UPGRADEARROWS_DOWNGRADES_DESC = "Also mark gear that's worse than what you wear, with a red arrow "
+    .. "pointing down and its percentage in red. Quest rewards only ever mark the best choice."
 L.UPGRADEARROWS_SECTION_ARROW = "Arrow"
 L.UPGRADEARROWS_SECTION_SHOW = "Show In"
 L.UPGRADEARROWS_CORNER = "Corner"

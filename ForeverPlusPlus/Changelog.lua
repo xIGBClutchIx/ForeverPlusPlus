@@ -28,7 +28,8 @@ ns.changelog = {
                     .. "at the size you pick, with the percentage beside it if you like. In the "
                     .. "item's tooltip the arrow and the percentage sit to the right of its name, "
                     .. "or on an Upgrade line of their own, Show Scores adds every item's score, "
-                    .. "and a Threshold slider hides small upgrades. Off by default." },
+                    .. "Show Downgrades marks worse gear with a red arrow pointing down, and a "
+                    .. "Threshold slider hides small differences. Off by default." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.QUESTTRACKER_TITLE, "The background is a little darker by default, at 40% "
