@@ -429,6 +429,27 @@ local function checkStats()
     probeAll("can dual wield", "CanDualWield")
 end
 
+-- What a point of each attribute gives, from the functions the character sheet's stat tooltips
+-- use (Upgrade Arrows derives its attribute weights from them).
+local function checkConversions()
+    section("conversions")
+    for stat = 1, 5 do
+        probeAll("attack power from 100 of stat " .. stat, "GetAttackPowerForStat", stat, 100)
+        probeAll("ranged attack power from 100 of stat " .. stat, "GetRangedAttackPowerForStat", stat, 100)
+    end
+    probeAll("crit from agility", "GetCritChanceFromStat", 2)
+    probeAll("dodge from agility", "GetDodgeChanceFromAttribute", 2)
+    probeAll("spell crit from intellect", "GetSpellCritChanceFromStat", 4)
+    probeAll("health per stamina", "UnitHPPerStamina", "player")
+    add("mana per intellect: " .. text(_G.MANA_PER_INTELLECT) .. ", break " .. text(_G.INTELLECT_BREAK))
+    probeAll("mana regen from spirit", "GetManaRegenFromSpirit")
+    probeAll("health regen from spirit", "GetHealthRegenFromSpirit")
+    probeAll("mana regen", "GetManaRegen")
+    probeAll("health regen", "GetHealthRegen")
+    local rates = ns.ItemStats and ns.ItemStats.PlayerRates and ns.ItemStats.PlayerRates()
+    dump("rates (Lib/ItemStats.lua)", rates)
+end
+
 -- The weapon skill lines Forever's SkillsFrame lists (Character Window's Skills.lua has the map).
 local SKILL_LINES = { 43, 44, 45, 46, 54, 55, 136, 160, 162, 172, 173, 176, 226, 228, 229 }
 
@@ -479,7 +500,8 @@ end
 
 -- Running it ---------------------------------------------------------------------------------
 
-local CHECKS = { checkClient, checkApi, checkWorn, checkBags, checkTalents, checkStats, checkSkills, checkArt }
+local CHECKS = { checkClient, checkApi, checkWorn, checkBags, checkTalents, checkStats, checkConversions,
+    checkSkills, checkArt }
 
 ---Runs every probe and writes the results to the saved log.
 ---@return number count how many lines it wrote

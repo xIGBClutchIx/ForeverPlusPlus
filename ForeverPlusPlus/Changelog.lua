@@ -34,9 +34,12 @@ ns.changelog = {
                     .. "or on an Upgrade line of their own, Show Scores adds every item's score, "
                     .. "Show Downgrades marks worse gear with a red arrow pointing down, in a "
                     .. "corner of its own, and a Threshold slider hides small differences. The "
-                    .. "weights start from a template per talent tree, and the module's own page "
-                    .. "in Settings (/fpp weights) has a slider per stat to make them your own, "
-                    .. "per profile. Off by default." },
+                    .. "weights start from a template per talent tree, with Strength, Agility, "
+                    .. "Stamina, and Intellect worked out from what the game says a point of each "
+                    .. "gives your class, and the module's own page in Settings (/fpp weights) "
+                    .. "has a slider per stat to make them your own, per profile, for any class, "
+                    .. "and Import and Export of stat weight strings in the Pawn format sims and "
+                    .. "gear sites publish. Off by default." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.QUESTTRACKER_TITLE, "The background is a little darker by default, at 40% "

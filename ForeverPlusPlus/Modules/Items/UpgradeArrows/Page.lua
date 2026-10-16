@@ -32,7 +32,7 @@ local GROUPS = {
 -- The classes the Class dropdown lists, in Blizzard's order.
 local CLASSES = { "WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "SHAMAN", "MAGE", "WARLOCK", "DRUID" }
 
-local MAX_WEIGHT, STEP = 20, 0.05 -- every default is a multiple of the step, so none drifts
+local MAX_WEIGHT, STEP = 20, 0.01 -- every default is a multiple of the step, so none drifts
 local EPSILON = 0.001 -- two weights this close are the same, whatever floating point says
 local ROW_HEIGHT, HEADER_HEIGHT = 26, 24
 local NAME_WIDTH, SLIDER_WIDTH, RESET_SIZE = 190, 250, 22
@@ -256,6 +256,21 @@ local function newRow(parent, stat)
     name:SetWidth(NAME_WIDTH - 12)
     name:SetJustifyH("LEFT")
     name:SetText(statName(stat))
+    -- A derived attribute says what the game gives for a point of it, over its name.
+    if internal.DERIVED[stat] then
+        local hit = CreateFrame("Frame", nil, row)
+        hit:SetPoint("TOPLEFT")
+        hit:SetPoint("BOTTOMLEFT")
+        hit:SetWidth(NAME_WIDTH - 12)
+        hit:EnableMouse(true)
+        hit:SetScript("OnEnter", function(self)
+            local text = editing and internal.DerivedText(stat, editing)
+            if text then
+                Kit.ShowTooltip(self, L["UPGRADEARROWS_STAT_" .. stat] or stat, text)
+            end
+        end)
+        hit:SetScript("OnLeave", Kit.HideTooltip)
+    end
     row.slider = addSlider(row, stat)
     if not row.slider then
         row.value = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
@@ -364,6 +379,47 @@ function module:BuildPage(frame)
     end)
     showAllBox:SetChecked(showAll)
     Kit.AddTooltip(showAllBox, L.UPGRADEARROWS_PAGE_SHOW_ALL, L.UPGRADEARROWS_PAGE_SHOW_ALL_DESC)
+
+    -- Export and Import, left of Show All: the shown profile as a Pawn-format string to copy,
+    -- and such a string pasted in, which replaces every weight of the shown profile.
+    local export = Kit.NewButton(frame, L.UPGRADEARROWS_PAGE_EXPORT, 80, function()
+        if not editing then
+            return
+        end
+        local name = format(L.UPGRADEARROWS_PAGE_EXPORT_NAME, profileName(editing))
+        local tree = editing.bear and L.UPGRADEARROWS_PROFILE_BEAR or tabName(editing.class, editing.index)
+        ns.Prompt("UPGRADEARROWS_EXPORT", format(L.UPGRADEARROWS_PAGE_EXPORT_TEXT, profileName(editing)),
+            ItemStats.WeightString(name, editing.class, tree, editing.weights))
+    end)
+    export:SetPoint("RIGHT", showAllBox, "LEFT", -12, 0)
+    Kit.AddTooltip(export, L.UPGRADEARROWS_PAGE_EXPORT, L.UPGRADEARROWS_PAGE_EXPORT_DESC)
+    local import = Kit.NewButton(frame, L.UPGRADEARROWS_PAGE_IMPORT, 80, function()
+        if not editing then
+            return
+        end
+        ns.Prompt("UPGRADEARROWS_IMPORT", L.UPGRADEARROWS_PAGE_IMPORT_TEXT, "", function(text)
+            local weights, name, unknown = ItemStats.ParseWeightString(text)
+            if not weights then
+                ns.Print(L.UPGRADEARROWS_PAGE_IMPORT_BAD)
+                return
+            end
+            local count = 0
+            for _, stat in ipairs(ItemStats.ORDER) do
+                local value = weights[stat] or 0
+                if weights[stat] then
+                    count = count + 1
+                end
+                internal.SetWeight(editing, stat, value)
+            end
+            ns.Print(format(L.UPGRADEARROWS_PAGE_IMPORTED, count, profileName(editing), name or ""))
+            if unknown and #unknown > 0 then
+                ns.Print(format(L.UPGRADEARROWS_PAGE_IMPORT_UNKNOWN, table.concat(unknown, ", ")))
+            end
+            refresh()
+        end)
+    end)
+    import:SetPoint("RIGHT", export, "LEFT", -8, 0)
+    Kit.AddTooltip(import, L.UPGRADEARROWS_PAGE_IMPORT, L.UPGRADEARROWS_PAGE_IMPORT_DESC)
 
     -- Class, then Tree, on one row under the title.
     local classLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")

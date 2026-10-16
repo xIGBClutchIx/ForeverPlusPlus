@@ -5,8 +5,10 @@
 -- the caller can look again at GET_ITEM_INFO_RECEIVED. Nothing here reads frames.
 local _, ns = ...
 
-local pairs, type, sort = pairs, type, table.sort
-local C_Item = C_Item
+local _G, pairs, ipairs, type, sort, tonumber, pcall = _G, pairs, ipairs, type, table.sort, tonumber, pcall
+local format, gmatch, match, lower, concat = string.format, string.gmatch, string.match, string.lower, table.concat
+local floor = math.floor
+local C_Item, UnitStat = C_Item, UnitStat
 
 local ItemStats = {}
 ns.ItemStats = ItemStats
@@ -227,4 +229,199 @@ function ItemStats.Compare(score, rival, threshold)
     end
     local percent = (score - rival) / rival * 100
     return percent > (threshold or 0), percent
+end
+
+-- Weight strings -----------------------------------------------------------------------------------
+-- The Pawn-format string sims and gear sites publish weights in, and players paste between
+-- addons: `( Pawn: v1: "Name": Class=Mage, Spec=Frost, Intellect=0.35, SpellPower=1, ... )`. A
+-- public text format, read and written here in our own keys; nothing of that addon's is used.
+
+-- Our keys and the string's stat names. Reading also takes the other names sims use for them.
+local STRING_NAMES = {
+    STR = "Strength", AGI = "Agility", STA = "Stamina", INT = "Intellect", SPI = "Spirit",
+    HEALTH = "Health", MANA = "Mana", AP = "Ap", RAP = "Rap", HIT = "HitRating", CRIT = "CritRating",
+    HASTE = "HasteRating", EXPERTISE = "ExpertiseRating", ARMORPEN = "ArmorPenetration",
+    SP = "SpellPower", HEAL = "Healing", SPELLHIT = "SpellHitRating", SPELLCRIT = "SpellCritRating",
+    MP5 = "Mp5", HP5 = "Hp5", ARMOR = "Armor", DEF = "Defense", DODGE = "DodgeRating",
+    PARRY = "ParryRating", BLOCK = "BlockRating", BLOCKVALUE = "BlockValue", DPS = "Dps",
+    DPS_OFF = "OffHandDps", DPS_RANGED = "RangedDps", RES_FIRE = "FireResist",
+    RES_NATURE = "NatureResist", RES_FROST = "FrostResist", RES_SHADOW = "ShadowResist",
+    RES_ARCANE = "ArcaneResist",
+}
+local STRING_KEYS = {} -- a lowercased string name -> our key
+for key, name in pairs(STRING_NAMES) do
+    STRING_KEYS[lower(name)] = key
+end
+for name, key in pairs({ spelldamage = "SP", meleedps = "DPS", mainhanddps = "DPS", crit = "CRIT",
+    hit = "HIT", spellcrit = "SPELLCRIT", spellhit = "SPELLHIT", haste = "HASTE", expertise = "EXPERTISE",
+    dodge = "DODGE", parry = "PARRY", block = "BLOCK", attackpower = "AP", rangedattackpower = "RAP",
+    healingpower = "HEAL", manaregen = "MP5", healthregen = "HP5", defenserating = "DEF",
+    armorpenetrationrating = "ARMORPEN", bonusarmor = "ARMOR" }) do
+    STRING_KEYS[name] = key
+end
+
+-- A weight as the string writes it: up to two decimals, no trailing zeros.
+local function weightText(value)
+    local text = format("%.2f", value)
+    text = (text:gsub("0+$", ""))
+    return (text:gsub("%.$", ""))
+end
+
+---A profile's weights as a Pawn-format string, stats in ItemStats.ORDER, zero weights left out.
+---@param name string the scale's name
+---@param class string the class token, such as "MAGE"
+---@param spec string the tree's name
+---@param weights table our key -> weight
+---@return string
+function ItemStats.WeightString(name, class, spec, weights)
+    local parts = {}
+    local className = lower(class or "")
+    className = className:sub(1, 1):upper() .. className:sub(2)
+    parts[#parts + 1] = "Class=" .. className
+    parts[#parts + 1] = "Spec=" .. (spec or "")
+    for _, key in ipairs(ItemStats.ORDER) do
+        local weight = weights[key]
+        if type(weight) == "number" and weight ~= 0 then
+            parts[#parts + 1] = STRING_NAMES[key] .. "=" .. weightText(weight)
+        end
+    end
+    local title = (name or ""):gsub('"', "")
+    return format('( Pawn: v1: "%s": %s )', title, concat(parts, ", "))
+end
+
+---The weights in a Pawn-format string, in our keys, with the scale's name and the stat names
+---we don't know (skipped). Nil and "format" when the text isn't such a string.
+---@param text string
+---@return table? weights our key -> weight
+---@return string? nameOrReason the scale's name, or why it couldn't be read
+---@return string[]? unknown the stat names skipped
+function ItemStats.ParseWeightString(text)
+    if type(text) ~= "string" then
+        return nil, "format"
+    end
+    local name, body = match(text, '^%s*%(%s*[Pp][Aa][Ww][Nn]%s*:%s*[Vv]1%s*:%s*"([^"]*)"%s*:%s*(.-)%s*%)%s*$')
+    if not body then
+        return nil, "format"
+    end
+    local weights, unknown, any = {}, {}, false
+    for pair in gmatch(body, "[^,]+") do
+        local key, value = match(pair, "^%s*([%w_]+)%s*=%s*(.-)%s*$")
+        if key then
+            local lowered = lower(key)
+            if lowered == "class" or lowered == "spec" then
+                any = true
+            else
+                local ours = STRING_KEYS[lowered]
+                local number = tonumber(value)
+                if ours and number then
+                    weights[ours] = number
+                    any = true
+                else
+                    unknown[#unknown + 1] = key
+                end
+            end
+        end
+    end
+    if not any then
+        return nil, "format"
+    end
+    sort(unknown)
+    return weights, name, unknown
+end
+
+-- The player's conversions ------------------------------------------------------------------------
+-- What one point of an attribute gives this character, from the functions Forever's character
+-- sheet writes its stat tooltips with (Blizzard_UIPanels_Game/Camelot/PaperDollFrameStats.lua):
+-- attack power per Strength and Agility, crit and dodge per Agility, spell crit per Intellect,
+-- health per Stamina, mana per Intellect. Read for the player only; nil where the client can't
+-- say (an attribute of 0, a missing function, or a secret value).
+
+-- A global function's number, or nil.
+local function callNumber(name, ...)
+    local fn = _G[name]
+    if type(fn) ~= "function" then
+        return nil
+    end
+    local ok, value = pcall(fn, ...)
+    if ok and ns.IsReadable(value) and type(value) == "number" then
+        return value
+    end
+    return nil
+end
+
+-- The player's total of an attribute (1 Strength to 5 Spirit), or nil.
+local function total(stat)
+    if not UnitStat then
+        return nil
+    end
+    local ok, _, value = pcall(UnitStat, "player", stat)
+    if ok and ns.IsReadable(value) and type(value) == "number" and value > 0 then
+        return value
+    end
+    return nil
+end
+
+-- Per point: the game's answer for `amount` points, divided.
+local function perPoint(name, stat, amount)
+    local value = callNumber(name, stat, amount)
+    return value and value / amount or nil
+end
+
+-- Per point: the game's answer for all the player's points of a stat, divided by them.
+local function perOwnPoint(name, stat)
+    local points = total(stat)
+    local value = points and callNumber(name, stat)
+    return value and value / points or nil
+end
+
+---What one point of each attribute gives this character now: `AP_STR`, `AP_AGI`, `RAP_AGI`,
+---`CRIT_AGI` (percent), `DODGE_AGI`, `SPELLCRIT_INT`, `HEALTH_STA`, `MANA_INT`, `ARMOR_AGI`.
+---A rate the client can't give is left out.
+---@return table rates
+function ItemStats.PlayerRates()
+    local rates = {}
+    rates.AP_STR = perPoint("GetAttackPowerForStat", 1, 100)
+    rates.AP_AGI = perPoint("GetAttackPowerForStat", 2, 100)
+    rates.RAP_AGI = perPoint("GetRangedAttackPowerForStat", 2, 100)
+    rates.CRIT_AGI = perOwnPoint("GetCritChanceFromStat", 2)
+    rates.DODGE_AGI = perOwnPoint("GetDodgeChanceFromAttribute", 2)
+    rates.SPELLCRIT_INT = perOwnPoint("GetSpellCritChanceFromStat", 4)
+    rates.HEALTH_STA = callNumber("UnitHPPerStamina", "player")
+    local manaPerInt = _G.MANA_PER_INTELLECT
+    rates.MANA_INT = type(manaPerInt) == "number" and manaPerInt or nil
+    rates.ARMOR_AGI = 2 -- the game's flat rule, as the character sheet's Agility tooltip says
+    return rates
+end
+
+local function round(value)
+    return floor(value * 100 + 0.5) / 100
+end
+
+---The attribute weights that follow from a set of weights and the player's rates: Strength from
+---attack power, Agility from attack power, crit, dodge, and armor, Stamina from health, and
+---Intellect from spell crit and mana. Spirit isn't derived: its regen counts only outside the
+---five-second rule, which is a judgment, not a conversion. Only the attributes whose rates are
+---all there are returned.
+---@param weights table our key -> weight (the roots: AP, RAP, CRIT, DODGE, ARMOR, HEALTH, SPELLCRIT, MANA)
+---@param rates table from ItemStats.PlayerRates
+---@return table derived STR, AGI, STA, INT -> weight, for those that could be
+function ItemStats.DeriveAttributes(weights, rates)
+    local function w(key)
+        return weights[key] or 0
+    end
+    local derived = {}
+    if rates.AP_STR then
+        derived.STR = round(rates.AP_STR * w("AP"))
+    end
+    if rates.AP_AGI and rates.CRIT_AGI and rates.DODGE_AGI then
+        derived.AGI = round(rates.AP_AGI * w("AP") + (rates.RAP_AGI or 0) * w("RAP")
+            + rates.CRIT_AGI * w("CRIT") + rates.DODGE_AGI * w("DODGE") + (rates.ARMOR_AGI or 0) * w("ARMOR"))
+    end
+    if rates.HEALTH_STA then
+        derived.STA = round(rates.HEALTH_STA * w("HEALTH"))
+    end
+    if rates.SPELLCRIT_INT and rates.MANA_INT then
+        derived.INT = round(rates.SPELLCRIT_INT * w("SPELLCRIT") + rates.MANA_INT * w("MANA"))
+    end
+    return derived
 end
