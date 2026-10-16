@@ -51,6 +51,9 @@ ns.changelog = {
                     .. "name." },
             } },
             { L.CHANGELOG_FIXED, {
+                { L.ITEMTOOLTIPS_TITLE, "The Auction Prices scan no longer spins forever when the "
+                    .. "auction house stops answering partway: it asks again, then finishes with "
+                    .. "the prices it has." },
                 { L.SPELLRANKS_TITLE, "The warning badge on a lower-rank spell sits fully inside "
                     .. "the button's corner and draws above its icon, border, and cooldown, "
                     .. "instead of being cut off." },

@@ -225,11 +225,32 @@ local lastQuery = 0 -- GetTime() of Blizzard's last query of its own
 local blockTimer = ns.Frames.Timer()
 local onThrottleReady
 
+-- The server doesn't always answer: a page request can be dropped by the throttle, or the last
+-- page can come back with no event at all, and the throttle's ready event can fail to come. So a
+-- step that waits on the server or the throttle asks again after a while, and after a few tries
+-- with no answer the scan ends with the prices it has, instead of spinning forever.
+local STALL = 8 -- seconds without an answer before asking again
+local RETRIES = 2 -- times it asks again before it ends the scan
+local stallTimer = ns.Frames.Timer()
+local retries = 0
+local answered = false -- a browse answer came since the scan's query went out
+
 local function stopScan()
     scanning, sent, waiting = false, false, nil
     seen, seenCount = nil, nil
+    retries, answered = 0, false
     ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
     blockTimer:Cancel()
+    stallTimer:Cancel()
+end
+
+-- Ends the scan, keeping every price seen. The scan counts as done, so it waits the usual
+-- interval before scanning again on its own.
+local function finishScan(text)
+    local count = seenCount
+    house().scannedAt = time()
+    stopScan()
+    showIndicator(format(text, count), false)
 end
 
 -- An item is in the sell box on the Sell tab, so a post is coming. Probed: when the window's
@@ -246,6 +267,24 @@ local function selling()
 end
 
 local step
+
+-- No answer in time: ask again, or end the scan with what it has.
+local function onStall()
+    if not scanning or (waiting ~= "server" and waiting ~= "throttle") then
+        return
+    end
+    retries = retries + 1
+    if retries > RETRIES then
+        finishScan(L.AUCTIONPRICES_NO_ANSWER)
+        return
+    end
+    if waiting == "server" and not answered then
+        sent = false -- the first query got no answer: send it again
+    end
+    ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
+    waiting = nil
+    step()
+end
 
 -- Paused for the sell box or giving way: look again shortly. The timer runs only while a scan
 -- is held back.
@@ -265,6 +304,7 @@ function step()
     local wait = lastQuery + YIELD - GetTime()
     if sell or wait > 0 then
         waiting = "blocked"
+        stallTimer:Cancel() -- held back on purpose, not waiting on anyone
         if sell then
             showIndicator(format(L.AUCTIONPRICES_PAUSED, seenCount), false, true)
         end
@@ -279,23 +319,23 @@ function step()
         if waiting ~= "throttle" then
             waiting = "throttle"
             ns.On("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
+            stallTimer:Start(STALL, onStall)
         end
         return
     end
     waiting = "server"
     if not sent then
-        sent, ownQuery = true, true
+        sent, ownQuery, answered = true, true, false
         C_AuctionHouse.SendBrowseQuery({
             searchString = "", sorts = {}, filters = {}, itemClassFilters = {},
         })
         ownQuery = false
+        stallTimer:Start(STALL, onStall)
     elseif not C_AuctionHouse.HasFullBrowseResults() then
         C_AuctionHouse.RequestMoreBrowseResults()
+        stallTimer:Start(STALL, onStall)
     else
-        local count = seenCount
-        house().scannedAt = time()
-        stopScan()
-        showIndicator(format(L.AUCTIONPRICES_SCANNED, count), false)
+        finishScan(L.AUCTIONPRICES_SCANNED)
     end
 end
 
@@ -308,6 +348,8 @@ end
 
 local function onResults()
     if scanning and sent and waiting == "server" then
+        retries, answered = 0, true
+        stallTimer:Cancel()
         step()
     end
 end

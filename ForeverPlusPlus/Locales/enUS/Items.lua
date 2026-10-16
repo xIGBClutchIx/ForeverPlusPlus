@@ -44,6 +44,7 @@ L.AUCTIONPRICES_SCANNING ="Scanning prices... %d items" -- count so far
 L.AUCTIONPRICES_SCANNED = "Prices updated for %d items" -- count
 L.AUCTIONPRICES_PAUSED = "Scan paused while you sell... %d items" -- count so far
 L.AUCTIONPRICES_STOPPED = "Scan stopped by a search at %d items" -- count
+L.AUCTIONPRICES_NO_ANSWER = "Prices updated for %d items (the auction house stopped answering)" -- count
 L.AUCTIONPRICES_AGE = "Prices scanned %d min ago" -- minutes
 L.AUCTIONPRICES_COMMAND = "scan the open auction house now"
 L.AUCTIONPRICES_IS_OFF = "Auction prices are off. Turn on Item Tooltips and its Auction Prices option."
