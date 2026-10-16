@@ -500,4 +500,4 @@ module.debugActions = {
     },
 }
 
-ns.AddCommand("shots", "[scene | wait seconds]", L.SCREENSHOTS_COMMAND, module.Run)
+ns.AddCommand("shots", "[scene | wait seconds]", L.SCREENSHOTS_COMMAND, module.Run, "Debug")

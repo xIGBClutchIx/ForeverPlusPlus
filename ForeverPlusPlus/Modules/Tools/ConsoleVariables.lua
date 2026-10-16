@@ -17,9 +17,9 @@ local C_CVar = C_CVar
 local getAllCommands = ConsoleGetAllCommands or (C_Console and C_Console.GetAllCommands)
 local L = ns.L
 
-local module = ns.NewModule("ConsoleVariables", L.CONSOLEVARIABLES_DESC, { enabled = true })
+local module = ns.NewModule("ConsoleVariables", L.CONSOLEVARIABLES_DESC, { enabled = false })
 module.title = L.CONSOLEVARIABLES_TITLE
-module.alwaysOn = true -- a tool page, not a change to the game; it costs nothing until opened
+module.category = "tools" -- off, its page and command are gone; it costs nothing until opened
 
 local LIST_WIDTH = 160 -- the group list, a little narrower than the module list
 local ROW_HEIGHT = 40 -- a CVar's row: its name over its help text
@@ -465,6 +465,10 @@ local function openWith(text)
     end
 end
 
+function module:OnDisable()
+    ns.Off("CVAR_UPDATE", onCVarUpdate)
+end
+
 ns.AddCommand("cvar", "[search]", L.CONSOLEVARIABLES_COMMAND, function(rest)
     openWith(strtrim(rest))
-end)
+end, module.name)

@@ -58,6 +58,7 @@ Modules\System\ErrorCatcher.lua
 Modules\Units\PlayerNameplates.lua
 Modules\Units\NpcNameplates.lua
 Modules\Quests\QuestNameplates.lua
+Modules\Tools\Debug.lua
 Modules\Tools\ConsoleVariables.lua
 Modules\Tools\SelfTest.lua
 Modules\Tools\GearProbe.lua

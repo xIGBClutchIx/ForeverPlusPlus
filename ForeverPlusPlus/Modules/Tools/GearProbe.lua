@@ -534,4 +534,4 @@ module.debugActions = {
     },
 }
 
-ns.AddCommand("gearprobe", "", L.GEARPROBE_COMMAND, module.Run)
+ns.AddCommand("gearprobe", "", L.GEARPROBE_COMMAND, module.Run, "Debug")

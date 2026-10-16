@@ -8,7 +8,10 @@ end
 
 -- ConsoleVariables
 L.CONSOLEVARIABLES_TITLE = "Console Variables"
-L.CONSOLEVARIABLES_DESC = "Browse the game's console variables (CVars) on a page in Settings, and "
+L.DEBUG_DESC = "Add the Debug page to Settings, with debug options, Show Tags, and the testing "
+    .. "tools (Self Test, Gear Probe, Screenshots). Turning it off puts every debug option back "
+    .. "to its default."
+L.CONSOLEVARIABLES_DESC ="Browse the game's console variables (CVars) on a page in Settings, and "
     .. "change them."
 L.CONSOLEVARIABLES_COMMAND = "open Console Variables, searching for [search]"
 L.CONSOLEVARIABLES_NO_PAGE = "This client's Settings can't open the Console Variables page."

@@ -49,6 +49,12 @@ ns.changelog = {
                     .. "smaller indent under the option they depend on, so they wrap less. An "
                     .. "option's NEW label sits just after its checkbox instead of squeezing its "
                     .. "name." },
+                { L.CHANGELOG_SETTINGS, "Console Variables, Profiler, and the Debug page are "
+                    .. "modules under a new Tools category, off by default (on in Developer's "
+                    .. "Defaults). Off, their pages leave the sidebar and their commands are gone, "
+                    .. "the Profiler times nothing, and turning Debug off puts every debug option "
+                    .. "back to its default and takes away /fpp selftest, /fpp gearprobe, and "
+                    .. "/fpp shots." },
             } },
             { L.CHANGELOG_FIXED, {
                 { L.ITEMTOOLTIPS_TITLE, "The Auction Prices scan no longer spins forever when the "

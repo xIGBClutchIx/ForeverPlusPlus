@@ -422,6 +422,7 @@ local CATEGORIES = {
     { "map", L.CATEGORY_MAP },
     { "quests", L.CATEGORY_QUESTS },
     { "system", L.CATEGORY_SYSTEM },
+    { "tools", L.CATEGORY_TOOLS },
     { "units", L.CATEGORY_UNITS },
 }
 sort(CATEGORIES, function(a, b) return strlower(a[2]) < strlower(b[2]) end)
@@ -894,7 +895,7 @@ local function addModuleRows(view, module)
             byKey[option.key] = option
         end
     end
-    local ownPage = module.BuildPage and pages[name]
+    local ownPage = pages[name]
     if #options == 0 and not module.actions and not ownPage then
         addLine(view, "GameFontDisable", L.SETTINGS_NO_OPTIONS)
         return
@@ -1284,10 +1285,12 @@ function ns.RegisterSettings()
             pageOrder[#pageOrder + 1] = name
         end
     end
+    -- The Debug page is the Debug module's (Modules/Tools/Debug.lua), there while it's on.
+    pages.Debug = S.AddDebugPage(category, order)
+    pageOrder[#pageOrder + 1] = "Debug"
     for _, name in ipairs(pageOrder) do
         updatePage(name)
     end
-    S.AddDebugPage(category, order)
     addCanvasPage(category, L.CHANGELOG, S.BuildChangelog)
     aboutCategory = addCanvasPage(category, L.ABOUT, S.BuildAbout)
     Settings.RegisterAddOnCategory(category)

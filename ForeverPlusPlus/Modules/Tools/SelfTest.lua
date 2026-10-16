@@ -747,4 +747,4 @@ module.debugActions = {
     },
 }
 
-ns.AddCommand("selftest", "", L.SELFTEST_COMMAND, module.Run)
+ns.AddCommand("selftest", "", L.SELFTEST_COMMAND, module.Run, "Debug")

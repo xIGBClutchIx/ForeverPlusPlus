@@ -268,6 +268,7 @@ end
 -- The Debug page under `parent`: a header for each section, with Forever++'s own rows and then
 -- each module's (in `order`, by title) under it, and after them a header for each module with rows
 -- in no section.
+---@return table category the page
 function S.AddDebugPage(parent, order)
     local category, layout = Settings.RegisterVerticalLayoutSubcategory(parent, L.DEBUG)
     ourPages[category] = true
@@ -291,4 +292,5 @@ function S.AddDebugPage(parent, order)
             addRows(module, nil)
         end
     end
+    return category
 end

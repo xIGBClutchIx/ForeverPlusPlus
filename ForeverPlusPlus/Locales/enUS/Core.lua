@@ -74,6 +74,7 @@ L.CATEGORY_ITEMS = "Items"
 L.CATEGORY_MAP = "Map"
 L.CATEGORY_QUESTS = "Quests"
 L.CATEGORY_SYSTEM = "System"
+L.CATEGORY_TOOLS = "Tools" -- pages for finding problems: Console Variables, Profiler, Debug
 L.CATEGORY_UNITS = "Units" -- unit frames and nameplates
 L.CATEGORY_OTHER = "Other"
 L.DEBUG = "Debug"

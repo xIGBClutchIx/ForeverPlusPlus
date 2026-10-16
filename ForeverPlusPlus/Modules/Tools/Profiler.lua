@@ -4,7 +4,8 @@
 -- frame, and how often they ran, beside the game's own numbers for Forever++ as a whole. A module
 -- with parts has the AddOn List's +/- and folds open to them; the heaviest module starts open.
 -- Memory can only be read for the whole addon. Nothing is timed until Record, and nothing is
--- built until the page is first shown; `/fpp profile` opens it.
+-- built until the page is first shown; `/fpp profile` opens it. While the module is off its page
+-- and command are gone and nothing is timed.
 local _, ns = ...
 
 local ipairs, format, concat = ipairs, string.format, table.concat
@@ -12,9 +13,9 @@ local CreateFrame, C_Timer, GameTooltip = CreateFrame, C_Timer, GameTooltip
 local L = ns.L
 local Profiler = ns.Profiler
 
-local module = ns.NewModule("Profiler", L.PROFILER_DESC, { enabled = true })
+local module = ns.NewModule("Profiler", L.PROFILER_DESC, { enabled = false })
 module.title = L.PROFILER_TITLE
-module.alwaysOn = true -- a tool page; it costs nothing until it records
+module.category = "tools"
 
 local ROW_HEIGHT = 22 -- a module's row
 local PART_HEIGHT = 18 -- a part's row under it
@@ -307,8 +308,15 @@ function module:BuildPage(frame)
     end
 end
 
+-- Off, nothing is timed: a recording stops (and what it found is dropped) with the page.
+function module:OnDisable()
+    Profiler.Stop()
+    Profiler.Reset()
+    stopTicker()
+end
+
 ns.AddCommand("profile", "", L.PROFILER_COMMAND, function()
     if not ns.OpenSettings(module.name) then
         ns.Print(L.PROFILER_NO_PAGE)
     end
-end)
+end, module.name)

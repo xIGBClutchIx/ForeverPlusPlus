@@ -670,7 +670,7 @@ end
 -- Modules the Developer's Defaults preset turns on, on top of every module's default settings.
 local developerEnables = { "FishingCast", "SkipCinematics", "AutoScreenshot", "CurrencyBar",
     "HideBetaFeedback", "ShortChannelNames", "EasyDelete", "AutoWeaponBuff", "MinimapNodeIcons",
-    "AutoGossip", "WhisperWindow" }
+    "AutoGossip", "WhisperWindow", "ConsoleVariables", "Profiler", "Debug" }
 
 -- Options the Developer's Defaults preset sets differently from the module's default.
 local developerOptions = {
@@ -739,9 +739,16 @@ local commands, commandOrder = {}, {} -- name -> { usage, description, fn }, and
 ---@param usage string what follows the name in /fpp help, or ""
 ---@param description string one line for /fpp help
 ---@param fn fun(rest: string)
-function ns.AddCommand(name, usage, description, fn)
-    commands[name] = { usage = usage, description = description, fn = fn }
+---@param owner? string a module the command needs: it works and is listed only while that one is on
+function ns.AddCommand(name, usage, description, fn, owner)
+    commands[name] = { usage = usage, description = description, fn = fn, owner = owner }
     commandOrder[#commandOrder + 1] = name
+end
+
+-- A command whose module is off is as if it weren't there.
+local function commandOn(info)
+    local owner = info and (info.owner and ns.modules[info.owner])
+    return info and (not owner or owner.enabled) or false
 end
 
 local function findModule(query)
@@ -878,7 +885,7 @@ SLASH_FOREVERPLUSPLUS2 = "/forever++"
 SlashCmdList.FOREVERPLUSPLUS = function(message)
     local command, rest = strsplit(" ", strtrim(message or ""), 2)
     command = (command or ""):lower()
-    if commands[command] then
+    if commandOn(commands[command]) then
         commands[command].fn(rest or "")
     elseif command == "toggle" and rest then
         -- /fpp toggle <module> [option] [value]: the module itself when no option is named.
@@ -919,8 +926,10 @@ function ns.Commands()
     }
     for _, name in ipairs(commandOrder) do
         local info = commands[name]
-        local usage = info.usage ~= "" and " " .. info.usage or ""
-        lines[#lines + 1] = { format("/fpp %s%s", name, usage), info.description }
+        if commandOn(info) then
+            local usage = info.usage ~= "" and " " .. info.usage or ""
+            lines[#lines + 1] = { format("/fpp %s%s", name, usage), info.description }
+        end
     end
     return lines
 end
