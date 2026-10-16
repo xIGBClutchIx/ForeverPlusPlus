@@ -36,6 +36,7 @@ ns.changelog = {
                     .. "corner of its own, Higher Level Gear judges gear up to 5 levels (or as "
                     .. "many as you pick) above yours, profession tools like fishing poles and the "
                     .. "Mining Pick are left unmarked unless you turn off Ignore Profession Tools, "
+                    .. "as is the reagent bag unless you turn on Reagent Bag, "
                     .. "and a Threshold slider hides small "
                     .. "differences. The "
                     .. "weights start from a template per talent tree, with Strength, Agility, "

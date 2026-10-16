@@ -37,6 +37,7 @@ local module = ns.NewModule("UpgradeArrows", L.UPGRADEARROWS_DESC, {
     ahead = 5,
     tools = true, -- leave profession tools (fishing poles, the Mining Pick) unmarked
     bags = true,
+    reagentBag = false, -- the reagent bag holds tools you carry for a profession, not to wear
     bank = true,
     merchant = true,
     loot = true,
@@ -120,6 +121,10 @@ module.options = {
         section = L.UPGRADEARROWS_SECTION_ARROW,
     },
     { key = "bags", name = L.UPGRADEARROWS_BAGS, description = L.UPGRADEARROWS_BAGS_DESC, section = L.UPGRADEARROWS_SECTION_SHOW },
+    {
+        key = "reagentBag", name = L.UPGRADEARROWS_REAGENT_BAG, description = L.UPGRADEARROWS_REAGENT_BAG_DESC,
+        section = L.UPGRADEARROWS_SECTION_SHOW, requires = "bags",
+    },
     { key = "bank", name = L.UPGRADEARROWS_BANK, description = L.UPGRADEARROWS_BANK_DESC, section = L.UPGRADEARROWS_SECTION_SHOW },
     { key = "merchant", name = L.UPGRADEARROWS_MERCHANT, description = L.UPGRADEARROWS_MERCHANT_DESC, section = L.UPGRADEARROWS_SECTION_SHOW },
     { key = "loot", name = L.UPGRADEARROWS_LOOT, description = L.UPGRADEARROWS_LOOT_DESC, section = L.UPGRADEARROWS_SECTION_SHOW },
@@ -362,10 +367,14 @@ end
 
 -- Bags and bank ---------------------------------------------------------------------------------
 
+-- The reagent bag, which holds profession tools too. Probe: Enum.BagIndex is Mainline's; 5 is
+-- its slot there.
+local REAGENT_BAG = Enum and Enum.BagIndex and Enum.BagIndex.ReagentBag or 5
+
 local function updateBag(frame)
-    local on = module.db.bags
+    local on, reagent = module.db.bags, module.db.reagentBag
     ItemButtons.EachBagButton(frame, function(_, icon, bag, slot)
-        local link = on and C_Container.GetContainerItemLink(bag, slot)
+        local link = on and (reagent or bag ~= REAGENT_BAG) and C_Container.GetContainerItemLink(bag, slot)
         setArrow(arrows, icon, link and markOf(link), sizeAt(1))
     end)
 end
