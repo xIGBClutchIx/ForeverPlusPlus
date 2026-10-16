@@ -895,15 +895,10 @@ local function addModuleRows(view, module)
             byKey[option.key] = option
         end
     end
-    local ownPage = pages[name]
-    if #options == 0 and not module.actions and not ownPage then
+    -- A module's own page needs no button here: it's in the sidebar while the module is on.
+    if #options == 0 and not module.actions then
         addLine(view, "GameFontDisable", L.SETTINGS_NO_OPTIONS)
         return
-    end
-    -- The way to a module's own page comes first, before its options.
-    if ownPage then
-        addButtonRow(view, "", nil, nil, format(L.SETTINGS_OPEN_PAGE, module.pageTitle or module.title or name),
-            function() ns.OpenSettings(name) end)
     end
     local section, subsection
     if not (options[1] and options[1].section) then
