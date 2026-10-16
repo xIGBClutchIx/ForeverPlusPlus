@@ -244,6 +244,7 @@ From the Gear Probe tool (Debug page, `/fpp gearprobe`), run on a level 19 Mage 
 - `C_SkillInfo.GetSkillLineInfoByID(line)` returns `name`, `rank`, `maxRank`, `modifier` (Staves 71/95 on the Mage) and nil for a weapon skill the character lacks. **[in-game]**
 - `C_SpecializationInfo.IsInitialized()` was true and `GetNumSpecGroups()` 1; `C_Traits.GetGroupCurrencyInfo` gave points per tab again (Frost 15, tree 1112, config type 4). **[in-game]** (build 70425)
 - The `bags-greenarrow` atlas exists, and Forever's `ContainerFrameItemButtonTemplate` (Mainline `ContainerFrame.xml`) still declares a hidden `UpgradeIcon` texture with it, anchored TOPLEFT (0, 0) at the atlas's size, on OVERLAY sublevel 1; the combined bags' buttons have it. **[in-game]** **[source]** Upgrade Arrows draws its own texture with the same atlas at the same corner rather than showing Blizzard's region.
+- The old streaming indicator file `Interface\Buttons\UI-MicroStream-Red` (a plain red arrow pointing down) is still in the client, `GetFileIDFromPath` finds it, and it draws in tooltip text as `|T...:14:14|t`. **[in-game]** (2026-10-15, Cameron's screenshot) `UI-HUD-MicroMenu-StreamDLRed-Up` is the modern download indicator atlas, but it's the whole button face, a red blob at text height. An atlas in text (`|A:...|a`) draws at its own size with `0:0`; give it a height and width to match the font.
 
 ## Bags and the bank
 
