@@ -293,6 +293,9 @@ L.UPGRADEARROWS_HIGHER_DESC = "Also mark gear you're not high enough level to we
 L.UPGRADEARROWS_AHEAD = "Levels Ahead"
 L.UPGRADEARROWS_AHEAD_DESC = "How many levels above yours an item may need and still be marked."
 L.UPGRADEARROWS_AHEAD_FORMAT = "+%d" -- levels above the player's
+L.UPGRADEARROWS_TOOLS = "Ignore Profession Tools"
+L.UPGRADEARROWS_TOOLS_DESC = "Leave fishing poles and tools like the Mining Pick, Blacksmith "
+    .. "Hammer, and Skinning Knife unmarked, since you carry them for a profession, not to fight with."
 L.UPGRADEARROWS_SECTION_ARROW = "Arrow"
 L.UPGRADEARROWS_SECTION_SHOW = "Show In"
 L.UPGRADEARROWS_CORNER = "Corner"

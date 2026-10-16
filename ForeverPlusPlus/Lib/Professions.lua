@@ -100,6 +100,29 @@ local STONES = ns.GameData.New("miningStones", {
     [12365] = 245, -- Dense Stone
 }, { kind = "item", label = "Stones from veins" })
 
+-- Profession tools a character can equip but carries for their profession, not to fight with:
+-- item ID -> the skill line. Classic's IDs (Classic Era 1.15 item data); Self Test checks them.
+-- Fishing poles are told by their weapon subclass instead, so every pole counts.
+local TOOLS = ns.GameData.New("professionTools", {
+    [2901] = Professions.MINING, -- Mining Pick
+    [5956] = Professions.BLACKSMITHING, -- Blacksmith Hammer
+    [7005] = Professions.SKINNING, -- Skinning Knife
+    [6219] = 202, -- Arclight Spanner (Engineering)
+}, { kind = "item", label = "Profession tools" })
+local WEAPON, FISHING_POLE = 2, 20 -- Enum.ItemClass.Weapon, Enum.ItemWeaponSubclass.Fishingpole
+
+---Whether an item is a profession tool: a fishing pole, or a tool like the Mining Pick.
+---@param itemID number
+---@param classID? number
+---@param subclassID? number
+---@return boolean
+function Professions.IsTool(itemID, classID, subclassID)
+    if classID == WEAPON and subclassID == FISHING_POLE then
+        return true
+    end
+    return TOOLS:Get(itemID) ~= nil
+end
+
 local itemSkills -- item ID -> { skill line, skill }, built from the nodes when first asked
 
 ---The herb or vein named `name` (as the world writes it): { skill line, skill, item ID }, any of

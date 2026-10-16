@@ -35,6 +35,7 @@ local module = ns.NewModule("UpgradeArrows", L.UPGRADEARROWS_DESC, {
     downgrades = true, -- a red arrow down on gear worse than what you wear
     higher = true, -- judge gear you're up to `ahead` levels too low for, to grow into
     ahead = 5,
+    tools = true, -- leave profession tools (fishing poles, the Mining Pick) unmarked
     bags = true,
     bank = true,
     merchant = true,
@@ -81,6 +82,10 @@ module.options = {
         key = "ahead", name = L.UPGRADEARROWS_AHEAD, description = L.UPGRADEARROWS_AHEAD_DESC,
         section = L.UPGRADEARROWS_SECTION_GENERAL, requires = "higher",
         min = 1, max = 20, step = 1, format = L.UPGRADEARROWS_AHEAD_FORMAT,
+    },
+    {
+        key = "tools", name = L.UPGRADEARROWS_TOOLS, description = L.UPGRADEARROWS_TOOLS_DESC,
+        section = L.UPGRADEARROWS_SECTION_GENERAL,
     },
     {
         key = "corner", name = L.UPGRADEARROWS_CORNER, description = L.UPGRADEARROWS_CORNER_DESC,
@@ -205,6 +210,7 @@ local function compute(link)
     end
     local ahead = module.db.higher and module.db.ahead or 0
     if not Equipment.Slots(info.slot) or not Equipment.CanUse(link, info.minLevel, ahead)
+        or module.db.tools and ns.Professions.IsTool(info.id, info.classID, info.subclassID)
         or Equipment.IsWorn(link) then
         return false
     end
@@ -689,7 +695,7 @@ function module:OnOptionChanged(key)
     if key == "profile" or key == "threshold" then
         updateProfile()
         forgetScores()
-    elseif key == "higher" or key == "ahead" then
+    elseif key == "higher" or key == "ahead" or key == "tools" then
         forgetScores()
     end
     refreshSoon()
