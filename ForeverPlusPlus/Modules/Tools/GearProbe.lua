@@ -451,29 +451,29 @@ local function checkArt()
         local ok, info = call("C_Texture.GetAtlasInfo", atlas)
         add(format("atlas %s: %s", atlas, ok and (info and "yes" or "no") or text(info)))
     end
-    local frame = _G.ContainerFrameCombinedBags
-    if not (frame and frame.EnumerateValidItems) then
-        add("combined bags: not found")
-        return
-    end
-    if not frame:IsShown() then
-        add("combined bags: closed (open them and run again for the UpgradeIcon check)")
-    end
-    local ok, err = pcall(function()
-        for _, button in frame:EnumerateValidItems() do
-            if button then -- closed bags can list a slot with no button
-                local icon = button.UpgradeIcon
-                add("bag button UpgradeIcon: " .. text(icon and "yes" or "no"))
-                if icon and icon.GetAtlas then
-                    add("bag button UpgradeIcon atlas: " .. text(icon:GetAtlas()))
-                end
-                return
+    -- The first button of any bag window that's open: the combined bags, or a bag of its own.
+    local found = false
+    for _, frame in ipairs(ns.ItemButtons.Frames()) do
+        if frame and frame:IsShown() and not found then
+            local ok, err = pcall(function()
+                ns.ItemButtons.EachBagButton(frame, function(button)
+                    if button and not found then
+                        found = true
+                        local icon = button.UpgradeIcon
+                        add(format("bag button (%s) UpgradeIcon: %s", text(frame:GetName()), text(icon and "yes" or "no")))
+                        if icon and icon.GetAtlas then
+                            add("bag button UpgradeIcon atlas: " .. text(icon:GetAtlas()))
+                        end
+                    end
+                end)
+            end)
+            if not ok then
+                add("bag button: error " .. text(err))
             end
         end
-        add("bag button: none to look at")
-    end)
-    if not ok then
-        add("bag button: error " .. text(err))
+    end
+    if not found then
+        add("bag button: no bag window is open (open your bags and run /fpp gearprobe again)")
     end
 end
 
