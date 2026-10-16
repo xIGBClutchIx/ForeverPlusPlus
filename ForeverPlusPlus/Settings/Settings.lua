@@ -53,6 +53,7 @@ ns.SettingsUI = S
 local settings = {} -- module name -> its Blizzard setting objects, to refresh after /fpp changes
 local modulesCategory -- the Modules page, the top Forever++ entry, for /fpp
 local pages = {} -- module name -> the page it draws itself, for ns.OpenSettings(name)
+local pageOrder = {} -- the modules with a page of their own, in sidebar order
 local aboutCategory -- the About page, for ns.OpenAbout
 
 -- Opens a Forever++ page (after combat, if the player is in combat).
@@ -95,6 +96,51 @@ end
 
 local function addCanvasPage(category, name, build)
     return Settings.RegisterCanvasLayoutSubcategory(category, canvasFrame(build), name)
+end
+
+-- Whether a module's own page is in the sidebar: always for a tool, and only while it's on for a
+-- module the player turns on and off.
+local function pageShown(name)
+    local module = ns.modules[name]
+    return module.alwaysOn or module.enabled
+end
+
+-- Puts a module's page in the sidebar or takes it out, as the module turns on and off. Settings has
+-- no way to hide a page, so this adds it to or removes it from the Forever++ entry's subpages (its
+-- own list, which Blizzard reads when it draws the sidebar), and has the sidebar drawn again.
+local function updatePage(name)
+    local page = pages[name]
+    local list = page and modulesCategory.GetSubcategories and modulesCategory:GetSubcategories()
+    if not list then
+        return
+    end
+    local at, index = 1, nil
+    for _, other in ipairs(pageOrder) do
+        if other == name then
+            break
+        end
+        if pageShown(other) then
+            at = at + 1
+        end
+    end
+    for i, category in ipairs(list) do
+        if category == page then
+            index = i
+        end
+    end
+    local want = pageShown(name)
+    if want == (index ~= nil) then
+        return
+    end
+    if want then
+        table.insert(list, at, page)
+    else
+        table.remove(list, index)
+    end
+    local categoryList = SettingsPanel and SettingsPanel.GetCategoryList and SettingsPanel:GetCategoryList()
+    if categoryList and categoryList.CreateCategories then
+        categoryList:CreateCategories()
+    end
 end
 
 S.open = open
@@ -855,8 +901,8 @@ local function addModuleRows(view, module)
     end
     -- The way to a module's own page comes first, before its options.
     if ownPage then
-        addButtonRow(view, "", nil, nil, format(L.SETTINGS_OPEN_PAGE, module.title or name),
-            function() open(ownPage) end)
+        addButtonRow(view, "", nil, nil, format(L.SETTINGS_OPEN_PAGE, module.pageTitle or module.title or name),
+            function() ns.OpenSettings(name) end)
     end
     local section, subsection
     if not (options[1] and options[1].section) then
@@ -1232,10 +1278,14 @@ function ns.RegisterSettings()
     for _, name in ipairs(grouped) do
         local module = ns.modules[name]
         if module.BuildPage then
-            pages[name] = addCanvasPage(category, module.title or name, function(frame)
+            pages[name] = addCanvasPage(category, module.pageTitle or module.title or name, function(frame)
                 module:BuildPage(frame)
             end)
+            pageOrder[#pageOrder + 1] = name
         end
+    end
+    for _, name in ipairs(pageOrder) do
+        updatePage(name)
     end
     S.AddDebugPage(category, order)
     addCanvasPage(category, L.CHANGELOG, S.BuildChangelog)
@@ -1249,7 +1299,7 @@ end
 ---@param name? string a module
 ---@return boolean opened false when this client's Settings can't open to it
 function ns.OpenSettings(name)
-    if name and pages[name] then
+    if name and pages[name] and pageShown(name) then
         return open(pages[name])
     end
     if name and searchText[name] then
@@ -1276,6 +1326,7 @@ end
 ---@param name string
 function ns.RefreshSetting(name)
     refreshModule(name)
+    updatePage(name)
     if not Settings or not Settings.NotifyUpdate then
         return
     end

@@ -42,6 +42,7 @@ local module = ns.NewModule("UpgradeArrows", L.UPGRADEARROWS_DESC, {
     weights = {}, -- data: profile key -> { stat -> weight }, what the player changed
 })
 module.title = L.UPGRADEARROWS_TITLE
+module.pageTitle = L.UPGRADEARROWS_PAGE_TITLE
 module.category = "items"
 module.added = "0.10.0"
 module.internal = {}

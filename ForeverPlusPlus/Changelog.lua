@@ -36,8 +36,8 @@ ns.changelog = {
                     .. "corner of its own, and a Threshold slider hides small differences. The "
                     .. "weights start from a template per talent tree, with Strength, Agility, "
                     .. "Stamina, and Intellect worked out from what the game says a point of each "
-                    .. "gives your class, and the module's own page in Settings (/fpp weights) "
-                    .. "has a slider per stat to make them your own, per profile, for any class, "
+                    .. "gives your class, and its Stat Weights page in Settings (/fpp weights), "
+                    .. "there while the module is on, has a slider per stat to make them your own, per profile, for any class, "
                     .. "and Import and Export of stat weight strings in the Pawn format sims and "
                     .. "gear sites publish. Off by default." },
             } },
