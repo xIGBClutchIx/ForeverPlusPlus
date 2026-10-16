@@ -29,8 +29,10 @@ ns.changelog = {
                     .. "item's tooltip the arrow and the percentage sit to the right of its name, "
                     .. "or on an Upgrade line of their own, Show Scores adds every item's score, "
                     .. "Show Downgrades marks worse gear with a red arrow pointing down, in a "
-                    .. "corner of its own, and a Threshold slider hides small differences. Off by "
-                    .. "default." },
+                    .. "corner of its own, and a Threshold slider hides small differences. The "
+                    .. "weights start from a template per talent tree, and the module's own page "
+                    .. "in Settings (/fpp weights) has a slider per stat to make them your own, "
+                    .. "per profile. Off by default." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.QUESTTRACKER_TITLE, "The background is a little darker by default, at 40% "

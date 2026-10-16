@@ -5,7 +5,7 @@
 -- shows how it reads; they are Forever++'s own, not another addon's.
 local _, ns = ...
 
-local pairs, format, tonumber = pairs, string.format, tonumber
+local pairs, next, type, format, tonumber = pairs, next, type, string.format, tonumber
 
 local module = ns.modules.UpgradeArrows
 local internal = module.internal
@@ -58,9 +58,10 @@ local NUDGES = {
     DRUID = { [3] = { SPI = 0.9 } },
 }
 
----The profile a character judges gear by: `{ key, template, weights }`, where `key` names the
----saved weights ("MAGE:3", "DRUID:bear"), `template` the role it starts from, and `weights` the
----template with the class's nudges and the player's own changes on top.
+---The profile a character judges gear by: `{ key, template, defaults, weights, class, index,
+---bear }`, where `key` names the saved weights ("MAGE:3", "DRUID:bear"), `template` the role it
+---starts from, `defaults` the template with the class's nudges, and `weights` those with the
+---player's own changes on top.
 ---@param class string the class token, such as "MAGE"
 ---@param index number the talent tab, 1 to 3
 ---@param bear? boolean the Feral Bear profile (Druids)
@@ -70,12 +71,15 @@ function internal.Profile(class, index, bear)
     index = tonumber(index) or 1
     local template = bear and "bear" or (CLASS_TABS[class] and CLASS_TABS[class][index]) or "fallback"
     local key = bear and (class .. ":bear") or format("%s:%d", class, index)
-    local weights = {}
+    local defaults, weights = {}, {}
     for stat, weight in pairs(TEMPLATES[template]) do
-        weights[stat] = weight
+        defaults[stat] = weight
     end
     local nudge = not bear and NUDGES[class] and NUDGES[class][index]
     for stat, weight in pairs(nudge or {}) do
+        defaults[stat] = weight
+    end
+    for stat, weight in pairs(defaults) do
         weights[stat] = weight
     end
     local saved = module.db and module.db.weights and module.db.weights[key]
@@ -84,5 +88,46 @@ function internal.Profile(class, index, bear)
             weights[stat] = weight
         end
     end
-    return { key = key, template = template, weights = weights }
+    return { key = key, template = template, defaults = defaults, weights = weights,
+        class = class, index = index, bear = bear or nil }
+end
+
+---Saves the player's weight for a stat in a profile: nothing when it's the default again, so a
+---better default reaches everyone who never changed it.
+---@param profile table from internal.Profile
+---@param stat string
+---@param value number
+function internal.SetWeight(profile, stat, value)
+    local all = module.db.weights
+    local saved = all[profile.key]
+    local default = profile.defaults[stat] or 0
+    if value == default then
+        if saved then
+            saved[stat] = nil
+            if next(saved) == nil then
+                all[profile.key] = nil
+            end
+        end
+    else
+        if not saved then
+            saved = {}
+            all[profile.key] = saved
+        end
+        saved[stat] = value
+    end
+    profile.weights[stat] = value ~= 0 and value or nil
+    internal.WeightsChanged()
+end
+
+---Forgets every weight the player changed in a profile.
+---@param profile table from internal.Profile
+function internal.ResetWeights(profile)
+    module.db.weights[profile.key] = nil
+    for stat in pairs(profile.weights) do
+        profile.weights[stat] = nil
+    end
+    for stat, weight in pairs(profile.defaults) do
+        profile.weights[stat] = weight
+    end
+    internal.WeightsChanged()
 end

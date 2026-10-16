@@ -79,6 +79,7 @@ Modules\Items\AlreadyKnown.lua
 Modules\Items\UnusableItemsTint.lua
 Modules\Items\UpgradeArrows\UpgradeArrows.lua
 Modules\Items\UpgradeArrows\Weights.lua
+Modules\Items\UpgradeArrows\Page.lua
 Modules\Quests\BestQuestReward.lua
 Modules\Items\EasyDelete.lua
 Modules\System\HideBetaFeedback.lua
