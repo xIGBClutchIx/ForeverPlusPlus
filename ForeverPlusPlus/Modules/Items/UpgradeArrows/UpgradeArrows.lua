@@ -26,6 +26,7 @@ local module = ns.NewModule("UpgradeArrows", L.UPGRADEARROWS_DESC, {
     profile = "auto", -- "auto" (the tab with the most points), "1" to "3" (a tab), or "bear"
     threshold = 0, -- percent an item must beat what you wear by
     corner = "TOPRIGHT", -- where the arrow sits on an icon
+    downCorner = "TOPLEFT", -- where a downgrade's arrow sits
     size = 18, -- the arrow's size on a bag icon, in pixels
     percent = false, -- the percentage beside the arrow on icons (the tooltip has it)
     tooltip = "name", -- the arrow and percentage "name" (beside the item's name), on a "line" of their own, or "off"
@@ -91,6 +92,16 @@ module.options = {
         },
     },
     {
+        key = "downCorner", name = L.UPGRADEARROWS_DOWNCORNER, description = L.UPGRADEARROWS_DOWNCORNER_DESC,
+        section = L.UPGRADEARROWS_SECTION_ARROW,
+        choices = {
+            { "TOPLEFT", L.UPGRADEARROWS_CORNER_TOPLEFT },
+            { "TOPRIGHT", L.UPGRADEARROWS_CORNER_TOPRIGHT },
+            { "BOTTOMLEFT", L.UPGRADEARROWS_CORNER_BOTTOMLEFT },
+            { "BOTTOMRIGHT", L.UPGRADEARROWS_CORNER_BOTTOMRIGHT },
+        },
+    },
+    {
         key = "size", name = L.UPGRADEARROWS_SIZE, description = L.UPGRADEARROWS_SIZE_DESC,
         section = L.UPGRADEARROWS_SECTION_ARROW, min = 12, max = 32, step = 2, format = "%d px",
     },
@@ -118,6 +129,10 @@ module.notice = {
 }
 
 local ATLAS = "bags-greenarrow" -- the arrow Blizzard's bag buttons keep hidden
+-- A red arrow pointing down for a downgrade in text: the main menu button's download indicator
+-- (Blizzard_MicroMenu, MainMenuBarMicroButtons.lua). On icons the green arrow is turned over
+-- and tinted instead, which text can't do.
+local DOWN_ATLAS = "UI-HUD-MicroMenu-StreamDLRed-Up"
 local GREEN = { 0.1, 1, 0.1 } -- Blizzard's green font color
 local RED = { 1, 0.125, 0.125 } -- Blizzard's red font color, for downgrades
 local PI = math.pi
@@ -274,7 +289,7 @@ local rewardArrows = ItemButtons.Overlays(function(button)
     return makeMark(button.Icon or button.icon or button)
 end)
 
-local hasArt -- whether this client has the atlas (checked at enable)
+local hasArt, hasDownArt -- whether this client has the atlases (checked at enable)
 
 -- Where the percentage goes for each corner the arrow can sit in: toward the icon's middle, so
 -- under an arrow at the top and over one at the bottom.
@@ -292,15 +307,16 @@ local function setArrow(set, key, result, size)
     if not mark then
         return
     end
-    local corner = TEXT_ANCHORS[module.db.corner] and module.db.corner or "TOPRIGHT"
+    -- A downgrade's arrow is the same art turned over and made red (desaturated first, since a
+    -- tint multiplies the green), in its own corner.
+    local down = type(result) == "table" and not result.upgrade
+    local color = down and RED or GREEN
+    local corner = down and module.db.downCorner or module.db.corner
+    corner = TEXT_ANCHORS[corner] and corner or "TOPRIGHT"
     local arrow, text = mark.arrow, mark.text
     arrow:ClearAllPoints()
     arrow:SetPoint(corner, mark.icon, corner, 0, 0)
     arrow:SetSize(size, size)
-    -- A downgrade's arrow is the same art turned over and made red: desaturated first, since
-    -- a tint multiplies the green.
-    local down = type(result) == "table" and not result.upgrade
-    local color = down and RED or GREEN
     arrow:SetDesaturated(down)
     arrow:SetRotation(down and PI or 0)
     if down then
@@ -471,11 +487,11 @@ local function tooltipLink(data)
 end
 
 -- The arrow (when the client has the art) and the percentage, for a tooltip, and the color they
--- go in. A downgrade has no arrow in text, since an atlas in text can't be turned over or
--- tinted; its red percentage says it.
+-- go in.
 local function upgradeText(result)
     if not result.upgrade then
-        return format(L.UPGRADEARROWS_PERCENT, result.percent), RED
+        local arrow = hasDownArt and format("|A:%s:0:0|a ", DOWN_ATLAS) or ""
+        return arrow .. format(L.UPGRADEARROWS_PERCENT, result.percent), RED
     end
     local text = hasArt and format("|A:%s:0:0|a", ATLAS) or ""
     if result.percent then
@@ -603,6 +619,7 @@ end
 
 function module:OnEnable()
     hasArt = ns.Frames.HasAtlas(ATLAS)
+    hasDownArt = ns.Frames.HasAtlas(DOWN_ATLAS)
     updateProfile()
     self:Hook("MerchantFrame_UpdateMerchantInfo", updateMerchant)
     self:Hook("MerchantFrame_UpdateBuybackInfo", clearMerchant)
