@@ -678,6 +678,7 @@ local developerOptions = {
     ChatHistory = { divider = true },
     QuestTracker = { sort = "low" },
     AutoGossip = { other = true },
+    MinimapButton = { swapClicks = true },
 }
 
 ---Puts every module's options (`module.options`) back to their defaults, then turns on the

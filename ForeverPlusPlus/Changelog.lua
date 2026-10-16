@@ -17,6 +17,10 @@ ns.changelog = {
                     .. "/fpp gearprobe) that reads what the client says about the gear you wear "
                     .. "and carry, its own item comparison, your talent tabs, and your stats, and "
                     .. "saves it after /reload, for the developers planning upgrade arrows." },
+                { L.MINIMAPBUTTON_TITLE, "The new Swap Clicks option (off by default, on in "
+                    .. "Developer's Defaults) opens the quick toggles with a click and settings "
+                    .. "with a right-click; the error keys go with the settings click, and the "
+                    .. "tooltip says which is which." },
                 { L.UPGRADEARROWS_TITLE, "A new module that puts Blizzard's green arrow on gear "
                     .. "that beats what you wear, judged by stat weights for your class and the "
                     .. "talent tree you have the most points in (or one you pick, with a Feral "

@@ -26,6 +26,7 @@ local GOLD_CODE = Colors.Code(GOLD[1], GOLD[2], GOLD[3])
 local module = ns.NewModule("MinimapButton", L.MINIMAPBUTTON_DESC, {
     enabled = true,
     where = "minimap", -- minimap, compartment, or both
+    swapClicks = false, -- the quick toggles on a click and settings on a right-click
     -- Keys held with a click, while Error Catcher is on.
     errorsKey = "shift", -- shows the errors
     clearModifier = "ctrl", -- clears this session's errors
@@ -139,8 +140,13 @@ local function quickMenu(owner)
     end)
 end
 
+-- Which mouse button opens the quick toggles: the right one, or the left with Swap Clicks.
+local function menuButton()
+    return module.db.swapClicks and "LeftButton" or "RightButton"
+end
+
 local function onClick(owner, mouse)
-    if mouse == "RightButton" then
+    if mouse == menuButton() then
         quickMenu(owner)
         return
     end
@@ -187,16 +193,19 @@ local function showTooltip(owner, drag)
         addCount(L.MINIMAPBUTTON_TIP_SAVED, Errors.SavedCount(), GOLD)
         GameTooltip:AddLine(" ")
     end
+    -- The settings click and the quick toggles click, as Swap Clicks has them.
+    local swapped = module.db.swapClicks
+    local settingsClick = swapped and L.MINIMAPBUTTON_RIGHT_CLICK or L.MINIMAPBUTTON_LEFT_CLICK
+    local keyClick = swapped and L.MINIMAPBUTTON_KEY_RIGHT_CLICK or L.MINIMAPBUTTON_KEY_LEFT_CLICK
     addHint(ns.WelcomePending() and L.MINIMAPBUTTON_HINT_WELCOME or L.MINIMAPBUTTON_HINT_SETTINGS,
-        L.MINIMAPBUTTON_LEFT_CLICK)
-    addHint(L.MINIMAPBUTTON_HINT_TOGGLES, L.MINIMAPBUTTON_RIGHT_CLICK)
+        settingsClick)
+    addHint(L.MINIMAPBUTTON_HINT_TOGGLES, swapped and L.MINIMAPBUTTON_LEFT_CLICK or L.MINIMAPBUTTON_RIGHT_CLICK)
     if errors then
         for _, action in ipairs(KEY_ACTIONS) do
             local key = module.db[action.setting]
             if key ~= "none" and KEY_NAMES[key] then
                 -- The key in gold; |r goes back to the line's green.
-                addHint(action.hint, format(L.MINIMAPBUTTON_KEY_LEFT_CLICK, GOLD_CODE
-                    .. KEY_NAMES[key] .. "|r"), true)
+                addHint(action.hint, format(keyClick, GOLD_CODE .. KEY_NAMES[key] .. "|r"), true)
             end
         end
     end
@@ -375,6 +384,12 @@ module.options = {
             { "compartment", L.MINIMAPBUTTON_WHERE_COMPARTMENT },
             { "both", L.MINIMAPBUTTON_WHERE_BOTH },
         },
+    },
+    {
+        key = "swapClicks",
+        name = L.MINIMAPBUTTON_SWAP,
+        description = L.MINIMAPBUTTON_SWAP_DESC,
+        added = "0.10.0",
     },
     Keys.Option("errorsKey", L.MINIMAPBUTTON_ERRORS_KEY, L.MINIMAPBUTTON_ERRORS_KEY_DESC),
     -- Changed: a click instead of a right-click, and Shift is a choice.
