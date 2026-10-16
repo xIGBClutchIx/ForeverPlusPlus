@@ -25,7 +25,7 @@ local module = ns.NewModule("UpgradeArrows", L.UPGRADEARROWS_DESC, {
     enabled = false,
     profile = "auto", -- "auto" (the tab with the most points), "1" to "3" (a tab), or "bear"
     threshold = 0, -- percent an item must beat what you wear by
-    corner = "TOPRIGHT", -- where the arrow sits on an icon
+    corner = "TOPLEFT", -- where the arrow sits on an icon (Blizzard's own UpgradeIcon's corner)
     downCorner = "TOPLEFT", -- where a downgrade's arrow sits
     size = 20, -- the arrow's size on a bag icon, in pixels
     padding = 1, -- how far the arrow sits in from its corner, in pixels
@@ -86,10 +86,10 @@ module.options = {
         key = "corner", name = L.UPGRADEARROWS_CORNER, description = L.UPGRADEARROWS_CORNER_DESC,
         section = L.UPGRADEARROWS_SECTION_ARROW,
         choices = {
-            { "TOPRIGHT", L.UPGRADEARROWS_CORNER_TOPRIGHT },
             { "TOPLEFT", L.UPGRADEARROWS_CORNER_TOPLEFT },
-            { "BOTTOMRIGHT", L.UPGRADEARROWS_CORNER_BOTTOMRIGHT },
+            { "TOPRIGHT", L.UPGRADEARROWS_CORNER_TOPRIGHT },
             { "BOTTOMLEFT", L.UPGRADEARROWS_CORNER_BOTTOMLEFT },
+            { "BOTTOMRIGHT", L.UPGRADEARROWS_CORNER_BOTTOMRIGHT },
         },
     },
     {
