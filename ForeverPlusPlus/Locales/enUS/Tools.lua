@@ -128,3 +128,17 @@ L.PROFILER_COUNTED = "Counted, not timed: a stopwatch around each of thousands a
     .. "more than the call." -- a part's tooltip on the Profiler page
 L.PROFILER_NOTE = "Only Forever++'s own code is timed, and timing it adds a little cost of its own "
     .. "while recording. Memory can only be read for the whole addon, not for each module."
+
+-- Gear Probe
+L.GEARPROBE_TITLE = "Gear Probe"
+L.GEARPROBE_DESC = "Read what this client says about your gear, talent tabs, and stats, for the "
+    .. "developers of the upgrade arrows."
+L.GEARPROBE_COMMAND = "probe your gear, bags, talents, and stats, then /reload to save the log"
+L.GEARPROBE_BUTTON = "Run"
+L.GEARPROBE_BUTTON_DESC = "Read the stats of what you wear and of the gear in your bags, the "
+    .. "game's own item comparison, your talent tabs, and your stats, and save it for the "
+    .. "developers. Open your bags first, with a piece of gear in them that has an Equip: hit, "
+    .. "crit, or spell power line. Type /reload afterwards to save the log."
+L.GEARPROBE_DONE = "Gear probe wrote %d lines, with %d pieces of gear from your bags. Type /reload "
+    .. "to save them." -- number of lines, number of bag items
+L.GEARPROBE_NO_GEAR = "No weapons or armor were found in your bags, so the comparison wasn't tried."

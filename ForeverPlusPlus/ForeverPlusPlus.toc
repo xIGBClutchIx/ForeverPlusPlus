@@ -57,6 +57,7 @@ Modules\Units\NpcNameplates.lua
 Modules\Quests\QuestNameplates.lua
 Modules\Tools\ConsoleVariables.lua
 Modules\Tools\SelfTest.lua
+Modules\Tools\GearProbe.lua
 Modules\Tools\Profiler.lua
 Modules\Tools\Screenshots.lua
 Modules\Automation\FastLoot.lua

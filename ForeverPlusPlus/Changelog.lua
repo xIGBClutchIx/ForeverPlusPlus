@@ -12,6 +12,12 @@ ns.changelog = {
     {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
+            { L.CHANGELOG_ADDED, {
+                { L.GEARPROBE_TITLE, "A new Run button under Testing on the Debug page (and "
+                    .. "/fpp gearprobe) that reads what the client says about the gear you wear "
+                    .. "and carry, its own item comparison, your talent tabs, and your stats, and "
+                    .. "saves it after /reload, for the developers planning upgrade arrows." },
+            } },
             { L.CHANGELOG_CHANGED, {
                 { L.QUESTTRACKER_TITLE, "The background is a little darker by default, at 40% "
                     .. "opacity instead of 30%. If you set its Opacity yourself, it stays as you "
