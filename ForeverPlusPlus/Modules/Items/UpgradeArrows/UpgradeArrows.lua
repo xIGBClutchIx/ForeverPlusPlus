@@ -1,7 +1,7 @@
 -- Upgrade Arrows: Blizzard's green arrow on gear that beats what you wear, judged by stat weights
 -- for your class and talent tree (Weights.lua), in your bags and bank, at merchants, on loot and
 -- loot rolls, on quest reward choices, and in the auction house, each with its own checkbox, and
--- an Upgrade line with the percentage in the item's tooltip.
+-- the arrow with the percentage to the right of the item's name in its tooltip.
 --
 -- An item's score is its stats (Lib/ItemStats.lua) times the profile's weights; what it would
 -- replace comes from the client's own item comparison (Lib/Equipment.lua), so a ring is judged
@@ -27,7 +27,7 @@ local module = ns.NewModule("UpgradeArrows", L.UPGRADEARROWS_DESC, {
     threshold = 0, -- percent an item must beat what you wear by
     corner = "TOPRIGHT", -- where the arrow sits on an icon
     size = 18, -- the arrow's size on a bag icon, in pixels
-    percent = true, -- the percentage under the arrow
+    percent = false, -- the percentage under the arrow on icons (the tooltip always has it)
     tooltip = true,
     scores = false,
     bags = true,
@@ -421,33 +421,62 @@ local function round(number)
     return floor(number + 0.5)
 end
 
-local function onTooltip(tooltip, data)
+-- The item a tooltip shows, by its link.
+local function tooltipLink(data)
+    if ns.IsText(data.hyperlink, true) then
+        return data.hyperlink
+    end
+    local id = ItemTooltip.ItemID(data)
+    return id and ("item:" .. id) or nil
+end
+
+-- Draws the name line again with the arrow and the percentage at its right, in green, and
+-- returns true so Blizzard's is skipped. The name keeps its quality color.
+local function onNameLine(tooltip, data, lineData)
     if not (module.enabled and module.db.tooltip and profile) then
         return
     end
-    local link = ns.IsText(data.hyperlink, true) and data.hyperlink
-    if not link then
-        local id = ItemTooltip.ItemID(data)
-        link = id and ("item:" .. id)
+    local lines = ns.IsReadable(data.lines) and data.lines
+    if not (type(lines) == "table" and lines[1] == lineData) then
+        return
     end
-    local result = link and evaluate(link)
+    local name = lineData.leftText
+    if not ns.IsText(name, true) then
+        return
+    end
+    local result = upgradeOf(tooltipLink(data))
     if not result then
         return
     end
-    if result.upgrade then
-        local value = result.percent and format(L.UPGRADEARROWS_PERCENT, result.percent)
-            or L.UPGRADEARROWS_EMPTY_SLOT
-        ItemTooltip.AddInfo(tooltip, L.UPGRADEARROWS_LINE, value, "right", GREEN)
+    local right = hasArt and format("|A:%s:0:0|a", ATLAS) or ""
+    if result.percent then
+        right = right .. " " .. format(L.UPGRADEARROWS_PERCENT, result.percent)
     end
-    if module.db.scores then
-        local text
-        if result.rival > 0 then
-            text = format(L.UPGRADEARROWS_SCORE_VALUE, round(result.score), round(result.rival))
-        else
-            text = format(L.UPGRADEARROWS_SCORE_NONE, round(result.score))
-        end
-        ItemTooltip.AddInfo(tooltip, L.UPGRADEARROWS_SCORE_LINE, text, "right", "gray")
+    local r, g, b = 1, 1, 1
+    local color = lineData.leftColor
+    if ns.IsReadable(color) and type(color) == "table" and color.GetRGB then
+        r, g, b = color:GetRGB()
     end
+    tooltip:AddDoubleLine(name, right, r, g, b, GREEN[1], GREEN[2], GREEN[3])
+    return true
+end
+
+-- The Score line, among our other lines about the item.
+local function onTooltip(tooltip, data)
+    if not (module.enabled and module.db.tooltip and module.db.scores and profile) then
+        return
+    end
+    local result = evaluate(tooltipLink(data))
+    if not result then
+        return
+    end
+    local text
+    if result.rival > 0 then
+        text = format(L.UPGRADEARROWS_SCORE_VALUE, round(result.score), round(result.rival))
+    else
+        text = format(L.UPGRADEARROWS_SCORE_NONE, round(result.score))
+    end
+    ItemTooltip.AddInfo(tooltip, L.UPGRADEARROWS_SCORE_LINE, text, "right", "gray")
 end
 
 -- Module ----------------------------------------------------------------------------------------
@@ -521,6 +550,7 @@ function module:OnEnable()
     ItemButtons.HookRolls(self, markRoll)
     ItemButtons.HookAuction(self, updateAuction)
     self:Hook("QuestInfo_Display", onQuestDisplay)
+    ItemTooltip.ReplaceLine(onNameLine, self)
     ItemTooltip.OnInfo(onTooltip, self)
     self:On("LOOT_OPENED", hookLoot)
     self:On("GET_ITEM_INFO_RECEIVED", onItemInfo)

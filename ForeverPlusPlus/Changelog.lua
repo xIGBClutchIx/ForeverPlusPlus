@@ -25,9 +25,10 @@ ns.changelog = {
                     .. "upgrade, and in the auction house (off by default), each with its own "
                     .. "checkbox. A ring is judged against your weaker ring and a two-hander "
                     .. "against both hands. The arrow sits at the icon's top right (or top left), "
-                    .. "at the size you pick, with the percentage under it. The item's tooltip gets an Upgrade line with the "
-                    .. "percentage, Show Scores adds every item's score, and a Threshold slider "
-                    .. "hides small upgrades. Off by default." },
+                    .. "at the size you pick, with the percentage under it if you like. In the "
+                    .. "item's tooltip the arrow and the percentage sit to the right of its name, "
+                    .. "Show Scores adds every item's score, and a Threshold slider hides small "
+                    .. "upgrades. Off by default." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.QUESTTRACKER_TITLE, "The background is a little darker by default, at 40% "
