@@ -2,6 +2,12 @@
 
 What changed in each release of Forever++. The same notes show in game under Settings > AddOns > Forever++ > Changelog, from [`ForeverPlusPlus/Changelog.lua`](ForeverPlusPlus/Changelog.lua); change both together.
 
+## Unreleased
+
+### Added
+
+- **Gear Probe**: a new Run button under Testing on the Debug page (and `/fpp gearprobe`) that reads what the client says about the gear you wear and carry, its own item comparison, your talent tabs, and your stats, and saves it after `/reload`, for the developers planning upgrade arrows.
+
 ## 0.9.0 (2026-10-14)
 
 ### Added
