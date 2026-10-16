@@ -11,7 +11,8 @@ local module = ns.modules.UpgradeArrows
 local internal = module.internal
 
 -- Role templates. DPS is a main-hand or two-handed weapon's, DPS_OFF an off-hand weapon's, and
--- DPS_RANGED a ranged weapon's (Lib/ItemStats.lua, Slotted).
+-- DPS_RANGED a ranged weapon's (Lib/ItemStats.lua, Slotted). Every value is a multiple of 0.05,
+-- the page's slider step, so a default sits on a step and never reads as changed.
 local TEMPLATES = {
     -- Strength melee: 2 attack power a point for these classes; the off hand counts for the
     -- dual wielders among them.
@@ -25,10 +26,10 @@ local TEMPLATES = {
     -- Healers: healing, regen, and mana. Spirit matters more on Forever than in Classic.
     healer = { HEAL = 1, SP = 0.3, MP5 = 1.5, INT = 0.6, SPI = 0.5, SPELLCRIT = 3, STA = 0.2, DPS_RANGED = 0.5 },
     -- Tanks: defense until uncrittable, then avoidance and stamina.
-    tank = { STA = 1.2, DEF = 1.8, DODGE = 10, PARRY = 8, BLOCK = 4, BLOCKVALUE = 0.4, ARMOR = 0.06,
+    tank = { STA = 1.2, DEF = 1.8, DODGE = 10, PARRY = 8, BLOCK = 4, BLOCKVALUE = 0.4, ARMOR = 0.05,
         STR = 0.6, AGI = 0.7, HIT = 4, CRIT = 2, DPS = 1 },
     -- Bears: armor is multiplied in form, so it counts more; no block or parry.
-    bear = { STA = 1.2, AGI = 1, ARMOR = 0.08, STR = 0.4, DEF = 1.2, DODGE = 10, HIT = 4, CRIT = 3, DPS = 1 },
+    bear = { STA = 1.2, AGI = 1, ARMOR = 0.1, STR = 0.4, DEF = 1.2, DODGE = 10, HIT = 4, CRIT = 3, DPS = 1 },
     -- A tab the map doesn't know (after a patch): something sensible.
     fallback = { STR = 1, AGI = 1, STA = 0.5, INT = 1, SPI = 0.5, AP = 0.3, SP = 0.8, HEAL = 0.6,
         HIT = 5, CRIT = 5, SPELLHIT = 5, SPELLCRIT = 5, DPS = 2 },
@@ -49,6 +50,16 @@ local CLASS_TABS = {
     DRUID = { "caster", "agility", "healer" }, -- Balance, Feral (cat), Restoration
 }
 internal.CLASS_TABS = CLASS_TABS
+
+---A class's talent tab's name in our strings, for a class the client has no talent data for
+---(another class than the character's). "Tree N" for a class or tab we don't know.
+---@param class string the class token
+---@param index number 1 to 3
+---@return string
+function internal.TabName(class, index)
+    local name = ns.L[format("UPGRADEARROWS_TAB_%s_%d", class, index)]
+    return name or format(ns.L.UPGRADEARROWS_PROFILE_TREE, index)
+end
 
 -- What each tab changes in its template, so every tree has defaults of its own: two-handers
 -- for Arms and Retribution, the off hand for Fury and Combat, crit for the crit trees (Fire,

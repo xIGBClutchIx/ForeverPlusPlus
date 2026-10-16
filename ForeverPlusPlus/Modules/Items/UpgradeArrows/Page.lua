@@ -1,13 +1,14 @@
--- Upgrade Arrows' own page in Settings (`/fpp weights`): the Profile dropdown (Auto, the
--- class's talent tabs, and Feral Bear for Druids), which picks the module's Profile setting,
--- then a slider row per stat of the profile in use under small headers, with its value and an
--- undo arrow while it isn't the default. Only the stats the profile weighs are listed unless
--- Show All is ticked. Drawn with ns.SettingsKit so it looks like the Modules page, which uses
--- the same slider and dropdown templates.
+-- Upgrade Arrows' own page in Settings (`/fpp weights`): a Class dropdown and a Tree dropdown,
+-- then a slider row per stat of that profile under small headers, with its value and an undo
+-- arrow while it isn't the default. For the character's own class the Tree dropdown (Auto, each
+-- talent tab, and Feral Bear for Druids) is also the module's Profile setting, what gear is
+-- judged by; another class's trees can be edited ahead of playing it. Only the stats the profile
+-- weighs are listed unless Show All is ticked. Drawn with ns.SettingsKit so it looks like the
+-- Modules page, which uses the same slider and dropdown templates.
 local _, ns = ...
 
-local ipairs, pairs, format, tonumber, select = ipairs, pairs, string.format, tonumber, select
-local CreateFrame, UnitClass = CreateFrame, UnitClass
+local ipairs, pairs, format, tonumber, tostring, abs = ipairs, pairs, string.format, tonumber, tostring, math.abs
+local _G, CreateFrame, UnitClass = _G, CreateFrame, UnitClass
 
 local L = ns.L
 local Kit = ns.SettingsKit
@@ -28,13 +29,23 @@ local GROUPS = {
     { L.UPGRADEARROWS_GROUP_RESISTANCES, { "RES_FIRE", "RES_NATURE", "RES_FROST", "RES_SHADOW", "RES_ARCANE" } },
 }
 
-local MAX_WEIGHT, STEP = 20, 0.1
+-- The classes the Class dropdown lists, in Blizzard's order.
+local CLASSES = { "WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "SHAMAN", "MAGE", "WARLOCK", "DRUID" }
+
+local MAX_WEIGHT, STEP = 20, 0.05 -- every default is a multiple of the step, so none drifts
+local EPSILON = 0.001 -- two weights this close are the same, whatever floating point says
 local ROW_HEIGHT, HEADER_HEIGHT = 26, 24
 local NAME_WIDTH, SLIDER_WIDTH, RESET_SIZE = 190, 250, 22
 
 local ui -- the page's frames, once built
 local editing -- the profile shown: from internal.Profile
+local editingClass -- the class shown; the character's own at first
+local treeChoice = {} -- class -> the tree picked for a class other than the character's
 local showAll = false
+
+local function nearly(a, b)
+    return abs((a or 0) - (b or 0)) < EPSILON
+end
 
 -- The stat's name, with "per 1%" in gray after a chance stat's.
 local function statName(stat)
@@ -45,46 +56,80 @@ local function statName(stat)
     return name
 end
 
+-- A weight as text: up to two decimals, without trailing zeros ("1", "0.35", "0.5").
 local function weightText(value)
-    return format("%.1f", value or 0)
+    local text = format("%.2f", value or 0)
+    text = (text:gsub("0+$", ""))
+    text = (text:gsub("%.$", ""))
+    return text
 end
 
--- Profiles ------------------------------------------------------------------------------------
+-- Classes and trees ---------------------------------------------------------------------------
 
 local function playerClass()
     local _, class = UnitClass("player")
     return ns.IsText(class, true) and class or "?"
 end
 
--- The profiles the dropdown offers, each with the Profile setting's value: Auto, each talent
--- tab, and Bear for a Druid.
-local function choices()
-    local list = { { value = "auto", name = L.UPGRADEARROWS_PROFILE_AUTO } }
-    local tabs = Talents.Tabs()
-    for i = 1, 3 do
-        local tab = tabs and tabs[i]
-        local name = tab and tab.name ~= "" and tab.name or format(L.UPGRADEARROWS_PROFILE_TREE, i)
-        list[#list + 1] = { value = tostring(i), index = i, name = name }
+-- A class's name in the player's language. Probe: the table is Blizzard's; without it, the token.
+local function className(class)
+    local names = _G.LOCALIZED_CLASS_NAMES_MALE
+    local name = names and names[class]
+    return ns.IsText(name, true) and name or class
+end
+
+-- A talent tab's name: the live one for the character's own class, else ours.
+local function tabName(class, index)
+    if class == playerClass() then
+        local tabs = Talents.Tabs()
+        local tab = tabs and tabs[index]
+        if tab and tab.name ~= "" then
+            return tab.name
+        end
     end
-    if playerClass() == "DRUID" then
+    return internal.TabName(class, index)
+end
+
+-- The Tree dropdown's choices for a class, each with its value: Auto (the character's own class
+-- only), each talent tab, and Bear for a Druid.
+local function treeChoices(class)
+    local list = {}
+    if class == playerClass() then
+        list[#list + 1] = { value = "auto", name = L.UPGRADEARROWS_PROFILE_AUTO }
+    end
+    for i = 1, 3 do
+        list[#list + 1] = { value = tostring(i), index = i, name = tabName(class, i) }
+    end
+    if class == "DRUID" then
         list[#list + 1] = { value = "bear", bear = true, name = L.UPGRADEARROWS_PROFILE_BEAR }
     end
     return list
 end
 
--- The profile the Profile setting resolves to, with the module's saved weights read in: the
--- module's own while it's on, else worked out the same way here.
-local function resolveProfile()
-    local current = internal.CurrentProfile()
-    if current then
-        return internal.Profile(current.class, current.index, current.bear), current.guess
+-- The Tree dropdown's value for a class: the Profile setting for the character's own, else
+-- what was picked here.
+local function treeValue(class)
+    if class == playerClass() then
+        return module.db.profile
     end
-    local choice = module.db.profile
-    local class = playerClass()
-    if choice == "bear" and class == "DRUID" then
+    return treeChoice[class] or "1"
+end
+
+-- The profile the dropdowns show, with the module's saved weights read in, and whether it's a
+-- guess (Auto with no talent points). For the character's own class it's the module's own.
+local function resolveProfile()
+    local class = editingClass
+    local value = treeValue(class)
+    if class == playerClass() then
+        local current = internal.CurrentProfile()
+        if current then
+            return internal.Profile(current.class, current.index, current.bear), current.guess
+        end
+    end
+    if value == "bear" and class == "DRUID" then
         return internal.Profile(class, 1, true), false
-    elseif tonumber(choice) then
-        return internal.Profile(class, tonumber(choice)), false
+    elseif tonumber(value) then
+        return internal.Profile(class, tonumber(value)), false
     end
     local best = Talents.Dominant()
     if best and best.spent > 0 then
@@ -93,20 +138,20 @@ local function resolveProfile()
     return internal.Profile(class, 1), true
 end
 
--- The name of the tab or Bear a profile is, for the line under the dropdown.
+-- A profile's name for the player: "Arms (Warrior)".
 local function profileName(profile)
-    for _, choice in ipairs(choices()) do
-        if choice.value ~= "auto" and internal.Profile(profile.class, choice.index or 1, choice.bear).key == profile.key then
-            return choice.name
-        end
-    end
-    return profile.key
+    local tree = profile.bear and L.UPGRADEARROWS_PROFILE_BEAR or tabName(profile.class, profile.index)
+    return format(L.UPGRADEARROWS_PAGE_PROFILE_NAME, tree, className(profile.class))
 end
 
--- What the module judges gear by right now.
+-- The line under the dropdowns: what the module judges gear by now, or whom another class's
+-- weights are for.
 local function usedText(guess)
     if not editing then
         return ""
+    end
+    if editingClass ~= playerClass() then
+        return format(L.UPGRADEARROWS_PAGE_OTHER_CLASS, className(editingClass))
     end
     local name = profileName(editing)
     if module.db.profile == "auto" then
@@ -127,7 +172,7 @@ local function rowShown(stat)
     if showAll or not editing then
         return true
     end
-    return (editing.defaults[stat] or 0) ~= 0 or editing.weights[stat] ~= nil
+    return not nearly(editing.defaults[stat], 0) or editing.weights[stat] ~= nil
 end
 
 local function currentWeight(stat)
@@ -172,7 +217,7 @@ local function addResetButton(row, stat)
     return button
 end
 
--- Blizzard's slider with steppers, 0 to 20 by 0.1, its value shown at its right. Probe:
+-- Blizzard's slider with steppers, 0 to 20 by 0.05, its value shown at its right. Probe:
 -- Mainline's; without it the row shows the value as text only.
 local function addSlider(row, stat)
     if not (MinimalSliderWithSteppersMixin and Settings and Settings.CreateSliderOptions) then
@@ -190,9 +235,12 @@ local function addSlider(row, stat)
     end
     slider:Init(currentWeight(stat), options.minValue, options.maxValue, options.steps, options.formatters)
     slider:RegisterCallback(MinimalSliderWithSteppersMixin.Event.OnValueChanged, function(_, value)
-        value = tonumber(format("%.1f", value))
-        -- Setting it back to what's saved (a refresh) changes nothing.
-        if editing and value and value ~= currentWeight(stat) then
+        -- A refresh setting the slider to what's saved changes nothing.
+        if ui.loading or not editing then
+            return
+        end
+        value = tonumber(format("%.2f", value))
+        if value and not nearly(value, currentWeight(stat)) then
             internal.SetWeight(editing, stat, value)
             ui.refreshRow(stat)
         end
@@ -235,13 +283,15 @@ local function refreshRow(stat)
         return
     end
     local value = currentWeight(stat)
+    ui.loading = true
     if row.slider then
         row.slider:SetValue(value)
     elseif row.value then
         row.value:SetText(weightText(value))
     end
+    ui.loading = false
     if row.reset then
-        row.reset:SetShown(value ~= defaultWeight(stat))
+        row.reset:SetShown(not nearly(value, defaultWeight(stat)))
     end
 end
 
@@ -249,13 +299,20 @@ local function refresh()
     if not ui then
         return
     end
+    editingClass = editingClass or playerClass()
     local guess
     editing, guess = resolveProfile()
     ui.used:SetText(usedText(guess))
-    if ui.dropdown and ui.dropdown.GenerateMenu then
-        ui.dropdown:GenerateMenu()
-    elseif ui.profileText then
-        ui.profileText:SetText(profileName(editing))
+    for _, dropdown in ipairs({ ui.classDropdown, ui.treeDropdown }) do
+        if dropdown.GenerateMenu then
+            dropdown:GenerateMenu()
+        end
+    end
+    if ui.classText then
+        ui.classText:SetText(className(editingClass))
+    end
+    if ui.treeText then
+        ui.treeText:SetText(profileName(editing))
     end
     for stat in pairs(ui.rows) do
         refreshRow(stat)
@@ -265,29 +322,21 @@ end
 
 -- The page --------------------------------------------------------------------------------------
 
--- Blizzard's menu dropdown for the profile. Probe: Mainline's; without it, the profile's name.
-local function addDropdown(frame)
+-- Blizzard's menu dropdown, filled by `fill(root)` each time it opens. Probe: Mainline's; without
+-- it, a text the caller sets through the second value.
+local function newDropdown(frame, width, fill)
     if WowStyle1DropdownMixin then
         local ok, dropdown = pcall(CreateFrame, "DropdownButton", nil, frame, "WowStyle1DropdownTemplate")
         if ok and dropdown and dropdown.SetupMenu then
-            dropdown:SetWidth(200)
+            dropdown:SetWidth(width)
             dropdown:SetupMenu(function(_, root)
-                for _, choice in ipairs(choices()) do
-                    root:CreateRadio(choice.name, function()
-                        return module.db.profile == choice.value
-                    end, function()
-                        internal.SetProfile(choice.value)
-                        refresh()
-                    end)
-                end
+                fill(root)
             end)
-            Kit.AddTooltip(dropdown, L.UPGRADEARROWS_PROFILE, L.UPGRADEARROWS_PROFILE_DESC)
             return dropdown
         end
     end
     local text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    ui.profileText = text
-    return text
+    return text, text
 end
 
 ---Draws the page the first time it's shown (called by Settings/Settings.lua).
@@ -304,7 +353,7 @@ function module:BuildPage(frame)
         ns.Confirm("UPGRADEARROWS_RESET", L.UPGRADEARROWS_PAGE_RESET_CONFIRM, function()
             internal.ResetWeights(editing)
             refresh()
-        end, editing.key)
+        end, profileName(editing))
     end)
     reset:SetPoint("TOPRIGHT", -12, -19)
     Kit.AddTooltip(reset, L.UPGRADEARROWS_PAGE_RESET, L.UPGRADEARROWS_PAGE_RESET_DESC)
@@ -316,11 +365,42 @@ function module:BuildPage(frame)
     showAllBox:SetChecked(showAll)
     Kit.AddTooltip(showAllBox, L.UPGRADEARROWS_PAGE_SHOW_ALL, L.UPGRADEARROWS_PAGE_SHOW_ALL_DESC)
 
-    local profileLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    profileLabel:SetPoint("TOPLEFT", 10, -64)
-    profileLabel:SetText(L.UPGRADEARROWS_PROFILE)
-    ui.dropdown = addDropdown(frame)
-    ui.dropdown:SetPoint("LEFT", profileLabel, "RIGHT", 8, 0)
+    -- Class, then Tree, on one row under the title.
+    local classLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    classLabel:SetPoint("TOPLEFT", 10, -64)
+    classLabel:SetText(L.UPGRADEARROWS_PAGE_CLASS)
+    ui.classDropdown, ui.classText = newDropdown(frame, 150, function(root)
+        for _, class in ipairs(CLASSES) do
+            root:CreateRadio(className(class), function()
+                return editingClass == class
+            end, function()
+                editingClass = class
+                refresh()
+            end)
+        end
+    end)
+    ui.classDropdown:SetPoint("LEFT", classLabel, "RIGHT", 8, 0)
+    Kit.AddTooltip(ui.classDropdown, L.UPGRADEARROWS_PAGE_CLASS, L.UPGRADEARROWS_PAGE_CLASS_DESC)
+
+    local treeLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    treeLabel:SetPoint("LEFT", ui.classDropdown, "RIGHT", 16, 0)
+    treeLabel:SetText(L.UPGRADEARROWS_PAGE_TREE)
+    ui.treeDropdown, ui.treeText = newDropdown(frame, 170, function(root)
+        for _, choice in ipairs(treeChoices(editingClass)) do
+            root:CreateRadio(choice.name, function()
+                return treeValue(editingClass) == choice.value
+            end, function()
+                if editingClass == playerClass() then
+                    internal.SetProfile(choice.value)
+                else
+                    treeChoice[editingClass] = choice.value
+                end
+                refresh()
+            end)
+        end
+    end)
+    ui.treeDropdown:SetPoint("LEFT", treeLabel, "RIGHT", 8, 0)
+    Kit.AddTooltip(ui.treeDropdown, L.UPGRADEARROWS_PROFILE, L.UPGRADEARROWS_PROFILE_DESC)
 
     ui.used = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
     ui.used:SetPoint("TOPLEFT", 10, -90)
@@ -339,7 +419,7 @@ function module:BuildPage(frame)
     local width = 560
     ui.content = Kit.NewStack(scroll, width, 2)
     scroll:SetScrollChild(ui.content)
-    scroll:HookScript("OnSizeChanged", function(self, w)
+    scroll:HookScript("OnSizeChanged", function(_, w)
         ui.content:SetWidth(w)
     end)
 
@@ -363,7 +443,10 @@ function module:BuildPage(frame)
         end
     end
 
-    frame:HookScript("OnShow", refresh)
+    frame:HookScript("OnShow", function()
+        editingClass = playerClass() -- back to your own class each time the page opens
+        refresh()
+    end)
     refresh()
 end
 
