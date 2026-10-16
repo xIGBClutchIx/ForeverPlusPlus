@@ -9,7 +9,8 @@
 -- and forgotten when what you wear, your level, your talents, or the weights change.
 --
 -- The arrow is our own texture over the icon, with the atlas Blizzard's bag buttons keep in a
--- hidden UpgradeIcon region, at the same corner; nothing is written onto Blizzard's frames.
+-- hidden UpgradeIcon region, in the corner and at the size the Arrow options pick, with the
+-- percentage under it; nothing is written onto Blizzard's frames.
 local _, ns = ...
 
 local _G, ipairs, type, wipe, select, tonumber = _G, ipairs, type, wipe, select, tonumber
@@ -24,6 +25,9 @@ local module = ns.NewModule("UpgradeArrows", L.UPGRADEARROWS_DESC, {
     enabled = false,
     profile = "auto", -- "auto" (the tab with the most points), "1" to "3" (a tab), or "bear"
     threshold = 0, -- percent an item must beat what you wear by
+    corner = "TOPRIGHT", -- where the arrow sits on an icon
+    size = 18, -- the arrow's size on a bag icon, in pixels
+    percent = true, -- the percentage under the arrow
     tooltip = true,
     scores = false,
     bags = true,
@@ -65,6 +69,22 @@ module.options = {
     {
         key = "scores", name = L.UPGRADEARROWS_SCORES, description = L.UPGRADEARROWS_SCORES_DESC,
         section = L.UPGRADEARROWS_SECTION_GENERAL, requires = "tooltip",
+    },
+    {
+        key = "corner", name = L.UPGRADEARROWS_CORNER, description = L.UPGRADEARROWS_CORNER_DESC,
+        section = L.UPGRADEARROWS_SECTION_ARROW,
+        choices = {
+            { "TOPRIGHT", L.UPGRADEARROWS_CORNER_TOPRIGHT },
+            { "TOPLEFT", L.UPGRADEARROWS_CORNER_TOPLEFT },
+        },
+    },
+    {
+        key = "size", name = L.UPGRADEARROWS_SIZE, description = L.UPGRADEARROWS_SIZE_DESC,
+        section = L.UPGRADEARROWS_SECTION_ARROW, min = 12, max = 32, step = 2, format = "%d px",
+    },
+    {
+        key = "percent", name = L.UPGRADEARROWS_PERCENT_ICON, description = L.UPGRADEARROWS_PERCENT_ICON_DESC,
+        section = L.UPGRADEARROWS_SECTION_ARROW,
     },
     { key = "bags", name = L.UPGRADEARROWS_BAGS, description = L.UPGRADEARROWS_BAGS_DESC, section = L.UPGRADEARROWS_SECTION_SHOW },
     { key = "bank", name = L.UPGRADEARROWS_BANK, description = L.UPGRADEARROWS_BANK_DESC, section = L.UPGRADEARROWS_SECTION_SHOW },
@@ -194,9 +214,10 @@ local function evaluate(link)
     return result
 end
 
-local function isUpgrade(link)
+-- An item's result when it's an upgrade, else false.
+local function upgradeOf(link)
     local result = link and evaluate(link)
-    return result and result.upgrade or false
+    return result and result.upgrade and result or false
 end
 
 local function forgetScores()
@@ -205,32 +226,65 @@ end
 
 -- Arrows ----------------------------------------------------------------------------------------
 
--- Our own texture at a corner of an icon (or on a button), in Blizzard's atlas.
-local function makeArrow(icon, corner)
+-- A mark on an icon: our own arrow texture in Blizzard's atlas, and the percentage under it in
+-- the outlined number font stack counts use. Shown and hidden together (ItemButtons.Overlays
+-- only needs Show and Hide); placed each time it shows, since the Arrow options can change.
+local function makeMark(icon)
     local frame = icon.CreateTexture and icon or icon:GetParent()
     local arrow = frame:CreateTexture(nil, "OVERLAY", nil, 2)
     arrow:SetAtlas(ATLAS)
-    arrow:SetPoint(corner, icon, corner, 0, 0)
-    return arrow
+    local text = frame:CreateFontString(nil, "OVERLAY", "NumberFontNormalSmall")
+    text:SetTextColor(GREEN[1], GREEN[2], GREEN[3])
+    local mark = { icon = icon, arrow = arrow, text = text }
+    function mark:Show()
+        arrow:Show()
+    end
+    function mark:Hide()
+        arrow:Hide()
+        text:Hide()
+    end
+    return mark
 end
 
--- On item icons, the arrow sits at the top left as Blizzard's does; on quest reward buttons at
--- the top right, clear of Best Quest Reward's coin.
-local arrows = ItemButtons.Overlays(function(icon)
-    return makeArrow(icon, "TOPLEFT")
-end)
+-- On item icons the mark sits on the icon itself; on a quest reward button on its icon region.
+local arrows = ItemButtons.Overlays(makeMark)
 local rewardArrows = ItemButtons.Overlays(function(button)
-    return makeArrow(button.Icon or button.icon or button, "TOPRIGHT")
+    return makeMark(button.Icon or button.icon or button)
 end)
 
 local hasArt -- whether this client has the atlas (checked at enable)
 
--- Shows or clears the arrow on an icon, `size` wide, chosen per place since the icons differ.
-local function setArrow(set, key, on, size)
-    local arrow = set:Set(key, hasArt and on)
-    if arrow then
-        arrow:SetSize(size, size)
+-- Shows the mark for an upgrade's `result` on an icon (or clears it), the arrow `size` wide in
+-- the corner the Arrow options pick, with the percentage under it when there is one.
+local function setArrow(set, key, result, size)
+    local mark = set:Set(key, hasArt and result)
+    if not mark then
+        return
     end
+    local corner = module.db.corner
+    local arrow, text = mark.arrow, mark.text
+    arrow:ClearAllPoints()
+    arrow:SetPoint(corner, mark.icon, corner, 0, 0)
+    arrow:SetSize(size, size)
+    local percent = module.db.percent and type(result) == "table" and result.percent
+    if percent then
+        text:SetText(format(L.UPGRADEARROWS_PERCENT, percent))
+        text:ClearAllPoints()
+        if corner == "TOPLEFT" then
+            text:SetPoint("TOPLEFT", arrow, "BOTTOMLEFT", 1, 1)
+        else
+            text:SetPoint("TOPRIGHT", arrow, "BOTTOMRIGHT", -1, 1)
+        end
+        text:Show()
+    else
+        text:Hide()
+    end
+end
+
+-- The arrow's size at a place, from the Arrow Size option (a bag icon's), scaled where the icons
+-- are smaller.
+local function sizeAt(scale)
+    return floor(module.db.size * scale + 0.5)
 end
 
 local function clearArrows()
@@ -244,7 +298,7 @@ local function updateBag(frame)
     local on = module.db.bags
     ItemButtons.EachBagButton(frame, function(_, icon, bag, slot)
         local link = on and C_Container.GetContainerItemLink(bag, slot)
-        setArrow(arrows, icon, link and isUpgrade(link), 16)
+        setArrow(arrows, icon, link and upgradeOf(link), sizeAt(1))
     end)
 end
 
@@ -260,7 +314,7 @@ local function updateBank()
         if on and button.GetBankTabID and button.GetContainerSlotID then
             link = C_Container.GetContainerItemLink(button:GetBankTabID(), button:GetContainerSlotID())
         end
-        setArrow(arrows, button.icon, link and isUpgrade(link), 16)
+        setArrow(arrows, button.icon, link and upgradeOf(link), sizeAt(1))
     end
 end
 
@@ -275,7 +329,7 @@ local function updateMerchant()
     local on = module.db.merchant
     ItemButtons.EachMerchantItem(function(icon, index)
         local link = on and _G.GetMerchantItemLink(index)
-        setArrow(arrows, icon, link and isUpgrade(link), 16)
+        setArrow(arrows, icon, link and upgradeOf(link), sizeAt(1))
     end)
 end
 
@@ -293,14 +347,14 @@ end
 local function updateAuction()
     local on = module.db.auction
     ItemButtons.EachAuctionRow(function(icon, itemID)
-        setArrow(arrows, icon, on and itemID and isUpgrade("item:" .. itemID), 12)
+        setArrow(arrows, icon, on and itemID and upgradeOf("item:" .. itemID), sizeAt(0.6))
     end)
 end
 
 -- Loot ------------------------------------------------------------------------------------------
 
 local function markLoot(icon, _, link)
-    setArrow(arrows, icon, module.db.loot and link and isUpgrade(link), 14)
+    setArrow(arrows, icon, module.db.loot and link and upgradeOf(link), sizeAt(0.9))
 end
 
 local function hookLoot()
@@ -308,7 +362,7 @@ local function hookLoot()
 end
 
 local function markRoll(icon, link)
-    setArrow(arrows, icon, module.db.loot and link and isUpgrade(link), 14)
+    setArrow(arrows, icon, module.db.loot and link and upgradeOf(link), sizeAt(0.9))
 end
 
 -- Quest rewards ---------------------------------------------------------------------------------
@@ -344,15 +398,15 @@ local function updateRewards(rewardsFrame)
             elseif result and result.upgrade then
                 local value = result.percent or huge
                 if not bestValue or value > bestValue then
-                    best, bestValue = { button }, value
+                    best, bestValue = { { button, result } }, value
                 elseif value == bestValue then
-                    best[#best + 1] = button
+                    best[#best + 1] = { button, result }
                 end
             end
         end
     end
-    for _, button in ipairs(best) do
-        setArrow(rewardArrows, button, true, 16)
+    for _, entry in ipairs(best) do
+        setArrow(rewardArrows, entry[1], entry[2], sizeAt(1))
     end
 end
 

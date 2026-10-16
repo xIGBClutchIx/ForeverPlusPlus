@@ -20,10 +20,10 @@ local TEMPLATES = {
     agility = { AGI = 1, STR = 0.5, AP = 0.5, HIT = 10, CRIT = 7, STA = 0.3, DPS = 3, DPS_OFF = 1.5 },
     -- Ranged: the ranged weapon's DPS first; melee weapons are stat sticks.
     ranged = { AGI = 1, RAP = 0.5, AP = 0.2, HIT = 10, CRIT = 8, INT = 0.3, STA = 0.3, DPS_RANGED = 5, DPS = 0.2 },
-    -- Casters: spell damage, then hit, then crit.
-    caster = { SP = 1, SPELLHIT = 10, SPELLCRIT = 7, INT = 0.35, STA = 0.25, MP5 = 0.6, SPI = 0.15 },
+    -- Casters: spell damage, then hit, then crit; a wand's damage counts while leveling.
+    caster = { SP = 1, SPELLHIT = 10, SPELLCRIT = 7, INT = 0.35, STA = 0.25, MP5 = 0.6, SPI = 0.15, DPS_RANGED = 1.2 },
     -- Healers: healing, regen, and mana. Spirit matters more on Forever than in Classic.
-    healer = { HEAL = 1, SP = 0.3, MP5 = 1.5, INT = 0.6, SPI = 0.5, SPELLCRIT = 3, STA = 0.2 },
+    healer = { HEAL = 1, SP = 0.3, MP5 = 1.5, INT = 0.6, SPI = 0.5, SPELLCRIT = 3, STA = 0.2, DPS_RANGED = 0.5 },
     -- Tanks: defense until uncrittable, then avoidance and stamina.
     tank = { STA = 1.2, DEF = 1.8, DODGE = 10, PARRY = 8, BLOCK = 4, BLOCKVALUE = 0.4, ARMOR = 0.06,
         STR = 0.6, AGI = 0.7, HIT = 4, CRIT = 2, DPS = 1 },

@@ -24,7 +24,8 @@ ns.changelog = {
                     .. "window and on loot rolls, on the quest reward choice that's the biggest "
                     .. "upgrade, and in the auction house (off by default), each with its own "
                     .. "checkbox. A ring is judged against your weaker ring and a two-hander "
-                    .. "against both hands. The item's tooltip gets an Upgrade line with the "
+                    .. "against both hands. The arrow sits at the icon's top right (or top left), "
+                    .. "at the size you pick, with the percentage under it. The item's tooltip gets an Upgrade line with the "
                     .. "percentage, Show Scores adds every item's score, and a Threshold slider "
                     .. "hides small upgrades. Off by default." },
             } },
