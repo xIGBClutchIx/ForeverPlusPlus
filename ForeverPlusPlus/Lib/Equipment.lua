@@ -1,0 +1,224 @@
+-- What the player wears, and what a piece of gear would replace: the inventory slots an item's
+-- type goes in, the worn item in each, whether the character can use an item, and the worn items
+-- an item competes with (rings and trinkets against the weaker, a two-hander against both hands,
+-- a one-hander against either hand when dual wielding), asked of the client's own item
+-- comparison first (C_TooltipComparison, the "Equipped" tooltips' source; it answers addon code
+-- on Forever, Gear Probe, build 70425) and worked out from the slot rules when it doesn't answer.
+-- Nothing is cached: the worn links are cheap to read, and they change under us.
+local _, ns = ...
+
+local _G, ipairs, type, pcall = _G, ipairs, type, pcall
+local GetInventoryItemLink, UnitLevel = GetInventoryItemLink, UnitLevel
+local CanDualWield = CanDualWield
+local C_Item, C_PlayerInfo, Enum = C_Item, C_PlayerInfo, Enum
+
+local Equipment = {}
+ns.Equipment = Equipment
+
+Equipment.MAINHAND, Equipment.OFFHAND, Equipment.RANGED = 16, 17, 18
+
+-- Each item type's inventory slots. Shirts, tabards, bags, quivers, and ammo aren't gear worth a
+-- score, so they're left out and `Slots` gives nil for them.
+local SLOTS = {
+    INVTYPE_HEAD = { 1 },
+    INVTYPE_NECK = { 2 },
+    INVTYPE_SHOULDER = { 3 },
+    INVTYPE_CHEST = { 5 },
+    INVTYPE_ROBE = { 5 },
+    INVTYPE_WAIST = { 6 },
+    INVTYPE_LEGS = { 7 },
+    INVTYPE_FEET = { 8 },
+    INVTYPE_WRIST = { 9 },
+    INVTYPE_HAND = { 10 },
+    INVTYPE_FINGER = { 11, 12 },
+    INVTYPE_TRINKET = { 13, 14 },
+    INVTYPE_CLOAK = { 15 },
+    INVTYPE_WEAPON = { 16, 17 },
+    INVTYPE_2HWEAPON = { 16 },
+    INVTYPE_WEAPONMAINHAND = { 16 },
+    INVTYPE_WEAPONOFFHAND = { 17 },
+    INVTYPE_SHIELD = { 17 },
+    INVTYPE_HOLDABLE = { 17 },
+    INVTYPE_RANGED = { 18 },
+    INVTYPE_RANGEDRIGHT = { 18 },
+    INVTYPE_THROWN = { 18 },
+    INVTYPE_RELIC = { 18 },
+}
+Equipment.SLOTS = SLOTS
+
+---The inventory slots an item type (INVTYPE_*) goes in, or nil for something that isn't gear.
+---@param invType string?
+---@return number[]?
+function Equipment.Slots(invType)
+    return invType and SLOTS[invType] or nil
+end
+
+---The link of the item worn in a slot, or nil.
+---@param slot number
+---@return string?
+function Equipment.Worn(slot)
+    local link = GetInventoryItemLink and GetInventoryItemLink("player", slot)
+    return ns.IsText(link, true) and link or nil
+end
+
+---Whether this exact item (by link) is worn.
+---@param link string
+---@return boolean
+function Equipment.IsWorn(link)
+    for slot = 1, 19 do
+        if Equipment.Worn(slot) == link then
+            return true
+        end
+    end
+    return false
+end
+
+---The item type (INVTYPE_*) of what's worn in a slot, or nil.
+---@param slot number
+---@return string?
+function Equipment.WornType(slot)
+    local link = Equipment.Worn(slot)
+    local _, _, _, equipLoc = link and C_Item.GetItemInfoInstant(link)
+    return ns.IsText(equipLoc, true) and equipLoc or nil
+end
+
+---Whether the character can dual wield now (Rogues and Hunters, Warriors and Shamans with the
+---talent). False when the client can't say.
+---@return boolean
+function Equipment.CanDualWield()
+    return ns.IsTrue(CanDualWield and CanDualWield())
+end
+
+---Whether the character can use an item: its class and proficiencies by the client's own check,
+---and its level requirement against the character's level. True when the client can't say.
+---@param link string
+---@param minLevel? number the item's level requirement
+---@return boolean
+function Equipment.CanUse(link, minLevel)
+    if minLevel and minLevel > 0 then
+        local level = UnitLevel and UnitLevel("player")
+        if ns.IsReadable(level) and type(level) == "number" and level < minLevel then
+            return false
+        end
+    end
+    if C_PlayerInfo and C_PlayerInfo.CanUseItem and C_Item and C_Item.GetItemInfoInstant then
+        local itemID = C_Item.GetItemInfoInstant(link)
+        if itemID then
+            local ok, usable = pcall(C_PlayerInfo.CanUseItem, itemID)
+            if ok and ns.IsReadable(usable) and usable == false then
+                return false
+            end
+        end
+    end
+    return true
+end
+
+-- Rivals ------------------------------------------------------------------------------------------
+-- What an item would replace, as alternatives: each a list of worn links whose scores add up
+-- (a two-hander replaces both hands), and the alternative worth least is the rival (either ring).
+-- An empty alternative is an empty slot.
+
+-- The link an item GUID names, or nil.
+local function linkOf(guid)
+    if not (ns.IsText(guid, true) and C_Item and C_Item.GetItemLinkByGUID) then
+        return nil
+    end
+    local ok, link = pcall(C_Item.GetItemLinkByGUID, guid)
+    return ok and ns.IsText(link, true) and link or nil
+end
+
+-- A comparison item's link, or nil for nothing worn there.
+local function comparedLink(entry)
+    return type(entry) == "table" and ns.IsReadable(entry) and linkOf(entry.guid) or nil
+end
+
+-- The client's own answer: the item it would show under "Equipped" and the others it cycles
+-- through, or, for a two-hander, the pair it would replace. Nil when the client doesn't answer.
+local function clientRivals(link)
+    local api = _G.C_TooltipComparison
+    if not (api and api.GetItemComparisonInfo) then
+        return nil
+    end
+    local ok, info = pcall(api.GetItemComparisonInfo, { hyperlink = link })
+    if not (ok and type(info) == "table" and ns.IsReadable(info)) then
+        return nil
+    end
+    local method = ns.IsReadable(info.method) and info.method or 0
+    local both = Enum and Enum.TooltipComparisonMethod and Enum.TooltipComparisonMethod.WithBothHands or 1
+    local first = comparedLink(info.item)
+    local extra = ns.IsReadable(info.additionalItems) and type(info.additionalItems) == "table"
+        and info.additionalItems or {}
+    if method == both then
+        local pair = {}
+        pair[#pair + 1] = first
+        for _, entry in ipairs(extra) do
+            pair[#pair + 1] = comparedLink(entry)
+        end
+        return { pair }
+    end
+    local alternatives = { { first } }
+    for _, entry in ipairs(extra) do
+        alternatives[#alternatives + 1] = { comparedLink(entry) }
+    end
+    return alternatives
+end
+
+-- Which slots an item type competes for, by the rules, each a list of slots.
+local function ruleSlots(invType)
+    local slots = SLOTS[invType]
+    if not slots then
+        return {}
+    end
+    if invType == "INVTYPE_2HWEAPON" then
+        return { { 16, 17 } }
+    elseif invType == "INVTYPE_WEAPON" then
+        -- Either hand when dual wielding, unless the off hand holds a shield or an off-hand
+        -- item, which a second weapon shouldn't push out.
+        local off = Equipment.WornType(17)
+        local offIsWeapon = off == nil or off == "INVTYPE_WEAPON" or off == "INVTYPE_WEAPONOFFHAND"
+        if Equipment.CanDualWield() and offIsWeapon then
+            return { { 16 }, { 17 } }
+        end
+        return { { 16 } }
+    elseif #slots == 2 then
+        return { { slots[1] }, { slots[2] } } -- rings and trinkets: either
+    end
+    return { { slots[1] } }
+end
+
+---Pure form of the rules, for tests and for a client without the comparison API: the alternatives
+---an item type competes with as worn links, read through `worn(slot)`.
+---@param invType string
+---@param worn fun(slot: number): string?
+---@return table alternatives lists of links
+function Equipment.RuleRivals(invType, worn)
+    local alternatives = {}
+    for _, slots in ipairs(ruleSlots(invType)) do
+        local links = {}
+        for _, slot in ipairs(slots) do
+            links[#links + 1] = worn(slot)
+        end
+        alternatives[#alternatives + 1] = links
+    end
+    return alternatives
+end
+
+---The worn items an item would replace, as alternatives (lists of links whose scores add up; an
+---empty list is an empty slot). From the client's own comparison when it answers, else the rules.
+---@param link string
+---@param invType string the item's INVTYPE_*
+---@return table alternatives
+function Equipment.Rivals(link, invType)
+    local alternatives = clientRivals(link)
+    if not alternatives then
+        return Equipment.RuleRivals(invType, Equipment.Worn)
+    end
+    -- An empty slot the item could take (the second ring, a free off hand) beats any rival; the
+    -- client compares with what's worn, so offer it too.
+    for _, slots in ipairs(ruleSlots(invType)) do
+        if #slots == 1 and not Equipment.Worn(slots[1]) then
+            alternatives[#alternatives + 1] = {}
+        end
+    end
+    return alternatives
+end

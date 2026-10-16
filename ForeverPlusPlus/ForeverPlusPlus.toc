@@ -51,6 +51,9 @@ Lib\Chat.lua
 Lib\TalentPlan.lua
 Lib\Slash.lua
 Lib\SettingsKit.lua
+Lib\ItemStats.lua
+Lib\Equipment.lua
+Lib\Talents.lua
 Modules\System\ErrorCatcher.lua
 Modules\Units\PlayerNameplates.lua
 Modules\Units\NpcNameplates.lua
@@ -74,6 +77,8 @@ Modules\Items\WaylaidCrates\Category.lua
 Modules\Items\BagSlotCounter.lua
 Modules\Items\AlreadyKnown.lua
 Modules\Items\UnusableItemsTint.lua
+Modules\Items\UpgradeArrows\UpgradeArrows.lua
+Modules\Items\UpgradeArrows\Weights.lua
 Modules\Quests\BestQuestReward.lua
 Modules\Items\EasyDelete.lua
 Modules\System\HideBetaFeedback.lua

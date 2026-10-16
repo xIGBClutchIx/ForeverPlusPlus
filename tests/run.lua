@@ -30,10 +30,24 @@ GetRealZoneText = function(id)
 end
 game.cachedItems = {}
 C_Item = {
+    -- An ID, or a table of the whole answer (id, type, subtype, equip location, ...).
     GetItemInfoInstant = function(name)
-        return game.cachedItems[name]
+        local item = game.cachedItems[name]
+        if type(item) == "table" then
+            return unpack(item)
+        end
+        return item
     end,
 }
+-- What the player wears (Lib/Equipment.lua): slot -> link.
+game.worn = {}
+game.dualWield = false
+GetInventoryItemLink = function(_, slot)
+    return game.worn[slot]
+end
+CanDualWield = function()
+    return game.dualWield
+end
 
 local ns = {}
 ns.NewLocale = function()
@@ -55,7 +69,8 @@ for _, file in ipairs({ "Core", "Map" }) do
 end
 ITEM_MIN_SKILL = "Requires %s (%d)"
 for _, file in ipairs({ "Secret", "Colors", "Text", "GameData", "WorldMap", "Instances", "Chat",
-    "TalentPlan", "Errors", "Prices", "Store", "Keys", "Professions" }) do
+    "TalentPlan", "Errors", "Prices", "Store", "Keys", "Professions", "ItemStats", "Equipment",
+    "Talents" }) do
     load("ForeverPlusPlus/Lib/" .. file .. ".lua")
 end
 
@@ -713,6 +728,88 @@ eq(itemSkill(10620), Professions.MINING .. ":245", "items: the lowest vein that 
 eq(itemSkill(2835), Professions.MINING .. ":1", "items: a stone")
 eq(itemSkill(2589), "nil", "items: not gathered")
 ns.db = savedDB
+
+-- Item stats and equipment ----------------------------------------------------------------------
+
+local ItemStats, Equipment, Talents = ns.ItemStats, ns.Equipment, ns.Talents
+
+local stats = ItemStats.Normalize({
+    ITEM_MOD_STRENGTH_SHORT = 5, ITEM_MOD_SPELL_POWER_SHORT = 2, ITEM_MOD_SPELL_DAMAGE_DONE_SHORT = 3,
+    RESISTANCE0_NAME = 34, ITEM_MOD_DAMAGE_PER_SECOND_SHORT = 8.5, MADE_UP_STAT = 1, ITEM_MOD_TEXT = "no",
+})
+eq(stats.STR, 5, "stats: strength")
+eq(stats.SP, 5, "stats: two spell power keys add up")
+eq(stats.ARMOR, 34, "stats: armor is resistance 0")
+eq(stats.DPS, 8.5, "stats: weapon dps")
+eq(stats.MADE_UP_STAT, nil, "stats: an unknown key isn't a stat")
+eq(ItemStats.Unknown()[1], "MADE_UP_STAT", "stats: but is remembered")
+eq(#ItemStats.Unknown(), 1, "stats: a non-number isn't remembered")
+eq(ItemStats.Normalize(nil).STR, nil, "stats: nothing from nothing")
+for _, key in ipairs(ItemStats.ORDER) do
+    local known = key == "DPS_OFF" or key == "DPS_RANGED"
+    for _, ours in pairs(ItemStats.KEYS) do
+        known = known or ours == key
+    end
+    eq(known, true, "stats: ORDER key " .. key .. " comes from a game key")
+end
+eq(ItemStats.Score({ STR = 5, SP = 5, ARMOR = 34 }, { STR = 1, SP = 2 }), 15, "score: weighted sum")
+eq(ItemStats.Score({}, { STR = 1 }), 0, "score: nothing")
+eq(ItemStats.Slotted({ DPS = 10, STR = 1 }, "INVTYPE_WEAPONOFFHAND").DPS_OFF, 10, "score: off-hand dps")
+eq(ItemStats.Slotted({ DPS = 10 }, "INVTYPE_WEAPONOFFHAND").DPS, nil, "score: off-hand dps moved")
+eq(ItemStats.Slotted({ DPS = 10 }, "INVTYPE_RANGEDRIGHT").DPS_RANGED, 10, "score: ranged dps")
+local plain = { DPS = 10 }
+eq(ItemStats.Slotted(plain, "INVTYPE_WEAPON"), plain, "score: main hand dps stays")
+local up, percent = ItemStats.Compare(110, 100, 0)
+eq(up, true, "compare: better is an upgrade")
+near(percent, 10, "compare: by ten percent")
+eq(ItemStats.Compare(105, 100, 10), false, "compare: under the threshold")
+eq(ItemStats.Compare(100, 100, 0), false, "compare: the same isn't")
+up, percent = ItemStats.Compare(5, 0, 0)
+eq(up, true, "compare: anything beats an empty slot")
+eq(percent, nil, "compare: with no percentage")
+eq(ItemStats.Compare(0, 0, 0), false, "compare: nothing doesn't")
+
+eq(Equipment.Slots("INVTYPE_FINGER")[2], 12, "slots: second ring")
+eq(Equipment.Slots("INVTYPE_ROBE")[1], 5, "slots: a robe is the chest")
+eq(Equipment.Slots("INVTYPE_BAG"), nil, "slots: a bag isn't gear")
+eq(Equipment.Slots(""), nil, "slots: nothing isn't gear")
+game.worn = { [11] = "ring1", [12] = "ring2", [16] = "main", [17] = "off" }
+game.cachedItems.off = { 2, "Weapon", "Daggers", "INVTYPE_WEAPON", 0, 2, 15 }
+local function wornOf(slot)
+    return game.worn[slot]
+end
+local rivals = Equipment.RuleRivals("INVTYPE_FINGER", wornOf)
+eq(#rivals, 2, "rivals: either ring")
+eq(rivals[1][1], "ring1", "rivals: the first ring")
+eq(rivals[2][1], "ring2", "rivals: the second ring")
+rivals = Equipment.RuleRivals("INVTYPE_2HWEAPON", wornOf)
+eq(#rivals, 1, "rivals: a two-hander has one alternative")
+eq(#rivals[1], 2, "rivals: both hands")
+rivals = Equipment.RuleRivals("INVTYPE_WEAPON", wornOf)
+eq(#rivals, 1, "rivals: a one-hander without dual wield is the main hand")
+eq(rivals[1][1], "main", "rivals: the main hand")
+game.dualWield = true
+rivals = Equipment.RuleRivals("INVTYPE_WEAPON", wornOf)
+eq(#rivals, 2, "rivals: dual wielding, either hand")
+eq(rivals[2][1], "off", "rivals: the off hand")
+game.worn[17] = nil
+rivals = Equipment.RuleRivals("INVTYPE_WEAPON", wornOf)
+eq(#rivals, 2, "rivals: dual wielding with an empty off hand still offers it")
+eq(#rivals[2], 0, "rivals: as an empty alternative")
+game.dualWield = false
+rivals = Equipment.RuleRivals("INVTYPE_HEAD", wornOf)
+eq(#rivals[1], 0, "rivals: an empty slot is an empty alternative")
+eq(#Equipment.RuleRivals("INVTYPE_TABARD", wornOf), 0, "rivals: not gear, no alternatives")
+eq(Equipment.IsWorn("main"), true, "worn: by link")
+eq(Equipment.IsWorn("other"), false, "worn: not by link")
+eq(Equipment.Worn(11), "ring1", "worn: a slot's link")
+eq(Equipment.CanDualWield(), false, "dual wield: off")
+eq(Equipment.CanUse("item:1", 10), true, "can use: a level 30 can wear level 10 gear")
+eq(Equipment.CanUse("item:1", 31), false, "can use: not level 31 gear")
+eq(Talents.Tabs(), nil, "talents: nothing without the trait API")
+local tab, total = Talents.Dominant()
+eq(tab, nil, "talents: no dominant tab without data")
+eq(total, 0, "talents: no points without data")
 
 -- Done ------------------------------------------------------------------------------------------
 

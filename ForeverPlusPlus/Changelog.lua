@@ -17,6 +17,16 @@ ns.changelog = {
                     .. "/fpp gearprobe) that reads what the client says about the gear you wear "
                     .. "and carry, its own item comparison, your talent tabs, and your stats, and "
                     .. "saves it after /reload, for the developers planning upgrade arrows." },
+                { L.UPGRADEARROWS_TITLE, "A new module that puts Blizzard's green arrow on gear "
+                    .. "that beats what you wear, judged by stat weights for your class and the "
+                    .. "talent tree you have the most points in (or one you pick, with a Feral "
+                    .. "Bear profile for Druids), in your bags and bank, at merchants, in the loot "
+                    .. "window and on loot rolls, on the quest reward choice that's the biggest "
+                    .. "upgrade, and in the auction house (off by default), each with its own "
+                    .. "checkbox. A ring is judged against your weaker ring and a two-hander "
+                    .. "against both hands. The item's tooltip gets an Upgrade line with the "
+                    .. "percentage, Show Scores adds every item's score, and a Threshold slider "
+                    .. "hides small upgrades. Off by default." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.QUESTTRACKER_TITLE, "The background is a little darker by default, at 40% "
