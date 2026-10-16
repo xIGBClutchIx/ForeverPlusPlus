@@ -50,12 +50,56 @@ local CLASS_TABS = {
 }
 internal.CLASS_TABS = CLASS_TABS
 
--- Changes to a template for one class's tab: Warlocks tap for mana, Priests and Druids heal on
--- Spirit.
+-- What each tab changes in its template, so every tree has defaults of its own: two-handers
+-- for Arms and Retribution, the off hand for Fury and Combat, crit for the crit trees (Fire,
+-- Destruction, Elemental, Assassination), hit for Shadow, mana for Warlocks (Life Tap) and
+-- Arcane, Spirit for the healers who regen on it, armor and stamina for Demonology.
 local NUDGES = {
-    WARLOCK = { [1] = { MP5 = 0.2 }, [2] = { MP5 = 0.2 }, [3] = { MP5 = 0.2 } },
-    PRIEST = { [1] = { SPI = 0.9 }, [2] = { SPI = 0.9 } },
-    DRUID = { [3] = { SPI = 0.9 } },
+    WARRIOR = {
+        [1] = { CRIT = 9, DPS = 5, DPS_OFF = 0 }, -- Arms: a slow two-hander, Deep Wounds
+        [2] = { HIT = 11, DPS_OFF = 2.5 }, -- Fury: dual wielding needs hit, and the off hand counts
+        [3] = {}, -- Protection
+    },
+    PALADIN = {
+        [1] = { INT = 0.7, SPELLCRIT = 4 }, -- Holy: Illumination
+        [2] = { BLOCKVALUE = 0.6, SP = 0.3 }, -- Protection: blocks, and holy damage from spell power
+        [3] = { CRIT = 9, DPS = 5, DPS_OFF = 0, SP = 0.2 }, -- Retribution: a slow two-hander, seals
+    },
+    HUNTER = {
+        [1] = { STA = 0.35, INT = 0.35 }, -- Beast Mastery: mana for the pet's keeper
+        [2] = { RAP = 0.55, CRIT = 9 }, -- Marksmanship
+        [3] = { AGI = 1.1 }, -- Survival: agility talents
+    },
+    ROGUE = {
+        [1] = { CRIT = 8, DPS = 3.5 }, -- Assassination: Seal Fate, a dagger's damage
+        [2] = { HIT = 11, DPS_OFF = 2 }, -- Combat: dual wielding needs hit
+        [3] = { AGI = 1.1 }, -- Subtlety
+    },
+    PRIEST = {
+        [1] = { SPI = 0.9, INT = 0.7 }, -- Discipline: Spiritual Guidance, Mental Strength
+        [2] = { SPI = 0.9 }, -- Holy: Spiritual Guidance
+        [3] = { SPELLHIT = 11, SPI = 0.4 }, -- Shadow
+    },
+    SHAMAN = {
+        [1] = { SPELLCRIT = 9 }, -- Elemental
+        [2] = { DPS = 5, DPS_OFF = 0.5, INT = 0.2 }, -- Enhancement: a slow two-hander for Windfury
+        [3] = { MP5 = 1.7 }, -- Restoration
+    },
+    MAGE = {
+        [1] = { INT = 0.5, SPELLCRIT = 6 }, -- Arcane: a mana pool to burn
+        [2] = { SPELLCRIT = 9 }, -- Fire: Ignite
+        [3] = { SPELLCRIT = 8 }, -- Frost: Shatter
+    },
+    WARLOCK = {
+        [1] = { MP5 = 0.2, SPI = 0.25 }, -- Affliction: Life Tap, some regen
+        [2] = { MP5 = 0.2, STA = 0.4 }, -- Demonology: Life Tap, stamina for the pet and the tap
+        [3] = { MP5 = 0.2, SPELLCRIT = 9 }, -- Destruction: Life Tap, crit
+    },
+    DRUID = {
+        [1] = { SPELLCRIT = 8, SPI = 0.3 }, -- Balance
+        [2] = { STR = 0.6, DPS_OFF = 0 }, -- Feral (cat): no off hand
+        [3] = { SPI = 0.9 }, -- Restoration
+    },
 }
 
 ---The profile a character judges gear by: `{ key, template, defaults, weights, class, index,

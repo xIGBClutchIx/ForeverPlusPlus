@@ -853,6 +853,11 @@ local function addModuleRows(view, module)
         addLine(view, "GameFontDisable", L.SETTINGS_NO_OPTIONS)
         return
     end
+    -- The way to a module's own page comes first, before its options.
+    if ownPage then
+        addButtonRow(view, "", nil, nil, format(L.SETTINGS_OPEN_PAGE, module.title or name),
+            function() open(ownPage) end)
+    end
     local section, subsection
     if not (options[1] and options[1].section) then
         addLine(view, "GameFontHighlightLarge", L.SETTINGS_OPTIONS)
@@ -873,10 +878,6 @@ local function addModuleRows(view, module)
     for i, action in ipairs(module.actions or {}) do
         addButtonRow(view, action.name, on, nil, action.button, actionFn(module, action, i),
             action.description)
-    end
-    if ownPage then
-        addButtonRow(view, "", nil, nil, format(L.SETTINGS_OPEN_PAGE, module.title or name),
-            function() open(ownPage) end)
     end
 end
 

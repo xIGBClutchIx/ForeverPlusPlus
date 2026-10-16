@@ -47,20 +47,8 @@ module.added = "0.10.0"
 module.internal = {}
 local internal = module.internal
 
--- The Profile dropdown's choices. The tabs' names fill in once the talent data is there.
-local PROFILE_CHOICES = {
-    { "auto", L.UPGRADEARROWS_PROFILE_AUTO },
-    { "1", format(L.UPGRADEARROWS_PROFILE_TREE, 1) },
-    { "2", format(L.UPGRADEARROWS_PROFILE_TREE, 2) },
-    { "3", format(L.UPGRADEARROWS_PROFILE_TREE, 3) },
-    { "bear", L.UPGRADEARROWS_PROFILE_BEAR },
-}
-
+-- The profile (Auto, a tab, or Bear) is picked on the module's own page (Page.lua), not here.
 module.options = {
-    {
-        key = "profile", name = L.UPGRADEARROWS_PROFILE, description = L.UPGRADEARROWS_PROFILE_DESC,
-        section = L.UPGRADEARROWS_SECTION_GENERAL, choices = PROFILE_CHOICES,
-    },
     {
         key = "threshold", name = L.UPGRADEARROWS_THRESHOLD, description = L.UPGRADEARROWS_THRESHOLD_DESC,
         section = L.UPGRADEARROWS_SECTION_GENERAL, min = 0, max = 25, step = 1, format = "%d%%",
@@ -155,12 +143,6 @@ local function updateProfile()
     local _, class = UnitClass("player")
     class = ns.IsText(class, true) and class or "?"
     local tabs = Talents.Tabs()
-    for i = 1, 3 do
-        local tab = tabs and tabs[i]
-        if tab and tab.name ~= "" then
-            PROFILE_CHOICES[i + 1][2] = tab.name
-        end
-    end
     local choice = module.db.profile
     local index, guess, bear
     if choice == "bear" and class == "DRUID" then
@@ -693,6 +675,13 @@ function internal.WeightsChanged()
         forgetScores()
         refreshSoon()
     end
+end
+
+---Picks the profile ("auto", "1" to "3", or "bear"), from the weights page.
+---@param value string
+function internal.SetProfile(value)
+    module.db.profile = value
+    internal.WeightsChanged()
 end
 
 -- The stats met on items that no weight covers, so they can be added (Lib/ItemStats.lua).

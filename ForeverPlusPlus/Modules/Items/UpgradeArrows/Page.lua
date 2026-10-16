@@ -1,8 +1,9 @@
--- Upgrade Arrows' Stat Weights page in Settings (`/fpp weights`): a Profile dropdown (the
--- class's talent tabs, and Feral Bear for Druids), then a slider row per stat under small
--- headers, with its value and an undo arrow while it isn't the default. Only the stats the
--- shown profile weighs are listed unless Show All is ticked. Drawn with ns.SettingsKit so it
--- looks like the Modules page, which uses the same slider and dropdown templates.
+-- Upgrade Arrows' own page in Settings (`/fpp weights`): the Profile dropdown (Auto, the
+-- class's talent tabs, and Feral Bear for Druids), which picks the module's Profile setting,
+-- then a slider row per stat of the profile in use under small headers, with its value and an
+-- undo arrow while it isn't the default. Only the stats the profile weighs are listed unless
+-- Show All is ticked. Drawn with ns.SettingsKit so it looks like the Modules page, which uses
+-- the same slider and dropdown templates.
 local _, ns = ...
 
 local ipairs, pairs, format, tonumber, select = ipairs, pairs, string.format, tonumber, select
@@ -55,50 +56,62 @@ local function playerClass()
     return ns.IsText(class, true) and class or "?"
 end
 
--- The profiles the dropdown offers: each talent tab, and Bear for a Druid.
+-- The profiles the dropdown offers, each with the Profile setting's value: Auto, each talent
+-- tab, and Bear for a Druid.
 local function choices()
-    local list = {}
+    local list = { { value = "auto", name = L.UPGRADEARROWS_PROFILE_AUTO } }
     local tabs = Talents.Tabs()
     for i = 1, 3 do
         local tab = tabs and tabs[i]
         local name = tab and tab.name ~= "" and tab.name or format(L.UPGRADEARROWS_PROFILE_TREE, i)
-        list[#list + 1] = { index = i, name = name }
+        list[#list + 1] = { value = tostring(i), index = i, name = name }
     end
     if playerClass() == "DRUID" then
-        list[#list + 1] = { bear = true, name = L.UPGRADEARROWS_PROFILE_BEAR }
+        list[#list + 1] = { value = "bear", bear = true, name = L.UPGRADEARROWS_PROFILE_BEAR }
     end
     return list
 end
 
-local function choiceName(choice)
-    return choice.bear and L.UPGRADEARROWS_PROFILE_BEAR or choice.name
-end
-
--- The profile a dropdown choice stands for, with the module's saved weights read in.
-local function profileOf(choice)
-    return internal.Profile(playerClass(), choice.index or 1, choice.bear)
-end
-
-local function sameProfile(choice)
-    return editing and editing.key == profileOf(choice).key
-end
-
--- What the module judges gear by right now, for the line under the dropdown.
-local function usedText()
+-- The profile the Profile setting resolves to, with the module's saved weights read in: the
+-- module's own while it's on, else worked out the same way here.
+local function resolveProfile()
     local current = internal.CurrentProfile()
-    if not current then
-        return ""
+    if current then
+        return internal.Profile(current.class, current.index, current.bear), current.guess
     end
-    local name
+    local choice = module.db.profile
+    local class = playerClass()
+    if choice == "bear" and class == "DRUID" then
+        return internal.Profile(class, 1, true), false
+    elseif tonumber(choice) then
+        return internal.Profile(class, tonumber(choice)), false
+    end
+    local best = Talents.Dominant()
+    if best and best.spent > 0 then
+        return internal.Profile(class, best.index), false
+    end
+    return internal.Profile(class, 1), true
+end
+
+-- The name of the tab or Bear a profile is, for the line under the dropdown.
+local function profileName(profile)
     for _, choice in ipairs(choices()) do
-        if profileOf(choice).key == current.key then
-            name = choiceName(choice)
+        if choice.value ~= "auto" and internal.Profile(profile.class, choice.index or 1, choice.bear).key == profile.key then
+            return choice.name
         end
     end
-    name = name or current.key
+    return profile.key
+end
+
+-- What the module judges gear by right now.
+local function usedText(guess)
+    if not editing then
+        return ""
+    end
+    local name = profileName(editing)
     if module.db.profile == "auto" then
         local best = Talents.Dominant()
-        if current.guess or not best then
+        if guess or not best then
             return format(L.UPGRADEARROWS_PAGE_USED_GUESS, name)
         end
         return format(L.UPGRADEARROWS_PAGE_USED_AUTO, name, best.spent)
@@ -236,16 +249,13 @@ local function refresh()
     if not ui then
         return
     end
-    if not editing then
-        local current = internal.CurrentProfile()
-        editing = current and internal.Profile(current.class, current.index, current.bear)
-            or profileOf(choices()[1])
-    end
-    ui.used:SetText(usedText())
+    local guess
+    editing, guess = resolveProfile()
+    ui.used:SetText(usedText(guess))
     if ui.dropdown and ui.dropdown.GenerateMenu then
         ui.dropdown:GenerateMenu()
     elseif ui.profileText then
-        ui.profileText:SetText(editing.key)
+        ui.profileText:SetText(profileName(editing))
     end
     for stat in pairs(ui.rows) do
         refreshRow(stat)
@@ -263,14 +273,15 @@ local function addDropdown(frame)
             dropdown:SetWidth(200)
             dropdown:SetupMenu(function(_, root)
                 for _, choice in ipairs(choices()) do
-                    root:CreateRadio(choiceName(choice), function()
-                        return sameProfile(choice)
+                    root:CreateRadio(choice.name, function()
+                        return module.db.profile == choice.value
                     end, function()
-                        editing = profileOf(choice)
+                        internal.SetProfile(choice.value)
                         refresh()
                     end)
                 end
             end)
+            Kit.AddTooltip(dropdown, L.UPGRADEARROWS_PROFILE, L.UPGRADEARROWS_PROFILE_DESC)
             return dropdown
         end
     end
@@ -303,10 +314,11 @@ function module:BuildPage(frame)
         refresh()
     end)
     showAllBox:SetChecked(showAll)
+    Kit.AddTooltip(showAllBox, L.UPGRADEARROWS_PAGE_SHOW_ALL, L.UPGRADEARROWS_PAGE_SHOW_ALL_DESC)
 
     local profileLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     profileLabel:SetPoint("TOPLEFT", 10, -64)
-    profileLabel:SetText(L.UPGRADEARROWS_PAGE_PROFILE)
+    profileLabel:SetText(L.UPGRADEARROWS_PROFILE)
     ui.dropdown = addDropdown(frame)
     ui.dropdown:SetPoint("LEFT", profileLabel, "RIGHT", 8, 0)
 
@@ -351,14 +363,7 @@ function module:BuildPage(frame)
         end
     end
 
-    frame:HookScript("OnShow", function()
-        -- Follow the module's profile when the page opens, so Auto's choice is what shows.
-        local current = internal.CurrentProfile()
-        if current then
-            editing = internal.Profile(current.class, current.index, current.bear)
-        end
-        refresh()
-    end)
+    frame:HookScript("OnShow", refresh)
     refresh()
 end
 

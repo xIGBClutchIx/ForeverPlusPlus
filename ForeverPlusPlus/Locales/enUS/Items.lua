@@ -281,7 +281,7 @@ L.UPGRADEARROWS_DESC = "Put Blizzard's green arrow on gear that beats what you w
     .. "weights for your class and talent tree, in your bags and bank, at merchants, on loot and "
     .. "loot rolls, on quest rewards, and in the auction house, with the upgrade in the item's tooltip."
 L.UPGRADEARROWS_PART_SCORE = "scoring items" -- its row on the Profiler page
-L.UPGRADEARROWS_SECTION_GENERAL = "Weights"
+L.UPGRADEARROWS_SECTION_GENERAL = "General"
 L.UPGRADEARROWS_DOWNGRADES = "Show Downgrades"
 L.UPGRADEARROWS_DOWNGRADES_DESC = "Also mark gear that's worse than what you wear, with a red arrow "
     .. "pointing down (in the Downgrade Corner of the icon) and its percentage in red. Quest "
@@ -308,7 +308,8 @@ L.UPGRADEARROWS_PERCENT_ICON_DESC = "Also write the upgrade beside the arrow on 
     .. "An upgrade over an empty slot has no percentage."
 L.UPGRADEARROWS_PROFILE = "Profile"
 L.UPGRADEARROWS_PROFILE_DESC = "Whose stat weights to judge gear by: the talent tree you have the most "
-    .. "points in, or one you pick. Feral Bear weighs armor and stamina, for a Druid who tanks."
+    .. "points in, or one you pick. Feral Bear weighs armor and stamina, for a Druid who tanks. The "
+    .. "sliders below are that profile's."
 L.UPGRADEARROWS_PROFILE_AUTO = "Auto (by talents)"
 L.UPGRADEARROWS_PROFILE_TREE = "Tree %d" -- a talent tab, before its name is known
 L.UPGRADEARROWS_PROFILE_BEAR = "Feral Bear (Druid)"
@@ -347,7 +348,6 @@ L.UPGRADEARROWS_SCORE_NONE = "%d (nothing worn)"
 L.UPGRADEARROWS_OTHER_ADDON = "The UpgradeArrow addon is on too, so upgrades get two arrows."
 L.UPGRADEARROWS_OTHER_ADDON_DESC = "Turn one of the two off to see one arrow on each upgrade."
 L.UPGRADEARROWS_COMMAND = "open the Upgrade Arrows page, with a weight slider per stat"
-L.UPGRADEARROWS_PAGE_PROFILE = "Profile"
 L.UPGRADEARROWS_PAGE_USED = "Judging gear by %s now." -- a profile's name
 L.UPGRADEARROWS_PAGE_USED_AUTO = "Judging gear by %s now, your tree with the most points (%d)." -- name, points
 L.UPGRADEARROWS_PAGE_USED_GUESS = "Judging gear by %s now, a guess until you spend talent points."
@@ -355,6 +355,7 @@ L.UPGRADEARROWS_PAGE_NOTE = "A weight is what one point of the stat is worth, or
     .. "item's score is its stats times these weights, and an arrow means a higher score than "
     .. "what you wear."
 L.UPGRADEARROWS_PAGE_SHOW_ALL = "Show All"
+L.UPGRADEARROWS_PAGE_SHOW_ALL_DESC = "List every stat, not only the ones this profile weighs."
 L.UPGRADEARROWS_PAGE_RESET = "Defaults"
 L.UPGRADEARROWS_PAGE_RESET_DESC = "Put every weight of the shown profile back to its default."
 L.UPGRADEARROWS_PAGE_RESET_CONFIRM = "Put every weight of %s back to its default?" -- the profile's key
