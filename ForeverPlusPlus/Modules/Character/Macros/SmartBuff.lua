@@ -2,7 +2,8 @@
 -- target) should get from you, at the best rank you know that they can take. Each class has its
 -- own buffs in the order it prefers them, and some go only to those who use mana (Arcane
 -- Intellect, Blessing of Wisdom) or only to those who don't (Blessing of Might); for yourself,
--- a Paladin's or Druid's talent tree decides. A buff they already have, from anyone, is skipped
+-- a Paladin's or Druid's talent tree decides. With every buff that suits them on, they get one they
+-- may not use, but never one that would replace one of yours. A buff they already have, from anyone, is skipped
 -- unless it's about to run out, and a Blessing is skipped when they have one of yours already,
 -- since each Paladin's Blessings replace each other. When they can't get anything from you, it
 -- buffs you instead; with nothing left for either, its buttons show a red X over your class's buff.
@@ -239,13 +240,20 @@ local function pick(unit, isSelf, auras)
             full[entry.group] = true
         end
     end
-    for _, entry in ipairs(list) do
-        if fits(entry, kind, isSelf) and not (entry.group and full[entry.group]) then
-            local name = spellName(entry)
-            if name and not has(name) then
-                local cast = castText(name, unit)
-                if cast then
-                    return cast, soonest
+    -- The buffs that suit them first. Nothing that suits them: a buff they may not use, but never
+    -- one that would replace one of yours (a full group). A Warrior with Might from another
+    -- Paladin gets your Wisdom; one with your own Might gets nothing.
+    for pass = 1, 2 do
+        for _, entry in ipairs(list) do
+            local suits = fits(entry, kind, isSelf)
+            local wanted = pass == 1 and suits or pass == 2 and not suits and entry.who ~= "self"
+            if wanted and not (entry.group and full[entry.group]) then
+                local name = spellName(entry)
+                if name and not has(name) then
+                    local cast = castText(name, unit)
+                    if cast then
+                        return cast, soonest
+                    end
                 end
             end
         end
