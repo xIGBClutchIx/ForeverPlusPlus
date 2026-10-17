@@ -118,7 +118,7 @@ L.MINIMAPBUTTON_KEY_LEFT_CLICK = "%s-Left-Click" -- a key, such as Shift
 L.MINIMAPBUTTON_KEY_RIGHT_CLICK = "%s-Right-Click" -- the same with Swap Clicks on
 L.MINIMAPBUTTON_SWAP = "Swap Clicks"
 L.MINIMAPBUTTON_SWAP_DESC = "Open the quick toggles with a click and settings with a right-click, "
-    .. "the other way round. The error keys go with the settings click."
+    .. "the other way round."
 L.MINIMAPBUTTON_KEYS_LEFT = "Error Keys on Left-Click"
 L.MINIMAPBUTTON_KEYS_LEFT_DESC = "Keep the error keys on a click, such as Shift-Left-Click to "
     .. "show the errors, instead of moving them to the right-click with settings."

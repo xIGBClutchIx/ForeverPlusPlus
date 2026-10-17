@@ -27,7 +27,7 @@ local module = ns.NewModule("MinimapButton", L.MINIMAPBUTTON_DESC, {
     enabled = true,
     where = "minimap", -- minimap, compartment, or both
     swapClicks = false, -- the quick toggles on a click and settings on a right-click
-    keysLeftClick = false, -- with Swap Clicks, the error keys stay on a click
+    keysLeftClick = true, -- with Swap Clicks, the error keys stay on a click
     -- Keys held with a click, while Error Catcher is on.
     errorsKey = "shift", -- shows the errors
     clearModifier = "ctrl", -- clears this session's errors
