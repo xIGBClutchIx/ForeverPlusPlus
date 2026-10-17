@@ -585,8 +585,10 @@ ns.AddCommand("buffs", "", L.MACROS_SMARTBUFF_COMMAND, function()
             line.suits and L.MACROS_SMARTBUFF_DIAG_SUITS or L.MACROS_SMARTBUFF_DIAG_FALLBACK, state))
     end
     for group, held in pairs(trace.full or {}) do
-        ns.Print(format(held.suits and L.MACROS_SMARTBUFF_DIAG_FULL or L.MACROS_SMARTBUFF_DIAG_REPLACE,
-            group, held.name))
+        -- Yours that doesn't suit them is replaced only when the macro casts something now.
+        local text = held.suits and L.MACROS_SMARTBUFF_DIAG_FULL
+            or trace.cast and L.MACROS_SMARTBUFF_DIAG_REPLACE or L.MACROS_SMARTBUFF_DIAG_KEEP
+        ns.Print(format(text, group, held.name))
     end
     ns.Print(format(L.MACROS_SMARTBUFF_DIAG_CASTS, trace.cast or L.MACROS_SMARTBUFF_DIAG_NOTHING))
     if not auras then
