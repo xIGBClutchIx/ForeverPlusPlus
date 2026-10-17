@@ -302,6 +302,8 @@
     "Menu",
     "MenuVariants",
     "AnchorUtil",
+    "InputUtil",
+    "GetAppropriateTopLevelParent",
     "GetCursorPosition",
     "MinimalSliderWithSteppersMixin",
     "CreateMinimalSliderFormatter",

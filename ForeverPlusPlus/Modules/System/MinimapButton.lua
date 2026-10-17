@@ -137,32 +137,35 @@ local function quickMenuItems(_, root)
     end
 end
 
--- Menu Side's anchor: beside the button, top edges lined up in the top half of the screen and
--- bottom edges in the bottom half, so the menu grows away from the screen's edge.
-local function menuAnchor(owner, side)
-    local _, y = owner:GetCenter()
-    local low = y and y * owner:GetEffectiveScale()
-        < UIParent:GetHeight() * UIParent:GetEffectiveScale() / 2
-    local edge = low and "BOTTOM" or "TOP"
-    if side == "left" then
-        return AnchorUtil.CreateAnchor(edge .. "RIGHT", owner, edge .. "LEFT")
+-- Menu Side's anchor: a corner of the menu on the cursor, the right one for Left and the left one
+-- for Right, and a bottom corner in the bottom half of the screen so it grows up from there. As
+-- Blizzard's InputUtil.AnchorRegionToCursor does, with its fix for letterboxing.
+local function menuAnchor(side)
+    local parent = GetAppropriateTopLevelParent()
+    local x, y = InputUtil.GetCursorPosition(parent)
+    local _, _, _, left = parent:GetPointByName("TOPLEFT")
+    if left then
+        x = x - left
     end
-    return AnchorUtil.CreateAnchor(edge .. "LEFT", owner, edge .. "RIGHT")
+    local corner = (y < parent:GetHeight() / 2 and "BOTTOM" or "TOP")
+        .. (side == "left" and "RIGHT" or "LEFT")
+    return AnchorUtil.CreateAnchor(corner, parent, "BOTTOMLEFT", x, y)
 end
 
--- Auto is Blizzard's context menu: at the cursor, growing right and down, flipped up at the
--- bottom of the screen and pushed back on at the right. Left and Right open the same menu beside
--- the button instead, through Blizzard_Menu's own OpenMenu (Gethe's `forever` branch, 2026-10-16).
+-- Auto is Blizzard's context menu: its top-left corner at the cursor, flipped up at the bottom of
+-- the screen and pushed back on at the right. Left and Right put the corner they name there
+-- instead, through Blizzard_Menu's own OpenMenu (Gethe's `forever` branch, 2026-10-16).
 local function quickMenu(owner)
     if not (MenuUtil and MenuUtil.CreateContextMenu) then
         return
     end
     local side = module.db.menuSide
     if side ~= "auto" and Menu and Menu.GetManager and Menu.PopulateDescription
-        and MenuUtil.CreateRootMenuDescription and MenuVariants and AnchorUtil then
+        and MenuUtil.CreateRootMenuDescription and MenuVariants and AnchorUtil and InputUtil
+        and GetAppropriateTopLevelParent then
         local root = MenuUtil.CreateRootMenuDescription(MenuVariants.GetDefaultContextMenuMixin())
         Menu.PopulateDescription(quickMenuItems, owner, root)
-        if Menu.GetManager():OpenMenu(owner, root, menuAnchor(owner, side)) then
+        if Menu.GetManager():OpenMenu(owner, root, menuAnchor(side)) then
             PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
         end
         return

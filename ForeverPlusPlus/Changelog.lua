@@ -31,7 +31,7 @@ ns.changelog = {
                     .. "keys stay on a click unless you turn off Error Keys on Left-Click under "
                     .. "it, which moves them to the settings click, and the tooltip says which "
                     .. "is which. Menu Side (Left in Developer's Defaults) opens the quick "
-                    .. "toggles to the left or right of the button instead of at the cursor." },
+                    .. "toggles to the left or right of the cursor." },
                 { L.UPGRADEARROWS_TITLE, "A new module that puts Blizzard's green arrow on gear "
                     .. "that beats what you wear, judged by stat weights for your class and the "
                     .. "talent tree you have the most points in (or one you pick, with a Feral "
