@@ -28,12 +28,12 @@ local MARK_SIZE = 18
 local NONE_ATLAS, NONE_FILE = "common-icon-redx", "Interface\\Buttons\\UI-GroupLoot-Pass-Up"
 local STALE_ATLAS, STALE_FILE = "services-icon-warning", "Interface\\DialogFrame\\DialogAlertIcon"
 
--- Character macros may not be loaded before the player is in the world, and a macro looked up too
--- early would be made twice.
+-- Character macros may not be loaded before the player is in the world (or the game says they
+-- changed), and a macro looked up too early would be made twice.
 local inWorld = false
 local wanted = {} -- macro name -> true while its part is on
 local states = {} -- macro name -> "none" or "stale" while its buttons are marked
-local saidFull = false
+local saidFailed = false
 
 local function setIcon(texture, atlas, file)
     if Frames.HasAtlas(atlas) then
@@ -100,13 +100,15 @@ function internal.Write(name, body)
     if not index or index == 0 then
         local ok, made = pcall(CreateMacro, name, ICON, body, true)
         if not (ok and made) then
-            if not saidFull then
-                saidFull = true
-                Frames.ErrorMessage(format(L.MACROS_FULL, name))
+            -- Said once on screen, like the game's own errors, with the game's reason when it gave one.
+            if not saidFailed then
+                saidFailed = true
+                local reason = not ok and ns.IsText(made, true) and made or L.MACROS_FULL_REASON
+                Frames.ErrorMessage(format(L.MACROS_FAILED, name, reason))
             end
             return false
         end
-        saidFull = false
+        saidFailed = false
         queueMarks()
         return true
     end
@@ -144,16 +146,26 @@ function internal.Mark(name, state)
     end
 end
 
----Puts macro `name` on the cursor, to drop on an action bar.
+---Puts macro `name` on the cursor, to drop on an action bar. `make` writes it first when it isn't
+---there yet (its part is on, but it couldn't be made before).
 ---@param name string
-function internal.Pickup(name)
+---@param make? function
+function internal.Pickup(name, make)
     if InCombatLockdown() then
         Frames.ErrorMessage(L.MACROS_IN_COMBAT)
         return
     end
     local index = GetMacroIndexByName(name)
-    if not (module.enabled and wanted[name] and index and index > 0) then
-        Frames.ErrorMessage(format(L.MACROS_MISSING, name))
+    if not (index and index > 0) and module.enabled and make then
+        inWorld = true -- a click in Settings is long past login
+        saidFailed = false
+        make()
+        index = GetMacroIndexByName(name)
+    end
+    if not (module.enabled and index and index > 0) then
+        if not saidFailed then
+            Frames.ErrorMessage(format(L.MACROS_MISSING, name))
+        end
         return
     end
     PickupMacro(index)
@@ -171,10 +183,12 @@ end
 function module:OnLoad()
     local function entered()
         ns.Off("PLAYER_ENTERING_WORLD", entered)
+        ns.Off("UPDATE_MACROS", entered)
         inWorld = true
         partsReady()
     end
     ns.On("PLAYER_ENTERING_WORLD", entered)
+    ns.On("UPDATE_MACROS", entered)
 end
 
 function module:OnEnable()

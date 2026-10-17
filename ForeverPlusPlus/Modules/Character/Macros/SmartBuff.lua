@@ -409,7 +409,10 @@ macros.actions = {
         name = L.MACROS_SMARTBUFF_PICKUP, button = L.MACROS_PICKUP_BUTTON,
         description = L.MACROS_SMARTBUFF_PICKUP_DESC,
         fn = function()
-            internal.Pickup(NAME)
+            internal.Pickup(NAME, function()
+                ranks = nil
+                refresh()
+            end)
         end,
     },
 }
