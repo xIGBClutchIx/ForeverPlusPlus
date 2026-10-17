@@ -3,8 +3,10 @@
 -- own buffs in the order it prefers them, and some go only to those who use mana (Arcane
 -- Intellect, Blessing of Wisdom) or only to those who don't (Blessing of Might); for yourself,
 -- a Paladin's or Druid's talent tree decides. With every buff that suits them on, they get one they
--- may not use, but never one that would replace one of yours. A buff they already have, from anyone, is skipped
--- unless it's about to run out, and a Blessing is skipped when they have one of yours already,
+-- may not use, but never one that would replace one of yours. A buff they already have, from
+-- anyone, is skipped unless it's about to run out or is someone else's lower rank, and so is one
+-- whose stronger version they have (a Greater Blessing, Prayer of Fortitude, Arcane Brilliance,
+-- Gift of the Wild). A Blessing is skipped when they have one of yours already,
 -- since each Paladin's Blessings replace each other. When they can't get anything from you, it
 -- buffs you instead; with nothing left for either, its buttons show a red X over your class's buff.
 --
@@ -68,29 +70,38 @@ local SPELLS = ns.GameData.New("smartBuffSpells", {
     [324] = "Lightning Shield",
     [6673] = "Battle Shout",
     [19506] = "Trueshot Aura",
+    -- Stronger versions that count as having the buff (Classic's IDs, first rank).
+    [25782] = "Greater Blessing of Might",
+    [25894] = "Greater Blessing of Wisdom",
+    [25898] = "Greater Blessing of Kings",
+    [21562] = "Prayer of Fortitude",
+    [27681] = "Prayer of Spirit",
+    [23028] = "Arcane Brilliance",
+    [21849] = "Gift of the Wild",
 }, { kind = "spell", label = L.MACROS_SMARTBUFF })
 
 -- Each class's buffs, the one it prefers first. `who` is who can get it: "any", "mana" (those who
 -- use mana), "physical" (those who don't, or a Paladin or Druid of a melee tree), or "self". Of a
 -- `group`, a unit holds one from each caster: a Paladin's Blessings, a Mage's or Warlock's armor.
+-- `stronger` are buffs that count as having it: its group version, from anyone.
 local BUFFS = {
     PALADIN = {
-        { id = 19740, who = "physical", group = "blessing" },
-        { id = 19742, who = "mana", group = "blessing" },
-        { id = 20217, who = "any", group = "blessing" },
+        { id = 19740, who = "physical", group = "blessing", stronger = { 25782 } },
+        { id = 19742, who = "mana", group = "blessing", stronger = { 25894 } },
+        { id = 20217, who = "any", group = "blessing", stronger = { 25898 } },
     },
     PRIEST = {
-        { id = 1243, who = "any" },
-        { id = 14752, who = "mana" },
+        { id = 1243, who = "any", stronger = { 21562 } },
+        { id = 14752, who = "mana", stronger = { 27681 } },
         { id = 588, who = "self" },
     },
     MAGE = {
-        { id = 1459, who = "mana" },
+        { id = 1459, who = "mana", stronger = { 23028 } },
         { id = 7302, who = "self", group = "armor" },
         { id = 168, who = "self", group = "armor" },
     },
     DRUID = {
-        { id = 1126, who = "any" },
+        { id = 1126, who = "any", stronger = { 21849 } },
         { id = 467, who = "physical" },
         { id = 16864, who = "self" },
     },
@@ -123,9 +134,13 @@ local function classOf(unit)
     return readable(class) and class or nil
 end
 
-local function spellName(entry)
-    local name = C_Spell.GetSpellName(entry.id)
+local function nameOf(id)
+    local name = C_Spell.GetSpellName(id)
     return readable(name) and name or nil
+end
+
+local function spellName(entry)
+    return nameOf(entry.id)
 end
 
 -- Whether the class has buffs for others, so the macro aims at a friendly target at all.
@@ -170,7 +185,7 @@ local function fits(entry, kind, isSelf)
 end
 
 -- The unit's buffs by name: { mine = cast by you, left = seconds left or huge, length = its full
--- length or 0 }. Nil while auras
+-- length or 0, rank = its rank or nil }. Nil while auras
 -- can't be read (in combat, mostly), so nothing counts as there.
 local function aurasOf(unit)
     if not (ns.AurasReadable() and C_UnitAuras and C_UnitAuras.GetAuraDataByIndex) then
@@ -186,7 +201,9 @@ local function aurasOf(unit)
         if ns.IsText(name, true) then
             local left = readable(expires) and tonumber(expires) or 0
             local length = readable(aura.duration) and tonumber(aura.duration) or 0
+            local id = aura.spellId
             found[name] = {
+                rank = readable(id) and id and Spellbook.Rank(id) or nil,
                 -- Either says so: a Blessing of yours missed here would be replaced by another.
                 mine = readable(source) and source == "player" or isTrue(aura.isFromPlayerOrPlayerPet),
                 left = left > 0 and left - now or huge,
@@ -197,9 +214,9 @@ local function aurasOf(unit)
     return found
 end
 
--- The macro text that casts the best rank of `name` you know the unit can take: a buff's rank can
--- go on someone up to 10 levels below the level it's learned at.
-local function castText(name, unit)
+-- The best rank of `name` you know the unit can take ({ id, rank, subtext }): a buff's rank can go
+-- on someone up to 10 levels below the level it's learned at.
+local function bestRank(name, unit)
     local list = ranks and ranks[name]
     if not (list and #list > 0) then
         return nil
@@ -214,6 +231,15 @@ local function castText(name, unit)
             best = list[i]
             break
         end
+    end
+    return best
+end
+
+-- The macro text that casts that rank.
+local function castText(name, unit)
+    local best = bestRank(name, unit)
+    if not best then
+        return nil
     end
     if best.subtext ~= "" then
         return format("%s(%s)", name, best.subtext)
@@ -232,8 +258,7 @@ local function pick(unit, isSelf, auras)
     local kind = kindOf(unit, isSelf)
     local percent = (module.db.smartBuffRecast or 0) / 100
     local soonest = huge
-    local function has(name)
-        local aura = auras and auras[name]
+    local function live(aura)
         -- A share of the buff's own length, so one setting fits 5 and 30 minute buffs alike; one
         -- without a length never runs low.
         local margin = aura and aura.length > 0 and aura.length * percent or 0
@@ -243,11 +268,35 @@ local function pick(unit, isSelf, auras)
         end
         return nil
     end
-    -- A group the unit has one of yours from is full: another would replace it.
+    -- The unit's aura that counts as the entry's buff: the buff itself, unless someone else's lower
+    -- rank (yours goes over it), or a stronger version from anyone (a Greater Blessing, a Prayer).
+    local function has(entry)
+        local name = spellName(entry)
+        if not (name and auras) then
+            return nil
+        end
+        local aura = auras[name]
+        if aura and not aura.mine and aura.rank then
+            local best = bestRank(name, unit)
+            if best and best.rank > aura.rank then
+                aura = nil
+            end
+        end
+        local found = live(aura)
+        for _, id in ipairs(entry.stronger or {}) do
+            if found then
+                break
+            end
+            local stronger = nameOf(id)
+            found = stronger and live(auras[stronger])
+        end
+        return found or nil
+    end
+    -- A group the unit has one of yours from (a Greater Blessing too) is full: another would
+    -- replace it.
     local full = {}
     for _, entry in ipairs(list) do
-        local name = entry.group and spellName(entry)
-        local aura = name and has(name)
+        local aura = entry.group and has(entry)
         if aura and aura.mine then
             full[entry.group] = true
         end
@@ -264,7 +313,7 @@ local function pick(unit, isSelf, auras)
                 and (entry.who ~= "mana" or mana)
             if wanted and not (entry.group and full[entry.group]) then
                 local name = spellName(entry)
-                if name and not has(name) then
+                if name and not has(entry) then
                     local cast = castText(name, unit)
                     if cast then
                         return cast, soonest

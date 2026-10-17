@@ -21,8 +21,9 @@ ns.changelog = {
                     .. "by your characters, each with its own checkbox, and deletes them when "
                     .. "they're turned off. The first is Smart Buff: it casts the buff your friendly "
                     .. "target (or you) should get from you, at the best rank you know, like Blessing "
-                    .. "of Might or Wisdom by class, skips buffs they already have, buffs you when the "
-                    .. "target can't get anything from you and says on screen why, shows a red X only "
+                    .. "of Might or Wisdom by class, skips buffs they already have (or a stronger one, "
+                    .. "like a Greater Blessing, and recasts over someone else's lower rank), buffs "
+                    .. "you when the target can't get anything from you and says on screen why, shows a red X only "
                     .. "when there's nothing left for either, and warns in combat when it can't change "
                     .. "to fit a new target. Off by default." },
                 { L.MINIMAPBUTTON_TITLE, "The new Swap Clicks option (off by default, on in "
