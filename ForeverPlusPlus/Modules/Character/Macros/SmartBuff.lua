@@ -300,19 +300,19 @@ local function explain()
         return
     end
     local own = written and written.self
-    local other = givesOthers() and UnitExists("target") and not UnitIsUnit("target", "player")
-    if other then
-        local text
-        if friendlyTarget() then
-            local auras = aurasOf("target") -- nil in combat: then only "can't use them" is known
-            if pick("target", false, auras) then
-                return -- it buffs them
-            end
-            if pick("target", false, nil) then -- what they'd get if they had none of your buffs
-                text = own and L.MACROS_SMARTBUFF_HAS_ALL_SELF or L.MACROS_SMARTBUFF_HAS_ALL
-            end
+    -- Only a friendly, living target is someone to buff. An enemy, a dead one, or none: the macro
+    -- buffs you, so it says something only when you have everything.
+    if givesOthers() and friendlyTarget() then
+        local auras = aurasOf("target") -- nil in combat: then only "can't use them" is known
+        if pick("target", false, auras) then
+            return -- it buffs them
         end
-        text = text or (own and L.MACROS_SMARTBUFF_CANT_SELF or L.MACROS_SMARTBUFF_CANT)
+        local text
+        if pick("target", false, nil) then -- what they'd get if they had none of your buffs
+            text = own and L.MACROS_SMARTBUFF_HAS_ALL_SELF or L.MACROS_SMARTBUFF_HAS_ALL
+        else
+            text = own and L.MACROS_SMARTBUFF_CANT_SELF or L.MACROS_SMARTBUFF_CANT
+        end
         local name = UnitName("target")
         name = ns.IsText(name, true) and name or L.MACROS_SMARTBUFF_TARGET
         Frames.ErrorMessage(format(text, name))
