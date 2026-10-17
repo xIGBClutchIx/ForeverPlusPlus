@@ -17,6 +17,7 @@ local ipairs, format, huge = ipairs, string.format, math.huge
 local pcall, tonumber, min = pcall, tonumber, math.min
 local UnitClass, UnitLevel, UnitExists, UnitCanAssist = UnitClass, UnitLevel, UnitExists, UnitCanAssist
 local UnitIsDeadOrGhost, UnitIsUnit, InCombatLockdown = UnitIsDeadOrGhost, UnitIsUnit, InCombatLockdown
+local UnitName, CreateFrame = UnitName, CreateFrame
 local GetTime, C_Spell, C_UnitAuras, C_Timer = GetTime, C_Spell, C_UnitAuras, C_Timer
 
 local L = ns.L
@@ -43,6 +44,7 @@ module:AddOptions({
 })
 
 local NAME = L.MACROS_SMARTBUFF_MACRO -- the macro's name, at most 16 letters
+local BUTTON_NAME = "ForeverPlusPlusSmartBuffButton" -- a global name, since /click needs one
 local DELAY = 0.1 -- seconds to wait for a burst of changes to settle
 
 -- Each buff's first rank (build 70374, Classic's IDs); the spellbook gives the rest by name.
@@ -112,6 +114,7 @@ local ranks -- spell name -> its known ranks (Lib/Spellbook.lua), or nil until r
 local incomplete = false
 local written -- what the macro holds: { target = cast or false, self = cast or false }
 local checkTimer
+local button -- ours, clicked by the macro (explain)
 
 local function classOf(unit)
     local _, class = UnitClass(unit)
@@ -268,17 +271,46 @@ local function iconSpell()
     return nil
 end
 
--- The macro: the target's buff on a friendly target that can get one, else yours on you.
+-- The macro: the target's buff on a friendly target that can get one, else yours on you. Each
+-- press clicks our button first, which says on screen why it can't buff them.
 local function body(target, own)
+    local click = "\n/click " .. BUTTON_NAME
     if target then
-        return format("#showtooltip\n/cast [@target,help,nodead] %s%s", target,
+        return format("#showtooltip%s\n/cast [@target,help,nodead] %s%s", click, target,
             own and format("; [@player] %s", own) or "")
     end
     if own then
-        return format("#showtooltip\n/cast [@player] %s", own)
+        return format("#showtooltip%s\n/cast [@player] %s", click, own)
     end
     local icon = iconSpell()
-    return icon and format("#showtooltip %s", icon) or "#showtooltip"
+    return (icon and format("#showtooltip %s", icon) or "#showtooltip") .. click
+end
+
+-- Says on screen why the macro can't buff your target (or you), when it's pressed.
+local function explain()
+    if not module.enabled then
+        return
+    end
+    local own = written and written.self
+    local other = givesOthers() and UnitExists("target") and not UnitIsUnit("target", "player")
+    if other then
+        local text
+        if friendlyTarget() then
+            local auras = aurasOf("target") -- nil in combat: then only "can't use them" is known
+            if pick("target", false, auras) then
+                return -- it buffs them
+            end
+            if pick("target", false, nil) then -- what they'd get if they had none of your buffs
+                text = own and L.MACROS_SMARTBUFF_HAS_ALL_SELF or L.MACROS_SMARTBUFF_HAS_ALL
+            end
+        end
+        text = text or (own and L.MACROS_SMARTBUFF_CANT_SELF or L.MACROS_SMARTBUFF_CANT)
+        local name = UnitName("target")
+        name = ns.IsText(name, true) and name or L.MACROS_SMARTBUFF_TARGET
+        Frames.ErrorMessage(format(text, name))
+    elseif not own then
+        Frames.ErrorMessage(L.MACROS_SMARTBUFF_NOTHING)
+    end
 end
 
 local refresh
@@ -387,6 +419,12 @@ function module:OnEnable()
     end
     playerClass = classOf("player")
     ranks, written = nil, nil
+    -- A plain button, not a secure one: it only shows text, so a click in combat is fine, and the
+    -- /cast after it in the macro still works. Made once; it does nothing while the part is off.
+    if not button then
+        button = CreateFrame("Button", BUTTON_NAME)
+        button:SetScript("OnClick", explain)
+    end
     self:On("PLAYER_TARGET_CHANGED", onTarget)
     self:On("UNIT_AURA", onAura)
     self:On("UNIT_LEVEL", onAura)
