@@ -96,7 +96,11 @@ L.MACROS_TITLE = "Macros"
 L.MACROS_DESC = "Macros Forever++ makes in your general macros and keeps up to date, each with its "
     .. "own checkbox. A macro is made when its checkbox is on and deleted when it's off; drag it "
     .. "from the Macros window (/macro) or use its Pick Up button to put it on a bar."
-L.MACROS_FAILED = "Can't make the %s macro: %s" -- the macro's name, then why
+L.MACROS_NOTICE = "Macros can't change in combat: they update when combat ends."
+L.MACROS_NOTICE_DESC = "The game doesn't let addons make or change macros in combat. Until combat "
+    .. "ends, a macro keeps what it last held, and its button shows a warning when that's out of "
+    .. "date for your new target."
+L.MACROS_FAILED ="Can't make the %s macro: %s" -- the macro's name, then why
 L.MACROS_FULL_REASON = "there's no room for another general macro"
 L.MACROS_MISSING = "The %s macro isn't made yet"
 L.MACROS_IN_COMBAT = "Macros can't be picked up in combat."
