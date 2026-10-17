@@ -54,6 +54,8 @@ Lib\SettingsKit.lua
 Lib\ItemStats.lua
 Lib\Equipment.lua
 Lib\Talents.lua
+Lib\ActionButtons.lua
+Lib\Spellbook.lua
 Modules\System\ErrorCatcher.lua
 Modules\Units\PlayerNameplates.lua
 Modules\Units\NpcNameplates.lua
@@ -100,6 +102,8 @@ Modules\Automation\ComprehendScrolls.lua
 Modules\Automation\AutoScreenshot.lua
 Modules\Character\SpellRanks.lua
 Modules\Character\BuffTimers.lua
+Modules\Character\Macros\Macros.lua
+Modules\Character\Macros\SmartBuff.lua
 Modules\Interface\RecipeColors.lua
 Modules\Interface\CombatAlert.lua
 Modules\System\MovableFramerate.lua

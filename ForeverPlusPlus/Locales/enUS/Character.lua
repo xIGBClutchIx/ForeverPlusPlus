@@ -91,6 +91,31 @@ L.TALENTPLANNER_IMPORT_INVALID = "That talent plan doesn't fit this talent tree.
 L.TALENTPLANNER_DELETE = "Delete Plan"
 L.TALENTPLANNER_DELETE_CONFIRM = "Delete this talent plan?"
 
+-- Macros
+L.MACROS_TITLE = "Macros"
+L.MACROS_DESC = "Macros Forever++ makes for this character and keeps up to date, each with its "
+    .. "own checkbox. A macro is made when its checkbox is on and deleted when it's off; drag it "
+    .. "from the Macros window (/macro) or use its Pick Up button to put it on a bar."
+L.MACROS_FULL = "No room for the %s macro: delete one of this character's macros and it's made."
+L.MACROS_MISSING = "The %s macro isn't made yet: turn it on, and wait for combat to end."
+L.MACROS_IN_COMBAT = "Macros can't be picked up in combat."
+L.MACROS_PICKUP_BUTTON = "Pick Up"
+L.MACROS_CHAT_DESC = "Say in chat when a macro can't be made because this character has no room "
+    .. "for another."
+L.MACROS_SMARTBUFF = "Smart Buff"
+L.MACROS_SMARTBUFF_MACRO = "F++ Smart Buff" -- the macro's name: at most 16 letters
+L.MACROS_SMARTBUFF_DESC = "A macro that casts the buff your friendly target (or you, with none) "
+    .. "should get from you, at the best rank you know that they can take: Blessing of Might or "
+    .. "Wisdom by class, Fortitude, Arcane Intellect, Mark of the Wild, and the like. Buffs they "
+    .. "already have are skipped, and with nothing left to give, its button shows a red X. In "
+    .. "combat it can't change: a warning shows when it would cast the wrong buff."
+L.MACROS_SMARTBUFF_REFRESH = "Recast Below"
+L.MACROS_SMARTBUFF_REFRESH_DESC = "A buff with less time left than this counts as missing, so the "
+    .. "macro casts it again."
+L.MACROS_SMARTBUFF_STALE = "Smart Buff can't change in combat"
+L.MACROS_SMARTBUFF_PICKUP = "Smart Buff Macro"
+L.MACROS_SMARTBUFF_PICKUP_DESC = "Put the Smart Buff macro on your cursor, to drop on an action bar."
+
 -- SpellRanks
 L.SPELLRANKS_TITLE = "Spell Ranks"
 L.SPELLRANKS_PART_SCAN = "scanning the spellbook" -- its row on the Profiler page
