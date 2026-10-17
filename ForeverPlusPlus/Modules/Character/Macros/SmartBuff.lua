@@ -205,8 +205,8 @@ local function aurasOf(unit)
             local id = aura.spellId
             found[name] = {
                 rank = readable(id) and id and Spellbook.Rank(id) or nil,
-                -- Either says so: a Blessing of yours missed here would be replaced by another.
-                mine = readable(source) and source == "player" or isTrue(aura.isFromPlayerOrPlayerPet),
+                -- Only your own cast: isFromPlayerOrPlayerPet is true for any player's, not just yours.
+                mine = ns.IsText(source, true) and isTrue(UnitIsUnit(source, "player")),
                 left = left > 0 and left - now or huge,
                 length = length,
             }
@@ -296,13 +296,13 @@ local function pick(unit, isSelf, auras, trace)
         return nil
     end
     -- A group the unit has one of yours from (a Greater Blessing too) is full: another would
-    -- replace it.
+    -- replace it. Unless yours doesn't suit them (Might on a caster): then one that does goes over it.
     local full = {}
     for _, entry in ipairs(list) do
         if entry.group then
             local aura, matched = has(entry)
             if aura and aura.mine then
-                full[entry.group] = matched
+                full[entry.group] = { name = matched, suits = fits(entry, kind, isSelf) }
             end
         end
     end
@@ -320,7 +320,10 @@ local function pick(unit, isSelf, auras, trace)
             local name = wanted and spellName(entry)
             if name then
                 local _, matched = has(entry)
-                matched = entry.group and full[entry.group] or matched
+                local held = entry.group and full[entry.group]
+                if held and (pass == 2 or held.suits) then
+                    matched = matched or held.name
+                end
                 if not matched then
                     cast = castText(name, unit)
                 elseif pass == 1 then
@@ -581,8 +584,9 @@ ns.AddCommand("buffs", "", L.MACROS_SMARTBUFF_COMMAND, function()
             line.rank and tostring(line.rank) or L.MACROS_SMARTBUFF_DIAG_UNKNOWN,
             line.suits and L.MACROS_SMARTBUFF_DIAG_SUITS or L.MACROS_SMARTBUFF_DIAG_FALLBACK, state))
     end
-    for group, matched in pairs(trace.full or {}) do
-        ns.Print(format(L.MACROS_SMARTBUFF_DIAG_FULL, group, matched))
+    for group, held in pairs(trace.full or {}) do
+        ns.Print(format(held.suits and L.MACROS_SMARTBUFF_DIAG_FULL or L.MACROS_SMARTBUFF_DIAG_REPLACE,
+            group, held.name))
     end
     ns.Print(format(L.MACROS_SMARTBUFF_DIAG_CASTS, trace.cast or L.MACROS_SMARTBUFF_DIAG_NOTHING))
     if not auras then
