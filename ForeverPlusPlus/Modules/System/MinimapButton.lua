@@ -27,6 +27,7 @@ local module = ns.NewModule("MinimapButton", L.MINIMAPBUTTON_DESC, {
     enabled = true,
     where = "minimap", -- minimap, compartment, or both
     swapClicks = false, -- the quick toggles on a click and settings on a right-click
+    keysLeftClick = false, -- with Swap Clicks, the error keys stay on a click
     -- Keys held with a click, while Error Catcher is on.
     errorsKey = "shift", -- shows the errors
     clearModifier = "ctrl", -- clears this session's errors
@@ -145,12 +146,15 @@ local function menuButton()
     return module.db.swapClicks and "LeftButton" or "RightButton"
 end
 
+-- Which mouse button the error keys go with: the settings click, or the left one with Error
+-- Keys on Left-Click.
+local function keyButton()
+    local db = module.db
+    return (db.swapClicks and not db.keysLeftClick) and "RightButton" or "LeftButton"
+end
+
 local function onClick(owner, mouse)
-    if mouse == menuButton() then
-        quickMenu(owner)
-        return
-    end
-    if Errors.IsOn() then
+    if mouse == keyButton() and Errors.IsOn() then
         -- Clearing needs a key held, so it's never an accident.
         for _, action in ipairs(KEY_ACTIONS) do
             if Keys.IsDown(module.db[action.setting]) then
@@ -158,6 +162,10 @@ local function onClick(owner, mouse)
                 return
             end
         end
+    end
+    if mouse == menuButton() then
+        quickMenu(owner)
+        return
     end
     if not (ns.WelcomePending() and ns.OpenAbout()) then
         ns.OpenSettings()
@@ -196,7 +204,8 @@ local function showTooltip(owner, drag)
     -- The settings click and the quick toggles click, as Swap Clicks has them.
     local swapped = module.db.swapClicks
     local settingsClick = swapped and L.MINIMAPBUTTON_RIGHT_CLICK or L.MINIMAPBUTTON_LEFT_CLICK
-    local keyClick = swapped and L.MINIMAPBUTTON_KEY_RIGHT_CLICK or L.MINIMAPBUTTON_KEY_LEFT_CLICK
+    local keyClick = keyButton() == "RightButton" and L.MINIMAPBUTTON_KEY_RIGHT_CLICK
+        or L.MINIMAPBUTTON_KEY_LEFT_CLICK
     addHint(ns.WelcomePending() and L.MINIMAPBUTTON_HINT_WELCOME or L.MINIMAPBUTTON_HINT_SETTINGS,
         settingsClick)
     addHint(L.MINIMAPBUTTON_HINT_TOGGLES, swapped and L.MINIMAPBUTTON_LEFT_CLICK or L.MINIMAPBUTTON_RIGHT_CLICK)
@@ -389,6 +398,13 @@ module.options = {
         key = "swapClicks",
         name = L.MINIMAPBUTTON_SWAP,
         description = L.MINIMAPBUTTON_SWAP_DESC,
+        added = "0.10.0",
+    },
+    {
+        key = "keysLeftClick",
+        name = L.MINIMAPBUTTON_KEYS_LEFT,
+        description = L.MINIMAPBUTTON_KEYS_LEFT_DESC,
+        requires = "swapClicks",
         added = "0.10.0",
     },
     Keys.Option("errorsKey", L.MINIMAPBUTTON_ERRORS_KEY, L.MINIMAPBUTTON_ERRORS_KEY_DESC),

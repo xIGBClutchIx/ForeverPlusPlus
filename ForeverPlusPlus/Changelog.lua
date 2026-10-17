@@ -28,8 +28,9 @@ ns.changelog = {
                     .. "to fit a new target. Off by default." },
                 { L.MINIMAPBUTTON_TITLE, "The new Swap Clicks option (off by default, on in "
                     .. "Developer's Defaults) opens the quick toggles with a click and settings "
-                    .. "with a right-click; the error keys go with the settings click, and the "
-                    .. "tooltip says which is which." },
+                    .. "with a right-click; the error keys go with the settings click unless "
+                    .. "you turn on Error Keys on Left-Click under it, and the tooltip says which "
+                    .. "is which." },
                 { L.UPGRADEARROWS_TITLE, "A new module that puts Blizzard's green arrow on gear "
                     .. "that beats what you wear, judged by stat weights for your class and the "
                     .. "talent tree you have the most points in (or one you pick, with a Feral "
