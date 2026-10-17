@@ -8,7 +8,7 @@ local _, ns = ...
 local ipairs, type, tostring, pcall = ipairs, type, tostring, pcall
 local format = string.format
 local C_Minimap, C_Timer = C_Minimap, C_Timer
-local InCombatLockdown, UnitIsDeadOrGhost, UnitOnTaxi = InCombatLockdown, UnitIsDeadOrGhost, UnitOnTaxi
+local GetTime, InCombatLockdown, UnitIsDeadOrGhost, UnitOnTaxi = GetTime, InCombatLockdown, UnitIsDeadOrGhost, UnitOnTaxi
 local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
 
 local L = ns.L
@@ -23,7 +23,7 @@ local SPELLS = {
     herbs = { HERBS },
 }
 
-local RETRY = 2 -- seconds between tries while the player can't cast it yet
+local RETRY = 2 -- seconds between checks
 
 -- The fewest seconds between swaps: each swap is a cast on the global cooldown, and a faster one
 -- would keep taking it.
@@ -133,10 +133,13 @@ end
 -- Turning tracking back on --------------------------------------------------------------------
 
 local want = false -- turn tracking back on at the next chance
-local waiting = false -- a retry is scheduled
-local tries = 0 -- retries left while the tracking list has none of our spells yet
+local waiting = false -- a check is scheduled
+local deadline = 0 -- GetTime() until which to keep checking
 
-local LIST_TRIES = 5 -- at a fresh login the list fills in seconds after the event
+-- How long to keep checking once the player can cast. At a fresh login the list fills in seconds
+-- after the event, and after coming back to life it can still show the tracking lost at death as on
+-- for a moment, or a cast right then can fail, so one look isn't enough.
+local WATCH = 12
 
 local function reapply()
     waiting = false
@@ -145,43 +148,41 @@ local function reapply()
         return
     end
     if busy() then
+        deadline = GetTime() + WATCH -- the time to watch starts once the player can cast
         waiting = true
         C_Timer.After(RETRY, reapply)
         return
     end
     local index, _, any = scan()
-    if any then
-        want = false
-        return -- something is tracked already, maybe by the player's choice
-    end
-    -- None of our spells listed may only mean the list isn't filled yet, or that they're unknown.
-    if not (index[HERBS] or index[MINERALS]) and tries > 0 then
-        tries = tries - 1
-        waiting = true
-        C_Timer.After(RETRY, reapply)
-        return
-    end
-    want = false
-    local spells = SPELLS[module.db.track]
-    local first
-    for _, spellID in ipairs(spells) do
-        if index[spellID] then
-            if spellID == last then
-                first = spellID
-                break
+    if not any then
+        local spells = SPELLS[module.db.track]
+        local first
+        for _, spellID in ipairs(spells) do
+            if index[spellID] then
+                if spellID == last then
+                    first = spellID
+                    break
+                end
+                first = first or spellID
             end
-            first = first or spellID
+        end
+        if first then
+            track(index[first])
         end
     end
-    if first then
-        track(index[first])
+    -- Look again until the time is up, whether something was on or we just turned it on.
+    if GetTime() < deadline then
+        waiting = true
+        C_Timer.After(RETRY, reapply)
+    else
+        want = false
     end
 end
 
 -- Login, /reload, zoning, and coming back to life. The tracking list can lag the event a little.
 local function request()
     want = true
-    tries = LIST_TRIES
+    deadline = GetTime() + WATCH
     if not waiting then
         waiting = true
         C_Timer.After(1, reapply)

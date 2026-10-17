@@ -73,6 +73,10 @@ ns.changelog = {
                     .. "/fpp shots." },
             } },
             { L.CHANGELOG_FIXED, {
+                { L.GATHERINGTRACKING_TITLE, "Find Minerals or Find Herbs comes back on after "
+                    .. "dying again: it keeps checking for a few seconds after you come back to "
+                    .. "life, instead of giving up when the tracking list still showed it on or "
+                    .. "the first try didn't take." },
                 { L.ITEMTOOLTIPS_TITLE, "The Auction Prices scan no longer spins forever when the "
                     .. "auction house stops answering partway: it asks again, then finishes with "
                     .. "the prices it has." },
