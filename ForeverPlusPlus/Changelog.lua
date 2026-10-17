@@ -26,10 +26,12 @@ ns.changelog = {
                     .. "you when the target can't get anything from you and says on screen why, shows a red X only "
                     .. "when there's nothing left for either, and warns in combat when it can't change "
                     .. "to fit a new target. Off by default." },
-                { L.MINIMAPBUTTON_TITLE, "The new Swap Clicks option (on by default) opens the quick toggles with a click and settings "
-                    .. "with a right-click; the error keys stay on a click unless you turn off "
-                    .. "Error Keys on Left-Click under it, which moves them to the settings click, "
-                    .. "and the tooltip says which is which." },
+                { L.MINIMAPBUTTON_TITLE, "The new Swap Clicks option (on by default) opens the "
+                    .. "quick toggles with a click and settings with a right-click; the error "
+                    .. "keys stay on a click unless you turn off Error Keys on Left-Click under "
+                    .. "it, which moves them to the settings click, and the tooltip says which "
+                    .. "is which. Menu Side opens the quick toggles to the left or right of the "
+                    .. "button instead of at the cursor." },
                 { L.UPGRADEARROWS_TITLE, "A new module that puts Blizzard's green arrow on gear "
                     .. "that beats what you wear, judged by stat weights for your class and the "
                     .. "talent tree you have the most points in (or one you pick, with a Feral "

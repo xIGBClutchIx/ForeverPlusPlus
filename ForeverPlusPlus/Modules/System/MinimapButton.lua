@@ -28,6 +28,7 @@ local module = ns.NewModule("MinimapButton", L.MINIMAPBUTTON_DESC, {
     where = "minimap", -- minimap, compartment, or both
     swapClicks = true, -- the quick toggles on a click and settings on a right-click
     keysLeftClick = true, -- with Swap Clicks, the error keys stay on a click
+    menuSide = "auto", -- the quick toggles at the cursor as Blizzard opens them, or left or right
     -- Keys held with a click, while Error Catcher is on.
     errorsKey = "shift", -- shows the errors
     clearModifier = "ctrl", -- clears this session's errors
@@ -117,28 +118,56 @@ local function quickEntries(names)
 end
 
 -- Turned on and off through Core, as the Modules page does, so Settings and /fpp follow along.
+local function quickMenuItems(_, root)
+    root:CreateTitle(ns.title)
+    for _, group in ipairs(QUICK_GROUPS) do
+        local entries = quickEntries(group[2])
+        if #entries > 0 then
+            root:CreateTitle(GROUP_COLOR .. group[1] .. "|r")
+            for _, entry in ipairs(entries) do
+                local name, other = entry.name, entry.module
+                root:CreateCheckbox(entry.title,
+                    function() return other.db.enabled end,
+                    function()
+                        ns.SetEnabled(name, not other.db.enabled)
+                        ns.RefreshSetting(name)
+                    end)
+            end
+        end
+    end
+end
+
+-- Menu Side's anchor: beside the button, top edges lined up in the top half of the screen and
+-- bottom edges in the bottom half, so the menu grows away from the screen's edge.
+local function menuAnchor(owner, side)
+    local _, y = owner:GetCenter()
+    local low = y and y * owner:GetEffectiveScale()
+        < UIParent:GetHeight() * UIParent:GetEffectiveScale() / 2
+    local edge = low and "BOTTOM" or "TOP"
+    if side == "left" then
+        return AnchorUtil.CreateAnchor(edge .. "RIGHT", owner, edge .. "LEFT")
+    end
+    return AnchorUtil.CreateAnchor(edge .. "LEFT", owner, edge .. "RIGHT")
+end
+
+-- Auto is Blizzard's context menu: at the cursor, growing right and down, flipped up at the
+-- bottom of the screen and pushed back on at the right. Left and Right open the same menu beside
+-- the button instead, through Blizzard_Menu's own OpenMenu (Gethe's `forever` branch, 2026-10-16).
 local function quickMenu(owner)
     if not (MenuUtil and MenuUtil.CreateContextMenu) then
         return
     end
-    MenuUtil.CreateContextMenu(owner, function(_, root)
-        root:CreateTitle(ns.title)
-        for _, group in ipairs(QUICK_GROUPS) do
-            local entries = quickEntries(group[2])
-            if #entries > 0 then
-                root:CreateTitle(GROUP_COLOR .. group[1] .. "|r")
-                for _, entry in ipairs(entries) do
-                    local name, other = entry.name, entry.module
-                    root:CreateCheckbox(entry.title,
-                        function() return other.db.enabled end,
-                        function()
-                            ns.SetEnabled(name, not other.db.enabled)
-                            ns.RefreshSetting(name)
-                        end)
-                end
-            end
+    local side = module.db.menuSide
+    if side ~= "auto" and Menu and Menu.GetManager and Menu.PopulateDescription
+        and MenuUtil.CreateRootMenuDescription and MenuVariants and AnchorUtil then
+        local root = MenuUtil.CreateRootMenuDescription(MenuVariants.GetDefaultContextMenuMixin())
+        Menu.PopulateDescription(quickMenuItems, owner, root)
+        if Menu.GetManager():OpenMenu(owner, root, menuAnchor(owner, side)) then
+            PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
         end
-    end)
+        return
+    end
+    MenuUtil.CreateContextMenu(owner, quickMenuItems)
 end
 
 -- Which mouse button opens the quick toggles: the right one, or the left with Swap Clicks.
@@ -405,6 +434,17 @@ module.options = {
         name = L.MINIMAPBUTTON_KEYS_LEFT,
         description = L.MINIMAPBUTTON_KEYS_LEFT_DESC,
         requires = "swapClicks",
+        added = "0.10.0",
+    },
+    {
+        key = "menuSide",
+        name = L.MINIMAPBUTTON_MENU_SIDE,
+        description = L.MINIMAPBUTTON_MENU_SIDE_DESC,
+        choices = {
+            { "auto", L.MINIMAPBUTTON_MENU_SIDE_AUTO },
+            { "left", L.MINIMAPBUTTON_MENU_SIDE_LEFT },
+            { "right", L.MINIMAPBUTTON_MENU_SIDE_RIGHT },
+        },
         added = "0.10.0",
     },
     Keys.Option("errorsKey", L.MINIMAPBUTTON_ERRORS_KEY, L.MINIMAPBUTTON_ERRORS_KEY_DESC),
