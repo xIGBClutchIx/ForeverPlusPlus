@@ -30,14 +30,15 @@ local module = macros:NewPart({
     section = L.MACROS_SMARTBUFF,
 }, {
     smartBuff = true,
-    smartBuffRefresh = 60, -- seconds left below which a buff counts as missing
+    smartBuffRecast = 20, -- percent of a buff's full length left below which it counts as missing
 })
 
 module:AddOptions({
     {
-        key = "smartBuffRefresh", name = L.MACROS_SMARTBUFF_REFRESH,
-        description = L.MACROS_SMARTBUFF_REFRESH_DESC,
-        min = 0, max = 300, step = 15, format = ns.Text.Seconds,
+        key = "smartBuffRecast", name = L.MACROS_SMARTBUFF_RECAST,
+        description = L.MACROS_SMARTBUFF_RECAST_DESC,
+        min = 0, max = 90, step = 5,
+        format = function(value) return L.MACROS_SMARTBUFF_RECAST_FORMAT:format(value) end,
     },
 })
 
@@ -153,7 +154,8 @@ local function fits(entry, kind, isSelf)
     return entry.who == "any" or entry.who == kind
 end
 
--- The unit's buffs by name: { mine = cast by you, left = seconds left or huge }. Nil while auras
+-- The unit's buffs by name: { mine = cast by you, left = seconds left or huge, length = its full
+-- length or 0 }. Nil while auras
 -- can't be read (in combat, mostly), so nothing counts as there.
 local function aurasOf(unit)
     if not (ns.AurasReadable() and C_UnitAuras and C_UnitAuras.GetAuraDataByIndex) then
@@ -168,9 +170,11 @@ local function aurasOf(unit)
         local name, expires, source = aura.name, aura.expirationTime, aura.sourceUnit
         if ns.IsText(name, true) then
             local left = readable(expires) and tonumber(expires) or 0
+            local length = readable(aura.duration) and tonumber(aura.duration) or 0
             found[name] = {
                 mine = readable(source) and source == "player",
                 left = left > 0 and left - now or huge,
+                length = length,
             }
         end
     end
@@ -210,10 +214,13 @@ local function pick(unit, isSelf, auras)
         return nil
     end
     local kind = kindOf(unit, isSelf)
-    local margin = module.db.smartBuffRefresh or 0
+    local percent = (module.db.smartBuffRecast or 0) / 100
     local soonest = huge
     local function has(name)
         local aura = auras and auras[name]
+        -- A share of the buff's own length, so one setting fits 5 and 30 minute buffs alike; one
+        -- without a length never runs low.
+        local margin = aura and aura.length > 0 and aura.length * percent or 0
         if aura and aura.left > margin then
             soonest = min(soonest, aura.left - margin)
             return aura
@@ -403,7 +410,7 @@ function module:OnDisable()
 end
 
 function module:OnOptionChanged(key)
-    if key == "smartBuffRefresh" and self.enabled then
+    if key == "smartBuffRecast" and self.enabled then
         queue()
     end
 end
