@@ -358,7 +358,10 @@ end
 ---@param frame table the empty page
 function module:BuildPage(frame)
     ui = { rows = {}, refresh = refresh, refreshRow = refreshRow }
-    Kit.AddPageTitle(frame, module.title)
+    -- Blizzard's dropdowns fill their menus as soon as they're made, so the class they list for
+    -- must be known before then.
+    editingClass = editingClass or playerClass()
+    Kit.AddPageTitle(frame, module.pageTitle)
 
     -- Defaults at the top right, as on the other pages, for the shown profile.
     local reset = Kit.NewButton(frame, L.UPGRADEARROWS_PAGE_RESET, 96, function()
