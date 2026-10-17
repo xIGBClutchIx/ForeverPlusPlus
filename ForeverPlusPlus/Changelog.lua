@@ -26,8 +26,7 @@ ns.changelog = {
                     .. "you when the target can't get anything from you and says on screen why, shows a red X only "
                     .. "when there's nothing left for either, and warns in combat when it can't change "
                     .. "to fit a new target. Off by default." },
-                { L.MINIMAPBUTTON_TITLE, "The new Swap Clicks option (off by default, on in "
-                    .. "Developer's Defaults) opens the quick toggles with a click and settings "
+                { L.MINIMAPBUTTON_TITLE, "The new Swap Clicks option (on by default) opens the quick toggles with a click and settings "
                     .. "with a right-click; the error keys stay on a click unless you turn off "
                     .. "Error Keys on Left-Click under it, which moves them to the settings click, "
                     .. "and the tooltip says which is which." },
