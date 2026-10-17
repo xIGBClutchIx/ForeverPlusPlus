@@ -4,8 +4,8 @@
 -- Intellect, Blessing of Wisdom) or only to those who don't (Blessing of Might); for yourself,
 -- a Paladin's or Druid's talent tree decides. A buff they already have, from anyone, is skipped
 -- unless it's about to run out, and a Blessing is skipped when they have one of yours already,
--- since each Paladin's Blessings replace each other. With nothing left to give, the macro casts
--- nothing and its buttons show a red X.
+-- since each Paladin's Blessings replace each other. When they can't get anything from you, it
+-- buffs you instead; with nothing left for either, its buttons show a red X over your class's buff.
 --
 -- The macro is rewritten out of combat whenever the target, an aura, a rank, or the talents
 -- change. In combat it can't be, and auras can't be read either: a new target there gets what the
@@ -13,7 +13,7 @@
 -- game's red error text says so.
 local _, ns = ...
 
-local ipairs, format, concat, huge = ipairs, string.format, table.concat, math.huge
+local ipairs, format, huge = ipairs, string.format, math.huge
 local pcall, tonumber, min = pcall, tonumber, math.min
 local UnitClass, UnitLevel, UnitExists, UnitCanAssist = UnitClass, UnitLevel, UnitExists, UnitCanAssist
 local UnitIsDeadOrGhost, UnitIsUnit, InCombatLockdown = UnitIsDeadOrGhost, UnitIsUnit, InCombatLockdown
@@ -109,7 +109,7 @@ local OWN_TREES = {
 local playerClass
 local ranks -- spell name -> its known ranks (Lib/Spellbook.lua), or nil until read
 local incomplete = false
-local written -- what the macro holds: { target = cast or false, self = cast or false, aimed = bool }
+local written -- what the macro holds: { target = cast or false, self = cast or false }
 local checkTimer
 
 local function classOf(unit)
@@ -249,20 +249,29 @@ local function friendlyTarget()
         and isTrue(UnitCanAssist("player", "target")) and not isTrue(UnitIsDeadOrGhost("target"))
 end
 
-local function body(target, own, aimed)
-    local lines = { "#showtooltip" }
-    if aimed and target then
-        lines[#lines + 1] = format("/cast [@target,help,nodead] %s%s", target,
-            own and format("; [@player] %s", own) or "")
-    else
-        if aimed then
-            lines[#lines + 1] = "/stopmacro [@target,help,nodead]"
-        end
-        if own then
-            lines[#lines + 1] = format("/cast [@player] %s", own)
+-- Your class's first buff you know, for the macro's icon when it has nothing to cast: the button
+-- keeps that buff's icon under its red X instead of a question mark.
+local function iconSpell()
+    for _, entry in ipairs(BUFFS[playerClass] or {}) do
+        local name = spellName(entry)
+        if name and ranks and ranks[name] then
+            return name
         end
     end
-    return concat(lines, "\n")
+    return nil
+end
+
+-- The macro: the target's buff on a friendly target that can get one, else yours on you.
+local function body(target, own)
+    if target then
+        return format("#showtooltip\n/cast [@target,help,nodead] %s%s", target,
+            own and format("; [@player] %s", own) or "")
+    end
+    if own then
+        return format("#showtooltip\n/cast [@player] %s", own)
+    end
+    local icon = iconSpell()
+    return icon and format("#showtooltip %s", icon) or "#showtooltip"
 end
 
 local refresh
@@ -289,18 +298,16 @@ local function checkInCombat()
     end
     local state
     if givesOthers() and friendlyTarget() then
+        -- The macro casts its target buff on whoever is targeted now, or yours on you without one,
+        -- so only a wrong buff for them is stale.
         local should = pick("target", false, nil)
-        local holds = written.aimed and written.target or nil
-        if should ~= holds then
+        if should and should ~= (written.target or nil) then
             state = "stale"
-        elseif not holds then
-            state = "none"
+            Frames.ErrorMessage(L.MACROS_SMARTBUFF_STALE)
         end
-    elseif not written.self then
-        state = "none"
     end
-    if state == "stale" then
-        Frames.ErrorMessage(L.MACROS_SMARTBUFF_STALE)
+    if not state and not written.target and not written.self then
+        state = "none"
     end
     internal.Mark(NAME, state)
 end
@@ -323,17 +330,14 @@ function refresh(targetChanged)
         ranks, complete = Spellbook.Ranks()
         incomplete = not complete
     end
-    local aimed = givesOthers()
     local target, soonTarget = nil, huge
-    local hasTarget = aimed and friendlyTarget()
-    if hasTarget then
+    if givesOthers() and friendlyTarget() then
         target, soonTarget = pick("target", false, aurasOf("target"))
     end
     local own, soonOwn = pick("player", true, aurasOf("player"))
-    if internal.Write(NAME, body(target, own, hasTarget)) then
-        written = { target = target or false, self = own or false, aimed = hasTarget }
-        local casts = hasTarget and target or not hasTarget and own
-        internal.Mark(NAME, not casts and "none" or nil)
+    if internal.Write(NAME, body(target, own)) then
+        written = { target = target or false, self = own or false }
+        internal.Mark(NAME, not (target or own) and "none" or nil)
     end
     lookAgain(min(soonTarget or huge, soonOwn or huge))
 end

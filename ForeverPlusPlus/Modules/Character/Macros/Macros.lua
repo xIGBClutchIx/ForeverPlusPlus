@@ -1,6 +1,7 @@
 -- Macros: macros Forever++ writes and keeps up to date, one part each (SmartBuff.lua for now). A
--- part's macro is made, for this character only, when its checkbox turns on, and deleted when it
--- turns off. The game doesn't let addons make or change macros in combat, so a change waits until
+-- part's macro is a general macro shared by your characters: made when its checkbox turns on, and
+-- deleted for all of them when it turns off. Each character rewrites it for its own class when it
+-- logs in or anything changes. The game doesn't let addons make or change macros in combat, so a change waits until
 -- combat ends, and a mark of ours over each action button holding the macro says when it has
 -- nothing to cast (a red X) or is out of date until combat ends (a warning triangle).
 local _, ns = ...
@@ -86,7 +87,7 @@ function internal.Ready()
     return inWorld and not InCombatLockdown()
 end
 
----Makes this character's macro `name` with `body`, or changes it when it holds something else. Only
+---Makes the general macro `name` with `body`, or changes it when it holds something else. Only
 ---while `internal.Ready()`; returns whether the macro holds `body` now.
 ---@param name string
 ---@param body string
@@ -98,7 +99,7 @@ function internal.Write(name, body)
     wanted[name] = true
     local index = GetMacroIndexByName(name)
     if not index or index == 0 then
-        local ok, made = pcall(CreateMacro, name, ICON, body, true)
+        local ok, made = pcall(CreateMacro, name, ICON, body)
         if not (ok and made) then
             -- Said once on screen, like the game's own errors, with the game's reason when it gave one.
             if not saidFailed then
@@ -118,7 +119,7 @@ function internal.Write(name, body)
     return true
 end
 
----Deletes this character's macro `name`, now or once combat ends, unless its part is back on by then.
+---Deletes the general macro `name`, now or once combat ends, unless its part is back on by then.
 ---@param name string
 function internal.Delete(name)
     wanted[name] = nil

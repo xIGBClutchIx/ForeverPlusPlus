@@ -17,13 +17,13 @@ ns.changelog = {
                     .. "/fpp gearprobe) that reads what the client says about the gear you wear "
                     .. "and carry, its own item comparison, your talent tabs, and your stats, and "
                     .. "saves it after /reload, for the developers planning upgrade arrows." },
-                { L.MACROS_TITLE, "A new module that makes macros for this character, each with "
-                    .. "its own checkbox, and deletes them when they're turned off. The first is "
+                { L.MACROS_TITLE, "A new module that makes macros in your general macros, shared "
+                    .. "by your characters, each with its own checkbox, and deletes them when they're turned off. The first is "
                     .. "Smart Buff: it casts the buff your friendly target (or you) should get from "
                     .. "you, at the best rank you know, like Blessing of Might or Wisdom by class, "
-                    .. "skips buffs they already have, shows a red X when there's nothing to give, "
-                    .. "and warns in combat when it can't change to fit a new target. Off by "
-                    .. "default." },
+                    .. "skips buffs they already have, buffs you when the target can't get anything "
+                    .. "from you, shows a red X only when there's nothing left for either, and warns "
+                    .. "in combat when it can't change to fit a new target. Off by default." },
                 { L.MINIMAPBUTTON_TITLE, "The new Swap Clicks option (off by default, on in "
                     .. "Developer's Defaults) opens the quick toggles with a click and settings "
                     .. "with a right-click; the error keys go with the settings click, and the "
