@@ -16,8 +16,9 @@
 -- game's red error text says so.
 local _, ns = ...
 
-local ipairs, format, huge = ipairs, string.format, math.huge
-local pcall, tonumber, min = pcall, tonumber, math.min
+local ipairs, pairs, format, huge = ipairs, pairs, string.format, math.huge
+local sort, concat = table.sort, table.concat
+local pcall, tonumber, tostring, min = pcall, tonumber, tostring, math.min
 local UnitClass, UnitLevel, UnitExists, UnitCanAssist = UnitClass, UnitLevel, UnitExists, UnitCanAssist
 local UnitIsDeadOrGhost, UnitIsUnit, InCombatLockdown = UnitIsDeadOrGhost, UnitIsUnit, InCombatLockdown
 local UnitName, CreateFrame = UnitName, CreateFrame
@@ -136,7 +137,7 @@ end
 
 local function nameOf(id)
     local name = C_Spell.GetSpellName(id)
-    return readable(name) and name or nil
+    return ns.IsText(name, true) and name or nil
 end
 
 local function spellName(entry)
@@ -250,7 +251,7 @@ end
 -- What the unit should get from you: the macro text that casts it, or nil when there's nothing
 -- left to give. With `auras`, buffs they have are skipped; the second result is when the soonest
 -- of those runs low (seconds from now), to look again then.
-local function pick(unit, isSelf, auras)
+local function pick(unit, isSelf, auras, trace)
     local list = BUFFS[playerClass]
     if not list then
         return nil
@@ -268,8 +269,9 @@ local function pick(unit, isSelf, auras)
         end
         return nil
     end
-    -- The unit's aura that counts as the entry's buff: the buff itself, unless someone else's lower
-    -- rank (yours goes over it), or a stronger version from anyone (a Greater Blessing, a Prayer).
+    -- The unit's aura that counts as the entry's buff, and its name: the buff itself by its exact
+    -- name, unless someone else's lower rank (yours goes over it), or a stronger version from
+    -- anyone (a Greater Blessing, a Prayer).
     local function has(entry)
         local name = spellName(entry)
         if not (name and auras) then
@@ -282,23 +284,26 @@ local function pick(unit, isSelf, auras)
                 aura = nil
             end
         end
-        local found = live(aura)
-        for _, id in ipairs(entry.stronger or {}) do
-            if found then
-                break
-            end
-            local stronger = nameOf(id)
-            found = stronger and live(auras[stronger])
+        if live(aura) then
+            return aura, name
         end
-        return found or nil
+        for _, id in ipairs(entry.stronger or {}) do
+            local stronger = nameOf(id)
+            if stronger and live(auras[stronger]) then
+                return auras[stronger], stronger
+            end
+        end
+        return nil
     end
     -- A group the unit has one of yours from (a Greater Blessing too) is full: another would
     -- replace it.
     local full = {}
     for _, entry in ipairs(list) do
-        local aura = entry.group and has(entry)
-        if aura and aura.mine then
-            full[entry.group] = true
+        if entry.group then
+            local aura, matched = has(entry)
+            if aura and aura.mine then
+                full[entry.group] = matched
+            end
         end
     end
     -- The buffs that suit them first. Nothing that suits them: a buff they may not use, but never
@@ -306,23 +311,41 @@ local function pick(unit, isSelf, auras)
     -- without mana. A caster with Wisdom from another Paladin gets your Might; a Rogue never gets
     -- Wisdom.
     local mana = usesMana(unit, isSelf)
+    local cast, blocked -- what to cast, or the first buff that suits them they already have
     for pass = 1, 2 do
         for _, entry in ipairs(list) do
             local suits = fits(entry, kind, isSelf)
             local wanted = pass == 1 and suits or pass == 2 and not suits and entry.who ~= "self"
                 and (entry.who ~= "mana" or mana)
-            if wanted and not (entry.group and full[entry.group]) then
-                local name = spellName(entry)
-                if name and not has(entry) then
-                    local cast = castText(name, unit)
-                    if cast then
-                        return cast, soonest
-                    end
+            local name = wanted and spellName(entry)
+            if name then
+                local _, matched = has(entry)
+                matched = entry.group and full[entry.group] or matched
+                if not matched then
+                    cast = castText(name, unit)
+                elseif pass == 1 then
+                    blocked = blocked or matched
                 end
             end
+            if cast then
+                break
+            end
+        end
+        if cast then
+            break
         end
     end
-    return nil, soonest
+    if trace then
+        trace.kind, trace.mana, trace.full, trace.cast = kind, mana, full, cast
+        for _, entry in ipairs(list) do
+            local name = spellName(entry)
+            local aura, matched = has(entry)
+            local best = name and bestRank(name, unit)
+            trace[#trace + 1] = { name = name or tostring(entry.id), rank = best and best.rank,
+                matched = matched, mine = aura and aura.mine, suits = fits(entry, kind, isSelf) }
+        end
+    end
+    return cast, soonest, blocked
 end
 
 -- Whether the target is someone the macro buffs: a friendly unit other than you, alive.
@@ -368,8 +391,16 @@ local function explain()
     -- buffs you, so it says something only when you have everything.
     if givesOthers() and friendlyTarget() then
         local auras = aurasOf("target") -- nil in combat: then only "can't use them" is known
-        if pick("target", false, auras) then
+        local cast, _, blocked = pick("target", false, auras)
+        if cast then
             return -- it buffs them
+        end
+        local name = UnitName("target")
+        name = ns.IsText(name, true) and name or L.MACROS_SMARTBUFF_TARGET
+        if blocked then -- the buff that suits them most, already on them
+            local text = own and L.MACROS_SMARTBUFF_HAS_SELF or L.MACROS_SMARTBUFF_HAS
+            Frames.ErrorMessage(format(text, name, blocked))
+            return
         end
         local text
         if pick("target", false, nil) then -- what they'd get if they had none of your buffs
@@ -377,8 +408,6 @@ local function explain()
         else
             text = own and L.MACROS_SMARTBUFF_CANT_SELF or L.MACROS_SMARTBUFF_CANT
         end
-        local name = UnitName("target")
-        name = ns.IsText(name, true) and name or L.MACROS_SMARTBUFF_TARGET
         Frames.ErrorMessage(format(text, name))
     elseif not own then
         Frames.ErrorMessage(L.MACROS_SMARTBUFF_NOTHING)
@@ -524,6 +553,50 @@ function module:OnOptionChanged(key)
         queue()
     end
 end
+
+-- /fpp buffs: how Smart Buff judges your friendly target (or you), to find why it picks what it does.
+ns.AddCommand("buffs", "", L.MACROS_SMARTBUFF_COMMAND, function()
+    if not (module.enabled and playerClass) then
+        ns.Print(L.MACROS_SMARTBUFF_DIAG_OFF)
+        return
+    end
+    if not ranks then
+        ranks = Spellbook.Ranks()
+    end
+    local unit = givesOthers() and friendlyTarget() and "target" or "player"
+    local isSelf = unit == "player"
+    local auras = aurasOf(unit)
+    local trace = {}
+    pick(unit, isSelf, auras, trace)
+    local name = UnitName(unit)
+    name = ns.IsText(name, true) and name or unit
+    ns.Print(format(L.MACROS_SMARTBUFF_DIAG_UNIT, name, classOf(unit) or "?", trace.kind or "?",
+        trace.mana and L.MACROS_SMARTBUFF_DIAG_MANA or L.MACROS_SMARTBUFF_DIAG_NO_MANA))
+    for _, line in ipairs(trace) do
+        local state = line.matched
+            and format(line.mine and L.MACROS_SMARTBUFF_DIAG_HAS_MINE or L.MACROS_SMARTBUFF_DIAG_HAS,
+                line.matched)
+            or L.MACROS_SMARTBUFF_DIAG_MISSING
+        ns.Print(format(L.MACROS_SMARTBUFF_DIAG_BUFF, line.name,
+            line.rank and tostring(line.rank) or L.MACROS_SMARTBUFF_DIAG_UNKNOWN,
+            line.suits and L.MACROS_SMARTBUFF_DIAG_SUITS or L.MACROS_SMARTBUFF_DIAG_FALLBACK, state))
+    end
+    for group, matched in pairs(trace.full or {}) do
+        ns.Print(format(L.MACROS_SMARTBUFF_DIAG_FULL, group, matched))
+    end
+    ns.Print(format(L.MACROS_SMARTBUFF_DIAG_CASTS, trace.cast or L.MACROS_SMARTBUFF_DIAG_NOTHING))
+    if not auras then
+        ns.Print(L.MACROS_SMARTBUFF_DIAG_NO_AURAS)
+        return
+    end
+    local names = {}
+    for aura in pairs(auras) do
+        names[#names + 1] = aura
+    end
+    sort(names)
+    ns.Print(format(L.MACROS_SMARTBUFF_DIAG_AURAS, #names > 0 and concat(names, ", ")
+        or L.MACROS_SMARTBUFF_DIAG_NOTHING))
+end, "Macros")
 
 macros.actions = {
     {
