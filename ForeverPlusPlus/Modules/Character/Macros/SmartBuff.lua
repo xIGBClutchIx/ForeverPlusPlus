@@ -20,6 +20,7 @@ local UnitClass, UnitLevel, UnitExists, UnitCanAssist = UnitClass, UnitLevel, Un
 local UnitIsDeadOrGhost, UnitIsUnit, InCombatLockdown = UnitIsDeadOrGhost, UnitIsUnit, InCombatLockdown
 local UnitName, CreateFrame = UnitName, CreateFrame
 local GetTime, C_Spell, C_UnitAuras, C_Timer = GetTime, C_Spell, C_UnitAuras, C_Timer
+local UnitPowerType, Enum = UnitPowerType, Enum
 
 local L = ns.L
 local Frames, Spellbook, Talents = ns.Frames, ns.Spellbook, ns.Talents
@@ -138,6 +139,17 @@ local function givesOthers()
 end
 
 -- "physical" or "mana": what kind of buffs the unit wants.
+local function usesMana(unit, isSelf)
+    local class = isSelf and playerClass or classOf(unit)
+    if class then
+        return not PHYSICAL[class]
+    end
+    -- A class we can't read (secret, mostly in combat): its power type, and no mana buffs without it.
+    local mana = Enum and Enum.PowerType and Enum.PowerType.Mana or 0
+    local power = UnitPowerType(unit)
+    return readable(power) and power == mana or false
+end
+
 local function kindOf(unit, isSelf)
     local trees = isSelf and OWN_TREES[playerClass]
     if trees then
@@ -147,8 +159,7 @@ local function kindOf(unit, isSelf)
         end
         return trees.physical[tab.index] and "physical" or "mana"
     end
-    local class = classOf(unit)
-    return class and PHYSICAL[class] and "physical" or "mana"
+    return usesMana(unit, isSelf) and "mana" or "physical"
 end
 
 local function fits(entry, kind, isSelf)
@@ -176,7 +187,8 @@ local function aurasOf(unit)
             local left = readable(expires) and tonumber(expires) or 0
             local length = readable(aura.duration) and tonumber(aura.duration) or 0
             found[name] = {
-                mine = readable(source) and source == "player",
+                -- Either says so: a Blessing of yours missed here would be replaced by another.
+                mine = readable(source) and source == "player" or isTrue(aura.isFromPlayerOrPlayerPet),
                 left = left > 0 and left - now or huge,
                 length = length,
             }
@@ -241,12 +253,15 @@ local function pick(unit, isSelf, auras)
         end
     end
     -- The buffs that suit them first. Nothing that suits them: a buff they may not use, but never
-    -- one that would replace one of yours (a full group). A Warrior with Might from another
-    -- Paladin gets your Wisdom; one with your own Might gets nothing.
+    -- one that would replace one of yours (a full group), and never a mana buff for someone
+    -- without mana. A caster with Wisdom from another Paladin gets your Might; a Rogue never gets
+    -- Wisdom.
+    local mana = usesMana(unit, isSelf)
     for pass = 1, 2 do
         for _, entry in ipairs(list) do
             local suits = fits(entry, kind, isSelf)
             local wanted = pass == 1 and suits or pass == 2 and not suits and entry.who ~= "self"
+                and (entry.who ~= "mana" or mana)
             if wanted and not (entry.group and full[entry.group]) then
                 local name = spellName(entry)
                 if name and not has(name) then

@@ -55,6 +55,7 @@
     "UnitClass",
     "GetGuildInfo",
     "UnitLevel",
+    "UnitPowerType",
     "UnitGUID",
     "UnitInParty",
     "UnitInRaid",
