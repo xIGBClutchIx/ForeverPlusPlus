@@ -100,8 +100,6 @@ L.MACROS_FULL = "No room for the %s macro: delete one of this character's macros
 L.MACROS_MISSING = "The %s macro isn't made yet: turn it on, and wait for combat to end."
 L.MACROS_IN_COMBAT = "Macros can't be picked up in combat."
 L.MACROS_PICKUP_BUTTON = "Pick Up"
-L.MACROS_CHAT_DESC = "Say in chat when a macro can't be made because this character has no room "
-    .. "for another."
 L.MACROS_SMARTBUFF = "Smart Buff"
 L.MACROS_SMARTBUFF_MACRO = "F++ Smart Buff" -- the macro's name: at most 16 letters
 L.MACROS_SMARTBUFF_DESC = "A macro that casts the buff your friendly target (or you, with none) "

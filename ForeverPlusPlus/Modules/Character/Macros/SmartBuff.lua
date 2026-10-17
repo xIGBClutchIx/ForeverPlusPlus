@@ -13,7 +13,7 @@
 -- game's red error text says so.
 local _, ns = ...
 
-local ipairs, format, concat, huge = ipairs, pairs, string.format, table.concat, math.huge
+local ipairs, format, concat, huge = ipairs, string.format, table.concat, math.huge
 local pcall, tonumber, min = pcall, tonumber, math.min
 local UnitClass, UnitLevel, UnitExists, UnitCanAssist = UnitClass, UnitLevel, UnitExists, UnitCanAssist
 local UnitIsDeadOrGhost, UnitIsUnit, InCombatLockdown = UnitIsDeadOrGhost, UnitIsUnit, InCombatLockdown
@@ -39,7 +39,6 @@ module:AddOptions({
         description = L.MACROS_SMARTBUFF_REFRESH_DESC,
         min = 0, max = 300, step = 15, format = ns.Text.Seconds,
     },
-    ns.ChatOption(L.MACROS_CHAT_DESC),
 })
 
 local NAME = L.MACROS_SMARTBUFF_MACRO -- the macro's name, at most 16 letters

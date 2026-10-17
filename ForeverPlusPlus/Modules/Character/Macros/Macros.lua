@@ -15,12 +15,11 @@ local Frames, ActionButtons = ns.Frames, ns.ActionButtons
 
 local module = ns.NewModule("Macros", L.MACROS_DESC, {
     enabled = false,
-    chat = true,
 })
 module.title = L.MACROS_TITLE
 module.category = "character"
 module.added = "0.10.0"
-module.options = {} -- each part adds its section; Smart Buff's ends with Chat Messages
+module.options = {} -- each part adds its section
 module.internal = {}
 local internal = module.internal
 
@@ -103,7 +102,7 @@ function internal.Write(name, body)
         if not (ok and made) then
             if not saidFull then
                 saidFull = true
-                module:Print(format(L.MACROS_FULL, name))
+                Frames.ErrorMessage(format(L.MACROS_FULL, name))
             end
             return false
         end
@@ -149,12 +148,12 @@ end
 ---@param name string
 function internal.Pickup(name)
     if InCombatLockdown() then
-        ns.Print(L.MACROS_IN_COMBAT)
+        Frames.ErrorMessage(L.MACROS_IN_COMBAT)
         return
     end
     local index = GetMacroIndexByName(name)
     if not (module.enabled and wanted[name] and index and index > 0) then
-        ns.Print(format(L.MACROS_MISSING, name))
+        Frames.ErrorMessage(format(L.MACROS_MISSING, name))
         return
     end
     PickupMacro(index)
