@@ -94,14 +94,26 @@ end
 local RECIPE, MISC, GLYPH, BATTLE_PET = 9, 15, 16, 17
 local PET, MOUNT = 2, 5
 
-local function canBeKnown(link, itemID)
-    local _, _, _, _, _, classID, subclassID = C_Item.GetItemInfoInstant(link)
-    if classID == RECIPE or classID == GLYPH or classID == BATTLE_PET then
-        return true
-    elseif classID == MISC and (subclassID == PET or subclassID == MOUNT) then
-        return true
+local kinds = {} -- itemID -> whether its kind can be known, which never changes
+
+-- Whether an item's kind can be known. "No" is remembered only for an item whose class says so:
+-- toys are misc items, and a toy's info may not have loaded yet.
+local function canBeKnown(itemID, classID, subclassID)
+    local can = kinds[itemID]
+    if can ~= nil then
+        return can
     end
-    return C_ToyBox and C_ToyBox.GetToyInfo and C_ToyBox.GetToyInfo(itemID) ~= nil or false
+    if classID == RECIPE or classID == GLYPH or classID == BATTLE_PET then
+        can = true
+    elseif classID == MISC and (subclassID == PET or subclassID == MOUNT) then
+        can = true
+    else
+        can = C_ToyBox and C_ToyBox.GetToyInfo and C_ToyBox.GetToyInfo(itemID) ~= nil or false
+    end
+    if can or (classID and classID ~= MISC) then
+        kinds[itemID] = can
+    end
+    return can
 end
 
 local known = {} -- key -> true, once known (you don't forget a recipe)
@@ -139,8 +151,8 @@ local function itemKnown(link)
     if not link then
         return false
     end
-    local itemID = C_Item.GetItemInfoInstant(link)
-    if not itemID or not canBeKnown(link, itemID) then
+    local itemID, _, _, _, _, classID, subclassID = C_Item.GetItemInfoInstant(link)
+    if not itemID or not canBeKnown(itemID, classID, subclassID) then
         return false
     end
     return check(itemID, tooltipKnown, link)
