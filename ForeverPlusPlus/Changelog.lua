@@ -58,6 +58,9 @@ ns.changelog = {
                     .. "gear sites publish. Off by default." },
             } },
             { L.CHANGELOG_CHANGED, {
+                { L.AUTOWEAPONBUFF_TITLE, "Using a sharpening stone, weightstone, oil, poison, or "
+                    .. "lure from an action bar puts it straight on your weapon too, like a "
+                    .. "right-click in your bags. Not in combat." },
                 { L.QUESTTRACKER_TITLE, "The background is a little darker by default, at 40% "
                     .. "opacity instead of 30%. If you set its Opacity yourself, it stays as you "
                     .. "set it." },

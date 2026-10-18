@@ -1,5 +1,6 @@
 -- Auto Weapon Buff: right-clicking a sharpening stone, weightstone, oil, poison, or fishing lure in
--- your bags puts it straight onto your weapon instead of waiting for you to click the weapon.
+-- your bags puts it straight onto your weapon instead of waiting for you to click the weapon, and
+-- so does using one from an action bar.
 --
 -- Forever forbids addons from answering the targeting cursor themselves, so each such item in
 -- Blizzard's bags gets a secure overlay (ns.BagClicks) whose right-click uses the item and then the
@@ -15,11 +16,19 @@
 -- hand's buff runs out sooner. When no equipped weapon can take the item (a weightstone with only
 -- blades), the right-click says so in red at the top of the screen, like Blizzard's own errors,
 -- instead of bringing up a cursor nothing will take.
+--
+-- On an action bar the same `target-slot` attribute goes on Blizzard's action button itself: its
+-- secure click reads it after using the item, while the item's cursor is up. It's set out of combat
+-- when the bars or the weapons change (so a key binding finds it), and again just before each
+-- click (to pick by the buffs' time left then). In combat the buttons work as Blizzard's, like the
+-- bags. Unverified on Forever: that an attribute an addon sets on Blizzard's button doesn't stop
+-- its click; if it does, this part goes and the bags stay.
 local _, ns = ...
 
 local C_Item, C_Container, C_PaperDollInfo, C_Timer = C_Item, C_Container, C_PaperDollInfo, C_Timer
 local GetInventoryItemID, GetWeaponEnchantInfo, GetTime = GetInventoryItemID, GetWeaponEnchantInfo, GetTime
-local pairs, select, tostring, type = pairs, select, tostring, type
+local GetActionInfo, InCombatLockdown = GetActionInfo, InCombatLockdown
+local pairs, select, setmetatable, tostring, type = pairs, select, setmetatable, tostring, type
 
 local L = ns.L
 
@@ -270,10 +279,8 @@ end
 -- The last bag item with a use spell the player used, and both weapons' buffs at that moment.
 local pending
 
--- Using a bag item (a right-click in the bags, or our overlay): remember it, in case it goes on a
--- weapon.
-local function onUse(bag, slot)
-    local itemID = C_Container.GetContainerItemID(bag, slot)
+-- Using an item with a use spell: remember it, in case it goes on a weapon.
+local function remember(itemID)
     if not itemID or not C_Item.GetItemSpell then
         return
     end
@@ -283,6 +290,22 @@ local function onUse(bag, slot)
     end
     pending = { itemID = itemID, spellID = spellID, time = GetTime(),
         [MAINHAND] = snapshot(MAINHAND), [OFFHAND] = snapshot(OFFHAND) }
+end
+
+-- A bag item (a right-click in the bags, or our overlay).
+local function onUse(bag, slot)
+    remember(C_Container.GetContainerItemID(bag, slot))
+end
+
+-- An action bar slot (a click or key on Blizzard's button).
+local function onUseAction(action)
+    if not (action and ns.IsReadable(action) and GetActionInfo) then
+        return
+    end
+    local kind, itemID = GetActionInfo(action)
+    if ns.IsReadable(kind) and kind == "item" and ns.IsReadable(itemID) then
+        remember(itemID)
+    end
 end
 
 local function learn(used)
@@ -329,11 +352,91 @@ local function onCast(_, unit, _, spellID)
     end)
 end
 
+-- Action bars ---------------------------------------------------------------------------------
+
+local targeted = setmetatable({}, { __mode = "k" }) -- action button -> the slot we set on it
+
+local function setTarget(button, slot)
+    if targeted[button] ~= slot then
+        button:SetAttribute("target-slot", slot)
+        targeted[button] = slot
+    end
+end
+
+-- The weapon slot the item on this button goes on (nil when it holds none we know, or no worn
+-- weapon takes it), its entry, and its item ID.
+local function actionTarget(button)
+    local kind, itemID = ns.ActionButtons.Content(button)
+    local entry = kind == "item" and BUFFS:Get(itemID)
+    if not entry then
+        return nil
+    end
+    return pickSlot(entry), entry, itemID
+end
+
+local function updateButton(button)
+    if not InCombatLockdown() then
+        setTarget(button, module.enabled and actionTarget(button) or nil)
+    end
+end
+
+local updateBars = ns.Frames.Coalesce(function()
+    ns.ActionButtons.Each(updateButton)
+end)
+
+-- Takes our attribute off every button. Only out of combat (or at PLAYER_REGEN_DISABLED, just
+-- before it).
+local function clearBars()
+    for button in pairs(targeted) do
+        setTarget(button, nil)
+    end
+end
+
+-- Just before Blizzard's secure click: pick the slot again, with the buffs as they are now.
+local function onActionPreClick(button, _, down)
+    if InCombatLockdown() then
+        return
+    end
+    updateButton(button)
+    if not down and module.db.printSteps then
+        local target, entry, itemID = actionTarget(button)
+        if entry then
+            ns.Print(L.AUTOWEAPONBUFF_PRINT_LINE:format(
+                tostring(C_Item.GetItemNameByID and C_Item.GetItemNameByID(itemID) or itemID),
+                describe(entry), tostring(target)))
+        end
+    end
+end
+
+local function onInventoryChanged(_, unit)
+    if unit == "player" then
+        updateBars()
+    end
+end
+
+local BAR_EVENTS = { "ACTIONBAR_SLOT_CHANGED", "ACTIONBAR_PAGE_CHANGED", "UPDATE_BONUS_ACTIONBAR",
+    "UPDATE_SHAPESHIFT_FORM", "PLAYER_EQUIPMENT_CHANGED", "PLAYER_REGEN_ENABLED" }
+
 function module:OnEnable()
     overlays:Enable()
     self:On("PLAYER_EQUIPMENT_CHANGED", overlays.refresh)
     self:Hook(C_Container, "UseContainerItem", onUse)
     self:On("UNIT_SPELLCAST_SUCCEEDED", onCast)
+    if GetActionInfo then
+        ns.ActionButtons.Each(function(button)
+            self:HookScript(button, "PreClick", onActionPreClick)
+        end)
+        for _, event in pairs(BAR_EVENTS) do
+            if ns.HasEvent(event) then
+                self:On(event, updateBars)
+            end
+        end
+        self:On("UNIT_INVENTORY_CHANGED", onInventoryChanged)
+        -- Fires just before combat lockdown starts, the last moment the attribute can change.
+        self:On("PLAYER_REGEN_DISABLED", clearBars)
+        self:Hook("UseAction", onUseAction)
+        updateBars()
+    end
 end
 
 function module:OnOptionChanged(key)
@@ -344,4 +447,5 @@ end
 
 function module:OnDisable()
     overlays:Disable()
+    ns.AfterCombat(clearBars)
 end
