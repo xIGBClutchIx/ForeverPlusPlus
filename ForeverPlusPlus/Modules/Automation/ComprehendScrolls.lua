@@ -94,10 +94,11 @@ local function readTooltip(itemID, bag, slot)
     end
 end
 
+-- Whether the player knows Comprehend Scroll, read again when their spells change: for anyone
+-- else the bags aren't looked through at all.
+local knows = false
+
 local function match(itemID, bag, slot)
-    if not known() then
-        return false
-    end
     if not checked[itemID] then
         skillName = skillName or nameFromSkillLine()
         readTooltip(itemID, bag, slot)
@@ -113,11 +114,19 @@ local function click(overlay, _, bag, slot)
     return true
 end
 
-overlays = ns.BagClicks.New(module, match, click)
+overlays = ns.BagClicks.New(module, match, click, function()
+    return knows
+end)
+
+local function onSpells()
+    knows = known() and true or false
+    overlays.refresh()
+end
 
 function module:OnEnable()
+    knows = known() and true or false
     overlays:Enable()
-    self:On("SPELLS_CHANGED", overlays.refresh)
+    self:On("SPELLS_CHANGED", onSpells)
 end
 
 function module:OnDisable()
