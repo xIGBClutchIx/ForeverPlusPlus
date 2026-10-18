@@ -150,7 +150,8 @@ local function buffLeft(slot)
         -- Forever's buff frame reads it this way: a list per weapon slot, 0 for the main hand.
         local enchants = C_Item.GetWeaponEnchantInfo(slot - MAINHAND)
         for _, enchant in pairs(enchants or {}) do
-            if enchant.hasEnchant then
+            -- A secret flag counts as a buff whose time we can't read.
+            if ns.IsTrueOrSecret(enchant.hasEnchant) then
                 local timeLeft = enchant.timeLeft or 0
                 if not ns.IsReadable(timeLeft) then
                     return 0 -- there is a buff, but not how long it has
@@ -248,7 +249,7 @@ local function buffID(slot)
     local id
     if C_Item.GetWeaponEnchantInfo then
         for _, enchant in pairs(C_Item.GetWeaponEnchantInfo(slot - MAINHAND) or {}) do
-            if enchant.hasEnchant then
+            if ns.IsTrue(enchant.hasEnchant) then
                 id = enchant.enchantID
                 break
             end
@@ -356,8 +357,11 @@ end
 
 local targeted = setmetatable({}, { __mode = "k" }) -- action button -> the slot we set on it
 
+-- Writes to Blizzard's button as rarely as possible: only out of combat, only a change, and only on
+-- a button holding a weapon buff we know (others get nil, which they already have). In combat it
+-- writes nothing; PLAYER_REGEN_ENABLED updates the bars again.
 local function setTarget(button, slot)
-    if targeted[button] ~= slot then
+    if targeted[button] ~= slot and not InCombatLockdown() then
         button:SetAttribute("target-slot", slot)
         targeted[button] = slot
     end
@@ -375,17 +379,15 @@ local function actionTarget(button)
 end
 
 local function updateButton(button)
-    if not InCombatLockdown() then
-        setTarget(button, module.enabled and actionTarget(button) or nil)
-    end
+    setTarget(button, module.enabled and actionTarget(button) or nil)
 end
 
 local updateBars = ns.Frames.Coalesce(function()
     ns.ActionButtons.Each(updateButton)
 end)
 
--- Takes our attribute off every button. Only out of combat (or at PLAYER_REGEN_DISABLED, just
--- before it).
+-- Takes our attribute off every button. Only out of combat: at PLAYER_REGEN_DISABLED lockdown may
+-- already have started, and then the slot set before stays until combat ends (setTarget skips).
 local function clearBars()
     for button in pairs(targeted) do
         setTarget(button, nil)
@@ -447,5 +449,9 @@ end
 
 function module:OnDisable()
     overlays:Disable()
-    ns.AfterCombat(clearBars)
+    ns.AfterCombat(function()
+        if not module.enabled then -- turned back on in combat: its own update set the bars
+            clearBars()
+        end
+    end)
 end
