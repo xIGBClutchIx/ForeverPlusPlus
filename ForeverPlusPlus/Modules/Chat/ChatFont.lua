@@ -102,7 +102,27 @@ function module:OnEnable()
     self:Hook("FCF_SetChatWindowFontSize", applyAll)
 end
 
+-- Blizzard's FCF_SetChatWindowFontSize copies ChatFrame1's font file (ours) onto these too.
+local function copiedFrames()
+    local communities = _G.CommunitiesFrame
+    return { _G.GMChatFrame, communities and communities.Chat and communities.Chat.MessageFrame }
+end
+
 function module:OnDisable()
+    local blizzard = original[ChatFrame1]
+    if blizzard then
+        local frames = copiedFrames()
+        for i = 1, 2 do
+            local frame = frames[i]
+            local file, size, flags
+            if frame and frame.GetFont then
+                file, size, flags = frame:GetFont()
+            end
+            if file and file == self.db.font then
+                frame:SetFont(blizzard, size, flags)
+            end
+        end
+    end
     for _, frame in ipairs(Chat.Frames()) do
         restore(frame)
         for _, part in ipairs(inputParts(frame)) do

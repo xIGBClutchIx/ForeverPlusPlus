@@ -93,6 +93,8 @@ ns.changelog = {
                     .. "takes a screenshot." },
                 { L.CHATCOPY_TITLE, "Turning Click Timestamps off no longer brings back chat lines "
                     .. "that had faded out." },
+                { L.CHATFONT_TITLE, "Turning the module off gives the Communities and GM chat "
+                    .. "windows their font back too." },
                 { L.CHANGELOG_COMMANDS, "/fpp reset turns every module off before it wipes the "
                     .. "settings, so game settings a module changed, like Auto Dismount's, go back "
                     .. "to your own. Started in combat, it waits until combat ends." },
