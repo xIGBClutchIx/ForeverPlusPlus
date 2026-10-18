@@ -314,6 +314,9 @@ local function updateAll()
         update(party and party["MemberFrame" .. i])
     end
 end
+-- UNIT_FACTION comes for every unit the client tracks, nameplates too, often several at once; one
+-- pass a frame later covers a burst. (No unit filter: the target's target gets no event of its own.)
+local updateSoon, cancelUpdate = ns.Frames.Coalesce(updateAll, nil, module)
 
 -- The friends list and the who list. Their rows are scroll box buttons, so we listen for the
 -- scroll box's OnInitializedFrame, which it sends for addons after Blizzard's own initializer has
@@ -416,7 +419,7 @@ end
 function module:OnEnable()
     self:Hook("UnitFrame_Update", update)
     -- A reaction or tap can change without a new unit (a mob turns hostile, someone tags it).
-    self:On("UNIT_FACTION", updateAll)
+    self:On("UNIT_FACTION", updateSoon)
     updateAll()
     if _G.ScrollBoxListMixin then
         ns.AddOns.WhenLoaded(FRIENDS_ADDON, watchFriends)
@@ -426,6 +429,7 @@ end
 
 -- module.enabled is already false here, so every painted bar and name goes back to Blizzard's.
 function module:OnDisable()
+    cancelUpdate()
     updateAll()
     ns.AddOns.Cancel(FRIENDS_ADDON, watchFriends)
     ns.AddOns.Cancel(WHO_ADDON, watchWho)
