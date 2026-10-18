@@ -7,7 +7,7 @@
 -- Nothing is cached: the worn links are cheap to read, and they change under us.
 local _, ns = ...
 
-local _G, ipairs, type, pcall = _G, ipairs, type, pcall
+local _G, ipairs, type, pcall, select = _G, ipairs, type, pcall, select
 local GetInventoryItemLink, UnitLevel = GetInventoryItemLink, UnitLevel
 local CanDualWield = CanDualWield
 local C_Item, C_PlayerInfo, Enum = C_Item, C_PlayerInfo, Enum
@@ -107,7 +107,11 @@ end
 ---@return string?
 function Equipment.WornType(slot)
     local link = Equipment.Worn(slot)
-    local _, _, _, equipLoc = link and C_Item.GetItemInfoInstant(link)
+    local equipLoc
+    if link then
+        -- Not `link and f()`: that keeps only f's first value.
+        equipLoc = select(4, C_Item.GetItemInfoInstant(link))
+    end
     return ns.IsText(equipLoc, true) and equipLoc or nil
 end
 
@@ -206,10 +210,14 @@ local function ruleSlots(invType)
         -- item, which a second weapon shouldn't push out.
         local off = Equipment.WornType(17)
         local offIsWeapon = off == nil or off == "INVTYPE_WEAPON" or off == "INVTYPE_WEAPONOFFHAND"
-        if Equipment.CanDualWield() and offIsWeapon then
+        -- A worn two-hander fills the off hand too: a one-hander takes its place, not an empty hand.
+        if Equipment.CanDualWield() and offIsWeapon
+            and Equipment.WornType(16) ~= "INVTYPE_2HWEAPON" then
             return { { 16 }, { 17 } }
         end
         return { { 16 } }
+    elseif slots[1] == 17 and Equipment.WornType(16) == "INVTYPE_2HWEAPON" then
+        return { { 16 } } -- a shield or off-hand item means taking the two-hander off
     elseif #slots == 2 then
         return { { slots[1] }, { slots[2] } } -- rings and trinkets: either
     end

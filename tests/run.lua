@@ -660,6 +660,12 @@ for _ in nodes:Pairs() do
 end
 eq(seen, 2, "game data: pairs merges seed and learned")
 eq(nodes:Learned(), 1, "game data: learned count")
+GetBuildInfo = function()
+    return "1.60.1", "70338", "Oct 1 2026", 16001
+end
+nodes:Learn("Silverleaf", { 182, 1 })
+eq(ns.db.gameData.testNodes.build, "70338", "game data: learned data is tagged with the build")
+GetBuildInfo = nil
 local empty = GameData.New("testEmpty", { [1] = true })
 eq(empty:Get(1), true, "game data: a set that learned nothing reads its seed")
 eq(ns.db.gameData.testEmpty, nil, "game data: and saves nothing")
@@ -806,6 +812,30 @@ game.dualWield = false
 rivals = Equipment.RuleRivals("INVTYPE_HEAD", wornOf)
 eq(#rivals[1], 0, "rivals: an empty slot is an empty alternative")
 eq(#Equipment.RuleRivals("INVTYPE_TABARD", wornOf), 0, "rivals: not gear, no alternatives")
+-- What's worn is read by type: a worn two-hander fills the off hand too.
+game.worn[17] = nil
+game.cachedItems.great = { 3, "Weapon", "Two-Handed Swords", "INVTYPE_2HWEAPON", 0, 2, 8 }
+game.worn[16] = "great"
+eq(Equipment.WornType(16), "INVTYPE_2HWEAPON", "worn type: read from the worn item")
+eq(Equipment.WornType(17), nil, "worn type: nil for an empty slot")
+rivals = Equipment.RuleRivals("INVTYPE_SHIELD", wornOf)
+eq(#rivals, 1, "rivals: a shield with a two-hander worn has one alternative")
+eq(rivals[1][1], "great", "rivals: the two-hander, not an empty off hand")
+game.dualWield = true
+rivals = Equipment.RuleRivals("INVTYPE_WEAPON", wornOf)
+eq(#rivals, 1, "rivals: dual wielding with a two-hander worn, a one-hander replaces it")
+eq(rivals[1][1], "great", "rivals: the two-hander")
+game.worn[16] = "main"
+game.cachedItems.shield = { 4, "Armor", "Shields", "INVTYPE_SHIELD", 0, 4, 6 }
+game.worn[17] = "shield"
+eq(Equipment.WornType(17), "INVTYPE_SHIELD", "worn type: a shield")
+rivals = Equipment.RuleRivals("INVTYPE_WEAPON", wornOf)
+eq(#rivals, 1, "rivals: dual wielding with a shield worn, a one-hander is the main hand")
+game.worn[17] = nil
+rivals = Equipment.RuleRivals("INVTYPE_SHIELD", wornOf)
+eq(#rivals[1], 0, "rivals: a shield with a one-hander worn takes the empty off hand")
+game.dualWield = false
+game.worn[17] = "off"
 eq(Equipment.IsWorn("main"), true, "worn: by link")
 eq(Equipment.IsWorn("other"), false, "worn: not by link")
 eq(Equipment.LinkKey("|cnIQ2:|Hitem:6541::::::::19:1482:::1:12734::::::|h[Willow Gloves of Magic]|h|r"),
