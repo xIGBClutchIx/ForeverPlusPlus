@@ -107,6 +107,9 @@ end
 ---@param text string
 ---@return string
 function Text.Plain(text)
+    if not find(text, "|", 1, true) then
+        return text -- most lines have no codes; skip the eight passes
+    end
     -- An escaped pipe is set aside first, so "||r" or "||cff..." isn't read as a code.
     text = gsub(text, "||", "\1")
     text = gsub(text, "|c%x%x%x%x%x%x%x%x", "")

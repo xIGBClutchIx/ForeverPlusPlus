@@ -133,6 +133,7 @@ eq(ns.Text.Plain("|cnCOLOR:named|r"), "named", "plain named color")
 eq(ns.Text.Plain("|Hplayer:Bob:1|h[Bob]|h: hi"), "[Bob]: hi", "plain link keeps its text")
 eq(ns.Text.Plain("a |TInterface\\Icon:0|t b |A:Raid:14:14|a c"), "a  b  c", "plain textures")
 eq(ns.Text.Plain("100||"), "100|", "plain escaped pipe")
+eq(ns.Text.Plain("Requires Mining (75)"), "Requires Mining (75)", "plain text without codes is kept")
 eq(ns.Text.Plain("a||rb ||cffffffffc |cff00ff00d|r"), "a|rb |cffffffffc d",
     "plain escaped pipe before a code letter")
 
