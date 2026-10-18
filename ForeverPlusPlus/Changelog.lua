@@ -95,6 +95,8 @@ ns.changelog = {
                     .. "the prices it has." },
                 { L.ITEMTOOLTIPS_TITLE, "An auction price over 214,748 gold no longer causes an "
                     .. "error when it's saved." },
+                { L.QUESTTRACKER_TITLE, "Turning the module on or off keeps the text size you "
+                    .. "set in Edit Mode, instead of setting it back to the default size." },
                 { L.SPELLRANKS_TITLE, "Spells in macros on your action bars get the badge too, "
                     .. "instead of none, or one from an unrelated macro." },
                 { L.SPELLRANKS_TITLE, "The line saying how many action bar spells have a higher "

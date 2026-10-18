@@ -163,7 +163,9 @@ local function applyFont(font)
     if db.outline ~= "default" then
         flags = db.outline
     end
-    font:SetFont(file, saved[2], flags)
+    -- The size it has now: Edit Mode's Text Size may have changed it since we first saw it.
+    local _, size = font:GetFont()
+    font:SetFont(file, size or saved[2], flags)
 end
 
 ---Whether a font object is one of the tracker's own, not a shared one like GameFontNormal.
@@ -194,6 +196,12 @@ local function findFonts(frame, depth)
     end
 end
 
+-- Whether the font or outline isn't Blizzard's, so the tracker's fonts need styling at all.
+local function styled()
+    local db = module.db
+    return db.font ~= "default" or db.outline ~= "default"
+end
+
 local function applyFonts()
     for _, name in ipairs(KNOWN_FONTS) do
         local font = _G[name]
@@ -208,7 +216,8 @@ end
 
 local function restoreFonts()
     for font, saved in pairs(original) do
-        font:SetFont(saved[1], saved[2], saved[3])
+        local _, size = font:GetFont() -- keep Edit Mode's Text Size
+        font:SetFont(saved[1], size or saved[2], saved[3])
         original[font] = nil
     end
 end
@@ -353,8 +362,7 @@ end
 -- font and outline there's nothing to style, so its text isn't searched. The box is fitted now,
 -- so it never trails a frame behind, and once more as the tracker settles; not again next frame as well (requestFit), since nothing moved since now.
 local function onUpdate()
-    local db = module.db
-    if db.font ~= "default" or db.outline ~= "default" then
+    if styled() then
         Profiler.Call(PART_FONTS, findFonts, tracker(), 4)
     end
     Profiler.Call(PART_FIT, fitBox)
@@ -748,7 +756,9 @@ end
 
 function module:OnEnable()
     local frame = tracker()
-    applyFonts()
+    if styled() then
+        applyFonts() -- at Blizzard's font and outline its fonts are left alone
+    end
     if frame.Update then
         self:Hook(frame, "Update", onUpdate)
     else
@@ -785,7 +795,11 @@ function module:OnOptionChanged(key)
         return
     end
     if key == "font" or key == "outline" then
-        applyFonts()
+        if styled() then
+            applyFonts()
+        else
+            restoreFonts()
+        end
         fitBox()
     elseif key == "fade" then
         setFaded(InCombatLockdown())
