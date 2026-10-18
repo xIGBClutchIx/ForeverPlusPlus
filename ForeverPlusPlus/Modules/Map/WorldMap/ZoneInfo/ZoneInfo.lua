@@ -164,7 +164,10 @@ local function levelsOf(mapID, zone)
     if not zone[1] then
         return nil
     end
-    local low, high = C_Map.GetMapLevels and C_Map.GetMapLevels(mapID)
+    local low, high
+    if C_Map.GetMapLevels then
+        low, high = C_Map.GetMapLevels(mapID) -- not `x and f()`, which keeps only the first value
+    end
     if type(low) == "number" and type(high) == "number" and low >= 1 and high >= low
         and high <= 60 then
         return low, high

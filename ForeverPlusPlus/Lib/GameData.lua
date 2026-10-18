@@ -42,8 +42,10 @@ local EXISTS = {
 
 -- The client build, to tag what was learned with.
 local function build()
-    local _, number = GetBuildInfo and GetBuildInfo()
-    return number
+    if GetBuildInfo then
+        local _, number = GetBuildInfo() -- not `GetBuildInfo and GetBuildInfo()`: that keeps one value
+        return number
+    end
 end
 
 -- Whether two values are the same: scalars, or tables with the same scalars (one level deep).
