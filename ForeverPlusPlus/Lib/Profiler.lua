@@ -109,13 +109,6 @@ function Profiler.Part(module, label)
     return { parent = module, label = label }
 end
 
----The module a key belongs to: itself, or the module of a part.
----@param key table
----@return table
-function Profiler.ModuleOf(key)
-    return key.parent or key.module or key
-end
-
 ---A function that calls `fn` and, while recording, charges it to `key`: for a module's OnUpdate
 ---script, timers, and other code that doesn't come through Core.
 ---@param key table the module

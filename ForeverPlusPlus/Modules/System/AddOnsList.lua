@@ -7,9 +7,8 @@
 -- addons are on under a name and turn that list back on later.
 local addonName, ns = ...
 
-local _G, ipairs, pairs, next, type, pcall, sort, lower, find, match, format =
-    _G, ipairs, pairs, next, type, pcall, table.sort, string.lower, string.find, string.match,
-    string.format
+local _G, ipairs, pairs, next, type, pcall, sort, lower, find, format =
+    _G, ipairs, pairs, next, type, pcall, table.sort, string.lower, string.find, string.format
 local C_AddOns, UnitGUID, CreateFrame, CreateTreeDataProvider, geterrorhandler =
     C_AddOns, UnitGUID, CreateFrame, CreateTreeDataProvider, geterrorhandler
 

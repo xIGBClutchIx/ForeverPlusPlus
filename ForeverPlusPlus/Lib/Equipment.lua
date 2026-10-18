@@ -15,8 +15,6 @@ local C_Item, C_PlayerInfo, Enum = C_Item, C_PlayerInfo, Enum
 local Equipment = {}
 ns.Equipment = Equipment
 
-Equipment.MAINHAND, Equipment.OFFHAND, Equipment.RANGED = 16, 17, 18
-
 -- Each item type's inventory slots. Shirts, tabards, bags, quivers, and ammo aren't gear worth a
 -- score, so they're left out and `Slots` gives nil for them.
 local SLOTS = {
@@ -44,7 +42,6 @@ local SLOTS = {
     INVTYPE_THROWN = { 18 },
     INVTYPE_RELIC = { 18 },
 }
-Equipment.SLOTS = SLOTS
 
 ---The inventory slots an item type (INVTYPE_*) goes in, or nil for something that isn't gear.
 ---@param invType string?

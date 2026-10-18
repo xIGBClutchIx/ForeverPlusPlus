@@ -328,7 +328,5 @@ function module:OnDisable()
 end
 
 function module:OnOptionChanged()
-    if self.enabled then
-        redraw()
-    end
+    redraw()
 end

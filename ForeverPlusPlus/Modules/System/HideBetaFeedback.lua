@@ -78,9 +78,6 @@ local function scrub(tooltip)
         return
     end
     local LeftLine = ns.Text.LeftLine
-    if not tooltip.NumLines then
-        return
-    end
     local found = false
     for i = tooltip:NumLines(), 1, -1 do
         local line = LeftLine(tooltip, i)

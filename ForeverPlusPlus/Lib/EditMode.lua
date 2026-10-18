@@ -460,7 +460,7 @@ function refreshDialog()
     end
     dialog:SetHeight(height + 20)
     -- Beside the frame on the side of the screen with room, and above it when it fills the width.
-    local cx, cy, width, h = box(frame)
+    local cx, cy, width = box(frame)
     dialog:ClearAllPoints()
     if cx then
         local left = cx - width / 2

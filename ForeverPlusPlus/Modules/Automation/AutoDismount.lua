@@ -32,7 +32,7 @@ local cvars = ns.CVars.Bind(module, {
     dismount = "autoDismount",
     stand = "autoStand",
     unshift = "autoUnshift",
-}, true)
+})
 
 -- Errors the CVars don't answer, by the name of the game's string for them. Names this client
 -- doesn't have are skipped. Leaving a shapeshift form has none: CancelShapeshiftForm is protected,

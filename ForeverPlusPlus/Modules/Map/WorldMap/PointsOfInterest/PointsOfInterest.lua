@@ -537,9 +537,6 @@ function module:OnDisable()
 end
 
 function module:OnOptionChanged(key)
-    if not self.enabled then
-        return
-    end
     if key:find("^capital") or key:find("^dungeon") or key:find("^raid") then
         ns.MapPins.RefreshMap() -- ours and Blizzard's, both redrawn
     else

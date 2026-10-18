@@ -253,7 +253,6 @@ local function create(frame)
     box.text = box:CreateFontString(nil, "OVERLAY")
     -- The nameplate font family (a font per alphabet), sized the way Blizzard's plates are.
     box.text:SetFontObject("SystemFont_NamePlate")
-    box.text:SetTextColor(1, 0.82, 0)
     return box
 end
 

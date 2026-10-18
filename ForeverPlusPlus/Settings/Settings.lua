@@ -1139,7 +1139,6 @@ local function addNewOnly(frame, anchor)
             relayout()
         end
     end)
-    return box
 end
 
 local function buildModules(frame)
@@ -1149,7 +1148,7 @@ local function buildModules(frame)
 
     local defaults = addPageDefaults(frame)
     page.search = addSearchBox(frame, defaults, L.SETTINGS_SEARCH, searchModules)
-    page.newOnly = addNewOnly(frame, page.search or defaults)
+    addNewOnly(frame, page.search or defaults)
 
     -- "No modules match" while the search hides them all, or "Nothing new" while the New checkbox
     -- is on and nothing is marked.

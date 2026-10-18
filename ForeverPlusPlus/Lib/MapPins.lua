@@ -238,7 +238,6 @@ end
 
 ---Shows the layer's pins on the world map.
 function Layer:Enable()
-    self.enabled = true
     self.onLoad = self.onLoad or function(map)
         self:Attach(map)
     end
@@ -247,7 +246,6 @@ end
 
 ---Takes the layer's pins off the world map.
 function Layer:Disable()
-    self.enabled = false
     if self.onLoad then
         WorldMap.Cancel(self.onLoad)
     end

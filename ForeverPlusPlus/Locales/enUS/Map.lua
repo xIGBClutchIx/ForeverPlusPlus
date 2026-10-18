@@ -295,8 +295,6 @@ L.MINIMAPNODEICONS_HERE_COLOR = "Name color: %s, %s, %s. Gray: %s." -- red, gree
 L.MINIMAPNODEICONS_HERE_ICON = "Its icon is at %.1f, %.1f; it last answered at %.1f, %.1f."
 -- trail right and up, standing still (yes/no)
 L.MINIMAPNODEICONS_HERE_LAG = "Trail while moving: %.1f, %.1f. Standing still: %s."
-L.MINIMAPNODEICONS_HERE_PROBED = "Probing at the cursor finds it at %.1f, %.1f. Icons with this name: %d." -- right, up, count
-L.MINIMAPNODEICONS_HERE_UNPROBED = "Probing at the cursor finds nothing by that name. Icons with this name: %d." -- count
 L.MINIMAPNODEICONS_HERE_MISSED = "No icon for it yet."
 L.MINIMAPNODEICONS_REPORT_UNAVAILABLE = "This client can't check the minimap for nodes."
 L.MINIMAPNODEICONS_REPORT_COMBAT = "Can't check the minimap in combat."

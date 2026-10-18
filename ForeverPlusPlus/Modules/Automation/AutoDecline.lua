@@ -3,7 +3,7 @@
 -- can be let through duels and party invites.
 local _, ns = ...
 
-local format, type = string.format, type
+local format = string.format
 local CancelDuel, DeclineGroup, StaticPopup_Hide = CancelDuel, DeclineGroup, StaticPopup_Hide
 
 local L = ns.L

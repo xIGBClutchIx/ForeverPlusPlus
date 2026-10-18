@@ -163,13 +163,6 @@ function ItemStats.Get(link)
     return info
 end
 
----Forgets every item read, so the next read asks the game again (after a patch, or for a test).
-function ItemStats.Forget()
-    for link in pairs(cache) do
-        cache[link] = nil
-    end
-end
-
 -- Scoring ---------------------------------------------------------------------------------------
 
 -- The weapon slots whose DPS a weight set prices apart from a main hand's.

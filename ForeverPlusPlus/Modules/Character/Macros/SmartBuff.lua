@@ -52,8 +52,9 @@ local NAME = L.MACROS_SMARTBUFF_MACRO -- the macro's name, at most 16 letters
 local BUTTON_NAME = "ForeverPlusPlusSmartBuffButton" -- a global name, since /click needs one
 local DELAY = 0.1 -- seconds to wait for a burst of changes to settle
 
--- Each buff's first rank (build 70374, Classic's IDs); the spellbook gives the rest by name.
-local SPELLS = ns.GameData.New("smartBuffSpells", {
+-- Each buff's first rank (build 70374, Classic's IDs); the spellbook gives the rest by name. Made
+-- only so Self Test checks the client still has them.
+ns.GameData.New("smartBuffSpells", {
     [19740] = "Blessing of Might",
     [19742] = "Blessing of Wisdom",
     [20217] = "Blessing of Kings",
@@ -563,7 +564,7 @@ function module:OnDisable()
 end
 
 function module:OnOptionChanged(key)
-    if key == "smartBuffRecast" and self.enabled then
+    if key == "smartBuffRecast" then
         queue()
     end
 end

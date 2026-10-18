@@ -11,7 +11,7 @@
 local _, ns = ...
 
 local CreateFrame, UIParent, C_Timer, EventRegistry = CreateFrame, UIParent, C_Timer, EventRegistry
-local ipairs, pairs, next, type, time = ipairs, pairs, next, type, time
+local ipairs, pairs, type, time = ipairs, pairs, type, time
 local floor, concat = math.floor, table.concat
 local find, match, sub = string.find, string.match, string.sub
 

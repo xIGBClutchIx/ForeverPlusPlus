@@ -14,7 +14,6 @@ local module = itemTooltips:NewPart({
     key = "sellPrice", name = L.ITEMTOOLTIPS_SELLPRICE, description = L.SELLPRICE_DESC,
     section = L.SELLPRICE_TITLE,
 }, {
-    sellPrice = true,
     sellPriceColor = "white", -- the quantity's color: "gray", "white", or "gold"
 })
 

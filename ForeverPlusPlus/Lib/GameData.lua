@@ -163,16 +163,11 @@ function Set:Learn(key, value)
     return not same(before, value)
 end
 
----Forgets what was learned for `key`, or for every key without one.
----@param key any
-function Set:Forget(key)
+---Forgets everything the set learned.
+function Set:Forget()
     local values = store(self)
-    if key == nil then
-        for k in pairs(values) do
-            values[k] = nil
-        end
-    else
-        values[key] = nil
+    for k in pairs(values) do
+        values[k] = nil
     end
 end
 

@@ -16,7 +16,7 @@
 local _, ns = ...
 
 local C_SpellBook, C_TooltipInfo, C_TradeSkillUI = C_SpellBook, C_TooltipInfo, C_TradeSkillUI
-local IsSpellKnown, type = IsSpellKnown, type
+local IsSpellKnown = IsSpellKnown
 
 local L = ns.L
 
