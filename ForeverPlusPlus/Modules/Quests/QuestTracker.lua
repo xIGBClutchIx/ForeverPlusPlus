@@ -9,7 +9,7 @@
 local _, ns = ...
 
 local pairs, ipairs, next, type, min, max = pairs, ipairs, next, type, math.min, math.max
-local setmetatable, sort = setmetatable, table.sort
+local setmetatable, sort, select = setmetatable, table.sort, select
 local InCombatLockdown, C_Timer, C_QuestLog, C_Map = InCombatLockdown, C_Timer, C_QuestLog, C_Map
 local GetRealZoneText = GetRealZoneText
 local GetQuestUiMapID, Enum = GetQuestUiMapID, Enum
@@ -303,6 +303,25 @@ local function watch(frame)
     module:HookScript(frame, "OnSizeChanged", requestFit)
 end
 
+-- One reused list per walk depth (regions and children apart), so a walk makes no tables. Each
+-- depth's lists are done with before a deeper level's could be filled again.
+local buffers = {}
+local function pack(key, ...)
+    local list = buffers[key]
+    if not list then
+        list = {}
+        buffers[key] = list
+    end
+    local n = select("#", ...)
+    for i = 1, n do
+        list[i] = select(i, ...)
+    end
+    for i = n + 1, #list do
+        list[i] = nil
+    end
+    return list, n
+end
+
 -- Lowers `bounds.bottom` to the lowest thing a frame and its children draw: header art and text,
 -- quest lines, map and item buttons. Only what's drawn counts, not frame sizes, since a
 -- collapsed section can keep its full height.
@@ -311,7 +330,9 @@ local function measure(frame, bounds, depth)
     if not frame:IsVisible() or frame:GetEffectiveAlpha() <= 0 then
         return
     end
-    for _, region in ipairs({ frame:GetRegions() }) do
+    local regions, count = pack(depth * 2, frame:GetRegions())
+    for i = 1, count do
+        local region = regions[i]
         if isDrawn(region) then
             local _, bottom, width, height = region:GetRect()
             if bottom and width > 1 and height > 1 then
@@ -320,8 +341,9 @@ local function measure(frame, bounds, depth)
         end
     end
     if depth > 0 then
-        for _, child in ipairs({ frame:GetChildren() }) do
-            measure(child, bounds, depth - 1)
+        local children, total = pack(depth * 2 + 1, frame:GetChildren())
+        for i = 1, total do
+            measure(children[i], bounds, depth - 1)
         end
     end
 end
