@@ -49,7 +49,7 @@ end
 
 -- The stat's name, with "per 1%" in gray after a chance stat's.
 local function statName(stat)
-    local name = L["UPGRADEARROWS_STAT_" .. stat] or stat
+    local name = L["UPGRADEARROWS_STAT_" .. stat]
     if ItemStats.PERCENT[stat] then
         name = format("%s |cff808080%s|r", name, L.UPGRADEARROWS_PER_PERCENT)
     end
@@ -266,7 +266,7 @@ local function newRow(parent, stat)
         hit:SetScript("OnEnter", function(self)
             local text = editing and internal.DerivedText(stat, editing)
             if text then
-                Kit.ShowTooltip(self, L["UPGRADEARROWS_STAT_" .. stat] or stat, text)
+                Kit.ShowTooltip(self, L["UPGRADEARROWS_STAT_" .. stat], text)
             end
         end)
         hit:SetScript("OnLeave", Kit.HideTooltip)

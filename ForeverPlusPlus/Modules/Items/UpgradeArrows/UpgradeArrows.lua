@@ -13,7 +13,7 @@
 -- percentage under it; nothing is written onto Blizzard's frames.
 local _, ns = ...
 
-local _G, ipairs, pairs, type, wipe, select, tonumber = _G, ipairs, pairs, type, wipe, select, tonumber
+local _G, ipairs, pairs, type, wipe, tonumber = _G, ipairs, pairs, type, wipe, tonumber
 local format, floor, huge = string.format, math.floor, math.huge
 local C_Container, C_AddOns, C_Item, UnitClass = C_Container, C_AddOns, C_Item, UnitClass
 
@@ -708,10 +708,8 @@ function module:OnOptionChanged(key)
     if not self.enabled then
         return
     end
-    if key == "profile" or key == "threshold" then
-        updateProfile()
-        forgetScores()
-    elseif key == "higher" or key == "ahead" or key == "tools" then
+    -- The profile isn't an option: it changes through internal.SetProfile.
+    if key == "threshold" or key == "higher" or key == "ahead" or key == "tools" then
         forgetScores()
     end
     refreshSoon()

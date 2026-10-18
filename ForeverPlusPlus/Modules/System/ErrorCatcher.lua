@@ -819,6 +819,21 @@ function module:OnLoad()
     pending = {}
 end
 
+-- Blizzard's "blocked from an action" popup, which offers to turn the addon off. Left to the addon
+-- that has the error handler (module.notice says so), like Blizzard's error window.
+local function onPopup(which)
+    if which == "ADDON_ACTION_FORBIDDEN" and not otherHandler() then
+        StaticPopup_Hide(which)
+    end
+end
+
+-- Blizzard's error window, which still opens for Lua warnings.
+local function onErrorWindow(frame)
+    if not otherHandler() then
+        frame:Hide()
+    end
+end
+
 function module:OnEnable()
     local current = geterrorhandler()
     if current ~= onError then
@@ -828,23 +843,10 @@ function module:OnEnable()
     listen("ADDON_ACTION_BLOCKED", onBlocked)
     listen("ADDON_ACTION_FORBIDDEN", onBlocked)
     listen("LUA_WARNING", onWarning)
-    -- Blizzard's "blocked from an action" popup, which offers to turn the addon off. Left to the
-    -- addon that has the error handler (module.notice says so), like Blizzard's error window.
-    if StaticPopup_Show and StaticPopup_Hide then
-        self:Hook("StaticPopup_Show", function(which)
-            if which == "ADDON_ACTION_FORBIDDEN" and not otherHandler() then
-                StaticPopup_Hide(which)
-            end
-        end)
+    if StaticPopup_Hide then
+        self:Hook("StaticPopup_Show", onPopup)
     end
-    -- Blizzard's error window, which still opens for Lua warnings.
-    if ScriptErrorsFrame then
-        self:HookScript(ScriptErrorsFrame, "OnShow", function(frame)
-            if not otherHandler() then
-                frame:Hide()
-            end
-        end)
-    end
+    self:HookScript(ScriptErrorsFrame, "OnShow", onErrorWindow)
 
     if #pending > 0 then
         local count = #pending

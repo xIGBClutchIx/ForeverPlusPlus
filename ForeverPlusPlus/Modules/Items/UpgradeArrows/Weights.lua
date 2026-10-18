@@ -54,7 +54,6 @@ local TEMPLATES = {
     fallback = { STR = 1, AGI = 1, STA = 0.5, HEALTH = 0.05, INT = 1, MANA = 0.03, SPI = 0.5, AP = 0.3, SP = 0.8,
         HEAL = 0.6, HIT = 5, CRIT = 5, SPELLHIT = 5, SPELLCRIT = 5, DPS = 2 },
 }
-internal.TEMPLATES = TEMPLATES
 
 -- The attributes the game's conversions decide, and the rates behind each.
 local DERIVED = { STR = true, AGI = true, STA = true, INT = true }
@@ -118,7 +117,7 @@ function internal.DerivedText(stat, profile)
     if #parts == 0 then
         return nil
     end
-    return format(L.UPGRADEARROWS_DERIVED, L["UPGRADEARROWS_STAT_" .. stat] or stat, concat(parts, ", "))
+    return format(L.UPGRADEARROWS_DERIVED, L["UPGRADEARROWS_STAT_" .. stat], concat(parts, ", "))
 end
 
 -- Each class's talent tabs in order, and the template each uses. The order is Classic's, which
@@ -134,7 +133,6 @@ local CLASS_TABS = {
     WARLOCK = { "caster", "caster", "caster" }, -- Affliction, Demonology, Destruction
     DRUID = { "caster", "agility", "healer" }, -- Balance, Feral (cat), Restoration
 }
-internal.CLASS_TABS = CLASS_TABS
 
 ---A class's talent tab's name in our strings, for a class the client has no talent data for
 ---(another class than the character's). "Tree N" for a class or tab we don't know.
@@ -142,8 +140,13 @@ internal.CLASS_TABS = CLASS_TABS
 ---@param index number 1 to 3
 ---@return string
 function internal.TabName(class, index)
-    local name = L[format("UPGRADEARROWS_TAB_%s_%d", class, index)]
-    return name or format(L.UPGRADEARROWS_PROFILE_TREE, index)
+    -- ns.L gives a missing key back as itself, never nil.
+    local key = format("UPGRADEARROWS_TAB_%s_%d", class, index)
+    local name = L[key]
+    if name ~= key then
+        return name
+    end
+    return format(L.UPGRADEARROWS_PROFILE_TREE, index)
 end
 
 -- What each tab changes in its template, so every tree has defaults of its own: two-handers
