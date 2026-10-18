@@ -89,9 +89,11 @@ end)
 function ns.On(event, fn)
     local list = handlers[event]
     if not list then
+        -- Register first: an event this client lacks throws here, and must leave nothing behind
+        -- for Off to unregister.
+        events:RegisterEvent(event)
         list = {}
         handlers[event] = list
-        events:RegisterEvent(event)
     end
     for i = 1, #list do
         if list[i] == fn then
@@ -250,9 +252,14 @@ Module.__index = Module
 ---@param fn fun(event: string, ...)
 function Module:On(event, fn)
     self.events = self.events or {}
+    for _, entry in ipairs(self.events) do
+        if entry[1] == event and entry[2] == fn then
+            return -- already listening; a module that syncs its events often mustn't pile them up
+        end
+    end
+    ns.On(event, fn) -- before recording it, so an event this client lacks isn't turned off later
     self.events[#self.events + 1] = { event, fn }
     owners[fn] = owners[fn] or self
-    ns.On(event, fn)
 end
 
 ---Stops one event added with `module:On` before the module turns off.
@@ -286,11 +293,13 @@ local function hookOnce(module, target, method, fn, install)
         byFn[fn] = true
         install(function(...)
             if module.enabled then
+                -- Through `call`, as events are: an error in our hook is reported, and doesn't
+                -- surface inside Blizzard's own code or stop the hooks after ours.
                 local profiler = ns.Profiler
                 if profiler and profiler.recording then
                     profiler.Call(module, call, fn, ...)
                 else
-                    fn(...)
+                    call(fn, ...)
                 end
             end
         end)
@@ -477,11 +486,11 @@ local function disable(module)
     offAll(module)
 end
 
--- Tells a module one of its options changed. A part's checkbox turns it on or off, and a part
--- hears about its own options while it's on.
+-- Tells a module one of its options changed. A module and a part hear about their options only
+-- while they're on (OnEnable reads them anyway), and a part's checkbox turns it on or off.
 local function optionChanged(module, key)
-    if module.OnOptionChanged then
-        module:OnOptionChanged(key)
+    if module.enabled and module.OnOptionChanged then
+        call(module.OnOptionChanged, module, key) -- as a part's: one error mustn't stop a preset
     end
     for _, part in ipairs(module.parts or {}) do
         if key == part.key then
@@ -901,9 +910,16 @@ SlashCmdList.FOREVERPLUSPLUS = function(message)
         end
     elseif command == "reset" then
         -- It throws away saved data too (prices, flight times, chat history), so it asks first.
+        -- Every module turns off before the wipe, so each puts back what it changed (the player's
+        -- own CVars, kept only in the saved data, macros, frames); CVars wait out combat.
         ns.Confirm("RESET_ALL", L.RESET_CONFIRM, function()
-            ForeverPlusPlusDB, ForeverPlusPlusCharDB = nil, nil
-            ReloadUI()
+            ns.AfterCombat(function()
+                for _, name in ipairs(ns.order) do
+                    ns.SetEnabled(name, false)
+                end
+                ForeverPlusPlusDB, ForeverPlusPlusCharDB = nil, nil
+                ReloadUI()
+            end)
         end)
     elseif command == "list" or command == "help" or not ns.OpenSettings() then
         list()

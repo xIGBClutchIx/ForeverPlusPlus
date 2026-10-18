@@ -42,13 +42,14 @@ end
 
 local owners = setmetatable({}, { __mode = "k" }) -- a module's fn -> the module, for the Profiler
 
--- Calls one module's fn, timed for the Profiler page while it records.
+-- Calls one module's fn, timed for the Profiler page while it records. Through ns.Call, so one
+-- module's error is reported and the other modules' lines still show.
 local function run(fn, ...)
     local profiler = ns.Profiler
     if profiler and profiler.recording then
-        return profiler.Call(owners[fn], fn, ...)
+        return profiler.Call(owners[fn], ns.Call, fn, ...)
     end
-    return fn(...)
+    return ns.Call(fn, ...)
 end
 
 local function addPrices(tooltip, data)

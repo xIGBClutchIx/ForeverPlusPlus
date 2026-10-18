@@ -34,10 +34,11 @@ local function dispatch(method, ...)
     for owner, handlers in pairs(users) do
         local fn = handlers[method]
         if fn then
+            -- Through ns.Call: one module's error mustn't stop the other plate modules.
             if timed then
-                profiler.Call(owner, fn, ...)
+                profiler.Call(owner, ns.Call, fn, ...)
             else
-                fn(...)
+                ns.Call(fn, ...)
             end
         end
     end

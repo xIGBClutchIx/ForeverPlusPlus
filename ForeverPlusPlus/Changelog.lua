@@ -76,6 +76,13 @@ ns.changelog = {
                     .. "/fpp shots." },
             } },
             { L.CHANGELOG_FIXED, {
+                "An error in one module no longer stops Blizzard's own window or tooltip it hooks "
+                    .. "from finishing, or the other modules' changes to it.",
+                { L.CHANGELOG_COMMANDS, "/fpp reset turns every module off before it wipes the "
+                    .. "settings, so game settings a module changed, like Auto Dismount's, go back "
+                    .. "to your own. Started in combat, it waits until combat ends." },
+                { L.FISHINGCAST_TITLE, "Changing Louder Bobber while the module is off no longer "
+                    .. "changes your sound volumes." },
                 { L.GATHERINGTRACKING_TITLE, "Find Minerals or Find Herbs comes back on after "
                     .. "dying again: it keeps checking for a few seconds after you come back to "
                     .. "life, instead of giving up when the tracking list still showed it on or "

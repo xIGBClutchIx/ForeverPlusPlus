@@ -20,6 +20,9 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Fixed
 
+- An error in one module no longer stops Blizzard's own window or tooltip it hooks from finishing, or the other modules' changes to it.
+- **Commands**: `/fpp reset` turns every module off before it wipes the settings, so game settings a module changed, like Auto Dismount's, go back to your own. Started in combat, it waits until combat ends.
+- **Fishing Cast**: changing Louder Bobber while the module is off no longer changes your sound volumes.
 - **Gathering Tracking**: Find Minerals or Find Herbs comes back on after dying again: it keeps checking for a few seconds after you come back to life, instead of giving up when the tracking list still showed it on or the first try didn't take.
 - **Item Tooltips**: the Auction Prices scan no longer spins forever when the auction house stops answering partway: it asks again, then finishes with the prices it has.
 - **Item Tooltips**: an auction price over 214,748 gold no longer causes an error when it's saved.
