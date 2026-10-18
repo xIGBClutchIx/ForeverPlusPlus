@@ -94,9 +94,14 @@ end
 
 -- A title without our icon at its end, so a title can be marked again (another icon, or none)
 -- without stacking icons, even after something else (Quest Levels) changed the rest of it.
+local STRIP = {} -- each icon's pattern, made once
+for _, icon in pairs(ICONS) do
+    STRIP[#STRIP + 1] = " |A:" .. icon.atlas:gsub("%-", "%%-") .. ":%d+:%d+|a$"
+end
+
 local function plain(text)
-    for _, icon in pairs(ICONS) do
-        text = text:gsub(" |A:" .. icon.atlas:gsub("%-", "%%-") .. ":%d+:%d+|a$", "")
+    for i = 1, #STRIP do
+        text = text:gsub(STRIP[i], "")
     end
     return text
 end
