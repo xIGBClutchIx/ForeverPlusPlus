@@ -116,6 +116,8 @@ ns.changelog = {
                 { L.ITEMTOOLTIPS_TITLE, "The lines stay above Forever's \"Press F6\" line on items "
                     .. "whose last line another module redraws, like a junkbox's lockpicking "
                     .. "requirement." },
+                { L.PERSISTENTCHAT_TITLE, "Chat no longer starts fading again after you leave it "
+                    .. "with a gamepad." },
                 { L.QUESTTRACKER_TITLE, "Turning the module on or off keeps the text size you "
                     .. "set in Edit Mode, instead of setting it back to the default size." },
                 { L.CHANGELOG_SETTINGS, "The About page lists the commands of the modules that are on "

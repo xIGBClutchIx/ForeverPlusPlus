@@ -33,8 +33,12 @@ function module:IsAvailable()
 end
 
 function module:OnEnable()
-    -- A window that was reset or added later starts with Blizzard's fading.
-    Chat.EachWindow(self, apply)
+    -- A window that was reset or added later starts with Blizzard's fading. Leaving chat with a
+    -- gamepad turns fading back on (FloatingChatFrameMixin:UnfocusGamepad), on each window's copy.
+    Chat.EachWindow(self, function(frame)
+        apply(frame)
+        self:Hook(frame, "UnfocusGamepad", apply)
+    end)
 end
 
 function module:OnDisable()

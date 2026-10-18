@@ -37,6 +37,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Item Tooltips**: the Auction Prices scan no longer spins forever when the auction house stops answering partway: it asks again, then finishes with the prices it has.
 - **Item Tooltips**: an auction price over 214,748 gold no longer causes an error when it's saved.
 - **Item Tooltips**: the lines stay above Forever's "Press F6" line on items whose last line another module redraws, like a junkbox's lockpicking requirement.
+- **Persistent Chat**: chat no longer starts fading again after you leave it with a gamepad.
 - **Quest Tracker**: turning the module on or off keeps the text size you set in Edit Mode, instead of setting it back to the default size.
 - **Settings**: the About page lists the commands of the modules that are on now, instead of the ones that were on when it first opened.
 - **Spell Ranks**: spells in macros on your action bars get the badge too, instead of none, or one from an unrelated macro.
