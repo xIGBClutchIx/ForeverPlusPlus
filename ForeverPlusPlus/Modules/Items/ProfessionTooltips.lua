@@ -534,18 +534,28 @@ local function isLockpicking(skill)
     return name ~= nil and skill == name
 end
 
--- The Lockpicking skill in tooltip line `lineData` of item `id`, learned for the box, or nil when
--- it isn't a lockbox's requirement line. A box we know counts whatever the skill's name says.
-local function learnLockLine(id, lineData)
-    local text = lineData and lineData.leftText
-    if not ns.IsText(text) then
-        return nil
+-- itemID -> { line index, Lockpicking needed } of the item's "Requires Lockpicking (N)" line, or
+-- false for an item without one. Looked for once per item, since this runs before every line of
+-- every item tooltip; later builds only compare line tables.
+local lockLines = {}
+
+-- An item's Lockpicking line, learned for the box, or false. A box we know counts whatever the
+-- skill's name says.
+local function lockLine(id, data)
+    local cached = lockLines[id]
+    if cached == nil then
+        local skill, need, index = ns.GameData.TooltipRequires(data)
+        cached = skill and (LOCKBOXES:Get(id) or isLockpicking(skill)) and { index, need } or false
+        if cached then
+            LOCKBOXES:Learn(id, need)
+        end
+        -- An item not loaded yet has a lone "Retrieving" line: don't remember that as "none".
+        local lines = data.lines
+        if cached or (type(lines) == "table" and #lines > 1) then
+            lockLines[id] = cached
+        end
     end
-    local skill, need = ns.GameData.Requires(ns.Text.Plain(text))
-    if skill and (LOCKBOXES:Get(id) or isLockpicking(skill)) then
-        LOCKBOXES:Learn(id, need)
-        return need
-    end
+    return cached
 end
 
 -- Blizzard's own "Requires Lockpicking (25)" line on a lockbox: learned, and drawn again in the
@@ -555,10 +565,11 @@ local function onItemLine(tooltip, data, lineData)
         return
     end
     local id = ItemTooltip.ItemID(data)
-    local need = id and learnLockLine(id, lineData)
-    if not (need and module.db.items) then
+    local lock = id and lockLine(id, data)
+    if not (lock and module.db.items and data.lines[lock[1]] == lineData) then
         return
     end
+    local need = lock[2]
     local line, color = skillLine(LOCK, need, L.PROFTOOLTIPS_REQUIRES)
     if line then
         addLine(tooltip, line, color)
@@ -571,7 +582,7 @@ end
 local function itemNeed(id, data)
     local lock = LOCKBOXES:Get(id)
     if lock then
-        if ns.GameData.TooltipRequires(data) then
+        if lockLine(id, data) then
             return nil
         end
         return LOCK, lock
