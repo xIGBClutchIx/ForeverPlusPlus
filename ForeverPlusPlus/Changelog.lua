@@ -85,6 +85,8 @@ ns.changelog = {
                     .. "their module on, instead of only on the next loot.",
                 { L.ALREADYKNOWN_TITLE, "Items on a vendor's Buyback tab no longer get the marks "
                     .. "of the vendor's own items." },
+                { L.AUTOSCREENSHOT_TITLE, "Reaching Neutral with a faction counts as a step up and "
+                    .. "takes a screenshot." },
                 { L.CHANGELOG_COMMANDS, "/fpp reset turns every module off before it wipes the "
                     .. "settings, so game settings a module changed, like Auto Dismount's, go back "
                     .. "to your own. Started in combat, it waits until combat ends." },

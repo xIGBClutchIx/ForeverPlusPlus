@@ -244,7 +244,7 @@ local function getStanding()
     if standingPattern == nil then
         standingPattern = toPattern(FACTION_STANDING_CHANGED) or false
         lowStandings = {}
-        for i = 1, 4 do
+        for i = 1, 3 do
             for _, text in ipairs({ _G["FACTION_STANDING_LABEL" .. i],
                 _G["FACTION_STANDING_LABEL" .. i .. "_FEMALE"] }) do
                 lowStandings[text] = true
