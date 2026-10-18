@@ -13,12 +13,18 @@
 local _, ns = ...
 
 local ipairs, pairs, pcall, type, tostring, tonumber = ipairs, pairs, pcall, type, tostring, tonumber
+local next, C_Timer = next, C_Timer
 local format = string.format
 local tconcat, min, max, floor = table.concat, math.min, math.max, math.floor
 local Screenshot, InCombatLockdown, C_Container = Screenshot, InCombatLockdown, C_Container
 local L = ns.L
 
-local module = ns.NewModule("Screenshots", L.SCREENSHOTS_DESC, { enabled = true })
+local module = ns.NewModule("Screenshots", L.SCREENSHOTS_DESC, {
+    enabled = true,
+    -- What a run changed, saved so a /reload or disconnect mid-run still puts it back (OnLoad).
+    pending = {}, -- { module name, key ("enabled" or an option), value to put back }, oldest first
+    cvars = {}, -- the player's screenshot CVars (CVar -> value)
+})
 module.title = L.SCREENSHOTS_TITLE
 module.alwaysOn = true -- a tool, not a change to the game
 
@@ -218,8 +224,6 @@ local SCENES = {
 
 -- Turning modules on for a shot -----------------------------------------------------------------
 
-local changed = {} -- { module name, key ("enabled" or an option), value to put back }, oldest first
-
 -- Turns a module on with `options` set, remembering what to put back. False when this client
 -- doesn't have it.
 local function use(name, options)
@@ -227,6 +231,7 @@ local function use(name, options)
     if not other or other.unavailable then
         return false
     end
+    local changed = module.db.pending
     if not other.enabled then
         changed[#changed + 1] = { name, "enabled", false }
         ns.SetEnabled(name, true)
@@ -243,6 +248,7 @@ local function use(name, options)
 end
 
 local function putBack()
+    local changed = module.db.pending
     for i = #changed, 1, -1 do
         local name, key, old = changed[i][1], changed[i][2], changed[i][3]
         if key == "enabled" then
@@ -258,7 +264,6 @@ end
 -- Running the scenes ----------------------------------------------------------------------------
 
 local timer = ns.Frames.Timer(module)
-local cvars = {} -- the player's screenshot CVars, put back at the end
 local queue, step, taken, skipped, current
 local waited = 0 -- seconds spent waiting on the player, or on "Screen captured" to fade
 local hinted = false -- whether the scene's `readyText` was said
@@ -278,7 +283,7 @@ local function finish()
     ns.Off("SCREENSHOT_SUCCEEDED", onShot)
     ns.Off("SCREENSHOT_FAILED", onShot)
     ns.Off("PLAYER_REGEN_DISABLED", stop)
-    ns.CVars.RestoreAll(cvars)
+    ns.CVars.RestoreAll(module.db.cvars)
     queue = nil
     ns.Print(format(L.SCREENSHOTS_DONE, taken))
     for _, line in ipairs(skipped) do
@@ -475,8 +480,8 @@ function module.Run(rest)
     ns.On("PLAYER_REGEN_DISABLED", stop)
     -- JPG at full quality for the gallery: a 2560x1440 PNG is 4 to 5 MB, over CurseForge's 2 MB
     -- limit. The player's own format comes back at the end.
-    ns.CVars.Set(cvars, "screenshotFormat", "jpg")
-    ns.CVars.Set(cvars, "screenshotQuality", "10")
+    ns.CVars.Set(module.db.cvars, "screenshotFormat", "jpg")
+    ns.CVars.Set(module.db.cvars, "screenshotQuality", "10")
     if seconds then
         ns.Print(format(L.SCREENSHOTS_WAIT, seconds))
         nextScene()
@@ -487,6 +492,17 @@ function module.Run(rest)
         ns.Print(L.SCREENSHOTS_CLOSE_SETTINGS)
     end
     waitForSettings()
+end
+
+-- A run cut short by a /reload or disconnect left its changes saved: put them back once every
+-- module has loaded.
+function module:OnLoad()
+    if next(self.db.pending) or next(self.db.cvars) then
+        C_Timer.After(0, function()
+            putBack()
+            ns.CVars.RestoreAll(self.db.cvars)
+        end)
+    end
 end
 
 -- Shown on the Debug page (Settings/Debug.lua).
