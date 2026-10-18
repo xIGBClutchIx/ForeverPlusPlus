@@ -171,7 +171,12 @@ function ItemButtons.HookLoot(module, fn)
         if module.enabled then
             lootSlot(frame, elementData, fn)
         end
-    end, module, true)
+    end, module, false)
+    -- Not iterateExisting: it calls back without the owner argument, so rows showing now are
+    -- marked here instead.
+    if module.enabled then
+        ItemButtons.EachLootSlot(fn)
+    end
 end
 
 ---Calls `fn(icon, slot, link)` for each row of the loot window while it's open.

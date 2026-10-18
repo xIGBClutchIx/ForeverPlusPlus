@@ -81,6 +81,8 @@ ns.changelog = {
             { L.CHANGELOG_FIXED, {
                 "An error in one module no longer stops Blizzard's own window or tooltip it hooks "
                     .. "from finishing, or the other modules' changes to it.",
+                "Marks, tints, and arrows on a loot window that's already open show when you turn "
+                    .. "their module on, instead of only on the next loot.",
                 { L.CHANGELOG_COMMANDS, "/fpp reset turns every module off before it wipes the "
                     .. "settings, so game settings a module changed, like Auto Dismount's, go back "
                     .. "to your own. Started in combat, it waits until combat ends." },
@@ -95,6 +97,9 @@ ns.changelog = {
                     .. "the prices it has." },
                 { L.ITEMTOOLTIPS_TITLE, "An auction price over 214,748 gold no longer causes an "
                     .. "error when it's saved." },
+                { L.ITEMTOOLTIPS_TITLE, "The lines stay above Forever's \"Press F6\" line on items "
+                    .. "whose last line another module redraws, like a junkbox's lockpicking "
+                    .. "requirement." },
                 { L.QUESTTRACKER_TITLE, "Turning the module on or off keeps the text size you "
                     .. "set in Edit Mode, instead of setting it back to the default size." },
                 { L.SPELLRANKS_TITLE, "Spells in macros on your action bars get the badge too, "

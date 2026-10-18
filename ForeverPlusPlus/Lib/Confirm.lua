@@ -6,8 +6,9 @@ local StaticPopupDialogs, StaticPopup_Show, YES, NO = StaticPopupDialogs, Static
 local CANCEL, ACCEPT, CLOSE = CANCEL, ACCEPT, CLOSE
 
 -- Shows our popup for `key`, made from `build()` the first time the key is used, so a key always
--- has the same buttons. `textArg` fills a %s in its text.
-local function show(key, build, data, textArg)
+-- has the same buttons. Its text is this call's, since callers format names into it. `textArg`
+-- fills a %s in its text.
+local function show(key, text, build, data, textArg)
     local which = "FOREVERPLUSPLUS_" .. key
     if not StaticPopupDialogs[which] then
         local dialog = build()
@@ -17,6 +18,7 @@ local function show(key, build, data, textArg)
         dialog.preferredIndex = 3 -- clear of the popups the game's own UI uses
         StaticPopupDialogs[which] = dialog
     end
+    StaticPopupDialogs[which].text = text
     StaticPopup_Show(which, textArg, nil, data)
 end
 
@@ -32,7 +34,7 @@ function ns.Confirm(key, text, onAccept, textArg)
         onAccept()
         return
     end
-    show(key, function()
+    show(key, text, function()
         return {
             text = text,
             button1 = YES,
@@ -59,7 +61,7 @@ function ns.ConfirmChoice(key, text, first, onFirst, second, onSecond)
     if not (StaticPopupDialogs and StaticPopup_Show) then
         return
     end
-    show(key, function()
+    show(key, text, function()
         return {
             text = text,
             button1 = first,
@@ -91,7 +93,7 @@ function ns.Prompt(key, text, initial, onAccept)
     if not (StaticPopupDialogs and StaticPopup_Show) then
         return
     end
-    show(key, function()
+    show(key, text, function()
         return {
             text = text,
             button1 = onAccept and ACCEPT or CLOSE,

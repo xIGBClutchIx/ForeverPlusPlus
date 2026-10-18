@@ -105,7 +105,10 @@ local function onAnyLinePre(tooltip, lineData)
     end
     for _, fn in ipairs(lineReplacers) do
         if run(fn, tooltip, data, lineData) then
-            return true -- Blizzard's line is skipped; the module drew its own
+            -- Blizzard's line is skipped, and with it the line's post-calls, so place the price
+            -- lines here if this was the last one.
+            onAnyLinePost(tooltip, lineData)
+            return true -- the module drew its own
         end
     end
 end

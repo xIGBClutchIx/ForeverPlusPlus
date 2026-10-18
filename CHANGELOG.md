@@ -22,11 +22,13 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Fixed
 
 - An error in one module no longer stops Blizzard's own window or tooltip it hooks from finishing, or the other modules' changes to it.
+- Marks, tints, and arrows on a loot window that's already open show when you turn their module on, instead of only on the next loot.
 - **Commands**: `/fpp reset` turns every module off before it wipes the settings, so game settings a module changed, like Auto Dismount's, go back to your own. Started in combat, it waits until combat ends.
 - **Fishing Cast**: changing Louder Bobber while the module is off no longer changes your sound volumes.
 - **Gathering Tracking**: Find Minerals or Find Herbs comes back on after dying again: it keeps checking for a few seconds after you come back to life, instead of giving up when the tracking list still showed it on or the first try didn't take.
 - **Item Tooltips**: the Auction Prices scan no longer spins forever when the auction house stops answering partway: it asks again, then finishes with the prices it has.
 - **Item Tooltips**: an auction price over 214,748 gold no longer causes an error when it's saved.
+- **Item Tooltips**: the lines stay above Forever's "Press F6" line on items whose last line another module redraws, like a junkbox's lockpicking requirement.
 - **Quest Tracker**: turning the module on or off keeps the text size you set in Edit Mode, instead of setting it back to the default size.
 - **Spell Ranks**: spells in macros on your action bars get the badge too, instead of none, or one from an unrelated macro.
 - **Spell Ranks**: the line saying how many action bar spells have a higher rank no longer shows at every login, only after you learn a spell or level up.
