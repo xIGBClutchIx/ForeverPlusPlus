@@ -108,6 +108,10 @@ ns.changelog = {
                 { L.WAYPOINTS_TITLE, "The arrow sits a little lower by default and always stays "
                     .. "inside the game window, so a windowed game's title bar can't cover it. If "
                     .. "you moved it in Edit Mode, it stays where you put it." },
+                { L.WHISPERWINDOW_TITLE, "A whisper you start by a player's name without their "
+                    .. "surname goes to your conversation with them, instead of a new empty one. "
+                    .. "With chat set to open whispers in a new tab, Hide Whispers in Chat leaves "
+                    .. "them there instead of leaving the tab empty." },
             } },
         },
     },

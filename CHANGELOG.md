@@ -32,6 +32,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Spell Ranks**: the line saying how many action bar spells have a higher rank no longer shows at every login, only after you learn a spell or level up.
 - **Spell Ranks**: the warning badge on a lower-rank spell sits fully inside the button's corner and draws above its icon, border, and cooldown, instead of being cut off.
 - **Waypoints**: the arrow sits a little lower by default and always stays inside the game window, so a windowed game's title bar can't cover it. If you moved it in Edit Mode, it stays where you put it.
+- **Whisper Window**: a whisper you start by a player's name without their surname goes to your conversation with them, instead of a new empty one. With chat set to open whispers in a new tab, Hide Whispers in Chat leaves them there instead of leaving the tab empty.
 
 ## 0.9.0 (2026-10-14)
 

@@ -11,7 +11,7 @@
 local _, ns = ...
 
 local pairs, ipairs, type, time, format, tremove = pairs, ipairs, type, time, string.format, table.remove
-local sort, wipe, GetTime = table.sort, wipe, GetTime
+local sort, wipe, GetTime, C_CVar = table.sort, wipe, GetTime, C_CVar
 local lower, match = string.lower, string.match
 
 local L = ns.L
@@ -141,7 +141,10 @@ local function playerConversation(sender, create)
     local conversations = internal.Conversations()
     local key = lower(sender)
     local conversation = conversations[key]
-    if not conversation then
+    if conversation and conversation.typed then
+        -- Typed as the game spells it but for case ("bob" for "Bob"): take the game's spelling.
+        conversation.name, conversation.display, conversation.typed = sender, shownName(sender), nil
+    elseif not conversation then
         local typed = conversations[firstName(sender)]
         if typed and typed.typed then
             conversations[typed.key] = nil
@@ -254,6 +257,16 @@ end
 function internal.Start(name)
     local conversation = playerConversation(name, false)
         or internal.Conversations()[firstName(name)]
+    if not conversation then
+        -- "Bob" for a conversation saved as "Bob-Surname": the whisper's echo will land there.
+        local want = firstName(name)
+        for _, other in pairs(internal.Conversations()) do
+            if not (other.bnet or other.test) and firstName(other.name) == want then
+                conversation = other
+                break
+            end
+        end
+    end
     if not conversation then
         conversation = newConversation(lower(name), name, name)
         conversation.typed = true
@@ -459,9 +472,17 @@ local function onSystem(_, text)
     end
 end
 
+-- Whether Blizzard opens a whisper tab of its own (Social > New Whispers: In a New Tab, or Both).
+-- It opens before chat filters run, so hiding the line there would leave the tab empty.
+local function inTab(event)
+    local get = C_CVar and C_CVar.GetCVar
+    local mode = get and get(event:find("^CHAT_MSG_BN_") and "bnWhisperMode" or "whisperMode")
+    return mode == "popout" or mode == "popout_and_inline"
+end
+
 -- The chat filter for Hide Whispers in Chat: true hides the line in every chat window.
 local function filter(_, event, text, sender, _, _, _, _, _, _, _, _, _, _, bnSenderID)
-    if not (module.enabled and module.db.hideInChat) then
+    if not (module.enabled and module.db.hideInChat) or inTab(event) then
         return false
     end
     if AWAY[event] then
