@@ -147,7 +147,8 @@ local function anchorBuffs(record, where, unit, state)
         -- Above the bar view's name, centered on the row; on a name-only plate, lowered to just
         -- above our name. Unsure, the client lowers it from the health (a secret we can't read).
         x = -(label.barNameShift or 0)
-        local rise = nameRise(label)
+        -- Measured at each layout (Plates:Layout), not on every health tick.
+        local rise = label.rise or nameRise(label)
         if state == "bar" then
             y = BUFF_ABOVE_GAP
         elseif state == "unsure" and unit and curve then
@@ -319,6 +320,7 @@ function Plates:Layout(unit)
     local record = self.records[unit]
     if record and record.label then
         PlateLabel.Layout(record.label, record, unit, self.style)
+        record.label.rise = nameRise(record.label)
         -- The name, level, or icons may have moved; keep the buffs placed against them.
         if record.buffsWhere and record.buffsWhere ~= "blizzard" then
             self:PlaceBuffs(unit, record.buffsInCombat)
