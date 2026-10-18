@@ -140,7 +140,7 @@ local MUSIC_VOLUME = "Sound_MusicVolume"
 local QUIET_MUSIC = 0.1
 local RESTORE_DELAY = 5 -- seconds after a cast ends before the volumes go back
 
-local restoreTimer = ns.Frames.Timer()
+local restoreTimer = ns.Frames.Timer(module)
 
 local function isFishing(spellID)
     if not spellID or not ns.IsReadable(spellID) then

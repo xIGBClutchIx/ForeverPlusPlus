@@ -753,7 +753,7 @@ function module:OnEnable()
         self:Hook(frame, "Update", onUpdate)
     else
         -- Mainline's tracker has Update; this covers a client where it doesn't.
-        local later = ns.Frames.Coalesce(onUpdate)
+        local later = ns.Frames.Coalesce(onUpdate, nil, module)
         self:On("QUEST_LOG_UPDATE", later)
         self:On("QUEST_WATCH_LIST_CHANGED", later)
     end

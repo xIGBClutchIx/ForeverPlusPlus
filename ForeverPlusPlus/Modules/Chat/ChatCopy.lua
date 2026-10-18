@@ -273,7 +273,7 @@ local function linkPending()
     end
 end
 
-local linkSoon = ns.Frames.Coalesce(linkPending)
+local linkSoon = ns.Frames.Coalesce(linkPending, nil, module)
 
 local function onMessage(frame)
     if not stampsOn then

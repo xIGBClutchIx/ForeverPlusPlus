@@ -38,7 +38,7 @@ module.options = {
 local SHEATHED = 1
 local RETRY = 1 -- seconds to wait while casting before trying again
 
-local timer = ns.Frames.Timer() -- the pending stow
+local timer = ns.Frames.Timer(module) -- the pending stow
 
 local function cancel()
     timer:Cancel()

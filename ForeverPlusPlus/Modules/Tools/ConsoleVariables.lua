@@ -380,7 +380,7 @@ end
 -- CVAR_UPDATE comes in bursts (the game's Settings can change dozens at once), and each refresh
 -- goes through every CVar, so a burst refreshes once, on the next frame. Listened to only while
 -- the page is open, to follow changes made anywhere (the game's own settings, other addons).
-local onCVarUpdate = ns.Frames.Coalesce(refresh)
+local onCVarUpdate = ns.Frames.Coalesce(refresh, nil, module)
 
 ---Draws the page the first time it's shown (called by Settings/Settings.lua).
 ---@param frame table the empty page

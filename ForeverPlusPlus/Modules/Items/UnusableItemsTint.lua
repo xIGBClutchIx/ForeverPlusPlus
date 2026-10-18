@@ -258,7 +258,7 @@ local refreshSoon, cancelRefresh = ns.Frames.Coalesce(function()
     if module.enabled then
         refresh()
     end
-end, 0.5)
+end, 0.5, module)
 
 local function onPlayerChanged()
     forget = true

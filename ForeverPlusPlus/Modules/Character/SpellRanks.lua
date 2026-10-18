@@ -203,7 +203,7 @@ local function refresh()
     module.announce = false
 end
 
-local schedule, cancel = Frames.Coalesce(refresh, DELAY)
+local schedule, cancel = Frames.Coalesce(refresh, DELAY, module)
 
 local function queue()
     if module.enabled then

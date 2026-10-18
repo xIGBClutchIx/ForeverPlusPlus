@@ -164,7 +164,7 @@ local refreshDetails = Frames.Coalesce(function()
         window.details:SetText(detailsText(selected))
         window.name:SetText(coloredName(selected))
     end
-end, 0.5)
+end, 0.5, module)
 
 local DETAIL_EVENTS = { "FRIENDLIST_UPDATE", "GUILD_ROSTER_UPDATE", "GROUP_ROSTER_UPDATE",
     "BN_FRIEND_INFO_CHANGED" }

@@ -257,7 +257,7 @@ end
 
 -- Running the scenes ----------------------------------------------------------------------------
 
-local timer = ns.Frames.Timer()
+local timer = ns.Frames.Timer(module)
 local cvars = {} -- the player's screenshot CVars, put back at the end
 local queue, step, taken, skipped, current
 local waited = 0 -- seconds spent waiting on the player, or on "Screen captured" to fade

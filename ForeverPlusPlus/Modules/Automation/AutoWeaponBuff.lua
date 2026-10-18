@@ -384,7 +384,7 @@ end
 
 local updateBars = ns.Frames.Coalesce(function()
     ns.ActionButtons.Each(updateButton)
-end)
+end, nil, module)
 
 -- Takes our attribute off every button. Only out of combat: at PLAYER_REGEN_DISABLED lockdown may
 -- already have started, and then the slot set before stays until combat ends (setTarget skips).

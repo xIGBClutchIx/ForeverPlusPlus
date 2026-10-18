@@ -88,13 +88,13 @@ local PVP_RANK_FACTION = 2800
 
 -- Taking a picture ----------------------------------------------------------------------------
 
-local timer = ns.Frames.Timer() -- the pending shot
+local timer = ns.Frames.Timer(module) -- the pending shot
 local reason -- what the last shot was for, for chat; nil for the player's own
 local hidden = false -- the interface is hidden for a shot and must come back
 local busy = false -- a shot is on its way, until the game says it's taken or failed
 -- Ends the shot if the game never reports it, so the next one isn't blocked. Its own timer, so a
 -- later shot isn't shown the interface by this one's.
-local fallback = ns.Frames.Timer()
+local fallback = ns.Frames.Timer(module)
 local showUI, onShot
 
 -- The shot is over (taken, failed, or never reported): the next one may start.

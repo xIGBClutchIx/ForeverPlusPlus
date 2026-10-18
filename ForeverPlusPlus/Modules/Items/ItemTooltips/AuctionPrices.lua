@@ -115,7 +115,7 @@ end
 -- "Prices updated" for a few seconds. Our own frame, parented to Blizzard's window.
 
 local indicator
-local hideTimer = ns.Frames.Timer()
+local hideTimer = ns.Frames.Timer(module)
 
 local function getIndicator()
     local parent = _G.AuctionHouseFrame
@@ -222,7 +222,7 @@ local sent = false -- the scan's browse query has gone out
 local waiting -- what the next step waits on: "server", "throttle", or "blocked"
 local ownQuery = false -- set while sending the scan's own browse query
 local lastQuery = 0 -- GetTime() of Blizzard's last query of its own
-local blockTimer = ns.Frames.Timer()
+local blockTimer = ns.Frames.Timer(module)
 local onThrottleReady
 
 -- The server doesn't always answer: a page request can be dropped by the throttle, or the last
@@ -231,7 +231,7 @@ local onThrottleReady
 -- with no answer the scan ends with the prices it has, instead of spinning forever.
 local STALL = 8 -- seconds without an answer before asking again
 local RETRIES = 2 -- times it asks again before it ends the scan
-local stallTimer = ns.Frames.Timer()
+local stallTimer = ns.Frames.Timer(module)
 local retries = 0
 local answered = false -- a browse answer came since the scan's query went out
 

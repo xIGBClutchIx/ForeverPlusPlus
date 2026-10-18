@@ -621,7 +621,7 @@ local refreshSoon, cancelRefresh = ns.Frames.Coalesce(function()
     if module.enabled then
         refresh()
     end
-end, 0.5)
+end, 0.5, module)
 
 -- Item data arrives a little after a window opens; look again once it has, for items we
 -- couldn't answer for yet. This fires for every item the game loads.

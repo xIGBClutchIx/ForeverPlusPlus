@@ -365,7 +365,7 @@ local refreshSoon = ns.Frames.Coalesce(function()
     if module.enabled then
         Nameplates.ForEach(update)
     end
-end, 0.2)
+end, 0.2, module)
 
 function module:OnEnable()
     kinds = nil

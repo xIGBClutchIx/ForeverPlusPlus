@@ -161,12 +161,17 @@ function Frames.ErrorMessage(text)
 end
 
 ---Runs `fn` once, `delay` seconds after the first call (the next frame by default), however often
----it's called before then. For events that come in bursts.
+---it's called before then. For events that come in bursts. Give the module (or part) whose work it
+---is, so the Profiler page charges the run to it.
 ---@param fn function
 ---@param delay? number
+---@param module? table
 ---@return function queue call to run `fn` soon
 ---@return function cancel drops a queued run
-function Frames.Coalesce(fn, delay)
+function Frames.Coalesce(fn, delay, module)
+    if module then
+        fn = ns.Profiler.Wrap(module, fn)
+    end
     local timer
     local function run()
         timer = nil
@@ -241,11 +246,17 @@ Timer.__index = Timer
 function Timer:Start(seconds, fn)
     self:Cancel()
     local handle
+    local owner = self.module
     handle = C_Timer.NewTimer(seconds, function()
         if self.handle == handle then
             self.handle = nil
         end
-        fn()
+        local profiler = ns.Profiler
+        if owner and profiler.recording then
+            profiler.Call(owner, fn)
+        else
+            fn()
+        end
     end)
     self.handle = handle
 end
@@ -266,8 +277,9 @@ end
 
 ---A timer that waits for one run at a time: `Start(seconds, fn)` replaces the run waiting,
 ---`Cancel()` drops it (for OnDisable), and `IsPending()` says whether one is waiting. `fn` can
----start it again.
+---start it again. Give the module (or part) whose work it is, so the Profiler page charges it.
+---@param module? table
 ---@return table timer
-function Frames.Timer()
-    return setmetatable({}, Timer)
+function Frames.Timer(module)
+    return setmetatable({ module = module }, Timer)
 end

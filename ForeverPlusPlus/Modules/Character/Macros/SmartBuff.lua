@@ -486,7 +486,7 @@ function refresh(targetChanged)
     lookAgain(min(soonTarget or huge, soonOwn or huge))
 end
 
-local queue, cancel = Frames.Coalesce(refresh, DELAY)
+local queue, cancel = Frames.Coalesce(refresh, DELAY, module)
 
 local function onTarget()
     if InCombatLockdown() then

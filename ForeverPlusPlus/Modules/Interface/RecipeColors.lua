@@ -174,7 +174,7 @@ local function hook()
 end
 
 -- Once for a burst: the list update comes many times as the window fills.
-local catchUpSoon = ns.Frames.Coalesce(catchUp)
+local catchUpSoon = ns.Frames.Coalesce(catchUp, nil, module)
 
 local function onEvent()
     if hook() then

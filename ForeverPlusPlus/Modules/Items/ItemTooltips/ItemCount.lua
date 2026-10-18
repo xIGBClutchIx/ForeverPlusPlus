@@ -115,7 +115,7 @@ local queueNext = ns.Frames.Coalesce(function()
     if module.enabled then
         scanBank()
     end
-end)
+end, nil, module)
 
 local function queueScan()
     if bankOpen then

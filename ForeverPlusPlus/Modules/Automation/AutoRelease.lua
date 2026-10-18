@@ -41,7 +41,7 @@ module.options[2].added = "0.9.0" -- the Skip Key
 -- "right away" waits this long before looking.
 local MIN_WAIT = 0.5 -- seconds
 
-local timer = ns.Frames.Timer() -- the pending release
+local timer = ns.Frames.Timer(module) -- the pending release
 local offered = false -- someone offered a resurrection since this death
 
 local function cancel()

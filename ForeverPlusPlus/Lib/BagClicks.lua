@@ -191,7 +191,7 @@ function BagClicks.New(module, match, click)
     local set = setmetatable({ module = module, match = match, click = click, active = {}, spare = {} }, Set)
     set.refresh = ns.Frames.Coalesce(function()
         set:Update()
-    end)
+    end, nil, set.module)
     set.clear = function()
         set:Clear()
     end

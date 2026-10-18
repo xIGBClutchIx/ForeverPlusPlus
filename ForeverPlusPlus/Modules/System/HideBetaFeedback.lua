@@ -302,7 +302,7 @@ end
 
 -- The reporter adds its widgets as the window opens; look once it has, once for the event and the
 -- window's OnShow together.
-local onQuestEvent = ns.Frames.Coalesce(hideQuestFeedback)
+local onQuestEvent = ns.Frames.Coalesce(hideQuestFeedback, nil, module)
 
 local function hookQuestMap()
     module:HookScript(_G.QuestMapFrame, "OnShow", onQuestEvent)
