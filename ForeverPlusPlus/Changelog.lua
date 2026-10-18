@@ -112,6 +112,8 @@ ns.changelog = {
                     .. "surname goes to your conversation with them, instead of a new empty one. "
                     .. "With chat set to open whispers in a new tab, Hide Whispers in Chat leaves "
                     .. "them there instead of leaving the tab empty." },
+                { L.WORLDMAP_TITLE, "Points of Interest no longer marks a ley line where you "
+                    .. "cast Read Ley Line while an older ley line buff was still on you." },
             } },
         },
     },

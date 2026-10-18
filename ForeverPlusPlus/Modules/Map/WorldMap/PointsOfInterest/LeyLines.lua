@@ -241,7 +241,8 @@ local function afterCast(spellID, castTime, where)
     end
     local learnBuff
     for _, buff in ipairs(longBuffs(kindName, castTime)) do
-        if buff.known and (knownCast or buff.fresh) then
+        -- Fresh only: an old 15-minute buff from a real convergence says nothing about here.
+        if buff.known and buff.fresh then
             if not knownCast then
                 CASTS:Learn(spellID, kindName)
             end
