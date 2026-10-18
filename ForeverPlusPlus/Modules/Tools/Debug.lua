@@ -10,6 +10,7 @@ local L = ns.L
 local module = ns.NewModule("Debug", L.DEBUG_DESC, { enabled = false })
 module.title = L.DEBUG
 module.category = "tools"
+module.added = "0.10.0"
 
 -- Puts every module's debug options back to their defaults, and Show Tags off.
 local function resetDebugOptions()

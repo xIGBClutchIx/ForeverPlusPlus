@@ -34,6 +34,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Item Tooltips**: an auction price over 214,748 gold no longer causes an error when it's saved.
 - **Item Tooltips**: the lines stay above Forever's "Press F6" line on items whose last line another module redraws, like a junkbox's lockpicking requirement.
 - **Quest Tracker**: turning the module on or off keeps the text size you set in Edit Mode, instead of setting it back to the default size.
+- **Settings**: the About page lists the commands of the modules that are on now, instead of the ones that were on when it first opened.
 - **Spell Ranks**: spells in macros on your action bars get the badge too, instead of none, or one from an unrelated macro.
 - **Spell Ranks**: the line saying how many action bar spells have a higher rank no longer shows at every login, only after you learn a spell or level up.
 - **Spell Ranks**: the warning badge on a lower-rank spell sits fully inside the button's corner and draws above its icon, border, and cooldown, instead of being cut off.

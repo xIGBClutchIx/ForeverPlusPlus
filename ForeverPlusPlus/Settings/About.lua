@@ -1,6 +1,6 @@
 -- The About page: what the addon is, how many modules are on, links, and the /fpp commands, with
 -- the Defaults button at the top right like the Modules page. Built the first time it's shown; the
--- module count updates each time.
+-- module count and the commands of the modules that are on update each time.
 local _, ns = ...
 
 local ipairs, format = ipairs, string.format
@@ -131,13 +131,33 @@ function S.BuildAbout(frame)
     y = y - 30
     addHeading(frame, y, L.HOME_COMMANDS)
     y = y - 24
-    for _, line in ipairs(ns.Commands()) do
-        local command = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-        command:SetPoint("TOPLEFT", 16, y)
-        command:SetText(line[1])
-        local description = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-        description:SetPoint("TOPLEFT", 250, y)
-        description:SetText(line[2])
-        y = y - 16
+    -- A row per command of a module that's on, so drawn again each time the page shows. Rows
+    -- are kept and reused; the ones past the list are hidden.
+    local rows = {}
+    local function drawCommands()
+        local lines = ns.Commands()
+        for i, line in ipairs(lines) do
+            local row = rows[i]
+            if not row then
+                local rowY = y - (i - 1) * 16
+                row = {
+                    command = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"),
+                    description = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall"),
+                }
+                row.command:SetPoint("TOPLEFT", 16, rowY)
+                row.description:SetPoint("TOPLEFT", 250, rowY)
+                rows[i] = row
+            end
+            row.command:SetText(line[1])
+            row.description:SetText(line[2])
+            row.command:Show()
+            row.description:Show()
+        end
+        for i = #lines + 1, #rows do
+            rows[i].command:Hide()
+            rows[i].description:Hide()
+        end
     end
+    drawCommands()
+    frame:HookScript("OnShow", drawCommands)
 end
