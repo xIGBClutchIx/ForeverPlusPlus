@@ -13,7 +13,7 @@ local _, ns = ...
 local CreateFrame, UIParent, C_Timer, EventRegistry = CreateFrame, UIParent, C_Timer, EventRegistry
 local ipairs, pairs, next, type, time = ipairs, pairs, next, type, time
 local floor, concat = math.floor, table.concat
-local find, gsub, match, sub = string.find, string.gsub, string.match, string.sub
+local find, match, sub = string.find, string.match, string.sub
 
 local L = ns.L
 local Chat = ns.Chat
@@ -212,7 +212,6 @@ end
 -- addon links go to EventRegistry's "SetItemRef" when clicked. The number tells the lines apart:
 -- the session's start time, then a count, since Chat History brings back lines from before.
 local LINK_PREFIX = "addon:ForeverPlusPlus:stamp:"
-local LINKED = "^|H" .. LINK_PREFIX .. "[%d%.]+|h(.-)|h"
 local SESSION = time() .. "."
 
 local stampsOn = false
@@ -250,16 +249,6 @@ local function linkStamps(frame)
         lastStamp = lastStamp + 1
         return "|H" .. LINK_PREFIX .. SESSION .. lastStamp .. "|h" .. stamp .. "|h" .. space
             .. sub(message, finish + 1)
-    end)
-end
-
----Puts every line of a chat window back the way Blizzard wrote it.
----@param frame table
-local function unlinkStamps(frame)
-    Chat.Transform(frame, function(message)
-        return find(message, LINKED) ~= nil
-    end, function(message)
-        return (gsub(message, LINKED, "%1", 1))
     end)
 end
 
@@ -328,10 +317,9 @@ local function updateStamps()
             linkStamps(frame)
         end
     else
+        -- The stamps stay links: they look the same, and clicking one does nothing now. Rewriting
+        -- the lines would bring back every line that had faded out (Chat.Transform).
         EventRegistry:UnregisterCallback("SetItemRef", module)
-        for _, frame in ipairs(Chat.Frames()) do
-            unlinkStamps(frame)
-        end
     end
 end
 

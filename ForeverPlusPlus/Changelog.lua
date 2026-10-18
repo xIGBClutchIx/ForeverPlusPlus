@@ -91,6 +91,8 @@ ns.changelog = {
                     .. "of the vendor's own items." },
                 { L.AUTOSCREENSHOT_TITLE, "Reaching Neutral with a faction counts as a step up and "
                     .. "takes a screenshot." },
+                { L.CHATCOPY_TITLE, "Turning Click Timestamps off no longer brings back chat lines "
+                    .. "that had faded out." },
                 { L.CHANGELOG_COMMANDS, "/fpp reset turns every module off before it wipes the "
                     .. "settings, so game settings a module changed, like Auto Dismount's, go back "
                     .. "to your own. Started in combat, it waits until combat ends." },

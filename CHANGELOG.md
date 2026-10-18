@@ -27,6 +27,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - The buttons Forever++ adds beside the chat window sit below Blizzard's voice chat Deafen and Mute buttons while those show, instead of on top of them.
 - **Already Known**: items on a vendor's Buyback tab no longer get the marks of the vendor's own items.
 - **Auto Screenshot**: reaching Neutral with a faction counts as a step up and takes a screenshot.
+- **Chat Copy**: turning Click Timestamps off no longer brings back chat lines that had faded out.
 - **Commands**: `/fpp reset` turns every module off before it wipes the settings, so game settings a module changed, like Auto Dismount's, go back to your own. Started in combat, it waits until combat ends.
 - **Fishing Cast**: changing Louder Bobber while the module is off no longer changes your sound volumes.
 - **Flight Timer**: bag items and action buttons no longer get a Flight Time line while the old flight map is open.
