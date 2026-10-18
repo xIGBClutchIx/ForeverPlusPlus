@@ -34,6 +34,15 @@ module.title = L.QUESTTRACKER_TITLE
 module.category = "quests"
 module.perCharacter = { hidden = true }
 
+-- 0.8.x saved every default as if the player chose it, so a 30% background from then is 0.8.4's
+-- default, not a choice: let it take today's.
+ns.Migrate(1, function(db)
+    local saved = db.modules and db.modules.QuestTracker
+    if saved and saved.opacity == 30 then
+        saved.opacity = nil
+    end
+end)
+
 -- Which quests and in what order, then the text, the box behind it, and combat.
 local QUESTS, TEXT, BOX, COMBAT = L.QUESTTRACKER_SECTION_QUESTS, L.QUESTTRACKER_SECTION_TEXT,
     L.QUESTTRACKER_SECTION_BOX, L.QUESTTRACKER_SECTION_COMBAT

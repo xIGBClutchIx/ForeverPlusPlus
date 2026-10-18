@@ -51,5 +51,17 @@ ns.Migrate(1, function(db)
     end
 end)
 
+-- 0.8.4's Coordinates forced Blizzard's map coordinate CVars on and kept the player's own values
+-- in `saved`. 0.9.0 dropped the key without putting them back, so do it here (after the step
+-- above has moved `saved` into WorldMap).
+ns.Migrate(1, function(db)
+    local old = db.modules and db.modules.WorldMap
+    if old and type(old.saved) == "table" then
+        local saved = old.saved
+        old.saved = nil
+        ns.CVars.RestoreAll(saved)
+    end
+end)
+
 -- Each part's own shared table, by its checkbox's key, for its Data.lua.
 module.internal = {}

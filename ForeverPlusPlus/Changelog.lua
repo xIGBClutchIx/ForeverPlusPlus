@@ -95,6 +95,9 @@ ns.changelog = {
                     .. "their module on, instead of only on the next loot.",
                 "The buttons Forever++ adds beside the chat window sit below Blizzard's voice chat "
                     .. "Deafen and Mute buttons while those show, instead of on top of them.",
+                "Updating from 0.8 puts Blizzard's map coordinate settings back the way you had "
+                    .. "them before Forever++ turned them on, and gives the Quest Tracker's "
+                    .. "background and the waypoint arrow today's defaults if you never changed them.",
                 { L.ALREADYKNOWN_TITLE, "Items on a vendor's Buyback tab no longer get the marks "
                     .. "of the vendor's own items." },
                 { L.AUTOSCREENSHOT_TITLE, "Reaching Neutral with a faction counts as a step up and "

@@ -33,6 +33,15 @@ module.title = L.WAYPOINTS_TITLE
 module.category = "map"
 module.added = "0.8.0"
 
+-- 0.8.x saved every default as if the player chose it, so an arrow at (0, 530) is 0.8.4's
+-- default, not a place the player picked: let it take today's.
+ns.Migrate(1, function(db)
+    local saved = db.modules and db.modules.Waypoints
+    if saved and saved.y == 530 and (saved.x or 0) == 0 then
+        saved.y = nil
+    end
+end)
+
 module.options = {
     { key = "way", name = L.WAYPOINTS_WAY, description = L.WAYPOINTS_WAY_DESC },
     { key = "arrow", name = L.WAYPOINTS_ARROW, description = L.WAYPOINTS_ARROW_DESC },
