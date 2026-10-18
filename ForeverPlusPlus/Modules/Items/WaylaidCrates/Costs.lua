@@ -55,7 +55,7 @@ local UNDER_INDENT = "|TInterface\\Common\\spacer:1:12|t"
 -- Draws a line that lists bundles again with their costs, and returns true so Blizzard's is
 -- skipped. Text around the bundles keeps its own line, wrapped as Blizzard wraps it.
 local function replaceBundleLine(tooltip, data, lineData)
-    if not (internal.Active("costs") and Prices.Available()) then
+    if not (internal.Active("costs") and Prices.Available() and internal.IsCrate(data)) then
         return
     end
     local below = module.db.costs == "below"

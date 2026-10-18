@@ -11,7 +11,7 @@
 -- when the option goes off).
 local _, ns = ...
 
-local _G, ipairs, pairs, sort, format, wipe = _G, ipairs, pairs, table.sort, string.format, wipe
+local _G, ipairs, pairs, type, sort, format, wipe = _G, ipairs, pairs, type, table.sort, string.format, wipe
 local CreateFrame, GameTooltip, Enum, C_Timer = CreateFrame, GameTooltip, Enum, C_Timer
 local C_Container, C_Item, C_TooltipInfo, C_AuctionHouse = C_Container, C_Item, C_TooltipInfo, C_AuctionHouse
 local GRAY_FONT_COLOR, HIGHLIGHT_FONT_COLOR, GREEN_FONT_COLOR = GRAY_FONT_COLOR, HIGHLIGHT_FONT_COLOR,
@@ -38,6 +38,10 @@ local function byName(a, b)
     return a.name < b.name
 end
 
+-- Item link -> its bundles ({} for an item that isn't a crate). A crate's list is fixed per
+-- link, so each item's tooltip is read once, not on every bag change and every hover of the row.
+local bundlesOf = {}
+
 -- Reads every crate in the bags.
 local function readCrates()
     wipe(needs)
@@ -45,9 +49,17 @@ local function readCrates()
     local wanted, names = {}, {}
     for bag = 0, LAST_BAG do
         for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
-            local info = C_Container.GetContainerItemInfo(bag, slot)
-            local data = info and C_TooltipInfo.GetBagItem(bag, slot)
-            local bundles = data and internal.Bundles(data)
+            local link = C_Container.GetContainerItemLink(bag, slot)
+            local bundles = link and bundlesOf[link]
+            if link and not bundles then
+                local data = C_TooltipInfo.GetBagItem(bag, slot)
+                bundles = data and internal.Bundles(data)
+                -- Not kept while the item hasn't loaded (a lone "Retrieving" line).
+                local lines = data and data.lines
+                if bundles and (#bundles > 0 or (type(lines) == "table" and #lines > 1)) then
+                    bundlesOf[link] = bundles
+                end
+            end
             if bundles and #bundles > 0 then
                 crates = crates + 1
                 for _, bundle in ipairs(bundles) do

@@ -148,6 +148,29 @@ function internal.Bundles(data)
     return bundles
 end
 
+local crates = {} -- item link (or itemID) -> whether its tooltip lists bundles
+
+---Whether the item in this tooltip data is a crate, looked at once per item: line callbacks ask
+---before every line of every item tooltip.
+---@param data table tooltip data
+---@return boolean
+function internal.IsCrate(data)
+    local key = ns.IsText(data.hyperlink, true) and data.hyperlink or ns.ItemTooltip.ItemID(data)
+    if not key then
+        return true -- can't tell: look at its lines
+    end
+    local known = crates[key]
+    if known == nil then
+        known = #internal.Bundles(data) > 0
+        -- An item not loaded yet has a lone "Retrieving" line: don't remember that as "no".
+        local lines = data.lines
+        if known or (type(lines) == "table" and #lines > 1) then
+            crates[key] = known
+        end
+    end
+    return known
+end
+
 -- Parts -------------------------------------------------------------------------------------------
 -- Each part is on while the module is and its option isn't "off": `enable` and `disable` undo
 -- each other, and `optionChanged(key)` hears about changes while it's on.
