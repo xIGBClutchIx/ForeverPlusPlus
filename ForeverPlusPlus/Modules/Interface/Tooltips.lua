@@ -314,10 +314,23 @@ local function addTarget(tooltip, unit)
     tooltip:AddDoubleLine(L.TOOLTIPS_TARGET_LINE, UnitName(target), lr, lg, lb, r, g, b)
 end
 
+-- Hide in Combat fades GameTooltip rather than hiding it: Hide would run Blizzard's OnHide from
+-- our code, mid-processing and in combat, and taint the next tooltip. The next tooltip or its
+-- hiding brings it back.
+local faded = false
+
+local function unfade()
+    if faded then
+        faded = false
+        GameTooltip:SetAlpha(1)
+    end
+end
+
 local function onUnit(tooltip, data)
     -- Hide in Combat: the mouseover tooltip only; tooltips the player opens stay.
     if module.db.hideInCombat and tooltip == GameTooltip and InCombatLockdown() then
-        tooltip:Hide()
+        faded = true
+        tooltip:SetAlpha(0)
         return
     end
     local unit = data and tooltipUnit(tooltip)
@@ -396,11 +409,14 @@ function module:OnEnable()
     self:TooltipPostCall(Enum.TooltipDataType.Item, onItem)
     -- GameTooltip_SetDefaultAnchor is Blizzard's for every default-placed tooltip.
     self:Hook("GameTooltip_SetDefaultAnchor", onDefaultAnchor)
+    self:HookScript(GameTooltip, "OnTooltipCleared", unfade)
+    self:HookScript(GameTooltip, "OnHide", unfade)
     fadeHealthBar(self.db.hideHealthBar)
 end
 
 function module:OnDisable()
     fadeHealthBar(false)
+    unfade()
 end
 
 function module:OnOptionChanged(key)
