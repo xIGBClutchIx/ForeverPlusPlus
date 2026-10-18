@@ -98,6 +98,8 @@ ns.changelog = {
                     .. "dying again: it keeps checking for a few seconds after you come back to "
                     .. "life, instead of giving up when the tracking list still showed it on or "
                     .. "the first try didn't take." },
+                { L.HIDEBETAFEEDBACK_TITLE, "Turning the module off brings back the feedback button "
+                    .. "even if it showed up after the module hid it." },
                 { L.ITEMTOOLTIPS_TITLE, "The Auction Prices scan no longer spins forever when the "
                     .. "auction house stops answering partway: it asks again, then finishes with "
                     .. "the prices it has." },

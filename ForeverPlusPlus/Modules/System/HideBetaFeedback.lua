@@ -118,6 +118,7 @@ end
 
 local function keepHidden(frame)
     if module.enabled and module.db.button then
+        buttonWasShown = true -- it showed itself, so it comes back when the module turns off
         frame:Hide()
     end
 end
@@ -159,7 +160,7 @@ end
 
 local function hideButton()
     if module.db.button and reporter and reporter.Hide then
-        buttonWasShown = reporter:IsShown()
+        buttonWasShown = buttonWasShown or reporter:IsShown()
         reporter:Hide()
     end
 end

@@ -29,6 +29,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Fishing Cast**: changing Louder Bobber while the module is off no longer changes your sound volumes.
 - **Flight Timer**: bag items and action buttons no longer get a Flight Time line while the old flight map is open.
 - **Gathering Tracking**: Find Minerals or Find Herbs comes back on after dying again: it keeps checking for a few seconds after you come back to life, instead of giving up when the tracking list still showed it on or the first try didn't take.
+- **Hide Beta Feedback**: turning the module off brings back the feedback button even if it showed up after the module hid it.
 - **Item Tooltips**: the Auction Prices scan no longer spins forever when the auction house stops answering partway: it asks again, then finishes with the prices it has.
 - **Item Tooltips**: an auction price over 214,748 gold no longer causes an error when it's saved.
 - **Item Tooltips**: the lines stay above Forever's "Press F6" line on items whose last line another module redraws, like a junkbox's lockpicking requirement.
