@@ -118,6 +118,8 @@ ns.changelog = {
                 { L.SPELLRANKS_TITLE, "The warning badge on a lower-rank spell sits fully inside "
                     .. "the button's corner and draws above its icon, border, and cooldown, "
                     .. "instead of being cut off." },
+                { L.TOOLTIPS_TITLE, "Class Color colors the class name on Russian, Korean, and "
+                    .. "Chinese clients too." },
                 { L.WAYPOINTS_TITLE, "The arrow sits a little lower by default and always stays "
                     .. "inside the game window, so a windowed game's title bar can't cover it. If "
                     .. "you moved it in Edit Mode, it stays where you put it." },

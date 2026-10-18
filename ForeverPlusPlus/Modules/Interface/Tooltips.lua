@@ -9,7 +9,7 @@
 local _, ns = ...
 
 local type, setmetatable = type, setmetatable
-local find, sub, gsub = string.find, string.sub, string.gsub
+local find, sub, byte = string.find, string.sub, string.byte
 local Enum, C_Item = Enum, C_Item
 local UnitExists, UnitClass, UnitLevel, UnitName = UnitExists, UnitClass, UnitLevel, UnitName
 local UnitPVPName, UnitIsUnit, UnitReaction, UnitSelectionColor = UnitPVPName, UnitIsUnit, UnitReaction, UnitSelectionColor
@@ -100,14 +100,37 @@ local function lineText(data, i)
     end
 end
 
-local function escape(text)
-    return (gsub(text, "[%^%$%(%)%%%.%[%]%*%+%-%?]", "%%%0"))
+-- Whether the byte at `i` is an ASCII letter or digit, so a match there runs into a longer word.
+local function wordByte(text, i)
+    local c = byte(text, i)
+    return c and ((c >= 48 and c <= 57) or (c >= 65 and c <= 90) or (c >= 97 and c <= 122))
 end
 
--- `text` with the first match of `pattern` wrapped in a color, and whether it matched. The |r
--- goes back to the line's own color.
-local function colorMatch(text, pattern, r, g, b)
-    local first, last = find(text, pattern)
+-- Where `word` first stands alone in `text`. A plain search with the edges checked by hand, since
+-- %w and %f only know ASCII and would never match a Russian or Korean class name.
+local function findWord(text, word)
+    local start = 1
+    while true do
+        local first, last = find(text, word, start, true)
+        if not first then
+            return
+        end
+        if not wordByte(text, first - 1) and not wordByte(text, last + 1) then
+            return first, last
+        end
+        start = first + 1
+    end
+end
+
+-- `text` with the first match of `pattern` (or of `word`, standing alone) wrapped in a color, and
+-- whether it matched. The |r goes back to the line's own color.
+local function colorMatch(text, pattern, r, g, b, word)
+    local first, last
+    if word then
+        first, last = findWord(text, word)
+    else
+        first, last = find(text, pattern)
+    end
     if not first then
         return text, false
     end
@@ -244,8 +267,7 @@ local function colorLevelLine(tooltip, data, unit, guildLine)
     local levelPattern = level > 0 and "%f[%d]" .. level .. "%f[%D]" or "%?%?"
     local className = db.classColor and UnitClass(unit)
     local class = classColor(unit)
-    local classPattern = readable(className) and className and class
-        and "%f[%w]" .. escape(className) .. "%f[%W]"
+    local classWord = readable(className) and className ~= "" and class and className
     for i = 2, #data.lines do
         local text = i ~= guildLine and lineText(data, i)
         if text and find(text, levelPattern) then
@@ -256,14 +278,14 @@ local function colorLevelLine(tooltip, data, unit, guildLine)
                     text, changed = colorMatch(text, levelPattern, color.r, color.g, color.b)
                 end
             end
-            if classPattern then
+            if classWord then
                 local r, g, b = class:GetRGB()
-                text, found = colorMatch(text, classPattern, r, g, b)
+                text, found = colorMatch(text, nil, r, g, b, classWord)
                 changed = changed or found
                 local nextText = not found and lineText(data, i + 1)
                 if nextText then
                     local nextLine = leftLine(tooltip, i + 1)
-                    nextText, found = colorMatch(nextText, classPattern, r, g, b)
+                    nextText, found = colorMatch(nextText, nil, r, g, b, classWord)
                     if found and nextLine then
                         nextLine:SetText(nextText)
                     end
