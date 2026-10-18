@@ -10,7 +10,6 @@ local _G, ipairs, pairs, tonumber, strmatch, format = _G, ipairs, pairs, tonumbe
     string.format
 local CreateFrame, C_Spell, C_SpellBook = CreateFrame, C_Spell, C_SpellBook
 local GetActionInfo, InCombatLockdown = GetActionInfo, InCombatLockdown
-local GetMacroSpell = GetMacroSpell or (_G.C_Macro and _G.C_Macro.GetMacroSpell)
 local Enum, GameTooltip = Enum, GameTooltip
 
 local L = ns.L
@@ -105,12 +104,13 @@ end
 
 -- The spell a slot holds, or nil for an empty slot or an item, or a macro with no spell.
 local function slotSpell(slot)
-    local kind, id = GetActionInfo(slot)
+    local kind, id, subType = GetActionInfo(slot)
     if not (kind and readable(id) and id) then
         return nil
     end
     if kind == "macro" then
-        return GetMacroSpell and GetMacroSpell(id) or nil
+        -- A macro that shows a spell gives that spell's ID, not the macro's index (Mainline).
+        return readable(subType) and subType == "spell" and id or nil
     end
     return kind == "spell" and id or nil
 end
@@ -213,8 +213,13 @@ end
 
 local function onSpellsChanged()
     known = nil
-    module.announce = true
     queue()
+end
+
+-- Only a new spell or a level is worth a chat line; SPELLS_CHANGED also fires at every login.
+local function onLearned()
+    module.announce = true
+    onSpellsChanged()
 end
 
 local function onLoaded()
@@ -245,8 +250,8 @@ function module:OnEnable()
         return
     end
     self:On("SPELLS_CHANGED", onSpellsChanged)
-    self:On("LEARNED_SPELL_IN_SKILL_LINE", onSpellsChanged)
-    self:On("PLAYER_LEVEL_UP", onSpellsChanged)
+    self:On("LEARNED_SPELL_IN_SKILL_LINE", onLearned)
+    self:On("PLAYER_LEVEL_UP", onLearned)
     self:On("ACTIONBAR_SLOT_CHANGED", queue)
     self:On("ACTIONBAR_PAGE_CHANGED", queue)
     self:On("UPDATE_BONUS_ACTIONBAR", queue)
