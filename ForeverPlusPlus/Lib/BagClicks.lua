@@ -99,8 +99,13 @@ end
 local Set = {}
 Set.__index = Set
 
----Takes every overlay away. Only out of combat (or at PLAYER_REGEN_DISABLED, just before it).
+---Takes every overlay away. Only out of combat (or at PLAYER_REGEN_DISABLED, just before it); if
+---lockdown has already started, once it ends.
 function Set:Clear()
+    if InCombatLockdown() then
+        ns.AfterCombat(self.clear)
+        return
+    end
     local active, spare = self.active, self.spare
     for i = #active, 1, -1 do
         local overlay = active[i]
