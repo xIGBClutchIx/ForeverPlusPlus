@@ -247,7 +247,11 @@ local function nodeOfOwner(owner)
     if owner.nodeID then
         return owner.nodeID
     end
-    if TaxiFrame and TaxiFrame:IsShown() and owner.GetID then
+    -- Only the old map's own buttons (TaxiButtonN on TaxiRouteMap): a bag slot or action button
+    -- has an ID too.
+    local routes = _G.TaxiRouteMap
+    if TaxiFrame and TaxiFrame:IsShown() and routes and owner.GetID and owner.GetParent
+        and owner:GetParent() == routes then
         return nodeOfSlot[owner:GetID()]
     end
 end
