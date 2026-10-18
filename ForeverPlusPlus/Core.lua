@@ -734,6 +734,7 @@ function ns.Start()
         known[name] = true
     end
     Store.Prune(ns.db, ns.charDB, known)
+    ns.GameData.Prune(ns.db)
     -- Before the game writes the saved variables, drop what's empty so the file holds only what
     -- was saved. module.db makes it again if a module saves at logout after this.
     ns.On("PLAYER_LOGOUT", function()

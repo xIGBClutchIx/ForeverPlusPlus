@@ -327,6 +327,20 @@ function GameData.Audit()
     return report, ids
 end
 
+---Drops what was learned for sets the addon no longer makes (a module or set that was removed).
+---Every set is made as its file loads, so call it once the saved variables are loaded.
+---@param db table ForeverPlusPlusDB
+function GameData.Prune(db)
+    if type(db.gameData) ~= "table" then
+        return
+    end
+    for name in pairs(db.gameData) do
+        if not sets[name] then
+            db.gameData[name] = nil
+        end
+    end
+end
+
 ---Forgets everything learned, in every set.
 function GameData.ForgetAll()
     for _, name in ipairs(order) do

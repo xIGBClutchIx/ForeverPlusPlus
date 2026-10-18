@@ -625,8 +625,16 @@ local plans = Store.Load(oldDB, oldChar, "TalentPlanner", { enabled = true, buil
 eq(plans.builds[1].active, 1, "store: per-character data reads the character's table")
 plans.builds[2] = { active = 3 }
 eq(oldChar.data.TalentPlanner.builds[2].active, 3, "store: per-character data is saved for the character")
+-- A key moved out of perCharacter takes the character's data to the account, and back.
+local moved = Store.Load(oldDB, oldChar, "TalentPlanner", { enabled = true, builds = {} })
+eq(moved.builds[2].active, 3, "store: data moved to the account keeps what the character had")
+eq(oldChar.data.TalentPlanner.builds, nil, "store: data moved to the account leaves the character")
+moved = Store.Load(oldDB, oldChar, "TalentPlanner", { enabled = true, builds = {} }, { builds = true })
+eq(moved.builds[2].active, 3, "store: data moved back to the character comes along")
+oldDB.unclaimed.Gone = { list = { a = {} } }
 Store.Prune(oldDB, oldChar, { BagSlotCounter = true })
 eq(oldDB.settings.TalentPlanner, nil, "store: a module that's gone loses its settings")
+eq(oldDB.unclaimed.Gone, nil, "store: a module that's gone loses its unclaimed data")
 view.size = "large"
 Store.Tidy(oldDB, oldChar)
 eq(oldDB.settings.BagSlotCounter, nil, "store: tidy drops a module with no changed settings")
@@ -667,6 +675,10 @@ end
 nodes:Learn("Silverleaf", { 182, 1 })
 eq(ns.db.gameData.testNodes.build, "70338", "game data: learned data is tagged with the build")
 GetBuildInfo = nil
+ns.db.gameData.removedSet = { values = { x = 1 } }
+GameData.Prune(ns.db)
+eq(ns.db.gameData.removedSet, nil, "game data: a set the addon no longer makes is dropped")
+eq(ns.db.gameData.testNodes.values.Silverleaf[2], 1, "game data: prune keeps sets still made")
 local empty = GameData.New("testEmpty", { [1] = true })
 eq(empty:Get(1), true, "game data: a set that learned nothing reads its seed")
 eq(ns.db.gameData.testEmpty, nil, "game data: and saves nothing")

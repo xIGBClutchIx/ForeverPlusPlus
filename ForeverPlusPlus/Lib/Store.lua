@@ -203,7 +203,7 @@ end
 ---a setting reads what the player chose or else its default, and setting it back to the default
 ---forgets the choice; a data key reads its table, in the account's or the character's saved
 ---variables. Settings and data the defaults no longer have are dropped, and so are settings equal
----to their default.
+---to their default. Data whose key moved in or out of `perCharacter` moves with it.
 ---@param db table ForeverPlusPlusDB
 ---@param char table ForeverPlusPlusCharDB
 ---@param name string
@@ -235,8 +235,14 @@ function Store.Load(db, char, name, defaults, perCharacter)
         end
     end
     for _, store in ipairs({ child(child(db, "data"), name), child(child(char, "data"), name) }) do
-        for key in pairs(store) do
-            if not isData(defaults, key) or dataTable(key) ~= store then
+        for key, value in pairs(store) do
+            local home = isData(defaults, key) and dataTable(key)
+            if home ~= store then
+                -- A key `perCharacter` moved between the account and the character takes its data
+                -- along, unless the other side already has some.
+                if home and home[key] == nil then
+                    home[key] = value
+                end
                 store[key] = nil
             end
         end
@@ -300,12 +306,13 @@ function Store.Tidy(db, char)
     end
 end
 
----Drops the settings and data of modules that no longer exist. `known` is { [name] = true }.
+---Drops the settings and data of modules that no longer exist, unclaimed data included. `known` is
+---{ [name] = true }.
 ---@param db table
 ---@param char table
 ---@param known table<string, boolean>
 function Store.Prune(db, char, known)
-    for _, byName in ipairs({ db.settings or {}, db.data or {}, char.data or {} }) do
+    for _, byName in ipairs({ db.settings or {}, db.data or {}, db.unclaimed or {}, char.data or {} }) do
         for name in pairs(byName) do
             if not known[name] then
                 byName[name] = nil
