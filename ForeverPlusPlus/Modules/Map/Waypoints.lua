@@ -268,7 +268,15 @@ local function destination()
     if questID then
         local now = GetTime()
         if questID ~= cachedQuest or now - checkedAt >= QUEST_INTERVAL then
-            cachedQuest, cachedPoint, checkedAt = questID, questPoint(questID), now
+            -- The same spot keeps the old point, so its route (built per point) isn't built again.
+            local point = questPoint(questID)
+            if not (point and cachedPoint and questID == cachedQuest
+                and point.uiMapID == cachedPoint.uiMapID
+                and point.position.x == cachedPoint.position.x
+                and point.position.y == cachedPoint.position.y) then
+                cachedPoint = point
+            end
+            cachedQuest, checkedAt = questID, now
             cachedTitle = C_QuestLog.GetTitleForQuestID and C_QuestLog.GetTitleForQuestID(questID)
         end
         if cachedPoint then
