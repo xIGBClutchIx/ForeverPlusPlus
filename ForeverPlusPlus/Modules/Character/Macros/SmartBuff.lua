@@ -353,7 +353,8 @@ end
 
 -- Whether the target is someone the macro buffs: a friendly unit other than you, alive.
 local function friendlyTarget()
-    return UnitExists("target") and not UnitIsUnit("target", "player")
+    -- Unit identity can be secret; unknown counts as you, so the macro buffs you (its fallback).
+    return UnitExists("target") and not ns.IsTrueOrSecret(UnitIsUnit("target", "player"))
         and isTrue(UnitCanAssist("player", "target")) and not isTrue(UnitIsDeadOrGhost("target"))
 end
 
