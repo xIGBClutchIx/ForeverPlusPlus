@@ -266,6 +266,9 @@ local function refreshQuests()
     countQuestXP()
     updateAll()
 end
+-- QUEST_LOG_UPDATE often comes several times in one frame (a kill, a turn-in): count once, a
+-- frame later.
+local refreshSoon, cancelRefresh = ns.Frames.Coalesce(refreshQuests, nil, module)
 
 -- The bar's width changes with Edit Mode and the action bars.
 local function onResized(statusBar)
@@ -343,10 +346,11 @@ function module:OnEnable()
     self:On("UPDATE_EXHAUSTION", updateAll)
     self:On("PLAYER_LEVEL_UP", updateAll)
     self:On("PLAYER_ENTERING_WORLD", refreshQuests)
-    self:On("QUEST_LOG_UPDATE", refreshQuests)
+    self:On("QUEST_LOG_UPDATE", refreshSoon)
 end
 
 function module:OnDisable()
+    cancelRefresh()
     ns.AddOns.Cancel(ADDON, setUp)
     for _, bar in ipairs(bars) do
         texts[bar]:Hide()
