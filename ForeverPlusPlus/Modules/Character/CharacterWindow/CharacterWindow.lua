@@ -383,8 +383,12 @@ local function start()
     updateLevelLine()
 end
 
-local function onPortrait()
+local function onPortrait(event, unit)
     if not started then
+        return
+    end
+    -- Only the pet's portrait is drawn on a tab; UNIT_PORTRAIT_UPDATE comes for every unit.
+    if event == "UNIT_PORTRAIT_UPDATE" and ns.IsText(unit) and unit ~= "pet" then
         return
     end
     for index, tab in pairs(tabs) do

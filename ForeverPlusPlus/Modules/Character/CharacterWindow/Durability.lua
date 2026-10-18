@@ -54,8 +54,10 @@ local function makeBar(button, side)
     return bar
 end
 
+-- IsVisible, not IsShown: the container stays shown while the window is closed, and its OnShow
+-- reads them when the window opens.
 local function update()
-    if not (container and container:IsShown()) then
+    if not (container and container:IsVisible()) then
         return
     end
     local below = SHOW_BELOW[module.db.durability] or SHOW_BELOW.always
