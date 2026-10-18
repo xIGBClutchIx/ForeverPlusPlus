@@ -11,8 +11,9 @@
 --   - Every frame, each icon is drawn from its node's spot on the zone map and the player's own
 --     (C_Map.GetPlayerMapPosition), the minimap's view radius, and its rotation. That's exact
 --     through moving, turning, and zooming, and costs no probes.
---   - A few times a second, the whole minimap is looked over for new dots on a grid, a part at a
---     time, and each node known is looked for again where its dot should be: a line of probes
+--   - Every second or so (more often while moving), the whole minimap is looked over for new dots
+--     on a grid, a part at a time, and a few times a second each node known is looked for again
+--     where its dot should be: a line of probes
 --     across it and one up through it. While the player stands still the answer is exact and fixes
 --     the node's spot; while they move the answer's lag is measured instead, and taken off new
 --     dots found. A node that stops answering (gathered, out of range) loses its icon.
@@ -174,22 +175,33 @@ internal.standing = standing
 -- yards, minimap units per yard, and the angle the minimap is turned by (0 unless it rotates).
 -- Nil when any of it can't be read, as in an instance.
 local view = {}
+local worldSizes = {} -- mapID -> { width, height }: a map's size never changes
+local rotating -- the rotateMinimap setting, read again when a setting changes
 
 local function readView()
     local mapID, x, y = ns.WorldMap.PlayerPosition()
     if not mapID then
         return nil
     end
-    local width, height = C_Map.GetMapWorldSize(mapID)
-    if not (width and height and readable(width) and readable(height) and width > 0 and height > 0) then
-        return nil
+    local size = worldSizes[mapID]
+    if not size then
+        local width, height = C_Map.GetMapWorldSize(mapID)
+        if not (width and height and readable(width) and readable(height) and width > 0 and height > 0) then
+            return nil
+        end
+        size = { width, height }
+        worldSizes[mapID] = size
     end
+    local width, height = size[1], size[2]
     local radius = C_Minimap.GetViewRadius and C_Minimap.GetViewRadius()
     if not (radius and readable(radius) and type(radius) == "number" and radius > 0) then
         return nil
     end
     local angle = 0
-    if GetCVarBool("rotateMinimap") then
+    if rotating == nil then
+        rotating = GetCVarBool("rotateMinimap") and true or false
+    end
+    if rotating then
         angle = GetPlayerFacing and GetPlayerFacing()
         if not (angle and readable(angle)) then
             return nil
@@ -226,16 +238,25 @@ internal.inside = inside
 
 -- Nodes -------------------------------------------------------------------------------------------
 
+local frame -- over the minimap; holds the icons and runs the probes
+
+-- Whether Find Herbs or Find Minerals is on. The frame (and with it its icons and OnUpdate) shows
+-- only while one is, so the module costs nothing per frame without them.
 local function readTracking()
     internal.tracking = false
     for i = 1, C_Minimap.GetNumTrackingTypes() do
         local info = C_Minimap.GetTrackingInfo(i)
         if type(info) == "table" and info.active and (info.spellID == HERBS or info.spellID == MINERALS) then
             internal.tracking = true
-            return
+            break
         end
     end
-    internal.nodes = {}
+    if not internal.tracking then
+        internal.nodes = {}
+    end
+    if frame and module.enabled then
+        frame:SetShown(internal.tracking)
+    end
 end
 internal.readTracking = readTracking
 
@@ -251,7 +272,6 @@ internal.drawnAt = drawnAt
 
 -- Drawing ---------------------------------------------------------------------------------------
 
-local frame -- over the minimap; holds the icons and runs the probes
 local pins = {}
 local sinceTick = 0
 
@@ -286,7 +306,11 @@ end
 
 local function hidePins(from)
     for i = from or 1, #pins do
-        pins[i]:Hide()
+        local pin = pins[i]
+        if pin.node then
+            pin.node = nil -- restyled when it's used again
+            pin:Hide()
+        end
     end
 end
 
@@ -304,41 +328,50 @@ local function placeRing(pin, size, shown)
     ring:Show()
 end
 
+-- Draws an icon per node inside the minimap. A pin's look and spot are set only when they
+-- changed: standing still nothing does, and moving only the spot does.
 local function draw(v)
     local db = module.db
-    local size = db.size
+    local size, border = db.size, db.border
+    local radius = Minimap:GetWidth() / 2 - EDGE
     local shown = 0
     for _, node in ipairs(internal.nodes) do
         local right, up = drawnAt(node, v)
-        if inside(right, up) then
+        if right * right + up * up <= radius * radius then
             shown = shown + 1
             local pin = getPin(shown)
-            local icon = pin.icon
-            icon:SetTexture(node.icon)
             local grayed = (db.gray and node.standing == "gray") or (db.levels and node.level) or false
-            icon:SetDesaturated(grayed)
-            if db.tint and node.standing == "low" then
-                icon:SetVertexColor(RED[1], RED[2], RED[3])
-            elseif grayed then
-                icon:SetVertexColor(GRAY[1], GRAY[2], GRAY[3])
-            else
-                icon:SetVertexColor(1, 1, 1)
+            local low = (db.tint and node.standing == "low") or false
+            if pin.node ~= node or pin.look ~= node.icon or pin.grayed ~= grayed or pin.low ~= low
+                or pin.size ~= size or pin.border ~= border then
+                pin.node, pin.look, pin.grayed, pin.low, pin.size, pin.border =
+                    node, node.icon, grayed, low, size, border
+                local icon = pin.icon
+                icon:SetTexture(node.icon)
+                icon:SetDesaturated(grayed)
+                if low then
+                    icon:SetVertexColor(RED[1], RED[2], RED[3])
+                elseif grayed then
+                    icon:SetVertexColor(GRAY[1], GRAY[2], GRAY[3])
+                else
+                    icon:SetVertexColor(1, 1, 1)
+                end
+                pin:SetSize(size, size)
+                placeRing(pin, size, border)
+                pin:Show()
+                pin.right = nil
             end
-            pin:SetSize(size, size)
-            pin:ClearAllPoints()
-            pin:SetPoint("CENTER", Minimap, "CENTER", right, up)
-            pin:Show()
-            placeRing(pin, size, db.border)
+            if pin.right ~= right or pin.up ~= up then
+                pin.right, pin.up = right, up
+                -- One point, so SetPoint replaces it.
+                pin:SetPoint("CENTER", Minimap, "CENTER", right, up)
+            end
         end
     end
     hidePins(shown + 1)
 end
 
 local function onUpdate(_, elapsed)
-    if not internal.tracking then
-        hidePins()
-        return
-    end
     local v = Profiler.Call(PART_VIEW, readView)
     -- A new zone map: the nodes' spots were on the old one.
     if v and v.mapID ~= nodesMap then
@@ -377,9 +410,9 @@ function module:OnEnable()
         frame:SetAllPoints(Minimap)
         frame:SetFrameLevel(Minimap:GetFrameLevel() + 5)
     end
-    frame:Show()
     frame:SetScript("OnUpdate", ns.Profiler.Wrap(self, onUpdate)) -- timed while the Profiler records
-    readTracking()
+    rotating = nil -- it may have changed while the module was off
+    readTracking() -- shows the frame while tracking is on
     internal.findAll = true
     self:On("MINIMAP_UPDATE_TRACKING", readTracking)
     self:On("PLAYER_ENTERING_WORLD", readTracking)
@@ -387,6 +420,9 @@ function module:OnEnable()
     self:On("LOOT_OPENED", internal.onLootOpened)
     self:On("SKILL_LINES_CHANGED", onSkill)
     self:On("MINIMAP_UPDATE_ZOOM", onZoom)
+    self:On("CVAR_UPDATE", function()
+        rotating = nil
+    end)
 end
 
 function module:OnDisable()

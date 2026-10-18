@@ -17,15 +17,17 @@ local internal = module.internal
 
 local PART_ASK = Profiler.Part(module, L.MINIMAPNODEICONS_PART_ASK)
 
+-- The minimap's center, scale, and size, read once a round of probes (startProbing) rather than
+-- per probe.
+local centerX, centerY, scale, width, height = 0, 0, 1, 1, 1
+
 -- What UpdateMouseoverAtPoint's point is measured in isn't documented (see docs/forever-api.md), so
 -- each way it could be is tried until a pass finds a node, and the one that does is saved. Each
 -- turns minimap units right and up of its center into that space.
 local SPACES = {
     -- Screen pixels from the bottom left, like GetCursorPosition.
     cursor = function(right, up)
-        local cx, cy = Minimap:GetCenter()
-        local scale = Minimap:GetEffectiveScale()
-        return (cx + right) * scale, (cy + up) * scale
+        return (centerX + right) * scale, (centerY + up) * scale
     end,
     -- Minimap units from its center.
     center = function(right, up)
@@ -33,11 +35,11 @@ local SPACES = {
     end,
     -- Minimap units from its bottom left.
     corner = function(right, up)
-        return Minimap:GetWidth() / 2 + right, Minimap:GetHeight() / 2 + up
+        return width / 2 + right, height / 2 + up
     end,
     -- 0 to 1 across and up the minimap.
     unit = function(right, up)
-        return 0.5 + right / Minimap:GetWidth(), 0.5 + up / Minimap:GetHeight()
+        return 0.5 + right / width, 0.5 + up / height
     end,
 }
 local ORDER = { "cursor", "center", "corner", "unit" }
@@ -134,6 +136,10 @@ end
 -- these two: on, then the point off the minimap and back to the mouse. This would also end a real
 -- controller's soft cursor on the minimap; it takes it up again as it moves.
 function internal.startProbing()
+    local x, y = Minimap:GetCenter()
+    centerX, centerY = x or 0, y or 0
+    scale = Minimap:GetEffectiveScale()
+    width, height = Minimap:GetWidth(), Minimap:GetHeight()
     if Minimap.SetUsingSoftCursor then
         pcall(Minimap.SetUsingSoftCursor, Minimap, true)
     end

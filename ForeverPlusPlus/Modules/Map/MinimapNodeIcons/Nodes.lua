@@ -4,7 +4,7 @@
 local _, ns = ...
 
 local ipairs, min, abs, tremove = ipairs, math.min, math.abs, table.remove
-local Minimap, InCombatLockdown = Minimap, InCombatLockdown
+local Minimap, InCombatLockdown, GetTime = Minimap, InCombatLockdown, GetTime
 
 local L = ns.L
 local Professions = ns.Professions
@@ -19,6 +19,9 @@ local PART_FIND = Profiler.Part(module, L.MINIMAPNODEICONS_PART_FIND)
 
 local STILL_FOLLOW = 0.33 -- seconds between rounds of following while standing still: dots don't move
 local PER_TICK = 120 -- finding probes each tick, so a pass over the minimap takes a few ticks
+-- Seconds between finding passes. Standing still, the minimap's dots seldom change; moving brings
+-- new ground into view sooner.
+local REST_STILL, REST_MOVING = 1.5, 0.3
 local REACH = 1.5 -- finding hits this many probe spacings apart touch (diagonal neighbors are 1.41)
 local FOLLOW_REACH = 14 -- how far (minimap units) each way of a dot's spot following probes look
 local FOLLOW_STEP = 2 -- minimap units between following probes
@@ -291,13 +294,13 @@ local function finishPass(v)
     internal.pass = nil
 end
 
--- Probes the next `count` spots of the finding pass (all of them without a count).
+-- Probes the next `count` spots of the finding pass.
 local function find(count, v)
     internal.pass = internal.pass or newPass()
     local pass = internal.pass
     local seen = internal.seen
     local list = pass.points
-    local last = count and min(pass.index + count - 1, #list) or #list
+    local last = min(pass.index + count - 1, #list)
     for i = pass.index, last do
         local right, up = list[i][1], list[i][2]
         local found = probe(right, up, pass.space) or NONE
@@ -332,8 +335,9 @@ end
 -- Rounds of probes ---------------------------------------------------------------------------------
 
 local sinceFollow = 0 -- seconds since the dots were last followed
+local restUntil = 0 -- when the next finding pass may start
 
--- A round of probes: following, then a part of the finding pass.
+-- A round of probes: following, then a part of the finding pass, or a rest between passes.
 function internal.tick(v)
     noteMovement(v)
     if internal.blocked or InCombatLockdown() or Minimap:IsMouseOver() then
@@ -342,19 +346,24 @@ function internal.tick(v)
     startProbing()
     local space = currentSpace()
     -- Standing still the dots don't move, so they're followed a few times a second rather than
-    -- every tick: still often enough to see one gathered. Finding goes on every tick.
+    -- every tick: still often enough to see one gathered. A finding pass goes on every tick until
+    -- it's done, then rests.
     sinceFollow = sinceFollow + internal.TICK
     if not still() or sinceFollow >= STILL_FOLLOW then
         sinceFollow = 0
         Profiler.Call(PART_FOLLOW, followAll, v, space)
     end
     if not internal.blocked then
+        -- Asked to look everything over (a zoom, a new map): a new pass now, spread over ticks like
+        -- any other rather than all in one frame.
         if internal.findAll then
-            internal.findAll = false
-            internal.pass = nil
-            Profiler.Call(PART_FIND, find, nil, v)
-        else
+            internal.findAll, internal.pass, restUntil = false, nil, 0
+        end
+        if internal.pass or GetTime() >= restUntil then
             Profiler.Call(PART_FIND, find, PER_TICK, v)
+            if not internal.pass then -- that finished the pass: rest before the next
+                restUntil = GetTime() + (still() and REST_STILL or REST_MOVING)
+            end
         end
     end
     stopProbing()

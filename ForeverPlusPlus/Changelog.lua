@@ -63,6 +63,11 @@ ns.changelog = {
                     .. "right-click in your bags. Not in combat." },
                 { L.CHATCOPY_TITLE, "The window looks like Forever++'s other windows, with the "
                     .. "portrait and the title \"Forever++ Chat Copy\"." },
+                { L.MINIMAPNODEICONS_TITLE, "Costs much less while you play: it looks the minimap "
+                    .. "over for new dots once a second or so instead of ten times, spreads the "
+                    .. "look after a zoom over a few moments instead of one frame, and does nothing "
+                    .. "while Find Herbs and Find Minerals are off. A new dot may take a moment "
+                    .. "longer to get its icon while you stand still." },
                 { L.PROFILER_TITLE, "Also times the work modules put off for a moment, like "
                     .. "redrawing the marks on your bag items, so it shows under the module that "
                     .. "did it." },
