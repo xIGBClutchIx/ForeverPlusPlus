@@ -178,6 +178,7 @@ end
 local scanning = false
 local seen, seenCount -- itemIDs priced in this scan, and how many
 local listed = {} -- itemIDs priced in the browse results shown now (any browse, not just a scan)
+local nextLook = 0 -- GetTime() the saved prices may next be looked through for names (itemByName)
 
 -- Keeps the lowest price from browse results. Any browse (the player's own searches too) updates
 -- the prices, so they stay fresh between full scans.
@@ -197,6 +198,9 @@ local function addResults(results)
                 end
             else
                 -- The first price in these results replaces the old one.
+                if not old then
+                    nextLook = 0 -- a newly priced item: named on the next look, not a minute later
+                end
                 listed[itemID] = true
                 items[itemID] = packPrice(price, now)
             end
@@ -507,22 +511,24 @@ end
 -- price, when the client's item cache doesn't know them.
 
 local nameIDs = {} -- item name -> itemID
-local named = {} -- itemIDs already in nameIDs, so each is only asked once
-local lookAt = {} -- item name -> GetTime() it may next be looked for among the saved prices
+local named = {} -- itemIDs already in nameIDs (or given up on), so each is only asked once
+local tries = {} -- itemID -> looks it had no name in
 local LOADING_AGAIN = 0.5 -- seconds, while some saved items' names are still loading
-local LOOK_AGAIN = 60 -- seconds, once every saved item has its name and this one isn't there
+local LOOK_AGAIN = 60 -- seconds, once every saved item has its name
+local GIVE_UP = 5 -- looks an item may come back without a name before it stops counting as loading
 
 -- The saved prices can hold thousands of items, and a tooltip draws many times while it's up,
--- so a name not found waits before it's looked for again. Asking for a name the client doesn't
--- have yet loads it, and the first look at a crate is usually before they've come in: look again
--- soon while any are loading, or the bundles show No price until the long wait is over.
+-- so after a look through them every name not found waits for the next. Asking for a name the
+-- client doesn't have yet loads it, and the first look at a crate is usually before they've come
+-- in: look again soon while any are loading, or the bundles show No price until the long wait is
+-- over. An item whose name never comes (gone from the game) stops counting after a few looks.
 local function itemByName(name)
     local id = nameIDs[name]
     if id or not C_Item.GetItemNameByID then
         return id
     end
     local now = GetTime()
-    if lookAt[name] and now < lookAt[name] then
+    if now < nextLook then
         return nil
     end
     local loading = false
@@ -533,11 +539,16 @@ local function itemByName(name)
                 named[itemID] = true
                 nameIDs[itemName] = itemID
             else
-                loading = true
+                tries[itemID] = (tries[itemID] or 0) + 1
+                if tries[itemID] >= GIVE_UP then
+                    named[itemID] = true
+                else
+                    loading = true
+                end
             end
         end
     end
-    lookAt[name] = now + (loading and LOADING_AGAIN or LOOK_AGAIN)
+    nextLook = now + (loading and LOADING_AGAIN or LOOK_AGAIN)
     return nameIDs[name]
 end
 
