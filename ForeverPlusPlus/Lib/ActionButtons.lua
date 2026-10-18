@@ -38,21 +38,23 @@ function ActionButtons.Each(fn)
 end
 
 ---What the button's slot holds: its kind ("spell", "macro", "item") and ID, or nil for an empty
----slot or one that can't be read now. A macro's ID is the spell or item it shows, not its index;
+---slot or one that can't be read now. A macro's ID is the spell or item it shows, not its index,
+---and its subtype says which ("spell" for a spell; it may be secret, so check it's readable);
 ---ActionButtons.MacroName tells which macro it is.
 ---@param button table
 ---@return string? kind
 ---@return number? id
+---@return string? subType
 function ActionButtons.Content(button)
     local action = button.action
     if not (action and readable(action)) then
         return nil
     end
-    local kind, id = GetActionInfo(action)
+    local kind, id, subType = GetActionInfo(action)
     if not (kind and readable(kind) and readable(id)) then
         return nil
     end
-    return kind, id
+    return kind, id, subType
 end
 
 ---The name of the macro in the button's slot, or nil when it holds none or can't be read now.

@@ -1,11 +1,13 @@
--- Small text helpers modules share: measuring a font string, lines of a tooltip, and how long as
--- words ("3 Seconds", "12m ago"), comparing version strings, text without its escape codes, the
--- client's format strings as patterns, and a long chat message cut into ones the game will send.
+-- Small text helpers modules share: measuring a font string, lines of a tooltip, numbers with
+-- thousands separators, how long as words ("3 Seconds", "12m ago"), comparing version strings,
+-- text without its escape codes, the client's format strings as patterns, and a long chat message
+-- cut into ones the game will send.
 local _, ns = ...
 
 local format, floor, max, type, _G = string.format, math.floor, math.max, type, _G
 local gmatch, gsub, tonumber = string.gmatch, string.gsub, tonumber
 local find, sub, ipairs = string.find, string.sub, ipairs
+local BreakUpLargeNumbers = BreakUpLargeNumbers
 
 -- Probe: WoW's strtrim, or the same in plain Lua (for tests/run.lua).
 local strtrim = strtrim or function(text)
@@ -40,6 +42,14 @@ end
 function Text.RightLine(tooltip, i)
     local name = tooltip.GetName and tooltip:GetName()
     return type(name) == "string" and _G[name .. "TextRight" .. i] or nil
+end
+
+---A number with the client's thousands separators ("12,345"), or the number itself on a client
+---without BreakUpLargeNumbers.
+---@param n number
+---@return string|number
+function Text.Number(n)
+    return BreakUpLargeNumbers and BreakUpLargeNumbers(n) or n
 end
 
 ---A number of seconds for a slider label: "1 Second", "5 Seconds".

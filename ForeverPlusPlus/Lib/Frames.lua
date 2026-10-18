@@ -147,6 +147,47 @@ function Frames.RowTexture(row, layer, atlas, r, g, b, a)
     return texture
 end
 
+---A frame's anchor points, each { point, relativeTo, relativePoint, x, y }, to put back later
+---with Frames.SetPoints (such as a Blizzard frame's own place before a module moves it).
+---@param frame table
+---@return table[] points empty when it has none
+function Frames.GetPoints(frame)
+    local points = {}
+    for i = 1, frame:GetNumPoints() do
+        points[i] = { frame:GetPoint(i) }
+    end
+    return points
+end
+
+---Puts back the anchor points Frames.GetPoints read.
+---@param frame table
+---@param points table[]
+function Frames.SetPoints(frame, points)
+    frame:ClearAllPoints()
+    for _, p in ipairs(points) do
+        frame:SetPoint(p[1], p[2], p[3], p[4], p[5])
+    end
+end
+
+---Blizzard's red panel button, 22 high. `onClick` is called with no arguments; a button that
+---needs `self` sets its own OnClick instead.
+---@param parent table
+---@param text string? set later when it changes
+---@param width number
+---@param onClick? function
+---@return table button
+function Frames.Button(parent, text, width, onClick)
+    local button = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
+    button:SetSize(width, 22)
+    if text then
+        button:SetText(text)
+    end
+    if onClick then
+        button:SetScript("OnClick", function() onClick() end)
+    end
+    return button
+end
+
 ---Red text in the middle of the screen, the way the game says "Not enough rage".
 ---@param text string?
 function Frames.ErrorMessage(text)
@@ -229,7 +270,7 @@ function Frames.PlayerActivity()
         return "combat"
     end
     local speed = GetUnitSpeed and GetUnitSpeed("player")
-    if ns.IsReadable(speed) and type(speed) == "number" and speed > 0 then
+    if ns.IsNumber(speed) and speed > 0 then
         return "moving"
     end
     if IsFalling and ns.IsTrue(IsFalling()) then

@@ -101,6 +101,34 @@ local function bare(name)
     return (name:match("^([^%-]+)") or name):lower()
 end
 
+-- Calls `fn(info)` for each entry on the friends list until it returns true; true if one did.
+local function eachFriend(fn)
+    if not (C_FriendList and C_FriendList.GetNumFriends and C_FriendList.GetFriendInfoByIndex) then
+        return false
+    end
+    for i = 1, C_FriendList.GetNumFriends() or 0 do
+        local info = C_FriendList.GetFriendInfoByIndex(i)
+        if info and fn(info) then
+            return true
+        end
+    end
+    return false
+end
+
+-- Calls `fn(...)` with GetGuildRosterInfo's values for each member of the roster the client has,
+-- until it returns true; true if one did.
+local function eachGuildmate(fn)
+    if not (IsInGuild() and GetNumGuildMembers and GetGuildRosterInfo) then
+        return false
+    end
+    for i = 1, (GetNumGuildMembers()) do
+        if fn(GetGuildRosterInfo(i)) then
+            return true
+        end
+    end
+    return false
+end
+
 ---Whether a player by this name is on the player's friends list or an online Battle.net friend.
 ---@param name string
 ---@return boolean
@@ -109,13 +137,8 @@ function Units.IsFriendName(name)
     if not want then
         return false
     end
-    if C_FriendList and C_FriendList.GetNumFriends and C_FriendList.GetFriendInfoByIndex then
-        for i = 1, C_FriendList.GetNumFriends() do
-            local info = C_FriendList.GetFriendInfoByIndex(i)
-            if info and bare(info.name) == want then
-                return true
-            end
-        end
+    if eachFriend(function(info) return bare(info.name) == want end) then
+        return true
     end
     if BNGetNumFriends and C_BattleNet and C_BattleNet.GetFriendAccountInfo then
         for i = 1, (BNGetNumFriends()) do
@@ -141,21 +164,18 @@ end
 ---@return boolean
 function Units.IsGuildmateName(name)
     local want = bare(name)
-    if not (want and IsInGuild() and GetNumGuildMembers and GetGuildRosterInfo) then
+    if not want then
         return false
     end
-    for i = 1, (GetNumGuildMembers()) do
-        if bare((GetGuildRosterInfo(i))) == want then
-            return true
-        end
-    end
-    return false
+    return eachGuildmate(function(rosterName)
+        return bare(rosterName) == want
+    end)
 end
 
 -- What the game can tell about another player -------------------------------------------------
 
 local function readNumber(value)
-    if readable(value) and type(value) == "number" and value > 0 then
+    if ns.IsNumber(value) and value > 0 then
         return value
     end
 end
@@ -197,37 +217,33 @@ function Units.PlayerDetails(guid, name)
             d.online = true
         end
     end
-    if C_FriendList and C_FriendList.GetNumFriends and C_FriendList.GetFriendInfoByIndex then
-        for i = 1, C_FriendList.GetNumFriends() or 0 do
-            local info = C_FriendList.GetFriendInfoByIndex(i)
-            if info and matches(info.guid, info.name) then
-                d.friend = true
-                d.online = info.connected and true or false
-                if d.online then
-                    d.level = d.level or readNumber(info.level)
-                    d.zone = readText(info.area)
-                end
-                d.class = d.class or readText(info.className)
-                break
-            end
+    eachFriend(function(info)
+        if not matches(info.guid, info.name) then
+            return false
         end
-    end
-    if IsInGuild() and GetNumGuildMembers and GetGuildRosterInfo then
-        for i = 1, (GetNumGuildMembers()) do
-            local rosterName, _, _, level, class, zone, _, _, online, _, token, _, _, _, _, _, rosterGuid =
-                GetGuildRosterInfo(i)
-            if matches(rosterGuid, rosterName) then
-                d.guild = true
-                d.online = online and true or false
-                d.level = d.level or readNumber(level)
-                d.class, d.classToken = d.class or readText(class), d.classToken or readText(token)
-                if d.online then
-                    d.zone = d.zone or readText(zone)
-                end
-                break
-            end
+        d.friend = true
+        d.online = info.connected and true or false
+        if d.online then
+            d.level = d.level or readNumber(info.level)
+            d.zone = readText(info.area)
         end
-    end
+        d.class = d.class or readText(info.className)
+        return true
+    end)
+    eachGuildmate(function(rosterName, _, _, level, class, zone, _, _, online, _, token, _, _, _, _, _,
+        rosterGuid)
+        if not matches(rosterGuid, rosterName) then
+            return false
+        end
+        d.guild = true
+        d.online = online and true or false
+        d.level = d.level or readNumber(level)
+        d.class, d.classToken = d.class or readText(class), d.classToken or readText(token)
+        if d.online then
+            d.zone = d.zone or readText(zone)
+        end
+        return true
+    end)
     return d
 end
 
@@ -244,7 +260,7 @@ local SUMMON_TYPES = {
 ---@return string|boolean|nil
 function Units.SummonKind(unit)
     local _, kind = UnitCreatureType(unit)
-    if readable(kind) and type(kind) == "number" and SUMMON_TYPES[kind] then
+    if ns.IsNumber(kind) and SUMMON_TYPES[kind] then
         return SUMMON_TYPES[kind]
     end
     local controlled = UnitPlayerControlled(unit)

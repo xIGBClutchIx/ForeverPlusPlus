@@ -368,6 +368,18 @@ function ItemTooltip.AddPrice(tooltip, data, name, unitPrice, mode, align, color
     emit(tooltip, align, label, money(amount))
 end
 
+---Text in a quantity color by its name ("gray", "white", or "gold"; gray for another) or in
+---{ r, g, b }: the colors AddInfo and the price lines' choices use.
+---@param text string
+---@param color string|table
+---@return string
+function ItemTooltip.ColorText(text, color)
+    if type(color) == "table" then
+        return ns.Colors.Code(color[1], color[2], color[3]) .. text .. "|r"
+    end
+    return (COLORS[color] or GRAY_FONT_COLOR):WrapTextInColorCode(text)
+end
+
 ---Adds a line in the price lines' style with text instead of coins ("Scanned: 2h ago"). The
 ---text goes where `align` puts coins ("right" or "inline"), in `color`: a quantity color's name
 ---or { r, g, b }.
@@ -380,11 +392,5 @@ function ItemTooltip.AddInfo(tooltip, name, text, align, color)
     -- The padding goes after the colon: there's no quantity for it to sit in front of, and
     -- before the colon it read as "Scanned :".
     local label = format(L.PRICE_INFO_LINE, name) .. padding(tooltip, name)
-    local value
-    if type(color) == "table" then
-        value = ns.Colors.Code(color[1], color[2], color[3]) .. text .. "|r"
-    else
-        value = (COLORS[color] or GRAY_FONT_COLOR):WrapTextInColorCode(text)
-    end
-    emit(tooltip, align, label, value)
+    emit(tooltip, align, label, ItemTooltip.ColorText(text, color))
 end

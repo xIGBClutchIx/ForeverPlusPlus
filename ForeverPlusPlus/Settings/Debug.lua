@@ -148,12 +148,12 @@ end
 -- (never changed otherwise), and ours shows and hides with it, since Blizzard hides it while
 -- searching. The Modules, Changelog and About pages are drawn by us and have their own.
 
-local ourPages = {} -- category -> true, for the list pages that are ours
+local debugPage -- the Debug page's category, our only list page, once it's made
 local defaultsButton -- ours, while it's made
 
 local function onOurPage()
-    return SettingsPanel and SettingsPanel.GetCurrentCategory
-        and ourPages[SettingsPanel:GetCurrentCategory()] or false
+    return debugPage ~= nil and SettingsPanel and SettingsPanel.GetCurrentCategory
+        and SettingsPanel:GetCurrentCategory() == debugPage or false
 end
 
 local function updateDefaults(blizzard)
@@ -271,7 +271,7 @@ end
 ---@return table category the page
 function S.AddDebugPage(parent, order)
     local category, layout = Settings.RegisterVerticalLayoutSubcategory(parent, L.DEBUG)
-    ourPages[category] = true
+    debugPage = category
     local function addRows(module, section)
         addDebugOptions(category, module, section)
         addDebugActions(layout, module, section)

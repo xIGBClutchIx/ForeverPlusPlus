@@ -109,7 +109,6 @@ local TOOLS = ns.GameData.New("professionTools", {
     [7005] = Professions.SKINNING, -- Skinning Knife
     [6219] = 202, -- Arclight Spanner (Engineering)
 }, { kind = "item", label = "Profession tools" })
-local WEAPON, FISHING_POLE = 2, 20 -- Enum.ItemClass.Weapon, Enum.ItemWeaponSubclass.Fishingpole
 
 ---Whether an item is a profession tool: a fishing pole, or a tool like the Mining Pick.
 ---@param itemID number
@@ -117,7 +116,9 @@ local WEAPON, FISHING_POLE = 2, 20 -- Enum.ItemClass.Weapon, Enum.ItemWeaponSubc
 ---@param subclassID? number
 ---@return boolean
 function Professions.IsTool(itemID, classID, subclassID)
-    if classID == WEAPON and subclassID == FISHING_POLE then
+    -- At run time: Lib/Equipment.lua loads after this file.
+    local Equipment = ns.Equipment
+    if classID == Equipment.WEAPON and subclassID == Equipment.FISHING_POLE then
         return true
     end
     return TOOLS:Get(itemID) ~= nil
@@ -281,9 +282,9 @@ local function add(index)
         return
     end
     local name, icon, level, _, _, _, line, modifier = GetProfessionInfo(index)
-    if readable(line) and readable(level) and type(level) == "number" then
+    if readable(line) and ns.IsNumber(level) then
         -- The modifier (from gear or racials) counts toward what the player can gather.
-        local rank = level + (readable(modifier) and type(modifier) == "number" and modifier or 0)
+        local rank = level + (ns.IsNumber(modifier) and modifier or 0)
         known[line] = { rank = rank, name = readable(name) and name or nil,
             icon = readable(icon) and icon or nil }
     end
@@ -305,24 +306,17 @@ local function forget()
 end
 
 -- Lockpicking isn't a profession in the list above: rogues have it as a skill they learn with
--- Pick Lock, and, as in Classic, it's five times their level up to 300. Probe: the spell book
--- call is Mainline's, the plain global is Classic's.
+-- Pick Lock, and, as in Classic, it's five times their level up to 300.
 local PICK_LOCK = ns.GameData.Spell(1804, "Pick Lock")
 local LOCKPICKING_CAP = 300
 
-local function knowsPickLock()
-    if C_SpellBook and C_SpellBook.IsSpellKnown then
-        return C_SpellBook.IsSpellKnown(PICK_LOCK)
-    end
-    return IsSpellKnown and IsSpellKnown(PICK_LOCK)
-end
-
 local function lockpicking()
-    if not knowsPickLock() then
+    -- At run time: Lib/Spellbook.lua loads after this file.
+    if not ns.Spellbook.IsKnown(PICK_LOCK) then
         return nil
     end
     local level = UnitLevel("player")
-    if not (readable(level) and type(level) == "number") then
+    if not (ns.IsNumber(level)) then
         return nil
     end
     local rank = level * 5

@@ -37,7 +37,7 @@ local InCombatLockdown, CreateFrame = InCombatLockdown, CreateFrame
 local wipe = wipe
 local C_Timer = C_Timer
 local L = ns.L
-local hasTemplate, hasAtlas = ns.Frames.HasTemplate, ns.Frames.HasAtlas
+local hasTemplate = ns.Frames.HasTemplate
 local Kit = ns.SettingsKit
 local showTooltip, addTooltip = Kit.ShowTooltip, Kit.AddTooltip
 local newCheckbox, newButton = Kit.NewCheckbox, Kit.NewButton
@@ -143,8 +143,6 @@ local function updatePage(name)
     end
 end
 
-S.open = open
-
 -- Keeps a module's Blizzard setting, to refresh it after /fpp changes.
 function S.track(module, setting)
     local list = settings[module.name] or {}
@@ -236,7 +234,6 @@ local function lastRelease(before)
     end
     return "0"
 end
-S.lastRelease = lastRelease
 
 -- A version after the one module `name` was last seen in, and not after this one (still
 -- unreleased). With Show Tags on, any version after the last release.
@@ -673,40 +670,8 @@ end
 -- isn't at its default, that puts them back. Like the undo buttons on Blizzard's Talents and
 -- Transmog windows. Probe: their atlases are Mainline's; without one, no arrow.
 local function addResetButton(view, row, module, option, pair, on)
-    local atlas = hasAtlas("common-icon-undo") and "common-icon-undo"
-        or hasAtlas("talents-button-undo") and "talents-button-undo"
-    if not atlas then
-        return
-    end
     local keys = { option, pair }
-    local function changed()
-        for _, each in ipairs(keys) do
-            if module.db[each.key] ~= module.defaults[each.key] then
-                return true
-            end
-        end
-        return false
-    end
-    local button = CreateFrame("Button", nil, row)
-    button:SetSize(RESET_SIZE, RESET_SIZE)
-    button:SetPoint("RIGHT", -2, 0)
-    local icon = button:CreateTexture(nil, "ARTWORK")
-    icon:SetAtlas(atlas)
-    icon:SetSize(16, 16)
-    icon:SetPoint("CENTER")
-    button:SetHighlightAtlas(atlas, "ADD")
-    button:GetHighlightTexture():SetAllPoints(icon)
-    -- Pressed in a pixel, as Blizzard's icon buttons are.
-    button:SetScript("OnMouseDown", function(self)
-        if self:IsEnabled() then
-            icon:SetPoint("CENTER", 1, -1)
-        end
-    end)
-    button:SetScript("OnMouseUp", function() icon:SetPoint("CENTER") end)
-    button:SetScript("OnClick", function()
-        if PlaySound and SOUNDKIT then
-            PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-        end
+    local button, icon = Kit.NewResetButton(row, RESET_SIZE, function()
         for _, each in ipairs(keys) do
             local default = module.defaults[each.key]
             if module.db[each.key] ~= default then
@@ -715,6 +680,17 @@ local function addResetButton(view, row, module, option, pair, on)
         end
         ns.RefreshSetting(module.name)
     end)
+    if not button then
+        return
+    end
+    local function changed()
+        for _, each in ipairs(keys) do
+            if module.db[each.key] ~= module.defaults[each.key] then
+                return true
+            end
+        end
+        return false
+    end
     -- Greyed with the option, and still saying what it would do.
     button:SetMotionScriptsWhileDisabled(true)
     button:SetScript("OnEnter", function(self)
@@ -763,14 +739,8 @@ local function addOptionRow(view, module, option, byKey, done)
     local updates = view.updates
     local pair = option.slider and byKey[option.slider]
     -- Highlighted like a selected sidebar entry while the search finds it (or the slider in it).
-    local highlight = row:CreateTexture(nil, "BACKGROUND")
-    highlight:SetAllPoints()
-    if hasAtlas("Options_List_Active") then
-        highlight:SetAtlas("Options_List_Active")
-    else
-        local r, g, b = NORMAL_FONT_COLOR:GetRGB()
-        highlight:SetColorTexture(r, g, b, 0.15)
-    end
+    local r, g, b = NORMAL_FONT_COLOR:GetRGB()
+    local highlight = ns.Frames.RowTexture(row, "BACKGROUND", "Options_List_Active", r, g, b, 0.15)
     highlight:Hide()
     view.found[#view.found + 1] = { row = row, highlight = highlight,
         text = optionText(option) .. (pair and "\n" .. optionText(pair) or "") }
@@ -1183,9 +1153,7 @@ local function buildModules(frame)
 end
 
 -- Redraws the Modules page, for Show Tags on the Debug page.
-function S.refreshAll()
-    refreshAll()
-end
+S.refreshAll = refreshAll
 
 -- Puts the version last seen back to the release before this one, so the Modules page marks what a
 -- player updating from it would see, and opens it the way it would open for them: on the first

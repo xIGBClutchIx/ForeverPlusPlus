@@ -1,7 +1,8 @@
 -- Blizzard's item buttons, for modules that mark items on them: the bag windows and their buttons,
--- the merchant's buttons, the auction house's browse list, the loot window and loot rolls, our own
--- textures laid over their icons, and an item's tooltip lines. Nothing is written onto Blizzard's
--- frames: what a module lays on an icon is kept in a weak table of its own.
+-- the bank's, the merchant's buttons, the auction house's browse list, the loot window and loot
+-- rolls, quest reward choices, our own textures laid over their icons, and an item's tooltip
+-- lines. Nothing is written onto Blizzard's frames: what a module lays on an icon is kept in a
+-- weak table of its own.
 local _, ns = ...
 
 local _G, ipairs, pairs, type, setmetatable = _G, ipairs, pairs, type, setmetatable
@@ -48,9 +49,7 @@ end
 ---@param update fun(frame: table)
 function ItemButtons.HookBags(module, update)
     for _, frame in ipairs(ItemButtons.Frames()) do
-        if type(frame.UpdateItems) == "function" then
-            module:Hook(frame, "UpdateItems", update)
-        end
+        module:Hook(frame, "UpdateItems", update) -- skipped on a window without it
     end
 end
 
@@ -63,6 +62,37 @@ function ItemButtons.EachOpenBag(update)
         end
     end
 end
+
+-- Bank --------------------------------------------------------------------------------------------
+
+---Calls `fn(icon, tab, slot)` for each item button of the bank's shown tab, with its bag (tab)
+---and slot for C_Container (nil when the button can't say). Forever's bank is Blizzard's
+---BankPanel with tabs (Blizzard_UIPanels_Game, Camelot BankFrame).
+---@param fn fun(icon: table?, tab: number?, slot: number?)
+function ItemButtons.EachBankButton(fn)
+    local panel = _G.BankPanel
+    if not (panel and panel.EnumerateValidItems) then
+        return
+    end
+    for button in panel:EnumerateValidItems() do
+        local tab, slot
+        if button.GetBankTabID and button.GetContainerSlotID then
+            tab, slot = button:GetBankTabID(), button:GetContainerSlotID()
+        end
+        fn(button.icon, tab, slot)
+    end
+end
+
+---Runs `update()` as the bank draws its shown tab's items, through `module` (so it stops when the
+---module turns off).
+---@param module table
+---@param update fun()
+function ItemButtons.HookBank(module, update)
+    module:Hook(_G.BankPanel, "RefreshAllItemsForSelectedTab", update)
+    module:Hook(_G.BankPanel, "GenerateItemSlotsForSelectedTab", update)
+end
+
+-- Merchant ----------------------------------------------------------------------------------------
 
 ---The icon of the merchant's `i`th button on the page, or nil.
 ---@param i number
@@ -162,29 +192,38 @@ local function lootSlot(frame, elementData, fn)
 end
 
 local lootHooked = {} -- fn -> true once its callback is on the loot window
+local lootHooks = {} -- fn -> the function that puts its callback on the loot window
 
 ---Calls `fn(icon, slot, link)` for each row of the loot window as it shows, while `module` is on.
----Call it from OnEnable and on LOOT_OPENED, since the loot window may not be made yet. Once per
----`fn`: the callback can't come off. Probe: the scroll box and the callback are Mainline's, and
----this is unverified on Forever.
+---Call it from OnEnable: it tries now and again on each LOOT_OPENED while the module is on, since
+---the loot window may not be made yet. Once per `fn`: the callback can't come off. Probe: the
+---scroll box and the callback are Mainline's, and this is unverified on Forever.
 ---@param module table
 ---@param fn fun(icon: table?, slot: number?, link: string?)
 function ItemButtons.HookLoot(module, fn)
-    local box = _G.LootFrame and _G.LootFrame.ScrollBox
-    if lootHooked[fn] or not (box and _G.ScrollUtil and _G.ScrollUtil.AddAcquiredFrameCallback) then
-        return
-    end
-    lootHooked[fn] = true
-    _G.ScrollUtil.AddAcquiredFrameCallback(box, function(_, frame, elementData)
-        if module.enabled then
-            lootSlot(frame, elementData, fn)
+    local hook = lootHooks[fn]
+    if not hook then
+        hook = function()
+            local box = _G.LootFrame and _G.LootFrame.ScrollBox
+            if lootHooked[fn] or not (box and _G.ScrollUtil and _G.ScrollUtil.AddAcquiredFrameCallback) then
+                return
+            end
+            lootHooked[fn] = true
+            _G.ScrollUtil.AddAcquiredFrameCallback(box, function(_, frame, elementData)
+                if module.enabled then
+                    lootSlot(frame, elementData, fn)
+                end
+            end, module, false)
+            -- Not iterateExisting: it calls back without the owner argument, so rows showing now
+            -- are marked here instead.
+            if module.enabled then
+                ItemButtons.EachLootSlot(fn)
+            end
         end
-    end, module, false)
-    -- Not iterateExisting: it calls back without the owner argument, so rows showing now are
-    -- marked here instead.
-    if module.enabled then
-        ItemButtons.EachLootSlot(fn)
+        lootHooks[fn] = hook
     end
+    hook()
+    module:On("LOOT_OPENED", hook)
 end
 
 ---Calls `fn(icon, slot, link)` for each row of the loot window while it's open.
@@ -237,6 +276,52 @@ function ItemButtons.EachRoll(fn)
             roll(frame, fn)
         end
     end
+end
+
+-- Quest rewards ---------------------------------------------------------------------------------
+-- The reward buttons are Blizzard's (QuestInfo_Display fills them, both for a quest giver and the
+-- quest log). Probe: those names are Mainline's, unverified on Forever.
+
+---A quest reward button's icon region, where a mark on it goes (the button itself without one).
+---@param button table
+---@return table
+function ItemButtons.RewardIcon(button)
+    return button.Icon or button.icon or button
+end
+
+---Calls `fn(button, index, link, questLog)` for each item choice a quest's rewards frame shows:
+---its choice index, its item link (nil while the game doesn't have it), and whether it's the
+---quest log's rather than a quest giver's. Hides `overlays`' texture on every reward button
+---first, when given, so a module clears its marks in the same walk.
+---@param rewardsFrame table? such as QuestInfoFrame.rewardsFrame
+---@param fn fun(button: table, index: number, link: string?, questLog: boolean?)
+---@param overlays? table a set from `ItemButtons.Overlays`
+---@return boolean walked false when there's no rewards frame with buttons to walk
+function ItemButtons.EachRewardChoice(rewardsFrame, fn, overlays)
+    local info = _G.QuestInfoFrame
+    local buttons = rewardsFrame and rewardsFrame.RewardButtons
+    if not (info and type(buttons) == "table") then
+        return false
+    end
+    local questLog = info.questLog
+    for _, button in ipairs(buttons) do
+        if overlays then
+            overlays:Set(button, false)
+        end
+        -- Currency choices aren't items; objectType is Mainline's, so missing means item.
+        local object = button.objectType
+        if button:IsShown() and button.type == "choice" and (object == nil or object == "item") then
+            local index = button:GetID()
+            local link
+            if questLog then
+                link = _G.GetQuestLogItemLink and _G.GetQuestLogItemLink("choice", index)
+            else
+                link = _G.GetQuestItemLink and _G.GetQuestItemLink("choice", index)
+            end
+            fn(button, index, link, questLog)
+        end
+    end
+    return true
 end
 
 -- Overlays --------------------------------------------------------------------------------------

@@ -19,7 +19,7 @@ local function spentIn(configID, groupID)
     local entry = ok and type(result) == "table" and result[1]
     local currency = entry and type(entry.currencyInfos) == "table" and entry.currencyInfos[1]
     local spent = currency and currency.spent
-    return readable(spent) and type(spent) == "number" and spent or 0
+    return ns.IsNumber(spent) and spent or 0
 end
 
 ---The player's talent tabs in order: `{ index, groupID, name, spent }` each, or nil while the

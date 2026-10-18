@@ -142,11 +142,44 @@ end
 ---@param fn fun()
 ---@return table button
 function Kit.NewButton(parent, text, width, fn)
-    local button = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
-    button:SetSize(width, 22)
-    button:SetText(text)
-    button:SetScript("OnClick", function() fn() end)
-    return button
+    return ns.Frames.Button(parent, text, width, fn)
+end
+
+---The undo arrow at the right end of a row, `size` square, calling `onClick()` with the checkbox
+---sound: like the undo buttons on Blizzard's Talents and Transmog windows, pressed in a pixel
+---while enabled. The caller adds its tooltip. Probe: the atlases are Mainline's; without one, nil.
+---@param row table
+---@param size number
+---@param onClick fun()
+---@return table? button
+---@return table? icon
+function Kit.NewResetButton(row, size, onClick)
+    local atlas = ns.Frames.FirstAtlas("common-icon-undo", "talents-button-undo")
+    if not atlas then
+        return nil
+    end
+    local button = CreateFrame("Button", nil, row)
+    button:SetSize(size, size)
+    button:SetPoint("RIGHT", -2, 0)
+    local icon = button:CreateTexture(nil, "ARTWORK")
+    icon:SetAtlas(atlas)
+    icon:SetSize(16, 16)
+    icon:SetPoint("CENTER")
+    button:SetHighlightAtlas(atlas, "ADD")
+    button:GetHighlightTexture():SetAllPoints(icon)
+    button:SetScript("OnMouseDown", function(self)
+        if self:IsEnabled() then
+            icon:SetPoint("CENTER", 1, -1)
+        end
+    end)
+    button:SetScript("OnMouseUp", function() icon:SetPoint("CENTER") end)
+    button:SetScript("OnClick", function()
+        if PlaySound and SOUNDKIT then
+            PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+        end
+        onClick()
+    end)
+    return button, icon
 end
 
 -- Stacks ----------------------------------------------------------------------------------------

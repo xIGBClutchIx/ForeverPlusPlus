@@ -190,6 +190,10 @@ end
 
 -- Blizzard's panels ---------------------------------------------------------------------------
 
+-- The CVars of Blizzard's checkboxes for the player's and the cursor's coordinates on the map
+-- (Settings > Gameplay > Interface > Coordinates). Forever only; see docs/forever-api.md.
+WorldMap.COORDS_CVARS = { "worldMapShowPlayerCoords", "worldMapShowCursorCoords" }
+
 local coords -- false once looked for and not there
 
 ---Blizzard's coordinates panel: the map's overlay frame with a CursorCoords row and a

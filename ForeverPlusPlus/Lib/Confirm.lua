@@ -3,7 +3,7 @@
 local _, ns = ...
 
 local StaticPopupDialogs, StaticPopup_Show, YES, NO = StaticPopupDialogs, StaticPopup_Show, YES, NO
-local CANCEL, ACCEPT, CLOSE = CANCEL, ACCEPT, CLOSE
+local CANCEL, ACCEPT, CLOSE, strtrim = CANCEL, ACCEPT, CLOSE, strtrim
 
 -- Shows our popup for `key`, made from `build()` the first time the key is used, so a key always
 -- has the same buttons. Its text is this call's, since callers format names into it. `textArg`
@@ -125,4 +125,18 @@ function ns.Prompt(key, text, initial, onAccept)
             end,
         }
     end, { initial = initial, onAccept = onAccept })
+end
+
+---ns.Prompt for a name: calls `onName(name)` with the text trimmed, and not at all when it's blank.
+---@param key string a name for this question
+---@param text string the question
+---@param initial? string
+---@param onName fun(name: string)
+function ns.PromptName(key, text, initial, onName)
+    ns.Prompt(key, text, initial, function(input)
+        local name = strtrim(input or "")
+        if name ~= "" then
+            onName(name)
+        end
+    end)
 end

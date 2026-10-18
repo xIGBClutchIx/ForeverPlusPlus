@@ -86,6 +86,13 @@ function TalentPlan.CanTake(tree, counts, tabs, id)
     return true
 end
 
+-- Counts one point in a node, and in its tab.
+local function count(tree, counts, tabs, id)
+    counts[id] = (counts[id] or 0) + 1
+    local tab = tree.nodes[id].tab
+    tabs[tab] = (tabs[tab] or 0) + 1
+end
+
 ---Plays the plan's first `limit` points (all by default) in order.
 ---@param tree table
 ---@param picks table nodeIDs in order
@@ -103,9 +110,7 @@ function TalentPlan.Simulate(tree, picks, limit)
         if not ok then
             return counts, tabs, i, reason
         end
-        counts[id] = (counts[id] or 0) + 1
-        local tab = tree.nodes[id].tab
-        tabs[tab] = (tabs[tab] or 0) + 1
+        count(tree, counts, tabs, id)
     end
     return counts, tabs
 end
@@ -176,9 +181,7 @@ function TalentPlan.FromRanks(tree, ranks)
         for _, id in ipairs(tree.order) do
             if (counts[id] or 0) < (ranks[id] or 0) and TalentPlan.CanTake(tree, counts, tabs, id) then
                 picks[#picks + 1] = id
-                counts[id] = (counts[id] or 0) + 1
-                local tab = tree.nodes[id].tab
-                tabs[tab] = (tabs[tab] or 0) + 1
+                count(tree, counts, tabs, id)
                 progress = true
                 break
             end

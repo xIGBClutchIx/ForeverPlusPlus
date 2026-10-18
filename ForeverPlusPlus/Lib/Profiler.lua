@@ -125,11 +125,8 @@ end
 
 ---Starts recording from nothing.
 function Profiler.Start()
-    wipe(stats)
-    wipe(groups)
-    depth = 0
-    started, stopped = GetTime(), nil
     Profiler.recording = true
+    Profiler.Reset() -- recording, so it starts the clock from now
     if not frame then
         frame = CreateFrame("Frame")
         frame:SetScript("OnUpdate", onUpdate)

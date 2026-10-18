@@ -93,7 +93,7 @@ function ItemStats.Normalize(raw)
         return stats
     end
     for key, value in pairs(raw) do
-        if ns.IsReadable(key) and ns.IsReadable(value) and type(value) == "number" then
+        if ns.IsReadable(key) and ns.IsNumber(value) then
             local ours = ItemStats.KEYS[key]
             if ours then
                 stats[ours] = (stats[ours] or 0) + value
@@ -139,7 +139,7 @@ function ItemStats.Get(link)
         return nil
     end
     local itemID, _, _, equipLoc, _, classID, subclassID = C_Item.GetItemInfoInstant(link)
-    if not (ns.IsReadable(itemID) and type(itemID) == "number") then
+    if not (ns.IsNumber(itemID)) then
         return nil
     end
     local name, _, _, level, minLevel = C_Item.GetItemInfo(link)
@@ -155,8 +155,8 @@ function ItemStats.Get(link)
         slot = ns.IsText(equipLoc) and equipLoc or "",
         classID = ns.IsReadable(classID) and classID or nil,
         subclassID = ns.IsReadable(subclassID) and subclassID or nil,
-        level = ns.IsReadable(level) and type(level) == "number" and level or 0,
-        minLevel = ns.IsReadable(minLevel) and type(minLevel) == "number" and minLevel or 0,
+        level = ns.IsNumber(level) and level or 0,
+        minLevel = ns.IsNumber(minLevel) and minLevel or 0,
         stats = ItemStats.Normalize(ns.IsReadable(raw) and raw or nil),
     }
     cache[link] = info
@@ -336,7 +336,7 @@ local function callNumber(name, ...)
         return nil
     end
     local ok, value = pcall(fn, ...)
-    if ok and ns.IsReadable(value) and type(value) == "number" then
+    if ok and ns.IsNumber(value) then
         return value
     end
     return nil
@@ -348,7 +348,7 @@ local function total(stat)
         return nil
     end
     local ok, _, value = pcall(UnitStat, "player", stat)
-    if ok and ns.IsReadable(value) and type(value) == "number" and value > 0 then
+    if ok and ns.IsNumber(value) and value > 0 then
         return value
     end
     return nil

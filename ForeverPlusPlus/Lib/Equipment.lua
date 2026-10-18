@@ -9,10 +9,13 @@ local _, ns = ...
 
 local _G, ipairs, type, pcall, select = _G, ipairs, type, pcall, select
 local GetInventoryItemLink, UnitLevel = GetInventoryItemLink, UnitLevel
-local CanDualWield = CanDualWield
+local CanDualWield, GetInventoryItemID = CanDualWield, GetInventoryItemID
 local C_Item, C_PlayerInfo, Enum = C_Item, C_PlayerInfo, Enum
 
-local Equipment = {}
+local Equipment = {
+    WEAPON = 2, -- Enum.ItemClass.Weapon
+    FISHING_POLE = 20, -- Enum.ItemWeaponSubclass.Fishingpole
+}
 ns.Equipment = Equipment
 
 -- Each item type's inventory slots. Shirts, tabards, bags, quivers, and ammo aren't gear worth a
@@ -112,6 +115,22 @@ function Equipment.WornType(slot)
     return ns.IsText(equipLoc, true) and equipLoc or nil
 end
 
+---The weapon subclass (Enum.ItemWeaponSubclass) of what's worn in a slot, or nil when it holds no
+---weapon.
+---@param slot number
+---@return number?
+function Equipment.WeaponSubclass(slot)
+    local itemID = GetInventoryItemID and GetInventoryItemID("player", slot)
+    if not (itemID and C_Item.GetItemInfoInstant) then
+        return nil
+    end
+    local _, _, _, _, _, classID, subclassID = C_Item.GetItemInfoInstant(itemID)
+    if classID ~= Equipment.WEAPON then
+        return nil
+    end
+    return subclassID
+end
+
 ---Whether the character can dual wield now (Rogues and Hunters, Warriors and Shamans with the
 ---talent). False when the client can't say.
 ---@return boolean
@@ -128,7 +147,7 @@ end
 function Equipment.CanUse(link, minLevel, ahead)
     if minLevel and minLevel > 0 then
         local level = UnitLevel and UnitLevel("player")
-        if ns.IsReadable(level) and type(level) == "number" and level + (ahead or 0) < minLevel then
+        if ns.IsNumber(level) and level + (ahead or 0) < minLevel then
             return false
         end
     end

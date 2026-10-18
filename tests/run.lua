@@ -48,6 +48,10 @@ end
 CanDualWield = function()
     return game.dualWield
 end
+-- Marks the number it's given, so tests can tell Text.Number went through it.
+BreakUpLargeNumbers = function(n)
+    return "big:" .. n
+end
 
 local ns = {}
 ns.NewLocale = function()
@@ -107,6 +111,7 @@ eq(ns.Colors.LevelRange(29, 30).r, 29, "outleveled never goes under low")
 
 -- Text ------------------------------------------------------------------------------------------
 
+eq(ns.Text.Number(12345), "big:12345", "Number uses the client's separators")
 eq(ns.Text.Clock(0), "0:00", "Clock zero")
 eq(ns.Text.Clock(42), "0:42", "Clock seconds")
 eq(ns.Text.Clock(725), "12:05", "Clock minutes")
@@ -180,6 +185,11 @@ eq(ns.IsText("", true), false, "empty text when it must not be")
 eq(ns.IsText(5), false, "a number isn't text")
 eq(ns.IsText(nil), false, "nil isn't text")
 eq(ns.IsText("secret"), false, "secret isn't text")
+eq(ns.IsNumber(5), true, "a number")
+eq(ns.IsNumber("5"), false, "text isn't a number")
+game.secret = 7
+eq(ns.IsNumber(7), false, "a secret number isn't readable")
+game.secret = "secret"
 eq(ns.IsTrue(true), true, "true is true")
 eq(ns.IsTrue(false), false, "false isn't true")
 eq(ns.IsTrue("secret"), false, "secret isn't surely true")
