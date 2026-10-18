@@ -4,6 +4,8 @@
 -- from its own code now and then, so its SetPoint is hooked to put it back.
 local _, ns = ...
 
+local ipairs = ipairs
+
 local L = ns.L
 local Chat = ns.Chat
 
@@ -32,6 +34,28 @@ local function restore(button)
     end
 end
 
+-- Blizzard's chat alerts (Text to Speech, voice prompts) stack on the button, the first in
+-- ChatAlertFrame's chain; with the button in our column they'd sit on top of it. The alert that
+-- anchors to it goes where the button would have been: on the chain's base.
+local function unchainAlerts()
+    local container, button = _G.ChatAlertFrame, QuickJoinToastButton
+    local systems = container and container.alertFrameSubSystems
+    if not systems then
+        return
+    end
+    local base = container.baseAnchorFrame or container
+    for _, system in ipairs(systems) do
+        local frame = system.anchorFrame
+        if frame and frame ~= button and frame.GetPoint and frame:IsShown() then
+            local point, relativeTo, relativePoint = frame:GetPoint(1)
+            if relativeTo == button then
+                frame:ClearAllPoints()
+                frame:SetPoint(point, base, relativePoint, 0, 0)
+            end
+        end
+    end
+end
+
 function module:IsAvailable()
     return QuickJoinToastButton ~= nil and Chat.Anchor() ~= nil
 end
@@ -51,6 +75,11 @@ function module:OnEnable()
             Chat.Layout()
         end
     end)
+    -- Probe: ChatAlertFrame and its subsystem list are Mainline's (AlertFrames.lua).
+    if _G.ChatAlertFrame and _G.ChatAlertFrame.UpdateAnchors then
+        self:Hook(_G.ChatAlertFrame, "UpdateAnchors", unchainAlerts)
+    end
+    unchainAlerts()
 end
 
 function module:OnDisable()

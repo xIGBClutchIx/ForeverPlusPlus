@@ -40,6 +40,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Persistent Chat**: chat no longer starts fading again after you leave it with a gamepad.
 - **Quest Tracker**: turning the module on or off keeps the text size you set in Edit Mode, instead of setting it back to the default size.
 - **Settings**: the About page lists the commands of the modules that are on now, instead of the ones that were on when it first opened.
+- **Social Button**: Text to Speech and voice chat alerts no longer sit on top of the chat buttons once the social button is in their column.
 - **Spell Ranks**: spells in macros on your action bars get the badge too, instead of none, or one from an unrelated macro.
 - **Spell Ranks**: the line saying how many action bar spells have a higher rank no longer shows at every login, only after you learn a spell or level up.
 - **Spell Ranks**: the warning badge on a lower-rank spell sits fully inside the button's corner and draws above its icon, border, and cooldown, instead of being cut off.

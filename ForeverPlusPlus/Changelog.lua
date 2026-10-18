@@ -122,6 +122,8 @@ ns.changelog = {
                     .. "set in Edit Mode, instead of setting it back to the default size." },
                 { L.CHANGELOG_SETTINGS, "The About page lists the commands of the modules that are on "
                     .. "now, instead of the ones that were on when it first opened." },
+                { L.SOCIALBUTTON_TITLE, "Text to Speech and voice chat alerts no longer sit on top "
+                    .. "of the chat buttons once the social button is in their column." },
                 { L.SPELLRANKS_TITLE, "Spells in macros on your action bars get the badge too, "
                     .. "instead of none, or one from an unrelated macro." },
                 { L.SPELLRANKS_TITLE, "The line saying how many action bar spells have a higher "
