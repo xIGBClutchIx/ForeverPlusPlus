@@ -122,6 +122,15 @@ function internal.Write(name, body)
     return true
 end
 
+---Whether the general macro `name` holds `body` now.
+---@param name string
+---@param body string
+---@return boolean
+function internal.Holds(name, body)
+    local index = GetMacroIndexByName(name)
+    return index ~= nil and index > 0 and GetMacroBody(index) == body
+end
+
 ---Deletes the general macro `name`, now or once combat ends, unless its part is back on by then.
 ---@param name string
 function internal.Delete(name)

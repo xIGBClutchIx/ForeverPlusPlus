@@ -127,6 +127,7 @@ local playerClass
 local ranks -- spell name -> its known ranks (Lib/Spellbook.lua), or nil until read
 local incomplete = false
 local written -- what the macro holds: { target = cast or false, self = cast or false }
+local lastBody -- the text refresh last wrote, so our own edit's UPDATE_MACROS is let pass
 local checkTimer
 local button -- ours, clicked by the macro (explain)
 
@@ -479,7 +480,9 @@ function refresh(targetChanged)
         target, soonTarget = pick("target", false, aurasOf("target"))
     end
     local own, soonOwn = pick("player", true, aurasOf("player"))
-    if internal.Write(NAME, body(target, own)) then
+    local text = body(target, own)
+    if internal.Write(NAME, text) then
+        lastBody = text
         written = { target = target or false, self = own or false }
         internal.Mark(NAME, not (target or own) and "none" or nil)
     end
@@ -487,6 +490,13 @@ function refresh(targetChanged)
 end
 
 local queue, cancel = Frames.Coalesce(refresh, DELAY, module)
+
+-- Deleted or edited by hand: made again. Our own EditMacro fires this too, and needs nothing.
+local function onMacros()
+    if not (lastBody and internal.Holds(NAME, lastBody)) then
+        queue()
+    end
+end
 
 local function onTarget()
     if InCombatLockdown() then
@@ -523,7 +533,7 @@ function module:OnEnable()
         return
     end
     playerClass = classOf("player")
-    ranks, written = nil, nil
+    ranks, written, lastBody = nil, nil, nil
     -- A plain button, not a secure one: it only shows text, so a click in combat is fine, and the
     -- /cast after it in the macro still works. Made once; it does nothing while the part is off.
     if not button then
@@ -538,7 +548,7 @@ function module:OnEnable()
     self:On("PLAYER_LEVEL_UP", onSpells)
     self:On("SPELL_DATA_LOAD_RESULT", onLoaded)
     self:On("PLAYER_REGEN_ENABLED", queue)
-    self:On("UPDATE_MACROS", queue) -- deleted or edited by hand: made again
+    self:On("UPDATE_MACROS", onMacros)
     if ns.HasEvent("TRAIT_CONFIG_UPDATED") then
         self:On("TRAIT_CONFIG_UPDATED", queue)
     end
@@ -548,7 +558,7 @@ end
 function module:OnDisable()
     cancel()
     lookAgain(huge)
-    written, ranks = nil, nil
+    written, ranks, lastBody = nil, nil, nil
     internal.Delete(NAME)
 end
 
