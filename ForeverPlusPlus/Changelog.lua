@@ -85,6 +85,8 @@ ns.changelog = {
                     .. "from finishing, or the other modules' changes to it.",
                 "Marks, tints, and arrows on a loot window that's already open show when you turn "
                     .. "their module on, instead of only on the next loot.",
+                "The buttons Forever++ adds beside the chat window sit below Blizzard's voice chat "
+                    .. "Deafen and Mute buttons while those show, instead of on top of them.",
                 { L.ALREADYKNOWN_TITLE, "Items on a vendor's Buyback tab no longer get the marks "
                     .. "of the vendor's own items." },
                 { L.AUTOSCREENSHOT_TITLE, "Reaching Neutral with a faction counts as a step up and "

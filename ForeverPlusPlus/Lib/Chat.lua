@@ -66,6 +66,8 @@ end
 
 ---Rewrites the lines a chat window already shows: each readable line `test` accepts becomes
 ---`rewrite(line)`, keeping its color and links. Does nothing on a client without TransformMessages.
+---Each rewritten line counts as new, so one that had faded out shows again until it fades; there's
+---no way to keep its time. Rewrite only when the change needs it.
 ---@param frame table
 ---@param test fun(line: string): boolean
 ---@param rewrite fun(line: string): string
@@ -350,9 +352,35 @@ function Chat.Anchor()
     return _G.ChatFrameChannelButton or _G.ChatFrameMenuButton
 end
 
+-- Blizzard's voice Deafen and Mute buttons sit under the channel button while in a voice channel
+-- (FloatingChatFrameVoiceChat.xml), so the column starts below them then, and moves when they
+-- show or hide.
+local voiceHooked
+local function top()
+    local mute, deafen = _G.ChatFrameToggleVoiceMuteButton, _G.ChatFrameToggleVoiceDeafenButton
+    if not voiceHooked then
+        voiceHooked = true
+        for _, button in ipairs({ deafen or false, mute or false }) do
+            if button and button.HookScript then
+                button:HookScript("OnShow", Chat.Layout)
+                button:HookScript("OnHide", Chat.Layout)
+            end
+        end
+    end
+    if mute and mute:IsShown() then
+        return mute
+    elseif deafen and deafen:IsShown() then
+        return deafen
+    end
+    return Chat.Anchor()
+end
+
 ---Puts the buttons in the column back in place. Modules call it again when something moves one.
 function Chat.Layout()
-    local previous = Chat.Anchor()
+    if not column[1] then
+        return
+    end
+    local previous = top()
     if not previous then
         return
     end
