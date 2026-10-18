@@ -65,11 +65,8 @@ local handlers = {} -- event -> list of functions
 -- Handler -> the module that added it with module:On, for the Profiler page (Lib/Profiler.lua).
 local owners = setmetatable({}, { __mode = "k" })
 
-events:SetScript("OnEvent", function(_, event, ...)
-    local list = handlers[event]
-    if not list then
-        return
-    end
+-- Calls each handler in `list`, timed for the Profiler page while it records.
+local function dispatch(list, event, ...)
     local profiler = ns.Profiler
     if profiler and profiler.recording then
         for i = 1, #list do
@@ -80,6 +77,13 @@ events:SetScript("OnEvent", function(_, event, ...)
     end
     for i = 1, #list do
         call(list[i], event, ...)
+    end
+end
+
+events:SetScript("OnEvent", function(_, event, ...)
+    local list = handlers[event]
+    if list then
+        dispatch(list, event, ...)
     end
 end)
 
@@ -133,6 +137,87 @@ function ns.Off(event, fn)
     if #list == 0 then
         handlers[event] = nil
         events:UnregisterEvent(event)
+    end
+end
+
+-- Unit events ---------------------------------------------------------------------------------
+-- A UNIT_* event fires for every unit: each nameplate, party member and target. RegisterUnitEvent
+-- has the client drop the ones for other units before any Lua runs, so a handler for the player's
+-- auras costs nothing while a crowd's auras change. A frame keeps one unit filter per event, so
+-- each event and unit list gets a frame of its own, made on first use and kept for reuse (frames
+-- can't be freed).
+
+local unitEvents = {} -- "EVENT|unit|unit" -> { frame, list, units, on }
+
+-- Unit tokens in a payload aren't known to be secret, but a secret can't be compared.
+local issecret = issecretvalue or function()
+    return false
+end
+
+---Like ns.On, for a UNIT_* event of one or two units only: `ns.OnUnit("UNIT_AURA", { "player" },
+---fn)`. Handlers get (event, unit, ...) as with ns.On. UNVERIFIED on Forever: without
+---RegisterUnitEvent the frame hears every unit and other units are filtered out here instead.
+---@param event string
+---@param units string[] one or two unit tokens
+---@param fn fun(event: string, unit: string, ...)
+function ns.OnUnit(event, units, fn)
+    if #units < 1 or #units > 2 then
+        error("Forever++: OnUnit takes one or two units", 2)
+    end
+    local key = event .. "|" .. concat(units, "|")
+    local entry = unitEvents[key]
+    if not entry then
+        local frame = CreateFrame("Frame")
+        entry = { frame = frame, list = {}, units = {} }
+        for _, unit in ipairs(units) do
+            entry.units[unit] = true
+        end
+        local filtered = frame.RegisterUnitEvent and true or false
+        frame:SetScript("OnEvent", function(_, name, unit, ...)
+            if not filtered and (issecret(unit) or not entry.units[unit]) then
+                return
+            end
+            dispatch(entry.list, name, unit, ...)
+        end)
+        unitEvents[key] = entry
+    end
+    for i = 1, #entry.list do
+        if entry.list[i] == fn then
+            return
+        end
+    end
+    if not entry.on then
+        -- Register first, as ns.On does: an event this client lacks throws here.
+        if entry.frame.RegisterUnitEvent then
+            entry.frame:RegisterUnitEvent(event, units[1], units[2])
+        else
+            entry.frame:RegisterEvent(event)
+        end
+        entry.on = true
+    end
+    entry.list[#entry.list + 1] = fn
+end
+
+---Stops calling `fn` for `event` of `units` (the same list given to ns.OnUnit).
+---@param event string
+---@param units string[]
+---@param fn function
+function ns.OffUnit(event, units, fn)
+    local entry = unitEvents[event .. "|" .. concat(units, "|")]
+    if not entry then
+        return
+    end
+    -- A new list, as in ns.Off: a handler may call this while OnEvent loops over the old one.
+    local list = {}
+    for i = 1, #entry.list do
+        if entry.list[i] ~= fn then
+            list[#list + 1] = entry.list[i]
+        end
+    end
+    entry.list = list
+    if #list == 0 and entry.on then
+        entry.on = false
+        entry.frame:UnregisterEvent(event)
     end
 end
 
@@ -262,14 +347,41 @@ function Module:On(event, fn)
     owners[fn] = owners[fn] or self
 end
 
----Stops one event added with `module:On` before the module turns off.
+---Like ns.OnUnit, turned off by itself when the module turns off (see `module:On`).
+---@param event string
+---@param units string[] one or two unit tokens
+---@param fn fun(event: string, unit: string, ...)
+function Module:OnUnit(event, units, fn)
+    self.events = self.events or {}
+    local key = concat(units, "|")
+    for _, entry in ipairs(self.events) do
+        if entry[1] == event and entry[2] == fn and entry[3] == key then
+            return
+        end
+    end
+    ns.OnUnit(event, units, fn)
+    self.events[#self.events + 1] = { event, fn, key, units }
+    owners[fn] = owners[fn] or self
+end
+
+-- Stops one entry of `module.events`, whichever kind it is.
+local function stop(entry)
+    if entry[4] then
+        ns.OffUnit(entry[1], entry[4], entry[2])
+    else
+        ns.Off(entry[1], entry[2])
+    end
+end
+
+---Stops one event added with `module:On` or `module:OnUnit` before the module turns off.
 ---@param event string
 ---@param fn function
 function Module:Off(event, fn)
-    ns.Off(event, fn)
     local list = {}
     for _, entry in ipairs(self.events or {}) do
-        if entry[1] ~= event or entry[2] ~= fn then
+        if entry[1] == event and entry[2] == fn then
+            stop(entry)
+        else
             list[#list + 1] = entry
         end
     end
@@ -372,10 +484,10 @@ function ns.ChatOption(description, section)
     return { key = "chat", name = ns.L.CHAT_MESSAGES, description = description, section = section }
 end
 
--- Stops every event the module added with `module:On`.
+-- Stops every event the module added with `module:On` or `module:OnUnit`.
 local function offAll(module)
     for _, entry in ipairs(module.events or {}) do
-        ns.Off(entry[1], entry[2])
+        stop(entry)
     end
     module.events = nil
 end

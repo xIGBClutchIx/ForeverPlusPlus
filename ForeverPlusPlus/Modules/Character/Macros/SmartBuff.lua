@@ -506,10 +506,10 @@ local function onTarget()
     end
 end
 
-local function onAura(_, unit)
-    if unit == "player" or unit == "target" then
-        queue()
-    end
+local AURA_UNITS = { "player", "target" }
+
+local function onAura()
+    queue()
 end
 
 local function onSpells()
@@ -541,8 +541,8 @@ function module:OnEnable()
         button:SetScript("OnClick", explain)
     end
     self:On("PLAYER_TARGET_CHANGED", onTarget)
-    self:On("UNIT_AURA", onAura)
-    self:On("UNIT_LEVEL", onAura)
+    self:OnUnit("UNIT_AURA", AURA_UNITS, onAura)
+    self:OnUnit("UNIT_LEVEL", AURA_UNITS, onAura)
     self:On("SPELLS_CHANGED", onSpells)
     self:On("LEARNED_SPELL_IN_SKILL_LINE", onSpells)
     self:On("PLAYER_LEVEL_UP", onSpells)
