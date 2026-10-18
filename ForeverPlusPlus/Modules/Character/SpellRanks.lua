@@ -58,23 +58,31 @@ local marks = setmetatable({}, { __mode = "k" }) -- button -> our overlay frame
 local lowSlots = {} -- { bar, slot, spellID, rank, best } for every marked button, in bar order
 local lastCount = 0
 
-local function rankNumber(spellID)
-    local text = C_Spell.GetSpellSubtext(spellID)
-    local rank = text and readable(text) and strmatch(text, "%d+")
-    return rank and tonumber(rank)
-end
+-- A spell ID's name and rank don't change between spellbook scans, so they're kept until the next
+-- one (dropped wherever `known` is): spellID -> { name, rank }.
+local rankOf = {}
 
 -- The spell's name and rank, or nil while the game hasn't loaded its data (it is asked for, and
 -- SPELL_DATA_LOAD_RESULT refreshes us).
 local function spellRank(spellID)
-    local name = C_Spell.GetSpellName(spellID)
-    if not name or C_Spell.GetSpellSubtext(spellID) == nil then
+    local hit = rankOf[spellID]
+    if hit then
+        return hit[1], hit[2]
+    end
+    local name, text = C_Spell.GetSpellName(spellID), C_Spell.GetSpellSubtext(spellID)
+    if not name or text == nil then
         if C_Spell.RequestLoadSpellData then
             C_Spell.RequestLoadSpellData(spellID)
         end
         return nil
     end
-    return name, rankNumber(spellID)
+    if not readable(text) then
+        return name, nil
+    end
+    local digits = strmatch(text, "%d+")
+    local rank = digits and tonumber(digits)
+    rankOf[spellID] = { name, rank }
+    return name, rank
 end
 
 -- Every spell in your spellbook's highest rank by name. Probe: the skill line fields are
@@ -212,7 +220,7 @@ local function queue()
 end
 
 local function onSpellsChanged()
-    known = nil
+    known, rankOf = nil, {}
     queue()
 end
 
@@ -224,7 +232,7 @@ end
 
 local function onLoaded()
     if module.incomplete then
-        known = nil
+        known, rankOf = nil, {}
     end
     queue()
 end
@@ -259,7 +267,7 @@ function module:OnEnable()
     self:On("PLAYER_REGEN_ENABLED", queue) -- buttons created late, when we were in combat
     self:On("SPELL_DATA_LOAD_RESULT", onLoaded)
     self:TooltipPostCall(Enum.TooltipDataType and Enum.TooltipDataType.Spell, onTooltip)
-    known = nil
+    known, rankOf = nil, {}
     lastCount = 0
     queue()
 end
@@ -269,7 +277,7 @@ function module:OnDisable()
     for _, frame in pairs(marks) do
         frame:Hide()
     end
-    known, lowSlots = nil, {}
+    known, lowSlots, rankOf = nil, {}, {}
 end
 
 function module:OnOptionChanged(key)
