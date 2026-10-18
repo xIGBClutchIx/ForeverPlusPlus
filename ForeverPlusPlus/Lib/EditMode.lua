@@ -38,13 +38,24 @@ end
 
 -- Positions ---------------------------------------------------------------------------------------
 
+-- Keeps a frame's box on the screen.
+local function clamp(center, length, size)
+    return max(length / 2, min(size - length / 2, center))
+end
+
 ---Puts `frame` at an offset from the center of the screen, in screen units, whatever its own
----scale is. Modules use this for a frame that takes its scale itself.
+---scale is, kept inside the screen like Blizzard's own frames. Modules use this for a frame that
+---takes its scale itself. The offset given isn't changed, so a window made smaller for a while
+---doesn't lose where the player put the frame.
 ---@param frame table
 ---@param x number
 ---@param y number
 function EditMode.Place(frame, x, y)
     local scale = frame:GetScale()
+    local ratio = frame:GetEffectiveScale() / UIParent:GetEffectiveScale()
+    local width, height = UIParent:GetWidth(), UIParent:GetHeight()
+    x = clamp(x + width / 2, frame:GetWidth() * ratio, width) - width / 2
+    y = clamp(y + height / 2, frame:GetHeight() * ratio, height) - height / 2
     frame:ClearAllPoints()
     frame:SetPoint("CENTER", UIParent, "CENTER", x / scale, y / scale)
 end
@@ -126,11 +137,6 @@ local function snap(frame, center, length, axis)
         return center + best, bestLine
     end
     return center
-end
-
--- Keeps a frame's box on the screen.
-local function clamp(center, length, size)
-    return max(length / 2, min(size - length / 2, center))
 end
 
 local function showGuides(vertical, horizontal)
@@ -572,6 +578,8 @@ function EditMode.Register(frame, label, onMove, options)
         return
     end
     unregistered[frame] = nil
+    -- Blizzard's Edit Mode frames stay on screen, also when the game window shrinks.
+    frame:SetClampedToScreen(true)
     info.selection = info.selection or newSelection(frame, info)
     registered[frame] = info
     install()
