@@ -12,8 +12,7 @@
 -- quest log's gray through red); Blizzard's prefix function and its other callers are untouched.
 local _, ns = ...
 
-local setmetatable, select, type, sub, hooksecurefunc = setmetatable, select, type, string.sub,
-    hooksecurefunc
+local select, type, sub = select, type, string.sub
 local GetQuestDifficultyColor = GetQuestDifficultyColor
 
 local L = ns.L
@@ -103,7 +102,6 @@ end
 
 -- The greeting window. Its last word on each title is the button's SetText, so the tag goes in
 -- right after that, before anything hooked to the panel's OnShow (Forever Quest Icons) sees it.
-local hooked = setmetatable({}, { __mode = "k" })
 local busy = false
 
 -- The row's quest ID, and its level from the old index functions if this client still has them.
@@ -117,7 +115,7 @@ local function greetingQuest(button)
 end
 
 local function tagGreeting(button, text)
-    if busy or not module.enabled or type(text) ~= "string" then
+    if busy or type(text) ~= "string" then
         return
     end
     local prefix = prefixFor(greetingQuest(button))
@@ -131,10 +129,7 @@ end
 -- Runs right after the pool hands out a button and before Blizzard titles it.
 local function hookGreetingButtons(pool)
     for button in pool:EnumerateActive() do
-        if not hooked[button] then
-            hooked[button] = true
-            hooksecurefunc(button, "SetText", tagGreeting)
-        end
+        module:Hook(button, "SetText", tagGreeting)
     end
 end
 

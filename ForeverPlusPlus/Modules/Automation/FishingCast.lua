@@ -8,8 +8,8 @@ local _, ns = ...
 
 local GetTime, InCombatLockdown, CreateFrame = GetTime, InCombatLockdown, CreateFrame
 local SetOverrideBindingSpell, ClearOverrideBindings = SetOverrideBindingSpell, ClearOverrideBindings
-local GetInventoryItemID, UnitExists, GetUnitSpeed = GetInventoryItemID, UnitExists, GetUnitSpeed
-local C_Item, C_Spell, C_Timer, WorldFrame = C_Item, C_Spell, C_Timer, WorldFrame
+local UnitExists, GetUnitSpeed = UnitExists, GetUnitSpeed
+local C_Spell, C_Timer, WorldFrame = C_Spell, C_Timer, WorldFrame
 local GetMouseFoci, GetMouseFocus, UnitChannelInfo = GetMouseFoci, GetMouseFocus, UnitChannelInfo
 local C_CVar, tonumber, tostring, next, select = C_CVar, tonumber, tostring, next, select
 
@@ -41,7 +41,6 @@ module.options = {
 }
 
 local MAINHAND = 16
-local POLE_CLASS, POLE_SUBCLASS = 2, 20 -- weapons: fishing poles
 -- Classic's ID: Self Test on build 70338 found Mainline's 131474 isn't in Forever's data.
 local FISHING = ns.GameData.Spell(7620, "Fishing")
 
@@ -50,12 +49,7 @@ local lastClick = 0
 local armed = false
 
 local function poleEquipped()
-    local id = GetInventoryItemID("player", MAINHAND)
-    if not id or not C_Item.GetItemInfoInstant then
-        return false
-    end
-    local _, _, _, _, _, class, subclass = C_Item.GetItemInfoInstant(id)
-    return class == POLE_CLASS and subclass == POLE_SUBCLASS
+    return ns.Equipment.WeaponSubclass(MAINHAND) == ns.Equipment.FISHING_POLE
 end
 
 -- Whether the mouse is over the world and not a window or button.

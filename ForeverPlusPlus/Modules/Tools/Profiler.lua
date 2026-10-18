@@ -241,19 +241,13 @@ function module:BuildPage(frame)
     ui = { refreshList = refreshList }
     ns.SettingsKit.AddPageTitle(frame, module.title)
 
-    ui.reset = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-    ui.reset:SetSize(96, 22)
-    ui.reset:SetPoint("TOPRIGHT", -12, -19) -- where the Defaults button would be
-    ui.reset:SetText(L.PROFILER_RESET)
-    ui.reset:SetScript("OnClick", function()
+    ui.reset = ns.Frames.Button(frame, L.PROFILER_RESET, 96, function()
         Profiler.Reset()
         refresh()
     end)
+    ui.reset:SetPoint("TOPRIGHT", -12, -19) -- where the Defaults button would be
 
-    ui.record = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-    ui.record:SetSize(96, 22)
-    ui.record:SetPoint("RIGHT", ui.reset, "LEFT", -8, 0)
-    ui.record:SetScript("OnClick", function()
+    ui.record = ns.Frames.Button(frame, nil, 96, function()
         if Profiler.recording then
             Profiler.Stop()
         else
@@ -261,6 +255,7 @@ function module:BuildPage(frame)
         end
         refresh()
     end)
+    ui.record:SetPoint("RIGHT", ui.reset, "LEFT", -8, 0)
 
     ui.status = newText(frame, "GameFontHighlight", 10, -62)
     ui.addon = newText(frame, "GameFontHighlight", 10, -82)

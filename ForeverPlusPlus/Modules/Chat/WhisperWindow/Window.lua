@@ -375,13 +375,6 @@ end
 
 -- The window ------------------------------------------------------------------------------------
 
-local function newButton(parent, text, width)
-    local b = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
-    b:SetSize(width, 22)
-    b:SetText(text)
-    return b
-end
-
 local function savePlace()
     -- Saved here, not in the game's layout cache, which a moved named frame would go into.
     if window.SetUserPlaced then
@@ -548,13 +541,12 @@ local function newWindow()
     details:SetPoint("TOPLEFT", listInset, "TOPRIGHT", 2, 0)
     details:SetPoint("BOTTOMRIGHT", -6, 28)
 
-    f.invite = newButton(details, L.WHISPERWINDOW_INVITE, 110)
-    f.invite:SetPoint("TOPRIGHT", -8, -6)
-    f.invite:SetScript("OnClick", function()
+    f.invite = ns.Frames.Button(details, L.WHISPERWINDOW_INVITE, 110, function()
         if selected then
             internal.Invite(selected)
         end
     end)
+    f.invite:SetPoint("TOPRIGHT", -8, -6)
     f.name = details:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     f.name:SetPoint("TOPLEFT", 12, -10)
     f.name:SetPoint("RIGHT", f.invite, "LEFT", -8, 0)
@@ -577,16 +569,12 @@ local function newWindow()
     f.messages:SetPoint("BOTTOMRIGHT", -10, 6)
 
     -- The strip at the bottom: New Whisper under the list, the reply box under the conversation.
-    f.new = newButton(f, L.WHISPERWINDOW_NEW, 130)
-    f.new:SetPoint("BOTTOMLEFT", 4, 4)
-    f.new:SetScript("OnClick", function()
-        ns.Prompt("WHISPERWINDOW_NEW", L.WHISPERWINDOW_NEW_PROMPT, "", function(name)
-            name = strtrim(name or "")
-            if name ~= "" then
-                internal.Open(internal.Start(name), true)
-            end
+    f.new = ns.Frames.Button(f, L.WHISPERWINDOW_NEW, 130, function()
+        ns.PromptName("WHISPERWINDOW_NEW", L.WHISPERWINDOW_NEW_PROMPT, "", function(name)
+            internal.Open(internal.Start(name), true)
         end)
     end)
+    f.new:SetPoint("BOTTOMLEFT", 4, 4)
 
     local edit = CreateFrame("EditBox", nil, f, "InputBoxTemplate")
     edit:SetHeight(20)

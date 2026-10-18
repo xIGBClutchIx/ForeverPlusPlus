@@ -2,8 +2,8 @@
 -- one, drawing the saved ones, and the button that forgets them.
 local _, ns = ...
 
-local ipairs, pairs, pcall, format, abs = ipairs, pairs, pcall, string.format, math.abs
-local C_Spell, C_UnitAuras, C_Timer, GetTime = C_Spell, C_UnitAuras, C_Timer, GetTime
+local ipairs, pairs, format, abs = ipairs, pairs, string.format, math.abs
+local C_Spell, C_Timer, GetTime = C_Spell, C_Timer, GetTime
 local UnitRace, InCombatLockdown = UnitRace, InCombatLockdown
 
 local L = ns.L
@@ -151,10 +151,6 @@ local FRESH = 1
 -- first, and a read that throws anyway ends the scan.
 local function longBuffs(kindName, castTime)
     local found = {}
-    if not (C_UnitAuras and C_UnitAuras.GetAuraDataByIndex) then
-        return found
-    end
-    local getAura = C_UnitAuras.GetAuraDataByIndex
     local names = {}
     for id, kind in BUFFS:Pairs() do
         local name = kind == kindName and spellName(id)
@@ -162,11 +158,7 @@ local function longBuffs(kindName, castTime)
             names[name] = true
         end
     end
-    for i = 1, 40 do
-        local ok, aura = pcall(getAura, "player", i, "HELPFUL")
-        if not (ok and aura) then
-            break
-        end
+    ns.EachAura("player", "HELPFUL", function(aura)
         local id, name, duration, expires = aura.spellId, aura.name, aura.duration,
             aura.expirationTime
         if ns.IsReadable(id) and ns.IsReadable(name) and ns.IsReadable(duration)
@@ -177,7 +169,7 @@ local function longBuffs(kindName, castTime)
                 fresh = expires and expires - duration >= castTime - FRESH or false,
             }
         end
-    end
+    end)
     return found
 end
 
@@ -185,8 +177,8 @@ end
 -- already saved there.
 local function saveSpot(kindName, where)
     local mapID, x, y = where[1], where[2], where[3]
-    if not (module.enabled and mapID) then
-        return
+    if not mapID then
+        return -- afterCast, the only caller, has checked the module is on
     end
     x, y = percent(x), percent(y)
     local all = module.db.leyLineSpots

@@ -130,10 +130,6 @@ end
 
 -- Hooks ---------------------------------------------------------------------------------------
 
-local function onButtonsUpdated()
-    refresh()
-end
-
 local function onTreeParts()
     if internal.planning and internal.tree then
         local plan = internal.getPlan(true)
@@ -189,7 +185,7 @@ local function start()
         module:Hook(frame, "RefreshTreeHeaders", onTreeParts)
         module:Hook(frame, "RefreshGates", onTreeParts)
         if EventRegistry then
-            EventRegistry:RegisterCallback("TalentFrameBase.ButtonsUpdated", onButtonsUpdated, module)
+            EventRegistry:RegisterCallback("TalentFrameBase.ButtonsUpdated", refresh, module)
             EventRegistry:RegisterCallback("TalentDisplay.TooltipCreated", onTalentTooltip, module)
         end
         refresh()

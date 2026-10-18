@@ -111,10 +111,6 @@ local function simpleTooltip(owner, title, text)
     owner:SetScript("OnLeave", internal.onLeave)
 end
 
-local function trim(text)
-    return strtrim(text or "")
-end
-
 -- Adds a plan to this character's list and picks it.
 local function addPlan(plan)
     local builds = internal.getBuilds(true)
@@ -127,21 +123,19 @@ end
 
 local function promptNew()
     local builds = internal.getBuilds(true)
-    ns.Prompt("TALENTPLANNER_NEW", L.TALENTPLANNER_NEW_PROMPT,
-        format(L.TALENTPLANNER_PLAN_NAME, builds and #builds.list + 1 or 1), function(text)
-            if trim(text) ~= "" then
-                addPlan(internal.newPlan(trim(text)))
-            end
+    ns.PromptName("TALENTPLANNER_NEW", L.TALENTPLANNER_NEW_PROMPT,
+        format(L.TALENTPLANNER_PLAN_NAME, builds and #builds.list + 1 or 1), function(name)
+            addPlan(internal.newPlan(name))
         end)
 end
 
 local function promptRename()
     local plan = internal.getPlan(true)
-    ns.Prompt("TALENTPLANNER_RENAME", L.TALENTPLANNER_RENAME_PROMPT, plan and plan.name,
-        function(text)
+    ns.PromptName("TALENTPLANNER_RENAME", L.TALENTPLANNER_RENAME_PROMPT, plan and plan.name,
+        function(name)
             local current = internal.getPlan(true)
-            if current and trim(text) ~= "" then
-                current.name = trim(text)
+            if current then
+                current.name = name
                 internal.refresh()
             end
         end)
@@ -245,12 +239,10 @@ function internal.createUI()
     ui.bar = bar
 
     -- Where Blizzard's loadout dropdown sits on Mainline; Forever hides it.
-    local planButton = CreateFrame("Button", nil, bar, "UIPanelButtonTemplate")
-    planButton:SetSize(150, 22)
-    planButton:SetPoint("BOTTOMLEFT", anchor, "BOTTOMLEFT", 48, 8)
-    planButton:SetScript("OnClick", function()
+    local planButton = ns.Frames.Button(bar, nil, 150, function()
         internal.setPlanning(not internal.planning)
     end)
+    planButton:SetPoint("BOTTOMLEFT", anchor, "BOTTOMLEFT", 48, 8)
     simpleTooltip(planButton, L.TALENTPLANNER_TITLE, L.TALENTPLANNER_PLAN_DESC)
     ui.planButton = planButton
 
@@ -289,15 +281,7 @@ function internal.createUI()
     controls:Hide()
     ui.controls = controls
 
-    local clear = CreateFrame("Button", nil, controls, "UIPanelButtonTemplate")
-    clear:SetSize(90, 22)
-    if dropdown then
-        clear:SetPoint("RIGHT", dropdown, "LEFT", -12, 0)
-    else
-        clear:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMRIGHT", -48, 8)
-    end
-    clear:SetText(L.TALENTPLANNER_CLEAR)
-    clear:SetScript("OnClick", function()
+    local clear = ns.Frames.Button(controls, L.TALENTPLANNER_CLEAR, 90, function()
         ns.Confirm("TALENTPLANNER_CLEAR", L.TALENTPLANNER_CLEAR_CONFIRM, function()
             local plan = internal.getPlan(true)
             if plan then
@@ -306,13 +290,14 @@ function internal.createUI()
             end
         end)
     end)
+    if dropdown then
+        clear:SetPoint("RIGHT", dropdown, "LEFT", -12, 0)
+    else
+        clear:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMRIGHT", -48, 8)
+    end
     simpleTooltip(clear, L.TALENTPLANNER_CLEAR, L.TALENTPLANNER_CLEAR_DESC)
 
-    local reset = CreateFrame("Button", nil, controls, "UIPanelButtonTemplate")
-    reset:SetSize(90, 22)
-    reset:SetPoint("RIGHT", clear, "LEFT", -6, 0)
-    reset:SetText(L.TALENTPLANNER_RESET)
-    reset:SetScript("OnClick", function()
+    local reset = ns.Frames.Button(controls, L.TALENTPLANNER_RESET, 90, function()
         ns.Confirm("TALENTPLANNER_RESET", L.TALENTPLANNER_RESET_CONFIRM, function()
             local plan = internal.getPlan(true)
             local tree = internal.tree
@@ -322,6 +307,7 @@ function internal.createUI()
             end
         end)
     end)
+    reset:SetPoint("RIGHT", clear, "LEFT", -6, 0)
     simpleTooltip(reset, L.TALENTPLANNER_RESET, L.TALENTPLANNER_RESET_DESC)
 
     local level = CreateFrame("EditBox", nil, controls, "InputBoxTemplate")

@@ -352,10 +352,6 @@ end
 
 -- Which zone ----------------------------------------------------------------------------------
 
-local function isContinent(info)
-    return ns.WorldMap.IsContinent(info, true)
-end
-
 -- The zone in Data.lua a map is, or is inside (a cave or a town's own map), or nil.
 local function zoneOf(mapID)
     for each in ns.WorldMap.Up(mapID) do
@@ -372,7 +368,7 @@ local function target(map)
     if not info then
         return nil
     end
-    if not isContinent(info) then
+    if not ns.WorldMap.IsContinent(info, true) then
         return zoneOf(mapID)
     end
     if not (module.db.hover and map.IsCanvasMouseFocus and map:IsCanvasMouseFocus()) then
@@ -416,8 +412,8 @@ end
 local textWidth = ns.Text.Width
 
 -- Blizzard's own coordinates, a row each for the cursor and the player, sit in the bottom left
--- corner from 2 pixels up, each row 15 tall, while their Settings checkboxes (these CVars) are on.
-local COORDS_CVARS = { "worldMapShowCursorCoords", "worldMapShowPlayerCoords" }
+-- corner from 2 pixels up, each row 15 tall, while their Settings checkboxes
+-- (WorldMap.COORDS_CVARS) are on.
 local COORDS_BOTTOM, COORDS_ROW = 2, 15
 
 -- How far up the panel sits in the bottom left corner: over Blizzard's coordinates when they
@@ -430,7 +426,7 @@ local function bottomLeftOffset()
         return 8
     end
     local rows = 0
-    for _, name in ipairs(COORDS_CVARS) do
+    for _, name in ipairs(ns.WorldMap.COORDS_CVARS) do
         if ns.CVars.IsOn(name) then
             rows = rows + 1
         end

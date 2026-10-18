@@ -6,15 +6,14 @@
 -- needed: slots and spells change out of combat, and the marks refresh after a short wait.
 local _, ns = ...
 
-local _G, ipairs, pairs, tonumber, strmatch, format = _G, ipairs, pairs, tonumber, string.match,
-    string.format
-local CreateFrame, C_Spell, C_SpellBook = CreateFrame, C_Spell, C_SpellBook
-local GetActionInfo, InCombatLockdown = GetActionInfo, InCombatLockdown
+local ipairs, pairs, format = ipairs, pairs, string.format
+local C_Spell = C_Spell
 local Enum, GameTooltip = Enum, GameTooltip
 
 local L = ns.L
 local readable = ns.IsReadable
 local Frames = ns.Frames
+local ActionButtons, Spellbook = ns.ActionButtons, ns.Spellbook
 
 local module = ns.NewModule("SpellRanks", L.SPELLRANKS_DESC, {
     enabled = true,
@@ -37,24 +36,13 @@ module.options = {
     ns.ChatOption(L.SPELLRANKS_CHAT_DESC),
 }
 
--- Blizzard's action bars, in the order /fpp ranks numbers them: the button name prefix of each.
-local BARS = {
-    "ActionButton", "MultiBarBottomLeftButton", "MultiBarBottomRightButton",
-    "MultiBarRightButton", "MultiBarLeftButton", "MultiBar5Button", "MultiBar6Button",
-    "MultiBar7Button",
-}
-local BUTTONS = 12
 local DELAY = 0.2 -- seconds to wait for a burst of changes to settle
 
 local ALERT_ATLAS = "services-icon-warning" -- Blizzard's yellow warning triangle, when it exists
 local ALERT_FILE = "Interface\\DialogFrame\\DialogAlertIcon" -- and its older art
 local BADGE_SIZE = 16
--- Levels above the button: past its cooldown, flash, and the other child frames Blizzard stacks
--- on it, so the mark is never drawn under them.
-local LEVELS_ABOVE = 20
 
 local known -- spell name -> the highest rank known, or nil until scanned
-local marks = setmetatable({}, { __mode = "k" }) -- button -> our overlay frame
 local lowSlots = {} -- { bar, slot, spellID, rank, best } for every marked button, in bar order
 local lastCount = 0
 
@@ -79,41 +67,26 @@ local function spellRank(spellID)
     if not readable(text) then
         return name, nil
     end
-    local digits = strmatch(text, "%d+")
-    local rank = digits and tonumber(digits)
+    local rank = Spellbook.Rank(spellID)
     rankOf[spellID] = { name, rank }
     return name, rank
 end
 
--- Every spell in your spellbook's highest rank by name. Probe: the skill line fields are
--- Mainline's; on Forever they are **Unverified** (docs/forever-api.md).
+-- Every spell in your spellbook's highest rank by name (Spellbook.Ranks leaves out passives and
+-- the other spec's spells, which can't be put on the bar).
 local function scan()
-    local best, complete = {}, true
-    local bank = Enum.SpellBookSpellBank and Enum.SpellBookSpellBank.Player or 0
-    for line = 1, C_SpellBook.GetNumSpellBookSkillLines() do
-        local info = C_SpellBook.GetSpellBookSkillLineInfo(line)
-        -- Spells of the spec you aren't using can't be put on the bar.
-        if info and not (info.offSpecID and info.offSpecID ~= 0) then
-            for i = info.itemIndexOffset + 1, info.itemIndexOffset + info.numSpellBookItems do
-                local item = C_SpellBook.GetSpellBookItemInfo(i, bank)
-                if item and item.spellID and not item.isPassive then
-                    local name, rank = spellRank(item.spellID)
-                    if not name then
-                        complete = false
-                    elseif rank and (not best[name] or rank > best[name]) then
-                        best[name] = rank
-                    end
-                end
-            end
-        end
+    local best = {}
+    local ranks, complete = Spellbook.Ranks()
+    for name, list in pairs(ranks) do
+        best[name] = list[#list].rank
     end
     return best, complete
 end
 
--- The spell a slot holds, or nil for an empty slot or an item, or a macro with no spell.
-local function slotSpell(slot)
-    local kind, id, subType = GetActionInfo(slot)
-    if not (kind and readable(id) and id) then
+-- The spell a button's slot holds, or nil for an empty slot or an item, or a macro with no spell.
+local function slotSpell(button)
+    local kind, id, subType = ActionButtons.Content(button)
+    if not (kind and id) then
         return nil
     end
     if kind == "macro" then
@@ -123,15 +96,8 @@ local function slotSpell(slot)
     return kind == "spell" and id or nil
 end
 
-local function overlay(button)
-    local frame = marks[button]
-    if frame or InCombatLockdown() then
-        return frame -- creating a child of a protected button waits for combat to end
-    end
-    frame = CreateFrame("Frame", nil, button)
-    frame:SetAllPoints()
-    frame:SetFrameLevel(button:GetFrameLevel() + LEVELS_ABOVE)
-    frame:EnableMouse(false)
+-- A mark is made out of combat only (Lib/ActionButtons.lua).
+local marks = ActionButtons.Marks(function(frame)
     frame.tint = frame:CreateTexture(nil, "OVERLAY")
     frame.tint:SetPoint("TOPLEFT", 2, -2)
     frame.tint:SetPoint("BOTTOMRIGHT", -2, 2)
@@ -145,12 +111,10 @@ local function overlay(button)
     else
         frame.badge:SetTexture(ALERT_FILE)
     end
-    marks[button] = frame
-    return frame
-end
+end)
 
 local function mark(button, on)
-    local frame = on and overlay(button) or marks[button]
+    local frame = on and marks.Get(button) or marks.Find(button)
     if not frame then
         return
     end
@@ -183,26 +147,20 @@ local function refresh()
         module.incomplete = not complete
     end
     lowSlots = {}
-    for bar, prefix in ipairs(BARS) do
-        for slotNumber = 1, BUTTONS do
-            local button = _G[prefix .. slotNumber]
-            local low = false
-            if button then
-                local action = button.action
-                local spellID = action and readable(action) and slotSpell(action)
-                if spellID then
-                    local name, rank = spellRank(spellID)
-                    local best = name and rank and known[name]
-                    if best and rank < best then
-                        low = true
-                        lowSlots[#lowSlots + 1] = { bar = bar, slot = slotNumber,
-                            spellID = spellID, rank = rank, best = best }
-                    end
-                end
-                mark(button, low)
+    ActionButtons.Each(function(button, bar, slotNumber)
+        local low = false
+        local spellID = slotSpell(button)
+        if spellID then
+            local name, rank = spellRank(spellID)
+            local best = name and rank and known[name]
+            if best and rank < best then
+                low = true
+                lowSlots[#lowSlots + 1] = { bar = bar, slot = slotNumber,
+                    spellID = spellID, rank = rank, best = best }
             end
         end
-    end
+        mark(button, low)
+    end)
     -- Say it once when a level or a new spell adds marks, not on every bar change.
     if #lowSlots > lastCount and module.announce then
         module:Print(format(L.SPELLRANKS_FOUND, #lowSlots))
@@ -253,8 +211,7 @@ local function onTooltip(tooltip, data)
 end
 
 function module:OnEnable()
-    if not (C_Spell and C_Spell.GetSpellSubtext and C_SpellBook
-        and C_SpellBook.GetNumSpellBookSkillLines) then
+    if not Spellbook.Available() then
         return
     end
     self:On("SPELLS_CHANGED", onSpellsChanged)
@@ -274,9 +231,7 @@ end
 
 function module:OnDisable()
     cancel()
-    for _, frame in pairs(marks) do
-        frame:Hide()
-    end
+    marks.HideAll()
     known, lowSlots, rankOf = nil, {}, {}
 end
 

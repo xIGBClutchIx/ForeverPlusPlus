@@ -58,7 +58,7 @@ module.options = {
 }
 
 local MAINHAND, OFFHAND = 16, 17
-local WEAPON, FISHING_POLE = 2, 20 -- Enum.ItemClass.Weapon, Enum.ItemWeaponSubclass.Fishingpole
+local WEAPON, FISHING_POLE = ns.Equipment.WEAPON, ns.Equipment.FISHING_POLE
 local FIST = 13 -- Enum.ItemWeaponSubclass.Unarmed
 
 -- Weapon subclasses a sharpening stone ("sharp") or weightstone ("blunt") goes on. Fist weapons
@@ -96,18 +96,7 @@ function module:IsAvailable()
         and true or false
 end
 
--- The weapon subclass in this slot, or nil when it holds no weapon.
-local function weaponSubclass(slot)
-    local itemID = GetInventoryItemID("player", slot)
-    if not itemID then
-        return nil
-    end
-    local _, _, _, _, _, classID, subclassID = C_Item.GetItemInfoInstant(itemID)
-    if classID ~= WEAPON then
-        return nil
-    end
-    return subclassID
-end
+local weaponSubclass = ns.Equipment.WeaponSubclass
 
 -- Whether an item with this entry (BUFFS's) can go on the weapon in this slot: true, false, or nil
 -- when we don't know (a stone on a fist weapon, or a learned item on a kind of weapon it never

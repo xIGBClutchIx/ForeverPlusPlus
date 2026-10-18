@@ -329,7 +329,10 @@ end
 
 local steps, stepsFor -- route(stepsFor)
 
--- Where `point` is from the player, through WorldMap.Toward; see locate.
+-- How far `point` is from the player in yards and its direction counter-clockwise from north,
+-- through WorldMap.Toward (nil when the game can't say: no target, in an instance, another
+-- continent). Works on the target's own map, or the first map above it the player is also on, so
+-- a pin in the next zone still points the right way.
 local function toward(point)
     if not (point and point.uiMapID and point.position) then
         return nil
@@ -352,17 +355,6 @@ local function toward(point)
         end
     end
     return nil
-end
-
--- How far the target is from the player in yards and its direction counter-clockwise from north
--- (nil when the game can't say: no target, in an instance, another continent), then the line to
--- show under the distance and whether the target is the map pin. Works on the target's own map,
--- or the first map above it the player is also on, so a pin in the next zone still points the
--- right way.
-local function locate()
-    local point, title, isPin = destination()
-    local yards, angle = toward(point)
-    return yards, angle, title, isPin
 end
 
 -- The arrow -----------------------------------------------------------------------------------
@@ -418,7 +410,9 @@ local function update()
     if ns.EditMode.IsActive() then
         return -- the sample stays put while it's being placed
     end
-    local yards, angle, title, isPin = locate()
+    -- The target, the line to show under the distance, and whether the target is the map pin.
+    local point, title, isPin = destination()
+    local yards, angle = toward(point)
     if isPin and yards then
         if yards >= ARRIVED then
             headedToPin = true

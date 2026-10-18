@@ -165,7 +165,7 @@ end
 local function levelColor(level)
     if level <= 0 then
         local own = UnitLevel("player")
-        if not (readable(own) and type(own) == "number") then
+        if not (ns.IsNumber(own)) then
             return nil
         end
         level = own + 10 -- "??": far above the player
@@ -261,7 +261,7 @@ end
 local function colorLevelLine(tooltip, data, unit, guildLine)
     local db = module.db
     local level = UnitLevel(unit)
-    if not (readable(level) and type(level) == "number") then
+    if not (ns.IsNumber(level)) then
         return
     end
     local levelPattern = level > 0 and "%f[%d]" .. level .. "%f[%D]" or "%?%?"

@@ -653,6 +653,21 @@ local function watchedQuests()
     return watched
 end
 
+-- Drops every quest that's tracked again from the hidden list: one the player tracks again by hand
+-- is theirs to keep, and one filterZone tracked again in its zone is no longer hidden.
+local function onWatchListChanged()
+    local hidden = hiddenQuests()
+    if not hidden then
+        return
+    end
+    local watched = watchedQuests()
+    for questID in pairs(hidden) do
+        if watched[questID] then
+            hidden[questID] = nil
+        end
+    end
+end
+
 local function filterZone()
     if not (module.enabled and module.db.zone) then
         return
@@ -715,26 +730,7 @@ local function filterZone()
         end
     end
     -- One the watch limit kept out stays hidden, to try again in the next zone.
-    local watched = watchedQuests()
-    for questID in pairs(hidden) do
-        if watched[questID] then
-            hidden[questID] = nil
-        end
-    end
-end
-
--- A hidden quest the player tracks again by hand is theirs to keep.
-local function onWatchListChanged()
-    local hidden = hiddenQuests()
-    if not hidden then
-        return
-    end
-    local watched = watchedQuests()
-    for questID in pairs(hidden) do
-        if watched[questID] then
-            hidden[questID] = nil
-        end
-    end
+    onWatchListChanged()
 end
 
 local function onZoneCombatEnd()

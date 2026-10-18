@@ -127,10 +127,6 @@ local function paint(row, node)
     end
 end
 
-local function onInit(row, node)
-    paint(row, node)
-end
-
 local function onLeave(row)
     paint(row)
 end
@@ -153,7 +149,7 @@ local function catchUp()
         if row.Label and not seen[row] then
             seen[row] = true
             if mixin and row.Init ~= mixin.Init then
-                module:Hook(row, "Init", onInit)
+                module:Hook(row, "Init", paint)
                 module:Hook(row, "OnLeave", onLeave)
             end
         end
@@ -168,7 +164,7 @@ local function hook()
     end
     -- Rows built from now on carry the hooked methods: a mixin is copied into each frame when
     -- the frame is created.
-    module:Hook(mixin, "Init", onInit)
+    module:Hook(mixin, "Init", paint)
     module:Hook(mixin, "OnLeave", onLeave)
     return true
 end

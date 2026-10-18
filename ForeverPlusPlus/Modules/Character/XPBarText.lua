@@ -11,10 +11,11 @@ local _, ns = ...
 local ipairs, floor, format, min = ipairs, math.floor, string.format, math.min
 local CreateFrame, GetTime, UnitLevel = CreateFrame, GetTime, UnitLevel
 local UnitXP, UnitXPMax, GetXPExhaustion = UnitXP, UnitXPMax, GetXPExhaustion
-local C_QuestLog, BreakUpLargeNumbers = C_QuestLog, BreakUpLargeNumbers
+local C_QuestLog = C_QuestLog
 
 local L = ns.L
 local readable = ns.IsReadable
+local number = ns.Text.Number
 
 local module = ns.NewModule("XPBarText", L.XPBARTEXT_DESC, {
     enabled = true,
@@ -80,8 +81,21 @@ local questXP = 0 -- what the Quest XP choice counts, for the text
 local readyXP = 0 -- what the quests ready to turn in give
 local allXP = 0 -- what all the quests in the log give
 
-local function number(n)
-    return BreakUpLargeNumbers and BreakUpLargeNumbers(n) or n
+-- Your XP and the XP the level needs, or nil when they can't be read (secret values).
+local function readXP()
+    local current, max = UnitXP("player"), UnitXPMax("player")
+    if readable(current) and readable(max) and type(current) == "number"
+        and type(max) == "number" and max > 0 then
+        return current, max
+    end
+end
+
+-- Your rested XP, or nil when there's none or it can't be read.
+local function readRested()
+    local rested = GetXPExhaustion and GetXPExhaustion()
+    if ns.IsNumber(rested) and rested > 0 then
+        return rested
+    end
 end
 
 -- "2,100 (42%)", or just the number with Percent off.
@@ -108,7 +122,7 @@ local function countQuestXP()
         local id = info and not info.isHeader and info.questID
         if id then
             local xp = GetQuestLogRewardXP(id)
-            if readable(xp) and type(xp) == "number" then
+            if ns.IsNumber(xp) then
                 allXP = allXP + xp
                 if isComplete and isComplete(id) then
                     readyXP = readyXP + xp
@@ -155,10 +169,9 @@ local function addTooltip()
         return
     end
     local tooltip = GetAppropriateTooltip and GetAppropriateTooltip() or GameTooltip
-    local current, max = UnitXP("player"), UnitXPMax("player")
+    local current, max = readXP()
     -- Blizzard's builds nothing without a rest state; then there's nothing to add to.
-    if not (tooltip:IsShown() and tooltip:GetOwner() == UIParent and readable(current)
-        and readable(max) and type(current) == "number" and type(max) == "number" and max > 0) then
+    if not (tooltip:IsShown() and tooltip:GetOwner() == UIParent and current) then
         return
     end
     -- A value's color, when it has one, is its color on the bar.
@@ -171,8 +184,8 @@ local function addTooltip()
     end
     GameTooltip_AddBlankLineToTooltip(tooltip)
     line(L.XPBARTEXT_TIP_LEFT, amount(max - current, max))
-    local rested = GetXPExhaustion and GetXPExhaustion()
-    if rested and readable(rested) and type(rested) == "number" and rested > 0 then
+    local rested = readRested()
+    if rested then
         line(L.XPBARTEXT_TIP_RESTED, amount(rested, max), RESTED_COLOR)
     end
     if readyXP > 0 then
@@ -190,18 +203,16 @@ local function addTooltip()
 end
 
 -- Our text, or nil when the XP can't be read (then Blizzard's own text stays).
-local function barText()
-    local current, max = UnitXP("player"), UnitXPMax("player")
-    if not (readable(current) and readable(max) and type(current) == "number"
-        and type(max) == "number" and max > 0) then
+local function barText(current, max)
+    if not current then
         return nil
     end
     local text = format(L.XPBARTEXT_XP, number(current), number(max))
     if module.db.percent then
         text = format(L.XPBARTEXT_WITH_PERCENT, text, floor(current / max * 100))
     end
-    local rested = module.db.rested and GetXPExhaustion and GetXPExhaustion()
-    if rested and readable(rested) and type(rested) == "number" and rested > 0 then
+    local rested = module.db.rested and readRested()
+    if rested then
         text = text .. "    " .. format(L.XPBARTEXT_RESTED_TEXT, amount(rested, max))
     end
     if module.db.quests ~= "off" and questXP > 0 then
@@ -217,12 +228,10 @@ end
 
 -- Our green fill from the end of Blizzard's XP fill, as long as the ready quests' XP, up to the
 -- bar's end. It follows Blizzard's fill as that grows, and hides where the XP can't be read.
-local function updateFill(bar)
+local function updateFill(bar, current, max)
     local fill = fills[bar]
-    local current, max = UnitXP("player"), UnitXPMax("player")
     local xpFill = bar.StatusBar:GetStatusBarTexture()
-    if not (module.enabled and module.db.questBar and readyXP > 0 and xpFill and readable(current)
-        and readable(max) and type(current) == "number" and type(max) == "number" and max > 0
+    if not (module.enabled and module.db.questBar and readyXP > 0 and xpFill and current
         and current < max and not (IsXPUserDisabled and IsXPUserDisabled())) then
         fill:Hide()
         return
@@ -243,8 +252,10 @@ local function update(bar)
     if not ours then
         return
     end
-    updateFill(bar)
-    local text = module.enabled and barText()
+    -- Read once for the fill and the text.
+    local current, max = readXP()
+    updateFill(bar, current, max)
+    local text = module.enabled and barText(current, max)
     if not text then
         ours:Hide()
         bar.OverlayFrame:Show()

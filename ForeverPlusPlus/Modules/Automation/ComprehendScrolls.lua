@@ -15,8 +15,7 @@
 -- nobody else notices it.
 local _, ns = ...
 
-local C_SpellBook, C_TooltipInfo, C_TradeSkillUI = C_SpellBook, C_TooltipInfo, C_TradeSkillUI
-local IsSpellKnown = IsSpellKnown
+local C_TooltipInfo, C_TradeSkillUI = C_TooltipInfo, C_TradeSkillUI
 
 local L = ns.L
 
@@ -50,10 +49,7 @@ function module:IsAvailable()
 end
 
 local function known()
-    if C_SpellBook and C_SpellBook.IsSpellKnown then
-        return C_SpellBook.IsSpellKnown(COMPREHEND_SCROLL)
-    end
-    return IsSpellKnown and IsSpellKnown(COMPREHEND_SCROLL)
+    return ns.Spellbook.IsKnown(COMPREHEND_SCROLL)
 end
 
 -- Probe: the skill line's own name, when the client has profession info for it.

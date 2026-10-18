@@ -194,7 +194,7 @@ local function readView()
     end
     local width, height = size[1], size[2]
     local radius = C_Minimap.GetViewRadius and C_Minimap.GetViewRadius()
-    if not (radius and readable(radius) and type(radius) == "number" and radius > 0) then
+    if not (radius and ns.IsNumber(radius) and radius > 0) then
         return nil
     end
     local angle = 0

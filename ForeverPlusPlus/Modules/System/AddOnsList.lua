@@ -202,10 +202,6 @@ end
 
 local setsDropdown
 
-local function trim(text)
-    return strtrim(text or "")
-end
-
 local function isOn(index, character)
     local none = Enum and Enum.AddOnEnableState and Enum.AddOnEnableState.None or 0
     return C_AddOns.GetAddOnEnableState(index, character) > none
@@ -264,11 +260,7 @@ local function applySet(name)
 end
 
 local function promptSave()
-    ns.Prompt("ADDONSLIST_SETS_SAVE", L.ADDONSLIST_SETS_SAVE_PROMPT, "", function(text)
-        local name = trim(text)
-        if name == "" then
-            return
-        end
+    ns.PromptName("ADDONSLIST_SETS_SAVE", L.ADDONSLIST_SETS_SAVE_PROMPT, "", function(name)
         if module.db.sets[name] then
             ns.Confirm("ADDONSLIST_SETS_REPLACE", L.ADDONSLIST_SETS_REPLACE_CONFIRM, function()
                 saveSet(name)

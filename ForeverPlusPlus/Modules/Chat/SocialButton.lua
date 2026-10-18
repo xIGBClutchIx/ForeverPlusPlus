@@ -17,10 +17,7 @@ module.category = "chat"
 local original -- where Blizzard had the button: its parent and anchor points
 
 local function remember(button)
-    original = { parent = button:GetParent(), points = {} }
-    for i = 1, button:GetNumPoints() do
-        original.points[i] = { button:GetPoint(i) }
-    end
+    original = { parent = button:GetParent(), points = ns.Frames.GetPoints(button) }
 end
 
 local function restore(button)
@@ -28,10 +25,7 @@ local function restore(button)
         return
     end
     button:SetParent(original.parent)
-    button:ClearAllPoints()
-    for _, point in ipairs(original.points) do
-        button:SetPoint(point[1], point[2], point[3], point[4], point[5])
-    end
+    ns.Frames.SetPoints(button, original.points)
 end
 
 -- Blizzard's chat alerts (Text to Speech, voice prompts) stack on the button, the first in

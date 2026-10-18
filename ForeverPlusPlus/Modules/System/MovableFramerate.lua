@@ -27,7 +27,7 @@ local SAMPLE = 144 -- a wide framerate, to size the Edit Mode box
 
 local holder -- our frame: the Edit Mode box, and what the text follows once moved
 local baseScale -- the text's own scale before ours
-local original -- Blizzard's anchor for the text, for when the micro menu can't give it back
+local original -- Blizzard's anchor points for the text, for when the micro menu can't give it back
 local ready = false -- true while the module is on and Blizzard's text is there
 
 -- The point the text and its box line up on: Blizzard's own corner until moved, then the edge
@@ -75,8 +75,7 @@ end
 -- (on Forever that does nothing).
 local function restoreAnchor()
     if original then
-        FramerateFrame:ClearAllPoints()
-        FramerateFrame:SetPoint(original[1], original[2], original[3], original[4], original[5])
+        ns.Frames.SetPoints(FramerateFrame, original)
     end
     if MicroMenu and MicroMenu.UpdateFramerateFrameAnchor and MicroMenuContainer
         and MicroMenuContainer.GetPosition then
@@ -146,9 +145,9 @@ local function setup()
     holder = holder or newHolder()
     baseScale = baseScale or FramerateFrame:GetScale()
     if not original then
-        local p, relativeTo, relativePoint, x, y = FramerateFrame:GetPoint(1)
-        if p then
-            original = { p, relativeTo, relativePoint, x, y }
+        local points = ns.Frames.GetPoints(FramerateFrame)
+        if points[1] then
+            original = points
         end
     end
     ready = true

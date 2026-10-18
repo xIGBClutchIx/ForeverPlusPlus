@@ -18,11 +18,11 @@ local _, ns = ...
 
 local ipairs, pairs, format, huge = ipairs, pairs, string.format, math.huge
 local sort, concat = table.sort, table.concat
-local pcall, tonumber, tostring, min = pcall, tonumber, tostring, math.min
+local tonumber, tostring, min = tonumber, tostring, math.min
 local UnitClass, UnitLevel, UnitExists, UnitCanAssist = UnitClass, UnitLevel, UnitExists, UnitCanAssist
 local UnitIsDeadOrGhost, UnitIsUnit, InCombatLockdown = UnitIsDeadOrGhost, UnitIsUnit, InCombatLockdown
 local UnitName, CreateFrame = UnitName, CreateFrame
-local GetTime, C_Spell, C_UnitAuras, C_Timer = GetTime, C_Spell, C_UnitAuras, C_Timer
+local GetTime, C_Spell, C_Timer = GetTime, C_Spell, C_Timer
 local UnitPowerType, Enum = UnitPowerType, Enum
 
 local L = ns.L
@@ -191,15 +191,11 @@ end
 -- length or 0, rank = its rank or nil }. Nil while auras
 -- can't be read (in combat, mostly), so nothing counts as there.
 local function aurasOf(unit)
-    if not (ns.AurasReadable() and C_UnitAuras and C_UnitAuras.GetAuraDataByIndex) then
+    if not ns.AurasReadable() then
         return nil
     end
     local found, now = {}, GetTime()
-    for i = 1, 40 do
-        local ok, aura = pcall(C_UnitAuras.GetAuraDataByIndex, unit, i, "HELPFUL")
-        if not (ok and aura) then
-            break
-        end
+    local listed = ns.EachAura(unit, "HELPFUL", function(aura)
         local name, expires, source = aura.name, aura.expirationTime, aura.sourceUnit
         if ns.IsText(name, true) then
             local left = readable(expires) and tonumber(expires) or 0
@@ -213,8 +209,8 @@ local function aurasOf(unit)
                 length = length,
             }
         end
-    end
-    return found
+    end)
+    return listed and found or nil
 end
 
 -- The best rank of `name` you know the unit can take ({ id, rank, subtext }): a buff's rank can go

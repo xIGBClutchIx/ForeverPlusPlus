@@ -41,7 +41,7 @@ local function slotItem(slot)
         return nil
     end
     local id = C_Item.GetItemInfoInstant(link)
-    return readable(id) and type(id) == "number" and id or nil
+    return ns.IsNumber(id) and id or nil
 end
 
 function internal.onLootOpened()

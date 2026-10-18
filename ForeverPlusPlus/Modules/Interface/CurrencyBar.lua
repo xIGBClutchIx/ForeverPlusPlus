@@ -6,11 +6,11 @@ local _, ns = ...
 
 local GetMoney, C_CurrencyInfo, GameTooltip = GetMoney, C_CurrencyInfo, GameTooltip
 local CreateFrame, UIParent = CreateFrame, UIParent
-local format, max, floor, tconcat = string.format, math.max, math.floor, table.concat
-local BreakUpLargeNumbers = BreakUpLargeNumbers
+local format, max, floor, abs, tconcat = string.format, math.max, math.floor, math.abs, table.concat
 
 local L = ns.L
 local Colors = ns.Colors
+local number = ns.Text.Number
 
 local module = ns.NewModule("CurrencyBar", L.CURRENCYBAR_DESC, {
     enabled = false,
@@ -51,8 +51,14 @@ local function coins(amount)
     local silver = floor(amount / 100) % 100
     local copper = amount % 100
     local icon = "|TInterface/MoneyFrame/UI-%sIcon:" .. ICON .. ":" .. ICON .. ":2:0|t"
-    return (BreakUpLargeNumbers and BreakUpLargeNumbers(gold) or gold) .. format(icon, "Gold")
+    return number(gold) .. format(icon, "Gold")
         .. " " .. silver .. format(icon, "Silver") .. " " .. copper .. format(icon, "Copper")
+end
+
+local function backpackCurrency(index)
+    -- Probe: the Backpack currency list is Mainline's.
+    return C_CurrencyInfo and C_CurrencyInfo.GetBackpackCurrencyInfo
+        and C_CurrencyInfo.GetBackpackCurrencyInfo(index)
 end
 
 -- The parts --------------------------------------------------------------------------------------
@@ -63,10 +69,9 @@ local function parts()
     if module.db.money then
         list[#list + 1] = coins(GetMoney())
     end
-    -- Probe: the Backpack currency list is Mainline's.
-    if module.db.currencies and C_CurrencyInfo and C_CurrencyInfo.GetBackpackCurrencyInfo then
+    if module.db.currencies then
         for index = 1, MAX_CURRENCIES do
-            local info = C_CurrencyInfo.GetBackpackCurrencyInfo(index)
+            local info = backpackCurrency(index)
             if not info then
                 break
             end
@@ -108,12 +113,6 @@ end
 local startMoney
 local startCurrency = {} -- currency ID -> amount first seen
 
-local function backpackCurrency(index)
-    -- Probe: the Backpack currency list is Mainline's.
-    return C_CurrencyInfo and C_CurrencyInfo.GetBackpackCurrencyInfo
-        and C_CurrencyInfo.GetBackpackCurrencyInfo(index)
-end
-
 -- Remembers each Backpack currency the first time it is seen, so later changes count from there.
 local function noteCurrencies()
     for index = 1, MAX_CURRENCIES do
@@ -145,7 +144,7 @@ local function showTooltip(owner)
     GameTooltip:AddDoubleLine(L.CURRENCYBAR_MONEY, ns.Money(money), 1, 1, 1)
     if module.db.session and startMoney then
         local change = money - startMoney
-        GameTooltip:AddDoubleLine(L.CURRENCYBAR_SESSION, signed(change, ns.Money(math.abs(change))),
+        GameTooltip:AddDoubleLine(L.CURRENCYBAR_SESSION, signed(change, ns.Money(abs(change))),
             0.8, 0.8, 0.8)
     end
     local header
@@ -160,11 +159,10 @@ local function showTooltip(owner)
             GameTooltip:AddLine(L.CURRENCYBAR_CURRENCIES)
         end
         local quantity = info.quantity or 0
-        local text = BreakUpLargeNumbers and BreakUpLargeNumbers(quantity) or quantity
+        local text = number(quantity)
         local change = quantity - (startCurrency[info.currencyTypesID] or quantity)
         if module.db.session and change ~= 0 then
-            text = text .. "  " .. signed(change, BreakUpLargeNumbers
-                and BreakUpLargeNumbers(math.abs(change)) or math.abs(change))
+            text = text .. "  " .. signed(change, number(abs(change)))
         end
         GameTooltip:AddDoubleLine(format("|T%s:%d|t %s", info.iconFileID or 134400, ICON, info.name or ""),
             text, 1, 1, 1, 1, 1, 1)
@@ -209,6 +207,11 @@ local function layout()
     update()
 end
 
+local function onCurrencies()
+    noteCurrencies()
+    update()
+end
+
 function module:OnEnable()
     if not frame then
         frame = newFrame()
@@ -218,14 +221,8 @@ function module:OnEnable()
     layout()
     frame:Show()
     self:On("PLAYER_MONEY", update)
-    self:On("CURRENCY_DISPLAY_UPDATE", function()
-        noteCurrencies()
-        update()
-    end)
-    self:On("PLAYER_ENTERING_WORLD", function()
-        noteCurrencies()
-        update()
-    end)
+    self:On("CURRENCY_DISPLAY_UPDATE", onCurrencies)
+    self:On("PLAYER_ENTERING_WORLD", onCurrencies)
     ns.EditMode.RegisterModule(self, frame, L.CURRENCYBAR_TITLE, layout)
 end
 

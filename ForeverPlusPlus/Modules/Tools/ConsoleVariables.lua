@@ -295,16 +295,13 @@ local function buildRow(row)
     row.highlight:SetColorTexture(1, 1, 1, 0.08)
     row.highlight:Hide()
 
-    row.reset = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
-    row.reset:SetSize(RESET_WIDTH, 22)
-    row.reset:SetPoint("RIGHT", -4, 0)
-    row.reset:SetText(L.CONSOLEVARIABLES_DEFAULT)
-    row.reset:SetScript("OnClick", function()
+    row.reset = ns.Frames.Button(row, L.CONSOLEVARIABLES_DEFAULT, RESET_WIDTH, function()
         local _, default = read(row.entry.name)
         if default ~= nil then
             apply(row.entry.name, default)
         end
     end)
+    row.reset:SetPoint("RIGHT", -4, 0)
     -- It's disabled on most rows (already at the default) and still covers part of the row.
     row.reset:SetMotionScriptsWhileDisabled(true)
     row.reset:HookScript("OnEnter", function() enterRow(row) end)

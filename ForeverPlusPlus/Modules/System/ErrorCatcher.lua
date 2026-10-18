@@ -105,6 +105,12 @@ local function short(message)
     return line
 end
 
+-- The first line as the window and chat show it: "|" doubled, so a link or color code in the
+-- error shows as text instead of breaking the line.
+local function shownLine(message)
+    return (short(message):gsub("|", "||"))
+end
+
 -- Messages whose stack this session's saved entry already has: a repeat is only counted (store),
 -- so its stack and locals aren't captured again.
 local captured = {}
@@ -140,8 +146,7 @@ local function store(entry, announce)
     end
     if announce and GetTime() - lastAnnounced >= ANNOUNCE_EVERY then
         lastAnnounced = GetTime()
-        -- Doubled bars, so a link or color code in the error shows as text instead of breaking the line.
-        module:Print(format(L.ERRORCATCHER_CAUGHT, (short(entry.message):gsub("|", "||"))))
+        module:Print(format(L.ERRORCATCHER_CAUGHT, shownLine(entry.message)))
     end
     changed()
 end
@@ -250,6 +255,11 @@ local function clear()
     end
 end
 
+-- Asks before forgetting every saved error.
+local function confirmClear()
+    ns.Confirm("ERRORCATCHER_CLEAR", L.ERRORCATCHER_CLEAR_CONFIRM, clear)
+end
+
 -- Forgets this session's errors, keeping earlier sessions'.
 local function clearSession()
     wipe(captured)
@@ -324,11 +334,15 @@ local function otherAddOns()
     return names
 end
 
+-- How long ago an entry last happened ("12m ago").
+local function age(entry)
+    return ns.Text.Ago(time() - (entry.time or time()))
+end
+
 -- How often and when an entry happened, in one line.
 local function seenText(entry)
     return format(L.ERRORCATCHER_META, entry.count or 1, entry.session or 0,
-        when(entry.first or entry.time), when(entry.time),
-        ns.Text.Ago(time() - (entry.time or time())))
+        when(entry.first or entry.time), when(entry.time), age(entry))
 end
 
 -- The message, stack, and locals of an entry, as lines.
@@ -456,7 +470,7 @@ local function showDetails()
         f.kind:SetText(kind.name)
         f.kind:SetTextColor(kind.r, kind.g, kind.b)
         f.position:SetText(format(L.ERRORCATCHER_POSITION, indexOf(entry) or 0, #list))
-        f.message:SetText((short(entry.message):gsub("|", "||")))
+        f.message:SetText(shownLine(entry.message))
         f.meta:SetText(seenText(entry))
         setEditText(entryText(entry))
         f.copy:SetEnabled(true)
@@ -515,13 +529,6 @@ local function setFilter(value)
     refreshWindow()
 end
 
-local function newButton(parent, text, width)
-    local b = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
-    b:SetSize(width, 22)
-    b:SetText(text)
-    return b
-end
-
 local FILTERS = {
     { SESSION, L.ERRORCATCHER_THIS_SESSION },
     { LAST, L.ERRORCATCHER_LAST_SESSION },
@@ -544,7 +551,7 @@ local function newFilter(parent)
         end)
         return dropdown
     end
-    local b = newButton(parent, FILTERS[1][2], 180)
+    local b = ns.Frames.Button(parent, FILTERS[1][2], 180)
     b:SetScript("OnClick", function(self)
         for i, choice in ipairs(FILTERS) do
             if choice[1] == filter then
@@ -587,9 +594,8 @@ local function initRow(row, entry)
     local kind = kindOf(entry)
     row.kind:SetText(kind.name)
     row.kind:SetTextColor(kind.r, kind.g, kind.b)
-    row.info:SetText(format(L.ERRORCATCHER_ROW_INFO, entry.count or 1,
-        ns.Text.Ago(time() - (entry.time or time()))))
-    row.message:SetText((short(entry.message):gsub("|", "||")))
+    row.info:SetText(format(L.ERRORCATCHER_ROW_INFO, entry.count or 1, age(entry)))
+    row.message:SetText(shownLine(entry.message))
     row.selected:SetShown(entry == selected)
 end
 
@@ -609,14 +615,10 @@ end
 -- Named so Escape can close it (ns.Frames.CloseOnEscape).
 local WINDOW_NAME = "ForeverPlusPlusErrorCatcher"
 
-local function newFrame()
-    return ns.Frames.PortraitWindow(WINDOW_NAME, L.ERRORCATCHER_TITLE)
-end
-
 local LIST_WIDTH = 270
 
 local function newWindow()
-    local f = newFrame()
+    local f = ns.Frames.PortraitWindow(WINDOW_NAME, L.ERRORCATCHER_TITLE)
     window = f
     f:SetSize(780, 500)
     f:SetPoint("CENTER")
@@ -711,14 +713,10 @@ local function newWindow()
     f.edit, f.scroll = edit, scroll
 
     -- The strip at the bottom.
-    f.clear = newButton(f, L.ERRORCATCHER_CLEAR, 110)
+    f.clear = ns.Frames.Button(f, L.ERRORCATCHER_CLEAR, 110, confirmClear)
     f.clear:SetPoint("BOTTOMLEFT", 4, 4)
-    f.clear:SetScript("OnClick", function()
-        ns.Confirm("ERRORCATCHER_CLEAR", L.ERRORCATCHER_CLEAR_CONFIRM, clear)
-    end)
-    f.copy = newButton(f, L.ERRORCATCHER_COPY, 140)
+    f.copy = ns.Frames.Button(f, L.ERRORCATCHER_COPY, 140, copyReport)
     f.copy:SetPoint("BOTTOMRIGHT", -6, 4)
-    f.copy:SetScript("OnClick", copyReport)
     f.hint = f:CreateFontString(nil, "OVERLAY", "GameFontGreenSmall")
     f.hint:SetPoint("RIGHT", f.copy, "LEFT", -10, 0)
 
@@ -750,9 +748,7 @@ local provider = {
     end,
     toggle = toggleWindow,
     clearSession = clearSession,
-    clearAll = function()
-        ns.Confirm("ERRORCATCHER_CLEAR", L.ERRORCATCHER_CLEAR_CONFIRM, clear)
-    end,
+    clearAll = confirmClear,
 }
 
 module.options = {

@@ -17,9 +17,8 @@ local module = ns.modules.WorldMap:NewPart({
     section = L.COORDS_TITLE,
 })
 
--- Blizzard's checkboxes for the player's and the cursor's coordinates on the map. Forever only;
--- see docs/forever-api.md.
-local MAP_CVARS = { "worldMapShowPlayerCoords", "worldMapShowCursorCoords" }
+-- Blizzard's checkboxes for the player's and the cursor's coordinates on the map.
+local MAP_CVARS = ns.WorldMap.COORDS_CVARS
 
 local function anyShown()
     return CVars.IsOn(MAP_CVARS[1]) or CVars.IsOn(MAP_CVARS[2])
