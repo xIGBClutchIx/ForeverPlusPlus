@@ -58,6 +58,9 @@ ns.changelog = {
                     .. "gear sites publish. Off by default." },
             } },
             { L.CHANGELOG_CHANGED, {
+                "Item marks, tints, and tooltip lines do much less work after a skill point or "
+                    .. "level, in your bags, and at the auction house, so bags open more smoothly "
+                    .. "while leveling.",
                 { L.AUTOWEAPONBUFF_TITLE, "Using a sharpening stone, weightstone, oil, poison, or "
                     .. "lure from an action bar puts it straight on your weapon too, like a "
                     .. "right-click in your bags. Not in combat." },

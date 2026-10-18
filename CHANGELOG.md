@@ -13,6 +13,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Changed
 
+- Item marks, tints, and tooltip lines do much less work after a skill point or level, in your bags, and at the auction house, so bags open more smoothly while leveling.
 - **Auto Weapon Buff**: using a sharpening stone, weightstone, oil, poison, or lure from an action bar puts it straight on your weapon too, like a right-click in your bags. Not in combat.
 - **Chat Copy**: the window looks like Forever++'s other windows, with the portrait and the title "Forever++ Chat Copy".
 - **Minimap Node Icons**: costs much less while you play: it looks the minimap over for new dots once a second or so instead of ten times, spreads the look after a zoom over a few moments instead of one frame, and does nothing while Find Herbs and Find Minerals are off. A new dot may take a moment longer to get its icon while you stand still.

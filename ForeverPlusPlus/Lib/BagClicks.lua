@@ -134,7 +134,7 @@ function Set:Update()
         return
     end
     self:Clear()
-    if not self.module.enabled then
+    if not self.module.enabled or (self.wanted and not self.wanted()) then
         return
     end
     local match = self.match
@@ -187,13 +187,16 @@ end
 ---when nothing else wants it (no merchant, bank, mail, trade, auction house, or guild bank), on
 ---press and on release. It sets the overlay's secure attributes for that click (`type2`, cleared
 ---before it runs, and what goes with it) and returns true when it took the click; false sends
----the click to Blizzard's bag button as usual.
+---the click to Blizzard's bag button as usual. `wanted()`, when given, says whether any item could
+---match right now; while it's false the bags aren't looked through at all.
 ---@param module table
 ---@param match fun(itemID: number, bag: number, slot: number): any
 ---@param click fun(overlay: table, value: any, bag: number, slot: number, down: boolean): boolean?
+---@param wanted? fun(): boolean
 ---@return table set
-function BagClicks.New(module, match, click)
-    local set = setmetatable({ module = module, match = match, click = click, active = {}, spare = {} }, Set)
+function BagClicks.New(module, match, click, wanted)
+    local set = setmetatable({ module = module, match = match, click = click, wanted = wanted,
+        active = {}, spare = {} }, Set)
     set.refresh = ns.Frames.Coalesce(function()
         set:Update()
     end, nil, set.module)

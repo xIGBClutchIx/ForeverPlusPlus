@@ -14,14 +14,19 @@ local function weak()
     return setmetatable({}, { __mode = "k" })
 end
 
----Blizzard's bag windows that are there: the combined bags, then one per bag.
+local bagFrames
+
+---Blizzard's bag windows that are there: the combined bags, then one per bag. FrameXML makes
+---them at load, so the list is made once; don't change it.
 ---@return table[]
 function ItemButtons.Frames()
-    local list = { _G.ContainerFrameCombinedBags }
-    for i = 1, _G.NUM_CONTAINER_FRAMES or 13 do
-        list[#list + 1] = _G["ContainerFrame" .. i]
+    if not bagFrames then
+        bagFrames = { _G.ContainerFrameCombinedBags }
+        for i = 1, _G.NUM_CONTAINER_FRAMES or 13 do
+            bagFrames[#bagFrames + 1] = _G["ContainerFrame" .. i]
+        end
     end
-    return list
+    return bagFrames
 end
 
 ---Calls `fn(button, icon, bag, slot)` for each item button in a bag window.
@@ -95,7 +100,10 @@ end
 ---for a row without an item.
 ---@param fn fun(icon: table, itemID: number?)
 function ItemButtons.EachAuctionRow(fn)
-    local box = browseList()
+    -- Nothing to mark while the window is closed: its rows hold the last search, and the list's
+    -- Update hook (HookAuction) marks them when it opens.
+    local frame = _G.AuctionHouseFrame
+    local box = frame and frame:IsShown() and browseList()
     if not (box and box.ScrollTarget) then
         return
     end
