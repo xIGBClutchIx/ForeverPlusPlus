@@ -105,6 +105,10 @@ local function short(message)
     return line
 end
 
+-- Messages whose stack this session's saved entry already has: a repeat is only counted (store),
+-- so its stack and locals aren't captured again.
+local captured = {}
+
 -- Saves an error, or counts it again if it's already saved. An error seen again in a new session
 -- moves to the end, into this session, with its new stack.
 local function store(entry, announce)
@@ -131,6 +135,7 @@ local function store(entry, announce)
     entry.first = entry.time
     errors[#errors + 1] = entry
     while #errors > MAX_ERRORS do
+        captured[errors[1].message] = nil
         tremove(errors, 1)
     end
     if announce and GetTime() - lastAnnounced >= ANNOUNCE_EVERY then
@@ -185,13 +190,23 @@ local function onError(message)
         return
     end
     busy = true
-    local ok, stack, locals = pcall(capture)
-    if not ok then
-        stack, locals = nil, nil
+    local text = readable(message, L.ERRORCATCHER_SECRET)
+    local stack, locals
+    if not captured[text] then
+        local ok
+        -- Still called straight from the handler, as capture needs.
+        ok, stack, locals = pcall(capture)
+        if not ok then
+            stack, locals = nil, nil
+        end
+        -- Only once it will be saved: one handed on while the module is off keeps nothing.
+        if module.enabled or not module.db then
+            captured[text] = true
+        end
     end
     pcall(catch, {
         kind = "error",
-        message = readable(message, L.ERRORCATCHER_SECRET),
+        message = text,
         stack = stack,
         locals = locals,
         time = time(),
@@ -228,6 +243,7 @@ end
 
 local function clear()
     local data = saved()
+    wipe(captured)
     if data then
         wipe(data.errors)
         changed()
@@ -236,6 +252,7 @@ end
 
 -- Forgets this session's errors, keeping earlier sessions'.
 local function clearSession()
+    wipe(captured)
     local data = saved()
     if not data then
         return
