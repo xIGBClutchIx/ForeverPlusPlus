@@ -221,15 +221,15 @@ local function nodeLine(text)
 end
 
 -- For Blizzard's requirement line `text` of skill line `line`: its color (nil when the option is
--- off or the profession not shown), its text without codes, true, and the player's rank and
--- profession name. Nothing when `text` isn't such a line.
+-- off or the profession not shown), its text without codes, and the player's rank and profession
+-- name. Nothing when `text` isn't such a line.
 local function requiresColor(text, line)
     local plain = clean(text)
     local _, digits = match(plain, REQUIRES)
     local need = tonumber(digits)
     if need then
         local _, color, rank, name = skillLine(line, need, L.PROFTOOLTIPS_REQUIRES)
-        return color, plain, true, rank, name
+        return color, plain, rank, name
     end
 end
 
@@ -295,7 +295,7 @@ local function restyle(tooltip, job)
         end
         return
     end
-    local color, _, _, rank, name = requiresColor(job[3], job[2])
+    local color, _, rank, name = requiresColor(job[3], job[2])
     if fontString and color then
         fontString:SetText(Colors.Text(color, clean(job[3])))
         -- A bare name line below it becomes the player's skill against that requirement.
@@ -373,7 +373,7 @@ local function addNodeLines(tooltip, data)
         local node = NODES[clean(part)]
         local color, plain, rank, skillName = nil, nil, nil, nil
         if node and nextPart then
-            color, plain, _, rank, skillName = requiresColor(nextPart, node[1])
+            color, plain, rank, skillName = requiresColor(nextPart, node[1])
         end
         if node and nextPart and match(clean(nextPart), REQUIRES) then
             -- Blizzard's own line follows the name: color it, and a bare name line after it
@@ -453,7 +453,7 @@ local function canSkin(unit)
     end
     -- Probe: the type's ID is a second value on Mainline; without it, the name the game shows.
     local name, kind = UnitCreatureType(unit)
-    if readable(kind) and type(kind) == "number" then
+    if ns.IsNumber(kind) then
         if not SKINNABLE_TYPES[kind] then
             return false
         end
@@ -482,7 +482,7 @@ local function addSkinLine(tooltip)
         return
     end
     local level = UnitLevel(unit)
-    if not (readable(level) and type(level) == "number" and level > 0) then
+    if not (ns.IsNumber(level) and level > 0) then
         return -- a "??" boss, or secret
     end
     local line, color = skillLine(SKIN, Professions.SkinningNeed(level), L.PROFTOOLTIPS_REQUIRES)
@@ -524,16 +524,6 @@ end
 
 -- Items --------------------------------------------------------------------------------------
 
--- Whether `skill`, the name in Blizzard's requirement line, is Lockpicking, in English or the
--- client's language (known only to characters who can pick locks).
-local function isLockpicking(skill)
-    if skill == L.PROFTOOLTIPS_LOCKPICKING_NAME then
-        return true
-    end
-    local _, name = Professions.Rank(LOCK)
-    return name ~= nil and skill == name
-end
-
 -- itemID -> { line index, Lockpicking needed } of the item's "Requires Lockpicking (N)" line, or
 -- false for an item without one. Looked for once per item, since this runs before every line of
 -- every item tooltip; later builds only compare line tables.
@@ -545,7 +535,9 @@ local function lockLine(id, data)
     local cached = lockLines[id]
     if cached == nil then
         local skill, need, index = ns.GameData.TooltipRequires(data)
-        cached = skill and (LOCKBOXES:Get(id) or isLockpicking(skill)) and { index, need } or false
+        -- Lockpicking's name in English or the client's language (known only to characters who
+        -- can pick locks).
+        cached = skill and (LOCKBOXES:Get(id) or isProfessionName(skill, LOCK)) and { index, need } or false
         if cached then
             LOCKBOXES:Learn(id, need)
         end

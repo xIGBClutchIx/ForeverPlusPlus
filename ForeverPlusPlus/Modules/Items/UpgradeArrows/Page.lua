@@ -8,7 +8,7 @@
 local _, ns = ...
 
 local ipairs, pairs, format, tonumber, tostring, abs = ipairs, pairs, string.format, tonumber, tostring, math.abs
-local _G, CreateFrame, UnitClass = _G, CreateFrame, UnitClass
+local _G, CreateFrame = _G, CreateFrame
 
 local L = ns.L
 local Kit = ns.SettingsKit
@@ -66,10 +66,7 @@ end
 
 -- Classes and trees ---------------------------------------------------------------------------
 
-local function playerClass()
-    local _, class = UnitClass("player")
-    return ns.IsText(class, true) and class or "?"
-end
+local playerClass = internal.PlayerClass
 
 -- A class's name in the player's language. Probe: the table is Blizzard's; without it, the token.
 local function className(class)
@@ -119,23 +116,13 @@ end
 -- guess (Auto with no talent points). For the character's own class it's the module's own.
 local function resolveProfile()
     local class = editingClass
-    local value = treeValue(class)
     if class == playerClass() then
         local current = internal.CurrentProfile()
         if current then
             return internal.Profile(current.class, current.index, current.bear), current.guess
         end
     end
-    if value == "bear" and class == "DRUID" then
-        return internal.Profile(class, 1, true), false
-    elseif tonumber(value) then
-        return internal.Profile(class, tonumber(value)), false
-    end
-    local best = Talents.Dominant()
-    if best and best.spent > 0 then
-        return internal.Profile(class, best.index), false
-    end
-    return internal.Profile(class, 1), true
+    return internal.ResolveProfile(class, treeValue(class))
 end
 
 -- A profile's name for the player: "Arms (Warrior)".
@@ -183,33 +170,18 @@ local function defaultWeight(stat)
     return editing and editing.defaults[stat] or 0
 end
 
--- The undo arrow at a row's right, shown while the weight isn't the profile's default. Probe:
--- the atlases are Mainline's; without one, no arrow.
+-- The undo arrow at a row's right, shown while the weight isn't the profile's default. Without
+-- the art, no arrow (SettingsKit.NewResetButton).
 local function addResetButton(row, stat)
-    local atlas = ns.Frames.FirstAtlas("common-icon-undo", "talents-button-undo")
-    if not atlas then
-        return nil
-    end
-    local button = CreateFrame("Button", nil, row)
-    button:SetSize(RESET_SIZE, RESET_SIZE)
-    button:SetPoint("RIGHT", -2, 0)
-    local icon = button:CreateTexture(nil, "ARTWORK")
-    icon:SetAtlas(atlas)
-    icon:SetSize(16, 16)
-    icon:SetPoint("CENTER")
-    button:SetHighlightAtlas(atlas, "ADD")
-    button:GetHighlightTexture():SetAllPoints(icon)
-    button:SetScript("OnMouseDown", function() icon:SetPoint("CENTER", 1, -1) end)
-    button:SetScript("OnMouseUp", function() icon:SetPoint("CENTER") end)
-    button:SetScript("OnClick", function()
-        if PlaySound and SOUNDKIT then
-            PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-        end
+    local button = Kit.NewResetButton(row, RESET_SIZE, function()
         if editing then
             internal.SetWeight(editing, stat, defaultWeight(stat))
             ui.refresh()
         end
     end)
+    if not button then
+        return nil
+    end
     button:SetScript("OnEnter", function(self)
         Kit.ShowTooltip(self, L.SETTINGS_RESET, format(L.UPGRADEARROWS_PAGE_DEFAULT, weightText(defaultWeight(stat))))
     end)

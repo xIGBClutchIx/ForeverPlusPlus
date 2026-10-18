@@ -52,6 +52,14 @@ module.added = "0.10.0"
 module.internal = {}
 local internal = module.internal
 
+-- The corners the arrow can sit in, for both arrows.
+local CORNERS = {
+    { "TOPLEFT", L.UPGRADEARROWS_CORNER_TOPLEFT },
+    { "TOPRIGHT", L.UPGRADEARROWS_CORNER_TOPRIGHT },
+    { "BOTTOMLEFT", L.UPGRADEARROWS_CORNER_BOTTOMLEFT },
+    { "BOTTOMRIGHT", L.UPGRADEARROWS_CORNER_BOTTOMRIGHT },
+}
+
 -- The profile (Auto, a tab, or Bear) is picked on the module's own page (Page.lua), not here.
 module.options = {
     {
@@ -94,23 +102,11 @@ module.options = {
     },
     {
         key = "corner", name = L.UPGRADEARROWS_CORNER, description = L.UPGRADEARROWS_CORNER_DESC,
-        section = L.UPGRADEARROWS_SECTION_ARROW,
-        choices = {
-            { "TOPLEFT", L.UPGRADEARROWS_CORNER_TOPLEFT },
-            { "TOPRIGHT", L.UPGRADEARROWS_CORNER_TOPRIGHT },
-            { "BOTTOMLEFT", L.UPGRADEARROWS_CORNER_BOTTOMLEFT },
-            { "BOTTOMRIGHT", L.UPGRADEARROWS_CORNER_BOTTOMRIGHT },
-        },
+        section = L.UPGRADEARROWS_SECTION_ARROW, choices = CORNERS,
     },
     {
         key = "downCorner", name = L.UPGRADEARROWS_DOWNCORNER, description = L.UPGRADEARROWS_DOWNCORNER_DESC,
-        section = L.UPGRADEARROWS_SECTION_ARROW,
-        choices = {
-            { "TOPLEFT", L.UPGRADEARROWS_CORNER_TOPLEFT },
-            { "TOPRIGHT", L.UPGRADEARROWS_CORNER_TOPRIGHT },
-            { "BOTTOMLEFT", L.UPGRADEARROWS_CORNER_BOTTOMLEFT },
-            { "BOTTOMRIGHT", L.UPGRADEARROWS_CORNER_BOTTOMRIGHT },
-        },
+        section = L.UPGRADEARROWS_SECTION_ARROW, choices = CORNERS,
     },
     {
         key = "size", name = L.UPGRADEARROWS_SIZE, description = L.UPGRADEARROWS_SIZE_DESC,
@@ -159,27 +155,38 @@ local PI = math.pi
 
 local profile -- { key, template, weights, guess }, from Weights.lua
 
+---The character's class token, or "?" while the client doesn't say.
+---@return string
+function internal.PlayerClass()
+    local _, class = UnitClass("player")
+    return ns.IsText(class, true) and class or "?"
+end
+
+---The profile a class judges gear by for a Profile choice ("auto", "1" to "3", or "bear"), and
+---whether it's a guess: Auto takes the tab with the most points, and the first tab while
+---there's no talent data or no points spent. Bear is for a Druid only.
+---@param class string
+---@param choice string
+---@return table profile from internal.Profile
+---@return boolean guess
+function internal.ResolveProfile(class, choice)
+    if choice == "bear" and class == "DRUID" then
+        return internal.Profile(class, 1, true), false
+    elseif tonumber(choice) then
+        return internal.Profile(class, tonumber(choice)), false
+    end
+    local best = Talents.Dominant()
+    if best and best.spent > 0 then
+        return internal.Profile(class, best.index), false
+    end
+    return internal.Profile(class, 1), true
+end
+
 -- Reads the profile the Profile option and the talents give. Guessed (the first tab) while
 -- there's no talent data or no points spent, so it's read again when talents change.
 local function updateProfile()
-    local _, class = UnitClass("player")
-    class = ns.IsText(class, true) and class or "?"
-    local tabs = Talents.Tabs()
-    local choice = module.db.profile
-    local index, guess, bear
-    if choice == "bear" and class == "DRUID" then
-        bear = true
-    elseif tonumber(choice) then
-        index = tonumber(choice)
-    else
-        local best = tabs and Talents.Dominant()
-        if best and best.spent > 0 then
-            index = best.index
-        else
-            index, guess = 1, true
-        end
-    end
-    profile = internal.Profile(class, index, bear)
+    local guess
+    profile, guess = internal.ResolveProfile(internal.PlayerClass(), module.db.profile)
     profile.guess = guess
 end
 
@@ -300,7 +307,7 @@ end
 -- On item icons the mark sits on the icon itself; on a quest reward button on its icon region.
 local arrows = ItemButtons.Overlays(makeMark)
 local rewardArrows = ItemButtons.Overlays(function(button)
-    return makeMark(button.Icon or button.icon or button)
+    return makeMark(ItemButtons.RewardIcon(button))
 end)
 
 local hasArt, hasDownArt, hasDownFile -- whether this client has the art (checked at enable)
@@ -380,25 +387,12 @@ local function updateBag(frame)
     end)
 end
 
--- Forever's bank is Blizzard's BankPanel with tabs (as Unusable Items Tint reads it).
 local function updateBank()
-    local panel = _G.BankPanel
-    if not (panel and panel.EnumerateValidItems) then
-        return
-    end
     local on = module.db.bank
-    for button in panel:EnumerateValidItems() do
-        local link
-        if on and button.GetBankTabID and button.GetContainerSlotID then
-            link = C_Container.GetContainerItemLink(button:GetBankTabID(), button:GetContainerSlotID())
-        end
-        setArrow(arrows, button.icon, link and markOf(link), sizeAt(1))
-    end
-end
-
-local function hookBank()
-    module:Hook(_G.BankPanel, "RefreshAllItemsForSelectedTab", updateBank)
-    module:Hook(_G.BankPanel, "GenerateItemSlotsForSelectedTab", updateBank)
+    ItemButtons.EachBankButton(function(icon, tab, slot)
+        local link = on and tab and C_Container.GetContainerItemLink(tab, slot)
+        setArrow(arrows, icon, link and markOf(link), sizeAt(1))
+    end)
 end
 
 -- Merchants -------------------------------------------------------------------------------------
@@ -435,10 +429,6 @@ local function markLoot(icon, _, link)
     setArrow(arrows, icon, module.db.loot and link and markOf(link), sizeAt(0.9))
 end
 
-local function hookLoot()
-    ItemButtons.HookLoot(module, markLoot)
-end
-
 local function markRoll(icon, link)
     setArrow(arrows, icon, module.db.loot and link and markOf(link), sizeAt(0.9))
 end
@@ -447,43 +437,31 @@ end
 
 local rewardsWaiting -- the rewards frame whose items weren't cached, until GET_ITEM_INFO_RECEIVED
 
--- The link of a reward choice, from the quest giver or the quest log.
-local function choiceLink(index, questLog)
-    if questLog then
-        return _G.GetQuestLogItemLink and _G.GetQuestLogItemLink("choice", index)
-    end
-    return _G.GetQuestItemLink and _G.GetQuestItemLink("choice", index)
-end
-
 -- Marks the choice that's the biggest upgrade (an empty slot beats any percentage); choices
 -- that tie are all marked.
 local function updateRewards(rewardsFrame)
-    local info = _G.QuestInfoFrame
-    local buttons = rewardsFrame and rewardsFrame.RewardButtons
-    if not (info and type(buttons) == "table") then
-        return
-    end
-    rewardsWaiting = nil -- set again below while a choice still isn't cached
-    local best, bestValue = {}, nil
-    for _, button in ipairs(buttons) do
-        setArrow(rewardArrows, button, false)
-        local object = button.objectType
-        if module.db.quests and button:IsShown() and button.type == "choice"
-            and (object == nil or object == "item") then
-            local link = choiceLink(button:GetID(), info.questLog)
-            local result = ns.IsText(link, true) and evaluate(link)
-            if result == nil and link then
-                rewardsWaiting = rewardsFrame
-            elseif result and result.upgrade then
-                local value = result.percent or huge
-                if not bestValue or value > bestValue then
-                    best, bestValue = { { button, result } }, value
-                elseif value == bestValue then
-                    best[#best + 1] = { button, result }
-                end
+    local best, bestValue, uncached = {}, nil, false
+    local on = module.db.quests
+    local walked = ItemButtons.EachRewardChoice(rewardsFrame, function(button, _, link)
+        if not on then
+            return
+        end
+        local result = ns.IsText(link, true) and evaluate(link)
+        if result == nil and link then
+            uncached = true
+        elseif result and result.upgrade then
+            local value = result.percent or huge
+            if not bestValue or value > bestValue then
+                best, bestValue = { { button, result } }, value
+            elseif value == bestValue then
+                best[#best + 1] = { button, result }
             end
         end
+    end, rewardArrows)
+    if not walked then
+        return
     end
+    rewardsWaiting = uncached and rewardsFrame or nil -- looked at again once its items load
     for _, entry in ipairs(best) do
         setArrow(rewardArrows, entry[1], entry[2], sizeAt(1))
     end
@@ -669,19 +647,18 @@ function module:OnEnable()
     local ok, fileID = pcall(function()
         return getFileID and getFileID(DOWN_FILE)
     end)
-    hasDownFile = ok and ns.IsReadable(fileID) and type(fileID) == "number" and fileID > 0
+    hasDownFile = ok and ns.IsNumber(fileID) and fileID > 0
     updateProfile()
     self:Hook("MerchantFrame_UpdateMerchantInfo", updateMerchant)
     self:Hook("MerchantFrame_UpdateBuybackInfo", clearMerchant)
     ItemButtons.HookBags(self, updateBag)
-    hookBank()
-    hookLoot()
+    ItemButtons.HookBank(self, updateBank)
+    ItemButtons.HookLoot(self, markLoot)
     ItemButtons.HookRolls(self, markRoll)
     ItemButtons.HookAuction(self, updateAuction)
     self:Hook("QuestInfo_Display", onQuestDisplay)
     ItemTooltip.ReplaceLine(onNameLine, self)
     ItemTooltip.OnInfo(onTooltip, self)
-    self:On("LOOT_OPENED", hookLoot)
     self:On("GET_ITEM_INFO_RECEIVED", onItemInfo)
     self:On("PLAYER_EQUIPMENT_CHANGED", onGearChanged)
     self:On("PLAYER_LEVEL_UP", onPlayerChanged)

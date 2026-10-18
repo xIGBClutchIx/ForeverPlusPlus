@@ -54,7 +54,7 @@ local function isRed(color)
         return false
     end
     local r, g, b = color.r, color.g, color.b
-    if not (ns.IsReadable(r) and type(r) == "number" and type(g) == "number" and type(b) == "number") then
+    if not (ns.IsNumber(r) and type(g) == "number" and type(b) == "number") then
         return false
     end
     local rr, rg, rb = 1, 0.125, 0.125
@@ -141,42 +141,24 @@ local tints = ItemButtons.Overlays(function(icon)
     return ItemButtons.Tint(icon, TINT)
 end)
 
--- Shows or hides our tint over an icon.
-local function setTint(icon, on)
-    tints:Set(icon, on)
-end
-
 -- Bags ------------------------------------------------------------------------------------------
 
 local function updateBag(frame)
     local on = module.db.bags
     ItemButtons.EachBagButton(frame, function(_, icon, bag, slot)
         local link = on and C_Container.GetContainerItemLink(bag, slot)
-        setTint(icon, link and unusable(link))
+        tints:Set(icon, link and unusable(link))
     end)
 end
 
 -- Bank ------------------------------------------------------------------------------------------
 
--- Forever's bank is Blizzard's BankPanel with tabs (Blizzard_UIPanels_Game, Camelot BankFrame).
 local function updateBank()
-    local panel = _G.BankPanel
-    if not (panel and panel.EnumerateValidItems) then
-        return
-    end
     local on = module.db.bank
-    for button in panel:EnumerateValidItems() do
-        local link
-        if on and button.GetBankTabID and button.GetContainerSlotID then
-            link = C_Container.GetContainerItemLink(button:GetBankTabID(), button:GetContainerSlotID())
-        end
-        setTint(button.icon, link and unusable(link))
-    end
-end
-
-local function hookBank()
-    module:Hook(_G.BankPanel, "RefreshAllItemsForSelectedTab", updateBank)
-    module:Hook(_G.BankPanel, "GenerateItemSlotsForSelectedTab", updateBank)
+    ItemButtons.EachBankButton(function(icon, tab, slot)
+        local link = on and tab and C_Container.GetContainerItemLink(tab, slot)
+        tints:Set(icon, link and unusable(link))
+    end)
 end
 
 -- Merchants -------------------------------------------------------------------------------------
@@ -192,14 +174,14 @@ local function updateMerchant()
     local on = module.db.merchant
     ItemButtons.EachMerchantItem(function(icon, index)
         local link = on and _G.GetMerchantItemLink(index)
-        setTint(icon, link and not blizzardTinted(index) and unusable(link))
+        tints:Set(icon, link and not blizzardTinted(index) and unusable(link))
     end)
 end
 
 -- The buyback tab reuses the same buttons, and Blizzard tints those itself.
 local function clearMerchant()
     ItemButtons.EachMerchantItem(function(icon)
-        setTint(icon, false)
+        tints:Set(icon, false)
     end)
 end
 
@@ -208,7 +190,7 @@ end
 local function updateAuction()
     local on = module.db.auction
     ItemButtons.EachAuctionRow(function(icon, itemID)
-        setTint(icon, on and itemID and unusable("item:" .. itemID))
+        tints:Set(icon, on and itemID and unusable("item:" .. itemID))
     end)
 end
 
@@ -217,15 +199,11 @@ end
 -- Blizzard tints a slot you can't loot (locked) red itself, so ours isn't laid on top of it.
 local function tintLoot(icon, slot, link)
     local locked = slot and _G.GetLootSlotInfo and select(6, _G.GetLootSlotInfo(slot))
-    setTint(icon, module.db.loot and link and not locked and unusable(link))
-end
-
-local function hookLoot()
-    ItemButtons.HookLoot(module, tintLoot)
+    tints:Set(icon, module.db.loot and link and not locked and unusable(link))
 end
 
 local function tintRoll(icon, link)
-    setTint(icon, module.db.loot and link and unusable(link))
+    tints:Set(icon, module.db.loot and link and unusable(link))
 end
 
 -- Module ----------------------------------------------------------------------------------------
@@ -288,11 +266,10 @@ function module:OnEnable()
     self:Hook("MerchantFrame_UpdateMerchantInfo", updateMerchant)
     self:Hook("MerchantFrame_UpdateBuybackInfo", clearMerchant)
     ItemButtons.HookBags(self, updateBag)
-    hookBank()
-    hookLoot()
+    ItemButtons.HookBank(self, updateBank)
+    ItemButtons.HookLoot(self, tintLoot)
     ItemButtons.HookRolls(self, tintRoll)
     ItemButtons.HookAuction(self, updateAuction)
-    self:On("LOOT_OPENED", hookLoot)
     self:On("GET_ITEM_INFO_RECEIVED", onItemInfo) -- items without a tooltip yet weren't kept
     self:On("PLAYER_LEVEL_UP", onPlayerChanged)
     self:On("SKILL_LINES_CHANGED", onPlayerChanged)

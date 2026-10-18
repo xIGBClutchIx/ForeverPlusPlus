@@ -15,7 +15,11 @@ local Prices = ns.Prices
 local module = ns.modules.WaylaidCrates
 local internal = module.internal
 
-local LINES, HEX_CODE, NAMED_CODE = internal.LINES, internal.HEX_CODE, internal.NAMED_CODE
+local LINES = internal.LINES
+
+-- Color codes come as |cAARRGGBB or as |cnNAME: with one of Blizzard's named colors
+-- (|cnHIGHLIGHT_FONT_COLOR:), and end at |r.
+local HEX_CODE, NAMED_CODE = "|c%x%x%x%x%x%x%x%x", "|cn[%w_]+:"
 
 -- The color code still running at the end of `piece`: the code, false when the piece ends its
 -- color with |r, or nil when it has neither and the color before it runs on.

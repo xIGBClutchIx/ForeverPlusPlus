@@ -106,8 +106,6 @@ end
 
 -- Searching -------------------------------------------------------------------------------------
 
-local onThrottleReady
-
 -- On Forever the first search for these keys comes back with every row "None available", and
 -- the same search sent again fills in the prices (seen in game: the second or third click
 -- showed them). So while any row has no quantity, the search goes out again, up to RETRIES
@@ -117,10 +115,10 @@ local RETRY_DELAY = 0.5 -- seconds
 local tries = 0 -- searches sent for this click
 
 local function search()
-    ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
+    ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", search)
     local ready = C_AuctionHouse.IsThrottledMessageSystemReady
     if ready and not ready() then
-        ns.On("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
+        ns.On("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", search)
         return
     end
     local keys = {}
@@ -158,10 +156,6 @@ local function search()
     listed, awaiting = nil, true
     setSelected(true)
     C_AuctionHouse.SearchForItemKeys(keys, sorts)
-end
-
-function onThrottleReady()
-    search()
 end
 
 -- Sends the search again, unless something else replaced our list in the meantime.
@@ -266,7 +260,7 @@ end
 
 local function onHide()
     ns.Off("BAG_UPDATE_DELAYED", refresh)
-    ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
+    ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", search)
     awaiting = false
     setSelected(false)
 end

@@ -275,10 +275,6 @@ local function markLoot(icon, _, link)
     setMark(icon, module.db.loot and link and itemKnown(link), 14)
 end
 
-local function hookLoot()
-    ItemButtons.HookLoot(module, markLoot)
-end
-
 -- Loot rolls are marked as the frame shows, before the player picks Need.
 local function markRoll(icon, link)
     setMark(icon, module.db.loot and link and itemKnown(link), 14)
@@ -330,10 +326,9 @@ function module:OnEnable()
     self:Hook("InboxFrame_Update", updateInbox)
     self:Hook("OpenMail_Update", updateOpenMail)
     ItemButtons.HookBags(self, updateBag)
-    hookLoot()
+    ItemButtons.HookLoot(self, markLoot)
     ItemButtons.HookRolls(self, markRoll)
     ItemButtons.HookAuction(self, updateAuction)
-    self:On("LOOT_OPENED", hookLoot)
     self:On("GET_ITEM_INFO_RECEIVED", onItemInfo)
     refresh()
 end

@@ -11,7 +11,7 @@ local _, ns = ...
 local ipairs, pairs, format, time, floor = ipairs, pairs, string.format, time, math.floor
 local C_AuctionHouse, C_Timer, GetTime = C_AuctionHouse, C_Timer, GetTime
 local GetRealmName, UnitFactionGroup = GetRealmName, UnitFactionGroup
-local CreateFrame, pcall, type, hooksecurefunc = CreateFrame, pcall, type, hooksecurefunc
+local CreateFrame, pcall = CreateFrame, pcall
 local select, tostring, C_Item, C_TradeSkillUI, Enum = select, tostring, C_Item, C_TradeSkillUI, Enum
 local GRAY_FONT_COLOR, HIGHLIGHT_FONT_COLOR = GRAY_FONT_COLOR, HIGHLIGHT_FONT_COLOR
 local wipe = wipe
@@ -373,7 +373,7 @@ end
 -- Blizzard sent a query of its own (the sell list, an item's listings, your auctions, a post,
 -- a purchase): hold the next page back for a moment so those go first.
 local function onBlizzardQuery()
-    if module.enabled and scanning then
+    if scanning then
         lastQuery = GetTime()
     end
 end
@@ -382,7 +382,7 @@ end
 -- was paging through, so stop, keeping the prices seen so far. Also stops a scan still waiting
 -- to start, which would otherwise replace the player's results.
 local function onOtherSearch()
-    if module.enabled and scanning and not ownQuery then
+    if scanning and not ownQuery then
         local count = seenCount
         stopScan()
         showIndicator(format(L.AUCTIONPRICES_STOPPED, count), false)
@@ -398,32 +398,10 @@ local QUERIES = {
     "ConfirmCommoditiesPurchase",
 }
 
--- Hooks can't be removed; the functions above check the part is on. Probed per name, since the
--- client may not have them all.
-local hookedQueries = false
-
-local function hookAuctionHouse()
-    if hookedQueries then
-        return
-    end
-    hookedQueries = true
-    for _, name in ipairs(SEARCHES) do
-        if type(C_AuctionHouse[name]) == "function" then
-            hooksecurefunc(C_AuctionHouse, name, onOtherSearch)
-        end
-    end
-    for _, name in ipairs(QUERIES) do
-        if type(C_AuctionHouse[name]) == "function" then
-            hooksecurefunc(C_AuctionHouse, name, onBlizzardQuery)
-        end
-    end
-end
-
 local function startScan()
     if scanning or not open then
         return
     end
-    hookAuctionHouse()
     scanning, sent, waiting = true, false, nil
     seen, seenCount = {}, 0
     step()
@@ -679,7 +657,6 @@ end
 
 local GRAY, WHITE = GRAY_FONT_COLOR, HIGHLIGHT_FONT_COLOR
 local GREEN, RED = GREEN_FONT_COLOR, RED_FONT_COLOR
-local AGE_COLORS = { gray = GRAY, white = WHITE, gold = NORMAL_FONT_COLOR } -- Scan Age Color's choices
 
 local AUCTION_CUT = 0.05 -- the auction house's cut of a sale
 
@@ -843,13 +820,8 @@ local function refreshCrafting(recipeInfo)
     -- How old the oldest auction price in these totals is, colored like the tooltip's age.
     if oldest then
         local age = time() - oldest
-        local color = module.db.scanAgeColor == "age" and ageColor(age) or AGE_COLORS[module.db.scanAgeColor]
-        local text = ns.Text.Ago(age)
-        if color and color.WrapTextInColorCode then
-            text = color:WrapTextInColorCode(text)
-        elseif color then
-            text = ns.Colors.Code(color[1], color[2], color[3]) .. text .. "|r"
-        end
+        local color = module.db.scanAgeColor == "age" and ageColor(age) or module.db.scanAgeColor
+        local text = ItemTooltip.ColorText(ns.Text.Ago(age), color)
         i = i + 1
         setRow(i, y, L.AUCTIONPRICES_CRAFT_AGE, text)
         y = y - ROW_HEIGHT
@@ -926,6 +898,14 @@ local events = {
 function module:OnEnable()
     for event, fn in pairs(events) do
         self:On(event, fn)
+    end
+    -- Hooked by name, each skipped when this client doesn't have it; the hooks do nothing unless
+    -- a scan is running.
+    for _, name in ipairs(SEARCHES) do
+        self:Hook(C_AuctionHouse, name, onOtherSearch)
+    end
+    for _, name in ipairs(QUERIES) do
+        self:Hook(C_AuctionHouse, name, onBlizzardQuery)
     end
     -- Turned on with the auction house already open, its show event has passed.
     local frame = _G.AuctionHouseFrame

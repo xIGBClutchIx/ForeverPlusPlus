@@ -21,7 +21,7 @@ local function addRepairCost(tooltip, data)
         return
     end
     local cost = data.repairCost
-    if not (ns.IsReadable(cost) and type(cost) == "number" and cost > 0) then
+    if not (ns.IsNumber(cost) and cost > 0) then
         return
     end
     -- With the repair cursor Blizzard shows its own repair cost line.

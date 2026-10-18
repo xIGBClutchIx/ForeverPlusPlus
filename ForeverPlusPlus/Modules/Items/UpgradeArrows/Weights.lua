@@ -12,7 +12,6 @@
 local _, ns = ...
 
 local pairs, next, type, format, tonumber, concat = pairs, next, type, string.format, tonumber, table.concat
-local UnitClass = UnitClass
 
 local L = ns.L
 local ItemStats = ns.ItemStats
@@ -61,10 +60,7 @@ internal.DERIVED = DERIVED
 
 local rates -- the player's rates, read when a profile is made
 
-local function playerClass()
-    local _, class = UnitClass("player")
-    return ns.IsText(class, true) and class or "?"
-end
+local playerClass = internal.PlayerClass
 
 -- Puts the derived attributes into a profile's defaults, for the character's own class.
 local function derive(class, defaults)

@@ -60,10 +60,6 @@ local internal = module.internal
 
 local USE = _G.ITEM_SPELL_TRIGGER_ONUSE or "Use:" -- Blizzard's "Use:", in the player's language
 
--- Color codes come as |cAARRGGBB or as |cnNAME: with one of Blizzard's named colors
--- (|cnHIGHLIGHT_FONT_COLOR:), and end at |r.
-internal.HEX_CODE, internal.NAMED_CODE = "|c%x%x%x%x%x%x%x%x", "|cn[%w_]+:"
-
 -- Each line of a text, for gmatch on the text with "\n" added. The crate's text breaks lines
 -- with "\r\n", and a "\r" left on a line we draw shows as an empty line after it.
 internal.LINES = "(.-)\r?\n"

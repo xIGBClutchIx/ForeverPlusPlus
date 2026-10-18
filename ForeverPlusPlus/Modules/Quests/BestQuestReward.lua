@@ -4,14 +4,15 @@
 -- marked, and nothing is marked when every choice sells for the same or for nothing.
 --
 -- The reward buttons are Blizzard's (QuestInfo_Display fills them, both for a quest giver and the
--- quest log). Probe: those names are Mainline's, unverified on Forever. Our coin is our own
--- texture on the button's icon; nothing is written onto Blizzard's frames.
+-- quest log; Lib/ItemButtons.lua walks them). Our coin is our own texture on the button's icon;
+-- nothing is written onto Blizzard's frames.
 local _, ns = ...
 
 local _G, ipairs, select, type = _G, ipairs, select, type
 local C_Item = C_Item
 
 local L = ns.L
+local ItemButtons = ns.ItemButtons
 
 local module = ns.NewModule("BestQuestReward", L.BESTQUESTREWARD_DESC, { enabled = true })
 module.title = L.BESTQUESTREWARD_TITLE
@@ -21,8 +22,8 @@ local COIN_TEXTURE = "Interface\\MoneyFrame\\UI-GoldIcon"
 local COIN_SIZE = 16
 
 -- Our coin on a reward button, by its icon.
-local coins = ns.ItemButtons.Overlays(function(button)
-    local icon = button.Icon or button.icon or button
+local coins = ItemButtons.Overlays(function(button)
+    local icon = ItemButtons.RewardIcon(button)
     local coin = button:CreateTexture(nil, "OVERLAY", nil, 7)
     coin:SetTexture(COIN_TEXTURE)
     coin:SetSize(COIN_SIZE, COIN_SIZE)
@@ -31,23 +32,15 @@ local coins = ns.ItemButtons.Overlays(function(button)
 end)
 local waiting -- the rewards frame whose items weren't cached, until GET_ITEM_INFO_RECEIVED
 
-local function setCoin(button, on)
-    coins:Set(button, on)
-end
-
 -- How many of the choice you get and its item ID, from the quest log or the quest giver.
-local function choiceInfo(index, questLog)
-    local count, itemID, link
+local function choiceInfo(index, link, questLog)
+    local count, itemID
     if questLog then
         if _G.GetQuestLogChoiceInfo then
             count, _, _, itemID = select(3, _G.GetQuestLogChoiceInfo(index))
         end
-        link = _G.GetQuestLogItemLink and _G.GetQuestLogItemLink("choice", index)
-    else
-        if _G.GetQuestItemInfo then
-            count, _, _, itemID = select(3, _G.GetQuestItemInfo("choice", index))
-        end
-        link = _G.GetQuestItemLink and _G.GetQuestItemLink("choice", index)
+    elseif _G.GetQuestItemInfo then
+        count, _, _, itemID = select(3, _G.GetQuestItemInfo("choice", index))
     end
     if type(itemID) ~= "number" and link then
         itemID = C_Item.GetItemInfoInstant(link)
@@ -59,8 +52,8 @@ local function choiceInfo(index, questLog)
 end
 
 -- What the choice sells for in all, or nil while its item isn't cached (asked for meanwhile).
-local function choiceValue(index, questLog)
-    local count, itemID = choiceInfo(index, questLog)
+local function choiceValue(choice)
+    local count, itemID = choiceInfo(choice.index, choice.link, choice.questLog)
     if not itemID then
         return nil
     end
@@ -73,28 +66,21 @@ local function choiceValue(index, questLog)
 end
 
 local function update(rewardsFrame)
-    local info = _G.QuestInfoFrame
-    local buttons = rewardsFrame and rewardsFrame.RewardButtons
-    if not (info and type(buttons) == "table") then
-        return
-    end
-    -- The item choices among the frame's buttons, by choice index.
+    -- The item choices among the frame's buttons (currency choices have no sell price).
     local choices = {}
-    for _, button in ipairs(buttons) do
-        setCoin(button, false)
-        -- Currency choices have no sell price; objectType is Mainline's, so missing means item.
-        local object = button.objectType
-        if button:IsShown() and button.type == "choice" and (object == nil or object == "item") then
-            choices[#choices + 1] = button
-        end
+    local walked = ItemButtons.EachRewardChoice(rewardsFrame, function(button, index, link, questLog)
+        choices[#choices + 1] = { button = button, index = index, link = link, questLog = questLog }
+    end, coins)
+    if not walked then
+        return
     end
     waiting = nil
     if #choices < 2 then
         return
     end
     local values, best, lowest = {}, 0, nil
-    for i, button in ipairs(choices) do
-        local value = choiceValue(button:GetID(), info.questLog)
+    for i, choice in ipairs(choices) do
+        local value = choiceValue(choice)
         if not value then
             -- Mark nothing until every choice's price is known, then look again.
             waiting = rewardsFrame
@@ -111,8 +97,8 @@ local function update(rewardsFrame)
     if best <= 0 or best == lowest then
         return
     end
-    for i, button in ipairs(choices) do
-        setCoin(button, values[i] == best)
+    for i, choice in ipairs(choices) do
+        coins:Set(choice.button, values[i] == best)
     end
 end
 
