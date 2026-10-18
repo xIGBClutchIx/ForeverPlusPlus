@@ -126,7 +126,7 @@ function showUI()
     end
     hidden = false
     ns.Off("PLAYER_REGEN_DISABLED", showUI)
-    UIParent:Show()
+    UIParent:SetAlpha(1)
 end
 
 -- Takes a shot now, for `why` (nil for one the player took themselves). One already on its way
@@ -145,7 +145,9 @@ local function take(why)
     if module.db.hideUI and not InCombatLockdown() and UIParent:IsShown() then
         hidden = true
         ns.On("PLAYER_REGEN_DISABLED", showUI)
-        UIParent:Hide()
+        -- Faded, not hidden: Hide and Show would run every shown window's OnHide and OnShow from
+        -- our code. The shot looks the same.
+        UIParent:SetAlpha(0)
         C_Timer.After(HIDE_WAIT, Screenshot)
     else
         Screenshot()
