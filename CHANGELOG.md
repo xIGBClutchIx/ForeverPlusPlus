@@ -23,6 +23,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 - An error in one module no longer stops Blizzard's own window or tooltip it hooks from finishing, or the other modules' changes to it.
 - Marks, tints, and arrows on a loot window that's already open show when you turn their module on, instead of only on the next loot.
+- **Already Known**: items on a vendor's Buyback tab no longer get the marks of the vendor's own items.
 - **Commands**: `/fpp reset` turns every module off before it wipes the settings, so game settings a module changed, like Auto Dismount's, go back to your own. Started in combat, it waits until combat ends.
 - **Fishing Cast**: changing Louder Bobber while the module is off no longer changes your sound volumes.
 - **Gathering Tracking**: Find Minerals or Find Herbs comes back on after dying again: it keeps checking for a few seconds after you come back to life, instead of giving up when the tracking list still showed it on or the first try didn't take.

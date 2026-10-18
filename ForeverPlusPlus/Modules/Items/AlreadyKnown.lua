@@ -276,7 +276,8 @@ end
 
 local function refresh()
     local merchant = _G.MerchantFrame
-    if merchant and merchant:IsShown() then
+    -- Only on the Merchant tab: Buyback shows its items on the same buttons.
+    if merchant and merchant:IsShown() and (merchant.selectedTab or 1) == 1 then
         updateMerchant()
     end
     updateAuction()
@@ -287,6 +288,7 @@ local function refresh()
         updateOpenMail()
     end
     ItemButtons.EachRoll(markRoll)
+    ItemButtons.EachLootSlot(markLoot)
 end
 
 local refreshSoon, cancelRefresh = ns.Frames.Coalesce(function()

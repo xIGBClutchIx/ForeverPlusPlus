@@ -83,6 +83,8 @@ ns.changelog = {
                     .. "from finishing, or the other modules' changes to it.",
                 "Marks, tints, and arrows on a loot window that's already open show when you turn "
                     .. "their module on, instead of only on the next loot.",
+                { L.ALREADYKNOWN_TITLE, "Items on a vendor's Buyback tab no longer get the marks "
+                    .. "of the vendor's own items." },
                 { L.CHANGELOG_COMMANDS, "/fpp reset turns every module off before it wipes the "
                     .. "settings, so game settings a module changed, like Auto Dismount's, go back "
                     .. "to your own. Started in combat, it waits until combat ends." },
