@@ -13,7 +13,7 @@
 -- percentage under it; nothing is written onto Blizzard's frames.
 local _, ns = ...
 
-local _G, ipairs, type, wipe, select, tonumber = _G, ipairs, type, wipe, select, tonumber
+local _G, ipairs, pairs, type, wipe, select, tonumber = _G, ipairs, pairs, type, wipe, select, tonumber
 local format, floor, huge = string.format, math.floor, math.huge
 local C_Container, C_AddOns, C_Item, UnitClass = C_Container, C_AddOns, C_Item, UnitClass
 
@@ -463,6 +463,7 @@ local function updateRewards(rewardsFrame)
     if not (info and type(buttons) == "table") then
         return
     end
+    rewardsWaiting = nil -- set again below while a choice still isn't cached
     local best, bestValue = {}, nil
     for _, button in ipairs(buttons) do
         setArrow(rewardArrows, button, false)
@@ -640,9 +641,14 @@ local function onGearChanged()
     refreshSoon()
 end
 
--- Leveling and training change what you can use.
+-- Leveling and training only make gear usable that wasn't: only the "can't be an upgrade"
+-- answers can change; a score against what you wear stays right.
 local function onPlayerChanged()
-    forgetScores()
+    for link, result in pairs(results) do
+        if result == false then
+            results[link] = nil
+        end
+    end
     refreshSoon()
 end
 
