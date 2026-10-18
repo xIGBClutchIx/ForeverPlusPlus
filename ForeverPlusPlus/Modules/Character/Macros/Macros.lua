@@ -6,7 +6,7 @@
 -- nothing to cast (a red X) or is out of date until combat ends (a warning triangle).
 local _, ns = ...
 
-local pairs, ipairs, pcall, format = pairs, ipairs, pcall, string.format
+local ipairs, pcall, format = ipairs, pcall, string.format
 local InCombatLockdown = InCombatLockdown
 local CreateMacro, EditMacro, DeleteMacro = CreateMacro, EditMacro, DeleteMacro
 local GetMacroIndexByName, GetMacroBody, PickupMacro = GetMacroIndexByName, GetMacroBody, PickupMacro
@@ -68,16 +68,11 @@ local function drawMarks()
     if not module.enabled then
         return
     end
-    local byIndex = {}
-    for name, state in pairs(states) do
-        local index = GetMacroIndexByName(name)
-        if index and index > 0 then
-            byIndex[index] = state
-        end
-    end
     ActionButtons.Each(function(button)
-        local kind, id = ActionButtons.Content(button)
-        local state = kind == "macro" and byIndex[id] or nil
+        -- By name: a macro's slot gives the spell it shows, not its index.
+        local kind = ActionButtons.Content(button)
+        local name = kind == "macro" and ActionButtons.MacroName(button)
+        local state = name and states[name] or nil
         local frame = state and marks.Get(button) or marks.Find(button)
         if frame then
             frame:SetShown(state ~= nil)

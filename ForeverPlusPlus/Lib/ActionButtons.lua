@@ -6,6 +6,7 @@ local _, ns = ...
 
 local _G, ipairs, pairs, setmetatable = _G, ipairs, pairs, setmetatable
 local CreateFrame, GetActionInfo, InCombatLockdown = CreateFrame, GetActionInfo, InCombatLockdown
+local C_ActionBar, GetActionText = C_ActionBar, GetActionText
 
 local ActionButtons = {}
 ns.ActionButtons = ActionButtons
@@ -37,7 +38,8 @@ function ActionButtons.Each(fn)
 end
 
 ---What the button's slot holds: its kind ("spell", "macro", "item") and ID, or nil for an empty
----slot or one that can't be read now. A macro's ID is its index.
+---slot or one that can't be read now. A macro's ID is the spell or item it shows, not its index;
+---ActionButtons.MacroName tells which macro it is.
 ---@param button table
 ---@return string? kind
 ---@return number? id
@@ -51,6 +53,19 @@ function ActionButtons.Content(button)
         return nil
     end
     return kind, id
+end
+
+---The name of the macro in the button's slot, or nil when it holds none or can't be read now.
+---@param button table
+---@return string?
+function ActionButtons.MacroName(button)
+    local action = button.action
+    local get = C_ActionBar and C_ActionBar.GetActionText or GetActionText
+    if not (get and action and readable(action)) then
+        return nil
+    end
+    local name = get(action)
+    return ns.IsText(name, true) and name or nil
 end
 
 ---A set of marks: one frame of ours over each action button that needs one, made the first time
