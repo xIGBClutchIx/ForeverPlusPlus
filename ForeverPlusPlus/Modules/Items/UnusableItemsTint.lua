@@ -13,7 +13,7 @@
 -- on every cooldown update, which would wipe a color we set.
 local _, ns = ...
 
-local _G, type, wipe, select = _G, type, wipe, select
+local _G, type, wipe, select, pairs = _G, type, wipe, select, pairs
 local C_Item, C_Container = C_Item, C_Container
 
 local L = ns.L
@@ -247,13 +247,24 @@ end
 
 local forget
 
+-- Leveling, training, and skill-ups only ever make an item usable, so only the "can't use"
+-- answers can be wrong now. Forgetting just those spares a tooltip read per item on every skill
+-- point.
+local function forgetUnusable()
+    for itemID, result in pairs(results) do
+        if result then
+            results[itemID] = nil
+        end
+    end
+end
+
 -- Item data arrives a little after a window opens, and what you can use changes as you level
 -- and train: look again shortly, once for a burst of events. The answers are forgotten then
 -- too, not at the event, since the tooltip can still say the old level for a moment.
 local refreshSoon, cancelRefresh = ns.Frames.Coalesce(function()
     if forget then
         forget = false
-        wipe(results)
+        forgetUnusable()
     end
     if module.enabled then
         refresh()
