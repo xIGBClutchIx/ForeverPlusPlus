@@ -79,17 +79,28 @@ end
 
 local textWidth = ns.Text.Width
 
+-- What each of our lines shows now, so a line whose text and room are the same isn't measured
+-- again 20 times a second.
+local shownText, shownRoom = {}, {}
+
 -- One line from a row of Blizzard's: its text, which already has the tenths setting and, off the
 -- player's map, the player's zone, cut short with "..." before it reaches the title.
 local function copy(line, row, room)
     if not row:IsShown() then
         line:Hide()
+        shownText[line] = nil
+        return
+    end
+    local text = row.Label:GetText()
+    local same = ns.IsText(text) and shownText[line] == text and shownRoom[line] == room
+    if same and line:IsShown() then
         return
     end
     line:SetWidth(0)
-    line:SetText(row.Label:GetText())
+    line:SetText(text)
     line:SetWidth(min(textWidth(line), max(room, 0)))
     line:Show()
+    shownText[line], shownRoom[line] = ns.IsText(text) and text or nil, room
 end
 
 local function update()
