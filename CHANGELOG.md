@@ -14,6 +14,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Changed
 
 - **Auto Weapon Buff**: using a sharpening stone, weightstone, oil, poison, or lure from an action bar puts it straight on your weapon too, like a right-click in your bags. Not in combat.
+- **Chat Copy**: the window looks like Forever++'s other windows, with the portrait and the title "Forever++ Chat Copy".
 - **Profiler**: also times the work modules put off for a moment, like redrawing the marks on your bag items, so it shows under the module that did it.
 - **Quest Tracker**: the background is a little darker by default, at 40% opacity instead of 30%. If you set its Opacity yourself, it stays as you set it.
 - **Settings**: option names on the Modules page have more room and a smaller indent under the option they depend on, so they wrap less. An option's NEW label sits just after its checkbox instead of squeezing its name.

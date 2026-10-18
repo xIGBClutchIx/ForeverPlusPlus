@@ -61,6 +61,8 @@ ns.changelog = {
                 { L.AUTOWEAPONBUFF_TITLE, "Using a sharpening stone, weightstone, oil, poison, or "
                     .. "lure from an action bar puts it straight on your weapon too, like a "
                     .. "right-click in your bags. Not in combat." },
+                { L.CHATCOPY_TITLE, "The window looks like Forever++'s other windows, with the "
+                    .. "portrait and the title \"Forever++ Chat Copy\"." },
                 { L.PROFILER_TITLE, "Also times the work modules put off for a moment, like "
                     .. "redrawing the marks on your bag items, so it shows under the module that "
                     .. "did it." },

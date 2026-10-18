@@ -124,7 +124,7 @@ end
 
 local function newWindow()
     -- Named so Escape can close it (ns.Frames.CloseOnEscape).
-    local f = CreateFrame("Frame", "ForeverPlusPlusChatCopy", UIParent, "BasicFrameTemplateWithInset")
+    local f = ns.Frames.PortraitWindow("ForeverPlusPlusChatCopy", L.CHATCOPY_TITLE)
     f:SetSize(540, 420)
     f:SetPoint("CENTER")
     f:SetFrameStrata("DIALOG")
@@ -134,16 +134,15 @@ local function newWindow()
     f:SetScript("OnMouseDown", f.StartMoving)
     f:SetScript("OnMouseUp", f.StopMovingOrSizing)
     ns.Frames.CloseOnEscape(f)
-    if f.SetTitle then
-        f:SetTitle(L.CHATCOPY_TITLE)
-    elseif f.TitleText then
-        f.TitleText:SetText(L.CHATCOPY_TITLE)
-    end
 
-    local scroll = CreateFrame("ScrollFrame", nil, f, "UIPanelScrollFrameTemplate")
-    -- Below the title bar, which is about 24 pixels tall.
-    scroll:SetPoint("TOPLEFT", f, "TOPLEFT", 12, -36)
-    scroll:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -30, 12)
+    -- The text in the window's sunken box, below the portrait.
+    local inset = f.Inset or ns.Frames.Inset(f)
+    inset:ClearAllPoints()
+    inset:SetPoint("TOPLEFT", 4, -60)
+    inset:SetPoint("BOTTOMRIGHT", -6, 6)
+    local scroll = CreateFrame("ScrollFrame", nil, inset, "UIPanelScrollFrameTemplate")
+    scroll:SetPoint("TOPLEFT", 6, -6)
+    scroll:SetPoint("BOTTOMRIGHT", -26, 6)
 
     local edit = CreateFrame("EditBox", nil, scroll)
     edit:SetMultiLine(true)
