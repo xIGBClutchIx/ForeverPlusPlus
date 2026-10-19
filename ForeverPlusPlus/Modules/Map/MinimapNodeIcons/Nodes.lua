@@ -4,6 +4,7 @@
 local _, ns = ...
 
 local ipairs, min, abs, tremove = ipairs, math.min, math.abs, table.remove
+local floor, sqrt = math.floor, math.sqrt
 local Minimap, InCombatLockdown, GetTime = Minimap, InCombatLockdown, GetTime
 
 local L = ns.L
@@ -245,9 +246,10 @@ local function newPass()
         points = internal.grid(Minimap:GetWidth() / 2, spacing) }
 end
 
--- Whether a node of that name is followed already within `reach` of where a dot answered: where
--- its own dot answers, which while moving is its icon plus the trail.
-local function known(name, right, up, v, reach)
+-- The followed node of that name nearest where a dot answered, within `reach`, and where its own
+-- dot answers (while moving, its icon plus the trail); nil when there's none that close.
+local function nearestKnown(name, right, up, v, reach)
+    local best, bestR, bestU, bestD
     for _, node in ipairs(internal.nodes) do
         if node.name == name then
             local nr, nu = drawnAt(node, v)
@@ -255,12 +257,41 @@ local function known(name, right, up, v, reach)
                 nr, nu = nr + lagR, nu + lagU
             end
             local dr, du = nr - right, nu - up
-            if dr * dr + du * du <= reach * reach then
-                return true
+            local d = dr * dr + du * du
+            if d <= reach * reach and (not bestD or d < bestD) then
+                best, bestR, bestU, bestD = node, nr, nu, d
             end
         end
     end
-    return false
+    return best, bestR, bestU
+end
+
+local function known(name, right, up, v, reach)
+    return nearestKnown(name, right, up, v, reach) ~= nil
+end
+
+-- Whether two spots that both answer `name` are one dot: every probe on the line between them
+-- names it too. Two dots side by side have a gap between them that answers something else.
+local function joined(name, ar, au, br, bu, space)
+    local dr, du = br - ar, bu - au
+    local steps = floor(sqrt(dr * dr + du * du) / FOLLOW_STEP)
+    for k = 1, steps - 1 do
+        local t = k / steps
+        local named = false
+        for _, entry in ipairs(probe(ar + dr * t, au + du * t, space) or NONE) do
+            if entry.name == name then
+                named = true
+                break
+            end
+        end
+        if internal.blocked then
+            return true -- can't tell: leave it to the next pass
+        end
+        if not named then
+            return false
+        end
+    end
+    return true
 end
 
 -- Adds a node for a dot that answered at a spot. Moving, the trail is taken off before the spot
@@ -282,7 +313,8 @@ end
 
 -- Turns a finished pass's hits into nodes: hits of one name that touch are one dot, at their
 -- middle. Dots already followed are left to following. Hits on a followed dot are set aside
--- first, so a second dot of the same name right beside it isn't taken for part of it.
+-- first, so a second dot of the same name right beside it isn't taken for part of it, and what's
+-- left near a followed dot is a new one only with a gap between them.
 local function finishPass(v)
     local pass = internal.pass
     local hits = pass.hits
@@ -326,7 +358,14 @@ local function finishPass(v)
                 end
             end
             local right, up = sumR / #queue, sumU / #queue
-            if not known(first.name, right, up, v, own) then
+            -- Near a dot already followed, it's a dot of its own only if something else answers
+            -- between them; otherwise it's the edge of that one, a little wider than its middle.
+            local near, nr, nu = nearestKnown(first.name, right, up, v, FOLLOW_REACH)
+            local separate = not near
+            if near and own == OWN_REACH then
+                separate = not joined(first.name, nr, nu, right, up, pass.space)
+            end
+            if separate then
                 addNode(first.name, first.icon, right, up, gray, v)
             end
         end
