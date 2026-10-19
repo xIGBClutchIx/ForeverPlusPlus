@@ -5,7 +5,7 @@
 -- time is in chat (and in the shot).
 local _, ns = ...
 
-local ipairs, pairs, format, tonumber, type = ipairs, pairs, string.format, tonumber, type
+local ipairs, format, tonumber, type = ipairs, string.format, tonumber, type
 local concat = table.concat
 local C_Timer, C_Item = C_Timer, C_Item
 local Screenshot, InCombatLockdown, UIParent = Screenshot, InCombatLockdown, UIParent
@@ -99,8 +99,8 @@ local showUI, onShot
 
 -- The shot is over (taken, failed, or never reported): the next one may start.
 local function finish()
-    ns.Off("SCREENSHOT_SUCCEEDED", onShot)
-    ns.Off("SCREENSHOT_FAILED", onShot)
+    module:Off("SCREENSHOT_SUCCEEDED", onShot)
+    module:Off("SCREENSHOT_FAILED", onShot)
     fallback:Cancel()
     busy = false
     showUI()
@@ -125,7 +125,7 @@ function showUI()
         return
     end
     hidden = false
-    ns.Off("PLAYER_REGEN_DISABLED", showUI)
+    module:Off("PLAYER_REGEN_DISABLED", showUI)
     UIParent:SetAlpha(1)
 end
 
@@ -137,14 +137,14 @@ local function take(why)
     end
     busy = true
     reason = why
-    ns.On("SCREENSHOT_SUCCEEDED", onShot)
-    ns.On("SCREENSHOT_FAILED", onShot)
+    module:On("SCREENSHOT_SUCCEEDED", onShot)
+    module:On("SCREENSHOT_FAILED", onShot)
     fallback:Start(UI_BACK, finish)
     -- Hiding the interface in combat can be blocked, and so can showing it again, so only out of
     -- combat. If the player hid it themselves (Alt-Z), it's already out of the way.
     if module.db.hideUI and not InCombatLockdown() and UIParent:IsShown() then
         hidden = true
-        ns.On("PLAYER_REGEN_DISABLED", showUI)
+        module:On("PLAYER_REGEN_DISABLED", showUI)
         -- Faded, not hidden: Hide and Show would run every shown window's OnHide and OnShow from
         -- our code. The shot looks the same.
         UIParent:SetAlpha(0)
@@ -312,75 +312,66 @@ local function onTitles(_, unit)
     knownTitles = count
 end
 
--- Each checkbox's events. Handlers get the event's name, then its payload.
-local HANDLERS = {
-    levelUp = { PLAYER_LEVEL_UP = function()
-        request(L.AUTOSCREENSHOT_LEVEL_UP)
-    end },
-    achievement = { ACHIEVEMENT_EARNED = function(_, _, alreadyEarned)
-        -- Already earned means on another character; this one only caught up.
-        if not (readable(alreadyEarned) and alreadyEarned) then
-            request(L.AUTOSCREENSHOT_ACHIEVEMENT)
-        end
-    end },
-    loot = { CHAT_MSG_LOOT = onLoot },
-    bossKill = { ENCOUNTER_END = function(_, _, _, _, _, success)
-        if readable(success) and success == 1 then
-            request(L.AUTOSCREENSHOT_BOSS_KILL)
-        end
-    end },
-    -- Which chat event carries "You are now Friendly with ..." isn't certain on this client, so
-    -- both; the line only comes once.
-    reputation = { CHAT_MSG_SYSTEM = onStanding, CHAT_MSG_COMBAT_FACTION_CHANGE = onStanding },
-    pvpRank = { MAJOR_FACTION_RENOWN_LEVEL_CHANGED = function(_, factionID, new, old)
-        if readable(factionID) and readable(new) and readable(old)
-            and factionID == PVP_RANK_FACTION and new > old then
-            request(L.AUTOSCREENSHOT_PVP_RANK)
-        end
-    end },
-    title = { KNOWN_TITLES_UPDATE = onTitles },
-    battleground = { PVP_MATCH_COMPLETE = function()
-        request(L.AUTOSCREENSHOT_BATTLEGROUND)
-    end },
-    death = { PLAYER_DEAD = function()
-        request(L.AUTOSCREENSHOT_DEATH)
-    end },
-    -- Blizzard's chat prints the answer (TIME_PLAYED_MSG), well before the shot is taken.
-    playedTime = { PLAYER_LEVEL_UP = function()
-        if RequestTimePlayed then
-            RequestTimePlayed()
-        end
-    end },
-}
-
-local exists = ns.HasEvent
-
--- Listens for the events of the checkboxes that are on, and stops the rest.
-local function sync()
-    for key, events in pairs(HANDLERS) do
-        local on = module.enabled and module.db[key]
-        if key == "playedTime" then
-            on = on and module.db.levelUp -- it's for the level up's screenshot
-        end
-        for event, fn in pairs(events) do
-            if on and exists(event) then
-                module:On(event, fn)
-            else
-                module:Off(event, fn)
-            end
-        end
+-- Each checkbox's events, listened to only while it's on. Handlers get the event's name, then its
+-- payload.
+module:OnWhile("levelUp", { PLAYER_LEVEL_UP = function()
+    request(L.AUTOSCREENSHOT_LEVEL_UP)
+end })
+module:OnWhile("achievement", { ACHIEVEMENT_EARNED = function(_, _, alreadyEarned)
+    -- Already earned means on another character; this one only caught up.
+    if not (readable(alreadyEarned) and alreadyEarned) then
+        request(L.AUTOSCREENSHOT_ACHIEVEMENT)
     end
-    if module.enabled and module.db.title and countedAt == 0 then
-        knownTitles = countTitles()
-        countedAt = GetTime()
+end })
+module:OnWhile("loot", { CHAT_MSG_LOOT = onLoot })
+module:OnWhile("bossKill", { ENCOUNTER_END = function(_, _, _, _, _, success)
+    if readable(success) and success == 1 then
+        request(L.AUTOSCREENSHOT_BOSS_KILL)
     end
-    if not (module.enabled and module.db.title) then
+end })
+-- Which chat event carries "You are now Friendly with ..." isn't certain on this client, so both;
+-- the line only comes once.
+module:OnWhile("reputation", {
+    CHAT_MSG_SYSTEM = onStanding,
+    CHAT_MSG_COMBAT_FACTION_CHANGE = onStanding,
+})
+module:OnWhile("pvpRank", { MAJOR_FACTION_RENOWN_LEVEL_CHANGED = function(_, factionID, new, old)
+    if readable(factionID) and readable(new) and readable(old)
+        and factionID == PVP_RANK_FACTION and new > old then
+        request(L.AUTOSCREENSHOT_PVP_RANK)
+    end
+end })
+module:OnWhile("title", { KNOWN_TITLES_UPDATE = onTitles })
+module:OnWhile("battleground", { PVP_MATCH_COMPLETE = function()
+    request(L.AUTOSCREENSHOT_BATTLEGROUND)
+end })
+module:OnWhile("death", { PLAYER_DEAD = function()
+    request(L.AUTOSCREENSHOT_DEATH)
+end })
+-- It's for the level up's screenshot, so only with Level Up on. Blizzard's chat prints the answer
+-- (TIME_PLAYED_MSG), well before the shot is taken.
+module:OnWhile(function(db)
+    return db.playedTime and db.levelUp
+end, { PLAYER_LEVEL_UP = function()
+    if RequestTimePlayed then
+        RequestTimePlayed()
+    end
+end })
+
+-- Counts the titles already known when New Title turns on, so only later ones get a shot.
+local function syncTitles()
+    if module.db.title then
+        if countedAt == 0 then
+            knownTitles = countTitles()
+            countedAt = GetTime()
+        end
+    else
         countedAt = 0
     end
 end
 
 function module:OnEnable()
-    sync()
+    syncTitles()
     bindKeys()
     self:On("UPDATE_BINDINGS", bindKeys)
 end
@@ -388,10 +379,11 @@ end
 function module:OnDisable()
     timer:Cancel()
     finish()
+    countedAt = 0
     bindKeys()
 end
 
 function module:OnOptionChanged()
-    sync()
+    syncTitles()
     bindKeys()
 end

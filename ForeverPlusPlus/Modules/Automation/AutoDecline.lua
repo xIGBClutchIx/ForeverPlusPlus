@@ -55,7 +55,7 @@ end
 
 -- Blizzard shows the duel popup on the same event, before ours runs (it registered first).
 local function onDuel(_, name)
-    if not module.db.duels or isAllowed(name) then
+    if isAllowed(name) then
         return
     end
     CancelDuel()
@@ -121,43 +121,22 @@ local function onGuild()
     end
 end
 
+-- Each kind of request is listened to only while its checkbox is on. Core turns these on and off
+-- with the module and its options, so neither OnEnable nor OnOptionChanged has to.
+module:OnWhile("duels", { DUEL_REQUESTED = onDuel })
+module:OnWhile("partyInvites", { PARTY_INVITE_REQUEST = onInvite })
+module:OnWhile("guildInvites", { GUILD_INVITE_REQUEST = onGuildInvite })
+module:OnWhile("guildCharters", { PETITION_SHOW = onPetition })
+
 function module:OnEnable()
-    self:On("DUEL_REQUESTED", onDuel)
     self:On("PLAYER_GUILD_UPDATE", onGuild)
-    if self.db.partyInvites then
-        self:On("PARTY_INVITE_REQUEST", onInvite)
-    end
-    if self.db.guildInvites then
-        self:On("GUILD_INVITE_REQUEST", onGuildInvite)
-    end
-    if self.db.guildCharters then
-        self:On("PETITION_SHOW", onPetition)
-    end
     if self.db.allowFriends then
         Units.RequestGuildRoster()
     end
 end
 
--- An option's key, the event it listens to, and what handles it.
-local toggled = {
-    partyInvites = { "PARTY_INVITE_REQUEST", onInvite },
-    guildInvites = { "GUILD_INVITE_REQUEST", onGuildInvite },
-    guildCharters = { "PETITION_SHOW", onPetition },
-}
-
 function module:OnOptionChanged(key)
-    if not self.enabled then
-        return
-    end
-    local event = toggled[key]
-    if event then
-        if self.db[key] then
-            self:On(event[1], event[2])
-        else
-            self:Off(event[1], event[2])
-        end
-    end
-    if key == "allowFriends" and self.db.allowFriends then
+    if key == "allowFriends" and self.enabled and self.db.allowFriends then
         Units.RequestGuildRoster()
     end
 end

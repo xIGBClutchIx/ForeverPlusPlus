@@ -491,6 +491,20 @@ local function sample(active)
     end
 end
 
+-- What the arrow follows, listened to only while it's on. A new selection shows at once; a quest's
+-- spot moving is caught by QUEST_INTERVAL. Releasing to a ghost is PLAYER_ALIVE; coming back to
+-- life from one is PLAYER_UNGHOST.
+module:OnWhile("arrow", {
+    USER_WAYPOINT_UPDATED = waypointChanged,
+    PLAYER_ENTERING_WORLD = refresh,
+})
+module:OnWhile(function(db)
+    return db.arrow and db.quest
+end, { SUPER_TRACKING_CHANGED = refresh })
+module:OnWhile(function(db)
+    return db.arrow and db.corpse
+end, { PLAYER_ALIVE = refresh, PLAYER_UNGHOST = refresh })
+
 local function syncArrow()
     if module.enabled and module.db.arrow then
         if not frame then
@@ -498,27 +512,9 @@ local function syncArrow()
             watcher = ns.Frames.Watcher(module, INTERVAL, update)
         end
         place()
-        module:On("USER_WAYPOINT_UPDATED", waypointChanged)
-        module:On("PLAYER_ENTERING_WORLD", refresh)
         ns.EditMode.RegisterModule(module, frame, L.WAYPOINTS_ARROW, place, sample)
     elseif frame then
-        module:Off("USER_WAYPOINT_UPDATED", waypointChanged)
-        module:Off("PLAYER_ENTERING_WORLD", refresh)
         ns.EditMode.Unregister(frame)
-    end
-    -- A new selection shows at once; a quest's spot moving is caught by QUEST_INTERVAL.
-    if module.enabled and module.db.arrow and module.db.quest then
-        module:On("SUPER_TRACKING_CHANGED", refresh)
-    elseif frame then
-        module:Off("SUPER_TRACKING_CHANGED", refresh)
-    end
-    -- Releasing to a ghost is PLAYER_ALIVE; coming back to life from one is PLAYER_UNGHOST.
-    if module.enabled and module.db.arrow and module.db.corpse then
-        module:On("PLAYER_ALIVE", refresh)
-        module:On("PLAYER_UNGHOST", refresh)
-    elseif frame then
-        module:Off("PLAYER_ALIVE", refresh)
-        module:Off("PLAYER_UNGHOST", refresh)
     end
     refresh()
 end

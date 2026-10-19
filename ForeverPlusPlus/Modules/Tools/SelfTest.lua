@@ -633,6 +633,22 @@ local onUpdate = ns.Frames.Throttled(0.5, function()
     end
 end)
 
+local function onTakeTaxiNode(slot)
+    if recorder then
+        pcall(recordTake, slot)
+    end
+end
+
+local function onEarlyLanding()
+    record("TaxiRequestEarlyLanding called, UnitOnTaxi " .. text(UnitOnTaxi("player")))
+end
+
+local function onTooltipShow(tooltip)
+    if recorder then
+        pcall(recordTooltip, tooltip)
+    end
+end
+
 local function startRecorder()
     if recorder then
         return
@@ -647,23 +663,11 @@ local function startRecorder()
         "PLAYER_REGEN_DISABLED", "PLAYER_REGEN_ENABLED", "PLAYER_ENTERING_WORLD" }) do
         pcall(recorder.RegisterEvent, recorder, event)
     end
-    if TakeTaxiNode then
-        hooksecurefunc("TakeTaxiNode", function(slot)
-            if recorder then
-                pcall(recordTake, slot)
-            end
-        end)
-    end
-    if TaxiRequestEarlyLanding then
-        hooksecurefunc("TaxiRequestEarlyLanding", function()
-            record("TaxiRequestEarlyLanding called, UnitOnTaxi " .. text(UnitOnTaxi("player")))
-        end)
-    end
-    hooksecurefunc(GameTooltip, "Show", function(tooltip)
-        if recorder then
-            pcall(recordTooltip, tooltip)
-        end
-    end)
+    -- Self Test is always on, so these always run once hooked. Each skips a function this
+    -- client doesn't have.
+    module:Hook("TakeTaxiNode", onTakeTaxiNode)
+    module:Hook("TaxiRequestEarlyLanding", onEarlyLanding)
+    module:Hook(GameTooltip, "Show", onTooltipShow)
 end
 
 -- Game data: the IDs the addon ships (ns.GameData), and what play has taught it since.

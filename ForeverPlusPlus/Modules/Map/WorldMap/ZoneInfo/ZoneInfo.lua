@@ -6,7 +6,7 @@
 local _, ns = ...
 
 local pairs, ipairs, tostring, format, concat = pairs, ipairs, tostring, string.format, table.concat
-local hooksecurefunc, MAP_AREA_LABEL_TYPE = hooksecurefunc, MAP_AREA_LABEL_TYPE
+local MAP_AREA_LABEL_TYPE = MAP_AREA_LABEL_TYPE
 local min, max, GetLocale = math.min, math.max, GetLocale
 local unpack, ceil, type = unpack, math.ceil, type
 local CreateFrame, C_Map, C_Item = CreateFrame, C_Map, C_Item
@@ -547,10 +547,9 @@ local function labelHasOther(frame)
     return false
 end
 
--- After the label decides what to show, every frame while the map is open. A hook can't be
--- removed, so it checks whether the module is on.
+-- After the label decides what to show, every frame while the map is open and the module is on.
 local function onLabel(frame)
-    local fade = (module.enabled and module.db.hover and module.db.hideLabel and hovered
+    local fade = (module.db.hover and module.db.hideLabel and hovered
         and not labelHasOther(frame)) and true or false
     if fade ~= labelFaded then
         labelFaded = fade
@@ -565,7 +564,7 @@ local function hookLabel(map)
         local frame = provider.Label
         if frame and frame.EvaluateLabels then
             label = frame
-            hooksecurefunc(frame, "EvaluateLabels", onLabel)
+            module:Hook(frame, "EvaluateLabels", onLabel)
             return
         end
     end

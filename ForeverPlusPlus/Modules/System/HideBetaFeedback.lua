@@ -6,7 +6,6 @@ local _, ns = ...
 
 local _G, type, pairs, ipairs, setmetatable = _G, type, pairs, ipairs, setmetatable
 local find = string.find
-local hooksecurefunc = hooksecurefunc
 
 local L = ns.L
 
@@ -72,9 +71,9 @@ local function blank(tooltip, i)
 end
 
 -- Blanks the reminder and the empty line above it. Tooltip lines can't be removed, so the
--- tooltip is shown again to shrink around what's left.
+-- tooltip is shown again to shrink around what's left. Only hooks call it, so the module is on.
 local function scrub(tooltip)
-    if busy or not (module.enabled and module.db.tooltip) or #patterns == 0 then
+    if busy or not module.db.tooltip or #patterns == 0 then
         return
     end
     local LeftLine = ns.Text.LeftLine
@@ -113,8 +112,15 @@ local function hookTooltip(tooltip)
     end
 end
 
+-- Catches the line on tooltips the reporter adds to without calling Show.
+local function onHookIntoTooltip(tooltip)
+    if type(tooltip) == "table" and tooltip.NumLines then
+        scrub(tooltip)
+    end
+end
+
 local function keepHidden(frame)
-    if module.enabled and module.db.button then
+    if module.db.button then
         buttonWasShown = true -- it showed itself, so it comes back when the module turns off
         frame:Hide()
     end
@@ -141,16 +147,9 @@ local function setupReporter()
             hookTooltip(value)
         end
     end
-    -- Catches the line on tooltips it adds to without calling Show.
-    if type(reporter.HookIntoTooltip) == "function" then
-        hooksecurefunc(reporter, "HookIntoTooltip", function(tooltip)
-            if type(tooltip) == "table" and tooltip.NumLines then
-                scrub(tooltip)
-            end
-        end)
-    end
+    module:Hook(reporter, "HookIntoTooltip", onHookIntoTooltip)
     if reporter.HookScript then
-        reporter:HookScript("OnShow", keepHidden)
+        module:HookScript(reporter, "OnShow", keepHidden)
     end
     return true
 end
@@ -174,7 +173,6 @@ end
 -- puts on quest windows aren't known by name: Unverified in game, so every child of the quest
 -- frames whose name mentions the reporter or feedback is hidden, and anything else is left alone.
 local QUEST_FRAMES = { "QuestFrame", "GossipFrame", "QuestLogPopupDetailFrame", "QuestMapFrame" }
-local QUEST_EVENTS = { "QUEST_DETAIL", "QUEST_PROGRESS", "QUEST_COMPLETE", "GOSSIP_SHOW" }
 local MAX_DEPTH = 4
 local questHidden = setmetatable({}, { __mode = "k" }) -- widget -> { alpha, mouse, shown } it had
 
@@ -230,9 +228,10 @@ local function scanQuest(frame, depth)
 end
 
 -- Fading it out isn't enough: the alert plays an animation that sets its alpha back, so it is
--- also hidden, and hidden again whenever the reporter shows it.
+-- also hidden, and hidden again whenever the reporter shows it. Only called while the module is
+-- on.
 local function hideAlert(widget)
-    if module.enabled and module.db.quest then
+    if module.db.quest then
         hideQuestWidget(widget)
         if widget.Hide and not widget:IsForbidden() then
             local state = questHidden[widget]
@@ -302,6 +301,13 @@ end
 -- window's OnShow together.
 local onQuestEvent = ns.Frames.Coalesce(hideQuestFeedback, nil, module)
 
+module:OnWhile("quest", {
+    QUEST_DETAIL = onQuestEvent,
+    QUEST_PROGRESS = onQuestEvent,
+    QUEST_COMPLETE = onQuestEvent,
+    GOSSIP_SHOW = onQuestEvent,
+})
+
 local function hookQuestMap()
     module:HookScript(_G.QuestMapFrame, "OnShow", onQuestEvent)
 end
@@ -309,9 +315,6 @@ end
 local function setupQuest()
     for _, name in ipairs(QUEST_FRAMES) do
         module:HookScript(_G[name], "OnShow", onQuestEvent)
-    end
-    for _, event in ipairs(QUEST_EVENTS) do
-        module:On(event, onQuestEvent)
     end
     -- The quest log lives in the world map, which loads on demand.
     ns.AddOns.WhenLoaded("Blizzard_WorldMap", hookQuestMap)

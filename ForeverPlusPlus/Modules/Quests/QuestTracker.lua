@@ -551,17 +551,17 @@ local function onCombatEnd()
 end
 
 -- Listens for new quests and tracking only while Sort by Level is on.
+module:OnWhile("sort", {
+    QUEST_WATCH_LIST_CHANGED = requestSort,
+    QUEST_LOG_UPDATE = requestSort,
+    PLAYER_REGEN_ENABLED = onCombatEnd,
+})
+
 local function setSorting(on)
     if on then
         sortGaveUp = false
-        module:On("QUEST_WATCH_LIST_CHANGED", requestSort)
-        module:On("QUEST_LOG_UPDATE", requestSort)
-        module:On("PLAYER_REGEN_ENABLED", onCombatEnd)
         requestSort()
     else
-        module:Off("QUEST_WATCH_LIST_CHANGED", requestSort)
-        module:Off("QUEST_LOG_UPDATE", requestSort)
-        module:Off("PLAYER_REGEN_ENABLED", onCombatEnd)
         sortAfterCombat = false
     end
 end
@@ -754,23 +754,21 @@ local function restoreHidden()
     end)
 end
 
+module:OnWhile("zone", {
+    ZONE_CHANGED_NEW_AREA = filterZone,
+    PLAYER_ENTERING_WORLD = filterZone,
+    -- Only acts on a new zone, so this just catches the quest log becoming ready.
+    QUEST_LOG_UPDATE = filterZone,
+    QUEST_WATCH_LIST_CHANGED = onWatchListChanged,
+    PLAYER_REGEN_ENABLED = onZoneCombatEnd,
+})
+
 local function setZoneFilter(on)
     filteredZone = nil
     zoneAfterCombat = false
     if on then
-        module:On("ZONE_CHANGED_NEW_AREA", filterZone)
-        module:On("PLAYER_ENTERING_WORLD", filterZone)
-        -- Only acts on a new zone, so this just catches the quest log becoming ready.
-        module:On("QUEST_LOG_UPDATE", filterZone)
-        module:On("QUEST_WATCH_LIST_CHANGED", onWatchListChanged)
-        module:On("PLAYER_REGEN_ENABLED", onZoneCombatEnd)
         filterZone()
     else
-        module:Off("ZONE_CHANGED_NEW_AREA", filterZone)
-        module:Off("PLAYER_ENTERING_WORLD", filterZone)
-        module:Off("QUEST_LOG_UPDATE", filterZone)
-        module:Off("QUEST_WATCH_LIST_CHANGED", onWatchListChanged)
-        module:Off("PLAYER_REGEN_ENABLED", onZoneCombatEnd)
         restoreHidden()
     end
 end
@@ -781,6 +779,8 @@ function module:IsAvailable()
     return ObjectiveTrackerFrame ~= nil
 end
 
+local updateLater = ns.Frames.Coalesce(onUpdate, nil, module)
+
 function module:OnEnable()
     local frame = tracker()
     if styled() then
@@ -790,9 +790,8 @@ function module:OnEnable()
         self:Hook(frame, "Update", onUpdate)
     else
         -- Mainline's tracker has Update; this covers a client where it doesn't.
-        local later = ns.Frames.Coalesce(onUpdate, nil, module)
-        self:On("QUEST_LOG_UPDATE", later)
-        self:On("QUEST_WATCH_LIST_CHANGED", later)
+        self:On("QUEST_LOG_UPDATE", updateLater)
+        self:On("QUEST_WATCH_LIST_CHANGED", updateLater)
     end
     -- The header's collapse and Edit Mode's height change what shows without always updating.
     self:HookScript(frame, "OnSizeChanged", requestFit)

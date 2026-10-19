@@ -12,7 +12,7 @@
 -- exactly what Blizzard last set.
 local _, ns = ...
 
-local _G, setmetatable, hooksecurefunc = _G, setmetatable, hooksecurefunc
+local _G, setmetatable = _G, setmetatable
 local pairs, ipairs, format, wipe = pairs, ipairs, string.format, wipe
 local C_FriendList, GetPlayerInfoByGUID = C_FriendList, GetPlayerInfoByGUID
 local UnitIsPlayer, UnitIsConnected, UnitReaction = UnitIsPlayer, UnitIsConnected, UnitReaction
@@ -68,13 +68,12 @@ local HOSTILE, NEUTRAL, TAPPED = CreateColor(1, 0, 0), CreateColor(1, 1, 0), Cre
 local WHITE = CreateColor(1, 1, 1)
 local NEUTRAL_REACTION = 4 -- UnitReaction: 1-3 hostile, 4 neutral, 5-8 friendly
 local weak = { __mode = "k" }
-local barHooked = setmetatable({}, weak) -- StatusBar -> true once its setters are hooked
 local applying = setmetatable({}, weak) -- StatusBar -> true while we set its color ourselves
 local painted = setmetatable({}, weak) -- StatusBar or FontString -> true while in our color
 local blizzardColor = setmetatable({}, weak) -- StatusBar -> { r, g, b, a } Blizzard last set
 local blizzardDesaturated = setmetatable({}, weak) -- StatusBar -> what Blizzard last set
 local nameColor = setmetatable({}, weak) -- FontString -> { r, g, b, a } before we colored it
-local backgroundHooked = setmetatable({}, weak) -- Texture -> true once SetVertexColor is hooked
+local backgroundFrame = setmetatable({}, weak) -- Texture -> the unit frame it's the background of
 local blizzardBackground = setmetatable({}, weak) -- Texture -> { r, g, b, a } Blizzard last set
 
 -- Which of the module's frame settings a Blizzard unit frame falls under, or nil.
@@ -157,6 +156,21 @@ local function restoreBar(bar)
     painted[bar] = nil
 end
 
+-- Not painted, so what the bar shows is Blizzard's. Kept now because the hooks that remember it
+-- don't run while the module is off, so what they last saw may be out of date.
+local function keepBlizzardBar(bar)
+    local r, g, b, a = bar:GetStatusBarColor()
+    if readable(r) then
+        blizzardColor[bar] = { r, g, b, a }
+    end
+    if bar.IsStatusBarDesaturated then
+        local desaturated = bar:IsStatusBarDesaturated()
+        if readable(desaturated) then
+            blizzardDesaturated[bar] = desaturated
+        end
+    end
+end
+
 local function paintBar(bar)
     local color = wanted(bar.unitFrame, bar.unit, "healthBars")
     if not color then
@@ -164,6 +178,9 @@ local function paintBar(bar)
             restoreBar(bar)
         end
         return
+    end
+    if not painted[bar] then
+        keepBlizzardBar(bar)
     end
     applying[bar] = true
     bar:SetStatusBarDesaturated(true)
@@ -190,12 +207,8 @@ local function onBarDesaturated(bar, desaturated)
 end
 
 local function hookBar(bar)
-    if not bar or barHooked[bar] then
-        return
-    end
-    barHooked[bar] = true
-    hooksecurefunc(bar, "SetStatusBarColor", onBarColor)
-    hooksecurefunc(bar, "SetStatusBarDesaturated", onBarDesaturated)
+    module:Hook(bar, "SetStatusBarColor", onBarColor)
+    module:Hook(bar, "SetStatusBarDesaturated", onBarDesaturated)
 end
 
 -- Puts a font string in `color`, or back in the color it had before we first colored it.
@@ -257,8 +270,9 @@ local function paintBackground(texture, frame)
         end
         return
     end
-    -- Blizzard may have colored it before our hook, so keep what it shows now to put back.
-    if not painted[texture] and not blizzardBackground[texture] then
+    -- Blizzard may have colored it before our hook, or while the module was off and the hook did
+    -- nothing, so keep what it shows now to put back.
+    if not painted[texture] then
         local r, g, b, a = texture:GetVertexColor()
         if ns.IsReadable(r) then
             blizzardBackground[texture] = { r, g, b, a }
@@ -270,18 +284,17 @@ local function paintBackground(texture, frame)
     painted[texture] = true
 end
 
-local function hookBackground(texture, frame)
-    if backgroundHooked[texture] then
+local function onBackgroundColor(texture, r, g, b, a)
+    if applying[texture] then
         return
     end
-    backgroundHooked[texture] = true
-    hooksecurefunc(texture, "SetVertexColor", function(self, r, g, b, a)
-        if applying[self] then
-            return
-        end
-        blizzardBackground[self] = { r, g, b, a }
-        paintBackground(self, frame)
-    end)
+    blizzardBackground[texture] = { r, g, b, a }
+    paintBackground(texture, backgroundFrame[texture])
+end
+
+local function hookBackground(texture, frame)
+    backgroundFrame[texture] = frame
+    module:Hook(texture, "SetVertexColor", onBackgroundColor)
 end
 
 local function update(frame)
