@@ -294,6 +294,15 @@ local function finishPass(v)
             end
             local right, up = sumR / #queue, sumU / #queue
             if not known(first.name, right, up, v) then
+                -- The hits' middle is within about half a probe spacing of the dot; following's
+                -- finer lines from there put the new icon on its middle from the start.
+                local lr, lu = locate(first.name, right, up, pass.space)
+                if internal.blocked then
+                    break
+                end
+                if lr then
+                    right, up = lr, lu
+                end
                 addNode(first.name, first.icon, right, up, gray, v)
             end
         end
