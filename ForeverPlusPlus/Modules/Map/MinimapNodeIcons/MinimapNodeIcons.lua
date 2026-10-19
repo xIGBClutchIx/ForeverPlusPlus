@@ -16,8 +16,10 @@
 --     on a grid, a part at a time, and a few times a second each node known is looked for again
 --     where its dot should be: a line of probes
 --     across it and one up through it. While the player stands still the answer is exact and fixes
---     the node's spot; while they move the answer's lag is measured instead, and taken off new
---     dots found. A node that stops answering (gathered, out of range) loses its icon.
+--     the node's spot; while they move the answer's lag is measured instead, taken off new dots
+--     found, and each node's spot creeps toward its answer less the lag. A corrected icon slides
+--     to its new spot rather than jumping. A node that stops answering (gathered, out of range)
+--     loses its icon.
 -- Probing stops in combat and while the cursor is on the minimap, where the game's own mouseover
 -- and tooltip (which the icons let through) are the player's; icons keep moving meanwhile.
 -- Where the player's spot can't be read (an instance), icons sit where the dots answered.
@@ -34,7 +36,7 @@
 local _, ns = ...
 
 local ipairs, type, sin, cos = ipairs, type, math.sin, math.cos
-local CreateFrame, Minimap = CreateFrame, Minimap
+local CreateFrame, Minimap, GetTime = CreateFrame, Minimap, GetTime
 local GetPlayerFacing, GetCVarBool, GetUnitSpeed = GetPlayerFacing, GetCVarBool, GetUnitSpeed
 local C_Map, C_Minimap, C_TooltipInfo, C_Item = C_Map, C_Minimap, C_TooltipInfo, C_Item
 
@@ -261,11 +263,44 @@ local function readTracking()
 end
 internal.readTracking = readTracking
 
+local GLIDE = 0.15 -- seconds an icon takes to slide to a node's corrected spot
+local gliding = false -- an icon is sliding, so the next frame draws even standing still
+
+---Puts a node on a new spot on the zone map. Its icon slides there from where it's drawn now,
+---so a correction doesn't show as a jump.
+---@param node table
+---@param x number
+---@param y number
+function internal.moveNode(node, x, y)
+    if node.x and (node.x ~= x or node.y ~= y) then
+        local now, fromX, fromY = GetTime(), node.x, node.y
+        if node.glideAt then
+            local t = (now - node.glideAt) / GLIDE
+            if t < 1 then
+                fromX = node.fromX + (node.x - node.fromX) * t
+                fromY = node.fromY + (node.y - node.fromY) * t
+            end
+        end
+        node.fromX, node.fromY, node.glideAt = fromX, fromY, now
+    end
+    node.x, node.y = x, y
+end
+
 -- Where a node's icon belongs right now, from its map spot when there is a view, else where it
--- answered last.
-local function drawnAt(node, v)
+-- answered last. With `shown`, where it's drawn this frame: partway along a slide to a new spot.
+local function drawnAt(node, v, shown)
     if v and node.x and v.mapID == nodesMap then
-        return toMinimap(v, node.x, node.y)
+        local x, y = node.x, node.y
+        if shown and node.glideAt then
+            local t = (GetTime() - node.glideAt) / GLIDE
+            if t < 1 then
+                x, y = node.fromX + (x - node.fromX) * t, node.fromY + (y - node.fromY) * t
+                gliding = true
+            else
+                node.glideAt = nil
+            end
+        end
+        return toMinimap(v, x, y)
     end
     return node.right, node.up
 end
@@ -336,8 +371,9 @@ local function draw(v)
     local size, border = db.size, db.border
     local radius = Minimap:GetWidth() / 2 - EDGE
     local shown = 0
+    gliding = false
     for _, node in ipairs(internal.nodes) do
-        local right, up = drawnAt(node, v)
+        local right, up = drawnAt(node, v, true)
         if right * right + up * up <= radius * radius then
             shown = shown + 1
             local pin = getPin(shown)
@@ -397,7 +433,7 @@ end
 local function onUpdate(_, elapsed)
     sinceTick = sinceTick + elapsed
     local due = sinceTick >= TICK
-    if not (due or redraw or mayHaveMoved()) then
+    if not (due or redraw or gliding or mayHaveMoved()) then
         return
     end
     redraw = false

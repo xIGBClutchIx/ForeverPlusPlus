@@ -30,9 +30,11 @@ local SAME_SPOT = 4 -- two dots of one name closer than this (minimap units) are
 local STILL_TICKS = 3 -- ticks without moving before the dots' answers are trusted again
 local STILL_YARDS = 0.05 -- less movement than this in a tick is standing still
 local LAG_SMOOTH = 0.5 -- how much of each new lag reading replaces the running one
+local NUDGE = 0.25 -- how far a round of following moves a node toward its answer while moving
 local NONE = internal.NONE
 
 local inside, drawnAt, fromMinimap = internal.inside, internal.drawnAt, internal.fromMinimap
+local moveNode = internal.moveNode
 local probe, startProbing, stopProbing = internal.probe, internal.startProbing, internal.stopProbing
 local currentSpace = internal.currentSpace
 
@@ -178,9 +180,13 @@ local function followAll(v, space)
                 if trusted or not node.x then
                     -- Standing still the answer is where the dot is. A node without a spot yet
                     -- (found with no view) takes this one, trail and all, until the player stops.
-                    node.x, node.y = fromMinimap(v, foundR, foundU)
+                    moveNode(node, fromMinimap(v, foundR, foundU))
                 else
                     noteLag(foundR - right, foundU - up)
+                    -- Moving, the answer less the trail is where the dot is, give or take: the
+                    -- spot creeps toward it each round, so there's little left to fix on stopping.
+                    local x, y = fromMinimap(v, foundR - lagR, foundU - lagU)
+                    moveNode(node, node.x + (x - node.x) * NUDGE, node.y + (y - node.y) * NUDGE)
                 end
             end
         else
@@ -236,13 +242,14 @@ local function known(name, right, up, v)
 end
 
 -- Adds a node for a dot that answered at a spot. Moving, the trail is taken off before the spot
--- is placed on the map.
+-- is placed on the map: the one measured now, or else the last one measured, which is closer than
+-- none; following corrects it from there.
 local function addNode(name, icon, right, up, gray, v)
     local node = { name = name, icon = icon, right = right, up = up, level = gray, misses = 0,
         standing = internal.standing(name) }
     if v then
         local placeR, placeU = right, up
-        if not still() and lagKnown then
+        if not still() then
             placeR, placeU = right - lagR, up - lagU
         end
         node.x, node.y = fromMinimap(v, placeR, placeU)
