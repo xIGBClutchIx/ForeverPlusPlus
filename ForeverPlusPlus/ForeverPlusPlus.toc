@@ -8,6 +8,7 @@
 ## IconTexture: Interface\AddOns\ForeverPlusPlus\Media\Icon
 
 Core.lua
+Commands.lua
 Locales\enUS\Core.lua
 Locales\enUS\Units.lua
 Locales\enUS\Automation.lua

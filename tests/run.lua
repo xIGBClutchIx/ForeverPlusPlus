@@ -983,18 +983,32 @@ do
     hooksecurefunc = function() end
     InCombatLockdown = function() return false end
     GetLocale = function() return "enUS" end
-    strsplit = function(_, s) return s end
-    strtrim = function(s) return s end
     C_AddOns = { GetAddOnMetadata = function() return "0.9.0" end }
     SlashCmdList = {}
+    strtrim = function(s) return (s:gsub("^%s+", ""):gsub("%s+$", "")) end
+    strsplit = function(sep, s, limit)
+        local parts, from = {}, 1
+        while not limit or #parts < limit - 1 do
+            local at = s:find(sep, from, true)
+            if not at then
+                break
+            end
+            parts[#parts + 1] = s:sub(from, at - 1)
+            from = at + #sep
+        end
+        parts[#parts + 1] = s:sub(from)
+        return unpack(parts)
+    end
 
     local core = {}
-    for _, path in ipairs({ "Core", "Locales/enUS/Core", "Lib/Store", "Lib/Frames" }) do
+    for _, path in ipairs({ "Core", "Commands", "Locales/enUS/Core", "Lib/Store", "Lib/Frames" }) do
         local chunk = assert(loadfile("ForeverPlusPlus/" .. path .. ".lua"))
         chunk(ADDON, core)
     end
     core.GameData = { Prune = function() end }
     core.Profiler = { recording = false, Wrap = function(_, fn) return fn end }
+    core.RefreshSetting = function() end -- Settings/Settings.lua's
+    core.OpenSettings = function() return true end
     local Frames = core.Frames
 
     -- A module with a checkbox and a dropdown option, each driving events through OnWhile.
@@ -1136,6 +1150,23 @@ do
     eq(registered("MAIL_SHOW"), false, "lifecycle: module off: part's OnWhile stopped")
     core.SetEnabled("Host", true)
     eq(drop.enabled and check.enabled, true, "lifecycle: module on: its parts on")
+
+    -- /fpp set and the presets (Commands.lua) go through the same paths.
+    local fpp = SlashCmdList.FOREVERPLUSPLUS
+    core.Print = function() end
+    fpp("set Plain mode off")
+    eq(plain.db.mode, "off", "commands: /fpp set takes a choice key")
+    eq(registered("BAG_UPDATE"), false, "commands: /fpp set tells the module")
+    fpp("toggle Plain loud")
+    eq(plain.db.loud, false, "commands: /fpp toggle flips a checkbox")
+    fpp("toggle Host")
+    eq(host.enabled, false, "commands: /fpp toggle <module> turns it off")
+    core.SetOption("Plain", "loud", true)
+    core.ApplyPreset()
+    eq(plain.db.loud == false and plain.db.mode == "a", true, "commands: preset resets options")
+    eq(registered("PLAYER_MONEY") or not registered("BAG_UPDATE"), false,
+        "commands: preset tells the module")
+    eq(host.enabled, true, "commands: preset turns default-on modules back on")
 end
 
 -- Done ------------------------------------------------------------------------------------------
