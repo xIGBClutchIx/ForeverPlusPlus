@@ -117,7 +117,7 @@ L.MACROS_SMARTBUFF_DESC = "A macro that casts the buff your friendly target (or 
     .. "shows when it would cast the wrong buff."
 L.MACROS_SMARTBUFF_RECAST = "Recast Below"
 L.MACROS_SMARTBUFF_RECAST_DESC = "A buff with less than this much of its time left counts as "
-    .. "missing, so the macro casts it again: at 20%, a 30 minute buff is recast in its last 6 "
+    .. "missing, so the macro casts it again: at 50%, a 30 minute buff is recast in its last 15 "
     .. "minutes."
 L.MACROS_SMARTBUFF_RECAST_FORMAT = "%d%%"
 L.MACROS_SMARTBUFF_TARGET = "Your target"

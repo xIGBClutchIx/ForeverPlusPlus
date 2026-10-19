@@ -12,7 +12,8 @@ local L = ns.L
 -- Modules the Developer's Defaults preset turns on, on top of every module's default settings.
 local developerEnables = { "FishingCast", "SkipCinematics", "AutoScreenshot", "CurrencyBar",
     "HideBetaFeedback", "ShortChannelNames", "EasyDelete", "AutoWeaponBuff", "MinimapNodeIcons",
-    "AutoGossip", "WhisperWindow", "ConsoleVariables", "Profiler", "Debug" }
+    "AutoGossip", "WhisperWindow", "ConsoleVariables", "Profiler", "Debug", "UpgradeArrows",
+    "Macros" }
 
 -- Options the Developer's Defaults preset sets differently from the module's default.
 local developerOptions = {

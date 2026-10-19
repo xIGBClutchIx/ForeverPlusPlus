@@ -36,7 +36,7 @@ local module = macros:NewPart({
     section = L.MACROS_SMARTBUFF,
 }, {
     smartBuff = true,
-    smartBuffRecast = 20, -- percent of a buff's full length left below which it counts as missing
+    smartBuffRecast = 50, -- percent of a buff's full length left below which it counts as missing
 })
 
 module:AddOptions({
