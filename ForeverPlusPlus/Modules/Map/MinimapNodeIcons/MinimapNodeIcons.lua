@@ -8,9 +8,10 @@
 -- data for the mouseover names what is under that spot. Where a dot answers lags behind where it's
 -- drawn while the player moves, and catches up once they stop (in game, 2026-10-13), so probes
 -- can't place an icon frame by frame. Instead:
---   - Every frame, each icon is drawn from its node's spot on the zone map and the player's own
---     (C_Map.GetPlayerMapPosition), the minimap's view radius, and its rotation. That's exact
---     through moving, turning, and zooming, and costs no probes.
+--   - Every frame while the player moves or turns, each icon is drawn from its node's spot on the
+--     zone map and the player's own (C_Map.GetPlayerMapPosition), the minimap's view radius, and
+--     its rotation. That's exact through moving, turning, and zooming, and costs no probes. While
+--     they stand still the icons can't move, so they're drawn again only with each round of probes.
 --   - Every second or so (more often while moving), the whole minimap is looked over for new dots
 --     on a grid, a part at a time, and a few times a second each node known is looked for again
 --     where its dot should be: a line of probes
@@ -34,7 +35,7 @@ local _, ns = ...
 
 local ipairs, type, sin, cos = ipairs, type, math.sin, math.cos
 local CreateFrame, Minimap = CreateFrame, Minimap
-local GetPlayerFacing, GetCVarBool = GetPlayerFacing, GetCVarBool
+local GetPlayerFacing, GetCVarBool, GetUnitSpeed = GetPlayerFacing, GetCVarBool, GetUnitSpeed
 local C_Map, C_Minimap, C_TooltipInfo, C_Item = C_Map, C_Minimap, C_TooltipInfo, C_Item
 
 local L = ns.L
@@ -122,7 +123,7 @@ local Profiler = ns.Profiler
 local PART_VIEW = Profiler.Part(module, L.MINIMAPNODEICONS_PART_VIEW)
 local PART_DRAW = Profiler.Part(module, L.MINIMAPNODEICONS_PART_DRAW)
 
-local TICK = 0.1 -- seconds between rounds of probes; icons are drawn every frame regardless
+local TICK = 0.1 -- seconds between rounds of probes; icons are drawn every frame while moving
 local EDGE = 2 -- keep probes and icons this far inside the minimap's edge
 local RED = { 1, 0.25, 0.25 } -- the icon's vertex color while the skill is too low
 local GRAY = { 0.7, 0.7, 0.7 } -- dims a gray (desaturated) icon
@@ -371,15 +372,42 @@ local function draw(v)
     hidePins(shown + 1)
 end
 
+local redraw = true -- something changed that the next frame must draw (a zoom, an option)
+local lastFacing
+
+-- Whether the icons could have moved since the last frame: the player is moving or turning. While
+-- they stand still the icons are where they were, so the view is read and they're drawn only on
+-- each tick (which also follows the dots, so a gathered node still goes within one) and when
+-- something else changed. On a boat the speed reads 0; the ticks still follow it, less smoothly.
+local function mayHaveMoved()
+    local speed = GetUnitSpeed and GetUnitSpeed("player")
+    if not (ns.IsNumber(speed) and speed == 0) then
+        return true
+    end
+    if rotating then
+        local facing = GetPlayerFacing and GetPlayerFacing()
+        if not (facing and readable(facing)) or facing ~= lastFacing then
+            lastFacing = facing
+            return true
+        end
+    end
+    return false
+end
+
 local function onUpdate(_, elapsed)
+    sinceTick = sinceTick + elapsed
+    local due = sinceTick >= TICK
+    if not (due or redraw or mayHaveMoved()) then
+        return
+    end
+    redraw = false
     local v = Profiler.Call(PART_VIEW, readView)
     -- A new zone map: the nodes' spots were on the old one.
     if v and v.mapID ~= nodesMap then
         internal.nodes, nodesMap, internal.pass, internal.findAll = {}, v.mapID, nil, true
         internal.forgetSpot()
     end
-    sinceTick = sinceTick + elapsed
-    if sinceTick >= TICK then
+    if due then
         sinceTick = 0
         internal.tick(v)
     end
@@ -391,12 +419,13 @@ local function onSkill()
     for _, node in ipairs(internal.nodes) do
         node.standing = standing(node.name)
     end
+    redraw = true
 end
 
 -- A zoom: icons drawn from map spots move with it by themselves; look over the minimap for dots it
 -- brought in. Without a view, where the dots answered is all there is, so start over.
 local function onZoom()
-    internal.findAll = true
+    internal.findAll, redraw = true, true
     if not readView() then
         internal.nodes = {}
     end
@@ -411,7 +440,7 @@ function module:OnEnable()
         frame:SetFrameLevel(Minimap:GetFrameLevel() + 5)
     end
     frame:SetScript("OnUpdate", ns.Profiler.Wrap(self, onUpdate)) -- timed while the Profiler records
-    rotating = nil -- it may have changed while the module was off
+    rotating, redraw = nil, true -- rotation may have changed while the module was off
     readTracking() -- shows the frame while tracking is on
     internal.findAll = true
     self:On("MINIMAP_UPDATE_TRACKING", readTracking)
@@ -421,7 +450,7 @@ function module:OnEnable()
     self:On("SKILL_LINES_CHANGED", onSkill)
     self:On("MINIMAP_UPDATE_ZOOM", onZoom)
     self:On("CVAR_UPDATE", function()
-        rotating = nil
+        rotating, redraw = nil, true
     end)
 end
 
@@ -434,6 +463,7 @@ function module:OnDisable()
 end
 
 function module:OnOptionChanged(key)
+    redraw = true -- size, border, tints
     if key == "detail" then
         internal.pass = nil
     end
