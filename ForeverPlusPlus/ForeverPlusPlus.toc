@@ -57,6 +57,7 @@ Lib\Equipment.lua
 Lib\Talents.lua
 Lib\ActionButtons.lua
 Lib\Spellbook.lua
+Lib\Quests.lua
 Modules\System\ErrorCatcher.lua
 Modules\Units\PlayerNameplates.lua
 Modules\Units\NpcNameplates.lua

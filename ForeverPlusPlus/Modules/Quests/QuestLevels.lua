@@ -12,11 +12,12 @@
 -- quest log's gray through red); Blizzard's prefix function and its other callers are untouched.
 local _, ns = ...
 
-local select, type, sub = select, type, string.sub
+local type, sub = type, string.sub
 local GetQuestDifficultyColor = GetQuestDifficultyColor
 
 local L = ns.L
 local Colors = ns.Colors
+local Quests = ns.Quests
 
 local module = ns.NewModule("QuestLevels", L.QUESTLEVELS_DESC, { enabled = true, color = false })
 module.title = L.QUESTLEVELS_TITLE
@@ -104,21 +105,11 @@ end
 -- right after that, before anything hooked to the panel's OnShow (Forever Quest Icons) sees it.
 local busy = false
 
--- The row's quest ID, and its level from the old index functions if this client still has them.
-local function greetingQuest(button)
-    local index = button:GetID()
-    if button.isActive == 1 then
-        return GetActiveQuestID and GetActiveQuestID(index), GetActiveLevel and GetActiveLevel(index)
-    end
-    return GetAvailableQuestInfo and (select(5, GetAvailableQuestInfo(index))),
-        GetAvailableLevel and GetAvailableLevel(index)
-end
-
 local function tagGreeting(button, text)
     if busy or type(text) ~= "string" then
         return
     end
-    local prefix = prefixFor(greetingQuest(button))
+    local prefix = prefixFor(Quests.GreetingButton(button))
     if prefix and sub(text, 1, #prefix) ~= prefix then
         busy = true
         button:SetText(prefix .. untagged(text))
@@ -135,28 +126,15 @@ end
 
 -- A quest's details: QuestInfo_Display fills them for a quest giver's offer and reward, and for
 -- the quest log on the map. The quest log knows its quest's level even when the API doesn't.
-local function logLevel(questID)
-    local index = C_QuestLog.GetLogIndexForQuestID and C_QuestLog.GetLogIndexForQuestID(questID)
-    local info = index and C_QuestLog.GetInfo(index)
-    return info and (info.difficultyLevel or info.level)
-end
-
-local function detailsQuestID()
-    if QuestInfoFrame and QuestInfoFrame.questLog then
-        return C_QuestLog.GetSelectedQuest and C_QuestLog.GetSelectedQuest()
-    end
-    return GetQuestID and GetQuestID()
-end
-
 local function tagDetails()
-    local questID = detailsQuestID()
-    tagText(QuestInfoTitleHeader, prefixFor(questID, questID and logLevel(questID)))
+    local questID = Quests.DetailsID()
+    tagText(QuestInfoTitleHeader, prefixFor(questID, Quests.Level(questID)))
 end
 
 -- The window that asks for a quest's items before you turn it in.
 local function tagProgress()
-    local questID = GetQuestID and GetQuestID()
-    tagText(QuestProgressTitleText, prefixFor(questID, questID and logLevel(questID)))
+    local questID = Quests.GiverID()
+    tagText(QuestProgressTitleText, prefixFor(questID, Quests.Level(questID)))
 end
 
 -- Fills an open list again, with or without the tags, and tags or untags open details.

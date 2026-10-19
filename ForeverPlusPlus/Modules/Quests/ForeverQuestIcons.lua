@@ -10,10 +10,10 @@
 -- we add to it, so a title the icon would push onto another line is left without one.
 local _, ns = ...
 
-local pairs, ipairs, select, type, format, floor = pairs, ipairs, select, type, string.format,
-    math.floor
+local pairs, ipairs, type, format, floor = pairs, ipairs, type, string.format, math.floor
 
 local L = ns.L
+local Quests = ns.Quests
 local hasAtlas = ns.Frames.HasAtlas
 
 local module = ns.NewModule("ForeverQuestIcons", L.FOREVERQUESTICONS_DESC, {
@@ -189,8 +189,7 @@ local function markGossip()
     end)
 end
 
--- A quest giver's list, the older greeting way. Active quests come first; each button's ID is
--- its place in its own list.
+-- A quest giver's list, the older greeting way.
 local function markGreeting()
     local panel = QuestFrameGreetingPanel
     local pool = panel and panel.titleButtonPool
@@ -198,32 +197,19 @@ local function markGreeting()
         return
     end
     for button in pool:EnumerateActive() do
-        local id = button:GetID()
-        local questID
-        if button.isActive == 1 then
-            questID = GetActiveQuestID and GetActiveQuestID(id)
-        elseif GetAvailableQuestInfo then
-            questID = select(5, GetAvailableQuestInfo(id))
-        end
-        mark(button:GetFontString(), questID, "givers")
+        mark(button:GetFontString(), (Quests.GreetingButton(button)), "givers")
     end
 end
 
 -- The title of a quest's details: QuestInfo_Display fills them for a quest giver's offer and
 -- reward, and for the quest log on the map.
 local function markDetails()
-    local questID
-    if QuestInfoFrame and QuestInfoFrame.questLog then
-        questID = C_QuestLog.GetSelectedQuest and C_QuestLog.GetSelectedQuest()
-    else
-        questID = GetQuestID and GetQuestID()
-    end
-    mark(QuestInfoTitleHeader, questID, "details")
+    mark(QuestInfoTitleHeader, Quests.DetailsID(), "details")
 end
 
 -- The window that asks for a quest's items before you turn it in.
 local function markProgress()
-    mark(QuestProgressTitleText, GetQuestID and GetQuestID(), "details")
+    mark(QuestProgressTitleText, Quests.GiverID(), "details")
 end
 
 -- The tracker is its own Blizzard addon. Each tracker frame has its own copy of the method, so

@@ -15,6 +15,7 @@ local GetRealZoneText = GetRealZoneText
 local GetQuestUiMapID, Enum = GetQuestUiMapID, Enum
 
 local L = ns.L
+local Quests = ns.Quests
 
 local module = ns.NewModule("QuestTracker", L.QUESTTRACKER_DESC, {
     enabled = true,
@@ -428,18 +429,6 @@ local sortGaveUp = false -- the client kept neither order, so stop trying until 
 local addsToTop = true -- AddQuestWatch puts the quest first rather than last
 local addEndKnown = false -- a sort has shown which end it goes to
 
----The quest's level, or nil while the quest log doesn't know it yet.
----@param questID number
----@return number?
-local function questLevel(questID)
-    local index = C_QuestLog.GetLogIndexForQuestID(questID)
-    local info = index and C_QuestLog.GetInfo(index)
-    local level = info and info.level
-    if type(level) == "number" and level > 0 then
-        return level
-    end
-end
-
 -- Whether the watch list holds exactly `ids`, in that order.
 local function watchesMatch(ids)
     if C_QuestLog.GetNumQuestWatches() ~= #ids then
@@ -467,7 +456,7 @@ local function sortWatches()
     local watched = {}
     for i = 1, C_QuestLog.GetNumQuestWatches() do
         local questID = C_QuestLog.GetQuestIDForQuestWatchIndex(i)
-        local level = questID and questLevel(questID)
+        local level = Quests.Level(questID)
         if not level then
             return -- the quest log isn't ready; its next update sorts again
         end
