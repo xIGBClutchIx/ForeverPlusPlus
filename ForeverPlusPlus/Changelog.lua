@@ -66,6 +66,8 @@ ns.changelog = {
                     .. "right-click in your bags. Not in combat." },
                 { L.CHATCOPY_TITLE, "The window looks like Forever++'s other windows, with the "
                     .. "portrait and the title \"Forever++ Chat Copy\"." },
+                { L.ITEMTOOLTIPS_TITLE, "Sell Price also shows on a quest's reward tooltips, where "
+                    .. "the game leaves it off, so you can see what each choice sells for." },
                 { L.MINIMAPNODEICONS_TITLE, "Costs much less while you play: it looks the minimap "
                     .. "over for new dots once a second or so instead of ten times, spreads the "
                     .. "look after a zoom over a few moments instead of one frame, and does nothing "

@@ -16,6 +16,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - Item marks, tints, and tooltip lines do much less work after a skill point or level, in your bags, and at the auction house, so bags open more smoothly while leveling.
 - **Auto Weapon Buff**: using a sharpening stone, weightstone, oil, poison, or lure from an action bar puts it straight on your weapon too, like a right-click in your bags. Not in combat.
 - **Chat Copy**: the window looks like Forever++'s other windows, with the portrait and the title "Forever++ Chat Copy".
+- **Item Tooltips**: Sell Price also shows on a quest's reward tooltips, where the game leaves it off, so you can see what each choice sells for.
 - **Minimap Node Icons**: costs much less while you play: it looks the minimap over for new dots once a second or so instead of ten times, spreads the look after a zoom over a few moments instead of one frame, and does nothing while Find Herbs and Find Minerals are off. A new dot may take a moment longer to get its icon while you stand still.
 - **Profiler**: also times the work modules put off for a moment, like redrawing the marks on your bag items, so it shows under the module that did it.
 - **Quest Tracker**: the background is a little darker by default, at 40% opacity instead of 30%. If you set its Opacity yourself, it stays as you set it.

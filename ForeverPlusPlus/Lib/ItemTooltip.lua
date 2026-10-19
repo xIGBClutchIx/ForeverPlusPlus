@@ -2,7 +2,8 @@
 -- lines with `OnPrices`: right after the sell price, or after the item's last line of data when
 -- it has none. Other lines about the item (`OnInfo`) go just above them. One module may redraw
 -- the sell price line itself with `ReplaceSellPrice`, and any module another of Blizzard's lines
--- with `ReplaceLine`. Nothing is hooked until a module first calls in.
+-- with `ReplaceLine`. That module also gets to draw a sell price where Blizzard draws none (quest
+-- rewards). Nothing is hooked until a module first calls in.
 local _, ns = ...
 
 local ipairs, next, setmetatable, format, type = ipairs, next, setmetatable, string.format, type
@@ -27,6 +28,8 @@ local done = setmetatable({}, { __mode = "k" }) -- tooltip -> price lines alread
 local infoDone = setmetatable({}, { __mode = "k" }) -- tooltip -> lines above the prices added
 local current = setmetatable({}, { __mode = "k" }) -- tooltip -> item data being drawn
 local widest = setmetatable({}, { __mode = "k" }) -- tooltip -> widest price line name so far
+local sellLine = setmetatable({}, { __mode = "k" }) -- tooltip -> Blizzard has a sell price line
+local NO_LINE = {} -- the line data a sell price gets where Blizzard has none
 
 -- The item a line belongs to: from the item pre call, or else the tooltip's own data (probe:
 -- GetPrimaryTooltipData is Mainline's tooltip data mixin).
@@ -54,6 +57,11 @@ end
 
 local function addPrices(tooltip, data)
     done[tooltip] = true
+    -- Blizzard leaves the sell price off some tooltips, such as a quest's rewards: the module
+    -- that draws it puts it first, where the line would be.
+    if replacer and not sellLine[tooltip] then
+        run(replacer, tooltip, data, NO_LINE)
+    end
     for _, fn in ipairs(providers) do
         run(fn, tooltip, data)
     end
@@ -67,6 +75,7 @@ local function addInfo(tooltip, data)
 end
 
 local function onSellPricePre(tooltip, lineData)
+    sellLine[tooltip] = true
     local data = itemData(tooltip)
     if data and not infoDone[tooltip] then
         addInfo(tooltip, data)
@@ -119,6 +128,7 @@ local function reset(tooltip)
     infoDone[tooltip] = nil
     current[tooltip] = nil
     widest[tooltip] = nil
+    sellLine[tooltip] = nil
 end
 
 local function onItemPre(tooltip, data)
@@ -236,7 +246,9 @@ function ItemTooltip.ReplaceLine(fn, owner)
 end
 
 ---Lets `fn(tooltip, data, lineData)` draw the sell price line instead of Blizzard. It returns
----true when it drew one; otherwise Blizzard's line shows. `owner` as in OnPrices.
+---true when it drew one; otherwise Blizzard's line shows. It's also called, with a `lineData`
+---that has no price, on a tooltip Blizzard gives no sell price line, before the other prices.
+---`owner` as in OnPrices.
 ---@param fn fun(tooltip: table, data: table, lineData: table): boolean?
 ---@param owner? table
 function ItemTooltip.ReplaceSellPrice(fn, owner)
