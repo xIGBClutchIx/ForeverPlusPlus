@@ -357,16 +357,26 @@ local function finishPass(v)
                     end
                 end
             end
-            local right, up = sumR / #queue, sumU / #queue
-            -- Near a dot already followed, it's a dot of its own only if something else answers
-            -- between them; otherwise it's the edge of that one, a little wider than its middle.
-            local near, nr, nu = nearestKnown(first.name, right, up, v, FOLLOW_REACH)
-            local separate = not near
-            if near and own == OWN_REACH then
-                separate = not joined(first.name, nr, nu, right, up, pass.space)
+            -- The hits' middle can fall between two dots (their edges, left after the hits on
+            -- each were set aside), so the dot is looked for from there, as following does: it's
+            -- the nearest one that answers, or nothing.
+            local right, up = locate(first.name, sumR / #queue, sumU / #queue, pass.space)
+            if internal.blocked then
+                break
             end
-            if separate then
-                addNode(first.name, first.icon, right, up, gray, v)
+            if right then
+                -- Near a dot already followed, it's a dot of its own only if something else answers
+                -- between them; otherwise it's that one again.
+                local near, nr, nu = nearestKnown(first.name, right, up, v, FOLLOW_REACH)
+                local separate = not near
+                if near and own == OWN_REACH then
+                    local dr, du = nr - right, nu - up
+                    separate = dr * dr + du * du > OWN_REACH * OWN_REACH
+                        and not joined(first.name, nr, nu, right, up, pass.space)
+                end
+                if separate then
+                    addNode(first.name, first.icon, right, up, gray, v)
+                end
             end
         end
     end
