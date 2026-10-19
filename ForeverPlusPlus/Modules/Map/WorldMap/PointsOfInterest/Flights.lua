@@ -39,14 +39,13 @@ local function seenLearned()
 end
 
 -- At a flight master, remembers which of the flight points it lists are learned, by node ID.
--- Mainline's C_TaxiMap.GetAllTaxiNodes: ones the master can't fly to are Unreachable.
+-- Mainline's node states (Lib/Taxi.lua): ones the master can't fly to are Unreachable.
 function internal.rememberLearned()
-    if not (C_TaxiMap and C_TaxiMap.GetAllTaxiNodes and GetTaxiMapID and Enum.FlightPathState) then
+    if not Enum.FlightPathState then
         return
     end
     local seen = seenLearned()
-    local mapID = GetTaxiMapID()
-    for _, node in ipairs(mapID and C_TaxiMap.GetAllTaxiNodes(mapID) or {}) do
+    for _, node in ipairs((ns.Taxi.Nodes())) do
         if node.nodeID and node.state ~= Enum.FlightPathState.Unreachable then
             seen[node.nodeID] = true
         end
@@ -141,12 +140,9 @@ end
 -- At a flight master, saves where each flight point on its map is: on the map of Data.lua's flight
 -- point on the same spot, or else on the zone the game says the spot is in.
 function internal.learnFlights()
-    if not (C_TaxiMap and C_TaxiMap.GetAllTaxiNodes and GetTaxiMapID) then
-        return
-    end
-    local taxiMap = GetTaxiMapID()
+    local nodes, taxiMap = ns.Taxi.Nodes()
     local changed = false
-    for _, node in ipairs(taxiMap and C_TaxiMap.GetAllTaxiNodes(taxiMap) or {}) do
+    for _, node in ipairs(nodes) do
         local x, y
         if node.nodeID and node.position and not node.isMapLayerTransition then
             x, y = node.position:GetXY()

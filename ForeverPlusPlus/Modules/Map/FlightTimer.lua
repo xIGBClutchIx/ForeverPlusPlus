@@ -7,7 +7,7 @@
 local _, ns = ...
 
 local ipairs, floor, format, max, min = ipairs, math.floor, string.format, math.max, math.min
-local C_TaxiMap, Enum, GetTime, UnitOnTaxi = C_TaxiMap, Enum, GetTime, UnitOnTaxi
+local Enum, GetTime, UnitOnTaxi = Enum, GetTime, UnitOnTaxi
 local CreateFrame, UIParent, GameTooltip, PlaySound = CreateFrame, UIParent, GameTooltip, PlaySound
 
 local L = ns.L
@@ -61,11 +61,7 @@ local current -- the node ID the flight master is at
 
 local function readNodes()
     nodeOfSlot, nameOfNode, current = {}, {}, nil
-    if not (C_TaxiMap and C_TaxiMap.GetAllTaxiNodes and GetTaxiMapID) then
-        return
-    end
-    local mapID = GetTaxiMapID()
-    for _, node in ipairs(mapID and C_TaxiMap.GetAllTaxiNodes(mapID) or {}) do
+    for _, node in ipairs((ns.Taxi.Nodes())) do
         if node.nodeID then
             if node.slotIndex then
                 nodeOfSlot[node.slotIndex] = node.nodeID

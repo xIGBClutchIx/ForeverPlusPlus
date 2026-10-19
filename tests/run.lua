@@ -49,6 +49,10 @@ end
 CanDualWield = function()
     return game.dualWield
 end
+game.now = 0
+GetTime = function()
+    return game.now
+end
 -- Marks the number it's given, so tests can tell Text.Number went through it.
 BreakUpLargeNumbers = function(n)
     return "big:" .. n
@@ -75,7 +79,7 @@ end
 ITEM_MIN_SKILL = "Requires %s (%d)"
 for _, file in ipairs({ "Secret", "Colors", "Text", "GameData", "WorldMap", "Instances", "Chat",
     "TalentPlan", "Errors", "Prices", "Store", "Keys", "Professions", "ItemStats", "Equipment",
-    "Talents", "Quests" }) do
+    "Talents", "Quests", "Taxi" }) do
     load("ForeverPlusPlus/Lib/" .. file .. ".lua")
 end
 
@@ -952,6 +956,32 @@ do
     eq(id == 403 and level == nil, true, "quests: an available one without the level function")
     C_QuestLog, GetQuestID, QuestInfoFrame, GetActiveQuestID, GetActiveLevel = nil, nil, nil, nil, nil
     GetAvailableQuestInfo = nil
+end
+
+-- Taxi ------------------------------------------------------------------------------------------
+
+do
+    local Taxi = ns.Taxi
+    local reads = 0
+    local nodes, mapID = Taxi.Nodes()
+    eq(#nodes == 0 and mapID == nil, true, "taxi: nothing without the API")
+    game.now = 1
+    C_TaxiMap = {
+        GetAllTaxiNodes = function(map)
+            reads = reads + 1
+            return { { nodeID = map * 10 }, { nodeID = map * 10 + 1 } }
+        end,
+    }
+    GetTaxiMapID = function() return 1414 end
+    nodes, mapID = Taxi.Nodes()
+    eq(#nodes == 2 and nodes[1].nodeID == 14140 and mapID == 1414, true, "taxi: the master's nodes")
+    Taxi.Nodes()
+    eq(reads, 1, "taxi: read once in a frame")
+    game.now = 2
+    GetTaxiMapID = function() return nil end
+    nodes, mapID = Taxi.Nodes()
+    eq(#nodes == 0 and mapID == nil and reads == 1, true, "taxi: no flight map open")
+    C_TaxiMap, GetTaxiMapID = nil, nil
 end
 
 -- Core's module lifecycle -----------------------------------------------------------------------
