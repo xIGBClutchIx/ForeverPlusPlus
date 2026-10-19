@@ -22,7 +22,6 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Quest Tracker**: the background is a little darker by default, at 40% opacity instead of 30%. If you set its Opacity yourself, it stays as you set it.
 - **Settings**: option names on the Modules page have more room and a smaller indent under the option they depend on, so they wrap less. An option's NEW label sits just after its checkbox instead of squeezing its name.
 - **Settings**: Console Variables, Profiler, and the Debug page are modules under a new Tools category, off by default (on in Developer's Defaults). Off, their pages leave the sidebar and their commands are gone, the Profiler times nothing, and turning Debug off puts every debug option back to its default and takes away `/fpp selftest`, `/fpp gearprobe`, and `/fpp shots`.
-- **Waylaid Crates**: Bundle Costs and Auction House Category each have a section of their own on the Modules page, with the dropdown that turns it on and off in the section's header.
 
 ### Fixed
 

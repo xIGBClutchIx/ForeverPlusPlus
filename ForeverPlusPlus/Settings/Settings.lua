@@ -7,8 +7,9 @@
 --                    applies, then its options (checkboxes, dropdowns and sliders) and buttons
 --                    (from `module.actions`), greyed out while it's off. An option can sit under
 --                    another (`requires`). A module made of parts (`module:NewPart`) has a
---                    section for each, headed by the part's Enabled checkbox (or its dropdown,
---                    in the header), with the part's options greyed out while it's off.
+--                    section for each, headed by the part's Enabled checkbox (a part turned on
+--                    by a dropdown is that one row), with the part's options greyed out while
+--                    it's off.
 --                    `alwaysOn` modules (tools) aren't listed. A search box at the top narrows
 --                    the list to modules by title and description, or by an option's name or
 --                    description, and highlights those options; a New checkbox beside it lists
@@ -606,19 +607,18 @@ end
 -- `updates` put its controls back to what's saved.
 
 -- A row: `text` on the left, gold while `on()` and grey otherwise, and the space after it for a
--- control. Shown only while `shown()` is true, when given. `font` and `gap`, for a section's
--- header with a control in it.
-local function addRow(view, text, indent, on, shown, font, gap)
+-- control. Shown only while `shown()` is true, when given.
+local function addRow(view, text, indent, on, shown)
     local row = CreateFrame("Frame", nil, view)
     row:EnableMouse(true)
     row:SetWidth(view:GetWidth())
-    local label = row:CreateFontString(nil, "OVERLAY", font or "GameFontNormal")
+    local label = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     label:SetPoint("LEFT", 4 + indent, 0)
     label:SetWidth(CONTROL_LEFT - 8 - indent)
     label:SetJustifyH("LEFT")
     label:SetText(text)
     row:SetHeight(max(ROW_HEIGHT, label:GetStringHeight() + 8))
-    addEntry(view, row, shown, gap)
+    addEntry(view, row, shown)
     if on then
         view.updates[#view.updates + 1] = function()
             label:SetFontObject(on() and "GameFontNormal" or "GameFontDisable")
@@ -736,14 +736,9 @@ local function addOptionRow(view, module, option, byKey, done)
     end
     local indent = depth * INDENT
     -- A part's checkbox (`toggle`) is right under its section's header, which names it. A part's
-    -- dropdown (a toggle with `choices`) is in the header itself.
-    local header = option.toggle and option.choices and option.section
-    local row, label
-    if header then
-        row, label = addRow(view, header, indent, nil, nil, "GameFontHighlightLarge", 16)
-    else
-        row, label = addRow(view, option.toggle and L.SETTINGS_ENABLED or option.name, indent, on)
-    end
+    -- dropdown (a toggle with `choices`) is an ordinary option row with its own name.
+    local name = option.toggle and not option.choices and L.SETTINGS_ENABLED or option.name
+    local row, label = addRow(view, name, indent, on)
     local updates = view.updates
     local pair = option.slider and byKey[option.slider]
     -- Highlighted like a selected sidebar entry while the search finds it (or the slider in it).
@@ -885,7 +880,7 @@ local function addModuleRows(view, module)
     for _, option in ipairs(options) do
         if option.section and option.section ~= section then
             section, subsection = option.section, nil
-            -- A part's dropdown draws the header itself (addOptionRow).
+            -- A part turned on by a dropdown is one row among the options, with no header.
             if not (option.toggle and option.choices) then
                 addLine(view, "GameFontHighlightLarge", section)
             end
