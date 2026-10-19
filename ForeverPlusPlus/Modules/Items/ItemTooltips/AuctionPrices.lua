@@ -9,7 +9,7 @@
 local _, ns = ...
 
 local ipairs, pairs, format, time, floor = ipairs, pairs, string.format, time, math.floor
-local C_AuctionHouse, C_Timer, GetTime = C_AuctionHouse, C_Timer, GetTime
+local C_AuctionHouse, GetTime = C_AuctionHouse, GetTime
 local GetRealmName, UnitFactionGroup = GetRealmName, UnitFactionGroup
 local CreateFrame, pcall = CreateFrame, pcall
 local select, tostring, C_Item, C_TradeSkillUI, Enum = select, tostring, C_Item, C_TradeSkillUI, Enum
@@ -243,7 +243,7 @@ local function stopScan()
     scanning, sent, waiting = false, false, nil
     seen, seenCount = nil, nil
     retries, answered = 0, false
-    ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
+    module:Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
     blockTimer:Cancel()
     stallTimer:Cancel()
 end
@@ -285,7 +285,7 @@ local function onStall()
     if waiting == "server" and not answered then
         sent = false -- the first query got no answer: send it again
     end
-    ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
+    module:Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
     waiting = nil
     step()
 end
@@ -322,7 +322,7 @@ function step()
     if ready and not ready() then
         if waiting ~= "throttle" then
             waiting = "throttle"
-            ns.On("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
+            module:On("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
             stallTimer:Start(STALL, onStall)
         end
         return
@@ -344,7 +344,7 @@ function step()
 end
 
 function onThrottleReady()
-    ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
+    module:Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", onThrottleReady)
     if waiting == "throttle" then
         step()
     end
@@ -421,9 +421,10 @@ local function afterShow()
     end
 end
 
+local showTimer = ns.Frames.Timer(module)
 local function onShow()
     open = true
-    C_Timer.After(0.5, afterShow)
+    showTimer:Start(0.5, afterShow)
 end
 
 -- /fpp scan: scan now, whenever the last one was.

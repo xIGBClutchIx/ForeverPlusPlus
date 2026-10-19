@@ -133,7 +133,7 @@ end
 -- Turning tracking back on --------------------------------------------------------------------
 
 local want = false -- turn tracking back on at the next chance
-local waiting = false -- a check is scheduled
+local timer = ns.Frames.Timer(module) -- the next check, stopped by Core when the module turns off
 local deadline = 0 -- GetTime() until which to keep checking
 
 -- How long to keep checking once the player can cast. At a fresh login the list fills in seconds
@@ -142,15 +142,13 @@ local deadline = 0 -- GetTime() until which to keep checking
 local WATCH = 12
 
 local function reapply()
-    waiting = false
-    if not (want and module.enabled and module.db.reapply) or blocked then
+    if not (want and module.db.reapply) or blocked then
         want = false
         return
     end
     if busy() then
         deadline = GetTime() + WATCH -- the time to watch starts once the player can cast
-        waiting = true
-        C_Timer.After(RETRY, reapply)
+        timer:Start(RETRY, reapply)
         return
     end
     local index, _, any = scan()
@@ -172,8 +170,7 @@ local function reapply()
     end
     -- Look again until the time is up, whether something was on or we just turned it on.
     if GetTime() < deadline then
-        waiting = true
-        C_Timer.After(RETRY, reapply)
+        timer:Start(RETRY, reapply)
     else
         want = false
     end
@@ -183,9 +180,8 @@ end
 local function request()
     want = true
     deadline = GetTime() + WATCH
-    if not waiting then
-        waiting = true
-        C_Timer.After(1, reapply)
+    if not timer:IsPending() then
+        timer:Start(1, reapply)
     end
 end
 
@@ -252,7 +248,6 @@ end
 
 function module:OnDisable()
     stopSwapping()
-    want = false
 end
 
 function module:OnOptionChanged(key)

@@ -22,7 +22,7 @@ local tonumber, tostring, min = tonumber, tostring, math.min
 local UnitClass, UnitLevel, UnitExists, UnitCanAssist = UnitClass, UnitLevel, UnitExists, UnitCanAssist
 local UnitIsDeadOrGhost, UnitIsUnit, InCombatLockdown = UnitIsDeadOrGhost, UnitIsUnit, InCombatLockdown
 local UnitName, CreateFrame = UnitName, CreateFrame
-local GetTime, C_Spell, C_Timer = GetTime, C_Spell, C_Timer
+local GetTime, C_Spell = GetTime, C_Spell
 local UnitPowerType, Enum = UnitPowerType, Enum
 
 local L = ns.L
@@ -129,7 +129,7 @@ local ranks -- spell name -> its known ranks (Lib/Spellbook.lua), or nil until r
 local incomplete = false
 local written -- what the macro holds: { target = cast or false, self = cast or false }
 local lastBody -- the text refresh last wrote, so our own edit's UPDATE_MACROS is let pass
-local checkTimer
+local checkTimer = Frames.Timer(module)
 local button -- ours, clicked by the macro (explain)
 
 local function classOf(unit)
@@ -419,15 +419,10 @@ end
 local refresh
 
 local function lookAgain(seconds)
-    if checkTimer then
-        checkTimer:Cancel()
-        checkTimer = nil
-    end
     if seconds < huge then
-        checkTimer = C_Timer.NewTimer(seconds + 0.5, function()
-            checkTimer = nil
-            refresh()
-        end)
+        checkTimer:Start(seconds + 0.5, function() refresh() end)
+    else
+        checkTimer:Cancel()
     end
 end
 
@@ -486,7 +481,7 @@ function refresh(targetChanged)
     lookAgain(min(soonTarget or huge, soonOwn or huge))
 end
 
-local queue, cancel = Frames.Coalesce(refresh, DELAY, module)
+local queue = Frames.Coalesce(refresh, DELAY, module)
 
 -- Deleted or edited by hand: made again. Our own EditMacro fires this too, and needs nothing.
 local function onMacros()
@@ -553,8 +548,6 @@ function module:OnEnable()
 end
 
 function module:OnDisable()
-    cancel()
-    lookAgain(huge)
     written, ranks, lastBody = nil, nil, nil
     internal.Delete(NAME)
 end

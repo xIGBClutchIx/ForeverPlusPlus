@@ -433,13 +433,14 @@ function module:BuildPage(frame)
         end
     end
 
-    frame:HookScript("OnShow", function()
-        ns.On("CVAR_UPDATE", onCVarUpdate)
+    -- The listener stops by itself when the module turns off, and its queued refresh with it.
+    self:HookScript(frame, "OnShow", function()
+        self:On("CVAR_UPDATE", onCVarUpdate)
         refresh()
     end)
-    frame:HookScript("OnHide", function() ns.Off("CVAR_UPDATE", onCVarUpdate) end)
+    frame:HookScript("OnHide", function() self:Off("CVAR_UPDATE", onCVarUpdate) end)
     if frame:IsShown() then
-        ns.On("CVAR_UPDATE", onCVarUpdate)
+        self:On("CVAR_UPDATE", onCVarUpdate)
     end
     choose(selected)
 end
@@ -460,10 +461,6 @@ local function openWith(text)
     if not ns.OpenSettings(module.name) then
         ns.Print(L.CONSOLEVARIABLES_NO_PAGE)
     end
-end
-
-function module:OnDisable()
-    ns.Off("CVAR_UPDATE", onCVarUpdate)
 end
 
 ns.AddCommand("cvar", "[search]", L.CONSOLEVARIABLES_COMMAND, function(rest)

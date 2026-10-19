@@ -5,7 +5,7 @@ local _, ns = ...
 
 local format, tostring, select = string.format, tostring, select
 local StopCinematic = StopCinematic
-local C_Map, C_Timer, GetSubZoneText, GetInstanceInfo = C_Map, C_Timer, GetSubZoneText, GetInstanceInfo
+local C_Map, GetSubZoneText, GetInstanceInfo = C_Map, GetSubZoneText, GetInstanceInfo
 
 local L = ns.L
 
@@ -105,13 +105,14 @@ end
 
 -- After CinematicFrame's own OnEvent has shown the frame. Only cinematics the game lets you
 -- cancel: the others are vehicle rides and scenes, where skipping would drop you off a vehicle.
+local stopTimer = ns.Frames.Timer(module)
 local function onCinematicEvent(_, event, canBeCancelled)
     if event ~= "CINEMATIC_START" or not canBeCancelled then
         return
     end
     if shouldSkip(module.db.seen.cinematics, cinematicKey()) then
         -- A frame later, once the cinematic is under way.
-        C_Timer.After(0, StopCinematic)
+        stopTimer:Start(0, StopCinematic)
         module:Print(L.SKIPCINEMATICS_SKIPPED_CINEMATIC)
     end
 end

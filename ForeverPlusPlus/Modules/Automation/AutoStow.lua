@@ -78,7 +78,3 @@ function module:OnEnable()
     -- Drawing or stowing by hand (the Sheath/Unsheath key) is the player's choice; leave it.
     self:Hook("ToggleSheath", cancel)
 end
-
-function module:OnDisable()
-    cancel()
-end

@@ -596,7 +596,7 @@ local function refresh()
     end
 end
 
-local refreshSoon, cancelRefresh = ns.Frames.Coalesce(function()
+local refreshSoon = ns.Frames.Coalesce(function()
     if module.enabled then
         refresh()
     end
@@ -674,7 +674,6 @@ end
 
 function module:OnDisable()
     ItemButtons.CancelAuction(updateAuction)
-    cancelRefresh()
     forgetScores()
     wipe(waiting)
     rewardsWaiting = nil

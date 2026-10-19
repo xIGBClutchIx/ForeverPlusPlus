@@ -3,7 +3,7 @@
 -- TalentPlanner.lua listens for the events.
 local _, ns = ...
 
-local format, C_Timer = string.format, C_Timer
+local format = string.format
 
 local L = ns.L
 local Plan = ns.TalentPlan
@@ -59,9 +59,10 @@ function internal.checkPoints()
 end
 
 -- Talent points come a moment after the level does.
+local levelTimer = ns.Frames.Timer(module)
 function internal.onLevelUp()
     internal.refresh()
     if module.db.reminder then
-        C_Timer.After(1, internal.checkPoints)
+        levelTimer:Start(1, internal.checkPoints)
     end
 end

@@ -542,6 +542,7 @@ local function testConversation()
         conversation.messages[#conversation.messages].time = start + i * 60
     end
     -- Never opened: left unread, so the chat button's count can be checked.
+    return conversation
 end
 
 -- On the Debug page (Settings/Debug.lua).
@@ -553,6 +554,31 @@ module.debugActions = {
         fn = testConversation,
         section = L.DEBUG_SECTION_TESTING,
     },
+}
+
+-- The Screenshots tool's picture: the window on the made-up conversation, never a real
+-- player's. It's forgotten again after the shot unless it was there before.
+local shotConversation, shotMade
+module.screenshot = {
+    id = "whispers",
+    name = L.SCREENSHOTS_SCENE_WHISPERS,
+    open = function()
+        shotConversation, shotMade = internal.Conversations()[TEST_KEY], false
+        if not shotConversation then
+            shotConversation, shotMade = testConversation(), true
+        end
+        internal.Open(shotConversation)
+    end,
+    isShown = function() return internal.IsShown() end,
+    close = function()
+        if internal.IsShown() then
+            internal.Toggle()
+        end
+        if shotMade and shotConversation then
+            internal.Remove(shotConversation)
+        end
+        shotConversation, shotMade = nil, nil
+    end,
 }
 
 module.actions = {

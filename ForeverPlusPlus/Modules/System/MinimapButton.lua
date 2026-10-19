@@ -484,12 +484,17 @@ function module:OnOptionChanged(key)
     end
 end
 
----Shows the minimap button's tooltip as hovering it does, for the Screenshots tool's picture.
----@return boolean shown false while the button isn't on the minimap
-function module.ShowTooltip()
-    if not (module.enabled and button and button:IsShown()) then
-        return false
-    end
-    showTooltip(button, true)
-    return true
-end
+-- The Screenshots tool's picture: the button's tooltip as hovering it shows it.
+module.screenshot = {
+    id = "minimap",
+    name = L.SCREENSHOTS_SCENE_MINIMAP,
+    modules = { MinimapButton = { where = "minimap" } },
+    open = function()
+        if not (module.enabled and button and button:IsShown()) then
+            return L.SCREENSHOTS_NO_BUTTON
+        end
+        showTooltip(button, true)
+    end,
+    isShown = function() return GameTooltip:IsVisible() and true or false end,
+    close = function() GameTooltip:Hide() end,
+}

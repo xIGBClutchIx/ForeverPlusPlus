@@ -169,7 +169,7 @@ local function refresh()
     module.announce = false
 end
 
-local schedule, cancel = Frames.Coalesce(refresh, DELAY, module)
+local schedule = Frames.Coalesce(refresh, DELAY, module)
 
 local function queue()
     if module.enabled then
@@ -230,7 +230,6 @@ function module:OnEnable()
 end
 
 function module:OnDisable()
-    cancel()
     marks.HideAll()
     known, lowSlots, rankOf = nil, {}, {}
 end

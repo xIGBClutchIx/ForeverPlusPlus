@@ -6,7 +6,7 @@ local _, ns = ...
 local format, tonumber = string.format, tonumber
 local CanMerchantRepair, GetRepairAllCost, RepairAllItems = CanMerchantRepair, GetRepairAllCost, RepairAllItems
 local IsInGuild, CanGuildBankRepair, GetGuildBankWithdrawMoney = IsInGuild, CanGuildBankRepair, GetGuildBankWithdrawMoney
-local GetMoney, C_Timer = GetMoney, C_Timer
+local GetMoney = GetMoney
 
 local L = ns.L
 local money = ns.Money
@@ -59,13 +59,14 @@ module.options = {
 -- shown meanwhile ("Out of range") would look the same.
 local WAIT = 2 -- seconds to wait for the guild bank repair before calling it failed
 local pending -- the cost of the guild bank repair waiting for an answer
-local attempt = 0 -- counts repairs, so a timer knows whether it's still for the current one
+local timer = ns.Frames.Timer(module)
 local onDurability
 
 local function stopWaiting()
     pending = nil
-    ns.Off("UPDATE_INVENTORY_DURABILITY", onDurability)
-    ns.Off("MERCHANT_CLOSED", stopWaiting)
+    timer:Cancel()
+    module:Off("UPDATE_INVENTORY_DURABILITY", onDurability)
+    module:Off("MERCHANT_CLOSED", stopWaiting)
 end
 
 local function repairOwn(cost)
@@ -110,16 +111,10 @@ end
 local function repairGuild(cost)
     stopWaiting()
     pending = cost
-    attempt = attempt + 1
-    local this = attempt
-    ns.On("UPDATE_INVENTORY_DURABILITY", onDurability)
-    ns.On("MERCHANT_CLOSED", stopWaiting)
+    module:On("UPDATE_INVENTORY_DURABILITY", onDurability)
+    module:On("MERCHANT_CLOSED", stopWaiting)
     RepairAllItems(true)
-    C_Timer.After(WAIT, function()
-        if pending and attempt == this then
-            checkGuildRepair()
-        end
-    end)
+    timer:Start(WAIT, checkGuildRepair)
 end
 
 local function onMerchantShow()
@@ -140,10 +135,7 @@ local function onMerchantShow()
     end
 end
 
+-- Turning off drops a guild repair wait: its events and timer stop with the module.
 function module:OnEnable()
     self:On("MERCHANT_SHOW", onMerchantShow)
-end
-
-function module:OnDisable()
-    stopWaiting()
 end

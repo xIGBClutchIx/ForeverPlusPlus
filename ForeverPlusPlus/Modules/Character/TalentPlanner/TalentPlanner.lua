@@ -121,12 +121,24 @@ local function setPlanning(on)
 end
 internal.setPlanning = setPlanning
 
----Whether the talent window is open in plan mode, for the Screenshots tool's picture.
----@return boolean
-function module.IsPlanning()
-    local frame = internal.frame
-    return module.enabled and internal.planning and frame and frame:IsVisible() and true or false
-end
+-- The Screenshots tool's picture: the talent window, which the player opens, in plan mode. The
+-- player clicks our button: entering plan mode from here would start an empty plan for them.
+module.screenshot = {
+    id = "talents",
+    name = L.SCREENSHOTS_SCENE_TALENTS,
+    binding = "TOGGLETALENTS",
+    wait = 2,
+    isShown = function()
+        local window = PlayerSpellsFrame
+        return window and window:IsVisible() and window.TalentsFrame
+            and window.TalentsFrame:IsVisible() and true or false
+    end,
+    ready = function()
+        local frame = internal.frame
+        return module.enabled and internal.planning and frame and frame:IsVisible() and true or false
+    end,
+    readyText = L.SCREENSHOTS_PLAN_TALENTS,
+}
 
 -- Hooks ---------------------------------------------------------------------------------------
 

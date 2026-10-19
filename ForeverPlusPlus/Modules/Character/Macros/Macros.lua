@@ -82,7 +82,7 @@ local function drawMarks()
     end)
 end
 
-local queueMarks, cancelMarks = Frames.Coalesce(drawMarks, 0.1, module)
+local queueMarks = Frames.Coalesce(drawMarks, 0.1, module)
 
 ---Whether macros can be made and changed now: the player is in the world and out of combat.
 ---@return boolean
@@ -214,6 +214,5 @@ function module:OnEnable()
 end
 
 function module:OnDisable()
-    cancelMarks()
     marks.HideAll()
 end

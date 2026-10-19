@@ -299,7 +299,7 @@ local function refresh()
     ItemButtons.EachLootSlot(markLoot)
 end
 
-local refreshSoon, cancelRefresh = ns.Frames.Coalesce(function()
+local refreshSoon = ns.Frames.Coalesce(function()
     if module.enabled then
         refresh()
     end
@@ -335,7 +335,6 @@ end
 
 function module:OnDisable()
     ItemButtons.CancelAuction(updateAuction)
-    cancelRefresh()
     clearMarks()
 end
 

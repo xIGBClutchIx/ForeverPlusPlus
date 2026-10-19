@@ -25,7 +25,7 @@
 -- its click; if it does, this part goes and the bags stay.
 local _, ns = ...
 
-local C_Item, C_Container, C_PaperDollInfo, C_Timer = C_Item, C_Container, C_PaperDollInfo, C_Timer
+local C_Item, C_Container, C_PaperDollInfo = C_Item, C_Container, C_PaperDollInfo
 local GetInventoryItemID, GetWeaponEnchantInfo, GetTime = GetInventoryItemID, GetWeaponEnchantInfo, GetTime
 local GetActionInfo, InCombatLockdown = GetActionInfo, InCombatLockdown
 local pairs, select, setmetatable, tostring, type = pairs, select, setmetatable, tostring, type
@@ -327,6 +327,7 @@ local function learn(used)
 end
 
 -- The used item's cast went off: once the buff is on, see which weapon it went on.
+local learnTimer = ns.Frames.Timer(module)
 local function onCast(_, unit, _, spellID)
     if not (pending and ns.IsReadable(unit) and ns.IsReadable(spellID)) or unit ~= "player"
         or spellID ~= pending.spellID then
@@ -337,7 +338,7 @@ local function onCast(_, unit, _, spellID)
     if GetTime() - used.time > 60 then
         return
     end
-    C_Timer.After(1, function()
+    learnTimer:Start(1, function()
         learn(used)
     end)
 end

@@ -9,7 +9,7 @@ local _, ns = ...
 local GetTime, InCombatLockdown, CreateFrame = GetTime, InCombatLockdown, CreateFrame
 local SetOverrideBindingSpell, ClearOverrideBindings = SetOverrideBindingSpell, ClearOverrideBindings
 local UnitExists, GetUnitSpeed = UnitExists, GetUnitSpeed
-local C_Spell, C_Timer, WorldFrame = C_Spell, C_Timer, WorldFrame
+local C_Spell, WorldFrame = C_Spell, WorldFrame
 local GetMouseFoci, GetMouseFocus, UnitChannelInfo = GetMouseFoci, GetMouseFocus, UnitChannelInfo
 local C_CVar, tonumber, tostring, next, select = C_CVar, tonumber, tostring, next, select
 
@@ -101,6 +101,7 @@ local function onMouseDown(_, buttonName)
     lastClick = GetTime()
 end
 
+local disarmTimer = ns.Frames.Timer(module)
 local function onMouseUp(_, buttonName)
     if InCombatLockdown() or armed or buttonName ~= "RightButton" or lastClick == 0 then
         return
@@ -111,7 +112,7 @@ local function onMouseUp(_, buttonName)
         return
     end
     arm()
-    C_Timer.After(window, function()
+    disarmTimer:Start(window, function()
         lastClick = 0
         disarm()
     end)

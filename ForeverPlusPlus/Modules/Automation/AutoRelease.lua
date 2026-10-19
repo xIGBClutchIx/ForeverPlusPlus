@@ -123,6 +123,3 @@ function module:OnEnable()
     self:On("PLAYER_UNGHOST", onAlive)
 end
 
-function module:OnDisable()
-    onAlive()
-end

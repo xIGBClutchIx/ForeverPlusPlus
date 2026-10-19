@@ -4,16 +4,16 @@
 -- Blizzard's windows (the world map, bags, character window, talents): a window opened from addon
 -- code runs its setup tainted, and Blizzard's own code then errors on secret values (the player
 -- frame's health text did). So it asks the player to open each one and takes the shot once it's
--- open. It does the rest itself: an item tooltip, the minimap button's tooltip, our own Whisper
--- Window on a made-up conversation, and Settings
--- (opened through the client, which doesn't taint). A scene left unopened is skipped and named in
+-- open. It does the rest itself: an item tooltip and Settings (opened through the client, which
+-- doesn't taint). A module adds its own scene as `module.screenshot` (the minimap button's
+-- tooltip, the talent planner, the Whisper Window). A scene left unopened is skipped and named in
 -- chat at the end. `/fpp shots wait` takes the screen as it is after a countdown, for what needs
 -- the world (nameplates, a merchant, the waypoint arrow, a right-click menu). Nothing runs until
 -- it's asked for, and never in combat.
 local _, ns = ...
 
 local ipairs, pairs, pcall, type, tostring, tonumber = ipairs, pairs, pcall, type, tostring, tonumber
-local next, C_Timer = next, C_Timer
+local next, setmetatable, C_Timer = next, setmetatable, C_Timer
 local format = string.format
 local tconcat, min, max, floor = table.concat, math.min, math.max, math.floor
 local Screenshot, InCombatLockdown, C_Container = Screenshot, InCombatLockdown, C_Container
@@ -73,15 +73,16 @@ end
 
 -- The scenes ------------------------------------------------------------------------------------
 
-local whisperTest -- the whispers scene's test conversation, and whether the scene made it
 -- Each has an `id` for `/fpp shots <id>`, a `name`, the `modules` it shows (module -> options to
 -- set for the shot), `isShown()` (the shot waits for it, and a scene that isn't on screen isn't
 -- pictured), and how long to `wait` to draw. A scene we set up has `open()` (returns why it
 -- can't, or nil) and `close()`; one the player opens has `binding`, the key binding that opens it,
 -- and may have `closeFirst` (the name of what's in the way, or nil: the shot waits for it to
--- close) and `ready()` with `readyText` (a step inside the window the shot waits for).
+-- close) and `ready()` with `readyText` (a step inside the window the shot waits for). A
+-- module's own scene, `module.screenshot`, has the same fields; without `modules` it shows just
+-- that module. Module scenes go after these, before Settings.
 
-local SCENES = {
+local BLIZZARD_SCENES = {
     {
         id = "tooltip",
         name = L.SCREENSHOTS_SCENE_TOOLTIP,
@@ -98,19 +99,6 @@ local SCENES = {
                 tooltip:SetItemByID(LINEN_CLOTH)
             end
             tooltip:Show()
-        end,
-        isShown = function() return shown(GameTooltip) end,
-        close = function() GameTooltip:Hide() end,
-    },
-    {
-        id = "minimap",
-        name = L.SCREENSHOTS_SCENE_MINIMAP,
-        modules = { MinimapButton = { where = "minimap" } },
-        open = function()
-            local button = ns.modules.MinimapButton
-            if not (button.ShowTooltip and button.ShowTooltip()) then
-                return L.SCREENSHOTS_NO_BUTTON
-            end
         end,
         isShown = function() return shown(GameTooltip) end,
         close = function() GameTooltip:Hide() end,
@@ -147,80 +135,40 @@ local SCENES = {
         isShown = function() return shown(SkillsFrame) end,
         unavailable = function() return not SkillsFrame and L.SCREENSHOTS_NO_SKILLS end,
     },
-    {
-        id = "talents",
-        name = L.SCREENSHOTS_SCENE_TALENTS,
-        modules = { TalentPlanner = {} },
-        binding = "TOGGLETALENTS",
-        wait = 2,
-        isShown = function()
-            return shown(PlayerSpellsFrame) and shown(PlayerSpellsFrame.TalentsFrame)
-        end,
-        -- The picture is the planner, not the plain tree. The player clicks our button: entering
-        -- plan mode from here would start an empty plan for them.
-        ready = function()
-            local planner = ns.modules.TalentPlanner
-            return planner.IsPlanning and planner.IsPlanning()
-        end,
-        readyText = L.SCREENSHOTS_PLAN_TALENTS,
-    },
-    {
-        -- Our own window, so we open it. The conversation is the Debug page's made-up one, never a
-        -- real player's; it's forgotten again after the shot unless it was there before.
-        id = "whispers",
-        name = L.SCREENSHOTS_SCENE_WHISPERS,
-        modules = { WhisperWindow = {} },
-        open = function()
-            local whispers = ns.modules.WhisperWindow
-            local internal = whispers.internal
-            local function testOne()
-                for _, conversation in pairs(internal.Conversations()) do
-                    if conversation.test then
-                        return conversation
-                    end
-                end
-            end
-            local conversation = testOne()
-            whisperTest = { made = not conversation }
-            if not conversation then
-                whispers.debugActions[1].fn()
-                conversation = testOne()
-            end
-            if not conversation then
-                return L.SCREENSHOTS_NO_WINDOW
-            end
-            whisperTest.conversation = conversation
-            internal.Open(conversation)
-        end,
-        isShown = function()
-            local internal = ns.modules.WhisperWindow.internal
-            return internal.IsShown()
-        end,
-        close = function()
-            local internal = ns.modules.WhisperWindow.internal
-            if internal.IsShown() then
-                internal.Toggle()
-            end
-            if whisperTest and whisperTest.made and whisperTest.conversation then
-                internal.Remove(whisperTest.conversation)
-            end
-            whisperTest = nil
-        end,
-    },
-    {
-        -- Last, since it stays open for the player to close.
-        id = "settings",
-        name = L.SCREENSHOTS_SCENE_SETTINGS,
-        modules = { WorldMap = {} },
-        wait = 2.5,
-        open = function()
-            if not ns.OpenSettings("WorldMap") then
-                return L.SCREENSHOTS_NO_WINDOW
-            end
-        end,
-        isShown = function() return shown(SettingsPanel) end,
-    },
 }
+
+-- Last, since it stays open for the player to close.
+local SETTINGS_SCENE = {
+    id = "settings",
+    name = L.SCREENSHOTS_SCENE_SETTINGS,
+    modules = { WorldMap = {} },
+    wait = 2.5,
+    open = function()
+        if not ns.OpenSettings("WorldMap") then
+            return L.SCREENSHOTS_NO_WINDOW
+        end
+    end,
+    isShown = function() return shown(SettingsPanel) end,
+}
+
+-- Every scene in gallery order: Blizzard's windows, each module's own, then Settings.
+local function allScenes()
+    local scenes = {}
+    for _, scene in ipairs(BLIZZARD_SCENES) do
+        scenes[#scenes + 1] = scene
+    end
+    for _, name in ipairs(ns.order) do
+        local scene = ns.modules[name].screenshot
+        if scene and not scene.modules then
+            scene = setmetatable({ modules = { [name] = {} } }, { __index = scene })
+        end
+        if scene then
+            scenes[#scenes + 1] = scene
+        end
+    end
+    scenes[#scenes + 1] = SETTINGS_SCENE
+    return scenes
+end
 
 -- Turning modules on for a shot -----------------------------------------------------------------
 
@@ -280,9 +228,9 @@ end
 
 local function finish()
     timer:Cancel()
-    ns.Off("SCREENSHOT_SUCCEEDED", onShot)
-    ns.Off("SCREENSHOT_FAILED", onShot)
-    ns.Off("PLAYER_REGEN_DISABLED", stop)
+    module:Off("SCREENSHOT_SUCCEEDED", onShot)
+    module:Off("SCREENSHOT_FAILED", onShot)
+    module:Off("PLAYER_REGEN_DISABLED", stop)
     ns.CVars.RestoreAll(module.db.cvars)
     queue = nil
     ns.Print(format(L.SCREENSHOTS_DONE, taken))
@@ -310,15 +258,15 @@ local function shoot()
         return
     end
     waited = 0
-    ns.On("SCREENSHOT_SUCCEEDED", onShot)
-    ns.On("SCREENSHOT_FAILED", onShot)
+    module:On("SCREENSHOT_SUCCEEDED", onShot)
+    module:On("SCREENSHOT_FAILED", onShot)
     timer:Start(SHOT_TIMEOUT, function() onShot("SCREENSHOT_FAILED") end)
     Screenshot()
 end
 
 function onShot(event)
-    ns.Off("SCREENSHOT_SUCCEEDED", onShot)
-    ns.Off("SCREENSHOT_FAILED", onShot)
+    module:Off("SCREENSHOT_SUCCEEDED", onShot)
+    module:Off("SCREENSHOT_FAILED", onShot)
     if event == "SCREENSHOT_SUCCEEDED" then
         taken = taken + 1
     else
@@ -404,8 +352,8 @@ end
 -- Combat started: stop, and put the modules back once it's over.
 function stop()
     timer:Cancel()
-    ns.Off("SCREENSHOT_SUCCEEDED", onShot)
-    ns.Off("SCREENSHOT_FAILED", onShot)
+    module:Off("SCREENSHOT_SUCCEEDED", onShot)
+    module:Off("SCREENSHOT_FAILED", onShot)
     ns.Print(L.SCREENSHOTS_STOPPED)
     local scene = current
     current = nil
@@ -434,7 +382,7 @@ end
 
 local function scenesText()
     local ids = {}
-    for i, scene in ipairs(SCENES) do
+    for i, scene in ipairs(allScenes()) do
         ids[i] = scene.id
     end
     ids[#ids + 1] = "wait"
@@ -445,15 +393,16 @@ end
 local function pick(rest)
     local word, number = rest:match("^(%S*)%s*(%S*)")
     word = word:lower()
+    local scenes = allScenes()
     if word == "" then
-        return SCENES
+        return scenes
     end
     if word == "wait" then
         local seconds = max(1, min(30, floor(tonumber(number) or 5)))
         return { { name = L.SCREENSHOTS_SCENE_SCREEN, wait = seconds, open = function() end } },
             seconds
     end
-    for _, scene in ipairs(SCENES) do
+    for _, scene in ipairs(scenes) do
         if scene.id == word then
             return { scene }
         end
@@ -477,7 +426,7 @@ function module.Run(rest)
         return
     end
     queue, step, taken, skipped, current, waited = scenes, 0, 0, {}, nil, 0
-    ns.On("PLAYER_REGEN_DISABLED", stop)
+    module:On("PLAYER_REGEN_DISABLED", stop)
     -- JPG at full quality for the gallery: a 2560x1440 PNG is 4 to 5 MB, over CurseForge's 2 MB
     -- limit. The player's own format comes back at the end.
     ns.CVars.Set(module.db.cvars, "screenshotFormat", "jpg")
