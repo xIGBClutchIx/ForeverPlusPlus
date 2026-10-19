@@ -3,10 +3,12 @@
 -- module count and the commands of the modules that are on update each time.
 local _, ns = ...
 
-local ipairs, format = ipairs, string.format
+local ipairs, format, max = ipairs, string.format, math.max
 local CreateFrame, GameTooltip, GetBuildInfo = CreateFrame, GameTooltip, GetBuildInfo
 local L = ns.L
 local S = ns.SettingsUI
+
+local COMMAND_WIDTH = 234 -- the command column, before its description
 
 local WEBSITE = "https://github.com/xIGBClutchIx/ForeverPlusPlus"
 local ISSUES = WEBSITE .. "/issues"
@@ -131,32 +133,46 @@ function S.BuildAbout(frame)
     y = y - 30
     addHeading(frame, y, L.HOME_COMMANDS)
     y = y - 24
+    -- The commands scroll in the rest of the page: every module adds its own, so they outgrow it.
+    local scroll = ns.SettingsKit.NewScroll(frame)
+    scroll:SetPoint("TOPLEFT", 16, y)
+    scroll:SetPoint("BOTTOMRIGHT", -32, 8)
+    local width = frame:GetWidth()
+    width = (width > 0 and width or 615) - 48
+    local content = CreateFrame("Frame", nil, scroll)
+    content:SetSize(width, 1)
+    scroll:SetScrollChild(content)
+
     -- A row per command of a module that's on, so drawn again each time the page shows. Rows
-    -- are kept and reused; the ones past the list are hidden.
+    -- are kept and reused; the ones past the list are hidden. A long description wraps.
     local rows = {}
     local function drawCommands()
         local lines = ns.Commands()
+        local rowY = 0
         for i, line in ipairs(lines) do
             local row = rows[i]
             if not row then
-                local rowY = y - (i - 1) * 16
                 row = {
-                    command = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"),
-                    description = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall"),
+                    command = content:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"),
+                    description = content:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall"),
                 }
-                row.command:SetPoint("TOPLEFT", 16, rowY)
-                row.description:SetPoint("TOPLEFT", 250, rowY)
+                row.description:SetWidth(width - COMMAND_WIDTH)
+                row.description:SetJustifyH("LEFT")
                 rows[i] = row
             end
+            row.command:SetPoint("TOPLEFT", 0, rowY)
+            row.description:SetPoint("TOPLEFT", COMMAND_WIDTH, rowY)
             row.command:SetText(line[1])
             row.description:SetText(line[2])
             row.command:Show()
             row.description:Show()
+            rowY = rowY - max(16, row.description:GetStringHeight() + 4)
         end
         for i = #lines + 1, #rows do
             rows[i].command:Hide()
             rows[i].description:Hide()
         end
+        content:SetHeight(max(1, -rowY))
     end
     drawCommands()
     frame:HookScript("OnShow", drawCommands)
