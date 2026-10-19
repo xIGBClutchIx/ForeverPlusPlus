@@ -229,6 +229,10 @@ SlashCmdList.FOREVERPLUSPLUS = function(message)
     command = (command or ""):lower()
     if commandOn(commands[command]) then
         commands[command].fn(rest or "")
+    elseif commands[command] then
+        -- A module's command while that module is off: say so, rather than open Settings.
+        local owner = ns.modules[commands[command].owner]
+        ns.Print(format(L.COMMAND_NEEDS_MODULE, command, owner.title or owner.name))
     elseif command == "toggle" and rest then
         -- /fpp toggle <module> [option] [value]: the module itself when no option is named.
         set(rest:find(" ") and rest or rest .. " enabled", true)

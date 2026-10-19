@@ -1241,6 +1241,16 @@ do
     eq(registered("PLAYER_MONEY") or not registered("BAG_UPDATE"), false,
         "commands: preset tells the module")
     eq(host.enabled, true, "commands: preset turns default-on modules back on")
+    local said, ran = nil, false
+    core.Print = function(text) said = text end
+    core.AddCommand("ping", "", "test", function() ran = true end, "Plain")
+    core.SetEnabled("Plain", false)
+    fpp("ping")
+    eq(not ran and said ~= nil and said:find("/fpp ping", 1, true) ~= nil, true,
+        "commands: a command whose module is off says so")
+    core.SetEnabled("Plain", true)
+    fpp("ping")
+    eq(ran, true, "commands: and runs once it's on")
 end
 
 -- Done ------------------------------------------------------------------------------------------

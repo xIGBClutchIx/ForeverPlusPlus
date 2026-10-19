@@ -35,6 +35,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Chat Copy**: turning Click Timestamps off no longer brings back chat lines that had faded out.
 - **Chat Font**: turning the module off gives the Communities and GM chat windows their font back too.
 - **Commands**: `/fpp reset` turns every module off before it wipes the settings, so game settings a module changed, like Auto Dismount's, go back to your own. Started in combat, it waits until combat ends.
+- **Commands**: a `/fpp` command whose module is off, like `/fpp shots` while Debug is off, says so in chat instead of opening Settings.
 - **Fishing Cast**: changing Louder Bobber while the module is off no longer changes your sound volumes.
 - **Flight Timer**: bag items and action buttons no longer get a Flight Time line while the old flight map is open.
 - **Gathering Tracking**: Find Minerals or Find Herbs comes back on after dying again: it keeps checking for a few seconds after you come back to life, instead of giving up when the tracking list still showed it on or the first try didn't take.

@@ -114,6 +114,8 @@ ns.changelog = {
                 { L.CHANGELOG_COMMANDS, "/fpp reset turns every module off before it wipes the "
                     .. "settings, so game settings a module changed, like Auto Dismount's, go back "
                     .. "to your own. Started in combat, it waits until combat ends." },
+                { L.CHANGELOG_COMMANDS, "A /fpp command whose module is off, like /fpp shots "
+                    .. "while Debug is off, says so in chat instead of opening Settings." },
                 { L.FISHINGCAST_TITLE, "Changing Louder Bobber while the module is off no longer "
                     .. "changes your sound volumes." },
                 { L.FLIGHTTIMER_TITLE, "Bag items and action buttons no longer get a Flight Time "

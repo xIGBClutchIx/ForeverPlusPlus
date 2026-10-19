@@ -42,6 +42,7 @@ L.OFF = "off"
 L.MODULE_STATE = "%s is %s." -- module name, on/off
 L.MODULE_ALWAYS_ON = "%s is a tool and is always on." -- module title, such as Self Test
 L.NO_MODULE = "no module called %s"
+L.COMMAND_NEEDS_MODULE = "/fpp %s needs %s, which is off on the Modules page." -- command, title
 L.SLASH_MODULES = "modules (/fpp toggle <name>, /fpp list):"
 L.SLASH_OPEN = "open the settings"
 L.SLASH_LIST = "list the modules and whether each is on"
