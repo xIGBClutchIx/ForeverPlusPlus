@@ -12,8 +12,19 @@ local L = ns.L
 local ItemTooltip = ns.ItemTooltip
 local Prices = ns.Prices
 
-local module = ns.modules.WaylaidCrates
-local internal = module.internal
+local internal = ns.modules.WaylaidCrates.internal
+
+local module = ns.modules.WaylaidCrates:NewPart({
+    key = "costs", name = L.WAYLAIDCRATES_COSTS, description = L.WAYLAIDCRATES_COSTS_DESC,
+    section = L.WAYLAIDCRATES_COSTS,
+    choices = {
+        { "off", L.WAYLAIDCRATES_COSTS_OFF },
+        { "below", L.WAYLAIDCRATES_COSTS_BELOW },
+        { "beside", L.WAYLAIDCRATES_COSTS_BESIDE },
+    },
+}, {
+    costs = "beside", -- each bundle's cost: "off", "below" each bundle, or "beside" it
+})
 
 local LINES = internal.LINES
 
@@ -59,7 +70,7 @@ local UNDER_INDENT = "|TInterface\\Common\\spacer:1:12|t"
 -- Draws a line that lists bundles again with their costs, and returns true so Blizzard's is
 -- skipped. Text around the bundles keeps its own line, wrapped as Blizzard wraps it.
 local function replaceBundleLine(tooltip, data, lineData)
-    if not (internal.Active("costs") and Prices.Available() and internal.IsCrate(data)) then
+    if not (module.enabled and Prices.Available() and internal.IsCrate(data)) then
         return
     end
     local below = module.db.costs == "below"
@@ -115,10 +126,7 @@ local function replaceBundleLine(tooltip, data, lineData)
     return true
 end
 
-internal.AddPart("costs", {
-    enable = function()
-        -- The hook can't be removed; replaceBundleLine checks the part is on instead.
-        ItemTooltip.ReplaceLine(replaceBundleLine, module)
-    end,
-    disable = function() end,
-})
+function module:OnEnable()
+    -- The hook can't be removed; replaceBundleLine checks the part is on instead.
+    ItemTooltip.ReplaceLine(replaceBundleLine, self)
+end

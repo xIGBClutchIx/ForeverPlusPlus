@@ -7,13 +7,13 @@
 --                    applies, then its options (checkboxes, dropdowns and sliders) and buttons
 --                    (from `module.actions`), greyed out while it's off. An option can sit under
 --                    another (`requires`). A module made of parts (`module:NewPart`) has a
---                    section for each, headed by the part's Enabled checkbox, with the part's
---                    options greyed out while it's off. `alwaysOn` modules (tools) aren't
---                    listed. A search box at the top narrows the list to modules by title and
---                    description, or by an option's name or description, and highlights those
---                    options; a New checkbox beside it lists only modules marked NEW. A module
---                    or option added since the player last looked (`added`), or an option
---                    changed since then (`changed`), is marked NEW
+--                    section for each, headed by the part's Enabled checkbox (or its dropdown,
+--                    in the header), with the part's options greyed out while it's off.
+--                    `alwaysOn` modules (tools) aren't listed. A search box at the top narrows
+--                    the list to modules by title and description, or by an option's name or
+--                    description, and highlights those options; a New checkbox beside it lists
+--                    only modules marked NEW. A module or option added since the player last
+--                    looked (`added`), or an option changed since then (`changed`), is marked NEW
 --     <Tool>         a page a module draws itself (`BuildPage`)
 --     Debug          sections of Forever++'s own rows and modules' options marked `debug = true`
 --                    and buttons from `module.debugActions`, each placed by its `section`: What's
@@ -606,18 +606,19 @@ end
 -- `updates` put its controls back to what's saved.
 
 -- A row: `text` on the left, gold while `on()` and grey otherwise, and the space after it for a
--- control. Shown only while `shown()` is true, when given.
-local function addRow(view, text, indent, on, shown)
+-- control. Shown only while `shown()` is true, when given. `font` and `gap`, for a section's
+-- header with a control in it.
+local function addRow(view, text, indent, on, shown, font, gap)
     local row = CreateFrame("Frame", nil, view)
     row:EnableMouse(true)
     row:SetWidth(view:GetWidth())
-    local label = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    local label = row:CreateFontString(nil, "OVERLAY", font or "GameFontNormal")
     label:SetPoint("LEFT", 4 + indent, 0)
     label:SetWidth(CONTROL_LEFT - 8 - indent)
     label:SetJustifyH("LEFT")
     label:SetText(text)
     row:SetHeight(max(ROW_HEIGHT, label:GetStringHeight() + 8))
-    addEntry(view, row, shown)
+    addEntry(view, row, shown, gap)
     if on then
         view.updates[#view.updates + 1] = function()
             label:SetFontObject(on() and "GameFontNormal" or "GameFontDisable")
@@ -715,7 +716,7 @@ local function addOptionRow(view, module, option, byKey, done)
     -- Under an option that is itself under another, it's on only while all of them are.
     local function on()
         -- Off with the module, and with its part's checkbox (`part`) when it's one of a part's.
-        if not module.db.enabled or option.part and not module.db[option.part] then
+        if not module.db.enabled or option.part and not ns.PartOn(module, option.part) then
             return false
         end
         local up = parent
@@ -734,8 +735,15 @@ local function addOptionRow(view, module, option, byKey, done)
         up = up.requires and byKey[up.requires]
     end
     local indent = depth * INDENT
-    -- A part's checkbox (`toggle`) is right under its section's header, which names it.
-    local row, label = addRow(view, option.toggle and L.SETTINGS_ENABLED or option.name, indent, on)
+    -- A part's checkbox (`toggle`) is right under its section's header, which names it. A part's
+    -- dropdown (a toggle with `choices`) is in the header itself.
+    local header = option.toggle and option.choices and option.section
+    local row, label
+    if header then
+        row, label = addRow(view, header, indent, nil, nil, "GameFontHighlightLarge", 16)
+    else
+        row, label = addRow(view, option.toggle and L.SETTINGS_ENABLED or option.name, indent, on)
+    end
     local updates = view.updates
     local pair = option.slider and byKey[option.slider]
     -- Highlighted like a selected sidebar entry while the search finds it (or the slider in it).
@@ -877,7 +885,10 @@ local function addModuleRows(view, module)
     for _, option in ipairs(options) do
         if option.section and option.section ~= section then
             section, subsection = option.section, nil
-            addLine(view, "GameFontHighlightLarge", section)
+            -- A part's dropdown draws the header itself (addOptionRow).
+            if not (option.toggle and option.choices) then
+                addLine(view, "GameFontHighlightLarge", section)
+            end
         end
         if option.subsection and option.subsection ~= subsection then
             subsection = option.subsection

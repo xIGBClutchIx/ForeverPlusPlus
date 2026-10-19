@@ -12,15 +12,26 @@
 local _, ns = ...
 
 local _G, ipairs, pairs, type, sort, format, wipe = _G, ipairs, pairs, type, table.sort, string.format, wipe
-local CreateFrame, GameTooltip, Enum, C_Timer = CreateFrame, GameTooltip, Enum, C_Timer
+local CreateFrame, GameTooltip, Enum = CreateFrame, GameTooltip, Enum
 local C_Container, C_Item, C_TooltipInfo, C_AuctionHouse = C_Container, C_Item, C_TooltipInfo, C_AuctionHouse
 local GRAY_FONT_COLOR, HIGHLIGHT_FONT_COLOR, GREEN_FONT_COLOR = GRAY_FONT_COLOR, HIGHLIGHT_FONT_COLOR,
     GREEN_FONT_COLOR
 
 local L = ns.L
 
-local module = ns.modules.WaylaidCrates
-local internal = module.internal
+local internal = ns.modules.WaylaidCrates.internal
+
+local module = ns.modules.WaylaidCrates:NewPart({
+    key = "list", name = L.WAYLAIDCRATES_LIST, description = L.WAYLAIDCRATES_LIST_DESC,
+    section = L.WAYLAIDCRATES_LIST,
+    choices = {
+        { "off", L.WAYLAIDCRATES_LIST_OFF },
+        { "top", L.WAYLAIDCRATES_LIST_TOP },
+        { "bottom", L.WAYLAIDCRATES_LIST_BOTTOM },
+    },
+}, {
+    list = "bottom", -- the auction house entry: "off", "top" or "bottom" of the categories
+})
 
 local LAST_BAG = 5 -- backpack, four bags, and the reagent bag
 local ROW_WIDTH, ROW_HEIGHT = 132, 21 -- Blizzard's category buttons (AuctionCategoryButtonTemplate)
@@ -113,12 +124,13 @@ end
 local RETRIES = 3
 local RETRY_DELAY = 0.5 -- seconds
 local tries = 0 -- searches sent for this click
+local retryTimer = ns.Frames.Timer(module)
 
 local function search()
-    ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", search)
+    module:Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", search)
     local ready = C_AuctionHouse.IsThrottledMessageSystemReady
     if ready and not ready() then
-        ns.On("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", search)
+        module:On("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", search)
         return
     end
     local keys = {}
@@ -189,7 +201,7 @@ local function onResultsUpdated()
         local empty = addResults(C_AuctionHouse.GetBrowseResults())
         if empty and not awaiting and tries < RETRIES then
             listed = nil -- not known yet: the tooltip shouldn't say None listed
-            C_Timer.After(RETRY_DELAY, retry)
+            retryTimer:Start(RETRY_DELAY, retry)
         end
     elseif row and row.selected then
         setSelected(false)
@@ -255,12 +267,12 @@ end
 -- Bags change while the auction house is open (a purchase lands): read the crates again.
 local function onShow()
     refresh()
-    ns.On("BAG_UPDATE_DELAYED", refresh)
+    module:On("BAG_UPDATE_DELAYED", refresh)
 end
 
 local function onHide()
-    ns.Off("BAG_UPDATE_DELAYED", refresh)
-    ns.Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", search)
+    module:Off("BAG_UPDATE_DELAYED", refresh)
+    module:Off("AUCTION_HOUSE_THROTTLED_SYSTEM_READY", search)
     awaiting = false
     setSelected(false)
 end
@@ -375,29 +387,24 @@ local function teardown()
     end
 end
 
-local events = {
+module:OnWhile("list", {
     AUCTION_HOUSE_BROWSE_RESULTS_UPDATED = onResultsUpdated,
     AUCTION_HOUSE_BROWSE_RESULTS_ADDED = onResultsAdded,
-}
-
-internal.AddPart("list", {
-    enable = function()
-        for event, fn in pairs(events) do
-            ns.On(event, fn)
-        end
-        ns.AddOns.WhenLoaded("Blizzard_AuctionHouseUI", setup)
-    end,
-    disable = function()
-        for event, fn in pairs(events) do
-            ns.Off(event, fn)
-        end
-        ns.AddOns.Cancel("Blizzard_AuctionHouseUI", setup)
-        listed, awaiting = nil, false
-        teardown()
-    end,
-    optionChanged = function(key)
-        if key == "list" then
-            place()
-        end
-    end,
 })
+
+function module:OnEnable()
+    ns.AddOns.WhenLoaded("Blizzard_AuctionHouseUI", setup)
+end
+
+function module:OnDisable()
+    ns.AddOns.Cancel("Blizzard_AuctionHouseUI", setup)
+    listed, awaiting = nil, false
+    teardown()
+end
+
+-- Moving between the top and the bottom of the list.
+function module:OnOptionChanged(key)
+    if key == "list" then
+        place()
+    end
+end

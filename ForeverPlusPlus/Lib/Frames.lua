@@ -201,9 +201,22 @@ function Frames.ErrorMessage(text)
     end
 end
 
+-- Puts a timer in `module.timers`, which Core cancels when the module (or part) turns off.
+local function own(module, timer)
+    if module then
+        local timers = module.timers
+        if not timers then
+            timers = {}
+            module.timers = timers
+        end
+        timers[#timers + 1] = timer
+    end
+end
+
 ---Runs `fn` once, `delay` seconds after the first call (the next frame by default), however often
 ---it's called before then. For events that come in bursts. Give the module (or part) whose work it
----is, so the Profiler page charges the run to it.
+---is: the Profiler page charges the run to it, and a queued run is dropped when it turns off (and
+---doesn't happen while it's off). Make one per module at file load, not in OnEnable.
 ---@param fn function
 ---@param delay? number
 ---@param module? table
@@ -216,6 +229,9 @@ function Frames.Coalesce(fn, delay, module)
     local timer
     local function run()
         timer = nil
+        if module and not module.enabled then
+            return
+        end
         fn()
     end
     local function queue()
@@ -229,6 +245,7 @@ function Frames.Coalesce(fn, delay, module)
             timer = nil
         end
     end
+    own(module, { Cancel = cancel })
     return queue, cancel
 end
 
@@ -292,6 +309,9 @@ function Timer:Start(seconds, fn)
         if self.handle == handle then
             self.handle = nil
         end
+        if owner and not owner.enabled then
+            return -- turned off before Core could cancel it
+        end
         local profiler = ns.Profiler
         if owner and profiler.recording then
             profiler.Call(owner, fn)
@@ -317,10 +337,14 @@ function Timer:IsPending()
 end
 
 ---A timer that waits for one run at a time: `Start(seconds, fn)` replaces the run waiting,
----`Cancel()` drops it (for OnDisable), and `IsPending()` says whether one is waiting. `fn` can
----start it again. Give the module (or part) whose work it is, so the Profiler page charges it.
+---`Cancel()` drops it, and `IsPending()` says whether one is waiting. `fn` can start it again.
+---Give the module (or part) whose work it is: the Profiler page charges it, Core cancels it when
+---that turns off, and `fn` doesn't run while it's off. Without one, `Cancel` it in OnDisable.
+---Make one per module at file load, not in OnEnable.
 ---@param module? table
 ---@return table timer
 function Frames.Timer(module)
-    return setmetatable({ module = module }, Timer)
+    local timer = setmetatable({ module = module }, Timer)
+    own(module, timer)
+    return timer
 end

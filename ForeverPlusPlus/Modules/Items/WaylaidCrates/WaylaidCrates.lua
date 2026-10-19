@@ -1,8 +1,9 @@
 -- Waylaid Crates: help filling Waylaid Crates, in two parts: what each bundle a crate takes costs
 -- at auction, in its tooltip (Costs.lua), and a Waylaid Crates entry in the auction house's
--- categories listing what the crates in the bags still need (Category.lua). This file has the
--- settings, reads the bundles from a crate's tooltip for both, and turns each part on and off.
--- Prices and item names come from Item Tooltips' Auction Prices through ns.Prices.
+-- categories listing what the crates in the bags still need (Category.lua). Each part is turned
+-- on and off by its own dropdown (module:NewPart with `choices`). This file reads the bundles from
+-- a crate's tooltip for both. Prices and item names come from Item Tooltips' Auction Prices
+-- through ns.Prices.
 local _, ns = ...
 
 local ipairs, type, tonumber = ipairs, type, tonumber
@@ -10,11 +11,8 @@ local _G = _G
 
 local L = ns.L
 
-local module = ns.NewModule("WaylaidCrates", L.WAYLAIDCRATES_DESC, {
-    enabled = true,
-    costs = "beside", -- each bundle's cost: "off", "below" each bundle, or "beside" it
-    list = "bottom", -- the auction house entry: "off", "top" or "bottom" of the categories
-})
+-- The parts add their dropdowns and defaults: `costs` (Costs.lua) and `list` (Category.lua).
+local module = ns.NewModule("WaylaidCrates", L.WAYLAIDCRATES_DESC, { enabled = true })
 module.title = L.WAYLAIDCRATES_TITLE
 module.category = "items"
 module.added = "0.9.0"
@@ -31,25 +29,6 @@ ns.Migrate(1, function(db)
     ns.MoveSettings(old, db, { costs = "crates" })
     old.crates = nil
 end)
-
-module.options = {
-    {
-        key = "costs", name = L.WAYLAIDCRATES_COSTS, description = L.WAYLAIDCRATES_COSTS_DESC,
-        choices = {
-            { "off", L.WAYLAIDCRATES_COSTS_OFF },
-            { "below", L.WAYLAIDCRATES_COSTS_BELOW },
-            { "beside", L.WAYLAIDCRATES_COSTS_BESIDE },
-        },
-    },
-    {
-        key = "list", name = L.WAYLAIDCRATES_LIST, description = L.WAYLAIDCRATES_LIST_DESC,
-        choices = {
-            { "off", L.WAYLAIDCRATES_LIST_OFF },
-            { "top", L.WAYLAIDCRATES_LIST_TOP },
-            { "bottom", L.WAYLAIDCRATES_LIST_BOTTOM },
-        },
-    },
-}
 
 module.internal = {}
 local internal = module.internal
@@ -165,56 +144,4 @@ function internal.IsCrate(data)
         end
     end
     return known
-end
-
--- Parts -------------------------------------------------------------------------------------------
--- Each part is on while the module is and its option isn't "off": `enable` and `disable` undo
--- each other, and `optionChanged(key)` hears about changes while it's on.
-
-local parts = {} -- { key, enable, disable, optionChanged?, on }
-
----Adds a part, turned on and off by the dropdown option `key` (any choice but "off").
----@param key string
----@param part table { enable = fn, disable = fn, optionChanged? = fn(key) }
-function internal.AddPart(key, part)
-    part.key = key
-    parts[#parts + 1] = part
-end
-
----Whether the part with option `key` is on. Hooks can't be removed, so theirs ask this.
----@param key string
----@return boolean
-function internal.Active(key)
-    return module.enabled and module.db[key] ~= "off" or false
-end
-
-local function sync()
-    for _, part in ipairs(parts) do
-        local on = internal.Active(part.key)
-        if on ~= (part.on or false) then
-            part.on = on
-            if on then
-                part.enable()
-            else
-                part.disable()
-            end
-        end
-    end
-end
-
-function module:OnEnable()
-    sync()
-end
-
-function module:OnDisable()
-    sync()
-end
-
-function module:OnOptionChanged(key)
-    sync()
-    for _, part in ipairs(parts) do
-        if part.on and part.optionChanged then
-            part.optionChanged(key)
-        end
-    end
 end

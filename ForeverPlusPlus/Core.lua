@@ -388,6 +388,54 @@ function Module:Off(event, fn)
     self.events = list
 end
 
+---Listens to `events` ({ EVENT = fn }) only while `when` holds: the name of an option that is on
+---(any value but false, nil or "off"), or `when(db)` for anything else. Core checks it when the
+---module (or part) turns on and after every option change, so neither OnEnable nor OnOptionChanged
+---needs to. Call it once, at file load, next to the handlers. Events this client doesn't have are
+---skipped. A handler given here mustn't also be added with `module:On`.
+---@param when string|fun(db: table): any
+---@param events table<string, function>
+function Module:OnWhile(when, events)
+    self.whiles = self.whiles or {}
+    self.whiles[#self.whiles + 1] = { when = when, events = events }
+end
+
+-- Whether an option counts as on: any value but nil, false, or a dropdown's "off".
+local function optionOn(module, key)
+    local value = module.db[key]
+    return value ~= nil and value ~= false and value ~= "off"
+end
+
+---Whether a part's toggle is on: a checkbox that is checked, or a dropdown (a toggle with
+---`choices`) set to anything but "off".
+---@param module table the module the part belongs to
+---@param key string the part's toggle key
+---@return boolean
+function ns.PartOn(module, key)
+    return optionOn(module, key)
+end
+
+local function holds(module, when)
+    if type(when) == "function" then
+        return when(module.db) and true or false
+    end
+    return optionOn(module, when)
+end
+
+-- Listens to the events of each `module:OnWhile` that holds, and stops the rest.
+local function syncWhiles(module)
+    for _, entry in ipairs(module.whiles or {}) do
+        local on = module.enabled and holds(module, entry.when)
+        for event, fn in pairs(entry.events) do
+            if on and ns.HasEvent(event) then
+                module:On(event, fn)
+            else
+                module:Off(event, fn)
+            end
+        end
+    end
+end
+
 -- Hooks once per module, target, method and function, so `OnEnable` can ask for them every time
 -- it runs. The hook itself can't come off, so it does nothing while the module is off.
 local function child(t, key)
@@ -495,8 +543,9 @@ end
 ---Creates a module: one change to the game's UI, switched on and off on its own. Give it
 ---`OnEnable` and an `OnDisable` that undoes it, and put its settings in `defaults`. Events
 ---added with `module:On` and hooks added with `module:Hook` stop by themselves when it turns
----off, so a module that only does those needs no `OnDisable`; anything else `OnEnable` changes
----(a frame, a CVar, a timer) `OnDisable` must put back. Set
+---off, and so do timers from `Frames.Timer(module)` and `Frames.Coalesce(fn, delay, module)`, so
+---a module that only does those needs no `OnDisable`; anything else `OnEnable` changes (a frame,
+---a CVar) `OnDisable` must put back. Set
 ---`module.title` for a friendlier name in Settings (the name stays the /fpp key), and
 ---`module.category` for its group on the Modules page (see Settings/Settings.lua). A tool with
 ---nothing to turn off sets `module.alwaysOn`: it has no toggle and stays on. A module only for
@@ -526,22 +575,25 @@ end
 -- World Map module's layers. Each part is written like a module of its own, in its own file.
 
 ---Adds a part to a module: a piece of it with its own checkbox, the option `toggle.key`, that heads
----its section in Settings. A part is written like a module: `OnEnable`, an `OnDisable` that undoes
----it, `OnOptionChanged`, `part:On`, `part:Hook` and `part:Print` all work the same, and it is on
----while both the module and its checkbox are. Its settings go in `defaults` and its options in
----`part:AddOptions`; both join the module's, so their keys must differ from the other parts'.
----Its `db` is the module's.
----@param toggle table the checkbox option: `key`, `name`, `description`, and `section`, the header its options go under
----@param defaults? table its settings; its checkbox defaults to on
+---its section in Settings. A toggle with `choices` is a dropdown instead: the part is on while it's
+---set to anything but "off" (see ns.PartOn), and hears in its `OnOptionChanged` when it moves
+---between the other choices. A part is written like a module: `OnEnable`, an `OnDisable` that
+---undoes it, `OnOptionChanged`, `part:On`, `part:OnWhile`, `part:Hook`, `part:Print` and timers
+---given the part all work the same, and it is on while both the module and its checkbox are. Its
+---settings go in `defaults` and its options in `part:AddOptions`; both join the module's, so their
+---keys must differ from the other parts'. Its `db` is the module's.
+---@param toggle table the checkbox option: `key`, `name`, `description`, and `section`, the header its options go under, and `choices` for a dropdown
+---@param defaults? table its settings; a checkbox defaults to on, a dropdown's default goes here
 ---@return table part
 function Module:NewPart(toggle, defaults)
     local part = setmetatable({ name = self.name, module = self, key = toggle.key,
-        section = toggle.section, own = {} }, Module)
+        section = toggle.section, own = {}, dropdown = toggle.choices ~= nil }, Module)
     toggle.toggle = true
-    if defaults and defaults[toggle.key] == nil then
+    defaults = defaults or {}
+    if defaults[toggle.key] == nil and not toggle.choices then
         defaults[toggle.key] = true
     end
-    for key, value in pairs(defaults or { [toggle.key] = true }) do
+    for key, value in pairs(defaults) do
         if self.defaults[key] ~= nil then
             error("Forever++: " .. self.name .. " already has a setting called " .. key, 2)
         end
@@ -577,10 +629,19 @@ local function enable(module)
     if module.OnEnable then
         call(module.OnEnable, module) -- an error here must not stop the modules after it
     end
+    syncWhiles(module)
     for _, part in ipairs(module.parts or {}) do
-        if module.db[part.key] then
+        if ns.PartOn(module, part.key) then
             enable(part)
         end
+    end
+end
+
+-- Cancels the module's timers (Frames.Timer and Frames.Coalesce given the module), so none runs
+-- after it turned off.
+local function cancelTimers(module)
+    for _, timer in ipairs(module.timers or {}) do
+        timer:Cancel()
     end
 end
 
@@ -595,25 +656,31 @@ local function disable(module)
     if module.OnDisable then
         call(module.OnDisable, module)
     end
+    cancelTimers(module) -- after OnDisable, which may have used one
     offAll(module)
 end
 
 -- Tells a module one of its options changed. A module and a part hear about their options only
--- while they're on (OnEnable reads them anyway), and a part's checkbox turns it on or off.
+-- while they're on (OnEnable reads them anyway), and a part's checkbox turns it on or off. A part
+-- that stays on while its dropdown moves between choices hears about that too.
 local function optionChanged(module, key)
     if module.enabled and module.OnOptionChanged then
         call(module.OnOptionChanged, module, key) -- as a part's: one error mustn't stop a preset
     end
+    syncWhiles(module)
     for _, part in ipairs(module.parts or {}) do
         if key == part.key then
-            if module.enabled and module.db[key] then
-                enable(part)
-            else
+            if not (module.enabled and ns.PartOn(module, key)) then
                 disable(part)
+            elseif not part.enabled then
+                enable(part)
+            elseif part.dropdown and part.OnOptionChanged then
+                call(part.OnOptionChanged, part, key)
             end
         elseif part.own[key] and part.enabled and part.OnOptionChanged then
             call(part.OnOptionChanged, part, key)
         end
+        syncWhiles(part) -- a part's OnWhile may name any of the module's options
     end
 end
 

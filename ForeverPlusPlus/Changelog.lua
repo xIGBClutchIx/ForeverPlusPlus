@@ -87,6 +87,9 @@ ns.changelog = {
                     .. "the Profiler times nothing, and turning Debug off puts every debug option "
                     .. "back to its default and takes away /fpp selftest, /fpp gearprobe, and "
                     .. "/fpp shots." },
+                { L.WAYLAIDCRATES_TITLE, "Bundle Costs and Auction House Category each have a "
+                    .. "section of their own on the Modules page, with the dropdown that turns it "
+                    .. "on and off in the section's header." },
             } },
             { L.CHANGELOG_FIXED, {
                 "An error in one module no longer stops Blizzard's own window or tooltip it hooks "
