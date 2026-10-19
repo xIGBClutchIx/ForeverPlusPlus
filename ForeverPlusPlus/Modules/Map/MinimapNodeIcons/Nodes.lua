@@ -25,6 +25,7 @@ local REST_STILL, REST_MOVING = 1.5, 0.3
 local REACH = 1.5 -- finding hits this many probe spacings apart touch (diagonal neighbors are 1.41)
 local FOLLOW_REACH = 14 -- how far (minimap units) each way of a dot's spot following probes look
 local FOLLOW_STEP = 2 -- minimap units between following probes
+local OWN_REACH = 6 -- minimap units from a followed dot within which a hit counts as that dot's
 local MISSES = 4 -- ticks in a row a dot can not answer before its icon goes
 local SAME_SPOT = 4 -- two dots of one name closer than this (minimap units) are one
 local STILL_TICKS = 3 -- ticks without moving before the dots' answers are trusted again
@@ -100,9 +101,21 @@ end
 -- Following ----------------------------------------------------------------------------------------
 
 -- Probes a line across (or, with `vertical`, up through) a spot and returns the middle of the
--- probes that name `name`, and whether any of them named it in gray; nil when none did.
+-- probes that name `name`, and whether any of them named it in gray; nil when none did. Two dots
+-- of one name can both be on the line: each is an unbroken run of probes that name it, and the
+-- run whose middle is nearest the spot is this node's, not the middle of both.
 local function scanLine(name, right, up, vertical, space)
-    local first, last, gray
+    local best, bestGray -- the nearest run's middle so far, and whether it was gray
+    local first, last, gray -- the run under way
+    local function endRun()
+        if first then
+            local middle = (first + last) / 2
+            if not best or abs(middle) < abs(best) then
+                best, bestGray = middle, gray
+            end
+            first, last, gray = nil, nil, nil
+        end
+    end
     for offset = -FOLLOW_REACH, FOLLOW_REACH, FOLLOW_STEP do
         local r, u = right, up
         if vertical then
@@ -110,9 +123,11 @@ local function scanLine(name, right, up, vertical, space)
         else
             r = right + offset
         end
+        local named = false
         if inside(r, u) then
             for _, entry in ipairs(probe(r, u, space) or NONE) do
                 if entry.name == name then
+                    named = true
                     first = first or offset
                     last = offset
                     gray = gray or entry.gray
@@ -123,9 +138,13 @@ local function scanLine(name, right, up, vertical, space)
                 return nil
             end
         end
+        if not named then
+            endRun()
+        end
     end
-    if first then
-        return (first + last) / 2, gray
+    endRun()
+    if best then
+        return best, bestGray
     end
 end
 
@@ -226,16 +245,19 @@ local function newPass()
         points = internal.grid(Minimap:GetWidth() / 2, spacing) }
 end
 
--- Whether a node of that name is followed already near where a dot answered.
-local function known(name, right, up, v)
+-- Whether a node of that name is followed already within `reach` of where a dot answered: where
+-- its own dot answers, which while moving is its icon plus the trail.
+local function known(name, right, up, v, reach)
     for _, node in ipairs(internal.nodes) do
-        local nr, nu = drawnAt(node, v)
-        if v and node.x and not still() and lagKnown then
-            nr, nu = nr + lagR, nu + lagU
-        end
-        local dr, du = nr - right, nu - up
-        if node.name == name and dr * dr + du * du <= FOLLOW_REACH * FOLLOW_REACH then
-            return true
+        if node.name == name then
+            local nr, nu = drawnAt(node, v)
+            if v and node.x and not still() and lagKnown then
+                nr, nu = nr + lagR, nu + lagU
+            end
+            local dr, du = nr - right, nu - up
+            if dr * dr + du * du <= reach * reach then
+                return true
+            end
         end
     end
     return false
@@ -259,7 +281,8 @@ local function addNode(name, icon, right, up, gray, v)
 end
 
 -- Turns a finished pass's hits into nodes: hits of one name that touch are one dot, at their
--- middle. Dots already followed are left to following.
+-- middle. Dots already followed are left to following. Hits on a followed dot are set aside
+-- first, so a second dot of the same name right beside it isn't taken for part of it.
 local function finishPass(v)
     local pass = internal.pass
     local hits = pass.hits
@@ -271,6 +294,16 @@ local function finishPass(v)
         end
     end
     local reach = pass.spacing * REACH
+    -- Moving before the trail is measured, a followed dot answers somewhere near its icon, not on
+    -- it: then anything within following's reach counts as it, as before, so it isn't found twice.
+    local own = (not v or still() or lagKnown) and OWN_REACH or FOLLOW_REACH
+    local fresh = {}
+    for _, hit in ipairs(hits) do
+        if not known(hit.name, hit.right, hit.up, v, own) then
+            fresh[#fresh + 1] = hit
+        end
+    end
+    hits = fresh
     local taken = {}
     for i, first in ipairs(hits) do
         if not taken[i] then
@@ -293,7 +326,7 @@ local function finishPass(v)
                 end
             end
             local right, up = sumR / #queue, sumU / #queue
-            if not known(first.name, right, up, v) then
+            if not known(first.name, right, up, v, own) then
                 addNode(first.name, first.icon, right, up, gray, v)
             end
         end
