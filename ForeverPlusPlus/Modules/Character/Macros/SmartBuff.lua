@@ -234,13 +234,14 @@ local function bestRank(name, unit)
     return best
 end
 
--- The macro text that casts that rank.
+-- The macro text that casts that rank. A spell without ranks (Blessing of Kings) is cast by its
+-- name alone: its subtext, if any, isn't a rank /cast understands.
 local function castText(name, unit)
     local best = bestRank(name, unit)
     if not best then
         return nil
     end
-    if best.subtext ~= "" then
+    if best.rank > 0 and best.subtext ~= "" then
         return format("%s(%s)", name, best.subtext)
     end
     return name
@@ -582,7 +583,9 @@ ns.AddCommand("buffs", "", L.MACROS_SMARTBUFF_COMMAND, function()
                 line.matched)
             or L.MACROS_SMARTBUFF_DIAG_MISSING
         ns.Print(format(L.MACROS_SMARTBUFF_DIAG_BUFF, line.name,
-            line.rank and tostring(line.rank) or L.MACROS_SMARTBUFF_DIAG_UNKNOWN,
+            line.rank == 0 and L.MACROS_SMARTBUFF_DIAG_NO_RANKS
+                or line.rank and format(L.MACROS_SMARTBUFF_DIAG_RANK, line.rank)
+                or L.MACROS_SMARTBUFF_DIAG_UNKNOWN,
             line.suits and L.MACROS_SMARTBUFF_DIAG_SUITS or L.MACROS_SMARTBUFF_DIAG_FALLBACK, state))
     end
     for group, held in pairs(trace.full or {}) do
