@@ -82,6 +82,13 @@ ns.GameData.New("smartBuffSpells", {
     [21849] = "Gift of the Wild",
 }, { kind = "spell", label = L.MACROS_SMARTBUFF })
 
+-- The level of buffs the game doesn't give a learned level for, since a talent isn't learned from a
+-- trainer (Classic's spell levels; Forever refused Kings on a level 7 on 2026-10-20). A buff
+-- can go on someone up to 10 levels below it.
+local LEVELS = ns.GameData.New("smartBuffLevels", {
+    [20217] = 20, -- Blessing of Kings
+}, { kind = "spell", label = L.MACROS_SMARTBUFF })
+
 -- Each class's buffs, the one it prefers first. `who` is who can get it: "any", "mana" (those who
 -- use mana), "physical" (those who don't, or a Paladin or Druid of a melee tree), or "self". Of a
 -- `group`, a unit holds one from each caster: a Paladin's Blessings, a Mage's or Warlock's armor.
@@ -214,8 +221,18 @@ local function aurasOf(unit)
     return listed and found or nil
 end
 
+-- The level a rank is learned at, or nil when neither the game nor LEVELS says.
+local function spellLevel(id)
+    local learned = Spellbook.LevelLearned(id)
+    if learned and learned > 0 then
+        return learned
+    end
+    return LEVELS:Get(id)
+end
+
 -- The best rank of `name` you know the unit can take ({ id, rank, subtext }): a buff's rank can go
--- on someone up to 10 levels below the level it's learned at.
+-- on someone up to 10 levels below the level it's learned at. Nil, "low" when every rank is too
+-- high for them, so another buff goes first instead of one the game refuses.
 local function bestRank(name, unit)
     local list = ranks and ranks[name]
     if not (list and #list > 0) then
@@ -223,16 +240,16 @@ local function bestRank(name, unit)
     end
     local level = UnitLevel(unit)
     level = readable(level) and tonumber(level) or 0
-    -- Below every rank's limit, the first rank: the game says why when it's cast.
-    local best = list[1]
+    if level <= 0 then
+        return list[#list] -- a level we can't read: the best, and the game says if it's too high
+    end
     for i = #list, 1, -1 do
-        local learned = level > 0 and Spellbook.LevelLearned(list[i].id)
+        local learned = spellLevel(list[i].id)
         if not learned or learned - 10 <= level then
-            best = list[i]
-            break
+            return list[i]
         end
     end
-    return best
+    return nil, "low"
 end
 
 -- The macro text that casts that rank. A spell without ranks (Blessing of Kings) is cast by its
@@ -343,9 +360,12 @@ local function pick(unit, isSelf, auras, trace)
         for _, entry in ipairs(list) do
             local name = spellName(entry)
             local aura, matched = has(entry)
-            local best = name and bestRank(name, unit)
+            local best, low
+            if name then
+                best, low = bestRank(name, unit)
+            end
             trace[#trace + 1] = { name = name or tostring(entry.id), rank = best and best.rank,
-                matched = matched, mine = aura and aura.mine, suits = fits(entry, kind, isSelf) }
+                low = low, matched = matched, mine = aura and aura.mine, suits = fits(entry, kind, isSelf) }
         end
     end
     return cast, soonest, blocked
@@ -584,7 +604,8 @@ ns.AddCommand("buffs", "", L.MACROS_SMARTBUFF_COMMAND, function()
                 line.matched)
             or L.MACROS_SMARTBUFF_DIAG_MISSING
         ns.Print(format(L.MACROS_SMARTBUFF_DIAG_BUFF, line.name,
-            line.rank == 0 and L.MACROS_SMARTBUFF_DIAG_NO_RANKS
+            line.low and L.MACROS_SMARTBUFF_DIAG_TOO_LOW
+                or line.rank == 0 and L.MACROS_SMARTBUFF_DIAG_NO_RANKS
                 or line.rank and format(L.MACROS_SMARTBUFF_DIAG_RANK, line.rank)
                 or L.MACROS_SMARTBUFF_DIAG_UNKNOWN,
             line.suits and L.MACROS_SMARTBUFF_DIAG_SUITS or L.MACROS_SMARTBUFF_DIAG_FALLBACK, state))

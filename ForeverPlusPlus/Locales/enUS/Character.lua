@@ -137,6 +137,7 @@ L.MACROS_SMARTBUFF_DIAG_NO_MANA = "no mana"
 L.MACROS_SMARTBUFF_DIAG_BUFF = "%s (%s, %s): %s" -- buff, your rank for them, suits or fallback, state
 L.MACROS_SMARTBUFF_DIAG_RANK = "rank %d"
 L.MACROS_SMARTBUFF_DIAG_NO_RANKS = "no ranks"
+L.MACROS_SMARTBUFF_DIAG_TOO_LOW = "they're too low"
 L.MACROS_SMARTBUFF_DIAG_UNKNOWN = "not known"
 L.MACROS_SMARTBUFF_DIAG_SUITS = "suits them"
 L.MACROS_SMARTBUFF_DIAG_FALLBACK = "fallback"
