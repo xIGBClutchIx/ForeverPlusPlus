@@ -88,9 +88,10 @@ ns.GameData.New("smartBuffSpells", {
 -- `stronger` are buffs that count as having it: its group version, from anyone.
 local BUFFS = {
     PALADIN = {
+        -- Kings first: 10% of every stat beats Might or Wisdom once it's learned.
+        { id = 20217, who = "any", group = "blessing", stronger = { 25898 } },
         { id = 19740, who = "physical", group = "blessing", stronger = { 25782 } },
         { id = 19742, who = "mana", group = "blessing", stronger = { 25894 } },
-        { id = 20217, who = "any", group = "blessing", stronger = { 25898 } },
     },
     PRIEST = {
         { id = 1243, who = "any", stronger = { 21562 } },
