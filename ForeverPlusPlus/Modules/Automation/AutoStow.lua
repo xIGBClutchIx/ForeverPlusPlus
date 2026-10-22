@@ -57,6 +57,11 @@ local RETRY = 1 -- seconds to wait while casting before trying again
 -- A press shows in the state 0.1 to 0.7 seconds later (Cameron's log, 2026-10-22).
 local POLL = 0.25 -- seconds between looks after a toggle
 local WAIT = 2 -- seconds to wait for a toggle to change the state
+-- A toggle right after the state changes is ignored: one the moment the ranged weapon came out
+-- changed nothing, and Cameron's own press 0.5 seconds after a change did nothing while one 1.1
+-- seconds after worked (his logs, 2026-10-22). So the next toggle waits this long.
+local SETTLE = 1.25 -- seconds after a change before toggling again
+local AGAIN = 1.5 -- seconds before trying once more after a toggle that changed nothing
 local TOGGLES = 3 -- at most per stow
 
 local timer = ns.Frames.Timer(module) -- the stow under way: a cast to wait out, or a toggle's wait
@@ -65,6 +70,7 @@ local drawnSince -- GetTime() the weapons came out, or nil while away (or not co
 local stuck -- a state our toggles couldn't change: left alone until it changes
 local stowing = false
 local toggles, before, waitUntil -- this stow's toggles, the state before the last, when to give up
+local retried = false -- the last toggle changed nothing and is being tried once more
 local lastLogged -- the last state Log Sheath State printed
 
 local function log(text)
@@ -95,8 +101,8 @@ end
 
 local step
 
--- After a toggle: once the state moves off what it was, toggle again until it's away. Nothing
--- changed within WAIT: stop.
+-- After a toggle: once the state moves off what it was, let it settle and toggle again until it's
+-- away. Nothing changed within WAIT: try once more a little later, then stop.
 local function afterToggle()
     local state = GetSheathState()
     if state == before and GetTime() < waitUntil then
@@ -104,12 +110,19 @@ local function afterToggle()
         return
     end
     if state == before then
-        log(format(L.AUTOSTOW_LOG_NO_CHANGE, tostring(state)))
-        stopStow(state)
+        if retried then
+            log(format(L.AUTOSTOW_LOG_NO_CHANGE, tostring(state)))
+            stopStow(state)
+        else
+            log(format(L.AUTOSTOW_LOG_AGAIN, tostring(state)))
+            retried = true
+            timer:Start(AGAIN, step)
+        end
         return
     end
     log(format(L.AUTOSTOW_LOG_TOGGLED, tostring(state)))
-    step()
+    retried = false
+    timer:Start(SETTLE, step)
 end
 
 function step()
@@ -136,7 +149,7 @@ function step()
 end
 
 local function stow()
-    stowing, toggles = true, 0
+    stowing, toggles, retried = true, 0, false
     step()
 end
 
