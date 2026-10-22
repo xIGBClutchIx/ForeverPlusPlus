@@ -96,13 +96,13 @@ L.SETTINGS_SEARCH = "Search modules" -- gray text in the Modules page's empty se
 L.SETTINGS_NO_MATCH = "No modules match \"%s\"." -- the search text
 L.SETTINGS_NEW_ONLY = "New" -- the checkbox beside the search box that lists only modules marked NEW
 L.SETTINGS_NOTHING_NEW = "Nothing new." -- the Modules list while that checkbox is on and nothing is new
--- The Debug page's section headers, in the order they show. Modules put their debug options and
--- buttons in one with `section`.
+-- The Debug module's section headers on the Modules page, in the order they show. Modules put
+-- their debug options and buttons in one with `section`.
 L.DEBUG_SECTION_NEW = "What's New"
 L.DEBUG_SECTION_DIAGNOSTICS = "Diagnostics"
 L.DEBUG_SECTION_TESTING = "Testing"
 L.DEBUG_SECTION_LOGGING = "Logging"
--- The Debug page's own buttons: Reset Seen Version and Reset Welcome in What's New, the rest in
+-- The Debug module's own buttons: Reset Seen Version and Reset Welcome in What's New, the rest in
 -- Diagnostics
 L.DEBUG_RESET_SEEN = "Reset Seen Version"
 L.DEBUG_RESET_SEEN_BUTTON = "Reset"
@@ -158,7 +158,7 @@ L.HOME_INTRO = "Each module is one small change to Blizzard's interface, made to
     .. "see what it does and its options. Settings are saved for your whole account."
 L.HOME_MODULES_ON = "%d of %d modules on" -- on, total
 L.HOME_DEFAULTS = "Defaults"
--- The popup of the Defaults button at the top right of the Modules, Debug, Changelog, and About pages
+-- The popup of the Defaults button at the top right of the Modules, Changelog, and About pages
 L.DEFAULTS_ASK = "Put all Forever++ settings back to defaults? This replaces your current "
     .. "Forever++ settings. The rest of the game's settings stay as they are."
 L.DEFAULTS_DEVELOPER = "Developer's Defaults"

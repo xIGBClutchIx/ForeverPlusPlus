@@ -75,7 +75,8 @@ L.PLATES_SUBTITLE_OFF = "Never"
 L.PLATES_COLOR_WHITE = "White"
 L.PLATES_COLOR_GRAY = "Gray"
 L.PLATES_COLOR_GREEN = "Green"
--- Both modules' options sit together under Testing on the Debug page, so their names say which plates.
+-- Both modules' options sit together under Testing in the Debug module's settings, so their names
+-- say which plates.
 L.PLATES_CENTER_LINE_NPC = "Show NPC Plate Center"
 L.PLATES_CENTER_LINE_PLAYER = "Show Player Plate Center"
 L.PLATES_CENTER_LINE_DESC = "Draw a thin red line through the middle of each nameplate, to check "

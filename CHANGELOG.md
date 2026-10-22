@@ -6,7 +6,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Added
 
-- **Gear Probe**: a new Run button under Testing on the Debug page (and `/fpp gearprobe`) that reads what the client says about the gear you wear and carry, its own item comparison, your talent tabs, and your stats, and saves it after `/reload`, for the developers planning upgrade arrows.
+- **Gear Probe**: a new Run button under Testing in the Debug module's settings (and `/fpp gearprobe`) that reads what the client says about the gear you wear and carry, its own item comparison, your talent tabs, and your stats, and saves it after `/reload`, for the developers planning upgrade arrows.
 - **Item Tooltips**: the new Disenchant line (off by default) shows on green, blue, and purple weapons and armor what disenchanting gives on average, priced from Auction Prices while that's on, or else the material it most likely gives. Hold Shift for every outcome and its chance.
 - **Item Tooltips**: Auction Prices can use Auctionator's prices instead of scanning, when Auctionator is installed: turn on Use Auctionator's Prices. Your own saved prices are kept for when you turn it off.
 - **Macros**: a new module that makes macros in your general macros, shared by your characters, each with its own checkbox, and deletes them when they're turned off. The first is Smart Buff: it casts the buff your friendly target (or you) should get from you, at the best rank you know, like Blessing of Might or Wisdom by class, skips buffs they already have (or a stronger one, like a Greater Blessing, and recasts over someone else's lower rank), buffs you when the target can't get anything from you and says on screen why, shows a red X only when there's nothing left for either, and warns in combat when it can't change to fit a new target. Off by default.
@@ -24,7 +24,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Profiler**: also times the work modules put off for a moment, like redrawing the marks on your bag items, so it shows under the module that did it.
 - **Quest Tracker**: the background is a little darker by default, at 40% opacity instead of 30%. If you set its Opacity yourself, it stays as you set it.
 - **Settings**: option names on the Modules page have more room and a smaller indent under the option they depend on, so they wrap less. An option's NEW label sits just after its checkbox instead of squeezing its name.
-- **Settings**: Console Variables, Profiler, and the Debug page are modules under a new Tools category, off by default (on in Developer's Defaults). Off, their pages leave the sidebar and their commands are gone, the Profiler times nothing, and turning Debug off puts every debug option back to its default and takes away `/fpp selftest`, `/fpp gearprobe`, and `/fpp shots`.
+- **Settings**: Console Variables, Profiler, and Debug are modules under a new Tools category, off by default (on in Developer's Defaults). Debug's options and testing buttons are in its own settings on the Modules page instead of a Debug page in the sidebar. Off, Console Variables' and Profiler's pages leave the sidebar and their commands are gone, the Profiler times nothing, and turning Debug off puts every debug option back to its default and takes away `/fpp selftest`, `/fpp gearprobe`, and `/fpp shots`.
 
 ### Fixed
 

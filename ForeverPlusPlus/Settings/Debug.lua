@@ -1,73 +1,18 @@
--- The Debug page: Blizzard settings rows (a list page, not one we draw), with a header for each
--- section (What's New, Diagnostics, Testing, Logging). Under each, Forever++'s own rows and then
--- each module's options marked `debug = true` and buttons from `module.debugActions` that name it;
--- after them a header for each module with rows in no section. Our own Defaults button sits over
--- Blizzard's on it.
+-- The Debug module's rows on the Modules page, under its Enabled checkbox: a header for each
+-- section (What's New, Diagnostics, Testing, Logging), with Forever++'s own buttons and then each
+-- module's options marked `debug = true` and buttons from `module.debugActions` that name it; after
+-- them a header for each module with rows in no section. Drawn with the Modules page's own rows
+-- (Settings.lua), and greyed out while Debug is off.
 local _, ns = ...
 
 local ipairs, pairs, format, concat, tostring = ipairs, pairs, string.format, table.concat, tostring
-local CreateFrame, GetBuildInfo = CreateFrame, GetBuildInfo
+local strlower = string.lower
+local GetBuildInfo = GetBuildInfo
 local L = ns.L
 local S = ns.SettingsUI
 
--- Greys a row out while the module is off, so it shows nothing on it applies. Probe:
--- AddModifyPredicate is Mainline's; ManiaTip uses it on Forever.
-local function greyWhenOff(initializer, module)
-    if initializer and initializer.AddModifyPredicate then
-        initializer:AddModifyPredicate(function() return module.db.enabled end)
-    end
-end
-
--- The Blizzard setting behind one of a module's options, read and written through the module.
-local function optionSetting(category, module, option)
-    local varType = option.choices and Settings.VarType.String or Settings.VarType.Boolean
-    local setting = Settings.RegisterProxySetting(category,
-        format("ForeverPlusPlus_%s_%s", module.name, option.key), varType,
-        option.name, module.defaults[option.key],
-        function() return module.db[option.key] end,
-        function(value)
-            S.change(function()
-                ns.SetOption(module.name, option.key, value)
-            end)
-        end)
-    S.track(module, setting)
-    return setting
-end
-
--- A debug option: a checkbox, or a dropdown when it lists `choices` (debug options are only
--- these), greyed out while the module is off.
-local function addOption(category, module, option)
-    local choices = option.choices
-    local initializer
-    if option.min then
-        return -- a slider isn't one of these; it stays at its default rather than show as a checkbox
-    elseif choices then
-        if not (Settings.CreateDropdown and Settings.CreateControlTextContainer) then
-            return -- Probe: dropdowns are Mainline's; leave the option at its default without one.
-        end
-        initializer = Settings.CreateDropdown(category, optionSetting(category, module, option),
-            function()
-                local container = Settings.CreateControlTextContainer()
-                for _, choice in ipairs(choices) do
-                    container:Add(choice[1], choice[2])
-                end
-                return container:GetData()
-            end, option.description)
-    else
-        initializer = Settings.CreateCheckbox(category, optionSetting(category, module, option),
-            option.description)
-    end
-    greyWhenOff(initializer, module)
-end
-
-local function addHeader(layout, text)
-    if layout and CreateSettingsListSectionHeaderInitializer then
-        layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(text))
-    end
-end
-
--- The Debug page's sections, in order. Forever++'s own rows and modules' debug options and buttons
--- name one with `section`; a module's rows that name none of these go under its title, after them.
+-- The sections, in order. Forever++'s own rows and modules' debug options and buttons name one with
+-- `section`; a module's rows that name none of these go under its title, after them.
 local DEBUG_SECTIONS = {
     L.DEBUG_SECTION_NEW, L.DEBUG_SECTION_DIAGNOSTICS, L.DEBUG_SECTION_TESTING, L.DEBUG_SECTION_LOGGING,
 }
@@ -80,7 +25,18 @@ local function debugSection(row)
     end
 end
 
--- Whether a module has debug options or buttons in `section` (nil: in none of the Debug page's).
+-- A module's debug options, by key, for an option under another (`requires`).
+local function debugOptions(module)
+    local byKey = {}
+    for _, option in ipairs(module.options or {}) do
+        if option.debug then
+            byKey[option.key] = option
+        end
+    end
+    return byKey
+end
+
+-- Whether a module has debug options or buttons in `section` (nil: in none of the sections).
 local function hasDebugRows(module, section)
     for _, option in ipairs(module.options or {}) do
         if option.debug and debugSection(option) == section then
@@ -95,78 +51,7 @@ local function hasDebugRows(module, section)
     return false
 end
 
--- A module's debug options in `section` (nil: in none of the Debug page's), in the order it lists
--- them.
-local function addDebugOptions(category, module, section)
-    for _, option in ipairs(module.options or {}) do
-        if option.debug and debugSection(option) == section then
-            addOption(category, module, option)
-        end
-    end
-end
-
--- A module's debug buttons in `section` (`module.debugActions`, the same shape as `actions`), after
--- its options there. Greyed out while the module is off, unless the button is for that too
--- (`whileOff`).
-local function addDebugActions(layout, module, section)
-    if not (layout and CreateSettingsButtonInitializer) then
-        return -- Probe: the button row is Mainline's Settings.
-    end
-    for i, action in ipairs(module.debugActions or {}) do
-        if debugSection(action) == section then
-            local initializer = CreateSettingsButtonInitializer(action.name, action.button,
-                S.actionFn(module, action, i), action.description, true)
-            if not action.whileOff then
-                greyWhenOff(initializer, module)
-            end
-            layout:AddInitializer(initializer)
-        end
-    end
-end
-
--- Defaults button -----------------------------------------------------------------------------
--- Blizzard's Defaults button, at the top right of a settings list, asks "These Settings" or "All
--- Settings", and All Settings resets the whole game. On our list page (Debug) our own Defaults
--- button sits over it instead, with our popup (askDefaults). Blizzard's is faded out underneath
--- (never changed otherwise), and ours shows and hides with it, since Blizzard hides it while
--- searching. The Modules, Changelog and About pages are drawn by us and have their own.
-
-local debugPage -- the Debug page's category, our only list page, once it's made
-local defaultsButton -- ours, while it's made
-
-local function onOurPage()
-    return debugPage ~= nil and SettingsPanel and SettingsPanel.GetCurrentCategory
-        and SettingsPanel:GetCurrentCategory() == debugPage or false
-end
-
-local function updateDefaults(blizzard)
-    local ours = onOurPage() and blizzard:IsShown()
-    defaultsButton:SetShown(ours and true or false)
-    blizzard:SetAlpha(ours and 0 or 1)
-end
-
--- Probe: the list header's DefaultsButton, GetSettingsList, and the Settings.CategoryChanged event
--- are Mainline's (the `forever` UI source has them); without them Blizzard's button stays as is.
-function S.AddDefaultsButton()
-    local list = SettingsPanel and SettingsPanel.GetSettingsList and SettingsPanel:GetSettingsList()
-    local blizzard = list and list.Header and list.Header.DefaultsButton
-    if not (blizzard and EventRegistry and EventRegistry.RegisterCallback) then
-        return
-    end
-    defaultsButton = CreateFrame("Button", nil, list.Header, "UIPanelButtonTemplate")
-    defaultsButton:SetAllPoints(blizzard)
-    defaultsButton:SetFrameLevel(blizzard:GetFrameLevel() + 5)
-    defaultsButton:SetText(SETTINGS_DEFAULTS or L.HOME_DEFAULTS)
-    defaultsButton:SetScript("OnClick", S.askDefaults)
-    defaultsButton:Hide()
-    blizzard:HookScript("OnShow", function() updateDefaults(blizzard) end)
-    blizzard:HookScript("OnHide", function() updateDefaults(blizzard) end)
-    EventRegistry:RegisterCallback("Settings.CategoryChanged", function() updateDefaults(blizzard) end,
-        defaultsButton)
-end
-
--- Debug page tools ----------------------------------------------------------------------------
--- Forever++'s own rows on the Debug page, and the page itself.
+-- Forever++'s own buttons ----------------------------------------------------------------------
 
 -- One line for a bug report: the addon and client, and the modules on.
 local function debugInfo()
@@ -232,45 +117,78 @@ local DEBUG_TOOLS = {
         fn = function() ReloadUI() end, section = L.DEBUG_SECTION_DIAGNOSTICS },
 }
 
--- Forever++'s own rows in `section`: its buttons there.
-local function addDebugTools(category, layout, section)
-    if not (layout and CreateSettingsButtonInitializer) then
-        return -- Probe: the button row is Mainline's Settings.
+-- The rows -------------------------------------------------------------------------------------
+
+-- A module's debug options and then its debug buttons in `section` (nil: in none of the sections).
+-- They're on while Debug (`debugOn`) and the module are, or while Debug is for a button that's for
+-- the module being off too (`whileOff`).
+local function addRows(view, debugOn, module, section)
+    local function moduleOn()
+        return debugOn() and module.db.enabled and true or false
     end
-    for _, tool in ipairs(DEBUG_TOOLS) do
-        if tool.section == section then
-            layout:AddInitializer(CreateSettingsButtonInitializer(tool.name, tool.button, tool.fn,
-                tool.description, true))
+    local byKey, done = debugOptions(module), {}
+    for _, option in ipairs(module.options or {}) do
+        if option.debug and debugSection(option) == section and not done[option.key] then
+            S.addOptionRow(view, module, option, byKey, done, debugOn)
         end
     end
+    for i, action in ipairs(module.debugActions or {}) do
+        if debugSection(action) == section then
+            S.addButtonRow(view, action.name, action.whileOff and debugOn or moduleOn, nil,
+                action.button, S.actionFn(module, action, i), action.description)
+        end
+    end
+    view.follows[module.name] = true -- its rows grey out with it
 end
 
--- The Debug page under `parent`: a header for each section, with Forever++'s own rows and then
--- each module's (in `order`, by title) under it, and after them a header for each module with rows
--- in no section.
----@return table category the page
-function S.AddDebugPage(parent, order)
-    local category, layout = Settings.RegisterVerticalLayoutSubcategory(parent, L.DEBUG)
-    debugPage = category
-    local function addRows(module, section)
-        addDebugOptions(category, module, section)
-        addDebugActions(layout, module, section)
-    end
+---Adds the Debug module's rows to its `view` on the Modules page, after its Enabled checkbox.
+---@param view table the Debug module's view (Settings.lua)
+---@param debugOn function whether Debug is on
+function S.AddDebugRows(view, debugOn)
+    local order = S.byTitle()
     for _, section in ipairs(DEBUG_SECTIONS) do
-        addHeader(layout, section)
-        addDebugTools(category, layout, section)
+        S.addLine(view, "GameFontHighlightLarge", section)
+        for _, tool in ipairs(DEBUG_TOOLS) do
+            if tool.section == section then
+                S.addButtonRow(view, tool.name, debugOn, nil, tool.button, tool.fn,
+                    tool.description)
+            end
+        end
         for _, name in ipairs(order) do
             if hasDebugRows(ns.modules[name], section) then
-                addRows(ns.modules[name], section)
+                addRows(view, debugOn, ns.modules[name], section)
             end
         end
     end
     for _, name in ipairs(order) do
         local module = ns.modules[name]
         if hasDebugRows(module, nil) then
-            addHeader(layout, module.title or name)
-            addRows(module, nil)
+            S.addLine(view, "GameFontHighlightLarge", module.title or name)
+            addRows(view, debugOn, module, nil)
         end
     end
-    return category
+end
+
+---What the Modules page's search finds the Debug module by: its rows' names and descriptions.
+---@return string text lowercased
+function S.DebugSearchText()
+    local text = {}
+    local function add(row)
+        text[#text + 1] = strlower(format("%s\n%s", row.name or "", row.description or ""))
+    end
+    for _, tool in ipairs(DEBUG_TOOLS) do
+        add(tool)
+    end
+    for _, name in ipairs(S.byTitle()) do
+        local module = ns.modules[name]
+        for _, option in ipairs(module.options or {}) do
+            if option.debug then
+                add(option)
+            end
+        end
+        for _, action in ipairs(module.debugActions or {}) do
+            add(action)
+        end
+    end
+    return concat(text, "\n")
 end

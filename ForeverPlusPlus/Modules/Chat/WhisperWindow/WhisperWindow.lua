@@ -331,7 +331,7 @@ function internal.Send(conversation, text)
     local pieces = ns.Text.Split(text, MAX_WHISPER)
     if conversation.test then
         for _, piece in ipairs(pieces) do
-            add(conversation, "out", piece) -- the Debug page's made-up player: nothing goes out
+            add(conversation, "out", piece) -- the Debug module's made-up player: nothing goes out
         end
         return true
     end
@@ -545,7 +545,7 @@ local function testConversation()
     return conversation
 end
 
--- On the Debug page (Settings/Debug.lua).
+-- In the Debug module's settings (Settings/Debug.lua).
 module.debugActions = {
     {
         name = L.WHISPERWINDOW_TEST,

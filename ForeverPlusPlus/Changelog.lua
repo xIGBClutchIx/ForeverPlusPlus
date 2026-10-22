@@ -13,10 +13,11 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_ADDED, {
-                { L.GEARPROBE_TITLE, "A new Run button under Testing on the Debug page (and "
-                    .. "/fpp gearprobe) that reads what the client says about the gear you wear "
-                    .. "and carry, its own item comparison, your talent tabs, and your stats, and "
-                    .. "saves it after /reload, for the developers planning upgrade arrows." },
+                { L.GEARPROBE_TITLE, "A new Run button under Testing in the Debug "
+                    .. "module's settings (and /fpp gearprobe) that reads what the client says "
+                    .. "about the gear you wear and carry, its own item comparison, your talent "
+                    .. "tabs, and your stats, and saves it after /reload, for the developers "
+                    .. "planning upgrade arrows." },
                 { L.ITEMTOOLTIPS_TITLE, "The new Disenchant line (off by default) shows on green, "
                     .. "blue, and purple weapons and armor what disenchanting gives on average, "
                     .. "priced from Auction Prices while that's on, or else the material it most "
@@ -93,9 +94,11 @@ ns.changelog = {
                     .. "smaller indent under the option they depend on, so they wrap less. An "
                     .. "option's NEW label sits just after its checkbox instead of squeezing its "
                     .. "name." },
-                { L.CHANGELOG_SETTINGS, "Console Variables, Profiler, and the Debug page are "
-                    .. "modules under a new Tools category, off by default (on in Developer's "
-                    .. "Defaults). Off, their pages leave the sidebar and their commands are gone, "
+                { L.CHANGELOG_SETTINGS, "Console Variables, Profiler, and Debug are modules "
+                    .. "under a new Tools category, off by default (on in Developer's Defaults). "
+                    .. "Debug's options and testing buttons are in its own settings on the Modules "
+                    .. "page instead of a Debug page in the sidebar. Off, Console Variables' and "
+                    .. "Profiler's pages leave the sidebar and their commands are gone, "
                     .. "the Profiler times nothing, and turning Debug off puts every debug option "
                     .. "back to its default and takes away /fpp selftest, /fpp gearprobe, and "
                     .. "/fpp shots." },

@@ -14,21 +14,22 @@
 --                    the list to modules by title and description, or by an option's name or
 --                    description, and highlights those options; a New checkbox beside it lists
 --                    only modules marked NEW. A module or option added since the player last
---                    looked (`added`), or an option changed since then (`changed`), is marked NEW
+--                    looked (`added`), or an option changed since then (`changed`), is marked NEW.
+--                    The Debug module shows, under its Enabled checkbox, the rows Debug.lua adds:
+--                    sections of Forever++'s own buttons and modules' options marked
+--                    `debug = true` and buttons from `module.debugActions`, each placed by its
+--                    `section`: What's New (Reset Seen Version, Reset Welcome), Diagnostics (Copy
+--                    Debug Info, Print Module Events, Reload UI), Testing, and Logging
 --     <Tool>         a page a module draws itself (`BuildPage`)
---     Debug          sections of Forever++'s own rows and modules' options marked `debug = true`
---                    and buttons from `module.debugActions`, each placed by its `section`: What's
---                    New (Reset Seen Version, Reset Welcome), Diagnostics (Copy Debug
---                    Info, Print Module Events, Reload UI), Testing, and Logging
 --     Changelog      the releases in Changelog.lua in a list like the Modules page's, with the
 --                    selected one's notes beside it, and a By Module checkbox, a search box and
 --                    the Defaults button at the top like Modules
 --     About          what the addon is, how many modules are on, the version, links, and the /fpp
 --                    commands, with the Defaults button at the top right like Modules
 -- Without subpages (an older Settings API), the Modules page is the only page.
--- This file has the Modules page and what the pages share; Debug.lua, Changelog.lua and About.lua
--- draw the others, through `S` (ns.SettingsUI). The pieces a drawn page is made of are in
--- Lib/SettingsKit.lua.
+-- This file has the Modules page and what the pages share; Changelog.lua and About.lua draw the
+-- others, and Debug.lua the Debug module's rows, through `S` (ns.SettingsUI). The pieces a drawn
+-- page is made of are in Lib/SettingsKit.lua.
 local _, ns = ...
 
 local ipairs, pairs, next, format, type, sort = ipairs, pairs, next, string.format, type, table.sort
@@ -47,11 +48,10 @@ local newSplit, paint, hover = Kit.NewSplit, Kit.Paint, Kit.Hover
 local newListButton, newEmptyRow, addSearchBox = Kit.NewListButton, Kit.NewEmptyRow, Kit.AddSearchBox
 
 -- What the Settings files share. Debug.lua, Changelog.lua and About.lua load after this one and add
--- the functions that draw their pages (S.AddDebugPage, S.BuildChangelog, S.BuildAbout).
+-- the functions that draw their parts (S.AddDebugRows, S.BuildChangelog, S.BuildAbout).
 local S = {}
 ns.SettingsUI = S
 
-local settings = {} -- module name -> its Blizzard setting objects, to refresh after /fpp changes
 local modulesCategory -- the Modules page, the top Forever++ entry, for /fpp
 local pages = {} -- module name -> the page it draws itself, for ns.OpenSettings(name)
 local pageOrder = {} -- the modules with a page of their own, in sidebar order
@@ -141,56 +141,6 @@ local function updatePage(name)
     local categoryList = SettingsPanel and SettingsPanel.GetCategoryList and SettingsPanel:GetCategoryList()
     if categoryList and categoryList.CreateCategories then
         categoryList:CreateCategories()
-    end
-end
-
--- Keeps a module's Blizzard setting, to refresh it after /fpp changes.
-function S.track(module, setting)
-    local list = settings[module.name] or {}
-    settings[module.name] = list
-    list[#list + 1] = setting
-end
-
--- Blizzard's Defaults button asks "These Settings" or "All Settings". All Settings sets every
--- setting in the panel to its default, every addon's included, so one misclick would throw away
--- every Forever++ choice. While Blizzard is setting defaults our setters hold their change back,
--- and the event the panel fires after says which button it was: Settings.CategoryDefaulted (These
--- Settings, on one of our pages) applies them, Settings.Defaulted (All Settings) drops them. Our own
--- Defaults button (askDefaults) is the way to reset everything of ours.
-local held -- changes held back while Blizzard sets defaults, to apply or drop after
-
--- Probe: CheckIsSettingDefaults is Mainline's (the `forever` UI source has it); without it,
--- changes apply at once.
-local function settingDefaults()
-    return SettingsPanel and SettingsPanel.CheckIsSettingDefaults
-        and SettingsPanel:CheckIsSettingDefaults() and true or false
-end
-
--- Runs `fn`, a setter's change, now or once Blizzard's Defaults says which button it was.
-local function change(fn)
-    if settingDefaults() then
-        held = held or {}
-        held[#held + 1] = fn
-    else
-        fn()
-    end
-end
-S.change = change
-
-local function release(apply)
-    local list = held
-    held = nil
-    if not list then
-        return
-    end
-    if apply then
-        for _, fn in ipairs(list) do
-            fn()
-        end
-    end
-    -- The rows show the defaults Blizzard set; put them back to what's saved.
-    for name in pairs(settings) do
-        ns.RefreshSetting(name)
     end
 end
 
@@ -384,7 +334,7 @@ local function trackNew(order)
 end
 
 -- Options -------------------------------------------------------------------------------------
--- The pieces both the Modules page and the Debug page use for a module's options.
+-- The pieces a module's options are drawn with.
 
 -- A slider option's value as its label shows it: `option.format` (a format string, such as "%d%%",
 -- or a function of the value, for labels like "Never" at 0), or the number.
@@ -722,11 +672,15 @@ local function addResetButton(view, row, module, option, pair, on)
 end
 
 -- One of the module's options, with `byKey` for the option it's under (`requires`) or the slider
--- in its row (`slider`), and `done` for those already drawn.
-local function addOptionRow(view, module, option, byKey, done)
+-- in its row (`slider`), and `done` for those already drawn. With `gate`, it's also off while that
+-- returns false (the Debug module's rows, off with Debug).
+local function addOptionRow(view, module, option, byKey, done, gate)
     local parent = option.requires and byKey[option.requires]
     -- Under an option that is itself under another, it's on only while all of them are.
     local function on()
+        if gate and not gate() then
+            return false
+        end
         -- Off with the module, and with its part's checkbox (`part`) when it's one of a part's.
         if not module.db.enabled or option.part and not ns.PartOn(module, option.part) then
             return false
@@ -884,9 +838,15 @@ local function addModuleRows(view, module)
             byKey[option.key] = option
         end
     end
+    -- The Debug module's rows (Debug.lua): every module's debug options and buttons.
+    local extra = name == "Debug" and S.AddDebugRows
     -- A module's own page needs no button here: it's in the sidebar while the module is on.
     if #options == 0 and not module.actions then
-        addLine(view, "GameFontDisable", L.SETTINGS_NO_OPTIONS)
+        if extra then
+            extra(view, on)
+        else
+            addLine(view, "GameFontDisable", L.SETTINGS_NO_OPTIONS)
+        end
         return
     end
     local section, subsection
@@ -913,7 +873,11 @@ local function addModuleRows(view, module)
         addButtonRow(view, action.name, on, nil, action.button, actionFn(module, action, i),
             action.description)
     end
+    if extra then
+        extra(view, on)
+    end
 end
+S.addOptionRow, S.addButtonRow, S.addLine = addOptionRow, addButtonRow, addLine
 
 -- The module on the right: its title, its category, its description in DESCRIPTION_LINES, and its
 -- Enabled checkbox in a row like its options', over its rows.
@@ -923,7 +887,8 @@ local function buildView(name)
     local width = page.paneWidth
     local view = newStack(page.paneContent, width, 4)
     view:SetPoint("TOPLEFT")
-    view.updates, view.found = {}, {}
+    -- `follows`: other modules whose changes show here too (the Debug module's rows).
+    view.updates, view.found, view.follows = {}, {}, {}
 
     local heading = view:CreateFontString(nil, "OVERLAY", "GameFontHighlightHuge")
     heading:SetPoint("TOPLEFT", 4, -4)
@@ -967,11 +932,17 @@ local function buildView(name)
     local box = newModuleCheck(row, name, 30)
     box:SetPoint("LEFT", CONTROL_LEFT, 0)
     addModuleRows(view, module)
-    bind(name, function()
-        for _, update in ipairs(view.updates) do
-            update()
+    local function update()
+        for _, each in ipairs(view.updates) do
+            each()
         end
-    end)
+    end
+    bind(name, update)
+    for other in pairs(view.follows) do
+        if other ~= name then
+            bind(other, update)
+        end
+    end
     return view
 end
 
@@ -1215,13 +1186,7 @@ function ns.RegisterSettings()
     if not (Settings and Settings.RegisterCanvasLayoutCategory and Settings.RegisterAddOnCategory) then
         return
     end
-    -- Probe: both events are Mainline's (the `forever` UI source fires them).
-    if EventRegistry and EventRegistry.RegisterCallback then
-        EventRegistry:RegisterCallback("Settings.CategoryDefaulted", function() release(true) end, ns)
-        EventRegistry:RegisterCallback("Settings.Defaulted", function() release(false) end, ns)
-    end
-    local subpages = Settings.RegisterVerticalLayoutSubcategory ~= nil
-        and Settings.RegisterCanvasLayoutSubcategory ~= nil
+    local subpages = Settings.RegisterCanvasLayoutSubcategory ~= nil
     local order = byTitle()
     trackNew(order)
     -- Modules by category, then title: the order of the Modules page and of the tool pages.
@@ -1243,6 +1208,9 @@ function ns.RegisterSettings()
                 if not option.debug then
                     text[#text + 1] = optionText(option)
                 end
+            end
+            if name == "Debug" and S.DebugSearchText then
+                text[#text + 1] = S.DebugSearchText()
             end
             searchText[name] = concat(text, "\n")
         end
@@ -1266,16 +1234,12 @@ function ns.RegisterSettings()
             pageOrder[#pageOrder + 1] = name
         end
     end
-    -- The Debug page is the Debug module's (Modules/Tools/Debug.lua), there while it's on.
-    pages.Debug = S.AddDebugPage(category, order)
-    pageOrder[#pageOrder + 1] = "Debug"
     for _, name in ipairs(pageOrder) do
         updatePage(name)
     end
     addCanvasPage(category, L.CHANGELOG, S.BuildChangelog)
     aboutCategory = addCanvasPage(category, L.ABOUT, S.BuildAbout)
     Settings.RegisterAddOnCategory(category)
-    S.AddDefaultsButton()
 end
 
 ---Opens the Forever++ Modules page in Settings, or a module: its own page, or the Modules page
@@ -1311,10 +1275,4 @@ end
 function ns.RefreshSetting(name)
     refreshModule(name)
     updatePage(name)
-    if not Settings or not Settings.NotifyUpdate then
-        return
-    end
-    for _, setting in ipairs(settings[name] or {}) do
-        Settings.NotifyUpdate(setting:GetVariable())
-    end
 end

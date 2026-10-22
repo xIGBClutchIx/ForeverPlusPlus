@@ -708,14 +708,14 @@ function ns.WelcomePending()
 end
 
 ---Calls fn once the player has seen the About page after a fresh install, and again whenever the
----welcome is reset (the Debug page), so it can show and hide what offers it.
+---welcome is reset (the Debug module's Reset Welcome), so it can show and hide what offers it.
 ---@param fn function
 function ns.OnWelcomed(fn)
     welcomed[#welcomed + 1] = fn
 end
 
 ---Marks the About page seen (false, from Settings/About.lua when it's first shown), or offers it
----again as on a fresh install, keeping every setting (true, from the Debug page).
+---again as on a fresh install, keeping every setting (true, from the Debug module's Reset Welcome).
 ---@param pending boolean
 function ns.SetWelcome(pending)
     if ns.WelcomePending() == pending then

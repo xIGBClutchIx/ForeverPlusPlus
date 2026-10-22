@@ -16,7 +16,7 @@ ns.ItemStats = ItemStats
 -- The game's stat keys (C_Item.GetItemStats) and ours. Retail tells melee, ranged, and spell hit
 -- and crit apart by key; Forever's strings say "Hit" and "Critical Strike" for one stat each
 -- (Gear Probe, build 70425), so those fold together, with spell hit and crit kept apart in case
--- an item carries them. A key not here is remembered in `unknown` for the Debug page.
+-- an item carries them. A key not here is remembered in `unknown` for debugging.
 ItemStats.KEYS = {
     ITEM_MOD_STRENGTH_SHORT = "STR",
     ITEM_MOD_AGILITY_SHORT = "AGI",
@@ -105,7 +105,7 @@ function ItemStats.Normalize(raw)
     return stats
 end
 
----The game's stat keys met so far that aren't mapped, sorted, for the Debug page.
+---The game's stat keys met so far that aren't mapped, sorted, for debugging.
 ---@return string[]
 function ItemStats.Unknown()
     local list = {}

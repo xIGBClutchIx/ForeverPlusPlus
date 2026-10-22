@@ -1,4 +1,4 @@
--- Self Test: a Debug page button (and `/fpp selftest`) that probes every Forever client API and
+-- Self Test: a Debug module button (and `/fpp selftest`) that probes every Forever client API and
 -- behavior the addon depends on but nobody has confirmed, and writes what it found to
 -- ForeverPlusPlusDB.selfTest. `/reload` (or logging out) saves it to the SavedVariables file, so
 -- the results can be read there. Some things need the player to do something (fly, die, fight):
@@ -729,7 +729,7 @@ function module.Run()
     return #lines
 end
 
--- Shown on the Debug page (Settings/Debug.lua).
+-- Shown in the Debug module's settings (Settings/Debug.lua).
 module.debugActions = {
     {
         name = L.SELFTEST_TITLE,

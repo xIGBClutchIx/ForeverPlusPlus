@@ -1,7 +1,7 @@
--- Debug: the Debug page under Forever++ in Settings (drawn by Settings/Debug.lua), with every
--- module's debug options and buttons, and the testing tools (Self Test, Gear Probe,
--- Screenshots). While it's off the page and those tools' commands are gone, and every debug option
--- is back at its default, so nothing set there goes on working out of sight.
+-- Debug: every module's debug options and buttons, and the testing tools (Self Test, Gear Probe,
+-- Screenshots), in its own settings on the Modules page (drawn by Settings/Debug.lua). While it's
+-- off they're greyed out, those tools' commands are gone, and every debug option is back at its
+-- default, so nothing set there goes on working out of sight.
 local _, ns = ...
 
 local ipairs, C_Timer = ipairs, C_Timer

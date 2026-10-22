@@ -1,4 +1,4 @@
--- Gear Probe: a Debug page button (and `/fpp gearprobe`) for the Upgrade Arrows work: reads what
+-- Gear Probe: a Debug module button (and `/fpp gearprobe`) for the Upgrade Arrows work: reads what
 -- this client says about the gear you wear and carry (stat tables, tooltip lines, item levels),
 -- its own item comparison (C_TooltipComparison), your talent tabs, your stats, and the bag
 -- buttons' upgrade art, and writes it to the module's saved log. `/reload` (or logging out)
@@ -523,7 +523,7 @@ function module.Run()
     return #lines
 end
 
--- Shown on the Debug page (Settings/Debug.lua).
+-- Shown in the Debug module's settings (Settings/Debug.lua).
 module.debugActions = {
     {
         name = L.GEARPROBE_TITLE,

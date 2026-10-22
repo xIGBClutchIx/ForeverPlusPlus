@@ -1,4 +1,4 @@
--- Screenshots: a Debug page button (and `/fpp shots`) that takes the addon's gallery pictures from
+-- Screenshots: a Debug module button (and `/fpp shots`) that takes the addon's gallery pictures from
 -- the real game, one scene at a time: it turns on the modules a scene shows, waits for the scene
 -- to be on screen and drawn, takes a screenshot, and puts the modules back. Our code never opens
 -- Blizzard's windows (the world map, bags, character window, talents): a window opened from addon
@@ -366,8 +366,8 @@ function stop()
     end)
 end
 
--- Settings is open when the run starts from the Debug page; the player closes it (closing it from
--- our code would taint it), then the scenes start.
+-- Settings is open when the run starts from the Debug module's button; the player closes it
+-- (closing it from our code would taint it), then the scenes start.
 local function waitForSettings()
     if not shown(SettingsPanel) then
         waited = 0
@@ -454,7 +454,7 @@ function module:OnLoad()
     end
 end
 
--- Shown on the Debug page (Settings/Debug.lua).
+-- Shown in the Debug module's settings (Settings/Debug.lua).
 module.debugActions = {
     {
         name = L.SCREENSHOTS_TITLE,
