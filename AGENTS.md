@@ -39,6 +39,7 @@ Names:
 - `LICENSE`: MIT.
 - `README.md`: for players and contributors: the module list, install, settings and commands, and "Add a module". Keep it short; rules and client detail belong here and in `docs/`.
 - `docs/forever-api.md`: what we know about the Forever client API, with sources and how sure we are.
+- `docs/stat-weights.md`: Upgrade Arrows' default stat weights for every talent tree, how each was worked out, and the sources.
 - `.luarc.json`: LuaLS settings (Lua 5.1 and the known globals).
 - `tests/run.lua`: offline tests for pure-logic `Lib/` code (see "Verification").
 

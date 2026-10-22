@@ -918,16 +918,32 @@ local stats = ItemStats.Normalize({
 })
 eq(stats.STR, 5, "stats: strength")
 eq(stats.SP, 5, "stats: two spell power keys add up")
+eq(stats.HEAL, 2, "stats: spell power heals too, spell damage doesn't")
 eq(stats.ARMOR, 34, "stats: armor is resistance 0")
 eq(stats.DPS, 8.5, "stats: weapon dps")
 eq(stats.MADE_UP_STAT, nil, "stats: an unknown key isn't a stat")
 eq(ItemStats.Unknown()[1], "MADE_UP_STAT", "stats: but is remembered")
 eq(#ItemStats.Unknown(), 1, "stats: a non-number isn't remembered")
 eq(ItemStats.Normalize(nil).STR, nil, "stats: nothing from nothing")
+stats = ItemStats.Normalize({ ITEM_MOD_HIT_RATING_SHORT = 4, ITEM_MOD_CRIT_RATING_SHORT = 14,
+    ITEM_MOD_DODGE_RATING_SHORT = 6, ITEM_MOD_DEFENSE_SKILL_RATING_SHORT = 7 })
+near(stats.HIT, 0.4, "stats: hit is a rating, 10 to 1% without the client")
+near(stats.SPELLHIT, 0.4, "stats: the one hit counts for spells too")
+near(stats.CRIT, 1, "stats: crit is a rating, 14 to 1%")
+near(stats.SPELLCRIT, 1, "stats: the one crit counts for spells too")
+near(stats.DODGE, 0.5, "stats: dodge is a rating, 12 to 1%")
+eq(stats.DEF, 7, "stats: defense is skill points")
+eq(select(2, ItemStats.RatingRates()).HIT, "seed", "ratings: the seed without the client")
 for _, key in ipairs(ItemStats.ORDER) do
     local known = key == "DPS_OFF" or key == "DPS_RANGED"
     for _, ours in pairs(ItemStats.KEYS) do
-        known = known or ours == key
+        if type(ours) == "table" then
+            for _, each in ipairs(ours) do
+                known = known or each == key
+            end
+        else
+            known = known or ours == key
+        end
     end
     eq(known, true, "stats: ORDER key " .. key .. " comes from a game key")
 end
@@ -1048,36 +1064,39 @@ near(derived.STR, 2, "derived: strength alone")
 eq(derived.AGI, nil, "derived: no agility without its rates")
 eq(next(ItemStats.PlayerRates()) ~= nil, true, "rates: the flat armor rule is always there")
 eq(ItemStats.PlayerRates().AP_STR, nil, "rates: nothing without the game's functions")
--- The character sheet's calls: (stat, value) for crit, no arguments for dodge, fractions back.
-_G.UnitStat = function(_, stat)
-    return 40, 40, 0, 0
+derived = ItemStats.DeriveAttributes({ AP = 0.25, BLOCKVALUE = 0.3 }, { AP_STR = 2, BLOCKVALUE_STR = 0.05 })
+near(derived.STR, 0.52, "derived: strength's block value counts, rounded")
+do
+    -- The character sheet's functions answer 0 to 1 for the player's own points (stub: 25 Agility,
+    -- 60 Intellect, 1% crit per 20 Agility, 1% dodge per 20, 1% spell crit per 60 Intellect).
+    local saved = { UnitStat, GetCritChanceFromStat, GetDodgeChanceFromAttribute, GetSpellCritChanceFromStat,
+        BLOCK_VALUE_PER_STRENGTH }
+    local points = { [2] = 25, [4] = 60 }
+    UnitStat = function(_, stat)
+        return points[stat] or 10, points[stat] or 10
+    end
+    GetCritChanceFromStat = function(_, value)
+        return value / 20 / 100
+    end
+    GetDodgeChanceFromAttribute = function(...)
+        assert(select("#", ...) == 0, "dodge takes no arguments")
+        return 25 / 20 / 100
+    end
+    GetSpellCritChanceFromStat = function(_, value)
+        return value / 60 / 100
+    end
+    BLOCK_VALUE_PER_STRENGTH = 20
+    -- ItemStats caches UnitStat at load, so reload it to see the stub.
+    assert(loadfile("ForeverPlusPlus/Lib/ItemStats.lua"))("ForeverPlusPlus", ns)
+    local rates = ns.ItemStats.PlayerRates()
+    near(rates.CRIT_AGI, 0.05, "rates: crit per Agility in percent")
+    near(rates.DODGE_AGI, 0.05, "rates: dodge per Agility in percent")
+    near(rates.SPELLCRIT_INT, 1 / 60, "rates: spell crit per Intellect in percent")
+    near(rates.BLOCKVALUE_STR, 0.05, "rates: block value per Strength")
+    UnitStat, GetCritChanceFromStat, GetDodgeChanceFromAttribute, GetSpellCritChanceFromStat,
+        BLOCK_VALUE_PER_STRENGTH = unpack(saved, 1, 5)
+    ns.ItemStats = ItemStats
 end
-_G.GetAttackPowerForStat = function(stat, value)
-    return stat == 1 and value * 2 or 0
-end
-_G.GetCritChanceFromStat = function(stat, value)
-    assert(stat == 2 and value == 40, "crit from agility needs the agility")
-    return value / 20 / 100
-end
-_G.GetDodgeChanceFromAttribute = function(...)
-    assert(select("#", ...) == 0, "dodge from agility takes no arguments")
-    return 40 / 20 / 100
-end
-_G.GetSpellCritChanceFromStat = function(stat, value)
-    assert(stat == 4 and value == 40, "spell crit from intellect needs the intellect")
-    return value / 50 / 100
-end
-_G.BLOCK_VALUE_PER_STRENGTH = 20
-local rates = ItemStats.PlayerRates()
-near(rates.AP_STR, 2, "rates: attack power per strength")
-near(rates.CRIT_AGI, 0.05, "rates: crit per agility in percent")
-near(rates.DODGE_AGI, 0.05, "rates: dodge per agility in percent")
-near(rates.SPELLCRIT_INT, 0.02, "rates: spell crit per intellect in percent")
-near(rates.BLOCKVALUE_STR, 0.05, "rates: block value per strength")
-near(ItemStats.DeriveAttributes({ AP = 0.4, BLOCKVALUE = 0.4 }, rates).STR, 0.82,
-    "derived: strength from attack power and block value")
-_G.UnitStat, _G.GetAttackPowerForStat, _G.GetCritChanceFromStat = nil, nil, nil
-_G.GetDodgeChanceFromAttribute, _G.GetSpellCritChanceFromStat, _G.BLOCK_VALUE_PER_STRENGTH = nil, nil, nil
 eq(Talents.Tabs(), nil, "talents: nothing without the trait API")
 local tab, total = Talents.Dominant()
 eq(tab, nil, "talents: no dominant tab without data")

@@ -437,14 +437,10 @@ local function checkConversions()
         probeAll("attack power from 100 of stat " .. stat, "GetAttackPowerForStat", stat, 100)
         probeAll("ranged attack power from 100 of stat " .. stat, "GetRangedAttackPowerForStat", stat, 100)
     end
-    -- The character sheet asks for all of the player's points, and gets a fraction back.
-    local _, _, agility = call("UnitStat", "player", 2)
-    local _, _, intellect = call("UnitStat", "player", 4)
-    probeAll("crit from all " .. text(agility) .. " agility", "GetCritChanceFromStat", 2, agility)
-    probeAll("dodge from all agility", "GetDodgeChanceFromAttribute")
-    probeAll("spell crit from all " .. text(intellect) .. " intellect", "GetSpellCritChanceFromStat", 4,
-        intellect)
-    add("strength per block value: " .. text(_G.BLOCK_VALUE_PER_STRENGTH))
+    -- As the character sheet asks: the stat and its points, answering 0 to 1.
+    probeAll("crit from 100 agility", "GetCritChanceFromStat", 2, 100)
+    probeAll("dodge from own agility", "GetDodgeChanceFromAttribute")
+    probeAll("spell crit from 100 intellect", "GetSpellCritChanceFromStat", 4, 100)
     probeAll("health per stamina", "UnitHPPerStamina", "player")
     add("mana per intellect: " .. text(_G.MANA_PER_INTELLECT) .. ", break " .. text(_G.INTELLECT_BREAK))
     probeAll("mana regen from spirit", "GetManaRegenFromSpirit")
@@ -453,6 +449,21 @@ local function checkConversions()
     probeAll("health regen", "GetHealthRegen")
     local rates = ns.ItemStats and ns.ItemStats.PlayerRates and ns.ItemStats.PlayerRates()
     dump("rates (Lib/ItemStats.lua)", rates)
+    -- Gear's ratings: what 100 points give, and the player's own.
+    for _, name in ipairs({ "CR_HIT_MELEE", "CR_HIT_SPELL", "CR_CRIT_MELEE", "CR_CRIT_SPELL", "CR_HASTE_MELEE",
+        "CR_EXPERTISE", "CR_DODGE", "CR_PARRY", "CR_BLOCK", "CR_DEFENSE_SKILL" }) do
+        local index = _G[name]
+        if type(index) == "number" then
+            probeAll(name .. " from 100 rating", "GetCombatRatingBonusForCombatRatingValue", index, 100)
+            probeAll(name .. " own rating", "GetCombatRating", index)
+            probeAll(name .. " own bonus", "GetCombatRatingBonus", index)
+        else
+            add(name .. ": missing")
+        end
+    end
+    local ratingRates, sources = ns.ItemStats and ns.ItemStats.RatingRates and ns.ItemStats.RatingRates()
+    dump("rating rates per point (Lib/ItemStats.lua)", ratingRates)
+    dump("rating rate sources", sources)
 end
 
 -- The weapon skill lines Forever's SkillsFrame lists (Character Window's Skills.lua has the map).

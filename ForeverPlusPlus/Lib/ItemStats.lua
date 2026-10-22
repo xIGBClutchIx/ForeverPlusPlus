@@ -8,15 +8,19 @@ local _, ns = ...
 local _G, pairs, ipairs, type, sort, tonumber, pcall = _G, pairs, ipairs, type, table.sort, tonumber, pcall
 local format, gmatch, match, lower, concat = string.format, string.gmatch, string.match, string.lower, table.concat
 local floor = math.floor
-local C_Item = C_Item
+local C_Item, UnitStat, UnitLevel = C_Item, UnitStat, UnitLevel
 
 local ItemStats = {}
 ns.ItemStats = ItemStats
 
 -- The game's stat keys (C_Item.GetItemStats) and ours. Retail tells melee, ranged, and spell hit
 -- and crit apart by key; Forever's strings say "Hit" and "Critical Strike" for one stat each
--- (Gear Probe, build 70425), so those fold together, with spell hit and crit kept apart in case
--- an item carries them. A key not here is remembered in `unknown` for debugging.
+-- (Gear Probe, build 70425), and that one stat counts for spells too (NaowhForever PR #137, in
+-- game), so the plain keys give both ours, and a set of weights prices each side. Spell Power
+-- is "damage and healing" on Forever (a wand's "Increases damage and healing done by magical
+-- spells and effects by up to 2" read as it, Gear Probe, build 70425), so it gives healing too.
+-- A key that gives more than one of ours is a list. A key not here is remembered in `unknown`
+-- for debugging.
 ItemStats.KEYS = {
     ITEM_MOD_STRENGTH_SHORT = "STR",
     ITEM_MOD_AGILITY_SHORT = "AGI",
@@ -27,18 +31,18 @@ ItemStats.KEYS = {
     ITEM_MOD_MANA_SHORT = "MANA",
     ITEM_MOD_ATTACK_POWER_SHORT = "AP",
     ITEM_MOD_RANGED_ATTACK_POWER_SHORT = "RAP",
-    ITEM_MOD_SPELL_POWER_SHORT = "SP",
+    ITEM_MOD_SPELL_POWER_SHORT = { "SP", "HEAL" },
     ITEM_MOD_SPELL_DAMAGE_DONE_SHORT = "SP",
     ITEM_MOD_SPELL_HEALING_DONE_SHORT = "HEAL",
     ITEM_MOD_MANA_REGENERATION_SHORT = "MP5",
     ITEM_MOD_POWER_REGEN0_SHORT = "MP5",
     ITEM_MOD_HEALTH_REGEN_SHORT = "HP5",
     ITEM_MOD_HEALTH_REGENERATION_SHORT = "HP5",
-    ITEM_MOD_HIT_RATING_SHORT = "HIT",
+    ITEM_MOD_HIT_RATING_SHORT = { "HIT", "SPELLHIT" },
     ITEM_MOD_HIT_MELEE_RATING_SHORT = "HIT",
     ITEM_MOD_HIT_RANGED_RATING_SHORT = "HIT",
     ITEM_MOD_HIT_SPELL_RATING_SHORT = "SPELLHIT",
-    ITEM_MOD_CRIT_RATING_SHORT = "CRIT",
+    ITEM_MOD_CRIT_RATING_SHORT = { "CRIT", "SPELLCRIT" },
     ITEM_MOD_CRIT_MELEE_RATING_SHORT = "CRIT",
     ITEM_MOD_CRIT_RANGED_RATING_SHORT = "CRIT",
     ITEM_MOD_CRIT_SPELL_RATING_SHORT = "SPELLCRIT",
@@ -74,17 +78,77 @@ ItemStats.ORDER = {
     "RES_FIRE", "RES_NATURE", "RES_FROST", "RES_SHADOW", "RES_ARCANE",
 }
 
--- The keys whose values are a chance in percent on Forever's gear (inferred from the client's
--- strings and the character sheet; a weight for them is per 1%).
+-- The keys whose weight is per 1% chance. Forever's gear carries them as ratings ("+4 Hit" is
+-- 0.4%), so Normalize turns them into percent (see RATINGS).
 ItemStats.PERCENT = {
-    HIT = true, CRIT = true, HASTE = true, SPELLHIT = true, SPELLCRIT = true,
+    HIT = true, CRIT = true, HASTE = true, EXPERTISE = true, SPELLHIT = true, SPELLCRIT = true,
     DODGE = true, PARRY = true, BLOCK = true,
 }
 
+-- Ratings: our key, the game's combat rating it is (a CR_* global), and how many points of it
+-- make 1% at level 60 when the client can't say: Forever's level 60 table as wowsims/forever PR
+-- #571 and foreverdb.net/stats give it (hit 10, crit 14, haste 10, expertise 10, dodge 12,
+-- parry 15, block 5), matching NaowhForever PR #137 (a ring with 4 hit showed 0.4% in game).
+-- The client's own conversion wins whenever it answers. Defense isn't here: Forever's string
+-- reads "Increases defense skill by %s", points of skill as in Classic.
+local RATINGS = {
+    HIT = { "CR_HIT_MELEE", 10 },
+    SPELLHIT = { "CR_HIT_SPELL", 10 },
+    CRIT = { "CR_CRIT_MELEE", 14 },
+    SPELLCRIT = { "CR_CRIT_SPELL", 14 },
+    HASTE = { "CR_HASTE_MELEE", 10 },
+    EXPERTISE = { "CR_EXPERTISE", 10 },
+    DODGE = { "CR_DODGE", 12 },
+    PARRY = { "CR_PARRY", 15 },
+    BLOCK = { "CR_BLOCK", 5 },
+}
+
+-- What one rating point gives in percent, asked of the client: the game's own conversion for a
+-- value where it has one, else the player's rating and what it gives now.
+local function clientRate(index)
+    local fn = _G.GetCombatRatingBonusForCombatRatingValue
+    if type(fn) == "function" then
+        local ok, value = pcall(fn, index, 100)
+        if ok and ns.IsNumber(value) and value > 0 then
+            return value / 100
+        end
+    end
+    local rating, bonus = _G.GetCombatRating, _G.GetCombatRatingBonus
+    if type(rating) == "function" and type(bonus) == "function" then
+        local okR, points = pcall(rating, index)
+        local okB, given = pcall(bonus, index)
+        if okR and okB and ns.IsNumber(points) and ns.IsNumber(given) and points > 0 and given > 0 then
+            return given / points
+        end
+    end
+    return nil
+end
+
+local ratingLevel, ratingRates -- the level the rates were read at, and our key -> per point
+
+---What one rating point of each of our rating keys gives in percent, from the client where it
+---answers and Forever's level 60 table otherwise, read again when the level changes.
+---@return table rates our key -> per point
+---@return table sources our key -> "client" or "seed"
+function ItemStats.RatingRates()
+    local level = UnitLevel and UnitLevel("player")
+    if ratingRates and level == ratingLevel then
+        return ratingRates, ratingRates.sources
+    end
+    ratingLevel, ratingRates = level, { sources = {} }
+    for key, rating in pairs(RATINGS) do
+        local index = _G[rating[1]]
+        local rate = ns.IsNumber(index) and clientRate(index)
+        ratingRates[key] = rate or 1 / rating[2]
+        ratingRates.sources[key] = rate and "client" or "seed"
+    end
+    return ratingRates, ratingRates.sources
+end
+
 local unknown = {} -- a game key KEYS lacks -> true, once met
 
----The game's stat table in our keys, numbers only; keys we don't know are remembered for
----`Unknown`. Two game keys that mean the same stat add up.
+---The game's stat table in our keys, numbers only, ratings as percent; keys we don't know are
+---remembered for `Unknown`. Two game keys that mean the same stat add up.
 ---@param raw table? C_Item.GetItemStats's table
 ---@return table stats our key -> value
 function ItemStats.Normalize(raw)
@@ -92,11 +156,19 @@ function ItemStats.Normalize(raw)
     if type(raw) ~= "table" then
         return stats
     end
+    local rates = ItemStats.RatingRates()
+    local function add(ours, value)
+        stats[ours] = (stats[ours] or 0) + value * (rates[ours] or 1)
+    end
     for key, value in pairs(raw) do
         if ns.IsReadable(key) and ns.IsNumber(value) then
             local ours = ItemStats.KEYS[key]
-            if ours then
-                stats[ours] = (stats[ours] or 0) + value
+            if type(ours) == "table" then
+                for _, each in ipairs(ours) do
+                    add(each, value)
+                end
+            elseif ours then
+                add(ours, value)
             elseif type(key) == "string" then
                 unknown[key] = true
             end
@@ -118,7 +190,7 @@ end
 
 -- Reading items ---------------------------------------------------------------------------------
 
-local cache = {} -- link -> info
+local cache, cacheLevel = {}, nil -- link -> info, and the level it was read at (ratings change)
 
 ---What an item link is: `{ id, slot (INVTYPE_*, or ""), classID, subclassID, level, minLevel,
 ---stats }`, kept per link (which carries suffix and enchant). Nil while the game hasn't cached
@@ -130,6 +202,10 @@ local cache = {} -- link -> info
 function ItemStats.Get(link)
     if not ns.IsText(link, true) then
         return nil
+    end
+    local level = UnitLevel and UnitLevel("player")
+    if level ~= cacheLevel then
+        cache, cacheLevel = {}, level
     end
     local info = cache[link]
     if info then
@@ -344,11 +420,10 @@ end
 
 -- The player's total of an attribute (1 Strength to 5 Spirit), or nil.
 local function total(stat)
-    local unitStat = _G.UnitStat
-    if type(unitStat) ~= "function" then
+    if not UnitStat then
         return nil
     end
-    local ok, _, value = pcall(unitStat, "player", stat)
+    local ok, _, value = pcall(UnitStat, "player", stat)
     if ok and ns.IsNumber(value) and value > 0 then
         return value
     end
@@ -361,43 +436,45 @@ local function perPoint(name, stat, amount)
     return value and value / amount or nil
 end
 
--- Percent per point of a chance the game gives as a fraction for all the player's points, as
--- the character sheet asks: `GetCritChanceFromStat(stat, value)`, and
--- `GetDodgeChanceFromAttribute()` with no arguments, for all of the player's Agility.
-local function percentPerOwnPoint(name, stat, withArgs)
+-- Percent per point: the game's chance (0 to 1) for all the player's points of a stat, as the
+-- character sheet asks for it (`fn(stat, points)`, times 100), divided by them. `noArgs` for a
+-- function that reads the player's own attribute itself (GetDodgeChanceFromAttribute()).
+local function percentPerOwnPoint(name, stat, noArgs)
     local points = total(stat)
     if not points then
         return nil
     end
     local value
-    if withArgs then
-        value = callNumber(name, stat, points)
-    else
+    if noArgs then
         value = callNumber(name)
+    else
+        value = callNumber(name, stat, points)
     end
     return value and value * 100 / points or nil
 end
 
 ---What one point of each attribute gives this character now: `AP_STR`, `AP_AGI`, `RAP_AGI`,
----`CRIT_AGI`, `DODGE_AGI`, and `SPELLCRIT_INT` (in percent), `HEALTH_STA`, `MANA_INT`,
----`ARMOR_AGI`, `BLOCKVALUE_STR`. A rate the client can't give is left out.
+---`CRIT_AGI` (percent), `DODGE_AGI` (percent), `SPELLCRIT_INT` (percent), `HEALTH_STA`,
+---`MANA_INT`, `ARMOR_AGI`, `BLOCKVALUE_STR`. A rate the client can't give is left out.
 ---@return table rates
 function ItemStats.PlayerRates()
     local rates = {}
     rates.AP_STR = perPoint("GetAttackPowerForStat", 1, 100)
     rates.AP_AGI = perPoint("GetAttackPowerForStat", 2, 100)
     rates.RAP_AGI = perPoint("GetRangedAttackPowerForStat", 2, 100)
-    rates.CRIT_AGI = percentPerOwnPoint("GetCritChanceFromStat", 2, true)
-    rates.DODGE_AGI = percentPerOwnPoint("GetDodgeChanceFromAttribute", 2, false)
-    rates.SPELLCRIT_INT = percentPerOwnPoint("GetSpellCritChanceFromStat", 4, true)
+    -- The character sheet calls these with the stat and its points and shows them times 100
+    -- (Blizzard_UIPanels_Game/Camelot/PaperDollFrameStats.lua); called with the stat alone,
+    -- the first two raise "bad argument #2" (Gear Probe, build 70425).
+    rates.CRIT_AGI = percentPerOwnPoint("GetCritChanceFromStat", 2)
+    rates.DODGE_AGI = percentPerOwnPoint("GetDodgeChanceFromAttribute", 2, true)
+    rates.SPELLCRIT_INT = percentPerOwnPoint("GetSpellCritChanceFromStat", 4)
     rates.HEALTH_STA = callNumber("UnitHPPerStamina", "player")
     local manaPerInt = _G.MANA_PER_INTELLECT
     rates.MANA_INT = type(manaPerInt) == "number" and manaPerInt or nil
     rates.ARMOR_AGI = 2 -- the game's flat rule, as the character sheet's Agility tooltip says
-    -- Shield block value per Strength (1 per 20 for Warriors, Paladins, and Shamans); the game
-    -- says nothing per class, so it counts only with a block value weight.
-    local strPerBlock = _G.BLOCK_VALUE_PER_STRENGTH
-    rates.BLOCKVALUE_STR = type(strPerBlock) == "number" and strPerBlock > 0 and 1 / strPerBlock or nil
+    -- Strength's shield block value, as the sheet's Strength tooltip works it out.
+    local perBlock = _G.BLOCK_VALUE_PER_STRENGTH
+    rates.BLOCKVALUE_STR = type(perBlock) == "number" and perBlock > 0 and 1 / perBlock or nil
     return rates
 end
 
@@ -406,11 +483,11 @@ local function round(value)
 end
 
 ---The attribute weights that follow from a set of weights and the player's rates: Strength from
----attack power, Agility from attack power, crit, dodge, and armor, Stamina from health, and
+---attack power and block value, Agility from attack power, crit, dodge, and armor, Stamina from health, and
 ---Intellect from spell crit and mana. Spirit isn't derived: its regen counts only outside the
 ---five-second rule, which is a judgment, not a conversion. Only the attributes whose rates are
 ---all there are returned.
----@param weights table our key -> weight (the roots: AP, RAP, CRIT, DODGE, ARMOR, HEALTH, SPELLCRIT, MANA)
+---@param weights table our key -> weight (the roots: AP, RAP, CRIT, DODGE, ARMOR, BLOCKVALUE, HEALTH, SPELLCRIT, MANA)
 ---@param rates table from ItemStats.PlayerRates
 ---@return table derived STR, AGI, STA, INT -> weight, for those that could be
 function ItemStats.DeriveAttributes(weights, rates)
