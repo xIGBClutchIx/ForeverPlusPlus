@@ -105,23 +105,6 @@ local function addDebugOptions(category, module, section)
     end
 end
 
--- Show Tags: every module and option added or changed since the last release marked NEW on the
--- Modules page, and kept marked, to check how they look. Live: the marks are made again and the
--- page redrawn.
-local function addShowTags(category)
-    local setting = Settings.RegisterProxySetting(category, "ForeverPlusPlus_ShowTags",
-        Settings.VarType.Boolean, L.SETTINGS_SHOW_TAGS, false,
-        function() return ns.db.showTags and true or false end,
-        function(value)
-            S.change(function()
-                ns.db.showTags = value or nil
-                S.markNew()
-                S.refreshAll()
-            end)
-        end)
-    Settings.CreateCheckbox(category, setting, L.SETTINGS_SHOW_TAGS_DESC)
-end
-
 -- A module's debug buttons in `section` (`module.debugActions`, the same shape as `actions`), after
 -- its options there. Greyed out while the module is off, unless the button is for that too
 -- (`whileOff`).
@@ -249,11 +232,8 @@ local DEBUG_TOOLS = {
         fn = function() ReloadUI() end, section = L.DEBUG_SECTION_DIAGNOSTICS },
 }
 
--- Forever++'s own rows in `section`: Show Tags first in What's New, then its buttons there.
+-- Forever++'s own rows in `section`: its buttons there.
 local function addDebugTools(category, layout, section)
-    if section == L.DEBUG_SECTION_NEW then
-        addShowTags(category)
-    end
     if not (layout and CreateSettingsButtonInitializer) then
         return -- Probe: the button row is Mainline's Settings.
     end

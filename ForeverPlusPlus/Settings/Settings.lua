@@ -18,7 +18,7 @@
 --     <Tool>         a page a module draws itself (`BuildPage`)
 --     Debug          sections of Forever++'s own rows and modules' options marked `debug = true`
 --                    and buttons from `module.debugActions`, each placed by its `section`: What's
---                    New (Show Tags, Reset Seen Version, Reset Welcome), Diagnostics (Copy Debug
+--                    New (Reset Seen Version, Reset Welcome), Diagnostics (Copy Debug
 --                    Info, Print Module Events, Reload UI), Testing, and Logging
 --     Changelog      the releases in Changelog.lua in a list like the Modules page's, with the
 --                    selected one's notes beside it, and a By Module checkbox, a search box and
@@ -206,14 +206,13 @@ S.askDefaults = askDefaults
 -- A module added (`added`) after the version the player last saw it in gets Blizzard's NEW label
 -- after its name, the one Blizzard's own new settings get. So does an option added or changed
 -- (`changed`) since then, unless its module is new itself (a longer word like CHANGED squeezes the
--- option's name), and the module's name in the list with it. A version after this one isn't marked
--- yet: what's tagged for the next release shows once the TOC's version reaches it.
+-- option's name), and the module's name in the list with it.
 -- A module is seen once the player has clicked it and moved on (to another module, or off the
 -- page): its labels stay while it shows. The page opens on the first module with a marked option.
 -- What's saved stays small: the version everything was seen in (ns.db.seenVersion), and the version
--- each module was seen in since (ns.db.seenModules), dropped once nothing is marked any more.
--- Show Tags on the Debug page (ns.db.showTags) marks everything tagged after the last release in
--- Changelog.lua instead, whatever was seen, and keeps it marked, to check them.
+-- each module was seen in since (ns.db.seenModules), dropped once nothing seen can be marked.
+-- What's tagged after the last release in Changelog.lua isn't released yet, so only a development
+-- copy has it: it stays marked whatever was seen, so everything added since the release shows.
 local newRows = {} -- module name (a new module), module table (one with a marked option), or
                    -- option table -> true while it's marked
 local newOrder -- the modules to mark, once trackNew has run
@@ -236,15 +235,21 @@ local function lastRelease(before)
     return "0"
 end
 
--- A version after the one module `name` was last seen in, and not after this one (still
--- unreleased). With Show Tags on, any version after the last release.
+-- Whether `version` is after the last release, so not released yet.
+local function unreleased(version)
+    return type(version) == "string" and ns.Text.NewerVersion(version, lastRelease()) and true
+        or false
+end
+
+-- A version after the one module `name` was last seen in, and not after this one, or one not
+-- released yet.
 local function since(version, name)
     local Text = ns.Text
     if type(version) ~= "string" then
         return false
     end
-    if ns.db.showTags then
-        return Text.NewerVersion(version, lastRelease()) and true or false
+    if unreleased(version) then
+        return true
     end
     local seenIn = ns.db.seenVersion
     local module = ns.db.seenModules[name]
@@ -262,8 +267,7 @@ local TAG_PADDING = 8 -- the room a label takes after its text, besides its own 
 -- `room` wide, less the label's room while it shows. With `after` (an option's checkbox), the label
 -- goes just after that instead, so the text keeps its room and the labels line up beside their
 -- checkboxes. It returns how far past the text's end the label reaches (0 while hidden or
--- after `after`), for something after it. The label is made the first time it's needed, so it can
--- come and go with Show Tags.
+-- after `after`), for something after it. The label is made the first time it's needed.
 local function newLabel(parent, text, room, after)
     local label
     return function(shown)
@@ -307,31 +311,39 @@ local function newMark(parent, text, room, key, other, after)
     end
 end
 
--- Marks what's new in `newOrder`'s modules, afresh. With nothing marked, everything up to this
--- version has been seen, so that's saved instead of each module.
+-- Marks what's new in `newOrder`'s modules, afresh. With nothing marked but what's unreleased,
+-- everything up to this version has been seen, so that's saved instead of each module.
 local function markNew()
     wipe(newRows)
+    local unseen -- something marked that seeing it takes away
+    local function mark(key, module, version, name)
+        if since(version, name) then
+            newRows[key] = true
+            if module then
+                newRows[module] = true
+            end
+            unseen = unseen or not unreleased(version)
+            return true
+        end
+    end
     for _, name in ipairs(newOrder or {}) do
         local module = ns.modules[name]
-        if since(module.added, name) then
-            newRows[name] = true -- all of it is new, so its options aren't marked
-        else
+        -- All of a new module is new, so its options aren't marked.
+        if not mark(name, nil, module.added, name) then
             for _, option in ipairs(module.options or {}) do
-                if not option.debug and (since(option.added, name) or since(option.changed, name)) then
-                    newRows[option] = true
-                    newRows[module] = true
+                if not option.debug and not mark(option, module, option.added, name) then
+                    mark(option, module, option.changed, name)
                 end
             end
         end
     end
-    if not next(newRows) and not ns.db.showTags and newOrder then
+    if not unseen and newOrder then
         if ns.Text.NewerVersion(ns.version, ns.db.seenVersion) then
             ns.db.seenVersion = ns.version
         end
         wipe(ns.db.seenModules)
     end
 end
-S.markNew = markNew
 
 -- Saves that the player has seen the module they were looking at, once they move on from it, and
 -- drops its labels.
@@ -339,7 +351,7 @@ local function moveOn(name)
     local left = viewing
     viewing = name
     local module = left and left ~= name and ns.modules[left]
-    if module and (newRows[left] or newRows[module]) and not ns.db.showTags then
+    if module and (newRows[left] or newRows[module]) then
         ns.db.seenModules[left] = ns.version
         markNew()
         refreshAll()
@@ -1161,9 +1173,6 @@ local function buildModules(frame)
     -- After /fpp or a preset changed things while the page was closed, and for notices.
     frame:HookScript("OnShow", refreshAll)
 end
-
--- Redraws the Modules page, for Show Tags on the Debug page.
-S.refreshAll = refreshAll
 
 -- Puts the version last seen back to the release before this one, so the Modules page marks what a
 -- player updating from it would see, and opens it the way it would open for them: on the first

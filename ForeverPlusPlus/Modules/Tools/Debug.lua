@@ -1,5 +1,5 @@
 -- Debug: the Debug page under Forever++ in Settings (drawn by Settings/Debug.lua), with every
--- module's debug options and buttons, Show Tags, and the testing tools (Self Test, Gear Probe,
+-- module's debug options and buttons, and the testing tools (Self Test, Gear Probe,
 -- Screenshots). While it's off the page and those tools' commands are gone, and every debug option
 -- is back at its default, so nothing set there goes on working out of sight.
 local _, ns = ...
@@ -12,7 +12,7 @@ module.title = L.DEBUG
 module.category = "tools"
 module.added = "0.10.0"
 
--- Puts every module's debug options back to their defaults, and Show Tags off.
+-- Puts every module's debug options back to their defaults.
 local function resetDebugOptions()
     for _, name in ipairs(ns.order) do
         local other = ns.modules[name]
@@ -21,14 +21,6 @@ local function resetDebugOptions()
                 ns.SetOption(name, option.key, other.defaults[option.key])
                 ns.RefreshSetting(name)
             end
-        end
-    end
-    if ns.db and ns.db.showTags then
-        ns.db.showTags = nil
-        local S = ns.SettingsUI
-        if S and S.markNew and S.refreshAll then
-            S.markNew()
-            S.refreshAll()
         end
     end
 end

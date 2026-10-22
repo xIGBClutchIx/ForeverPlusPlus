@@ -102,12 +102,7 @@ L.DEBUG_SECTION_NEW = "What's New"
 L.DEBUG_SECTION_DIAGNOSTICS = "Diagnostics"
 L.DEBUG_SECTION_TESTING = "Testing"
 L.DEBUG_SECTION_LOGGING = "Logging"
--- The Debug page's own checkbox, at the top of What's New
-L.SETTINGS_SHOW_TAGS = "Show Tags"
-L.SETTINGS_SHOW_TAGS_DESC = "Mark NEW every module and option added or changed since the last "
-    .. "release on the Modules page, even ones not released yet or already seen, and keep them "
-    .. "marked after you click them. For checking how the tags look."
--- The Debug page's own buttons: Reset Seen Version and Reset Welcome under Show Tags, the rest in
+-- The Debug page's own buttons: Reset Seen Version and Reset Welcome in What's New, the rest in
 -- Diagnostics
 L.DEBUG_RESET_SEEN = "Reset Seen Version"
 L.DEBUG_RESET_SEEN_BUTTON = "Reset"
