@@ -224,10 +224,11 @@ function Overlay:Draw()
     end
     learn(artID, textures)
     local areas = areasOf(artID)
-    -- Where Blizzard's explored areas go: above the map art, below every icon.
+    -- Just under Blizzard's explored areas: above the map art, and below the explored art, so an
+    -- unexplored area's rectangle never covers the edge of an explored one that overlaps it.
     local manager = map.GetPinFrameLevelsManager and map:GetPinFrameLevelsManager()
     if manager then
-        self.frame:SetFrameLevel(manager:GetValidFrameLevel("PIN_FRAME_LEVEL_MAP_EXPLORATION"))
+        self.frame:SetFrameLevel(manager:GetValidFrameLevel("PIN_FRAME_LEVEL_MAP_EXPLORATION") - 1)
     end
     local r, g, b = tintColor()
     for _, area in ipairs(areas) do

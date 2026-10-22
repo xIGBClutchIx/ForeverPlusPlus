@@ -160,6 +160,8 @@ ns.changelog = {
                     .. "them there instead of leaving the tab empty." },
                 { L.WORLDMAP_TITLE, "Points of Interest no longer marks a ley line where you "
                     .. "cast Read Ley Line while an older ley line buff was still on you." },
+                { L.WORLDMAP_TITLE, "Unexplored Areas no longer draws over the edges of explored "
+                    .. "areas, which left straight lines across the map." },
             } },
         },
     },

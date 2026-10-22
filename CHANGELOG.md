@@ -54,6 +54,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Waypoints**: the arrow sits a little lower by default and always stays inside the game window, so a windowed game's title bar can't cover it. If you moved it in Edit Mode, it stays where you put it.
 - **Whisper Window**: a whisper you start by a player's name without their surname goes to your conversation with them, instead of a new empty one. With chat set to open whispers in a new tab, Hide Whispers in Chat leaves them there instead of leaving the tab empty.
 - **World Map**: Points of Interest no longer marks a ley line where you cast Read Ley Line while an older ley line buff was still on you.
+- **World Map**: Unexplored Areas no longer draws over the edges of explored areas, which left straight lines across the map.
 
 ## 0.9.0 (2026-10-14)
 
