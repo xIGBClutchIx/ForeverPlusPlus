@@ -21,6 +21,9 @@ ns.changelog = {
                     .. "blue, and purple weapons and armor what disenchanting gives on average, "
                     .. "priced from Auction Prices while that's on, or else the material it most "
                     .. "likely gives. Hold Shift for every outcome and its chance." },
+                { L.ITEMTOOLTIPS_TITLE, "Auction Prices can use Auctionator's prices instead of "
+                    .. "scanning, when Auctionator is installed: turn on Use Auctionator's Prices. "
+                    .. "Your own saved prices are kept for when you turn it off." },
                 { L.MACROS_TITLE, "A new module that makes macros in your general macros, shared "
                     .. "by your characters, each with its own checkbox, and deletes them when "
                     .. "they're turned off. The first is Smart Buff: it casts the buff your friendly "

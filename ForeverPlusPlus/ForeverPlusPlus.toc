@@ -5,6 +5,7 @@
 ## Version: 0.9.0
 ## SavedVariables: ForeverPlusPlusDB
 ## SavedVariablesPerCharacter: ForeverPlusPlusCharDB
+## OptionalDeps: Auctionator
 ## IconTexture: Interface\AddOns\ForeverPlusPlus\Media\Icon
 
 Core.lua

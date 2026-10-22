@@ -33,6 +33,7 @@ local module = itemTooltips:NewPart({
     scanAgeRedHours = 12, -- hours old at which "age" is fully red
     crafting = true, -- costs, value, and profit under a recipe's reagents
     scanOnOpen = true,
+    auctionator = false, -- Auctionator's prices instead of our scans, while it's loaded
     chat = true,
     -- Data, not settings: they aren't in the options.
     -- What merchants charge for one of an item: { [itemID] = copper }, learned at each visit.
@@ -86,6 +87,10 @@ module:AddOptions({
     },
     { key = "crafting", name = L.AUCTIONPRICES_CRAFTING, description = L.AUCTIONPRICES_CRAFTING_DESC },
     { key = "scanOnOpen", name = L.AUCTIONPRICES_SCAN_ON_OPEN, description = L.AUCTIONPRICES_SCAN_ON_OPEN_DESC },
+    {
+        key = "auctionator", name = L.AUCTIONPRICES_AUCTIONATOR, description = L.AUCTIONPRICES_AUCTIONATOR_DESC,
+        available = ns.Prices.AuctionatorLoaded, added = "0.10.0",
+    },
     ns.ChatOption(L.AUCTIONPRICES_CHAT_DESC),
 })
 
@@ -398,8 +403,9 @@ local QUERIES = {
     "ConfirmCommoditiesPurchase",
 }
 
+-- With Auctionator's prices in use, ours aren't scanned; the saved ones stay for when it's off.
 local function startScan()
-    if scanning or not open then
+    if scanning or not open or ns.Prices.UsingAuctionator() then
         return
     end
     scanning, sent, waiting = true, false, nil
@@ -410,7 +416,7 @@ end
 -- A moment after opening, so Blizzard's window has set itself up first: scan when it's due, or
 -- say how old the prices are.
 local function afterShow()
-    if not open or scanning then
+    if not open or scanning or ns.Prices.UsingAuctionator() then
         return
     end
     local age = time() - house().scannedAt
@@ -431,6 +437,8 @@ end
 local function scanCommand()
     if not module.enabled then
         ns.Print(L.AUCTIONPRICES_IS_OFF)
+    elseif ns.Prices.UsingAuctionator() then
+        ns.Print(L.AUCTIONPRICES_USING_AUCTIONATOR)
     elseif not open then
         ns.Print(L.AUCTIONPRICES_NOT_OPEN)
     else
@@ -485,7 +493,8 @@ local function ageColor(seconds)
 end
 
 -- Prices for other modules -----------------------------------------------------------------------
--- ns.Prices hands our prices to other modules while this part is on. Waylaid Crates finds items
+-- ns.Prices hands our prices to other modules while this part is on, and this file reads its
+-- own through it too, so Use Auctionator's Prices switches them all. Waylaid Crates finds items
 -- by name, since a crate's tooltip gives names, not IDs: among the names of items with a saved
 -- price, when the client's item cache doesn't know them.
 
@@ -533,28 +542,33 @@ end
 
 local priceSource = {
     price = function(itemID)
-        return (unpackPrice(house().items[itemID]))
+        return unpackPrice(house().items[itemID])
     end,
     itemByName = itemByName,
     inline = function()
         return module.db.align == "inline"
     end,
+    auctionator = function()
+        return module.db.auctionator
+    end,
 }
+
+local auctionPrice = ns.Prices.Auction
 
 local function addAuctionPrice(tooltip, data)
     local itemID = module.enabled and ItemTooltip.ItemID(data)
     if not itemID then
         return
     end
-    local price, seenAt = unpackPrice(house().items[itemID])
+    local price, seenAt = auctionPrice(itemID)
     if not price then
         return
     end
     local db = module.db
     ItemTooltip.AddPrice(tooltip, data, L.AUCTIONPRICES_LINE, price, db.mode, db.align, db.auctionColor)
     -- When this item's price was last seen, by a scan or the player's own search: an item
-    -- missing from the last scan keeps its older price and age.
-    if db.scanAge ~= "off" then
+    -- missing from the last scan keeps its older price and age. Auctionator may not say.
+    if db.scanAge ~= "off" and seenAt then
         local age = time() - seenAt
         local color = db.scanAgeColor == "age" and ageColor(age) or db.scanAgeColor
         ItemTooltip.AddInfo(tooltip, L.AUCTIONPRICES_SCAN_AGE_LINE, ns.Text.Ago(age), db.scanAge, color)
@@ -607,7 +621,7 @@ end
 -- What one of a reagent costs: the lower of its auction and merchant prices, or nil. Then when
 -- the auction price was seen, when that's the one used.
 local function reagentCost(itemID)
-    local auction, seenAt = unpackPrice(house().items[itemID])
+    local auction, seenAt = auctionPrice(itemID)
     local vendor = module.db.vendor[itemID]
     if auction and (not vendor or auction < vendor) then
         return auction, seenAt
@@ -618,7 +632,7 @@ end
 -- What one crafted item is worth: its auction price, or else what a merchant pays (and true).
 -- Then when the auction price was seen.
 local function craftedValue(itemID)
-    local price, seenAt = unpackPrice(house().items[itemID])
+    local price, seenAt = auctionPrice(itemID)
     if price then
         return price, false, seenAt
     end
@@ -897,6 +911,8 @@ local events = {
 }
 
 function module:OnEnable()
+    -- First, since the crafting totals below read their prices through it.
+    ns.Prices.SetSource(priceSource)
     for event, fn in pairs(events) do
         self:On(event, fn)
     end
@@ -916,7 +932,6 @@ function module:OnEnable()
     -- The price changes from the stack to one item with Shift.
     ItemTooltip.RedrawOnShift(self, true)
     ns.AddOns.WhenLoaded("Blizzard_Professions", hookProfessions)
-    ns.Prices.SetSource(priceSource)
 end
 
 function module:OnDisable()
@@ -937,6 +952,13 @@ end
 
 function module:OnOptionChanged(key)
     if key == "crafting" then
+        refreshCrafting()
+    elseif key == "auctionator" then
+        -- A scan running when Auctionator's prices take over stops, keeping what it saw.
+        if ns.Prices.UsingAuctionator() then
+            stopScan()
+            hideIndicator()
+        end
         refreshCrafting()
     end
 end

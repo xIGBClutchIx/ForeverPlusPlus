@@ -53,6 +53,10 @@ game.now = 0
 GetTime = function()
     return game.now
 end
+game.clock = 0
+time = function()
+    return game.clock
+end
 -- Marks the number it's given, so tests can tell Text.Number went through it.
 BreakUpLargeNumbers = function(n)
     return "big:" .. n
@@ -585,6 +589,68 @@ do
     eq(total, 0.75 * 1.5 * 100 + 0.2 * 1.5 * 1000, "disenchant: unpriced outcome left out")
     eq(missing, 1, "disenchant: counts the outcome with no price")
 end
+
+-- Auctionator's prices, while the player chose them and it's loaded.
+local chooseAuctionator = false
+Prices.SetSource({
+    price = function(itemID)
+        if itemID == 4305 then
+            return 120, 1000
+        end
+    end,
+    itemByName = function() end,
+    inline = function()
+        return false
+    end,
+    auctionator = function()
+        return chooseAuctionator
+    end,
+})
+local ownPrice, ownSeen = Prices.Auction(4305)
+eq(ownPrice, 120, "auctionator: our price while it isn't chosen")
+eq(ownSeen, 1000, "auctionator: and when ours was seen")
+chooseAuctionator = true
+eq(Prices.AuctionatorLoaded(), false, "auctionator: not loaded")
+eq(Prices.UsingAuctionator(), false, "auctionator: chosen but not loaded")
+eq(Prices.Auction(4305), 120, "auctionator: our price while it isn't loaded")
+local callers = {}
+Auctionator = { API = { v1 = {
+    GetAuctionPriceByItemID = function(caller, itemID)
+        callers[#callers + 1] = caller
+        if type(itemID) ~= "number" then
+            error("bad item ID")
+        end
+        return ({ [4305] = 300, [10940] = 50, [10938] = 200 })[itemID]
+    end,
+} } }
+game.clock = 10 * 86400
+eq(Prices.AuctionatorLoaded(), true, "auctionator: loaded")
+eq(Prices.UsingAuctionator(), true, "auctionator: in use")
+local theirPrice, theirSeen = Prices.Auction(4305)
+eq(theirPrice, 300, "auctionator: its price")
+eq(theirSeen, nil, "auctionator: no age without its age call")
+eq(callers[1], "Forever++", "auctionator: our caller ID")
+eq(Prices.Auction(2589), nil, "auctionator: an item it has no price for")
+eq(Prices.Auction("x"), nil, "auctionator: its error is caught")
+Auctionator.API.v1.GetAuctionAgeByItemID = function(_, itemID)
+    return itemID == 4305 and 2 or nil
+end
+theirPrice, theirSeen = Prices.Auction(4305)
+eq(theirSeen, 8 * 86400, "auctionator: seen its age in days ago")
+theirPrice, theirSeen = Prices.Auction(10940)
+eq(theirPrice, 50, "auctionator: a price without an age")
+eq(theirSeen, nil, "auctionator: and no age for it")
+-- Disenchant prices its materials through Prices.Auction: 0.8 x 1.5 x 50 + 0.2 x 1.5 x 200.
+local deValue, deMissing = ns.Disenchant.Value(ns.Disenchant.Outcomes(2, 5, false), Prices.Auction)
+eq(deValue, 0.8 * 1.5 * 50 + 0.2 * 1.5 * 200, "auctionator: disenchant value from its prices")
+eq(deMissing, 0, "auctionator: every disenchant outcome priced")
+chooseAuctionator = false
+eq(Prices.Auction(4305), 120, "auctionator: back to ours when it's turned off")
+chooseAuctionator = true
+Prices.SetSource(nil)
+eq(Prices.UsingAuctionator(), false, "auctionator: not in use without a source")
+eq(Prices.Auction(4305), nil, "auctionator: no prices without a source")
+Auctionator = nil
 
 -- Saved prices ------------------------------------------------------------------------------------
 

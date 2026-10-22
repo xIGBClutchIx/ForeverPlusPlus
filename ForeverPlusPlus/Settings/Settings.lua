@@ -6,7 +6,7 @@
 --                    and description, its Enabled checkbox, its `notice` (a warning) while that
 --                    applies, then its options (checkboxes, dropdowns and sliders) and buttons
 --                    (from `module.actions`), greyed out while it's off. An option can sit under
---                    another (`requires`). A module made of parts (`module:NewPart`) has a
+--                    another (`requires`), and is greyed out while its `available()` is false. A module made of parts (`module:NewPart`) has a
 --                    section for each, headed by the part's Enabled checkbox (a part turned on
 --                    by a dropdown is that one row), with the part's options greyed out while
 --                    it's off.
@@ -717,6 +717,10 @@ local function addOptionRow(view, module, option, byKey, done)
     local function on()
         -- Off with the module, and with its part's checkbox (`part`) when it's one of a part's.
         if not module.db.enabled or option.part and not ns.PartOn(module, option.part) then
+            return false
+        end
+        -- Off while what it needs isn't there (`available`), such as another addon.
+        if option.available and not option.available() then
             return false
         end
         local up = parent
