@@ -79,6 +79,19 @@ L.AUTOSTOW_DELAY_DESC = "How long after combat to wait before putting your weapo
 L.AUTOSTOW_OUTSIDE_ONLY = "Only Out of Instances"
 L.AUTOSTOW_OUTSIDE_ONLY_DESC = "Leave your weapons out in dungeons, raids and battlegrounds, where "
     .. "the next pull is never far off."
+L.AUTOSTOW_LOG = "Log Sheath State"
+L.AUTOSTOW_LOG_DESC = "Print in chat, with timestamps, the sheath state (1 away, 2 melee, 3 "
+    .. "ranged) from the end of combat until a few seconds after Auto Stow's toggle, and every "
+    .. "toggle it or you make."
+L.AUTOSTOW_LOG_LINE = "Auto Stow %.2f: %s" -- GetTime(), what happened
+L.AUTOSTOW_LOG_STATE = "state %s" -- sheath state
+L.AUTOSTOW_LOG_COMBAT_END = "combat ended, state %s"
+L.AUTOSTOW_LOG_COMBAT_START = "combat started, stow dropped"
+L.AUTOSTOW_LOG_TOGGLE = "toggling, state before %s"
+L.AUTOSTOW_LOG_TOGGLED = "toggled, state right after %s"
+L.AUTOSTOW_LOG_SKIPPED = "no toggle (in combat, dead, or away), state %s"
+L.AUTOSTOW_LOG_PLAYER = "you pressed Sheath, state %s"
+L.AUTOSTOW_LOG_DONE = "stopped watching"
 
 -- AutoDismount
 L.AUTODISMOUNT_TITLE = "Auto Dismount"

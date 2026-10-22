@@ -111,8 +111,6 @@ ns.changelog = {
                     .. "of the vendor's own items." },
                 { L.AUTOSCREENSHOT_TITLE, "Reaching Neutral with a faction counts as a step up and "
                     .. "takes a screenshot." },
-                { L.AUTOSTOW_TITLE, "Puts a bow, gun, or thrown weapon away too, instead of "
-                    .. "leaving it drawn after combat." },
                 { L.CHATCOPY_TITLE, "Turning Click Timestamps off no longer brings back chat lines "
                     .. "that had faded out." },
                 { L.CHATFONT_TITLE, "Turning the module off gives the Communities and GM chat "

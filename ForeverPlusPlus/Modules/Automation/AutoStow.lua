@@ -1,8 +1,8 @@
--- Auto Stow: puts your weapons away a few seconds after combat ends. One sheath doesn't always
--- put everything away: with a ranged weapon or thrown weapon out it can leave one drawn, so after
--- each toggle it looks again and toggles once more, a few times at most, while the state keeps
--- changing. Nothing happens if they're already away, if combat starts again first, or if you draw
--- or stow them yourself meanwhile.
+-- Auto Stow: puts your weapons away a few seconds after combat ends, with one toggle. Nothing
+-- happens if they're already away, if combat starts again first, or if you draw or stow them
+-- yourself meanwhile. With a thrown weapon one toggle has been seen to put the melee weapon away
+-- and draw the thrown one; what the sheath state does then isn't known yet, so Log Sheath State
+-- (Debug page) prints it over time to find out before anything toggles more than once.
 local _, ns = ...
 
 -- The original ToggleSheath, from before the hook below, so our own stow doesn't look like the
@@ -10,7 +10,8 @@ local _, ns = ...
 local GetSheathState, ToggleSheath = GetSheathState, ToggleSheath
 local UnitAffectingCombat, UnitIsDeadOrGhost = UnitAffectingCombat, UnitIsDeadOrGhost
 local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
-local IsInInstance = IsInInstance
+local IsInInstance, GetTime = IsInInstance, GetTime
+local format, tostring = string.format, tostring
 
 local L = ns.L
 
@@ -18,6 +19,7 @@ local module = ns.NewModule("AutoStow", L.AUTOSTOW_DESC, {
     enabled = true,
     delay = 5, -- seconds
     outsideOnly = false, -- leave weapons out in dungeons and raids
+    logSheath = false,
 })
 module.title = L.AUTOSTOW_TITLE
 module.category = "automation"
@@ -34,30 +36,75 @@ module.options = {
         name = L.AUTOSTOW_OUTSIDE_ONLY,
         description = L.AUTOSTOW_OUTSIDE_ONLY_DESC,
     },
+    {
+        key = "logSheath",
+        name = L.AUTOSTOW_LOG,
+        description = L.AUTOSTOW_LOG_DESC,
+        debug = true,
+        section = L.DEBUG_SECTION_LOGGING,
+        added = "0.10.0",
+    },
 }
 
 -- GetSheathState: 1 is nothing drawn, 2 melee drawn, 3 ranged drawn.
 local SHEATHED = 1
 local RETRY = 1 -- seconds to wait while casting before trying again
-local CHECK = 0.75 -- seconds after a toggle before looking whether everything is away
-local TRIES = 3 -- toggles at most per stow
 
 local timer = ns.Frames.Timer(module) -- the pending stow
+
+-- Log Sheath State --------------------------------------------------------------------------
+-- From combat's end until a few seconds after our toggle, the sheath state every quarter
+-- second, printed when it changes, and what we and the player did, with GetTime() stamps.
+
+local SAMPLE = 0.25 -- seconds between looks
+local AFTER = 4 -- seconds to keep looking after our toggle (or after the stow was dropped)
+
+local sampler = ns.Frames.Timer(module)
+local lastSeen, stopAt
+
+local function log(text)
+    if module.db.logSheath then
+        ns.Print(format(L.AUTOSTOW_LOG_LINE, GetTime(), text))
+    end
+end
+
+local function sample()
+    local state = GetSheathState()
+    if state ~= lastSeen then
+        log(format(L.AUTOSTOW_LOG_STATE, tostring(state)))
+        lastSeen = state
+    end
+    if stopAt and GetTime() >= stopAt then
+        log(L.AUTOSTOW_LOG_DONE)
+        stopAt = nil
+        return
+    end
+    sampler:Start(SAMPLE, sample)
+end
+
+-- Keeps looking for AFTER seconds from now (or, with `open`, until told otherwise).
+local function watch(open)
+    if not module.db.logSheath then
+        return
+    end
+    stopAt = not open and GetTime() + AFTER or nil
+    if not sampler:IsPending() then
+        lastSeen = nil
+        sample()
+    end
+end
+
+-- Stowing -------------------------------------------------------------------------------------
 
 local function cancel()
     timer:Cancel()
 end
 
-local tries, lastState = 0, nil
-
 local function stow()
-    if UnitAffectingCombat("player") or UnitIsDeadOrGhost("player") then
-        return
-    end
-    local state = GetSheathState()
-    -- Away, out of tries, or our last toggle changed nothing: stop, so we never draw weapons
-    -- or keep toggling.
-    if state == SHEATHED or tries >= TRIES or state == lastState then
+    if UnitAffectingCombat("player") or UnitIsDeadOrGhost("player")
+        or GetSheathState() == SHEATHED then
+        log(format(L.AUTOSTOW_LOG_SKIPPED, tostring(GetSheathState())))
+        watch()
         return
     end
     -- Sheathing mid-cast can interrupt it; wait for the cast to finish. The player's own cast,
@@ -66,9 +113,10 @@ local function stow()
         timer:Start(RETRY, stow)
         return
     end
-    tries, lastState = tries + 1, state
+    log(format(L.AUTOSTOW_LOG_TOGGLE, tostring(GetSheathState())))
     ToggleSheath()
-    timer:Start(CHECK, stow)
+    log(format(L.AUTOSTOW_LOG_TOGGLED, tostring(GetSheathState())))
+    watch()
 end
 
 -- A dungeon, raid, battleground or arena.
@@ -79,16 +127,41 @@ end
 
 local function onCombatEnd()
     cancel()
+    log(format(L.AUTOSTOW_LOG_COMBAT_END, tostring(GetSheathState())))
     if module.db.outsideOnly and inInstance() then
+        watch()
         return
     end
-    tries, lastState = 0, nil
+    watch(true)
     timer:Start(module.db.delay, stow)
+end
+
+local function onCombatStart()
+    cancel()
+    if sampler:IsPending() then
+        log(L.AUTOSTOW_LOG_COMBAT_START)
+        watch()
+    end
+end
+
+-- Drawing or stowing by hand (the Sheath/Unsheath key) is the player's choice; leave it.
+local function onPlayerToggle()
+    if timer:IsPending() or sampler:IsPending() then
+        log(format(L.AUTOSTOW_LOG_PLAYER, tostring(GetSheathState())))
+        watch()
+    end
+    cancel()
 end
 
 function module:OnEnable()
     self:On("PLAYER_REGEN_ENABLED", onCombatEnd)
-    self:On("PLAYER_REGEN_DISABLED", cancel)
-    -- Drawing or stowing by hand (the Sheath/Unsheath key) is the player's choice; leave it.
-    self:Hook("ToggleSheath", cancel)
+    self:On("PLAYER_REGEN_DISABLED", onCombatStart)
+    self:Hook("ToggleSheath", onPlayerToggle)
+end
+
+function module:OnOptionChanged(key)
+    if key == "logSheath" and not module.db.logSheath then
+        sampler:Cancel()
+        stopAt = nil
+    end
 end
