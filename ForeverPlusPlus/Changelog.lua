@@ -17,6 +17,10 @@ ns.changelog = {
                     .. "/fpp gearprobe) that reads what the client says about the gear you wear "
                     .. "and carry, its own item comparison, your talent tabs, and your stats, and "
                     .. "saves it after /reload, for the developers planning upgrade arrows." },
+                { L.ITEMTOOLTIPS_TITLE, "The new Disenchant line (off by default) shows on green, "
+                    .. "blue, and purple weapons and armor what disenchanting gives on average, "
+                    .. "priced from Auction Prices while that's on, or else the material it most "
+                    .. "likely gives. Hold Shift for every outcome and its chance." },
                 { L.MACROS_TITLE, "A new module that makes macros in your general macros, shared "
                     .. "by your characters, each with its own checkbox, and deletes them when "
                     .. "they're turned off. The first is Smart Buff: it casts the buff your friendly "

@@ -123,17 +123,28 @@ L.ITEMCOUNT_IN_BANK = "%d in bank" -- count
 L.EASYDELETE_TITLE = "Easy Delete"
 L.EASYDELETE_DESC = "Type DELETE for you when destroying a good item, so Yes is a single click."
 
--- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE, and
--- AUCTIONPRICES_TITLE)
+-- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE,
+-- DISENCHANT_TITLE, and AUCTIONPRICES_TITLE)
 L.ITEMTOOLTIPS_TITLE = "Item Tooltips"
 L.ITEMTOOLTIPS_DESC = "Add to item tooltips: the sell price of the whole stack, what damaged gear "
-    .. "costs to repair, how many you own, and the lowest auction house buyout, scanned when you "
-    .. "open the auction house. Each has its own checkbox."
+    .. "costs to repair, how many you own, what disenchanting gives, and the lowest auction house "
+    .. "buyout, scanned when you open the auction house. Each has its own checkbox."
 L.ITEMTOOLTIPS_SECTION_GENERAL = "Price Lines"
 L.ITEMTOOLTIPS_SELLPRICE = "Show Sell Price"
 L.ITEMTOOLTIPS_REPAIRCOST = "Show Repair Cost"
 L.ITEMTOOLTIPS_ITEMCOUNT = "Show Item Count"
+L.ITEMTOOLTIPS_DISENCHANT = "Show Disenchant"
 L.ITEMTOOLTIPS_AUCTION = "Show Auction Prices"
+L.DISENCHANT_TITLE = "Disenchant"
+L.DISENCHANT_DESC = "On green, blue, and purple weapons and armor, show what disenchanting gives "
+    .. "on average, priced from Auction Prices while that's on, or else the material it most "
+    .. "likely gives. Hold Shift for every outcome and its chance."
+L.DISENCHANT_LINE = "Disenchant"
+L.DISENCHANT_OUTCOME = "%s  %s" -- chance, amount and material
+L.DISENCHANT_CHANCE = "%s%%" -- a number such as 75 or 99.5
+L.DISENCHANT_AMOUNT = "%s %s" -- amount (such as 1-2), material
+L.DISENCHANT_RANGE = "%d-%d" -- fewest, most
+L.DISENCHANT_UNKNOWN_ITEM = "Item %d" -- item ID, while its name isn't loaded
 L.SELLPRICE_TITLE = "Sell Price"
 L.SELLPRICE_DESC = "Show the vendor price of the whole stack. Hold Shift to see one item."
 L.REPAIRCOST_TITLE = "Repair Cost"

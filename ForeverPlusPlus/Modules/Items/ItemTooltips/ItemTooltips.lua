@@ -1,7 +1,7 @@
 -- Item Tooltips: lines in item tooltips, each with its own checkbox: the vendor price of the whole
 -- stack (SellPrice.lua), what damaged gear costs to repair (RepairCost.lua), how many you own
--- (ItemCount.lua), and the lowest auction house buyout, with crafting costs in the professions
--- window (AuctionPrices.lua). This file has the settings every line shares; each line is a part
+-- (ItemCount.lua), what disenchanting gives (Disenchant.lua), and the lowest auction house
+-- buyout, with crafting costs in the professions window (AuctionPrices.lua). This file has the settings every line shares; each line is a part
 -- of the module (`module:NewPart`) with its own.
 local _, ns = ...
 
@@ -56,8 +56,8 @@ module.internal.COLORS = {
     { "gold", L.PRICE_COLOR_GOLD },
 }
 
--- The settings every line shares first; each part (Sell Price, Repair Cost, Item Count, Auction
--- Prices, in the TOC's order) adds its section after them, with Auction Prices last for its Chat Messages.
+-- The settings every line shares first; each part (Sell Price, Repair Cost, Item Count,
+-- Disenchant, Auction Prices, in the TOC's order) adds its section after them, with Auction Prices last for its Chat Messages.
 module.options = {
     {
         key = "mode", name = L.PRICE_MODE, description = L.PRICE_MODE_DESC,

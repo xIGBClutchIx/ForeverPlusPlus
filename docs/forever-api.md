@@ -249,6 +249,11 @@ From the Gear Probe tool (Debug page, `/fpp gearprobe`), run on a level 19 Mage 
 - The `bags-greenarrow` atlas exists, and Forever's `ContainerFrameItemButtonTemplate` (Mainline `ContainerFrame.xml`) still declares a hidden `UpgradeIcon` texture with it, anchored TOPLEFT (0, 0) at the atlas's size, on OVERLAY sublevel 1; the combined bags' buttons have it. **[in-game]** **[source]** Upgrade Arrows draws its own texture with the same atlas at the same corner rather than showing Blizzard's region.
 - The old streaming indicator file `Interface\Buttons\UI-MicroStream-Red` (a plain red arrow pointing down) is still in the client, `GetFileIDFromPath` finds it, and it draws in tooltip text as `|T...:14:14|t`. **[in-game]** (2026-10-15, Cameron's screenshot) `UI-HUD-MicroMenu-StreamDLRed-Up` is the modern download indicator atlas, but it's the whole button face, a red blob at text height. An atlas in text (`|A:...|a`) draws at its own size with `0:0`; give it a height and width to match the font.
 
+## Disenchanting
+
+- Item Tooltips' Disenchant (Lib/Disenchant.lua) uses Classic Era 1.x rules, written from general game knowledge: Uncommon, Rare, and Epic weapons and armor (not shirts or tabards), by item level, with armor giving mostly dust and weapons mostly essence, and the 1.x material item IDs (Strange Dust 10940 to Nexus Crystal 20725). Whether Forever gives the same outcomes, chances, and amounts, and has the same item IDs, is **Unverified**; Self Test lists any material ID the client doesn't have.
+- A few items carry a flag that stops them being disenchanted. `C_Item.GetItemInfo` doesn't return it, so the tooltip shows a Disenchant line on them too. **Unverified** whether Forever's tooltip data has anything that says so.
+
 ## Bags and the bank
 
 - `C_Item.GetItemCount(itemID, true)` (bags plus bank) is used by Lootified. **[addon]** (Lootified `Core/Items.lua`) Whether it counts the bank away from the bank, before it was opened this session, is **Unverified**; Item Tooltips' Item Count keeps its own count of the bank from the last visit for that reason.

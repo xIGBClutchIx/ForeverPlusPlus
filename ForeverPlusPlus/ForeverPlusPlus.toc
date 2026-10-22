@@ -38,6 +38,7 @@ Lib\ItemTooltip.lua
 Lib\ItemButtons.lua
 Lib\BagClicks.lua
 Lib\Prices.lua
+Lib\Disenchant.lua
 Lib\Professions.lua
 Lib\PlateLabel.lua
 Lib\FriendlyPlates.lua
@@ -76,6 +77,7 @@ Modules\Items\ItemTooltips\ItemTooltips.lua
 Modules\Items\ItemTooltips\SellPrice.lua
 Modules\Items\ItemTooltips\RepairCost.lua
 Modules\Items\ItemTooltips\ItemCount.lua
+Modules\Items\ItemTooltips\Disenchant.lua
 Modules\Items\ItemTooltips\AuctionPrices.lua
 Modules\Items\WaylaidCrates\WaylaidCrates.lua
 Modules\Items\WaylaidCrates\Costs.lua
