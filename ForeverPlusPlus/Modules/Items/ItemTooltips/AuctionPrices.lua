@@ -560,15 +560,25 @@ local function addAuctionPrice(tooltip, data)
     if not itemID then
         return
     end
-    local price, seenAt = auctionPrice(itemID)
+    local price = auctionPrice(itemID)
     if not price then
         return
     end
     local db = module.db
     ItemTooltip.AddPrice(tooltip, data, L.AUCTIONPRICES_LINE, price, db.mode, db.align, db.auctionColor)
-    -- When this item's price was last seen, by a scan or the player's own search: an item
-    -- missing from the last scan keeps its older price and age. Auctionator may not say.
-    if db.scanAge ~= "off" and seenAt then
+end
+
+-- When this item's price was last seen, by a scan or the player's own search: an item missing
+-- from the last scan keeps its older price and age. Auctionator may not say. After every price
+-- line (OnPriceNotes), so other prices priced from this one, like Disenchant, sit above it.
+local function addScanAge(tooltip, data)
+    local itemID = module.enabled and ItemTooltip.ItemID(data)
+    if not itemID then
+        return
+    end
+    local price, seenAt = auctionPrice(itemID)
+    local db = module.db
+    if price and db.scanAge ~= "off" and seenAt then
         local age = time() - seenAt
         local color = db.scanAgeColor == "age" and ageColor(age) or db.scanAgeColor
         ItemTooltip.AddInfo(tooltip, L.AUCTIONPRICES_SCAN_AGE_LINE, ns.Text.Ago(age), db.scanAge, color)
@@ -927,8 +937,9 @@ function module:OnEnable()
     -- Turned on with the auction house already open, its show event has passed.
     local frame = _G.AuctionHouseFrame
     open = frame and frame:IsShown() and true or false
-    -- The hook can't be removed; addAuctionPrice checks the part is on instead.
+    -- The hooks can't be removed; addAuctionPrice and addScanAge check the part is on instead.
     ItemTooltip.OnPrices(addAuctionPrice, module)
+    ItemTooltip.OnPriceNotes(addScanAge, module)
     -- The price changes from the stack to one item with Shift.
     ItemTooltip.RedrawOnShift(self, true)
     ns.AddOns.WhenLoaded("Blizzard_Professions", hookProfessions)

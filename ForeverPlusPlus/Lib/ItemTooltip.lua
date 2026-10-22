@@ -21,6 +21,7 @@ local ItemTooltip = {}
 ns.ItemTooltip = ItemTooltip
 
 local providers = {} -- fn(tooltip, data), in the order added
+local noteProviders = {} -- fn(tooltip, data) for lines about the prices, after every price line
 local lineReplacers = {} -- fn(tooltip, data, lineData) -> true when it drew the line itself
 local infoProviders = {} -- fn(tooltip, data) for lines above the prices, in the order added
 local replacer -- fn(tooltip, data, lineData) -> true when it drew the sell price line
@@ -63,6 +64,9 @@ local function addPrices(tooltip, data)
         run(replacer, tooltip, data, NO_LINE)
     end
     for _, fn in ipairs(providers) do
+        run(fn, tooltip, data)
+    end
+    for _, fn in ipairs(noteProviders) do
         run(fn, tooltip, data)
     end
 end
@@ -219,6 +223,17 @@ function ItemTooltip.OnPrices(fn, owner)
     hook()
     owners[fn] = owner
     addProvider(providers, fn)
+end
+
+---Calls `fn(tooltip, data)` on every item tooltip after all the price lines, for lines about
+---the prices rather than prices themselves (Auction Prices' "Scanned: 2h ago"), so every price
+---line stays together above them. Otherwise as OnPrices.
+---@param fn fun(tooltip: table, data: table)
+---@param owner? table
+function ItemTooltip.OnPriceNotes(fn, owner)
+    hook()
+    owners[fn] = owner
+    addProvider(noteProviders, fn)
 end
 
 ---Calls `fn(tooltip, data)` on every item tooltip just above the price lines (or where they'd
