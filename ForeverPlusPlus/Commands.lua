@@ -2,7 +2,7 @@
 -- commands with ns.AddCommand as they load. Everything here uses only Core's public functions.
 local _, ns = ...
 
-local ipairs, type, print, format, tostring = ipairs, type, print, string.format, tostring
+local ipairs, type, format, tostring = ipairs, type, string.format, tostring
 local concat, strsplit, strtrim = table.concat, strsplit, strtrim
 
 local L = ns.L
@@ -108,7 +108,7 @@ local function list()
     for _, name in ipairs(ns.order) do
         local module = ns.modules[name]
         if not (module.alwaysOn or module.unavailable) then
-            print(format("  %s  %s  |cff999999%s|r", ns.StateText(module.db.enabled), name,
+            ns.PrintLine(format("  %s  %s  |cff999999%s|r", ns.StateText(module.db.enabled), name,
                 module.description))
         end
     end
@@ -148,12 +148,12 @@ local function listOptions(module)
     ns.Print(format(L.OPTIONS_HEADER, module.name, module.db.enabled and L.ON or L.OFF,
         module.name))
     if not module.options or #module.options == 0 then
-        print(format("  |cff999999%s|r", L.OPTIONS_NONE))
+        ns.PrintLine(format("  |cff999999%s|r", L.OPTIONS_NONE))
     end
     for _, option in ipairs(module.options or {}) do
         local value, allowed = describe(module, option)
-        print(format("  %s = |cffffd100%s|r  |cff999999%s (%s)%s|r", option.key, value, option.name,
-            allowed, option.debug and L.OPTIONS_DEBUG or ""))
+        ns.PrintLine(format("  %s = |cffffd100%s|r  |cff999999%s (%s)%s|r", option.key, value,
+            option.name, allowed, option.debug and L.OPTIONS_DEBUG or ""))
     end
 end
 
@@ -214,7 +214,7 @@ local function set(rest, flip)
         local current, allowed = describe(module, option)
         ns.Print(format(L.OPTION_STATE_ALLOWED, module.name, option.key, current, allowed))
         if option.description then
-            print(format("  |cff999999%s: %s|r", option.name, option.description))
+            ns.PrintLine(format("  |cff999999%s: %s|r", option.name, option.description))
         end
         return
     end
@@ -262,7 +262,7 @@ SlashCmdList.FOREVERPLUSPLUS = function(message)
     elseif command == "list" or command == "help" or not ns.OpenSettings() then
         list()
         for _, line in ipairs(ns.Commands()) do
-            print(format("  %s  |cff999999%s|r", line[1], line[2]))
+            ns.PrintLine(format("  %s  |cff999999%s|r", line[1], line[2]))
         end
     end
 end

@@ -21,10 +21,18 @@ ns.icon = "Interface\\AddOns\\" .. addonName .. "\\Media\\Icon" -- also the TOC'
 ns.modules = {} -- name -> module, in ns.order
 ns.order = {}
 
+---Prints a line in chat with no name in front, for the lines that follow an ns.Print. It gets
+---the chat timestamp while the player has timestamps on, as Blizzard's own lines do (print()
+---adds none).
+---@param text string
+function ns.PrintLine(text)
+    print((ns.Chat and ns.Chat.Stamp() or "") .. text)
+end
+
 ---Prints a line in chat with the addon's name in front.
 ---@param message string
 function ns.Print(message)
-    print(format("|cff33d0ffForever++|r %s", message))
+    ns.PrintLine(format("|cff33d0ffForever++|r %s", message))
 end
 
 ---"On" in green or "Off" in red, for a module's state.

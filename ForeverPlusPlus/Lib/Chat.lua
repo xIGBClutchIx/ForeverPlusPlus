@@ -110,6 +110,38 @@ function Chat.TimestampPattern(stampFormat)
     return concat(pieces)
 end
 
+---The chat timestamp format the player picked in Blizzard's chat settings, or nil while
+---timestamps are off.
+---@return string?
+function Chat.TimestampFormat()
+    local util, stampFormat = _G.ChatFrameUtil, nil
+    if util and util.GetTimestampFormat then
+        stampFormat = util.GetTimestampFormat()
+    else
+        stampFormat = _G.CHAT_TIMESTAMP_FORMAT
+    end
+    if type(stampFormat) == "string" and stampFormat ~= "" then
+        return stampFormat
+    end
+end
+
+---The timestamp Blizzard puts in front of a chat line from an event, for the time now, or "" while
+---timestamps are off. Blizzard's own is plain text in the line's color, made with BetterDate,
+---so this is too. print() and AddMessage don't stamp a line by themselves.
+---@return string
+function Chat.Stamp()
+    local stampFormat = Chat.TimestampFormat()
+    if not stampFormat then
+        return ""
+    end
+    local util = _G.TimeUtil
+    local betterDate = util and util.BetterDate or _G.BetterDate
+    if betterDate then
+        return betterDate(stampFormat, _G.time())
+    end
+    return _G.date(stampFormat, _G.time())
+end
+
 -- Colored lines -----------------------------------------------------------------------------------
 -- A chat line as an edit box can show it in its chat colors: the line's color around it, its own
 -- color codes (names, links) kept, and links, textures, and atlases gone. Copying from an edit box

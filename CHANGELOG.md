@@ -32,6 +32,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - Marks, tints, and arrows on a loot window that's already open show when you turn their module on, instead of only on the next loot.
 - The buttons Forever++ adds beside the chat window sit below Blizzard's voice chat Deafen and Mute buttons while those show, instead of on top of them.
 - Updating from 0.8 puts Blizzard's map coordinate settings back the way you had them before Forever++ turned them on, and gives the Quest Tracker's background and the waypoint arrow today's defaults if you never changed them.
+- Forever++'s chat messages start with the chat timestamp while timestamps are on in the game's chat settings, like the game's own lines.
 - **Already Known**: items on a vendor's Buyback tab no longer get the marks of the vendor's own items.
 - **Auto Screenshot**: reaching Neutral with a faction counts as a step up and takes a screenshot.
 - **Auto Stow**: no longer draws your bow, gun, or thrown weapon when it meant to put your melee weapon away: it keeps toggling until everything is away.

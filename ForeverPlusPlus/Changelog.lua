@@ -110,6 +110,8 @@ ns.changelog = {
                 "Updating from 0.8 puts Blizzard's map coordinate settings back the way you had "
                     .. "them before Forever++ turned them on, and gives the Quest Tracker's "
                     .. "background and the waypoint arrow today's defaults if you never changed them.",
+                "Forever++'s chat messages start with the chat timestamp while timestamps are on "
+                    .. "in the game's chat settings, like the game's own lines.",
                 { L.ALREADYKNOWN_TITLE, "Items on a vendor's Buyback tab no longer get the marks "
                     .. "of the vendor's own items." },
                 { L.AUTOSCREENSHOT_TITLE, "Reaching Neutral with a faction counts as a step up and "

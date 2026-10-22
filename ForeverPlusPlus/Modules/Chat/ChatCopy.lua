@@ -218,24 +218,10 @@ local stampsOn = false
 local lastStamp = 0
 local pending = {}
 
----The chat timestamp format the player picked, or nil while timestamps are off.
----@return string?
-local function stampFormat()
-    local format
-    if ChatFrameUtil and ChatFrameUtil.GetTimestampFormat then
-        format = ChatFrameUtil.GetTimestampFormat()
-    else
-        format = CHAT_TIMESTAMP_FORMAT
-    end
-    if type(format) == "string" and format ~= "" then
-        return format
-    end
-end
-
 ---Makes the timestamp of each line in a chat window that has none yet a link.
 ---@param frame table
 local function linkStamps(frame)
-    local format = stampFormat()
+    local format = Chat.TimestampFormat()
     if not format then
         return
     end

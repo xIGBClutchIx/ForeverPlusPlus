@@ -339,6 +339,18 @@ ITEM_QUALITY_COLORS = nil
 eq(Chat.Colored("|Hplayer:Bob|h[Bob]|h |TIcon:0|tx", 1, 1, 1), "|cffffffff[Bob] x|r",
     "colored drops links and textures")
 eq(Chat.Colored("a||rb", 1, 1, 1), "|cffffffffa||rb|r", "colored keeps an escaped pipe")
+-- Chat.TimestampFormat and Chat.Stamp, as Blizzard's chat setting and BetterDate give them
+eq(Chat.Stamp(), "", "no stamp while chat timestamps are off")
+time, date = function() return 0 end, function(fmt) return "D(" .. fmt .. ")" end
+ChatFrameUtil = { GetTimestampFormat = function() return "[%H:%M] " end }
+eq(Chat.TimestampFormat(), "[%H:%M] ", "timestamp format from the chat setting")
+eq(Chat.Stamp(), "D([%H:%M] )", "stamp without BetterDate")
+TimeUtil = { BetterDate = function(fmt, t) return "B(" .. fmt .. t .. ")" end }
+eq(Chat.Stamp(), "B([%H:%M] 0)", "stamp through BetterDate, like Blizzard's")
+ChatFrameUtil.GetTimestampFormat = function() return nil end
+eq(Chat.TimestampFormat(), nil, "timestamps off")
+eq(Chat.Stamp(), "", "no stamp while off")
+ChatFrameUtil, TimeUtil, time, date = nil, nil, nil, nil
 local colored = "|cffff0000ab|cnRED:cd|r||e|r"
 eq(Chat.Uncolor(colored), "abcd|e", "uncolor")
 eq(Chat.Uncolor(Chat.Colored("[|cff00ff00Bob|r]: 5||6", 1, 0, 0)), "[Bob]: 5|6", "uncolor colored")
