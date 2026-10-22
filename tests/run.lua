@@ -1048,6 +1048,36 @@ near(derived.STR, 2, "derived: strength alone")
 eq(derived.AGI, nil, "derived: no agility without its rates")
 eq(next(ItemStats.PlayerRates()) ~= nil, true, "rates: the flat armor rule is always there")
 eq(ItemStats.PlayerRates().AP_STR, nil, "rates: nothing without the game's functions")
+-- The character sheet's calls: (stat, value) for crit, no arguments for dodge, fractions back.
+_G.UnitStat = function(_, stat)
+    return 40, 40, 0, 0
+end
+_G.GetAttackPowerForStat = function(stat, value)
+    return stat == 1 and value * 2 or 0
+end
+_G.GetCritChanceFromStat = function(stat, value)
+    assert(stat == 2 and value == 40, "crit from agility needs the agility")
+    return value / 20 / 100
+end
+_G.GetDodgeChanceFromAttribute = function(...)
+    assert(select("#", ...) == 0, "dodge from agility takes no arguments")
+    return 40 / 20 / 100
+end
+_G.GetSpellCritChanceFromStat = function(stat, value)
+    assert(stat == 4 and value == 40, "spell crit from intellect needs the intellect")
+    return value / 50 / 100
+end
+_G.BLOCK_VALUE_PER_STRENGTH = 20
+local rates = ItemStats.PlayerRates()
+near(rates.AP_STR, 2, "rates: attack power per strength")
+near(rates.CRIT_AGI, 0.05, "rates: crit per agility in percent")
+near(rates.DODGE_AGI, 0.05, "rates: dodge per agility in percent")
+near(rates.SPELLCRIT_INT, 0.02, "rates: spell crit per intellect in percent")
+near(rates.BLOCKVALUE_STR, 0.05, "rates: block value per strength")
+near(ItemStats.DeriveAttributes({ AP = 0.4, BLOCKVALUE = 0.4 }, rates).STR, 0.82,
+    "derived: strength from attack power and block value")
+_G.UnitStat, _G.GetAttackPowerForStat, _G.GetCritChanceFromStat = nil, nil, nil
+_G.GetDodgeChanceFromAttribute, _G.GetSpellCritChanceFromStat, _G.BLOCK_VALUE_PER_STRENGTH = nil, nil, nil
 eq(Talents.Tabs(), nil, "talents: nothing without the trait API")
 local tab, total = Talents.Dominant()
 eq(tab, nil, "talents: no dominant tab without data")

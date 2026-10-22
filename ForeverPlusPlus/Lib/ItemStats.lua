@@ -8,7 +8,7 @@ local _, ns = ...
 local _G, pairs, ipairs, type, sort, tonumber, pcall = _G, pairs, ipairs, type, table.sort, tonumber, pcall
 local format, gmatch, match, lower, concat = string.format, string.gmatch, string.match, string.lower, table.concat
 local floor = math.floor
-local C_Item, UnitStat = C_Item, UnitStat
+local C_Item = C_Item
 
 local ItemStats = {}
 ns.ItemStats = ItemStats
@@ -344,10 +344,11 @@ end
 
 -- The player's total of an attribute (1 Strength to 5 Spirit), or nil.
 local function total(stat)
-    if not UnitStat then
+    local unitStat = _G.UnitStat
+    if type(unitStat) ~= "function" then
         return nil
     end
-    local ok, _, value = pcall(UnitStat, "player", stat)
+    local ok, _, value = pcall(unitStat, "player", stat)
     if ok and ns.IsNumber(value) and value > 0 then
         return value
     end
@@ -360,29 +361,43 @@ local function perPoint(name, stat, amount)
     return value and value / amount or nil
 end
 
--- Per point: the game's answer for all the player's points of a stat, divided by them.
-local function perOwnPoint(name, stat)
+-- Percent per point of a chance the game gives as a fraction for all the player's points, as
+-- the character sheet asks: `GetCritChanceFromStat(stat, value)`, and
+-- `GetDodgeChanceFromAttribute()` with no arguments, for all of the player's Agility.
+local function percentPerOwnPoint(name, stat, withArgs)
     local points = total(stat)
-    local value = points and callNumber(name, stat)
-    return value and value / points or nil
+    if not points then
+        return nil
+    end
+    local value
+    if withArgs then
+        value = callNumber(name, stat, points)
+    else
+        value = callNumber(name)
+    end
+    return value and value * 100 / points or nil
 end
 
 ---What one point of each attribute gives this character now: `AP_STR`, `AP_AGI`, `RAP_AGI`,
----`CRIT_AGI` (percent), `DODGE_AGI`, `SPELLCRIT_INT`, `HEALTH_STA`, `MANA_INT`, `ARMOR_AGI`.
----A rate the client can't give is left out.
+---`CRIT_AGI`, `DODGE_AGI`, and `SPELLCRIT_INT` (in percent), `HEALTH_STA`, `MANA_INT`,
+---`ARMOR_AGI`, `BLOCKVALUE_STR`. A rate the client can't give is left out.
 ---@return table rates
 function ItemStats.PlayerRates()
     local rates = {}
     rates.AP_STR = perPoint("GetAttackPowerForStat", 1, 100)
     rates.AP_AGI = perPoint("GetAttackPowerForStat", 2, 100)
     rates.RAP_AGI = perPoint("GetRangedAttackPowerForStat", 2, 100)
-    rates.CRIT_AGI = perOwnPoint("GetCritChanceFromStat", 2)
-    rates.DODGE_AGI = perOwnPoint("GetDodgeChanceFromAttribute", 2)
-    rates.SPELLCRIT_INT = perOwnPoint("GetSpellCritChanceFromStat", 4)
+    rates.CRIT_AGI = percentPerOwnPoint("GetCritChanceFromStat", 2, true)
+    rates.DODGE_AGI = percentPerOwnPoint("GetDodgeChanceFromAttribute", 2, false)
+    rates.SPELLCRIT_INT = percentPerOwnPoint("GetSpellCritChanceFromStat", 4, true)
     rates.HEALTH_STA = callNumber("UnitHPPerStamina", "player")
     local manaPerInt = _G.MANA_PER_INTELLECT
     rates.MANA_INT = type(manaPerInt) == "number" and manaPerInt or nil
     rates.ARMOR_AGI = 2 -- the game's flat rule, as the character sheet's Agility tooltip says
+    -- Shield block value per Strength (1 per 20 for Warriors, Paladins, and Shamans); the game
+    -- says nothing per class, so it counts only with a block value weight.
+    local strPerBlock = _G.BLOCK_VALUE_PER_STRENGTH
+    rates.BLOCKVALUE_STR = type(strPerBlock) == "number" and strPerBlock > 0 and 1 / strPerBlock or nil
     return rates
 end
 
@@ -404,7 +419,7 @@ function ItemStats.DeriveAttributes(weights, rates)
     end
     local derived = {}
     if rates.AP_STR then
-        derived.STR = round(rates.AP_STR * w("AP"))
+        derived.STR = round(rates.AP_STR * w("AP") + (rates.BLOCKVALUE_STR or 0) * w("BLOCKVALUE"))
     end
     if rates.AP_AGI and rates.CRIT_AGI and rates.DODGE_AGI then
         derived.AGI = round(rates.AP_AGI * w("AP") + (rates.RAP_AGI or 0) * w("RAP")

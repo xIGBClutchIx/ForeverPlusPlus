@@ -437,9 +437,14 @@ local function checkConversions()
         probeAll("attack power from 100 of stat " .. stat, "GetAttackPowerForStat", stat, 100)
         probeAll("ranged attack power from 100 of stat " .. stat, "GetRangedAttackPowerForStat", stat, 100)
     end
-    probeAll("crit from agility", "GetCritChanceFromStat", 2)
-    probeAll("dodge from agility", "GetDodgeChanceFromAttribute", 2)
-    probeAll("spell crit from intellect", "GetSpellCritChanceFromStat", 4)
+    -- The character sheet asks for all of the player's points, and gets a fraction back.
+    local _, _, agility = call("UnitStat", "player", 2)
+    local _, _, intellect = call("UnitStat", "player", 4)
+    probeAll("crit from all " .. text(agility) .. " agility", "GetCritChanceFromStat", 2, agility)
+    probeAll("dodge from all agility", "GetDodgeChanceFromAttribute")
+    probeAll("spell crit from all " .. text(intellect) .. " intellect", "GetSpellCritChanceFromStat", 4,
+        intellect)
+    add("strength per block value: " .. text(_G.BLOCK_VALUE_PER_STRENGTH))
     probeAll("health per stamina", "UnitHPPerStamina", "player")
     add("mana per intellect: " .. text(_G.MANA_PER_INTELLECT) .. ", break " .. text(_G.INTELLECT_BREAK))
     probeAll("mana regen from spirit", "GetManaRegenFromSpirit")
