@@ -44,8 +44,7 @@ module.options = {
         key = "logSheath",
         name = L.AUTOSTOW_LOG,
         description = L.AUTOSTOW_LOG_DESC,
-        debug = true,
-        section = L.DEBUG_SECTION_LOGGING,
+        section = L.DEBUG,
         added = "0.10.0",
     },
 }
