@@ -68,6 +68,9 @@ ns.changelog = {
                 "Item marks, tints, and tooltip lines do much less work after a skill point or "
                     .. "level, in your bags, and at the auction house, so bags open more smoothly "
                     .. "while leveling.",
+                { L.AUTOSTOW_TITLE, "Also puts away weapons you draw yourself out of combat, "
+                    .. "once they've been out for the Delay. Pressing Sheath starts the Delay "
+                    .. "again." },
                 { L.AUTOWEAPONBUFF_TITLE, "Using a sharpening stone, weightstone, oil, poison, or "
                     .. "lure from an action bar puts it straight on your weapon too, like a "
                     .. "right-click in your bags. Not in combat." },
@@ -112,8 +115,8 @@ ns.changelog = {
                 { L.AUTOSCREENSHOT_TITLE, "Reaching Neutral with a faction counts as a step up and "
                     .. "takes a screenshot." },
                 { L.AUTOSTOW_TITLE, "No longer draws your bow, gun, or thrown weapon when it "
-                    .. "meant to put your melee weapon away. The game already puts that away by "
-                    .. "itself a few seconds after combat." },
+                    .. "meant to put your melee weapon away: it keeps toggling until everything "
+                    .. "is away." },
                 { L.CHATCOPY_TITLE, "Turning Click Timestamps off no longer brings back chat lines "
                     .. "that had faded out." },
                 { L.CHATFONT_TITLE, "Turning the module off gives the Communities and GM chat "

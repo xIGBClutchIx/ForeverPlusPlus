@@ -1,9 +1,12 @@
--- Auto Stow: puts a ranged weapon away a few seconds after combat ends, with one toggle. The game
--- sheathes by itself within a few seconds of combat, and with a ranged weapon equipped the
--- Sheath key cycles away, melee, ranged, so a toggle with melee out would draw the ranged weapon:
--- melee drawn is left to the game (Cameron's log, 2026-10-22). What a toggle from ranged drawn
--- does isn't measured yet; Log Sheath State (Debug page) prints it. Nothing happens if they're
--- already away, if combat starts again first, or if you draw or stow them yourself meanwhile.
+-- Auto Stow: puts your weapons away once they've been out for the Delay out of combat, whether
+-- combat left them out or you drew them yourself. Pressing Sheath starts the Delay again.
+--
+-- No event says the sheath changed, so it looks twice a second out of combat (not at all in
+-- combat). With a ranged weapon the Sheath key cycles away, melee, ranged, so from melee one
+-- toggle draws the ranged weapon: it toggles, waits for the state to change, and toggles again
+-- until everything is away, three toggles at most. A toggle that changes nothing within a couple
+-- of seconds stops it until the state changes some other way. The game also sheathes by itself
+-- a few seconds after combat, often before the Delay is up (Cameron's log, 2026-10-22).
 local _, ns = ...
 
 -- The original ToggleSheath, from before the hook below, so our own stow doesn't look like the
@@ -11,7 +14,7 @@ local _, ns = ...
 local GetSheathState, ToggleSheath = GetSheathState, ToggleSheath
 local UnitAffectingCombat, UnitIsDeadOrGhost = UnitAffectingCombat, UnitIsDeadOrGhost
 local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
-local IsInInstance, GetTime = IsInInstance, GetTime
+local IsInInstance, InCombatLockdown, GetTime = IsInInstance, InCombatLockdown, GetTime
 local format, tostring = string.format, tostring
 
 local L = ns.L
@@ -48,20 +51,21 @@ module.options = {
 }
 
 -- GetSheathState: 1 is nothing drawn, 2 melee drawn, 3 ranged drawn.
-local SHEATHED, MELEE = 1, 2
+local SHEATHED = 1
+local LOOK = 0.5 -- seconds between looks out of combat
 local RETRY = 1 -- seconds to wait while casting before trying again
+-- A press shows in the state 0.1 to 0.7 seconds later (Cameron's log, 2026-10-22).
+local POLL = 0.25 -- seconds between looks after a toggle
+local WAIT = 2 -- seconds to wait for a toggle to change the state
+local TOGGLES = 3 -- at most per stow
 
-local timer = ns.Frames.Timer(module) -- the pending stow
-
--- Log Sheath State --------------------------------------------------------------------------
--- From combat's end until a few seconds after our toggle, the sheath state every quarter
--- second, printed when it changes, and what we and the player did, with GetTime() stamps.
-
-local SAMPLE = 0.25 -- seconds between looks
-local AFTER = 4 -- seconds to keep looking after our toggle (or after the stow was dropped)
-
-local sampler = ns.Frames.Timer(module)
-local lastSeen, stopAt
+local timer = ns.Frames.Timer(module) -- the stow under way: a cast to wait out, or a toggle's wait
+local watcher -- looks at the state out of combat; made on first enable
+local drawnSince -- GetTime() the weapons came out, or nil while away (or not counting)
+local stuck -- a state our toggles couldn't change: left alone until it changes
+local stowing = false
+local toggles, before, waitUntil -- this stow's toggles, the state before the last, when to give up
+local lastLogged -- the last state Log Sheath State printed
 
 local function log(text)
     if module.db.logSheath then
@@ -69,58 +73,8 @@ local function log(text)
     end
 end
 
-local function sample()
-    local state = GetSheathState()
-    if state ~= lastSeen then
-        log(format(L.AUTOSTOW_LOG_STATE, tostring(state)))
-        lastSeen = state
-    end
-    if stopAt and GetTime() >= stopAt then
-        log(L.AUTOSTOW_LOG_DONE)
-        stopAt = nil
-        return
-    end
-    sampler:Start(SAMPLE, sample)
-end
-
--- Keeps looking for AFTER seconds from now (or, with `open`, until told otherwise).
-local function watch(open)
-    if not module.db.logSheath then
-        return
-    end
-    stopAt = not open and GetTime() + AFTER or nil
-    if not sampler:IsPending() then
-        lastSeen = nil
-        sample()
-    end
-end
-
--- Stowing -------------------------------------------------------------------------------------
-
-local function cancel()
-    timer:Cancel()
-end
-
-local function stow()
-    -- Melee drawn is left to the game, which sheathes it by itself, since a toggle there draws
-    -- the ranged weapon instead.
-    local state = GetSheathState()
-    if UnitAffectingCombat("player") or UnitIsDeadOrGhost("player")
-        or state == SHEATHED or state == MELEE then
-        log(format(L.AUTOSTOW_LOG_SKIPPED, tostring(GetSheathState())))
-        watch()
-        return
-    end
-    -- Sheathing mid-cast can interrupt it; wait for the cast to finish. The player's own cast,
-    -- out of combat, isn't secret.
-    if UnitCastingInfo("player") or UnitChannelInfo("player") then
-        timer:Start(RETRY, stow)
-        return
-    end
-    log(format(L.AUTOSTOW_LOG_TOGGLE, tostring(GetSheathState())))
-    ToggleSheath()
-    log(format(L.AUTOSTOW_LOG_TOGGLED, tostring(GetSheathState())))
-    watch()
+local function blocked()
+    return UnitAffectingCombat("player") or UnitIsDeadOrGhost("player")
 end
 
 -- A dungeon, raid, battleground or arena.
@@ -129,43 +83,136 @@ local function inInstance()
     return inside and kind ~= "none"
 end
 
-local function onCombatEnd()
-    cancel()
-    log(format(L.AUTOSTOW_LOG_COMBAT_END, tostring(GetSheathState())))
-    if module.db.outsideOnly and inInstance() then
-        watch()
+-- Ends the stow under way. `state` is left alone until it changes (a toggle didn't move it).
+local function stopStow(state)
+    timer:Cancel()
+    stowing = false
+    drawnSince = nil
+    stuck = state
+end
+
+-- Stowing -------------------------------------------------------------------------------------
+
+local step
+
+-- After a toggle: once the state moves off what it was, toggle again until it's away. Nothing
+-- changed within WAIT: stop.
+local function afterToggle()
+    local state = GetSheathState()
+    if state == before and GetTime() < waitUntil then
+        timer:Start(POLL, afterToggle)
         return
     end
-    watch(true)
-    timer:Start(module.db.delay, stow)
+    if state == before then
+        log(format(L.AUTOSTOW_LOG_NO_CHANGE, tostring(state)))
+        stopStow(state)
+        return
+    end
+    log(format(L.AUTOSTOW_LOG_TOGGLED, tostring(state)))
+    step()
+end
+
+function step()
+    local state = GetSheathState()
+    if blocked() or state == SHEATHED then
+        stopStow(nil)
+        return
+    end
+    if toggles >= TOGGLES then
+        log(format(L.AUTOSTOW_LOG_GAVE_UP, TOGGLES, tostring(state)))
+        stopStow(state)
+        return
+    end
+    -- Sheathing mid-cast can interrupt it; wait for the cast to finish. The player's own cast,
+    -- out of combat, isn't secret.
+    if UnitCastingInfo("player") or UnitChannelInfo("player") then
+        timer:Start(RETRY, step)
+        return
+    end
+    toggles, before, waitUntil = toggles + 1, state, GetTime() + WAIT
+    log(format(L.AUTOSTOW_LOG_TOGGLE, tostring(state)))
+    ToggleSheath()
+    timer:Start(POLL, afterToggle)
+end
+
+local function stow()
+    stowing, toggles = true, 0
+    step()
+end
+
+-- Watching ------------------------------------------------------------------------------------
+
+local function look()
+    local state = GetSheathState()
+    if state ~= lastLogged then
+        log(format(L.AUTOSTOW_LOG_STATE, tostring(state)))
+        lastLogged = state
+    end
+    if stuck and state ~= stuck then
+        stuck = nil
+    end
+    if state == SHEATHED or stuck or UnitIsDeadOrGhost("player") then
+        drawnSince = nil
+        return
+    end
+    if stowing then
+        return
+    end
+    local now = GetTime()
+    if not drawnSince then
+        drawnSince = now
+    elseif now - drawnSince >= module.db.delay
+        and not (module.db.outsideOnly and inInstance()) then
+        stow()
+    end
+end
+
+local function startWatching()
+    drawnSince, stuck, lastLogged = nil, nil, nil
+    if not watcher then
+        watcher = ns.Frames.Watcher(module, LOOK, look)
+    end
+    watcher:Show()
+end
+
+local function stopWatching()
+    if watcher then
+        watcher:Hide()
+    end
+    if stowing then
+        stopStow(nil)
+    end
+    drawnSince = nil
+end
+
+local function onCombatEnd()
+    log(format(L.AUTOSTOW_LOG_COMBAT_END, tostring(GetSheathState())))
+    startWatching()
 end
 
 local function onCombatStart()
-    cancel()
-    if sampler:IsPending() then
-        log(L.AUTOSTOW_LOG_COMBAT_START)
-        watch()
-    end
+    log(L.AUTOSTOW_LOG_COMBAT_START)
+    stopWatching()
 end
 
--- Drawing or stowing by hand (the Sheath/Unsheath key) is the player's choice; leave it.
+-- Pressing Sheath (or Unsheath) yourself starts the Delay again and ends a stow under way.
 local function onPlayerToggle()
-    if timer:IsPending() or sampler:IsPending() then
-        log(format(L.AUTOSTOW_LOG_PLAYER, tostring(GetSheathState())))
-        watch()
+    log(format(L.AUTOSTOW_LOG_PLAYER, tostring(GetSheathState())))
+    if stowing then
+        stopStow(nil)
     end
-    cancel()
+    drawnSince, stuck = nil, nil
 end
 
 function module:OnEnable()
     self:On("PLAYER_REGEN_ENABLED", onCombatEnd)
     self:On("PLAYER_REGEN_DISABLED", onCombatStart)
     self:Hook("ToggleSheath", onPlayerToggle)
+    if not InCombatLockdown() then
+        startWatching()
+    end
 end
 
-function module:OnOptionChanged(key)
-    if key == "logSheath" and not module.db.logSheath then
-        sampler:Cancel()
-        stopAt = nil
-    end
+function module:OnDisable()
+    stopWatching()
 end

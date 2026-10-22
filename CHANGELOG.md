@@ -16,6 +16,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Changed
 
 - Item marks, tints, and tooltip lines do much less work after a skill point or level, in your bags, and at the auction house, so bags open more smoothly while leveling.
+- **Auto Stow**: also puts away weapons you draw yourself out of combat, once they've been out for the Delay. Pressing Sheath starts the Delay again.
 - **Auto Weapon Buff**: using a sharpening stone, weightstone, oil, poison, or lure from an action bar puts it straight on your weapon too, like a right-click in your bags. Not in combat.
 - **Chat Copy**: the window looks like Forever++'s other windows, with the portrait and the title "Forever++ Chat Copy".
 - **Item Tooltips**: Sell Price also shows on a quest's reward tooltips, where the game leaves it off, so you can see what each choice sells for.
@@ -33,7 +34,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - Updating from 0.8 puts Blizzard's map coordinate settings back the way you had them before Forever++ turned them on, and gives the Quest Tracker's background and the waypoint arrow today's defaults if you never changed them.
 - **Already Known**: items on a vendor's Buyback tab no longer get the marks of the vendor's own items.
 - **Auto Screenshot**: reaching Neutral with a faction counts as a step up and takes a screenshot.
-- **Auto Stow**: no longer draws your bow, gun, or thrown weapon when it meant to put your melee weapon away. The game already puts that away by itself a few seconds after combat.
+- **Auto Stow**: no longer draws your bow, gun, or thrown weapon when it meant to put your melee weapon away: it keeps toggling until everything is away.
 - **Chat Copy**: turning Click Timestamps off no longer brings back chat lines that had faded out.
 - **Chat Font**: turning the module off gives the Communities and GM chat windows their font back too.
 - **Commands**: `/fpp reset` turns every module off before it wipes the settings, so game settings a module changed, like Auto Dismount's, go back to your own. Started in combat, it waits until combat ends.

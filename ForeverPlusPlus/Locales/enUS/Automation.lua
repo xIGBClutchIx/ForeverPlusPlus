@@ -72,26 +72,26 @@ L.GATHERINGTRACKING_BLOCKED = "The game blocked Gathering Tracking from changing
 
 -- AutoStow
 L.AUTOSTOW_TITLE = "Auto Stow"
-L.AUTOSTOW_DESC = "Put your weapons away a few seconds after combat ends, unless you draw or "
-    .. "stow them yourself first."
+L.AUTOSTOW_DESC = "Put your weapons away once they've been out for a few seconds out of "
+    .. "combat, whether a fight left them out or you drew them yourself."
 L.AUTOSTOW_DELAY = "Delay"
-L.AUTOSTOW_DELAY_DESC = "How long after combat to wait before putting your weapons away."
+L.AUTOSTOW_DELAY_DESC = "How long your weapons stay out, after combat or after you draw them, "
+    .. "before they're put away."
 L.AUTOSTOW_OUTSIDE_ONLY = "Only Out of Instances"
 L.AUTOSTOW_OUTSIDE_ONLY_DESC = "Leave your weapons out in dungeons, raids and battlegrounds, where "
     .. "the next pull is never far off."
 L.AUTOSTOW_LOG = "Log Sheath State"
-L.AUTOSTOW_LOG_DESC = "Print in chat, with timestamps, the sheath state (1 away, 2 melee, 3 "
-    .. "ranged) from the end of combat until a few seconds after Auto Stow's toggle, and every "
-    .. "toggle it or you make."
+L.AUTOSTOW_LOG_DESC = "Print in chat, with timestamps, every change of the sheath state (1 away, "
+    .. "2 melee, 3 ranged) out of combat, and every toggle Auto Stow or you make."
 L.AUTOSTOW_LOG_LINE = "Auto Stow %.2f: %s" -- GetTime(), what happened
 L.AUTOSTOW_LOG_STATE = "state %s" -- sheath state
 L.AUTOSTOW_LOG_COMBAT_END = "combat ended, state %s"
-L.AUTOSTOW_LOG_COMBAT_START = "combat started, stow dropped"
+L.AUTOSTOW_LOG_COMBAT_START = "combat started, not watching"
 L.AUTOSTOW_LOG_TOGGLE = "toggling, state before %s"
-L.AUTOSTOW_LOG_TOGGLED = "toggled, state right after %s"
-L.AUTOSTOW_LOG_SKIPPED = "no toggle (in combat, dead, away, or melee out), state %s"
-L.AUTOSTOW_LOG_PLAYER = "you pressed Sheath, state %s"
-L.AUTOSTOW_LOG_DONE = "stopped watching"
+L.AUTOSTOW_LOG_TOGGLED = "toggle took, state %s"
+L.AUTOSTOW_LOG_NO_CHANGE = "toggle changed nothing, leaving state %s until it changes"
+L.AUTOSTOW_LOG_GAVE_UP = "still not away after %d toggles, leaving state %s until it changes"
+L.AUTOSTOW_LOG_PLAYER = "you pressed Sheath, state %s, delay starts again"
 
 -- AutoDismount
 L.AUTODISMOUNT_TITLE = "Auto Dismount"
