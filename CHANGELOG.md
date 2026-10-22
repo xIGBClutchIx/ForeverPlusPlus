@@ -31,6 +31,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - Updating from 0.8 puts Blizzard's map coordinate settings back the way you had them before Forever++ turned them on, and gives the Quest Tracker's background and the waypoint arrow today's defaults if you never changed them.
 - **Already Known**: items on a vendor's Buyback tab no longer get the marks of the vendor's own items.
 - **Auto Screenshot**: reaching Neutral with a faction counts as a step up and takes a screenshot.
+- **Auto Stow**: puts a bow, gun, or thrown weapon away too, instead of leaving it drawn after combat.
 - **Chat Copy**: turning Click Timestamps off no longer brings back chat lines that had faded out.
 - **Chat Font**: turning the module off gives the Communities and GM chat windows their font back too.
 - **Commands**: `/fpp reset` turns every module off before it wipes the settings, so game settings a module changed, like Auto Dismount's, go back to your own. Started in combat, it waits until combat ends.

@@ -295,7 +295,8 @@ From the Gear Probe tool (Debug page, `/fpp gearprobe`), run on a level 19 Mage 
 
 ## Weapon sheathing
 
-- `GetSheathState()` (1 nothing drawn, 2 melee, 3 ranged) and `ToggleSheath()` are there, and `ToggleSheath()` works from a `C_Timer` callback with no key press. One toggle puts away everything drawn. `hooksecurefunc("ToggleSheath", fn)` sees the Sheath/Unsheath key. **[addon]** (AutoStow 1.2.2 `AutoStow.lua`, which stows out of combat on a timer) Not yet tested by us in the live client.
+- `GetSheathState()` (1 nothing drawn, 2 melee, 3 ranged) and `ToggleSheath()` are there, and `ToggleSheath()` works from a `C_Timer` callback with no key press. `hooksecurefunc("ToggleSheath", fn)` sees the Sheath/Unsheath key. **[addon]** (AutoStow 1.2.2 `AutoStow.lua`, which stows out of combat on a timer) Not yet tested by us in the live client.
+- One toggle does not always put everything away: with a thrown weapon drawn (state 3), a Warrior was left running with it out after Auto Stow's single toggle. **[in-game]** (player report, 2026-10-22) Whether the toggle went to melee drawn (2) or did nothing is **Unverified**. Auto Stow now looks at `GetSheathState()` again 0.75 seconds after each toggle and toggles again, up to 3 times, while the state is still changing.
 
 ## Gossip
 

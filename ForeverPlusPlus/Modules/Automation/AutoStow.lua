@@ -1,6 +1,8 @@
--- Auto Stow: puts your weapons away a few seconds after combat ends. One sheath puts away
--- everything drawn (a sword and a gun alike), so it's one toggle. Nothing happens if they're
--- already away, if combat starts again first, or if you draw or stow them yourself meanwhile.
+-- Auto Stow: puts your weapons away a few seconds after combat ends. One sheath doesn't always
+-- put everything away: with a ranged weapon or thrown weapon out it can leave one drawn, so after
+-- each toggle it looks again and toggles once more, a few times at most, while the state keeps
+-- changing. Nothing happens if they're already away, if combat starts again first, or if you draw
+-- or stow them yourself meanwhile.
 local _, ns = ...
 
 -- The original ToggleSheath, from before the hook below, so our own stow doesn't look like the
@@ -37,6 +39,8 @@ module.options = {
 -- GetSheathState: 1 is nothing drawn, 2 melee drawn, 3 ranged drawn.
 local SHEATHED = 1
 local RETRY = 1 -- seconds to wait while casting before trying again
+local CHECK = 0.75 -- seconds after a toggle before looking whether everything is away
+local TRIES = 3 -- toggles at most per stow
 
 local timer = ns.Frames.Timer(module) -- the pending stow
 
@@ -44,9 +48,16 @@ local function cancel()
     timer:Cancel()
 end
 
+local tries, lastState = 0, nil
+
 local function stow()
-    if UnitAffectingCombat("player") or UnitIsDeadOrGhost("player")
-        or GetSheathState() == SHEATHED then
+    if UnitAffectingCombat("player") or UnitIsDeadOrGhost("player") then
+        return
+    end
+    local state = GetSheathState()
+    -- Away, out of tries, or our last toggle changed nothing: stop, so we never draw weapons
+    -- or keep toggling.
+    if state == SHEATHED or tries >= TRIES or state == lastState then
         return
     end
     -- Sheathing mid-cast can interrupt it; wait for the cast to finish. The player's own cast,
@@ -55,7 +66,9 @@ local function stow()
         timer:Start(RETRY, stow)
         return
     end
+    tries, lastState = tries + 1, state
     ToggleSheath()
+    timer:Start(CHECK, stow)
 end
 
 -- A dungeon, raid, battleground or arena.
@@ -69,6 +82,7 @@ local function onCombatEnd()
     if module.db.outsideOnly and inInstance() then
         return
     end
+    tries, lastState = 0, nil
     timer:Start(module.db.delay, stow)
 end
 
