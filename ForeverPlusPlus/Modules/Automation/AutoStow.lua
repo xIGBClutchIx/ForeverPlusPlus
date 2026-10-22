@@ -1,8 +1,9 @@
--- Auto Stow: puts your weapons away a few seconds after combat ends, with one toggle. Nothing
--- happens if they're already away, if combat starts again first, or if you draw or stow them
--- yourself meanwhile. With a thrown weapon one toggle has been seen to put the melee weapon away
--- and draw the thrown one; what the sheath state does then isn't known yet, so Log Sheath State
--- (Debug page) prints it over time to find out before anything toggles more than once.
+-- Auto Stow: puts a ranged weapon away a few seconds after combat ends, with one toggle. The game
+-- sheathes by itself within a few seconds of combat, and with a ranged weapon equipped the
+-- Sheath key cycles away, melee, ranged, so a toggle with melee out would draw the ranged weapon:
+-- melee drawn is left to the game (Cameron's log, 2026-10-22). What a toggle from ranged drawn
+-- does isn't measured yet; Log Sheath State (Debug page) prints it. Nothing happens if they're
+-- already away, if combat starts again first, or if you draw or stow them yourself meanwhile.
 local _, ns = ...
 
 -- The original ToggleSheath, from before the hook below, so our own stow doesn't look like the
@@ -47,7 +48,7 @@ module.options = {
 }
 
 -- GetSheathState: 1 is nothing drawn, 2 melee drawn, 3 ranged drawn.
-local SHEATHED = 1
+local SHEATHED, MELEE = 1, 2
 local RETRY = 1 -- seconds to wait while casting before trying again
 
 local timer = ns.Frames.Timer(module) -- the pending stow
@@ -101,8 +102,11 @@ local function cancel()
 end
 
 local function stow()
+    -- Melee drawn is left to the game, which sheathes it by itself, since a toggle there draws
+    -- the ranged weapon instead.
+    local state = GetSheathState()
     if UnitAffectingCombat("player") or UnitIsDeadOrGhost("player")
-        or GetSheathState() == SHEATHED then
+        or state == SHEATHED or state == MELEE then
         log(format(L.AUTOSTOW_LOG_SKIPPED, tostring(GetSheathState())))
         watch()
         return

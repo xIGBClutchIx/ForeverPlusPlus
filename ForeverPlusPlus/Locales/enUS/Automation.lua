@@ -89,7 +89,7 @@ L.AUTOSTOW_LOG_COMBAT_END = "combat ended, state %s"
 L.AUTOSTOW_LOG_COMBAT_START = "combat started, stow dropped"
 L.AUTOSTOW_LOG_TOGGLE = "toggling, state before %s"
 L.AUTOSTOW_LOG_TOGGLED = "toggled, state right after %s"
-L.AUTOSTOW_LOG_SKIPPED = "no toggle (in combat, dead, or away), state %s"
+L.AUTOSTOW_LOG_SKIPPED = "no toggle (in combat, dead, away, or melee out), state %s"
 L.AUTOSTOW_LOG_PLAYER = "you pressed Sheath, state %s"
 L.AUTOSTOW_LOG_DONE = "stopped watching"
 
