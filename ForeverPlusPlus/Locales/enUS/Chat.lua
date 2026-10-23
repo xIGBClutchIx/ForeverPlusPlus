@@ -19,6 +19,12 @@ L.CHATCOPY_STAMPS_PROMPT = "Press Ctrl+C to copy this chat line."
 L.CHATCOPY_HIDDEN = "(hidden by the game)"
 L.CHATCOPY_EMPTY = "(no chat yet)"
 
+-- ChatLevels
+L.CHATLEVELS_TITLE = "Chat Levels"
+L.CHATLEVELS_DESC = "Show each player's level before their name in chat, colored like a quest of "
+    .. "that level. Forever++ remembers the levels of players you group with, your guild and "
+    .. "friends, /who results, and players you target or see nearby."
+
 -- ShortChannelNames
 L.SHORTCHANNELNAMES_TITLE = "Short Channel Names"
 L.SHORTCHANNELNAMES_DESC = "Show chat channels as [1], [G], or [1. G] instead of [1. General]."
@@ -124,6 +130,7 @@ L.WHISPERWINDOW_INFO_LINE = "%s %s" -- time, what happened
 L.WHISPERWINDOW_FULL_NAME = "%s %s" -- first name, surname
 L.WHISPERWINDOW_LEVEL = "Level %d"
 L.WHISPERWINDOW_PLAYING = "Playing %s" -- a Battle.net friend's character
+L.WHISPERWINDOW_GUILD_NAME = "<%s>" -- their guild, as Blizzard's tooltips show it
 L.WHISPERWINDOW_FRIEND = "Friend"
 L.WHISPERWINDOW_GUILD = "Guild"
 L.WHISPERWINDOW_OFFLINE = "Offline"

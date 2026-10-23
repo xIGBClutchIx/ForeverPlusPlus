@@ -13,7 +13,7 @@
 local _, ns = ...
 
 local _G, setmetatable = _G, setmetatable
-local pairs, ipairs, format, wipe = pairs, ipairs, string.format, wipe
+local pairs, format, wipe = pairs, string.format, wipe
 local C_FriendList, GetPlayerInfoByGUID = C_FriendList, GetPlayerInfoByGUID
 local UnitIsPlayer, UnitIsConnected, UnitReaction = UnitIsPlayer, UnitIsConnected, UnitReaction
 local UnitIsTapDenied, UnitPlayerControlled, CreateColor = UnitIsTapDenied, UnitPlayerControlled, CreateColor
@@ -337,7 +337,6 @@ local updateSoon, cancelUpdate = ns.Frames.Coalesce(updateAll, nil, module)
 
 local FRIENDS_ADDON, WHO_ADDON = "Blizzard_FriendsFrame", "Blizzard_GroupFinder_VanillaStyle"
 local lists = {} -- scroll box -> its paint function, while the module is on
-local classTokens -- localized class name -> class token, filled on first use
 local friendPainted = setmetatable({}, weak) -- friend button -> true while its name is colored
 
 local function socialOn()
@@ -353,15 +352,7 @@ local function friendClass(info)
             return class
         end
     end
-    if not classTokens then
-        classTokens = {}
-        for _, names in ipairs({ _G.LOCALIZED_CLASS_NAMES_MALE or {}, _G.LOCALIZED_CLASS_NAMES_FEMALE or {} }) do
-            for token, name in pairs(names) do
-                classTokens[name] = token
-            end
-        end
-    end
-    return info.className and classTokens[info.className]
+    return ns.Players.ClassToken(info.className)
 end
 
 -- Blizzard draws an online WoW friend as "Name, Level 60 Warrior" in one flat color, so we write

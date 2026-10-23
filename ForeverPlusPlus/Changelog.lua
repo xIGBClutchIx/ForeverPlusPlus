@@ -13,6 +13,11 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_ADDED, {
+                { L.CHATLEVELS_TITLE, "A new module that shows each player's level before their "
+                    .. "name in chat, colored like a quest of that level. Forever++ now remembers "
+                    .. "the class, level, race, and guild of players you group with, your guild "
+                    .. "and friends, your /who results, and players you target or see nearby, so "
+                    .. "the level shows for players far away too. Off by default." },
                 { L.GEARPROBE_TITLE, "A new Run button under Testing in the Debug "
                     .. "module's settings (and /fpp gearprobe) that reads what the client says "
                     .. "about the gear you wear and carry, its own item comparison, your talent "
@@ -107,6 +112,9 @@ ns.changelog = {
                     .. "the Profiler times nothing, and turning Debug off puts every debug option "
                     .. "back to its default and takes away /fpp selftest, /fpp gearprobe, and "
                     .. "/fpp shots." },
+                { L.WHISPERWINDOW_TITLE, "Shows the guild of the player you're talking to, and "
+                    .. "their level, race, and class from when Forever++ last saw them when the "
+                    .. "game can't say now." },
             } },
             { L.CHANGELOG_FIXED, {
                 "An error in one module no longer stops Blizzard's own window or tooltip it hooks "

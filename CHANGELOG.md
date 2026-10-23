@@ -6,6 +6,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Added
 
+- **Chat Levels**: a new module that shows each player's level before their name in chat, colored like a quest of that level. Forever++ now remembers the class, level, race, and guild of players you group with, your guild and friends, your `/who` results, and players you target or see nearby, so the level shows for players far away too. Off by default.
 - **Gear Probe**: a new Run button under Testing in the Debug module's settings (and `/fpp gearprobe`) that reads what the client says about the gear you wear and carry, its own item comparison, your talent tabs, and your stats, and saves it after `/reload`, for the developers planning upgrade arrows.
 - **Item Tooltips**: the new Disenchant line (off by default) shows on green, blue, and purple weapons and armor what disenchanting gives on average, priced from Auction Prices while that's on, or else the material it most likely gives. Hold Shift for every outcome and its chance.
 - **Item Tooltips**: Auction Prices can use Auctionator's prices instead of scanning, when Auctionator is installed: turn on Use Auctionator's Prices. Your own saved prices are kept for when you turn it off.
@@ -26,6 +27,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Settings**: a module's warnings and limits, like what works only out of combat, sit in a gray line under its description on the Modules page instead of in it.
 - **Settings**: option names on the Modules page have more room and a smaller indent under the option they depend on, so they wrap less. An option's NEW label sits just after its checkbox instead of squeezing its name.
 - **Settings**: Console Variables, Profiler, and Debug are modules under a new Tools category, off by default (on in Developer's Defaults). Debug's options and testing buttons are in its own settings on the Modules page instead of a Debug page in the sidebar. Off, Console Variables' and Profiler's pages leave the sidebar and their commands are gone, the Profiler times nothing, and turning Debug off puts every debug option back to its default and takes away `/fpp selftest`, `/fpp gearprobe`, and `/fpp shots`.
+- **Whisper Window**: shows the guild of the player you're talking to, and their level, race, and class from when Forever++ last saw them when the game can't say now.
 
 ### Fixed
 

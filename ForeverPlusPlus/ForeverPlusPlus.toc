@@ -35,6 +35,7 @@ Lib\Confirm.lua
 Lib\CVars.lua
 Lib\Nameplates.lua
 Lib\Units.lua
+Lib\Players.lua
 Lib\ItemTooltip.lua
 Lib\ItemButtons.lua
 Lib\BagClicks.lua
@@ -131,6 +132,7 @@ Modules\System\Commands.lua
 Modules\System\MinimapButton.lua
 Modules\Chat\ChatCopy.lua
 Modules\Chat\ShortChannelNames.lua
+Modules\Chat\ChatLevels.lua
 Modules\Chat\ChatFont.lua
 Modules\Chat\PersistentChat.lua
 Modules\Chat\ChatHistory.lua

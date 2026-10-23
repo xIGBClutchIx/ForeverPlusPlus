@@ -84,8 +84,8 @@ local function playerName()
     return color and Colors.Text(color, name) or name
 end
 
--- The line under the name: level, race, and class, then zone, then friend, guild, or offline,
--- as far as the game knows (internal.Details).
+-- The line under the name: level, race, and class, then guild and zone, then friend, guildmate,
+-- or offline, as far as the game and Forever++ know (internal.Details).
 local function detailsText(conversation)
     local d = internal.Details(conversation)
     local who = {}
@@ -101,6 +101,7 @@ local function detailsText(conversation)
     if #who > 0 then
         parts[#parts + 1] = table.concat(who, " ")
     end
+    parts[#parts + 1] = d.guildName and format(L.WHISPERWINDOW_GUILD_NAME, d.guildName)
     parts[#parts + 1] = d.character and format(L.WHISPERWINDOW_PLAYING, d.character)
     parts[#parts + 1] = d.zone
     local tags = {}

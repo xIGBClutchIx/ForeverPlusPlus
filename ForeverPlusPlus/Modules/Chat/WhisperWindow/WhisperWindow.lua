@@ -275,8 +275,9 @@ function internal.Start(name)
 end
 
 ---What's known of the player behind a conversation: class, race, level, and zone (see
----ns.Units.PlayerDetails), with the class, race, and level last seen kept on the conversation for
----when the game can't say now. A Battle.net friend's character comes from Battle.net.
+---ns.Units.PlayerDetails), then their class, race, level, and guild name (`guildName`) as
+---Forever++ last saw them (ns.Players), with the class, race, and level kept on the conversation
+---for when neither can say. A Battle.net friend's character comes from Battle.net.
 ---@param conversation table
 ---@return table details
 function internal.Details(conversation)
@@ -298,6 +299,13 @@ function internal.Details(conversation)
         end
     else
         d = ns.Units.PlayerDetails(conversation.guid, conversation.name)
+        -- Then what Forever++ last saw of them, for someone who isn't near or on a list now.
+        local seen = ns.Players.Get(conversation.guid, conversation.name)
+        if seen then
+            d.classToken = d.classToken or seen.class
+            d.class = d.class or ns.Players.ClassName(seen.class)
+            d.race, d.level, d.guildName = d.race or seen.race, d.level or seen.level, seen.guild
+        end
         if d.classToken then
             conversation.class = d.classToken
         end
@@ -612,10 +620,12 @@ function module:OnEnable()
     self:On("CHAT_MSG_DND", onAway)
     self:On("CHAT_MSG_SYSTEM", onSystem)
     updateFilter()
+    ns.Players.Use(self)
     internal.EnableWindow()
 end
 
 function module:OnDisable()
+    ns.Players.Release(self)
     updateFilter()
     internal.DisableWindow()
 end

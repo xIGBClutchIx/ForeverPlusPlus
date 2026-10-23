@@ -8,6 +8,7 @@
 --       unclaimed = { [module] = { [key] = table } }, -- per-character data from version 1, until
 --                                                     -- each character logs in and takes its own
 --       gameData = { [set] = { values, build } },     -- what play taught Lib/GameData.lua
+--       players = { [realmID] = { [name] = entry } }, -- players seen, Lib/Players.lua
 --       seenVersion, seenModules, welcome, changelogByModule, selfTest, ...
 --                                                     -- the core's own
 --   }
