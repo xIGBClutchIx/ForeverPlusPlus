@@ -30,7 +30,7 @@ ns.changelog = {
                     .. "blue, and purple weapons and armor what disenchanting gives on average, "
                     .. "priced from Auction Prices while that's on, or else the material it most "
                     .. "likely gives. Hold Shift for every outcome and its chance." },
-                { L.ITEMTOOLTIPS_TITLE, "The new Color Stats option (off by default) shows each "
+                { L.ITEMTOOLTIPS_TITLE, "The new Color Stats option (on by default) shows each "
                     .. "stat on gear in its own color, like Strength, Agility, Stamina, Intellect, "
                     .. "and Spirit, and Equip: bonuses like hit and spell power, with Equip: still "
                     .. "in green." },

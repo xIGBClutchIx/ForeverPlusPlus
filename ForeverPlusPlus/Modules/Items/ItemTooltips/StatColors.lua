@@ -13,7 +13,7 @@ local module = ns.modules.ItemTooltips:NewPart({
     key = "statColors", name = L.ITEMTOOLTIPS_STATCOLORS, description = L.STATCOLORS_DESC,
     section = L.STATCOLORS_TITLE, added = "0.10.0",
 }, {
-    statColors = false,
+    statColors = true,
 })
 
 -- Probe: Mainline's line types; plain stat and Equip: lines are 0 (docs/forever-api.md).
