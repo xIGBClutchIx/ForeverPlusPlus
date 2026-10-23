@@ -445,7 +445,7 @@ function module:BuildPage(frame)
     note:SetText(L.UPGRADEARROWS_PAGE_NOTE)
 
     local scroll = Kit.NewScroll(frame)
-    scroll:SetPoint("TOPLEFT", 4, -128)
+    scroll:SetPoint("TOPLEFT", 4, -146) -- below the note's three lines
     scroll:SetPoint("BOTTOMRIGHT", -28, 8)
     local width = 560
     ui.content = Kit.NewStack(scroll, width, 2)
