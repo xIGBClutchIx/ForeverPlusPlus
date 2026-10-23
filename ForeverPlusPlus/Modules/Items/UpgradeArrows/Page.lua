@@ -444,8 +444,15 @@ function module:BuildPage(frame)
     note:SetJustifyH("LEFT")
     note:SetText(L.UPGRADEARROWS_PAGE_NOTE)
 
+    -- That the arrows are an estimate, a paragraph of its own.
+    local guide = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    guide:SetPoint("TOPLEFT", note, "BOTTOMLEFT", 0, -8)
+    guide:SetPoint("RIGHT", -40, 0)
+    guide:SetJustifyH("LEFT")
+    guide:SetText(L.UPGRADEARROWS_PAGE_GUIDE)
+
     local scroll = Kit.NewScroll(frame)
-    scroll:SetPoint("TOPLEFT", 4, -146) -- below the note's three lines
+    scroll:SetPoint("TOPLEFT", guide, "BOTTOMLEFT", -6, -8)
     scroll:SetPoint("BOTTOMRIGHT", -28, 8)
     local width = 560
     ui.content = Kit.NewStack(scroll, width, 2)
