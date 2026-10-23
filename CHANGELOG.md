@@ -7,7 +7,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Added
 
 - **Chat Levels**: a new module that shows each player's level before their name in chat, colored like a quest of that level. Forever++ now remembers the class, level, race, and guild of players you group with, your guild and friends, your `/who` results, and players you target or see nearby, so the level shows for players far away too. Off by default.
-- **Class Colors**: the new Offline Friends option (off by default) shows offline friends' names in the friends list in the class Forever++ last saw them as.
+- **Class Colors**: the new Offline Friends option (on by default) shows offline friends' names in the friends list in the class Forever++ last saw them as.
 - **Gear Probe**: a new Run button under Testing in the Debug module's settings (and `/fpp gearprobe`) that reads what the client says about the gear you wear and carry, its own item comparison, your talent tabs, and your stats, and saves it after `/reload`, for the developers planning upgrade arrows.
 - **Item Tooltips**: the new Disenchant line (off by default) shows on green, blue, and purple weapons and armor what disenchanting gives on average, priced from Auction Prices while that's on, or else the material it most likely gives. Hold Shift for every outcome and its chance.
 - **Item Tooltips**: Auction Prices can use Auctionator's prices instead of scanning, when Auctionator is installed: turn on Use Auctionator's Prices. Your own saved prices are kept for when you turn it off.
