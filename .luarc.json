@@ -3,6 +3,7 @@
   "diagnostics.globals": [
     "ForeverPlusPlusDB",
     "ForeverPlusPlusCharDB",
+    "ForeverPlusPlusPlayersDB",
     "SLASH_FOREVERPLUSPLUS1",
     "SLASH_FOREVERPLUSPLUS2",
     "SlashCmdList",

@@ -117,7 +117,7 @@ Open Game Menu > Options > AddOns > Forever++ (or type `/fpp`). It opens on the 
 | `/fpp resetprices` | Forgets the saved auction prices. |
 | `/fpp nodes [here]` | Checks what Minimap Node Icons sees on the minimap now: whether tracking is on and which herbs and veins it can read. With `here`, point at a dot and it says where the dot is against where a scan puts it. |
 
-Settings are saved per account in `ForeverPlusPlusDB`, and what belongs to one character (talent plans, learned flight points, Quest Tracker's zone-hidden quests) in `ForeverPlusPlusCharDB`.
+Settings are saved per account in `ForeverPlusPlusDB`, players seen (for Chat Levels and Whisper Window) per account in `ForeverPlusPlusPlayersDB`, and what belongs to one character (talent plans, learned flight points, Quest Tracker's zone-hidden quests) in `ForeverPlusPlusCharDB`.
 
 ## Feedback
 

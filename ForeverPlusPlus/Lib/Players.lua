@@ -5,18 +5,22 @@
 -- mouse over, or see a nameplate of, and chat lines, which carry the speaker's GUID. What it learns
 -- last wins, so a level goes up as they do. Anything the game makes secret is skipped, never kept.
 --
--- A player is kept by their first name (on Forever, UnitName's second value and the part after a
--- "-" are a surname, not a realm) under the realm ID their GUID carries, or the player's own realm
--- when there's no GUID (who results, the guild roster). Entries not seen for MAX_AGE are dropped at
--- login, and the oldest go once there are more than MAX_PLAYERS.
+-- It's saved in a variable of its own, ForeverPlusPlusPlayersDB (Core loads it as ns.playersDB), so
+-- thousands of players stay out of the settings. A player is kept by their first name (on Forever,
+-- UnitName's second value and the part after a "-" are a surname, not a realm) under their realm's
+-- name, from their GUID, or the player's own when there's none (who results) or the game leaves it
+-- out (someone on the player's own realm). Forever's realms are its rulesets ("Classic Beta PvE"),
+-- each split over several realm IDs in GUIDs, so the name, not the ID, says who's who. Entries not
+-- seen for MAX_AGE are dropped at login, and the oldest go once there are more than MAX_PLAYERS.
 --
---   ForeverPlusPlusDB.players = { [realmID] = { [first name, lowercased] = "CLASS,level,minutes,race,guild" } }
+--   ForeverPlusPlusPlayersDB = { [realm, no spaces] = { [first name, lowercased] = "CLASS,level,minutes,race,guild" } }
 local _, ns = ...
 
 local pairs, next, type, tonumber, time, floor = pairs, next, type, tonumber, time, math.floor
-local format, lower, match, sort = string.format, string.lower, string.match, table.sort
+local format, lower, match, gsub, sort = string.format, string.lower, string.match, string.gsub, table.sort
 local UnitIsPlayer, UnitGUID, UnitName, UnitClass, UnitRace, UnitLevel = UnitIsPlayer, UnitGUID, UnitName,
     UnitClass, UnitRace, UnitLevel
+local GetRealmName = GetRealmName
 local GetGuildInfo, UnitIsVisible, GetPlayerInfoByGUID = GetGuildInfo, UnitIsVisible, GetPlayerInfoByGUID
 local IsInRaid, GetNumGroupMembers, IsInGuild = IsInRaid, GetNumGroupMembers, IsInGuild
 local GetNumGuildMembers, GetGuildRosterInfo, C_FriendList = GetNumGuildMembers, GetGuildRosterInfo, C_FriendList
@@ -93,21 +97,6 @@ function Players.Unpack(saved)
     }
 end
 
--- The saved table, made once there's something to keep.
-local function saved(create)
-    local db = ns.db
-    if not db then
-        return nil
-    end
-    if type(db.players) ~= "table" then
-        if not create then
-            return nil
-        end
-        db.players = {}
-    end
-    return db.players
-end
-
 local count -- entries saved, counted on first use
 
 local function countAll(all)
@@ -122,15 +111,11 @@ end
 
 ---Drops entries not seen for MAX_AGE, anything that isn't an entry, and the oldest past
 ---`limit` (MAX_PLAYERS). Called at login, and when the count runs over.
----@param db table ForeverPlusPlusDB
+---@param all table ForeverPlusPlusPlayersDB
 ---@param limit? number
-function Players.Prune(db, limit)
-    local all = type(db) == "table" and db.players
-    if type(all) ~= "table" then
-        if db then
-            db.players = nil
-        end
-        count = nil
+function Players.Prune(all, limit)
+    count = nil
+    if next(all) == nil then
         return
     end
     local oldest = time() - MAX_AGE
@@ -163,9 +148,6 @@ function Players.Prune(db, limit)
             all[realmID] = nil
         end
     end
-    if next(all) == nil then
-        db.players = nil
-    end
     count = nil
 end
 
@@ -179,32 +161,43 @@ local function firstName(name)
     return lower(match(name, "^[^%-%s]+") or name)
 end
 
--- The realm ID a player GUID carries ("Player-4372-0A1B2C3D").
-local function realmOf(guid)
-    return ns.IsText(guid, true) and match(guid, "^Player%-(%d+)%-") or nil
+local function readText(value)
+    if ns.IsText(value, true) then
+        return value
+    end
+end
+
+local function isPlayerGUID(guid)
+    return ns.IsText(guid, true) and match(guid, "^Player%-") ~= nil
+end
+
+-- A realm's name as a key: "ClassicBetaPvE" for "Classic Beta PvE".
+local function realmKey(realm)
+    return realm and (gsub(realm, "[%s%-]", "")) or nil
 end
 
 local ownRealm
 
--- The player's own realm ID, for a name with no GUID. "0" while the game can't say.
+-- The player's own realm. "?" while the game can't say.
 local function homeRealm()
     if not ownRealm then
-        ownRealm = realmOf(UnitGUID and UnitGUID("player"))
+        ownRealm = realmKey(readText(GetRealmName and GetRealmName()))
     end
-    return ownRealm or "0"
+    return ownRealm or "?"
 end
 
----Where a player is kept: their realm's table key and their own, or nil when there's no name to
----go by. A readable GUID names the realm, and the name too when none is given.
+---Where a player is kept: their realm's key and their own, or nil when there's no name to go by.
+---A readable GUID names another realm, and the name too when none is given.
 ---@param guid string?
 ---@param name string?
----@return string? realmID
+---@return string? realm
 ---@return string? key
 local function where(guid, name)
-    local realm = realmOf(guid)
-    if not name and realm and GetPlayerInfoByGUID then
-        local _, _, _, _, _, guidName = GetPlayerInfoByGUID(guid)
-        name = guidName
+    local realm
+    if isPlayerGUID(guid) and GetPlayerInfoByGUID then
+        local _, _, _, _, _, guidName, guidRealm = GetPlayerInfoByGUID(guid)
+        name = name or readText(guidName)
+        realm = realmKey(readText(guidRealm))
     end
     local key = firstName(name)
     if not key then
@@ -221,19 +214,13 @@ end
 ---@param name string? their name, with or without a surname
 ---@return { class: string?, level: number?, race: string?, guild: string?, seen: number }?
 function Players.Get(guid, name)
-    local all = saved(false)
+    local all = ns.playersDB
     local realm, key = where(guid, name)
     if not (all and realm) then
         return nil
     end
     local byName = all[realm]
     return byName and Players.Unpack(byName[key]) or nil
-end
-
-local function readText(value)
-    if ns.IsText(value, true) then
-        return value
-    end
 end
 
 local function readLevel(value)
@@ -254,11 +241,11 @@ function Players.Learn(guid, name, info)
         return
     end
     local class, race, level = readText(info.class), readText(info.race), readLevel(info.level)
-    if ns.IsText(guid, true) and GetPlayerInfoByGUID and not (class and race) then
+    if isPlayerGUID(guid) and GetPlayerInfoByGUID and not (class and race) then
         local _, token, localizedRace = GetPlayerInfoByGUID(guid)
         class, race = class or readText(token), race or readText(localizedRace)
     end
-    local all = saved(true)
+    local all = ns.playersDB
     if not all then
         return
     end
@@ -292,7 +279,7 @@ function Players.Learn(guid, name, info)
     end
     byName[key] = Players.Pack(entry)
     if count and count > MAX_PLAYERS + 100 then
-        Players.Prune(ns.db)
+        Players.Prune(all)
     end
 end
 
@@ -377,7 +364,7 @@ end
 
 -- A chat line's speaker and GUID: the class and race come from the GUID.
 local function learnChat(_, _, sender, _, _, _, _, _, _, _, _, _, guid)
-    if ns.IsText(guid, true) and realmOf(guid) then
+    if isPlayerGUID(guid) then
         Players.Learn(guid, ns.IsText(sender, true) and sender or nil, {})
     end
 end

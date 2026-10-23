@@ -8,11 +8,11 @@
 --       unclaimed = { [module] = { [key] = table } }, -- per-character data from version 1, until
 --                                                     -- each character logs in and takes its own
 --       gameData = { [set] = { values, build } },     -- what play taught Lib/GameData.lua
---       players = { [realmID] = { [name] = entry } }, -- players seen, Lib/Players.lua
 --       seenVersion, seenModules, welcome, changelogByModule, selfTest, ...
 --                                                     -- the core's own
 --   }
 --   ForeverPlusPlusCharDB = { version = 4, data = { [module] = { [key] = table } } }
+--   ForeverPlusPlusPlayersDB: players seen, kept by Lib/Players.lua apart from all this
 --
 -- A module's settings are its scalar defaults: a value equal to the default isn't saved, so a
 -- better default reaches everyone who never changed it. Its data is every default that is a table;

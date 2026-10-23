@@ -3,7 +3,7 @@
 -- Every other file gets the same `ns` table through `...`.
 local addonName, ns = ...
 
-local pairs, ipairs, type, print, format = pairs, ipairs, type, print, string.format
+local pairs, ipairs, next, type, print, format = pairs, ipairs, next, type, print, string.format
 local tonumber, floor, min, max = tonumber, math.floor, math.min, math.max
 local concat, setmetatable = table.concat, setmetatable
 local InCombatLockdown, GetLocale, hooksecurefunc, _G = InCombatLockdown, GetLocale, hooksecurefunc, _G
@@ -794,6 +794,10 @@ function ns.Start()
     ForeverPlusPlusDB = type(ForeverPlusPlusDB) == "table" and ForeverPlusPlusDB or {}
     ForeverPlusPlusCharDB = type(ForeverPlusPlusCharDB) == "table" and ForeverPlusPlusCharDB or {}
     ns.db, ns.charDB = ForeverPlusPlusDB, ForeverPlusPlusCharDB
+    -- Players seen (Lib/Players.lua) are a variable of their own, so thousands of them stay out of
+    -- the settings.
+    ForeverPlusPlusPlayersDB = type(ForeverPlusPlusPlayersDB) == "table" and ForeverPlusPlusPlayersDB or {}
+    ns.playersDB = ForeverPlusPlusPlayersDB
     addCoreSteps()
     local fresh = Store.Upgrade(ns.db, ns.charDB)
     -- The last version whose Modules page the player has seen all of, and the version each module
@@ -817,11 +821,14 @@ function ns.Start()
     end
     Store.Prune(ns.db, ns.charDB, known)
     ns.GameData.Prune(ns.db)
-    ns.Players.Prune(ns.db)
+    ns.Players.Prune(ns.playersDB)
     -- Before the game writes the saved variables, drop what's empty so the file holds only what
     -- was saved. module.db makes it again if a module saves at logout after this.
     ns.On("PLAYER_LOGOUT", function()
         Store.Tidy(ns.db, ns.charDB)
+        if next(ns.playersDB) == nil then
+            ForeverPlusPlusPlayersDB = nil
+        end
     end)
     for _, name in ipairs(ns.order) do
         local module = ns.modules[name]

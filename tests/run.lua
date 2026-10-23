@@ -1463,16 +1463,22 @@ do
     UnitLevel = function(unit) return units[unit] and units[unit].level end
     GetPlayerInfoByGUID = function(guid)
         if guid == "Player-2-DDDD" then
-            return "Priest", "PRIEST", "Dwarf", "Dwarf", 2, "Dee", "Other"
+            return "Priest", "PRIEST", "Dwarf", "Dwarf", 2, "Dee", "Classic Beta PvP"
+        elseif guid == "Player-9-BBBB" then
+            return "Mage", "MAGE", "Gnome", "Gnome", 2, "Bob", "Classic Beta PvP"
+        elseif guid == "Player-5-BBBB" then
+            return "Warrior", "WARRIOR", "Orc", "Orc", 2, "Bob", ""
         end
     end
+    GetRealmName = function() return "Classic Beta PvE" end
     LOCALIZED_CLASS_NAMES_MALE = { WARRIOR = "Warrior", PRIEST = "Priest" }
     LOCALIZED_CLASS_NAMES_FEMALE = { WARRIOR = "Warrior", PRIEST = "Priest" }
     local savedTime = time
     time = function() return game.clock end
     load("ForeverPlusPlus/Lib/Players.lua")
     local Players = ns.Players
-    ns.db = {}
+    ns.playersDB = {}
+    local all = ns.playersDB
     game.clock = 1799999960 -- on a whole minute of the saved times
 
     local packed = Players.Pack({ class = "MAGE", level = 60, race = "Gnome", guild = "A, B", seen = game.clock })
@@ -1483,7 +1489,7 @@ do
     eq(Players.Unpack(Players.Pack({ seen = game.clock })).class, nil, "players: empty fields read nil")
 
     eq(Players.Get(nil, "Bob"), nil, "players: nobody seen yet")
-    eq(ns.db.players, nil, "players: nothing saved until something is learned")
+    eq(next(all), nil, "players: nothing saved until something is learned")
     Players.LearnUnit("target")
     local bob = Players.Get(nil, "Bob-Stone")
     eq(bob and bob.class, "WARRIOR", "players: unit class kept")
@@ -1491,9 +1497,11 @@ do
     eq(bob and bob.guild, "Red", "players: unit guild kept")
     eq(bob and bob.race, "Orc", "players: unit race kept")
     eq(Players.Get("Player-1-BBBB", "bob") ~= nil, true, "players: found by GUID and lowercase name")
+    eq(all.ClassicBetaPvE ~= nil, true, "players: kept under the realm's name")
     eq(Players.Get("Player-9-BBBB", "Bob"), nil, "players: another realm is someone else")
+    eq(Players.Get("Player-5-BBBB", nil) ~= nil, true, "players: another realm ID of the same realm is the same")
     Players.LearnUnit("mouseover")
-    eq(next(ns.db.players["1"]) ~= nil and Players.Get("Player-1-CCCC", nil), nil,
+    eq(next(all.ClassicBetaPvE) ~= nil and Players.Get("Player-1-CCCC", nil), nil,
         "players: a secret name isn't kept")
 
     game.clock = game.clock + 7200
@@ -1516,24 +1524,24 @@ do
     local dee = Players.Get("Player-2-DDDD", nil)
     eq(dee and dee.class, "PRIEST", "players: class from the GUID")
     eq(dee and dee.race, "Dwarf", "players: race from the GUID")
-    eq(ns.db.players["2"] ~= nil, true, "players: kept under the GUID's realm")
+    eq(all.ClassicBetaPvP ~= nil, true, "players: kept under the GUID's realm")
     eq(Players.ClassToken("Warrior"), "WARRIOR", "players: class token from its name")
     eq(Players.ClassName("PRIEST"), "Priest", "players: class name from its token")
 
     -- Old entries go at login, and the oldest past the limit.
-    ns.db.players["1"].old = Players.Pack({ level = 5, seen = game.clock - Players.MAX_AGE - 60 })
-    ns.db.players["3"] = { junk = 5 }
-    Players.Prune(ns.db)
-    eq(ns.db.players["1"].old, nil, "players: unseen too long is dropped")
-    eq(ns.db.players["3"], nil, "players: junk and empty realms are dropped")
+    all.ClassicBetaPvE.old = Players.Pack({ level = 5, seen = game.clock - Players.MAX_AGE - 60 })
+    all.Junk = { junk = 5 }
+    Players.Prune(all)
+    eq(all.ClassicBetaPvE.old, nil, "players: unseen too long is dropped")
+    eq(all.Junk, nil, "players: junk and empty realms are dropped")
     eq(Players.Get(nil, "Bob") ~= nil, true, "players: recent ones stay")
-    Players.Prune(ns.db, 1)
+    Players.Prune(all, 1)
     eq(Players.Get(nil, "Bob") == nil and Players.Get("Player-2-DDDD", nil) ~= nil, true,
         "players: past the limit, only the newest stay")
-    ns.db.players = nil
-    Players.Prune(ns.db)
-    eq(ns.db.players, nil, "players: prune with nothing saved")
-    ns.db = nil
+    Players.Prune(all, 0)
+    eq(next(all), nil, "players: an emptied realm is dropped")
+    ns.playersDB = nil
+    eq(Players.Get(nil, "Bob"), nil, "players: nothing to read before login")
     UnitLevel, time, game.secret = savedUnitLevel, savedTime, savedSecret
 end
 
