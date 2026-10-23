@@ -18,6 +18,9 @@ ns.changelog = {
                     .. "the class, level, race, and guild of players you group with, your guild "
                     .. "and friends, your /who results, and players you target or see nearby, so "
                     .. "the level shows for players far away too. Off by default." },
+                { L.CLASSCOLORS_TITLE, "The new Offline Friends option (off by default) shows "
+                    .. "offline friends' names in the friends list in the class Forever++ last "
+                    .. "saw them as." },
                 { L.GEARPROBE_TITLE, "A new Run button under Testing in the Debug "
                     .. "module's settings (and /fpp gearprobe) that reads what the client says "
                     .. "about the gear you wear and carry, its own item comparison, your talent "

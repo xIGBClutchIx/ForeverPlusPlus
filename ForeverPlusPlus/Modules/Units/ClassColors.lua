@@ -3,7 +3,8 @@
 -- when neutral, gray when tapped by someone else. Friendly NPCs, and units whose class or
 -- reaction can't be read, keep Blizzard's green. Idea from MiniClassColors; none of its code.
 -- With Friends and Who List on, online friends' names in the friends list and names in the who
--- list are in their class color too (the guild roster already does this itself).
+-- list are in their class color too (the guild roster already does this itself). With Offline
+-- Friends on, offline friends' names are in the class Forever++ last saw them as (ns.Players).
 --
 -- Blizzard's health bars are a green texture with lockColor set, so Blizzard never colors them
 -- except party frames, which desaturate the bar for a disconnected member. The bar is
@@ -30,6 +31,7 @@ local module = ns.NewModule("ClassColors", L.CLASSCOLORS_DESC, {
     nameColor = "default",
     nameBackgrounds = true,
     socialNames = true,
+    offlineFriends = false,
     player = true,
     target = true,
     focus = true,
@@ -55,6 +57,8 @@ module.options = {
     { key = "nameBackgrounds", name = L.CLASSCOLORS_NAME_BG, description = L.CLASSCOLORS_NAME_BG_DESC, section = PARTS },
     { key = "socialNames", name = L.CLASSCOLORS_SOCIAL, description = L.CLASSCOLORS_SOCIAL_DESC, section = PARTS,
         added = "0.8.0" },
+    { key = "offlineFriends", name = L.CLASSCOLORS_OFFLINE, description = L.CLASSCOLORS_OFFLINE_DESC,
+        section = PARTS, requires = "socialNames", added = "0.10.0" },
     { key = "player", name = L.CLASSCOLORS_PLAYER, description = L.CLASSCOLORS_PLAYER_DESC, section = FRAMES },
     { key = "target", name = L.CLASSCOLORS_TARGET, description = L.CLASSCOLORS_TARGET_DESC, section = FRAMES },
     { key = "focus", name = L.CLASSCOLORS_FOCUS, description = L.CLASSCOLORS_FOCUS_DESC, section = FRAMES },
@@ -343,6 +347,20 @@ local function socialOn()
     return module.enabled and module.db.socialNames
 end
 
+local function offlineOn()
+    return socialOn() and module.db.offlineFriends
+end
+
+-- The player cache learns only while some module uses it, so it's ours only while offline
+-- friends are colored.
+local function syncPlayers()
+    if offlineOn() then
+        ns.Players.Use(module)
+    else
+        ns.Players.Release(module)
+    end
+end
+
 -- A friend's class token: from their GUID when the client knows it, else from the localized
 -- class name the friend info carries.
 local function friendClass(info)
@@ -355,11 +373,21 @@ local function friendClass(info)
     return ns.Players.ClassToken(info.className)
 end
 
--- Blizzard draws an online WoW friend as "Name, Level 60 Warrior" in one flat color, so we write
--- the same line with only the name in its class color. Without `color` it's Blizzard's line.
+-- Blizzard draws an online WoW friend as "Name, Level 60 Warrior" in one flat color, and an
+-- offline one as just the name in gray, so we write the same line with only the name in its class
+-- color. Without `color` it's Blizzard's line.
 local function friendText(info, color)
     local name = color and ns.Colors.Text(color, info.name) or info.name
+    if not info.connected then
+        return name
+    end
     return name .. ", " .. format(_G.FRIENDS_LEVEL_TEMPLATE, info.level, info.className)
+end
+
+-- An offline friend's class isn't sent, so it's the one they had when last seen.
+local function offlineClass(info)
+    local seen = ns.Players.Get(info.guid, info.name)
+    return seen and seen.class
 end
 
 local function paintFriend(_, button, elementData)
@@ -367,11 +395,16 @@ local function paintFriend(_, button, elementData)
     if elementData and elementData.buttonType == _G.FRIENDS_BUTTON_TYPE_WOW and button.name then
         info = C_FriendList.GetFriendInfoByIndex(elementData.id)
     end
-    if not (info and info.connected and info.name) then
+    if not (info and info.name) then
         friendPainted[button] = nil -- a different kind of row now, which Blizzard has redrawn
         return
     end
-    local color = socialOn() and classColorOf(friendClass(info))
+    local color
+    if info.connected then
+        color = socialOn() and classColorOf(friendClass(info))
+    else
+        color = offlineOn() and classColorOf(offlineClass(info))
+    end
     if color then
         button.name:SetText(friendText(info, color))
         friendPainted[button] = true
@@ -429,6 +462,7 @@ function module:OnEnable()
         ns.AddOns.WhenLoaded(FRIENDS_ADDON, watchFriends)
         ns.AddOns.WhenLoaded(WHO_ADDON, watchWho)
     end
+    syncPlayers()
 end
 
 -- module.enabled is already false here, so every painted bar and name goes back to Blizzard's.
@@ -442,9 +476,11 @@ function module:OnDisable()
         scrollBox:UnregisterCallback(_G.ScrollBoxListMixin.Event.OnInitializedFrame, module)
     end
     wipe(lists)
+    ns.Players.Release(module)
 end
 
 function module:OnOptionChanged()
+    syncPlayers()
     updateAll()
     repaintLists()
 end
