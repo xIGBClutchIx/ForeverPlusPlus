@@ -92,9 +92,9 @@ L.ALREADYKNOWN_LOOT_DESC = "Mark known items in the loot window and on loot roll
 
 L.UNUSABLEITEMSTINT_TITLE = "Unusable Items Tint"
 L.UNUSABLEITEMSTINT_PART_LOOKUP = "reading item tooltips" -- its row on the Profiler page
-L.UNUSABLEITEMSTINT_DESC = "Tint red the items you can't use, because of your class, armor or weapon "
-    .. "skill, level, or profession, in your bags, the bank, and at merchants, the way merchants "
-    .. "tint them. It goes by the red lines in the item's tooltip."
+L.UNUSABLEITEMSTINT_DESC = "Tint red the items you can't use, because of your class, armor or weapon skill, level, "
+    .. "or profession, in your bags, the bank, and at merchants, going by the red lines in their "
+    .. "tooltip."
 L.UNUSABLEITEMSTINT_BAGS = "Bags"
 L.UNUSABLEITEMSTINT_BAGS_DESC = "Tint items you can't use in your bags."
 L.UNUSABLEITEMSTINT_BANK = "Bank"
@@ -132,9 +132,9 @@ L.EASYDELETE_DESC = "Type DELETE for you when destroying a good item, so Yes is 
 -- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE,
 -- DISENCHANT_TITLE, and AUCTIONPRICES_TITLE)
 L.ITEMTOOLTIPS_TITLE = "Item Tooltips"
-L.ITEMTOOLTIPS_DESC = "Add to item tooltips: the sell price of the whole stack, what damaged gear "
-    .. "costs to repair, how many you own, what disenchanting gives, and the lowest auction house "
-    .. "buyout, scanned when you open the auction house. Each has its own checkbox."
+L.ITEMTOOLTIPS_DESC = "Add to item tooltips: the stack's sell price, the repair cost of damaged gear, how many "
+    .. "you own, what disenchanting gives, and the lowest auction buyout. Each has its own "
+    .. "checkbox."
 L.ITEMTOOLTIPS_SECTION_GENERAL = "Price Lines"
 L.ITEMTOOLTIPS_SELLPRICE = "Show Sell Price"
 L.ITEMTOOLTIPS_REPAIRCOST = "Show Repair Cost"
@@ -267,9 +267,9 @@ L.PROFTOOLTIPS_DRAGONKIN = "Dragonkin"
 
 -- WaylaidCrates
 L.WAYLAIDCRATES_TITLE = "Waylaid Crates"
-L.WAYLAIDCRATES_DESC = "Help fill your Waylaid Crates: what each bundle a crate takes costs at "
-    .. "the auction house, and an auction house category that lists every item your crates still "
-    .. "need. Prices come from Item Tooltips' Auction Prices."
+L.WAYLAIDCRATES_DESC = "Help fill your Waylaid Crates: what each bundle a crate takes costs at auction, and an "
+    .. "auction house category listing every item your crates still need, priced by Auction "
+    .. "Prices."
 L.WAYLAIDCRATES_COSTS = "Bundle Costs"
 L.WAYLAIDCRATES_COSTS_DESC = "On a Waylaid Crate, show what buying each bundle it takes costs "
     .. "at the auction house (the count times the item's lowest buyout), beside or under each "
@@ -295,9 +295,9 @@ L.WAYLAIDCRATES_NONE_LISTED = "None listed" -- no auctions up for the item
 
 -- Upgrade Arrows
 L.UPGRADEARROWS_TITLE = "Upgrade Arrows"
-L.UPGRADEARROWS_DESC = "Put Blizzard's green arrow on gear that beats what you wear, judged by stat "
-    .. "weights for your class and talent tree, in your bags and bank, at merchants, on loot and "
-    .. "loot rolls, on quest rewards, and in the auction house, with the upgrade in the item's tooltip."
+L.UPGRADEARROWS_DESC = "Put Blizzard's green arrow on gear that beats what you wear, judged by stat weights for "
+    .. "your class and talent tree, in your bags, at merchants, on loot, on quest rewards, and "
+    .. "in the auction house."
 L.UPGRADEARROWS_NOTICE = "A quick guide, not a sim: tune the weights to how you play." -- a gray row atop the module
 L.UPGRADEARROWS_NOTICE_DESC = "The default weights are a starting point from Classic stat values. "
     .. "Change them on the Stat Weights page (/fpp weights)."

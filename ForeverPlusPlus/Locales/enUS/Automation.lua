@@ -215,10 +215,9 @@ L.FISHINGCAST_LOUDER_DESC = "While you fish, turn sound effects up and music dow
 
 -- AutoWeaponBuff
 L.AUTOWEAPONBUFF_TITLE = "Auto Weapon Buff"
-L.AUTOWEAPONBUFF_DESC = "Right-click a sharpening stone, weightstone, oil, poison, or lure in your "
-    .. "bags, or use one from an action bar, to put it straight on your weapon: the main hand, or the "
-    .. "off hand when only it fits or the main hand is buffed. Anything else you put on a weapon by "
-    .. "hand works this way from then on."
+L.AUTOWEAPONBUFF_DESC = "Right-click a sharpening stone, oil, poison, or lure in your bags, or use one from an "
+    .. "action bar, to put it straight on your weapon: the main hand, or the off hand when only "
+    .. "it fits."
 L.AUTOWEAPONBUFF_NOTICE = "Works only out of combat." -- a gray row atop the module
 L.AUTOWEAPONBUFF_NOTICE_DESC = "The game doesn't let addons change what a bag or action bar click "
     .. "does in combat, so until combat ends they work as Blizzard's do."

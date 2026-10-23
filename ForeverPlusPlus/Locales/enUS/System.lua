@@ -8,9 +8,8 @@ end
 
 -- ErrorCatcher
 L.ERRORCATCHER_TITLE = "Error Catcher"
-L.ERRORCATCHER_DESC = "Catch Lua errors and blocked actions quietly instead of in Blizzard's "
-    .. "error window, and read them later in a window you can copy from, with /fpp errors or "
-    .. "a Shift-click on the Forever++ minimap button."
+L.ERRORCATCHER_DESC = "Catch Lua errors and blocked actions quietly instead of in Blizzard's error window, and "
+    .. "read them later in a window you can copy from, with /fpp errors or the minimap button."
 L.ERRORCATCHER_CHAT_DESC = "Say in chat when an error is caught."
 L.ERRORCATCHER_SHOW = "Errors"
 L.ERRORCATCHER_SHOW_BUTTON = "Show"
@@ -86,9 +85,8 @@ L.ADDONSLIST_SETS_MISSING = "Addons in the AddOn set %s that aren't installed: %
 
 -- MinimapButton
 L.MINIMAPBUTTON_TITLE = "Minimap Button"
-L.MINIMAPBUTTON_DESC = "A Forever++ button on the minimap, in the addon compartment, or both. "
-    .. "Click it for quick toggles, right-click it for settings, and Shift-click it for caught "
-    .. "errors, Ctrl-click to clear this session's, or Alt-click to clear them all."
+L.MINIMAPBUTTON_DESC = "A Forever++ button on the minimap, in the addon compartment, or both: click it for quick "
+    .. "toggles, right-click it for settings, and Shift-click it for caught errors."
 L.MINIMAPBUTTON_WHERE = "Show In"
 L.MINIMAPBUTTON_WHERE_DESC = "Where the button goes: on the minimap, in the addon compartment "
     .. "under it, or both. Drag the minimap button to move it around the minimap."
