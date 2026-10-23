@@ -128,15 +128,18 @@ module.options = {
     { key = "auction", name = L.UPGRADEARROWS_AUCTION, description = L.UPGRADEARROWS_AUCTION_DESC, section = L.UPGRADEARROWS_SECTION_SHOW },
 }
 
--- A gray row in Settings while the UpgradeArrow addon is on too, since then every upgrade gets
--- two arrows.
+-- Gray rows in Settings: that the arrows are an estimate, and, while the UpgradeArrow addon is
+-- on too, that every upgrade gets two arrows.
 module.notice = {
-    text = L.UPGRADEARROWS_OTHER_ADDON,
-    description = L.UPGRADEARROWS_OTHER_ADDON_DESC,
-    shown = function()
-        return module.enabled and C_AddOns and C_AddOns.IsAddOnLoaded
-            and ns.IsTrue(C_AddOns.IsAddOnLoaded("UpgradeArrow"))
-    end,
+    { text = L.UPGRADEARROWS_NOTICE, description = L.UPGRADEARROWS_NOTICE_DESC },
+    {
+        text = L.UPGRADEARROWS_OTHER_ADDON,
+        description = L.UPGRADEARROWS_OTHER_ADDON_DESC,
+        shown = function()
+            return module.enabled and C_AddOns and C_AddOns.IsAddOnLoaded
+                and ns.IsTrue(C_AddOns.IsAddOnLoaded("UpgradeArrow"))
+        end,
+    },
 }
 
 local ATLAS = "bags-greenarrow" -- the arrow Blizzard's bag buttons keep hidden

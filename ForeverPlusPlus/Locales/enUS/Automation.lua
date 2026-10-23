@@ -217,8 +217,11 @@ L.FISHINGCAST_LOUDER_DESC = "While you fish, turn sound effects up and music dow
 L.AUTOWEAPONBUFF_TITLE = "Auto Weapon Buff"
 L.AUTOWEAPONBUFF_DESC = "Right-click a sharpening stone, weightstone, oil, poison, or lure in your "
     .. "bags, or use one from an action bar, to put it straight on your weapon: the main hand, or the "
-    .. "off hand when only it fits or the main hand is buffed. Not in combat. Anything else you put "
-    .. "on a weapon by hand works this way from then on."
+    .. "off hand when only it fits or the main hand is buffed. Anything else you put on a weapon by "
+    .. "hand works this way from then on."
+L.AUTOWEAPONBUFF_NOTICE = "Works only out of combat." -- a gray row atop the module
+L.AUTOWEAPONBUFF_NOTICE_DESC = "The game doesn't let addons change what a bag or action bar click "
+    .. "does in combat, so until combat ends they work as Blizzard's do."
 L.AUTOWEAPONBUFF_WARN = "Warn When No Weapon Fits"
 L.AUTOWEAPONBUFF_WARN_DESC = "When no equipped weapon can take the item, like a weightstone with "
     .. "only blades, say so in red at the top of the screen instead of bringing up a cursor."
@@ -235,7 +238,10 @@ L.AUTOWEAPONBUFF_LEARNED_LINE = "Weapon buff learned: %s goes on %s." -- item na
 -- ComprehendScrolls
 L.COMPREHENDSCROLLS_TITLE = "Comprehend Scrolls"
 L.COMPREHENDSCROLLS_DESC = "Right-click a Mage's scroll in your bags to cast Comprehend Scroll on "
-    .. "it, without opening the spellbook first. Not in combat."
+    .. "it, without opening the spellbook first."
+L.COMPREHENDSCROLLS_NOTICE = "Works only out of combat." -- a gray row atop the module
+L.COMPREHENDSCROLLS_NOTICE_DESC = "The game doesn't let addons change what a bag click does in "
+    .. "combat, so until combat ends a right-click works as Blizzard's does."
 
 -- AutoScreenshot
 L.AUTOSCREENSHOT_TITLE = "Auto Screenshot"

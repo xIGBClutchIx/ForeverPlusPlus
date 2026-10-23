@@ -17,9 +17,12 @@ local module = ns.NewModule("BuffTimers", L.BUFFTIMERS_DESC, {
 module.title = L.BUFFTIMERS_TITLE
 module.category = "character"
 module.added = "0.8.0"
--- Blizzard shows its own Duration text only with this CVar on, and so do we (see below).
-module.notice = ns.CVars.OffNotice(module, "buffDurations", L.BUFFTIMERS_BLIZZARD_OFF,
-    L.BUFFTIMERS_BLIZZARD_OFF_DESC)
+-- Blizzard shows its own Duration text only with this CVar on, and so do we (see below); and
+-- secret aura times in combat, which we can't show.
+module.notice = {
+    ns.CVars.OffNotice(module, "buffDurations", L.BUFFTIMERS_BLIZZARD_OFF, L.BUFFTIMERS_BLIZZARD_OFF_DESC),
+    { text = L.BUFFTIMERS_NOTICE, description = L.BUFFTIMERS_NOTICE_DESC },
+}
 
 module.options = {
     {

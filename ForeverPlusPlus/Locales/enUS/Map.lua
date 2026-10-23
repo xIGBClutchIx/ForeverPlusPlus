@@ -249,8 +249,8 @@ L.WAYPOINTS_YARDS = "%s yds" -- a distance; the game's own words are used when i
 -- MinimapNodeIcons
 L.MINIMAPNODEICONS_TITLE = "Minimap Node Icons"
 L.MINIMAPNODEICONS_DESC = "Put the herb's or ore's own icon on each tracking dot on the minimap "
-    .. "while Find Herbs or Find Minerals is on. Icons update out of combat, while your cursor "
-    .. "isn't on the minimap. A node it doesn't know gets its icon once you gather it."
+    .. "while Find Herbs or Find Minerals is on. A node it doesn't know gets its icon once you "
+    .. "gather it."
 L.MINIMAPNODEICONS_SIZE = "Icon Size"
 L.MINIMAPNODEICONS_SIZE_DESC = "How big the icons are on the minimap."
 L.MINIMAPNODEICONS_BORDER = "Round Border"
@@ -277,8 +277,8 @@ L.MINIMAPNODEICONS_NOTICE = "Not fully accurate, and uses more CPU than other mo
 L.MINIMAPNODEICONS_NOTICE_DESC = "The game lists its tracking dots nowhere an addon can read, so "
     .. "this module asks the minimap what is under many spots, several times a second. That "
     .. "takes more of your computer's time than other modules, and an icon can sit a little off "
-    .. "its dot or go missing for a moment. This should improve over time with optimizations "
-    .. "and changes."
+    .. "its dot or go missing for a moment. Icons update only out of combat, while your cursor "
+    .. "isn't on the minimap. This should improve over time with optimizations and changes."
 -- Its rows on the Profiler page, after "Minimap Node Icons: ".
 L.MINIMAPNODEICONS_PART_VIEW = "reading your spot"
 L.MINIMAPNODEICONS_PART_FOLLOW = "following dots"

@@ -87,7 +87,7 @@ L.ADDONSLIST_SETS_MISSING = "Addons in the AddOn set %s that aren't installed: %
 -- MinimapButton
 L.MINIMAPBUTTON_TITLE = "Minimap Button"
 L.MINIMAPBUTTON_DESC = "A Forever++ button on the minimap, in the addon compartment, or both. "
-    .. "Click it for settings, right-click it for quick toggles, and Shift-click it for caught "
+    .. "Click it for quick toggles, right-click it for settings, and Shift-click it for caught "
     .. "errors, Ctrl-click to clear this session's, or Alt-click to clear them all."
 L.MINIMAPBUTTON_WHERE = "Show In"
 L.MINIMAPBUTTON_WHERE_DESC = "Where the button goes: on the minimap, in the addon compartment "
@@ -163,5 +163,5 @@ L.HIDEBETAFEEDBACK_QUEST_DESC = "Hide the feedback buttons on quest windows."
 
 -- MovableFramerate
 L.MOVABLEFRAMERATE_TITLE = "Movable Framerate"
-L.MOVABLEFRAMERATE_DESC = "Lets you move and resize the framerate text (Ctrl+R) in Edit Mode, like "
+L.MOVABLEFRAMERATE_DESC = "Move and resize the framerate text (Ctrl+R) in Edit Mode, like "
     .. "Blizzard's own frames. Until you move it, it stays where Blizzard puts it."

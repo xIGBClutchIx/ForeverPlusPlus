@@ -295,9 +295,12 @@ L.WAYLAIDCRATES_NONE_LISTED = "None listed" -- no auctions up for the item
 
 -- Upgrade Arrows
 L.UPGRADEARROWS_TITLE = "Upgrade Arrows"
-L.UPGRADEARROWS_DESC = "Put Blizzard's green arrow on gear that beats what you wear, in your bags and "
-    .. "bank, at merchants, on loot, on quest rewards, and in the auction house. A quick guide from "
-    .. "stat weights for your class and tree, which you can tune on the Stat Weights page."
+L.UPGRADEARROWS_DESC = "Put Blizzard's green arrow on gear that beats what you wear, judged by stat "
+    .. "weights for your class and talent tree, in your bags and bank, at merchants, on loot and "
+    .. "loot rolls, on quest rewards, and in the auction house, with the upgrade in the item's tooltip."
+L.UPGRADEARROWS_NOTICE = "A quick guide, not a sim: tune the weights to how you play." -- a gray row atop the module
+L.UPGRADEARROWS_NOTICE_DESC = "The default weights are a starting point from Classic stat values. "
+    .. "Change them on the Stat Weights page (/fpp weights)."
 L.UPGRADEARROWS_PART_SCORE = "scoring items" -- its row on the Profiler page
 L.UPGRADEARROWS_SECTION_GENERAL = "General"
 L.UPGRADEARROWS_DOWNGRADES = "Show Downgrades"

@@ -9,8 +9,9 @@ end
 -- ConsoleVariables
 L.CONSOLEVARIABLES_TITLE = "Console Variables"
 L.DEBUG_DESC = "Show every module's debug options and the testing tools (Self Test, Gear Probe, "
-    .. "Screenshots) below, and turn on their commands. Turning it off puts every debug option "
-    .. "back to its default."
+    .. "Screenshots) below, and turn on their commands."
+L.DEBUG_NOTICE = "Turning Debug off puts every debug option back to its default." -- a gray row atop the module
+L.DEBUG_NOTICE_DESC = "So nothing set here goes on working out of sight."
 L.CONSOLEVARIABLES_DESC ="Browse the game's console variables (CVars) on a page in Settings, and "
     .. "change them."
 L.CONSOLEVARIABLES_COMMAND = "open Console Variables, searching for [search]"
@@ -134,8 +135,8 @@ L.PROFILER_NOTE = "Only Forever++'s own code is timed, and timing it adds a litt
 
 -- Gear Probe
 L.GEARPROBE_TITLE = "Gear Probe"
-L.GEARPROBE_DESC = "Read what this client says about your gear, talent tabs, and stats, for the "
-    .. "developers of the upgrade arrows."
+L.GEARPROBE_DESC = "Read what this client says about your gear, talent tabs, and stats, for "
+    .. "working on Upgrade Arrows."
 L.GEARPROBE_COMMAND = "probe your gear, bags, talents, and stats, then /reload to save the log"
 L.GEARPROBE_BUTTON = "Run"
 L.GEARPROBE_BUTTON_DESC = "Read the stats of what you wear and of the gear in your bags, the "

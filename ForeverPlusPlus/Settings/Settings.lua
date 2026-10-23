@@ -811,25 +811,31 @@ local function addModuleRows(view, module)
     local function on()
         return module.db.enabled and true or false
     end
-    -- A gray row while `shown()` is true, such as a Blizzard setting the module needs being off,
-    -- with a button that fixes it. ns.CVars.OffNotice makes one for a CVar. One without a `button`
-    -- only says so, across the whole row.
-    local notice = module.notice
-    if notice and not notice.button then
-        local row, label = addRow(view, format("|cff999999%s|r", notice.text), 0, nil, notice.shown)
-        label:SetWidth(view:GetWidth() - 8)
-        row:SetHeight(max(ROW_HEIGHT, label:GetStringHeight() + 8))
-        addTooltip(row, notice.text, notice.description)
-    elseif notice then
-        addButtonRow(view, format("|cff999999%s|r", notice.text), nil, notice.shown,
-            notice.button, function()
-                notice.fn()
-                refreshModule(name)
-                -- A CVar can change a moment later (ns.CVars waits out combat).
-                if C_Timer then
-                    C_Timer.After(0.2, function() refreshModule(name) end)
-                end
-            end, notice.description, notice.text)
+    -- A gray row while `shown()` is true (always without one), such as a Blizzard setting the
+    -- module needs being off, with a button that fixes it. ns.CVars.OffNotice makes one for a CVar.
+    -- One without a `button` only says so, across the whole row: a warning kept out of the
+    -- description. `module.notice` is one notice or a list of them.
+    local notices = module.notice
+    if notices and not notices[1] then
+        notices = { notices }
+    end
+    for _, notice in ipairs(notices or {}) do
+        if not notice.button then
+            local row, label = addRow(view, format("|cff999999%s|r", notice.text), 0, nil, notice.shown)
+            label:SetWidth(view:GetWidth() - 8)
+            row:SetHeight(max(ROW_HEIGHT, label:GetStringHeight() + 8))
+            addTooltip(row, notice.text, notice.description)
+        else
+            addButtonRow(view, format("|cff999999%s|r", notice.text), nil, notice.shown,
+                notice.button, function()
+                    notice.fn()
+                    refreshModule(name)
+                    -- A CVar can change a moment later (ns.CVars waits out combat).
+                    if C_Timer then
+                        C_Timer.After(0.2, function() refreshModule(name) end)
+                    end
+                end, notice.description, notice.text)
+        end
     end
     local options, byKey, done = {}, {}, {}
     for _, option in ipairs(module.options or {}) do

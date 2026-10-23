@@ -92,6 +92,9 @@ ns.changelog = {
                 { L.QUESTTRACKER_TITLE, "The background is a little darker by default, at 40% "
                     .. "opacity instead of 30%. If you set its Opacity yourself, it stays as you "
                     .. "set it." },
+                { L.CHANGELOG_SETTINGS, "A module's warnings and limits, like what works only "
+                    .. "out of combat, sit in a gray line under its description on the Modules page "
+                    .. "instead of in it." },
                 { L.CHANGELOG_SETTINGS, "Option names on the Modules page have more room and a "
                     .. "smaller indent under the option they depend on, so they wrap less. An "
                     .. "option's NEW label sits just after its checkbox instead of squeezing its "

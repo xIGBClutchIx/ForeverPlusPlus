@@ -25,6 +25,8 @@ local module = ns.NewModule("ComprehendScrolls", L.COMPREHENDSCROLLS_DESC, {
 module.title = L.COMPREHENDSCROLLS_TITLE
 module.category = "automation"
 module.added = "0.9.0"
+-- The game's rule, not ours, so say it where the player turns it on; a notice with no button.
+module.notice = { text = L.COMPREHENDSCROLLS_NOTICE, description = L.COMPREHENDSCROLLS_NOTICE_DESC }
 
 -- Comprehend Scroll, in the General tab of a Mage's spellbook (skill line 3012, Comprehension).
 -- **[web]** (wago.tools SpellName and SkillLineAbility for 1.60.1.70374)

@@ -182,8 +182,10 @@ L.SPELLRANKS_LINE = "Bar %d, slot %d: %s is Rank %d, and Rank %d is known." -- b
 -- BuffTimers
 L.BUFFTIMERS_TITLE = "Buff Timers"
 L.BUFFTIMERS_DESC = "Show the time left on your buffs and debuffs as a clock, like 1:23, instead "
-    .. "of rounded minutes like 2 m. In combat the game may hide aura times from addons; then "
-    .. "Blizzard's own timer shows."
+    .. "of rounded minutes like 2 m."
+L.BUFFTIMERS_NOTICE = "In combat, Blizzard's own timer may show instead." -- a gray row atop the module
+L.BUFFTIMERS_NOTICE_DESC = "In combat the game may hide aura times from addons. Then Blizzard's "
+    .. "rounded timer shows until it can read them again."
 L.BUFFTIMERS_BLIZZARD_OFF = "Blizzard's buff durations are off" -- a gray row atop the module, with a button
 L.BUFFTIMERS_BLIZZARD_OFF_DESC = "Blizzard's buff durations are off, so no time shows under your "
     .. "buffs and debuffs, ours included. Turn them on here or in Blizzard's options."
