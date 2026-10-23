@@ -95,6 +95,43 @@ function Colors.ClassToken(token)
     end
 end
 
+-- A color for each stat in ItemStats' keys, for stat lines in item tooltips. Our own palette,
+-- light enough to read on a tooltip: each attribute its own hue, what it feeds a lighter one near
+-- it (attack power near Strength, mana per 5 near Intellect), and resistances their school's.
+Colors.STATS = {
+    STR = { 1, 0.42, 0.32 },
+    AGI = { 1, 0.8, 0.28 },
+    STA = { 0.42, 0.86, 0.38 },
+    INT = { 0.38, 0.66, 1 },
+    SPI = { 0.82, 0.72, 1 },
+    HEALTH = { 0.42, 0.86, 0.38 },
+    MANA = { 0.38, 0.66, 1 },
+    AP = { 1, 0.58, 0.46 },
+    RAP = { 1, 0.66, 0.42 },
+    HIT = { 0.36, 0.94, 0.84 },
+    CRIT = { 1, 0.48, 0.72 },
+    HASTE = { 1, 0.94, 0.56 },
+    EXPERTISE = { 0.9, 0.76, 0.56 },
+    ARMORPEN = { 0.86, 0.62, 0.52 },
+    SP = { 0.68, 0.48, 1 },
+    HEAL = { 0.56, 1, 0.8 },
+    SPELLHIT = { 0.36, 0.94, 0.84 },
+    SPELLCRIT = { 1, 0.48, 0.72 },
+    MP5 = { 0.56, 0.84, 1 },
+    HP5 = { 0.64, 0.94, 0.56 },
+    ARMOR = { 0.8, 0.7, 0.56 },
+    DEF = { 0.56, 0.7, 0.92 },
+    DODGE = { 0.62, 0.76, 0.96 },
+    PARRY = { 0.68, 0.72, 0.88 },
+    BLOCK = { 0.76, 0.72, 0.66 },
+    BLOCKVALUE = { 0.76, 0.72, 0.66 },
+    RES_FIRE = { 1, 0.52, 0.22 },
+    RES_NATURE = { 0.48, 0.9, 0.3 },
+    RES_FROST = { 0.52, 0.86, 1 },
+    RES_SHADOW = { 0.68, 0.48, 0.88 },
+    RES_ARCANE = { 1, 0.66, 1 },
+}
+
 ---Like `Colors.Class`, but nil for anything that isn't a player.
 ---@param unit string
 ---@return table?

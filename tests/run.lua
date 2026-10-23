@@ -933,6 +933,43 @@ near(stats.CRIT, 1, "stats: crit is a rating, 14 to 1%")
 near(stats.SPELLCRIT, 1, "stats: the one crit counts for spells too")
 near(stats.DODGE, 0.5, "stats: dodge is a rating, 12 to 1%")
 eq(stats.DEF, 7, "stats: defense is skill points")
+
+-- Which stat a tooltip line is about, from the client's strings (build 70450's, from Gear Probe).
+do
+    local strings = {
+        ITEM_SPELL_TRIGGER_ONEQUIP = "Equip:", ITEM_MOD_SPIRIT = "%c%s Spirit", ITEM_MOD_SPIRIT_SHORT = "Spirit",
+        ITEM_MOD_STAMINA = "%c%s Stamina", ITEM_MOD_STAMINA_SHORT = "Stamina",
+        ITEM_MOD_HIT_RATING = "Increases your hit by %s.", ITEM_MOD_HIT_RATING_SHORT = "Hit",
+        ITEM_MOD_CRIT_RATING = "Increases your critical strike by %s.",
+        ITEM_MOD_CRIT_RATING_SHORT = "Critical Strike", RESISTANCE2_NAME = "Fire Resistance",
+        ITEM_MOD_SPELL_POWER_SHORT = "Spell Power", ITEM_MOD_ATTACK_POWER_SHORT = "Attack Power",
+    }
+    for name, text in pairs(strings) do
+        _G[name] = text
+    end
+    local line = ItemStats.LineStat
+    eq(line("+6 Spirit"), "SPI", "line stat: an attribute")
+    eq(line("-3 Stamina"), "STA", "line stat: a negative one")
+    eq(line("+10 Fire Resistance"), "RES_FIRE", "line stat: a resistance by its name")
+    eq(line("Durability 59 / 65"), nil, "line stat: not a stat")
+    eq(line("(12.6 damage per second)"), nil, "line stat: dps isn't colored")
+    local key, effect = line("Equip: Increases your hit by 1%.")
+    eq(key, "HIT", "line stat: an Equip: line by its string")
+    eq(effect, "Increases your hit by 1%.", "line stat: the effect after Equip:")
+    local wand = { ITEM_MOD_SPELL_POWER_SHORT = 2, ITEM_MOD_DAMAGE_PER_SECOND_SHORT = 15.8 }
+    local spell = "Equip: Increases damage and healing done by magical spells and effects by up to 2."
+    eq(line(spell, wand), "SP", "line stat: a spell's wording by its number")
+    eq(line(spell, nil), nil, "line stat: not without the item's stats")
+    eq(line(spell, { ITEM_MOD_SPELL_POWER_SHORT = 2, ITEM_MOD_ATTACK_POWER_SHORT = 2 }), nil,
+        "line stat: two stats with the number are left alone")
+    eq(line(spell, { ITEM_MOD_SPELL_POWER_SHORT = 2, ITEM_MOD_INTELLECT_SHORT = 2 }), "SP",
+        "line stat: an attribute is never an Equip: line's")
+    eq(line("Equip: Improves your chance to hit by 1%.", { ITEM_MOD_HIT_RATING_SHORT = 10 }), "HIT",
+        "line stat: a rating's percent")
+    for name in pairs(strings) do
+        _G[name] = nil
+    end
+end
 eq(select(2, ItemStats.RatingRates()).HIT, "seed", "ratings: the seed without the client")
 for _, key in ipairs(ItemStats.ORDER) do
     local known = key == "DPS_OFF" or key == "DPS_RANGED"

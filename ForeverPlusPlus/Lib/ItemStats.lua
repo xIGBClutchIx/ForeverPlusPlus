@@ -1,13 +1,14 @@
 -- An item's stats in short keys every module can share (STR, SP, HIT, DPS, ...), read from the
 -- game's stat table (C_Item.GetItemStats, which on Forever carries the Equip: effects too, as the
 -- Gear Probe showed on build 70425), with its slot, item level, and level requirement; and the
--- arithmetic of a stat weight score. An item the game hasn't cached yet gives nil and its ID, so
--- the caller can look again at GET_ITEM_INFO_RECEIVED. Nothing here reads frames.
+-- arithmetic of a stat weight score; and which stat a line of an item's tooltip is about. An item
+-- the game hasn't cached yet gives nil and its ID, so the caller can look again at
+-- GET_ITEM_INFO_RECEIVED. Nothing here reads frames.
 local _, ns = ...
 
 local _G, pairs, ipairs, type, sort, tonumber, pcall = _G, pairs, ipairs, type, table.sort, tonumber, pcall
 local format, gmatch, match, lower, concat = string.format, string.gmatch, string.match, string.lower, table.concat
-local floor = math.floor
+local floor, abs = math.floor, math.abs
 local C_Item, UnitStat, UnitLevel = C_Item, UnitStat, UnitLevel
 
 local ItemStats = {}
@@ -509,4 +510,119 @@ function ItemStats.DeriveAttributes(weights, rates)
         derived.INT = round(rates.SPELLCRIT_INT * w("SPELLCRIT") + rates.MANA_INT * w("MANA"))
     end
     return derived
+end
+
+-- Tooltip lines ---------------------------------------------------------------------------------
+
+-- Our key for a game key; a folded one (hit for melee and spells) gives its first.
+local function ourKey(gameKey)
+    local ours = ItemStats.KEYS[gameKey]
+    if type(ours) == "table" then
+        return ours[1]
+    end
+    return ours
+end
+
+-- Keys an Equip: line can carry. The five attributes, armor, and resistances always have a
+-- "+6 Spirit" line of their own, so a number that matches one of them isn't the Equip: line's.
+local EQUIP_KEYS = {
+    AP = true, RAP = true, SP = true, HEAL = true, HIT = true, CRIT = true, HASTE = true,
+    SPELLHIT = true, SPELLCRIT = true, MP5 = true, HP5 = true, EXPERTISE = true, ARMORPEN = true,
+    DEF = true, DODGE = true, PARRY = true, BLOCK = true, BLOCKVALUE = true,
+}
+
+local linePatterns, lineNames -- { pattern, key } from the client's long strings; short name -> key
+
+-- Built from the client's strings the first time a line is read, so they match in any language:
+-- each short key's long string ("%c%s Spirit", "Increases your hit by %s.") as a pattern, and
+-- each short name ("Spirit", "Fire Resistance") for a "+6 <name>" line no long string fits.
+local function buildLinePatterns()
+    linePatterns, lineNames = {}, {}
+    for gameKey in pairs(ItemStats.KEYS) do
+        local key = ourKey(gameKey)
+        local long = _G[(gameKey:gsub("_SHORT$", ""))]
+        if key ~= "DPS" and gameKey:find("_SHORT$") and type(long) == "string" then
+            local pattern = ns.Text.FormatPattern((long:gsub("%%c", "\2")))
+            pattern = "^" .. pattern:gsub("\2", "[%%+%%-]") .. "$"
+            -- A string with a format we don't turn into a pattern (%.1f) would throw: skip it.
+            if pcall(match, "", pattern) then
+                linePatterns[#linePatterns + 1] = { pattern, key }
+            end
+        end
+        local short = _G[gameKey]
+        if key ~= "DPS" and type(short) == "string" and short ~= "" then
+            lineNames[short] = key
+        end
+    end
+    -- Longest first, so "Increases your hit by %s." can't win over a longer string it's part of.
+    sort(linePatterns, function(a, b)
+        return #a[1] > #b[1]
+    end)
+end
+
+-- The one Equip: key among the item's stats whose value is a number in the line (raw, or as
+-- percent for a rating), or nil when none or more than one is.
+local function equipKeyByNumber(text, raw)
+    if type(raw) ~= "table" then
+        return nil
+    end
+    local numbers = {}
+    for number in gmatch(text, "%d+%.?%d*") do
+        numbers[#numbers + 1] = tonumber(number)
+    end
+    if #numbers == 0 then
+        return nil
+    end
+    local rates = ItemStats.RatingRates()
+    local found
+    for gameKey, value in pairs(raw) do
+        local key = ns.IsReadable(gameKey) and ns.IsNumber(value) and ourKey(gameKey)
+        if key and EQUIP_KEYS[key] then
+            local percent = rates[key] and value * rates[key]
+            for _, number in ipairs(numbers) do
+                if number == value or (percent and abs(number - percent) < 0.05) then
+                    if found and found ~= key then
+                        return nil
+                    end
+                    found = key
+                end
+            end
+        end
+    end
+    return found
+end
+
+---Which stat a line of an item's tooltip is about, in our keys: "+6 Spirit" and the like by the
+---client's own strings, and an Equip: line by those or, when its wording is a spell's ("Increases
+---damage and healing done by magical spells and effects by up to 2."), by its number among the
+---item's stats. Nil for any other line. The second value is the text after "Equip: " on an
+---Equip: line.
+---@param text string the line's text without escape codes (Text.Plain)
+---@param raw table? the item's C_Item.GetItemStats table, for Equip: lines
+---@return string? key
+---@return string? effect
+function ItemStats.LineStat(text, raw)
+    if type(text) ~= "string" or text == "" then
+        return nil
+    end
+    if not linePatterns then
+        buildLinePatterns()
+    end
+    local equip = _G.ITEM_SPELL_TRIGGER_ONEQUIP
+    local effect
+    if type(equip) == "string" and equip ~= "" and text:sub(1, #equip) == equip then
+        effect = text:sub(#equip + 1):gsub("^%s+", "")
+    end
+    local body = effect or text
+    for _, entry in ipairs(linePatterns) do
+        if match(body, entry[1]) then
+            return entry[2], effect
+        end
+    end
+    if effect then
+        local key = equipKeyByNumber(effect, raw)
+        return key, key and effect or nil
+    end
+    local name = match(text, "^[%+%-]%d+%s+(.+)$")
+    return name and lineNames[name] or nil
 end

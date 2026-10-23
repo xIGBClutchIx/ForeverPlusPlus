@@ -148,6 +148,7 @@
     "IsBetaBuild",
     "IsPublicTestClient",
     "SELL_PRICE",
+    "ITEM_SPELL_TRIGGER_ONEQUIP",
     "GetInventorySlotInfo",
     "GetInventoryItemDurability",
     "PaperDollItemsFrame",
