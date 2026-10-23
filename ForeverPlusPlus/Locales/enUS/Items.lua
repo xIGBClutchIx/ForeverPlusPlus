@@ -295,10 +295,9 @@ L.WAYLAIDCRATES_NONE_LISTED = "None listed" -- no auctions up for the item
 
 -- Upgrade Arrows
 L.UPGRADEARROWS_TITLE = "Upgrade Arrows"
-L.UPGRADEARROWS_DESC = "Put Blizzard's green arrow on gear that beats what you wear, judged by stat "
-    .. "weights for your class and talent tree, in your bags and bank, at merchants, on loot and "
-    .. "loot rolls, on quest rewards, and in the auction house, with the upgrade in the item's tooltip. "
-    .. "A quick guide, not a sim: tune the weights on the Stat Weights page."
+L.UPGRADEARROWS_DESC = "Put Blizzard's green arrow on gear that beats what you wear, in your bags and "
+    .. "bank, at merchants, on loot, on quest rewards, and in the auction house. A quick guide from "
+    .. "stat weights for your class and tree, which you can tune on the Stat Weights page."
 L.UPGRADEARROWS_PART_SCORE = "scoring items" -- its row on the Profiler page
 L.UPGRADEARROWS_SECTION_GENERAL = "General"
 L.UPGRADEARROWS_DOWNGRADES = "Show Downgrades"
