@@ -62,8 +62,8 @@ L.CONSOLEVARIABLES_NO_LOCKS = "Click the lock on a console variable to keep its 
 -- Locks: a locked CVar is put back to its value at login and whenever something changes it.
 L.CONSOLEVARIABLES_LOCKED_AT = "Locked at %s: put back at every login and whenever something "
     .. "changes it." -- the locked value
-L.CONSOLEVARIABLES_LOCK_HINT = "Click the lock to keep this value." -- tooltip of an open lock
-L.CONSOLEVARIABLES_UNLOCK_HINT = "Click the lock to stop keeping it." -- tooltip of a closed lock
+L.CONSOLEVARIABLES_LOCK_HINT = "<Click the lock to keep this value>" -- tooltip of an open lock
+L.CONSOLEVARIABLES_UNLOCK_HINT = "<Click the lock to stop keeping it>" -- tooltip of a closed lock
 L.CONSOLEVARIABLES_LOCK_STOPPED = "Not kept until you reload or log in again: it wouldn't hold."
 L.CONSOLEVARIABLES_LOCK_FAILED = "%s couldn't be put back to its locked %s (it's %s). Its lock waits "
     .. "until you reload or log in again." -- CVar name, the locked value, its value now

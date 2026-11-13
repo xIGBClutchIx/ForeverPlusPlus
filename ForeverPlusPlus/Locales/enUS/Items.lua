@@ -326,7 +326,7 @@ L.WAYLAIDCRATES_CATEGORY = "Waylaid Crates"
 L.WAYLAIDCRATES_NEEDS = "Waylaid Crate Needs"
 L.WAYLAIDCRATES_NO_CRATES = "No Waylaid Crates in your bags."
 L.WAYLAIDCRATES_DONE = "Your bags hold everything your crates need."
-L.WAYLAIDCRATES_HINT = "Click to list these items."
+L.WAYLAIDCRATES_HINT = "<Click to list these items>"
 L.WAYLAIDCRATES_NOT_FOUND = "Unknown item" -- an item name not found in the client or saved prices
 L.WAYLAIDCRATES_NONE_LISTED = "None listed" -- no auctions up for the item
 
