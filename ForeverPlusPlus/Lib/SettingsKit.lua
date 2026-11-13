@@ -107,7 +107,12 @@ function Kit.AddTooltip(row, title, text, ...)
         return
     end
     local function enter()
-        Kit.ShowTooltip(row, title, type(text) == "function" and text() or text)
+        local shown = text
+        if type(shown) == "function" then
+            shown = shown()
+        end
+        ---@cast shown string
+        Kit.ShowTooltip(row, title, shown)
     end
     local function leave()
         Kit.HideTooltip(row)
