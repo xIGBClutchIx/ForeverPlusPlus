@@ -26,6 +26,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Changed
 
+- **Gathering Map**: pointing at a minimap icon the game has no dot for shows the node's tooltip too: a node that's gone or just gathered, a chest, or a fishing pool.
 - **Whisper Window**: the reply box grows as you type, up to four lines, so a long whisper can be read before it's sent. Drag the divider between the list and the conversation to make the list wider or narrower. A whisper too long for the game to send as one still goes out as several, but shows in the window as the one message you typed.
 - **Square Minimap**: the mail icon sits in the map's top left corner instead of over its top edge. Mail Icon picks another corner, or Blizzard's place.
 - **Flight Timer**: a reload in the middle of a flight keeps the bar counting down, and the flight is still timed when you land.

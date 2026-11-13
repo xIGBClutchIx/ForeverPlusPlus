@@ -427,7 +427,8 @@ L.GATHERINGMAP_EDGE = "Keep at the Edge"
 L.GATHERINGMAP_EDGE_DESC = "Keep a node just past the minimap's edge on the edge, pointing the way to it."
 L.GATHERINGMAP_TOOLTIPS = "Minimap Tooltips"
 L.GATHERINGMAP_TOOLTIPS_DESC = "Add a node's lines to the game's tooltip when you point at its dot on "
-    .. "the minimap. Chests, fishing pools, and nodes that are gone have no dot."
+    .. "the minimap, and show a tooltip for an icon the game has no dot for: a node that's gone or "
+    .. "just gathered, a chest, or a fishing pool."
 -- A node's tooltip: the lines, each a label and its value as Blizzard's Sell Price line
 L.GATHERINGMAP_REQUIRES = "Requires %s (%d)" -- profession, skill; Blizzard's ITEM_MIN_SKILL when it has one
 L.GATHERINGMAP_TIP_GATHERED = "Gathered:"

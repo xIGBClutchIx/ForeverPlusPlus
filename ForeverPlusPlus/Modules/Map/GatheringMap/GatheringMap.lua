@@ -833,11 +833,20 @@ local function onMinimapTooltip(tooltip)
         return
     end
     addedAt[tooltip] = nil
-    -- Only under the game's own lines: where it has no dot (the node is gone) there's no tooltip,
-    -- as without the addon; the empty ring says so, and the world map has the node's history.
     local names = namesAtCursor()
     if not names then
-        return -- most frames over the minimap: no dot under the mouse
+        -- No dot of the game's under the mouse: most frames over the minimap, and also one of our
+        -- icons whose node the game doesn't show (gone or just gathered, a chest, a fishing pool,
+        -- tracking off). Then the tooltip is all ours, as the world map's is: the game left it
+        -- empty this frame, and fills nothing over it.
+        local node, yards = nodeAtCursor(nil)
+        if node then
+            local title = internal.Title(node)
+            tooltip:SetText(title[1], title[2].r, title[2].g, title[2].b)
+            ns.MapTooltip.AddLines(tooltip, internal.TooltipLines(node, yards))
+            tooltip:Show()
+        end
+        return
     end
     local node, yards = nodeAtCursor(names)
     if not node then
