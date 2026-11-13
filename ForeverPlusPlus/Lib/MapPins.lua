@@ -68,11 +68,43 @@ end
 
 -- Pins ----------------------------------------------------------------------------------------
 
+local IsShiftKeyDown, IsControlKeyDown = IsShiftKeyDown, IsControlKeyDown
+
+-- Click hints: what clicks do on an icon, as gray notes at the bottom of its tooltip, only while
+-- Shift is held, so a tooltip is the thing itself until the player asks. Written here from what
+-- the icon's `info` takes (see Clicks), for every layer alike: the Ctrl+click line is ours, and a
+-- module gives only the words for its own actions (`clickHint`, `shiftHint`).
+local function hints(info)
+    local Note = ns.MapTooltip.Note
+    local list = {}
+    if info.click and info.clickHint then
+        list[#list + 1] = Note(info.clickHint)
+    end
+    if info.waypoint or info.ctrlClick then
+        list[#list + 1] = Note(ns.L.MAPPINS_HINT_WAYPOINT)
+    end
+    if info.shiftClick and info.shiftHint then
+        list[#list + 1] = Note(info.shiftHint)
+    end
+    return list
+end
+
 local function showTooltip(pin)
     local info = pin.info
     local lines = info.lines
     if type(lines) == "function" then
         lines = lines(info)
+    end
+    if IsShiftKeyDown() then
+        -- A copy: the lines are the module's, and may be kept from one draw to the next.
+        local all = {}
+        for _, line in ipairs(lines or {}) do
+            all[#all + 1] = line
+        end
+        for _, line in ipairs(hints(info)) do
+            all[#all + 1] = line
+        end
+        lines = all
     end
     ns.MapTooltip.Show(pin, info.title, lines, info.kind)
 end
@@ -84,8 +116,6 @@ end
 --   `waypoint = true`         the same, putting Blizzard's map pin on the pin's own spot
 --   `shiftClick(pin, button)` a click with Shift held, either button
 -- A pin with only the last three takes clicks only while that key is held over it.
-
-local IsShiftKeyDown, IsControlKeyDown = IsShiftKeyDown, IsControlKeyDown
 
 local function takesClick(info)
     if info.click then
@@ -433,7 +463,9 @@ end
 ---hidden), and what a click on it does (see Clicks above): `waypoint = true` (Ctrl+click puts
 ---Blizzard's map pin on its spot) or `ctrlClick` (`fn(pin)` in its place), `shiftClick`
 ---(`fn(pin, button)` with Shift held), and `click` (`fn(pin, button)` on a plain left click,
----which then doesn't reach the map). Call `layer:Enable()` to show it and
+---which then doesn't reach the map). `clickHint` and `shiftHint` are the words for what its own
+---`click` and `shiftClick` do, shown with the Ctrl+click line at the bottom of its tooltip while
+---Shift is held; a module never writes hint lines itself. Call `layer:Enable()` to show it and
 ---`layer:Disable()` to take it off.
 ---@param fill fun(mapID: number, add: fun(x: number, y: number, info: table))
 ---@return table layer

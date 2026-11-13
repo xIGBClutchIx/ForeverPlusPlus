@@ -358,6 +358,12 @@ The goal is to add to Blizzard frames without tainting or breaking them.
 - On item tooltips, go through `ns.ItemTooltip`: facts with `OnInfo` and `AddInfo`, prices with `OnPrices` and `AddPrice`, so our lines sit together at the sell price.
 - Recoloring Blizzard's own line beats adding a second one.
 
+**Icons on the world map** all behave alike, through `ns.MapPins`:
+
+- Ctrl+click puts the map pin on the icon (`waypoint = true`, or `ctrlClick`), as the game's own Ctrl+click does. Never another key for a waypoint.
+- A module's own action on an icon is Shift+right-click (`shiftClick`), or a plain click (`click`) when the icon opens something.
+- Click hints show only while Shift is held, and `ns.MapPins` writes them. A module gives the words for its own action (`shiftHint`, `clickHint`, as "Shift+right-click: forget this node.") and never adds hint lines or a hints option itself.
+
 ## Settings
 
 `Settings/` builds every page from what modules declare. Modules don't create Settings UI themselves, except a `BuildPage` tool page drawn with `ns.SettingsKit`. "Add a module" in `README.md` has the step-by-step, and [docs/settings.md](docs/settings.md) has every rule below in full.

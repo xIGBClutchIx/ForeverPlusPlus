@@ -30,7 +30,6 @@ local module = ns.NewModule("QuestPins", L.QUESTPINS_DESC, {
     upcoming = true, -- quests the player is upcomingLevels or fewer levels short of
     upcomingLevels = 3,
     tooltipGiver = true,
-    tooltipHints = true,
     tooltipMax = 8, -- the most quests a pin's tooltip lists
     normal = true,
     repeatable = false,
@@ -132,8 +131,6 @@ module.options = {
     { key = "npcTooltips", name = L.QUESTPINS_NPC_TOOLTIPS, description = L.QUESTPINS_NPC_TOOLTIPS_DESC,
         section = TOOLTIPS },
     { key = "tooltipGiver", name = L.QUESTPINS_TOOLTIP_GIVER, description = L.QUESTPINS_TOOLTIP_GIVER_DESC,
-        section = TOOLTIPS },
-    { key = "tooltipHints", name = L.QUESTPINS_TOOLTIP_HINTS, description = L.QUESTPINS_TOOLTIP_HINTS_DESC,
         section = TOOLTIPS },
     { key = "tooltipMax", name = L.QUESTPINS_TOOLTIP_MAX, description = L.QUESTPINS_TOOLTIP_MAX_DESC,
         section = TOOLTIPS, min = 3, max = 20, step = 1, format = "%d" },

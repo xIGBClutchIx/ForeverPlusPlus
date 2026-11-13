@@ -336,13 +336,7 @@ local function pinFor(point, mapID, world)
             info.click = function(pin)
                 openMaps(pin, maps, title)
             end
-            -- A copy: a place's lines are its rows too, which a city's tooltip takes in.
-            local lines = {}
-            for i, line in ipairs(info.lines) do
-                lines[i] = line
-            end
-            lines[#lines + 1] = MapTooltip.Note(L.POI_DUNGEON_MAPS_HINT)
-            info.lines = lines
+            info.clickHint = L.POI_DUNGEON_MAPS_HINT
         end
     elseif kindName == "flight" then
         if not forPlayer(point[4]) then

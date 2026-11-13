@@ -214,10 +214,6 @@ local function tooltipLines(info)
         lines[#lines + 1] = MapTooltip.Note(format("%s %s, map %s %.1f, %.1f", tostring(info.giverKind),
             tostring(info.giverID), tostring(info.anchorMap), info.anchorX * 100, info.anchorY * 100))
     end
-    if db.tooltipHints then
-        lines[#lines + 1] = MapTooltip.Note(L.QUESTPINS_HINT_WAYPOINT)
-        lines[#lines + 1] = MapTooltip.Note(L.QUESTPINS_HINT_HIDE)
-    end
     return lines
 end
 
@@ -348,7 +344,8 @@ local function fill(mapID, add)
             atlas = "QuestNormal", size = size, color = color, desaturated = color ~= nil or faded == "low",
             alpha = (faded and db.fadeAlpha or db.alpha) / 100, upcoming = upcoming,
             title = questLine(pin.quests[1]), kind = kind and KIND_NAME[kind] or nil,
-            lines = tooltipLines, ctrlClick = ctrlClick, shiftClick = shiftClick, quests = pin.quests, count = pin.count,
+            lines = tooltipLines, ctrlClick = ctrlClick, shiftClick = shiftClick,
+            shiftHint = L.QUESTPINS_HINT_HIDE, quests = pin.quests, count = pin.count,
             anchorMap = pin.map, anchorX = pin.sx, anchorY = pin.sy,
             giverKind = pin.kind, giverID = pin.id,
         })

@@ -56,7 +56,7 @@ end
 local function infoFor(i, node, size, zone)
     local info = infos[i]
     if not info then
-        info = { ctrlClick = ctrlClick, shiftClick = shiftClick }
+        info = { ctrlClick = ctrlClick, shiftClick = shiftClick, shiftHint = ns.L.GATHERINGMAP_FORGET_HINT }
         infos[i] = info
     end
     info.node, info.zone = node, zone

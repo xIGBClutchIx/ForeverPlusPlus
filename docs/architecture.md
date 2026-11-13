@@ -165,7 +165,7 @@ Generated files (never edited by hand; see Generated data): `InstanceLevels.lua`
 
 ### `MapPins.lua`
 
-- `ns.MapPins`: layers of our own icons on the world map, through a map data provider, their art (`SetArt`: an atlas or item icon, round, tinted, ringed, or a hollow ring), and what a click on an icon does, set on its `info` (`waypoint = true` or `ctrlClick` for Ctrl+click, the game's own gesture for the map pin; `shiftClick` with Shift held; `click` for a plain left click the icon takes itself); an icon takes a click only when it has something for it, so plain clicks still reach the map.
+- `ns.MapPins`: layers of our own icons on the world map, through a map data provider, their art (`SetArt`: an atlas or item icon, round, tinted, ringed, or a hollow ring), and what a click on an icon does, set on its `info` (`waypoint = true` or `ctrlClick` for Ctrl+click, the game's own gesture for the map pin; `shiftClick` with Shift held; `click` for a plain left click the icon takes itself); an icon takes a click only when it has something for it, so plain clicks still reach the map; and the click hints at the bottom of an icon's tooltip, written here for every layer and shown only while Shift is held (the Ctrl+click line, and a module's `clickHint` and `shiftHint` for its own actions).
 
 ### `DungeonMaps.lua`
 

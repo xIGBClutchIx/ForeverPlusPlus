@@ -51,7 +51,6 @@ local module = ns.NewModule("GatheringMap", L.GATHERINGMAP_DESC, {
     tipLast = "always",
     tipAlso = "always",
     tipDistance = "shift",
-    tipForget = "shift",
     -- How a node shows on the minimap: "all" (an empty ring anywhere on it, the game's own dot
     -- inside it when the node is there, since the game draws dots out to about the minimap's edge:
     -- a Silver Vein ~200 yards off, in game, 2026-11-07), or within nearYards of the player "ring"
@@ -258,7 +257,6 @@ module.options = {
     tipOption("tipLast", L.GATHERINGMAP_TIP_LAST_NAME, L.GATHERINGMAP_TIP_LAST_DESC),
     tipOption("tipAlso", L.GATHERINGMAP_TIP_ALSO_NAME, L.GATHERINGMAP_TIP_ALSO_DESC),
     tipOption("tipDistance", L.GATHERINGMAP_TIP_DISTANCE_NAME, L.GATHERINGMAP_TIP_DISTANCE_DESC),
-    tipOption("tipForget", L.GATHERINGMAP_TIP_FORGET_NAME, L.GATHERINGMAP_TIP_FORGET_DESC),
     chatOption,
     {
         key = "log", name = L.GATHERINGMAP_LOG, description = L.GATHERINGMAP_LOG_DESC,
@@ -781,9 +779,10 @@ function internal.TooltipLines(node, yards, onDot)
     if yards and wants("tipDistance") then
         lines[#lines + 1] = Tip.Pair(L.GATHERINGMAP_TIP_DISTANCE, ns.Text.Yards(yards))
     end
-    if wants("tipForget") then
-        -- On the world map a Ctrl+click also places the map pin; on the minimap it's a ping.
-        lines[#lines + 1] = Tip.Note(onDot and L.GATHERINGMAP_FORGET_HINT or L.GATHERINGMAP_MAP_HINT)
+    -- Click hints only while Shift is held, as on every map icon. The world map's come from
+    -- Lib/MapPins; the minimap (where `yards` is known) isn't its, so its one hint is added here.
+    if yards and IsShiftKeyDown() then
+        lines[#lines + 1] = Tip.Note(L.GATHERINGMAP_FORGET_HINT)
     end
     return lines
 end
