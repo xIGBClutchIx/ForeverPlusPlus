@@ -362,7 +362,9 @@ The goal is to add to Blizzard frames without tainting or breaking them.
 
 - Ctrl+click puts the map pin on the icon (`waypoint = true`, or `ctrlClick`), as the game's own Ctrl+click does. Never another key for a waypoint.
 - A module's own action on an icon is Shift+right-click (`shiftClick`), or a plain click (`click`) when the icon opens something.
-- Click hints show only while Shift is held, and `ns.MapPins` writes them. A module gives the words for its own action (`shiftHint`, `clickHint`, as "Shift+right-click: forget this node.") and never adds hint lines or a hints option itself.
+- Click hints show only while Shift is held, and `ns.MapPins` writes them. A module gives the words for its own action (`shiftHint`, `clickHint`) and never adds hint lines or a hints option itself.
+
+**Click hints**, on any tooltip, are green (`GREEN_FONT_COLOR`), as Blizzard's own instruction lines are, and read as a sentence: "Shift+right-click to forget this node." On a map tooltip use `ns.MapTooltip.Hint`.
 
 ## Settings
 

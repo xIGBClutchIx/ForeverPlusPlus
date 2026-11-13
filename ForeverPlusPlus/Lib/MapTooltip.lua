@@ -27,6 +27,14 @@ function MapTooltip.Detail(text)
     return { text, HIGHLIGHT_FONT_COLOR }
 end
 
+---A click hint ("Ctrl+click to set a map pin here."): green, as Blizzard's own instruction lines
+---are (GameTooltip_AddInstructionLine, the map pin's "<Shift-click to share>" among them).
+---@param text string
+---@return table line
+function MapTooltip.Hint(text)
+    return { text, GREEN_FONT_COLOR }
+end
+
 ---A line of note (something not learned yet): gray.
 ---@param text string
 ---@return table line

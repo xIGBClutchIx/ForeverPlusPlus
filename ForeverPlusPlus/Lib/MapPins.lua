@@ -70,12 +70,12 @@ end
 
 local IsShiftKeyDown, IsControlKeyDown = IsShiftKeyDown, IsControlKeyDown
 
--- Click hints: what clicks do on an icon, as gray notes at the bottom of its tooltip, only while
+-- Click hints: what clicks do on an icon, as green lines at the bottom of its tooltip, only while
 -- Shift is held, so a tooltip is the thing itself until the player asks. Written here from what
 -- the icon's `info` takes (see Clicks), for every layer alike: the Ctrl+click line is ours, and a
 -- module gives only the words for its own actions (`clickHint`, `shiftHint`).
 local function hints(info)
-    local Note = ns.MapTooltip.Note
+    local Note = ns.MapTooltip.Hint
     local list = {}
     if info.click and info.clickHint then
         list[#list + 1] = Note(info.clickHint)

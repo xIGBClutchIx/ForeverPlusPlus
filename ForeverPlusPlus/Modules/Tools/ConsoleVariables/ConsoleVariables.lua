@@ -433,7 +433,7 @@ local function showTooltip(row, onLock)
     end
     if onLock then
         GameTooltip:AddLine(locked and L.CONSOLEVARIABLES_UNLOCK_HINT or L.CONSOLEVARIABLES_LOCK_HINT,
-            unpack(ns.Colors.GRAY))
+            GREEN_FONT_COLOR:GetRGB()) -- a click hint, green as Blizzard's instruction lines are
     end
     GameTooltip:Show()
 end

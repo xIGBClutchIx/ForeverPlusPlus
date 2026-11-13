@@ -146,7 +146,8 @@ local function onNodeEnter(self)
         end
     end
     GameTooltip:AddLine(" ")
-    GameTooltip:AddLine(L.TALENTPLANNER_CLICK, 0, 1, 0, true)
+    local green = GREEN_FONT_COLOR -- a click hint, green as Blizzard's instruction lines are
+    GameTooltip:AddLine(L.TALENTPLANNER_CLICK, green.r, green.g, green.b, true)
     GameTooltip:Show()
 end
 

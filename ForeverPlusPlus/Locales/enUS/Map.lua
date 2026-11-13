@@ -44,7 +44,7 @@ L.POI_RAIDS_DESC = "Raid entrances."
 L.POI_DUNGEON_MAPS = "Dungeon Maps"
 L.POI_DUNGEON_MAPS_DESC = "Click a dungeon or raid icon to open its map in the DungeonJournal addon. "
     .. "The game has no dungeon maps of its own. Not in combat."
-L.POI_DUNGEON_MAPS_HINT = "Click: open its map in DungeonJournal."
+L.POI_DUNGEON_MAPS_HINT = "Click to open its map in DungeonJournal."
 L.POI_CAPITALS = "Capital Cities"
 L.POI_CAPITALS_DESC = "Stormwind, Ironforge, Darnassus, Orgrimmar, Thunder Bluff, and the "
     .. "Undercity: our icons, with the city's dungeons in the tooltip (Blizzard's are then "
@@ -400,7 +400,7 @@ L.GATHERINGMAP_CLEAR_LEARNED_CONFIRM = "Forget every herb and vein Forever++ has
 L.GATHERINGMAP_CLEAR_LEARNED_DONE = "Learned herbs and veins cleared."
 L.GATHERINGMAP_FORGOT = "Forgot %d nodes." -- count
 L.GATHERINGMAP_FORGOT_ONE = "Forgot %s." -- node name
-L.GATHERINGMAP_FORGET_HINT = "Shift+right-click: forget this node."
+L.GATHERINGMAP_FORGET_HINT = "Shift+right-click to forget this node."
 L.GATHERINGMAP_JUST = "Just Gathered"
 L.GATHERINGMAP_JUST_DESC = "How a node you just gathered shows on this map while it's likely still "
     .. "gone: its icon faded, an empty ring, hidden, or as usual."

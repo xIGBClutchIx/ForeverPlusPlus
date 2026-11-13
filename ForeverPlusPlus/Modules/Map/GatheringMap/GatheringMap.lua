@@ -782,7 +782,7 @@ function internal.TooltipLines(node, yards, onDot)
     -- Click hints only while Shift is held, as on every map icon. The world map's come from
     -- Lib/MapPins; the minimap (where `yards` is known) isn't its, so its one hint is added here.
     if yards and IsShiftKeyDown() then
-        lines[#lines + 1] = Tip.Note(L.GATHERINGMAP_FORGET_HINT)
+        lines[#lines + 1] = Tip.Hint(L.GATHERINGMAP_FORGET_HINT)
     end
     return lines
 end
