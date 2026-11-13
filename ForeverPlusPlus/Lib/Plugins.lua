@@ -29,6 +29,23 @@ local function fail(message, level)
     error(addonName .. ": " .. message, (level or 1) + 1)
 end
 
+-- A plugin's function, wrapped so an error in it is reported (ns.Call) and answers `fallback`
+-- instead of stopping what called it. Core and Settings call these in the middle of their own
+-- work: login, laying out the Modules page. A plugin's mistake mustn't cost the player those.
+local function guarded(fn, fallback)
+    return function(...)
+        local done, result = false, nil
+        ns.Call(function(...)
+            result = fn(...)
+            done = true
+        end, ...)
+        if done then
+            return result
+        end
+        return fallback
+    end
+end
+
 -- Options ----------------------------------------------------------------------------------------
 
 -- The option fields a plugin may set, and each one's type ("any" for a value of the option's own
@@ -53,6 +70,9 @@ local function copyOption(option, defaults, index)
             end
             copy[field] = value
         end
+    end
+    if copy.shown then
+        copy.shown = guarded(copy.shown, true) -- an option whose test broke still shows
     end
     local key = copy.key
     if not key or not copy.name then
@@ -114,7 +134,7 @@ local function copyActions(actions)
             or type(action.fn) ~= "function" then
             fail("button " .. index .. " needs a name, a button text, and a function", 3)
         end
-        copies[index] = { name = action.name, button = action.button, fn = action.fn,
+        copies[index] = { name = action.name, button = action.button, fn = guarded(action.fn),
             description = type(action.description) == "string" and action.description or nil,
             section = type(action.section) == "string" and action.section or nil,
             confirm = type(action.confirm) == "string" and action.confirm or nil }
@@ -133,7 +153,7 @@ local function copyNotices(notice, own)
         end
         copies[#copies + 1] = { text = row.text,
             description = type(row.description) == "string" and row.description or nil,
-            shown = type(row.shown) == "function" and row.shown or nil }
+            shown = type(row.shown) == "function" and guarded(row.shown, true) or nil }
     end
     return copies
 end
@@ -167,9 +187,11 @@ local function setField(handle, key, value)
         fail(key .. " must be a " .. kind, 2)
     end
     if kind == "function" then
-        -- Core calls it with our module; the plugin's function gets its handle.
+        -- Core calls it with our module; the plugin's function gets its handle. Guarded: one that
+        -- errors answers false (not available, no problem) and the rest of login goes on.
+        local run = guarded(value, false)
         module[key] = function(_, ...)
-            return value(handle, ...)
+            return run(handle, ...)
         end
         return
     end

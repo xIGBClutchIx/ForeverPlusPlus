@@ -1032,7 +1032,9 @@ function ns.Start()
             module.db.enabled = not module.defaults.enabled or nil -- on, without saving the default
         end
         -- A module only for some clients (IsAvailable false) stays off and out of sight.
-        module.unavailable = module.IsAvailable and not module:IsAvailable() or nil
+        -- Through `call`: one that errors is reported and counts as not available, and the
+        -- modules after it still start.
+        module.unavailable = module.IsAvailable and not call(module.IsAvailable, module) or nil
         -- A locked module (`module.locked`, one the game broke) stays off, whatever was saved.
         if module.db.enabled and not module.unavailable and not module.locked then
             enable(module)
@@ -1068,7 +1070,9 @@ function ns.ChangeProfile(swap)
             disable(module)
         end
     end
-    swap()
+    -- Through `call`: every module is off here, so an error in the swap must not stop them
+    -- coming back on, on whichever profile it left in use, nor leave `switching` set.
+    call(swap)
     for _, name in ipairs(ns.order) do
         local module = ns.modules[name]
         checkValues(module)
