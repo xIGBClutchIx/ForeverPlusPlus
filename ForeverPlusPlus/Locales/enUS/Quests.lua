@@ -109,6 +109,9 @@ L.AUTOQUEST_KEY_DESC = "Hold this key as you talk to a quest giver to accept and
 
 -- BestQuestReward
 L.BESTQUESTREWARD_TITLE = "Best Quest Reward"
+L.BESTQUESTREWARD_CORNER_DESC = "Which corner of the reward's icon the gold coin sits on."
+L.BESTQUESTREWARD_CONFLICT_ARROW = "Upgrade Arrows puts its arrow in this corner of quest rewards "
+    .. "too, so the two overlap. Pick another corner for one of them."
 L.BESTQUESTREWARD_DESC = "Mark the quest reward choice that sells to a vendor for the most with a gold "
     .. "coin, in the quest window and the quest log. It doesn't choose it for you."
 

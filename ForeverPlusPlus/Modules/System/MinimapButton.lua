@@ -21,7 +21,7 @@ local Colors = ns.Colors
 -- The tooltip's colors, Blizzard's where it has them.
 local RED = RED_FONT_COLOR and { RED_FONT_COLOR:GetRGB() } or { 1, 0.1, 0.1 }
 local GOLD = NORMAL_FONT_COLOR and { NORMAL_FONT_COLOR:GetRGB() } or { 1, 0.82, 0 }
-local GREEN = { 0.1, 1, 0.1 } -- Blizzard's hint green
+local GREEN = GREEN_FONT_COLOR and { GREEN_FONT_COLOR:GetRGB() } or { 0.1, 1, 0.1 } -- Blizzard's hint green
 local WHITE = { 1, 1, 1 }
 local GRAY = Colors.GRAY
 local GOLD_CODE = Colors.Code(GOLD[1], GOLD[2], GOLD[3])

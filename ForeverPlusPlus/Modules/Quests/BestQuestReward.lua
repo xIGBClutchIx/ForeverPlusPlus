@@ -14,21 +14,40 @@ local C_Item = C_Item
 local L = ns.L
 local ItemButtons = ns.ItemButtons
 
-local module = ns.NewModule("BestQuestReward", L.BESTQUESTREWARD_DESC, { enabled = true })
+local module = ns.NewModule("BestQuestReward", L.BESTQUESTREWARD_DESC, {
+    enabled = true,
+    corner = "TOPLEFT", -- where the coin sits on a reward's icon
+})
 module.title = L.BESTQUESTREWARD_TITLE
 module.category = "quests"
+-- The Corner every mark on an icon has, with the row every mark has for a corner another takes:
+-- Upgrade Arrows marks the same reward buttons, in the same corner by default.
+module.options = {
+    ItemButtons.CornerOption(L.BESTQUESTREWARD_CORNER_DESC, nil, {
+        added = "1.6.0",
+        conflicts = {
+            {
+                module = "UpgradeArrows", key = "corner", text = L.BESTQUESTREWARD_CONFLICT_ARROW,
+                when = function(db, other)
+                    return other.quests and db.corner == other.corner
+                end,
+            },
+        },
+    }),
+}
+
+-- How far past the icon's corner the coin hangs, as it always has.
+local COIN_OUT = -3
 
 local COIN_TEXTURE = "Interface\\MoneyFrame\\UI-GoldIcon"
 local COIN_SIZE = 16
 
 -- Our coin on a reward button, by its icon.
 local coins = ItemButtons.Overlays(function(button)
-    local icon = ItemButtons.RewardIcon(button)
     local coin = button:CreateTexture(nil, "OVERLAY", nil, 7)
     coin:SetTexture(COIN_TEXTURE)
     coin:SetSize(COIN_SIZE, COIN_SIZE)
-    coin:SetPoint("TOPLEFT", icon, "TOPLEFT", -3, 3)
-    return coin
+    return coin -- placed each time it's shown, in the corner picked
 end)
 local waiting -- the rewards frame whose items weren't cached, until GET_ITEM_INFO_RECEIVED
 
@@ -98,7 +117,10 @@ local function update(rewardsFrame)
         return
     end
     for i, choice in ipairs(choices) do
-        coins:Set(choice.button, values[i] == best)
+        local coin = coins:Set(choice.button, values[i] == best)
+        if coin then
+            ItemButtons.PlaceInCorner(coin, ItemButtons.RewardIcon(choice.button), module.db.corner, COIN_OUT)
+        end
     end
 end
 
@@ -126,4 +148,8 @@ end
 function module:OnDisable()
     waiting = nil
     coins:HideAll()
+end
+
+function module:OnOptionChanged()
+    onDisplay() -- the coin moves to its new corner
 end

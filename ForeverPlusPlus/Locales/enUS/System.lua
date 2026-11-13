@@ -159,15 +159,17 @@ L.MINIMAPBUTTON_PLACE_NAME = "Button Position"
 L.MINIMAPBUTTON_PLACE_RESET = "Reset Position"
 L.MINIMAPBUTTON_PLACE_RESET_DESC = "Put the minimap button back on the minimap's edge, where it starts. "
     .. "Drag it to put it anywhere on or around the minimap."
-L.MINIMAPBUTTON_LEFT_CLICK = "Left-Click"
-L.MINIMAPBUTTON_RIGHT_CLICK = "Right-Click"
-L.MINIMAPBUTTON_KEY_LEFT_CLICK = "%s-Left-Click" -- a key, such as Shift
-L.MINIMAPBUTTON_KEY_RIGHT_CLICK = "%s-Right-Click" -- the same with Swap Clicks on
+-- The tooltip's legend: what each click does, the click at the right in green. Named as Blizzard's
+-- instruction lines name clicks ("Ctrl click", "Right click"): separate words, no hyphen.
+L.MINIMAPBUTTON_LEFT_CLICK = "Click"
+L.MINIMAPBUTTON_RIGHT_CLICK = "Right click"
+L.MINIMAPBUTTON_KEY_LEFT_CLICK = "%s click" -- a key, such as Shift
+L.MINIMAPBUTTON_KEY_RIGHT_CLICK = "%s right click" -- the same with Swap Clicks on
 L.MINIMAPBUTTON_SWAP = "Click Opens Quick Toggles"
 L.MINIMAPBUTTON_SWAP_DESC = "A click opens the quick toggles and a right-click opens settings. "
     .. "Off, it's the other way round."
-L.MINIMAPBUTTON_KEYS_LEFT = "Error Keys on Left-Click"
-L.MINIMAPBUTTON_KEYS_LEFT_DESC = "Keep the error keys on a click, such as Shift-Left-Click to "
+L.MINIMAPBUTTON_KEYS_LEFT = "Error Keys on Click"
+L.MINIMAPBUTTON_KEYS_LEFT_DESC = "Keep the error keys on a click, such as Shift+click to "
     .. "show the errors, instead of moving them to the right-click with settings."
 L.MINIMAPBUTTON_MENU_SIDE = "Menu Side"
 L.MINIMAPBUTTON_MENU_SIDE_DESC = "Which way the quick toggles open from the cursor: as Blizzard "
@@ -181,7 +183,7 @@ L.MINIMAPBUTTON_MENU_ORDER_DESC = "How the quick toggles are laid out: in groups
 L.MINIMAPBUTTON_MENU_ORDER_GROUPS = "Activity"
 L.MINIMAPBUTTON_MENU_ORDER_CATEGORY = "Category"
 L.MINIMAPBUTTON_MENU_ORDER_TITLE = "A to Z"
-L.MINIMAPBUTTON_LEFT_DRAG = "Left-Drag"
+L.MINIMAPBUTTON_LEFT_DRAG = "Drag"
 L.MINIMAPBUTTON_ERRORS_KEY = "Show Errors Key"
 L.MINIMAPBUTTON_ERRORS_KEY_DESC = "The key to hold while clicking the button to show the "
     .. "errors, while Error Catcher is on."
