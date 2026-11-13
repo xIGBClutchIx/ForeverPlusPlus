@@ -18,10 +18,12 @@ ns.changelog = {
                     .. "Modules page with its options, follows profiles, and turns on and off like "
                     .. "a built-in one, with a note saying which addon it comes from. Thanks to "
                     .. "cyberox.",
+                "For addon authors: SetWaypoint takes an optional name for the pin, shown under "
+                    .. "the Waypoint arrow and on the Compass Bar, and GetWaypoint returns it.",
                 { L.QUESTPINS_TITLE, "A new module, off by default, that needs the QuestieDB addon. "
                     .. "Puts a ! on the world map where each quest you can still take starts, "
                     .. "colored by its kind, and lists the quests an NPC offers or waits for on its "
-                    .. "tooltip. Shift+click a pin to put the map pin on it, and Shift+right-click "
+                    .. "tooltip. Ctrl+click a pin to put the map pin on it, and Shift+right-click "
                     .. "to hide its quests. Options pick the kinds of quest, the levels to hide, "
                     .. "upcoming quests, and the pins' colors, size, and opacity. Thanks to cyberox." },
                 { L.HIDEERRORS_TITLE, "A new module, off by default. Keeps the red errors that "
@@ -84,8 +86,8 @@ ns.changelog = {
                 { L.WORLDMAP_TITLE, "Ctrl+click an icon on the world map to put the map pin on "
                     .. "it, the same click the game uses anywhere else on the map. It works on "
                     .. "every Points of Interest icon (dungeons, boats, flight masters, and the "
-                    .. "rest) and replaces Shift+click on Gathering Map's nodes and Quest Pins' "
-                    .. "pins. Shift+right-click still forgets a node or hides a quest pin. The pin "
+                    .. "rest) and replaces Shift+click on Gathering Map's nodes. "
+                    .. "Shift+right-click still forgets a node or hides a quest pin. The pin "
                     .. "is named after what you clicked (the dungeon, the node, the quest giver), "
                     .. "which the Waypoint arrow and the Compass Bar show. Hold "
                     .. "Shift over any of these icons to see what clicks do on it; the hints "

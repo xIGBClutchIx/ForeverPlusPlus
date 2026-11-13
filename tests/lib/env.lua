@@ -103,6 +103,28 @@ function Env.LuaFiles()
     return paths
 end
 
+---Every .lua file in the addon folder, by listing it (cmd's dir on Windows, find elsewhere), as
+---the TOC writes them ("Lib/Text.lua"), sorted. What the TOC should list, whatever it does list.
+---@return string[] files
+function Env.DiskFiles()
+    local windows = package.config:sub(1, 1) == "\\"
+    local folder = Env.ROOT:sub(1, -2)
+    local command = windows and ('dir /s /b "' .. folder .. '\\*.lua"') or ("find " .. folder .. " -name '*.lua'")
+    local pipe = assert(io.popen(command), "can't list " .. folder)
+    local files = {}
+    for line in pipe:lines() do
+        -- The path after the addon's folder, whatever comes before it: dir gives full paths, and
+        -- the repository's own folder has the addon's name too, so the last one is the addon's.
+        local path = ("/" .. line:gsub("\\", "/"):gsub("%s+$", "")):match("^.*/" .. folder .. "/(.+%.lua)$")
+        if path then
+            files[#files + 1] = path
+        end
+    end
+    pipe:close()
+    table.sort(files)
+    return files
+end
+
 ---A whole file's text, or nil when it can't be read.
 ---@param path string from the repo root
 ---@return string|nil
@@ -158,7 +180,7 @@ function Env.New()
     end
     return {
         env = env, ns = ns, player = player, game = game, load = load, ADDON = Env.ADDON,
-        ROOT = Env.ROOT, Toc = Env.Toc, Read = Env.Read, LuaFiles = Env.LuaFiles,
+        ROOT = Env.ROOT, Toc = Env.Toc, Read = Env.Read, LuaFiles = Env.LuaFiles, DiskFiles = Env.DiskFiles,
     }
 end
 

@@ -361,8 +361,8 @@ function Plugins.Kit()
         NewMapLayer = function(fill)
             return ns.MapPins.New(fill)
         end,
-        SetWaypoint = function(map, x, y)
-            return ns.WorldMap.SetWaypoint(map, x, y)
+        SetWaypoint = function(map, x, y, name)
+            return ns.WorldMap.SetWaypoint(map, x, y, type(name) == "string" and name or nil)
         end,
         IsContinent = function(info, cosmic)
             return ns.WorldMap.IsContinent(info, cosmic)

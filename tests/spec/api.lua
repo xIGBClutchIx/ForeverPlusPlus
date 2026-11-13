@@ -456,6 +456,11 @@ do
     eq(v1.SetWaypoint(nil, 0.5, 0.4), true, "api: a pin on the player's map")
     local pinMap, pinX, pinY = v1.GetWaypoint()
     eq(pinMap == 1411 and pinX == 0.5 and pinY, 0.4, "api: reads the pin")
+    eq(select(4, v1.GetWaypoint()), nil, "api: a pin set without a name has none")
+    eq(v1.SetWaypoint(nil, 0.5, 0.4, "Hogger"), true, "api: a pin with a name")
+    eq(select(4, v1.GetWaypoint()), "Hogger", "api: reads the pin's name")
+    v1.SetWaypoint(nil, 0.5, 0.4, {})
+    eq(select(4, v1.GetWaypoint()), nil, "api: a name that isn't text is no name")
     local _, why = v1.SetWaypoint("Nowhere", 0.5, 0.5)
     eq(why, "zone", "api: no such zone")
     _, why = v1.SetWaypoint(1411, 50, 50)
@@ -466,4 +471,56 @@ do
     eq(v1.GetWaypoint(), nil, "api: the pin is cleared")
     eq(v1.GetWaypointTarget(), nil, "api: no arrow target while Waypoints is off")
     eq(#reported, 3, "api: nothing else went to the error handler")
+end
+
+-- v1 only grows: every function and callback it has ever had is still there. Add a name here when
+-- API.lua gains one; taking one out of this list is the breaking change the promise forbids, and
+-- wants a v2 beside it instead.
+do
+    local V1 = [[CanDisenchant ClearWaypoint FindZone GetAuctionPrice GetAuctionPriceSource GetClassColor
+        GetCurrentFlight GetDisenchantResults GetDisenchantValue GetFishingPoolByObject GetFlightEstimate
+        GetFlightTime GetFlightTimes GetGatheringMaps GetGatheringNode GetGatheringNodes GetInstanceInfo
+        GetInstances GetItemGatheringSkill GetItemScore GetItemUpgradeInfo GetKnownFlightPoints
+        GetLevelColor GetModuleInfo GetModuleOption GetModules GetPlayerClassColor GetPlayerInfo
+        GetPlayerPosition GetPluginKit GetPresets GetProfessionSkill GetProfile GetProfilePreset
+        GetSkinningSkill GetTalentTabs GetUpgradeProfile GetVersion GetWaypoint GetWaypointTarget
+        GetWorldNodeInfo HasAuctionPrices HasUpgradeScores IsModuleEnabled IsReady OpenSettings
+        RegisterCallback RegisterModule SetWaypoint UnregisterCallback]]
+    local EVENTS = [[READY PRICES_UPDATED UPGRADES_UPDATED MODULE_TOGGLED OPTION_CHANGED WAYPOINT_CHANGED
+        GATHERING_NODES_UPDATED GATHERED FLIGHT_STARTED FLIGHT_ENDED PROFILE_CHANGED]]
+    local source = T.Read(T.ROOT .. "API.lua") or ""
+    local docs = T.Read("docs/api.md") or ""
+    local exported, count = {}, 0
+    for name in source:gmatch('export%("(%w+)"') do
+        exported[name] = true
+        count = count + 1
+    end
+    local gone, undocumented = {}, {}
+    for name in V1:gmatch("%S+") do
+        if not exported[name] then
+            gone[#gone + 1] = name
+        end
+        exported[name] = nil
+    end
+    eq(table.concat(gone, ", "), "", "api: no v1 function has gone")
+    local new = {}
+    for name in pairs(exported) do
+        new[#new + 1] = name
+    end
+    table.sort(new)
+    eq(table.concat(new, ", "), "", "api: every function API.lua exports is in this spec's list")
+    eq(count > 40, true, "api: API.lua's exports are found")
+    for name in V1:gmatch("%S+") do
+        if not docs:find(name, 1, true) then
+            undocumented[#undocumented + 1] = name
+        end
+    end
+    eq(table.concat(undocumented, ", "), "", "api: every v1 function is in docs/api.md")
+    local missing = {}
+    for event in EVENTS:gmatch("%S+") do
+        if not source:find(event .. " = true", 1, true) then
+            missing[#missing + 1] = event
+        end
+    end
+    eq(table.concat(missing, ", "), "", "api: no v1 callback has gone")
 end

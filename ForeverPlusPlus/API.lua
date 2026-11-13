@@ -606,8 +606,10 @@ end)
 
 ---Puts the map pin at x, y (0 to 1) on `map`: a map ID, a zone name (as FindZone), or nil for the
 ---player's map. True when it's set; else false and why: "zone" (no such zone), "range" (x or y
----outside 0 to 1), "map" (no pin allowed there, like in a dungeon), or "unavailable".
-export("SetWaypoint", function(map, x, y)
+---outside 0 to 1), "map" (no pin allowed there, like in a dungeon), or "unavailable". With `name`
+---(text), the pin is called that wherever Forever++ shows it: under the Waypoint arrow, on the
+---Compass Bar. The game's own pin has no name.
+export("SetWaypoint", function(map, x, y, name)
     if type(x) ~= "number" or type(y) ~= "number" then
         return false, "range"
     end
@@ -620,10 +622,11 @@ export("SetWaypoint", function(map, x, y)
     if type(mapID) ~= "number" then
         return false, "zone"
     end
-    return ns.WorldMap.SetWaypoint(mapID, x, y)
+    return ns.WorldMap.SetWaypoint(mapID, x, y, type(name) == "string" and name or nil)
 end)
 
----The map pin: map ID and x, y (0 to 1), or nil when there's none.
+---The map pin: map ID, x, y (0 to 1), and its name when it was set with one (by SetWaypoint, a
+---Ctrl+click on one of our map icons, or /way's note), or nil when there's no pin.
 export("GetWaypoint", function()
     if not (C_Map and C_Map.GetUserWaypoint) then
         return nil
@@ -633,7 +636,7 @@ export("GetWaypoint", function()
     if not (position and type(position.x) == "number" and type(position.y) == "number") then
         return nil
     end
-    return point.uiMapID, position.x, position.y
+    return point.uiMapID, position.x, position.y, ns.WorldMap.WaypointNote(point)
 end)
 
 ---Takes the map pin away.

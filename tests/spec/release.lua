@@ -16,6 +16,22 @@ end
 eq(#files > 100, true, "release: the TOC lists the addon's files")
 eq(table.concat(absent, ", "), "", "release: every file the TOC loads is there")
 eq(files[#files], "Init.lua", "release: Init.lua loads last")
+
+-- And every .lua file in the folder is one the TOC loads: one left out would never load in game,
+-- and every other check here walks the TOC's list, so nothing else would notice it.
+local listed = {}
+for _, path in ipairs(files) do
+    listed[path] = true
+end
+local unlisted = {}
+local onDisk = T.DiskFiles()
+for _, path in ipairs(onDisk) do
+    if not listed[path] then
+        unlisted[#unlisted + 1] = path
+    end
+end
+eq(#onDisk > 100, true, "release: the addon folder's files are found")
+eq(table.concat(unlisted, ", "), "", "release: every .lua file in the folder is in the TOC")
 eq(fields.SavedVariables, "ForeverPlusPlusDB, ForeverPlusPlusPlayersDB", "release: the saved variables")
 
 -- Changelog.lua needs every module's title, so every enUS file goes in first.
