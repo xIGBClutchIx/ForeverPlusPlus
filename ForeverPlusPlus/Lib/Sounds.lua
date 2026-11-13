@@ -19,6 +19,7 @@ local KITS = {
     gm = "GM_CHAT_WARNING",
     alarm = "ALARM_CLOCK_WARNING_3",
     whisper = "TELL_MESSAGE",
+    readycheck = "READY_CHECK",
 }
 
 -- Key, then name, as a dropdown's `choices` take them, "off" first.
@@ -32,7 +33,18 @@ Sounds.CHOICES = {
     { "gm", L.SOUND_GM },
     { "alarm", L.SOUND_ALARM },
     { "whisper", L.SOUND_WHISPER },
+    { "readycheck", L.SOUND_READYCHECK },
 }
+
+---The choices without "off", for a dropdown under a checkbox that already turns the sound off.
+---@return table[] choices
+function Sounds.Sounds()
+    local list = {}
+    for i = 2, #Sounds.CHOICES do
+        list[#list + 1] = Sounds.CHOICES[i]
+    end
+    return list
+end
 
 ---Plays the sound `key` (a key of Sounds.CHOICES) on the Master channel, so it's heard with
 ---sound effects off. Nothing for "off", or a sound this client doesn't have.

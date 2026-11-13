@@ -10,7 +10,7 @@ local _, ns = ...
 local ipairs, floor, format, max, min, tonumber = ipairs, math.floor, string.format, math.max, math.min, tonumber
 local Enum, GetTime, UnitOnTaxi, time, wipe = Enum, GetTime, UnitOnTaxi, time, wipe
 local GetNumRoutes, TaxiGetNodeSlot = GetNumRoutes, TaxiGetNodeSlot
-local CreateFrame, UIParent, GameTooltip, PlaySound = CreateFrame, UIParent, GameTooltip, PlaySound
+local CreateFrame, UIParent, GameTooltip = CreateFrame, UIParent, GameTooltip
 
 local L = ns.L
 
@@ -21,6 +21,7 @@ local module = ns.NewModule("FlightTimer", L.FLIGHTTIMER_DESC, {
     tooltipStyle = "double", -- "double" (label left, time right), "line", or "gray" (one line)
     estimates = true,
     landingSound = false,
+    landingSoundKind = "readycheck", -- a key of ns.Sounds.CHOICES
     scale = 100, -- percent
     x = 0, -- the bar's offset from the center of the screen
     y = 250,
@@ -53,6 +54,11 @@ module.options = {
     {
         key = "landingSound", name = L.FLIGHTTIMER_LANDING_SOUND,
         description = L.FLIGHTTIMER_LANDING_SOUND_DESC, added = "0.9.0", changed = "1.6.0",
+    },
+    {
+        key = "landingSoundKind", name = L.FLIGHTTIMER_LANDING_SOUND_KIND,
+        description = L.FLIGHTTIMER_LANDING_SOUND_KIND_DESC, requires = "landingSound",
+        choices = ns.Sounds.Sounds(), added = "1.6.0",
     },
 }
 
@@ -244,13 +250,10 @@ local function finish()
     end
 end
 
--- The ready check's sound on the Master channel, so it's heard with sound effects off and, when
--- Sound in Background is on, while tabbed out.
+-- The sound picked (the ready check's by default) on the Master channel, so it's heard with sound
+-- effects off and, when Sound in Background is on, while tabbed out.
 local function playLanding()
-    local kit = SOUNDKIT and SOUNDKIT.READY_CHECK
-    if kit and PlaySound then
-        PlaySound(kit, "Master")
-    end
+    ns.Sounds.Play(module.db.landingSoundKind)
 end
 
 -- Sound on Landing: once, a few seconds before a flight of known length lands. A flight too short
@@ -536,6 +539,9 @@ function module:OnDisable()
 end
 
 function module:OnOptionChanged(option)
+    if option == "landingSoundKind" then
+        playLanding() -- hear the one picked
+    end
     if option == "bar" and bar and not ns.EditMode.IsActive() then
         -- Turned on mid-flight, the bar shows for the rest of it.
         bar:SetShown(self.db.bar and flight and flight.started and true or false)

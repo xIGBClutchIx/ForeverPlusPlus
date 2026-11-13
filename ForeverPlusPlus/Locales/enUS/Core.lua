@@ -50,6 +50,7 @@ L.SOUND_RAIDWARNING = "Raid Warning"
 L.SOUND_GM = "GM Alert"
 L.SOUND_ALARM = "Alarm Clock"
 L.SOUND_WHISPER = "Whisper"
+L.SOUND_READYCHECK = "Ready Check"
 
 -- Core: /fpp and chat
 L.ON = "on"

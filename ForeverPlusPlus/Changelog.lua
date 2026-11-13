@@ -46,6 +46,9 @@ ns.changelog = {
                 { L.GATHERINGTRACKING_TITLE, "Say When Turned Back On (off by default) says in "
                     .. "chat when tracking has been turned back on for you. Its other chat option "
                     .. "is now called Warning Messages." },
+                { L.FLIGHTTIMER_TITLE, "Sound on Landing has a Sound dropdown to pick another "
+                    .. "sound; it still plays the ready check's unless you change it. Error "
+                    .. "Catcher's and Durability Warning's Sound dropdowns offer Ready Check too." },
                 { L.FLIGHTTIMER_TITLE, "Estimated Times, on by default, shows a flight you haven't "
                     .. "taken yet with the time the game's own flight paths give it, marked with ~, on "
                     .. "the bar and the flight map's tooltip, until your own time replaces it." },
