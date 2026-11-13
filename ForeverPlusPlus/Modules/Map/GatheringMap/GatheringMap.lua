@@ -46,6 +46,7 @@ local module = ns.NewModule("GatheringMap", L.GATHERINGMAP_DESC, {
     minimapEdge = false, -- a node just past the minimap's edge sits on the edge
     minimapTooltips = true, -- an icon shows its node's tooltip
     -- Each line of a node's tooltip: "always", "shift" (while Shift is held), or "never".
+    tipSkill = "always",
     tipGathered = "always",
     tipLast = "always",
     tipAlso = "always",
@@ -248,6 +249,11 @@ module.options = {
         key = "mapContinents", name = L.GATHERINGMAP_CONTINENTS, description = L.GATHERINGMAP_CONTINENTS_DESC,
         section = WORLD, requires = "worldMap",
     },
+    (function()
+        local option = tipOption("tipSkill", L.GATHERINGMAP_TIP_SKILL_NAME, L.GATHERINGMAP_TIP_SKILL_DESC)
+        option.added = "1.6.0"
+        return option
+    end)(),
     tipOption("tipGathered", L.GATHERINGMAP_TIP_GATHERED_NAME, L.GATHERINGMAP_TIP_GATHERED_DESC),
     tipOption("tipLast", L.GATHERINGMAP_TIP_LAST_NAME, L.GATHERINGMAP_TIP_LAST_DESC),
     tipOption("tipAlso", L.GATHERINGMAP_TIP_ALSO_NAME, L.GATHERINGMAP_TIP_ALSO_DESC),
@@ -749,7 +755,9 @@ internal.Requires = requiresLine
 function internal.TooltipLines(node, yards, onDot)
     local Tip = ns.MapTooltip
     local lines = {}
-    if not onDot then
+    -- Gathering Map's own line and option: it isn't Gathering Skill Tooltips' (modules don't read
+    -- each other), which colors the game's line on the dot and the node in the world.
+    if not onDot and wants("tipSkill") then
         lines[#lines + 1] = requiresLine(node)
     end
     if node.count == 0 then

@@ -79,7 +79,8 @@ ns.changelog = {
                     .. "of over its top edge. Mail Icon picks another corner, or Blizzard's place." },
                 { L.GATHERINGMAP_TITLE, "Pointing at a minimap icon the game has no dot for shows "
                     .. "the node's tooltip too: a node that's gone or just gathered, a chest, or a "
-                    .. "fishing pool." },
+                    .. "fishing pool. A new Skill Needed option shows the skill line in its "
+                    .. "tooltips always, with Shift, or never." },
                 { L.WHISPERWINDOW_TITLE, "The reply box grows as you type, up to four lines, so a "
                     .. "long whisper can be read before it's sent. Drag the divider between the list "
                     .. "and the conversation to make the list wider or narrower. A whisper too long "
