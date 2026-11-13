@@ -73,6 +73,7 @@ function Harness.New(name, verbose)
     end
 
     local function record(pass, what, detail, depth)
+        what = tostring(what or "(a check with no name)") -- a nameless one still reports
         checks.count = checks.count + 1
         if pass then
             if verbose then

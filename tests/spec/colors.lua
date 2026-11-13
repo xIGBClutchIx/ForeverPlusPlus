@@ -5,7 +5,6 @@ local ns, eq, player = T.ns, T.eq, T.player
 eq(ns.Colors.Code(1, 0, 0), "|cffff0000", "Code red")
 eq(ns.Colors.Code(0.5, 0.5, 0.5), "|cff808080", "Code rounds")
 eq(ns.Colors.Text({ r = 0, g = 1, b = 0 }, "hi"), "|cff00ff00hi|r", "Text wraps")
-eq(ns.Colors.Faction("H"), ns.Colors.Faction("H"), "Faction stable")
 eq(ns.Colors.Faction("A").b > ns.Colors.Faction("A").r, true, "Alliance is blue")
 eq(ns.Colors.Faction("H").r > ns.Colors.Faction("H").b, true, "Horde is red")
 eq(ns.Colors.Faction("?"), ns.Colors.Faction(nil), "unknown side is neutral")

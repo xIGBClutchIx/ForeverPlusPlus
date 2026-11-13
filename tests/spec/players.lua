@@ -56,9 +56,17 @@ do
     eq(all.ClassicBetaPvE ~= nil, true, "players: kept under the realm's name")
     eq(Players.Get("Player-9-BBBB", "Bob"), nil, "players: another realm is someone else")
     eq(Players.Get("Player-5-BBBB", nil) ~= nil, true, "players: another realm ID of the same realm is the same")
+    -- Counted, not looked up: a lookup by that GUID finds nothing whether or not it was kept.
+    local function kept()
+        local count = 0
+        for _ in pairs(all.ClassicBetaPvE) do
+            count = count + 1
+        end
+        return count
+    end
+    local before = kept()
     Players.LearnUnit("mouseover")
-    eq(next(all.ClassicBetaPvE) ~= nil and Players.Get("Player-1-CCCC", nil), nil,
-        "players: a secret name isn't kept")
+    eq(kept(), before, "players: a secret name isn't kept")
 
     game.clock = game.clock + 7200
     Players.Learn(nil, "Bob", { level = 43 })

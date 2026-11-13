@@ -34,8 +34,9 @@ local function stub(env, player, game)
     env.FACTION_ALLIANCE, env.FACTION_HORDE = "Alliance", "Horde"
     env.Enum = { UIMapType = { Cosmic = 0, World = 1, Continent = 2, Zone = 3 } }
     env.ITEM_MIN_SKILL = "Requires %s (%d)"
+    -- Nothing is secret until a spec sets game.secret: nil is never secret, as in the game.
     env.issecretvalue = function(value)
-        return value == game.secret
+        return game.secret ~= nil and value == game.secret
     end
     env.GetRealZoneText = function(id)
         return game.zoneNames[id] or ""

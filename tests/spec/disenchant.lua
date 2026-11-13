@@ -41,7 +41,16 @@ do
         local b = Disenchant.Bracket(quality, level, isWeapon)
         return b and ("%d-%d"):format(b[3], b[4]) or "nil"
     end
-    eq(#ns.TableData.disenchantBrackets, 54, "brackets: 54 rows, as in build 70888")
+    -- The table's shape, whatever build it was generated from: a count would fail the day a
+    -- build adds a bracket, and say nothing about a malformed row.
+    local shaped = #ns.TableData.disenchantBrackets > 0
+    for _, row in ipairs(ns.TableData.disenchantBrackets) do
+        local quality, class, low, high = row[1], row[2], row[3], row[4]
+        shaped = shaped and type(quality) == "number" and quality >= 2 and quality <= 4
+            and (class == 2 or class == 4) and type(low) == "number" and type(high) == "number"
+            and low <= high
+    end
+    eq(shaped, true, "brackets: every row is { quality 2-4, class 2 or 4, low <= high }")
     eq(bracket(3, 5, false), "5-15", "brackets: rare from item level 5")
     eq(bracket(3, 10, true), "5-15", "brackets: rare 5-10 can be disenchanted")
     eq(bracket(3, 18, false), "16-20", "brackets: rare 11-25 is three brackets")
