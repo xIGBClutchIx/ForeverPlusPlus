@@ -23,10 +23,13 @@ module.category = "quests"
 module.presets = { developer = { enabled = true } }
 module.added = "1.5.0"
 
--- The game draws the sparkle until it restarts, whatever the CVar says after.
+-- The CVar is the game's one switch for the loot sparkle, on quest items and on quest givers and
+-- quest NPCs alike, so there's no keeping it on items and off NPCs. Forever Loot Sparkles' README
+-- says the same, and OneForAll's quest loot sparkles set only this CVar too (both read
+-- 2026-11-13). And the game draws the sparkle until it restarts, whatever the CVar says after.
 module.notice = {
-    text = L.QUESTITEMSPARKLES_NOTICE,
-    description = L.QUESTITEMSPARKLES_NOTICE_DESC,
+    { text = L.QUESTITEMSPARKLES_NPCS, description = L.QUESTITEMSPARKLES_NPCS_DESC },
+    { text = L.QUESTITEMSPARKLES_NOTICE, description = L.QUESTITEMSPARKLES_NOTICE_DESC },
 }
 
 CVars.Track(module)
