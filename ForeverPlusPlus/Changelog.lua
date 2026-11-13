@@ -60,8 +60,8 @@ ns.changelog = {
                 { L.MOVABLEWINDOWS_TITLE, "Drag From picks where a window can be grabbed: anywhere "
                     .. "in it, as before, or only its title bar." },
                 { L.WORLDMAP_TITLE, "Clicking a dungeon or raid icon opens its map in "
-                    .. "DungeonJournal or Leatrix Maps, if you have one of them. Points of "
-                    .. "Interest's Dungeon Maps picks which, or turns it off." },
+                    .. "the DungeonJournal addon, if you have it. Points of Interest's Dungeon "
+                    .. "Maps turns it off." },
                 { L.GATHERINGTRACKING_TITLE, "Mute Swap Sound (off by default) silences the "
                     .. "tracking spell's sound each time Swap Between Both swaps." },
                 { L.TOOLTIPS_TITLE, "Hide Bobber Tooltip (off by default) hides the fishing "

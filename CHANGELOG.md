@@ -18,7 +18,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Flight Timer**: Estimated Times, on by default, shows a flight you haven't taken yet with the time the game's own flight paths give it, marked with ~, on the bar and the flight map's tooltip, until your own time replaces it.
 - **Professions**: Unlearned Recipes brings back Show Learned and Show Unlearned in the recipe list's Filter menu: the recipes you don't know yet show in the list itself, alone or among the ones you know, each with the skill it takes to learn and, on its page, the recipe item that teaches it with its auction price. An Unlearned submenu filters them by source, by when you can learn them, and to those whose item is in your bags. Season of Discovery's recipes, which the game still lists, are left out. A trainer recipe's skill is learned the first time you open its trainer; until then it's listed under Unknown.
 - **Movable Windows**: Drag From picks where a window can be grabbed: anywhere in it, as before, or only its title bar.
-- **World Map**: clicking a dungeon or raid icon opens its map in DungeonJournal or Leatrix Maps, if you have one of them. Points of Interest's Dungeon Maps picks which, or turns it off.
+- **World Map**: clicking a dungeon or raid icon opens its map in the DungeonJournal addon, if you have it. Points of Interest's Dungeon Maps turns it off.
 - **Gathering Tracking**: Mute Swap Sound (off by default) silences the tracking spell's sound each time Swap Between Both swaps.
 - **Tooltips**: Hide Bobber Tooltip (off by default) hides the fishing bobber's tooltip while you fish, so it doesn't cover the bobber with Anchor to Cursor on.
 
