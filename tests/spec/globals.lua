@@ -13,7 +13,6 @@ local WRITES = {
     { name = "ForeverPlusPlusCharDB" },
     { name = "ForeverPlusPlusPlayersDB" },
     { name = "ForeverPlusPlusAPI", file = "ForeverPlusPlus/API.lua" },
-    { name = "ForeverPlusPlusCompanion", file = "ForeverPlusPlus/Init.lua" },
     { name = "GetMinimapShape", file = "ForeverPlusPlus/Modules/Map/SquareMinimap.lua" },
     { name = "BINDING_HEADER_FOREVERPLUSPLUS" },
     { pattern = "^SLASH_FOREVERPLUSPLUS[%w_]*$" },
@@ -23,9 +22,7 @@ local WRITES = {
 -- code between the brackets.
 local DYNAMIC = {
     ["ForeverPlusPlus/Lib/Slash.lua"] = '"SLASH_" .. key .. "1"', -- slash commands a module adds
-    ["ForeverPlusPlus/Modules/Units/TargetMarkers.lua"] = '"BINDING_NAME_" .. BINDING',
-    ["ForeverPlusPlus_AgentChat/AgentChat.lua"] = "INBOX", -- ForeverPlusPlusAgentInbox, cleared
-}
+    ["ForeverPlusPlus/Modules/Units/TargetMarkers.lua"] = '"BINDING_NAME_" .. BINDING',}
 
 -- Lua 5.1 as the game has it: no io, os, require, dofile, or loadfile. A file that needs one of
 -- the game's own (os.time, strsplit, ...) lists it in .luarc.json.

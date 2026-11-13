@@ -556,7 +556,7 @@ Results of the 2026-10-14 run (build 70338, out of combat, no flight master open
 
 ## Files an addon can reach while the game runs
 
-What Agent Chat's link to the Forever Agent program (`agent/`) is built on.
+Learned while building a link between the addon and a program outside the game (Agent Chat, since removed). "The program" below is that outside program.
 
 - `C_AddOns.SaveAddOns()` writes the character's `WTF\Account\<account>\<realm>\<character>\AddOns.txt` at once, no `/reload`: a line `Name: enabled` or `Name: disabled` per addon. **[in-game]** (2026-11-07, build 70862) `C_AddOns.EnableAddOn(name, UnitGUID("player"))` changes only the current character's file (as Blizzard's AddOns list does); a name alone (`UnitName("player")`) changes nothing; no character at all changed three of six characters' files on the account. 256 helper addons, each one bit, flipped and saved in about a millisecond. Forever's character folders are named `<Name>-<Surname>`.
 - `C_AddOns.LoadAddOn` reads a load-on-demand addon's files from disk when it loads, so a file rewritten after the game started is read as rewritten. A reply written by the program came back in 51 ms. **[in-game]** (2026-11-07) The addon itself must exist when the game starts; new addon folders need a full restart (every Forever AI bridge project says so **[web]**).

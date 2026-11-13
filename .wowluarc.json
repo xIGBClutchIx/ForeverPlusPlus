@@ -1,4 +1,4 @@
 {
   "flavors": ["forever"],
-  "ignore": ["tests/", "agent/", "tools/", ".claude/"]
+  "ignore": ["tests/", "tools/", ".claude/"]
 }

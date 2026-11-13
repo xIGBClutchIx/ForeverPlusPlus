@@ -1,4 +1,4 @@
--- Rules: the rules in AGENTS.md a machine can check exactly, over every file both addons load.
+-- Rules: the rules in AGENTS.md a machine can check exactly, over every file the addon loads.
 -- Globals come from each file's bytecode (tests/lib/bytecode.lua), so `C_Item.GetItemInfo` and a
 -- name in a comment never count. Each rule's exceptions are listed here, with why.
 local T = ...
@@ -53,10 +53,7 @@ end
 
 local function headerOk(path, line)
     line = line and line:gsub("%s*%-%-.*$", "")
-    if path:match("^" .. T.ROOT) then
-        return line == "local addonName, ns = ..." or line == "local _, ns = ..."
-    end
-    return line == "local ns = ForeverPlusPlusCompanion()"
+    return line == "local addonName, ns = ..." or line == "local _, ns = ..."
 end
 
 local paths = T.LuaFiles()
