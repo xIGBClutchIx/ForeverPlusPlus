@@ -25,6 +25,33 @@ function Quests.Level(questID)
     end
 end
 
+---The level a quest counts as, for its tag and its difficulty color: the game's own for a quest it
+---knows, then the quest log's, then `fallback` (what another source says, such as QuestieDB).
+---@param questID number?
+---@param fallback? number
+---@return number?
+function Quests.DifficultyLevel(questID, fallback)
+    local log = C_QuestLog
+    local level = questID and log and log.GetQuestDifficultyLevel and log.GetQuestDifficultyLevel(questID)
+    if type(level) == "number" and level > 0 then
+        return level
+    end
+    return Quests.Level(questID) or fallback
+end
+
+---A quest's title as the game has it, or `fallback` while it doesn't (a quest not seen yet).
+---@param questID number?
+---@param fallback? string
+---@return string?
+function Quests.Title(questID, fallback)
+    local log = C_QuestLog
+    local title = questID and log and log.GetTitleForQuestID and log.GetTitleForQuestID(questID)
+    if ns.IsText(title, true) then
+        return title
+    end
+    return fallback
+end
+
 ---Whether a quest is an elite (group) one, as Forever's quest log marks with a + after the level.
 ---C_QuestLog.IsEliteQuest is what Blizzard's own tag asks (Camelot's QuestUtilsOverrides); the
 ---quest's tag is asked too, for a quest that one doesn't answer for. Probe both.

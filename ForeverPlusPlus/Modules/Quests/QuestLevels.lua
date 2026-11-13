@@ -65,8 +65,9 @@ local function prefixFor(questID, level)
     end
     local blizzard = QuestUtilsOverrides and QuestUtilsOverrides.GetQuestTitlePrefix
     -- Mainline's version gives nil unless its Show Quest Level setting is on; this module is ours.
+    -- Without it, the same tag from Lib/Quests, which every other module writes ("[12+]").
     local prefix = blizzard and blizzard({ questID = questID, difficultyLevel = level })
-        or "[" .. level .. "] "
+        or Quests.LevelTag(questID, level) .. " "
     if module.db.color then
         prefix = colorTag(prefix, level)
     end

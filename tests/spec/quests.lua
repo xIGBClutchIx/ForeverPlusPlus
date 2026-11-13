@@ -24,6 +24,17 @@ do
     eq(Quests.Level(103), nil, "quests: level 0 is unknown")
     eq(Quests.Level(999), nil, "quests: not in the log")
     eq(Quests.Level(nil), nil, "quests: no quest")
+    eq(Quests.DifficultyLevel(101), 12, "quests: the log's level when the game gives no difficulty level")
+    eq(Quests.DifficultyLevel(999, 30), 30, "quests: the fallback for a quest the game doesn't know")
+    eq(Quests.DifficultyLevel(nil, 30), 30, "quests: and for no quest")
+    C_QuestLog.GetQuestDifficultyLevel = function(id) return id == 101 and 14 or 0 end
+    eq(Quests.DifficultyLevel(101, 30), 14, "quests: the game's difficulty level first")
+    eq(Quests.DifficultyLevel(999, 30), 30, "quests: a difficulty level of 0 is unknown")
+    C_QuestLog.GetQuestDifficultyLevel = nil
+    eq(Quests.Title(101, "Quest 101"), "Quest 101", "quests: the fallback title without the game's")
+    C_QuestLog.GetTitleForQuestID = function(id) return id == 101 and "A Grim Task" or "" end
+    eq(Quests.Title(101, "x"), "A Grim Task", "quests: the game's title")
+    eq(Quests.Title(999, "x"), "x", "quests: an empty title is none")
     eq(Quests.LevelTag(101, 12), "[12]", "quests: a plain quest's tag")
     C_QuestLog.IsEliteQuest = function(id) return id == 102 end
     eq(Quests.LevelTag(102, 22), "[22+]", "quests: an elite quest's tag has a +")

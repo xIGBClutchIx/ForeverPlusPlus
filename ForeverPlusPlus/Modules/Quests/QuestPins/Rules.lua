@@ -199,11 +199,19 @@ local function reputationMet(info)
 end
 
 local function levelOf(id, info)
-    local level = C_QuestLog and C_QuestLog.GetQuestDifficultyLevel and C_QuestLog.GetQuestDifficultyLevel(id)
-    if type(level) == "number" and level > 0 then
-        return level
+    return ns.Quests.DifficultyLevel(id, info.level or info.required)
+end
+
+---A quest's title: the game's, else QuestieDB's name for it, else "Quest 123".
+---@param id number
+---@return string
+function internal.Title(id)
+    local title = ns.Quests.Title(id)
+    if not title then
+        local quest = ns.QuestieDB.Quest(id)
+        title = quest and quest.name or format(L.QUESTPINS_QUEST, id)
     end
-    return info.level or info.required
+    return title
 end
 
 ---A quest's level as the game or QuestieDB has it, or nil.

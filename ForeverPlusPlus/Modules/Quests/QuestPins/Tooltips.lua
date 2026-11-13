@@ -20,16 +20,8 @@ local function npcID(guid)
 end
 
 local function row(id, marker)
-    local title = C_QuestLog.GetTitleForQuestID and C_QuestLog.GetTitleForQuestID(id)
-    if not title or title == "" then
-        local q = QuestieDB.Quest(id)
-        title = q and q.name or format(ns.L.QUESTPINS_QUEST, id)
-    end
-    local info = internal.info[id]
-    local level = C_QuestLog.GetQuestDifficultyLevel and C_QuestLog.GetQuestDifficultyLevel(id)
-    if not (type(level) == "number" and level > 0) then
-        level = info and (info.level or info.required) or nil
-    end
+    local title = internal.Title(id)
+    local level = internal.Level(id)
     return { id = id, level = level, text = format("%s %s%s", marker, level and (ns.Quests.LevelTag(id, level) .. " ") or "", title) }
 end
 

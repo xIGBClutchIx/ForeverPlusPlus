@@ -7,7 +7,7 @@ local _, ns = ...
 
 local type, pairs, ipairs, format, tostring = type, pairs, ipairs, string.format, tostring
 local sort = table.sort
-local C_Map, C_QuestLog = C_Map, C_QuestLog
+local C_Map = C_Map
 local GetQuestDifficultyColor, HIGHLIGHT_FONT_COLOR = GetQuestDifficultyColor, HIGHLIGHT_FONT_COLOR
 
 local L = ns.L
@@ -161,14 +161,8 @@ end
 -- Tooltip -----------------------------------------------------------------------------------------
 
 local function questLine(id)
-    local title = C_QuestLog.GetTitleForQuestID and C_QuestLog.GetTitleForQuestID(id)
-    local q = (not title or title == "") and QuestieDB.Quest(id) or nil
-    title = (title and title ~= "") and title or (q and q.name) or format(L.QUESTPINS_QUEST, id)
-    local info = internal.info[id]
-    local level = C_QuestLog.GetQuestDifficultyLevel and C_QuestLog.GetQuestDifficultyLevel(id)
-    if not (type(level) == "number" and level > 0) then
-        level = info and (info.level or info.required)
-    end
+    local title = internal.Title(id)
+    local level = internal.Level(id)
     local color = HIGHLIGHT_FONT_COLOR
     if level then
         title = format("%s %s", ns.Quests.LevelTag(id, level), title)
