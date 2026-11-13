@@ -138,6 +138,7 @@ One line here says what each file is for. [docs/architecture.md](docs/architectu
 | File | `ns` | For |
 | --- | --- | --- |
 | `ItemTooltip.lua` | `ItemTooltip` | Our lines on item tooltips, kept together at the sell price (`OnInfo`, `OnPrices`, `AddInfo`, `AddPrice`). |
+| `Bags.lua` | `Bags` | Walking every slot of the player's bags (`Each`), the free slots, and which bag is the reagent bag. |
 | `ItemButtons.lua` | `ItemButtons` | The item buttons in bags, bank, merchant, auction house, loot, and rolls, our marks on them, and the options every mark shares. |
 | `BagClicks.lua` | `BagClicks` | Secure overlays on bag items whose right-click uses an item or casts on it. |
 | `ItemStats.lua` | `ItemStats` | An item's stats in short keys, and a stat weight score. |
@@ -153,7 +154,7 @@ One line here says what each file is for. [docs/architecture.md](docs/architectu
 | `Spellbook.lua` | `Spellbook` | The spells the player knows, with every rank. |
 | `Talents.lua` | `Talents` | The talent tabs and the points in each. |
 | `TalentPlan.lua` | `TalentPlan` | An ordered talent plan checked against the tree's rules, share strings, and build links. |
-| `Units.lua` | `Units` | Who a unit is: in my group, a friend, a recent ally, a guildmate. |
+| `Units.lua` | `Units` | Who a unit is: in my group, a friend, a recent ally, a guildmate. And whether the player is busy (`PlayerBusy`, `PlayerCasting`), for a module that acts by itself. |
 
 **Nameplates**
 
@@ -166,7 +167,7 @@ One line here says what each file is for. [docs/architecture.md](docs/architectu
 
 | File | `ns` | For |
 | --- | --- | --- |
-| `WorldMap.lua` | `WorldMap` | The world map, the map tree, map names and sizes, Blizzard's map pin, and where the player, a quest, and the corpse are. |
+| `WorldMap.lua` | `WorldMap` | The world map, the map tree, map names and sizes, Blizzard's map pin and its name, where the player, a quest, and the corpse are, and our one group in its filter menu (`AddFilter`). |
 | `MapTooltip.lua` | `MapTooltip` | How every tooltip over the world map looks. |
 | `MapPins.lua` | `MapPins` | Layers of our own icons on the world map, and what a click on one does (Ctrl+click for the map pin, as the game's own). |
 | `MinimapPins.lua` | `MinimapPins` | What the minimap shows, zone-map spots as minimap spots, its gold ring, and its shape. |
@@ -362,6 +363,7 @@ The goal is to add to Blizzard frames without tainting or breaking them.
 
 - Ctrl+click puts the map pin on the icon (`waypoint = true`, or `ctrlClick`), as the game's own Ctrl+click does. Never another key for a waypoint.
 - A module's own action on an icon is Shift+right-click (`shiftClick`), or a plain click (`click`) when the icon opens something.
+- A module's entries in the map's filter menu go through `ns.WorldMap.AddFilter`, under the one Forever++ title. A layer of icons is one checkbox with its kinds in a submenu (`FilterLayer`). Never `Menu.ModifyMenu` on that menu directly.
 - Click hints show only while Shift is held, and `ns.MapPins` writes them. A module gives the words for its own action (`shiftHint`, `clickHint`) and never adds hint lines or a hints option itself.
 
 **Click hints**, on any tooltip, are written as Blizzard's own instruction lines are: green (`GREEN_FONT_COLOR`), in angle brackets, the keys and the click as separate words with no hyphen or plus, no full stop, one click to a line. `<Ctrl click to set a map pin>`, `<Shift right click to forget this node>` (the client's own: `<Ctrl click directly on the map>`, `<Right click for Frame Settings>`). On a map tooltip use `ns.MapTooltip.Hint`. Prose in Settings descriptions keeps "Ctrl+click". A tooltip that is a legend of several clicks (the Minimap Button's) lists the action on the left and the click in green on the right, with the same words: "Click", "Right click", "Shift click", "Drag".

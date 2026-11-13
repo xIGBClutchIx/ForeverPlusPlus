@@ -16,7 +16,6 @@ local InCombatLockdown, UnitIsDeadOrGhost, GetNumLootItems = InCombatLockdown, U
 
 local L = ns.L
 
-local LAST_BAG = 4     -- the backpack and four bags; the reagent bag holds no containers
 local NEXT = 0.5       -- seconds between one container and the next, for its loot to land
 local RETRY = 1        -- seconds before looking again while something is in the way
 local SETTLE = 0.5     -- bags change in bursts as loot arrives
@@ -98,17 +97,7 @@ end
 -- A cast or channel under way. One the game won't tell us about counts as one.
 local casting = ns.Units.PlayerCasting
 
-local function freeSlots()
-    local free = 0
-    for bag = 0, LAST_BAG do
-        local slots, family = C_Container.GetContainerNumFreeSlots(bag)
-        -- A quiver or a herb bag takes only its own kind (family 0 is an ordinary bag).
-        if type(slots) == "number" and (family == nil or family == 0) then
-            free = free + slots
-        end
-    end
-    return free
-end
+local freeSlots = ns.Bags.FreeSlots
 
 local function safe()
     if InCombatLockdown() or (UnitIsDeadOrGhost and ns.IsTrueOrSecret(UnitIsDeadOrGhost("player"))) then
@@ -154,21 +143,19 @@ end
 
 -- The next container to open: its bag, slot, link, and what `tried` would say of it.
 local function nextContainer()
-    for bag = 0, LAST_BAG do
-        for slot = 1, C_Container.GetContainerNumSlots(bag) do
-            local info = C_Container.GetContainerItemInfo(bag, slot)
-            local key = slotKey(bag, slot)
-            if not info then
-                tried[key] = nil
-            elseif ns.IsTrue(info.hasLoot) and not info.isLocked and type(info.itemID) == "number" then
-                local mark = info.itemID .. ":" .. (info.stackCount or 1)
-                if tried[key] ~= mark and (module.db.special or not KEPT:Get(info.itemID))
-                    and not locked(bag, slot) then
-                    return bag, slot, info.hyperlink, mark
-                end
+    -- Not the reagent bag, which holds no containers.
+    return ns.Bags.Each(function(bag, slot, info)
+        local key = slotKey(bag, slot)
+        if not info then
+            tried[key] = nil
+        elseif ns.IsTrue(info.hasLoot) and not info.isLocked and type(info.itemID) == "number" then
+            local mark = info.itemID .. ":" .. (info.stackCount or 1)
+            if tried[key] ~= mark and (module.db.special or not KEPT:Get(info.itemID))
+                and not locked(bag, slot) then
+                return bag, slot, info.hyperlink, mark
             end
         end
-    end
+    end)
 end
 
 -- Opening ----------------------------------------------------------------------------------------

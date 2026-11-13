@@ -25,7 +25,7 @@ module.category = "character"
 module.added = "1.5.0"
 
 local MACRO_UI = "Blizzard_MacroUI"
-local BAGS, WORN = 4, 19 -- the backpack and four bags; the worn slots
+local WORN = 19 -- the worn slots
 
 local box -- our search box, made the first time the picker shows
 local named -- { { name (lowercase), texture } } for this showing of the picker
@@ -45,14 +45,11 @@ local function gather()
         add(name, top and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(top.id))
     end
     if C_Container and C_Container.GetContainerNumSlots and C_Item and C_Item.GetItemNameByID then
-        for bag = 0, BAGS do
-            for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
-                local info = C_Container.GetContainerItemInfo(bag, slot)
-                if info and info.itemID then
-                    add(C_Item.GetItemNameByID(info.itemID), info.iconFileID)
-                end
+        ns.Bags.Each(function(_, _, info)
+            if info and info.itemID then
+                add(C_Item.GetItemNameByID(info.itemID), info.iconFileID)
             end
-        end
+        end)
         for slot = 1, WORN do
             local id = GetInventoryItemID("player", slot)
             if id then

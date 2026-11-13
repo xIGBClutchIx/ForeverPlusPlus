@@ -9,7 +9,6 @@ local GetNumBuybackItems, GetBuybackItemLink = GetNumBuybackItems, GetBuybackIte
 local L = ns.L
 local money = ns.Money
 
-local LAST_BAG = 5
 local BUYBACK_SLOTS = 12 -- the merchant's buyback list holds this many; older sales fall off it
 
 local module = ns.NewModule("AutoSellJunk", L.AUTOSELLJUNK_DESC, {
@@ -60,22 +59,19 @@ local function onMerchantShow()
     local limit = module.db.buybackOnly and buybackRoom() or nil
     -- Past the limit, junk is counted instead of sold, so the player hears what was left.
     local sold, left, total = 0, 0, 0
-    for bag = 0, LAST_BAG do -- backpack, four bags, and the reagent bag
-        for slot = 1, C_Container.GetContainerNumSlots(bag) do
-            local info = C_Container.GetContainerItemInfo(bag, slot)
-            if info and info.quality == Enum.ItemQuality.Poor and not info.hasNoValue
-                and not info.isLocked then
-                if limit and sold >= limit then
-                    left = left + 1
-                else
-                    local price = select(11, C_Item.GetItemInfo(info.hyperlink)) or 0
-                    total = total + price * (info.stackCount or 1)
-                    sold = sold + 1
-                    C_Container.UseContainerItem(bag, slot)
-                end
+    ns.Bags.Each(function(bag, slot, info) -- the reagent bag too
+        if info and info.quality == Enum.ItemQuality.Poor and not info.hasNoValue
+            and not info.isLocked then
+            if limit and sold >= limit then
+                left = left + 1
+            else
+                local price = select(11, C_Item.GetItemInfo(info.hyperlink)) or 0
+                total = total + price * (info.stackCount or 1)
+                sold = sold + 1
+                C_Container.UseContainerItem(bag, slot)
             end
         end
-    end
+    end, true)
     if sold > 0 and left > 0 then
         module:Print(format(L.AUTOSELLJUNK_SOLD_FULL, sold, money(total), left))
     elseif sold > 0 then

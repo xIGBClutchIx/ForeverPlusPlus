@@ -13,7 +13,7 @@ local _, ns = ...
 
 local _G, ipairs, pairs, type, sort, format, wipe = _G, ipairs, pairs, type, table.sort, string.format, wipe
 local CreateFrame, GameTooltip, Enum = CreateFrame, GameTooltip, Enum
-local C_Container, C_Item, C_TooltipInfo, C_AuctionHouse = C_Container, C_Item, C_TooltipInfo, C_AuctionHouse
+local C_Item, C_TooltipInfo, C_AuctionHouse = C_Item, C_TooltipInfo, C_AuctionHouse
 local GRAY_FONT_COLOR, HIGHLIGHT_FONT_COLOR, GREEN_FONT_COLOR = GRAY_FONT_COLOR, HIGHLIGHT_FONT_COLOR,
     GREEN_FONT_COLOR
 
@@ -33,7 +33,6 @@ local module = ns.modules.WaylaidCrates:NewPart({
     list = "bottom", -- the auction house entry: "off", "top" or "bottom" of the categories
 })
 
-local LAST_BAG = 5 -- backpack, four bags, and the reagent bag
 local ROW_WIDTH, ROW_HEIGHT = 132, 21 -- Blizzard's category buttons (AuctionCategoryButtonTemplate)
 
 local row -- our Waylaid Crates row
@@ -58,31 +57,29 @@ local function readCrates()
     wipe(needs)
     crates = 0
     local wanted, names = {}, {}
-    for bag = 0, LAST_BAG do
-        for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
-            local link = C_Container.GetContainerItemLink(bag, slot)
-            local bundles = link and bundlesOf[link]
-            if link and not bundles then
-                local data = C_TooltipInfo.GetBagItem(bag, slot)
-                bundles = data and internal.Bundles(data)
-                -- Not kept while the item hasn't loaded (a lone "Retrieving" line).
-                local lines = data and data.lines
-                if bundles and (#bundles > 0 or (type(lines) == "table" and #lines > 1)) then
-                    bundlesOf[link] = bundles
-                end
-            end
-            if bundles and #bundles > 0 then
-                crates = crates + 1
-                for _, bundle in ipairs(bundles) do
-                    local count, name = bundle[1], bundle[2]
-                    if not wanted[name] then
-                        names[#names + 1] = name
-                    end
-                    wanted[name] = (wanted[name] or 0) + count
-                end
+    ns.Bags.Each(function(bag, slot, info) -- the reagent bag too
+        local link = info and info.hyperlink
+        local bundles = link and bundlesOf[link]
+        if link and not bundles then
+            local data = C_TooltipInfo.GetBagItem(bag, slot)
+            bundles = data and internal.Bundles(data)
+            -- Not kept while the item hasn't loaded (a lone "Retrieving" line).
+            local lines = data and data.lines
+            if bundles and (#bundles > 0 or (type(lines) == "table" and #lines > 1)) then
+                bundlesOf[link] = bundles
             end
         end
-    end
+        if bundles and #bundles > 0 then
+            crates = crates + 1
+            for _, bundle in ipairs(bundles) do
+                local count, name = bundle[1], bundle[2]
+                if not wanted[name] then
+                    names[#names + 1] = name
+                end
+                wanted[name] = (wanted[name] or 0) + count
+            end
+        end
+    end, true)
     for _, name in ipairs(names) do
         local itemID = ns.Prices.ItemByName(name)
         -- What's in the bank counts too: it needn't be bought.

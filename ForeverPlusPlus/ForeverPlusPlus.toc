@@ -41,6 +41,7 @@ Lib\Nameplates.lua
 Lib\Units.lua
 Lib\Players.lua
 Lib\ItemTooltip.lua
+Lib\Bags.lua
 Lib\ItemButtons.lua
 Lib\BagClicks.lua
 Lib\Prices.lua

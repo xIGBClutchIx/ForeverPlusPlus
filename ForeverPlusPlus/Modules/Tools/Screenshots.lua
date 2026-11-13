@@ -16,7 +16,7 @@ local ipairs, pairs, pcall, type, tostring, tonumber = ipairs, pairs, pcall, typ
 local next, setmetatable, C_Timer = next, setmetatable, C_Timer
 local format = string.format
 local tconcat, min, max, floor = table.concat, math.min, math.max, math.floor
-local Screenshot, InCombatLockdown, C_Container = Screenshot, InCombatLockdown, C_Container
+local Screenshot, InCombatLockdown = Screenshot, InCombatLockdown
 local L = ns.L
 
 local module = ns.NewModule("Screenshots", L.SCREENSHOTS_DESC, {
@@ -56,18 +56,12 @@ end
 
 -- The bag slot holding the biggest stack that sells, for a Sell Price line worth showing.
 local function bestStack()
-    if not (C_Container and C_Container.GetContainerNumSlots) then
-        return nil
-    end
     local bestBag, bestSlot, most = nil, nil, 0
-    for bag = 0, NUM_BAG_SLOTS or 4 do
-        for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
-            local info = C_Container.GetContainerItemInfo(bag, slot)
-            if info and not info.hasNoValue and (info.stackCount or 0) > most then
-                bestBag, bestSlot, most = bag, slot, info.stackCount
-            end
+    ns.Bags.Each(function(bag, slot, info)
+        if info and not info.hasNoValue and (info.stackCount or 0) > most then
+            bestBag, bestSlot, most = bag, slot, info.stackCount
         end
-    end
+    end)
     return bestBag, bestSlot
 end
 

@@ -6,7 +6,7 @@
 local _, ns = ...
 
 local ipairs, format, floor, type = ipairs, string.format, math.floor, type
-local C_Item, C_Container, C_Timer = C_Item, C_Container, C_Timer
+local C_Item, C_Timer = C_Item, C_Timer
 local GRAY_FONT_COLOR = GRAY_FONT_COLOR
 local IsShiftKeyDown, GetTime = IsShiftKeyDown, GetTime
 local GetLootSourceInfo, GetNumLootItems = GetLootSourceInfo, GetNumLootItems
@@ -106,28 +106,25 @@ end
 
 local DISENCHANT_SPELL = ns.GameData.Spell(13262, "Disenchant") -- Enchanting's SkillLineAbility, 70888
 local TRADE_GOODS, ENCHANTING = 7, 12
-local LAST_BAG = 4
 local WAIT = 5 -- seconds after the cast for its loot
 
 local pending -- { castGUID, bracket, succeeded, items }
 
 local function lockedItem()
-    local found
-    for bag = 0, LAST_BAG do
-        for slot = 1, C_Container.GetContainerNumSlots(bag) do
-            local info = C_Container.GetContainerItemInfo(bag, slot)
-            if info and ns.IsTrue(info.isLocked) and type(info.itemID) == "number" then
-                local _, bracket = outcomesFor(info.itemID)
-                if bracket then
-                    if found then
-                        return nil -- two: can't tell which
-                    end
-                    found = bracket
+    local found, two
+    ns.Bags.Each(function(_, _, info)
+        if info and ns.IsTrue(info.isLocked) and type(info.itemID) == "number" then
+            local _, bracket = outcomesFor(info.itemID)
+            if bracket then
+                if found then
+                    two = true -- can't tell which
+                    return true
                 end
+                found = bracket
             end
         end
-    end
-    return found
+    end)
+    return not two and found or nil
 end
 
 local function learn()

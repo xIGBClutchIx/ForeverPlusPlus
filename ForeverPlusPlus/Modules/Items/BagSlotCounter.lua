@@ -104,7 +104,7 @@ local POSITIONS = {
 -- Bag ids (Enum.BagIndex) and their buttons on Mainline's bag bar. A button Forever doesn't have
 -- is skipped.
 local BACKPACK = 0
-local REAGENT = Enum and Enum.BagIndex and Enum.BagIndex.ReagentBag or 5
+local REAGENT = ns.Bags.REAGENT
 local BAGS = {
     { id = BACKPACK, button = "MainMenuBarBackpackButton" },
     { id = 1, button = "CharacterBag0Slot" },

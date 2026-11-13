@@ -485,9 +485,8 @@ end
 
 -- Bags and bank ---------------------------------------------------------------------------------
 
--- The reagent bag, which holds profession tools too. Probe: Enum.BagIndex is Mainline's; 5 is
--- its slot there.
-local REAGENT_BAG = Enum and Enum.BagIndex and Enum.BagIndex.ReagentBag or 5
+-- The reagent bag, which holds profession tools too.
+local REAGENT_BAG = ns.Bags.REAGENT
 
 local function updateBag(frame)
     local on, skipReagent = module.db.bags, module.db.reagentBag

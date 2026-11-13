@@ -118,6 +118,15 @@ Generated files (never edited by hand; see Generated data): `InstanceLevels.lua`
 ### `Units.lua`
 
 - `ns.Units`: in my group, a friend, a recent ally, a guildmate.
+- The player's own state, for a module that acts by itself (casts, sheathes, opens): `PlayerBusy` gives why now is a bad time ("combat", "dead", "taxi", "casting") or nil, and `PlayerCasting` whether a cast or channel is under way. An answer the game hides counts as busy, so a module waits instead of interrupting. Every module asks here, never the unit calls directly: five used to, with three different guards.
+
+### `Bags.lua`
+
+- `ns.Bags`: what's in the player's bags.
+- `Each(fn, reagent)` calls `fn(bag, slot, info)` for every slot of the backpack and the four bags (the reagent bag too with `reagent`), `info` nil for an empty slot. It stops at the first `fn` that returns something and returns that.
+- `FreeSlots()` counts the free slots of the bags that take anything (not a quiver's or the reagent bag's).
+- `LAST` and `REAGENT` are the bag indices, the one place they're written down.
+- The buttons Blizzard draws for bags are `ItemButtons`'.
 
 ### `Players.lua`
 
@@ -154,6 +163,7 @@ Generated files (never edited by hand; see Generated data): `InstanceLevels.lua`
 ### `WorldMap.lua`
 
 - `ns.WorldMap`: the world map once its addon has loaded, map data providers, walking up the map tree (`Up`, `Root`), a map's name, a map's size in yards (`Size`), a zone by name (`FindMap`), Blizzard's map pin (`SetWaypoint`, `CanWaypoint`) and the name it was set with, since the game's pin has no label (`WaypointNote`: the icon Ctrl+clicked or the note after `/way`, while the pin stays at that spot), where the player stands, where a quest and the corpse are (`QuestPoint`, `CorpsePoint`), and how far and which way a spot is from the player, also in the next zone (`FromPlayer`), Blizzard's coordinates panel on it and the CVars behind it (`COORDS_CVARS`), and the player's side for map data.
+- The filter menu (the funnel at the map's top right): `AddFilter(order, shown, build)` puts a module's entries under the one Forever++ title, after Blizzard's own, in `order` (World Map 1, Quest Pins 2, Gathering Map 3). `shown()` is asked each time the menu opens, since Blizzard's menus can't take an addition back. `FilterLayer(root, name, get, set, kinds)` is the entry for a layer of icons: a checkbox for the layer, with a checkbox per kind in a submenu that stays open while kinds are switched; a kind with `disabled` text is greyed out with that as its tooltip.
 
 ### `MapTooltip.lua`
 
@@ -227,6 +237,7 @@ Generated files (never edited by hand; see Generated data): `InstanceLevels.lua`
 ### `Quests.lua`
 
 - `ns.Quests`: which quest Blizzard's quest windows show (`DetailsID`, `GiverID`, and `GreetingButton` with its level) and a quest's level from the quest log.
+- What every module writes for a quest: `DifficultyLevel(questID, fallback)` (the game's, then the log's, then the fallback, such as QuestieDB's), `Title(questID, fallback)`, `IsElite`, and `LevelTag(questID, level)`, "[12]" or "[12+]" for a group quest. One source, so two modules can't tag the same quest differently.
 
 ### `QuestieDB.lua`
 
