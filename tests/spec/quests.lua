@@ -24,6 +24,14 @@ do
     eq(Quests.Level(103), nil, "quests: level 0 is unknown")
     eq(Quests.Level(999), nil, "quests: not in the log")
     eq(Quests.Level(nil), nil, "quests: no quest")
+    eq(Quests.LevelTag(101, 12), "[12]", "quests: a plain quest's tag")
+    C_QuestLog.IsEliteQuest = function(id) return id == 102 end
+    eq(Quests.LevelTag(102, 22), "[22+]", "quests: an elite quest's tag has a +")
+    eq(Quests.IsElite(101), false, "quests: not elite")
+    Constants = { QuestConsts = { QUEST_INFO_ELITE_ID = 1 } }
+    C_QuestLog.GetQuestTagInfo = function(id) return id == 103 and { tagID = 1 } or nil end
+    eq(Quests.IsElite(103), true, "quests: elite by its tag")
+    eq(Quests.IsElite(nil), false, "quests: no quest isn't elite")
     QuestInfoFrame = { questLog = true }
     eq(Quests.DetailsID(), 102, "quests: details from the quest log")
     QuestInfoFrame.questLog = nil

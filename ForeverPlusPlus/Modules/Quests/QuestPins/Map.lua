@@ -171,7 +171,7 @@ local function questLine(id)
     end
     local color = HIGHLIGHT_FONT_COLOR
     if level then
-        title = format("[%d] %s", level, title)
+        title = format("%s %s", ns.Quests.LevelTag(id, level), title)
         color = GetQuestDifficultyColor(level)
     end
     return { title, color }

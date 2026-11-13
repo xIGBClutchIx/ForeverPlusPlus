@@ -30,7 +30,7 @@ local function row(id, marker)
     if not (type(level) == "number" and level > 0) then
         level = info and (info.level or info.required) or nil
     end
-    return { id = id, level = level, text = format("%s %s%s", marker, level and ("[" .. level .. "] ") or "", title) }
+    return { id = id, level = level, text = format("%s %s%s", marker, level and (ns.Quests.LevelTag(id, level) .. " ") or "", title) }
 end
 
 local function onUnit(tooltip, data)

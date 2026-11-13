@@ -25,6 +25,32 @@ function Quests.Level(questID)
     end
 end
 
+---Whether a quest is an elite (group) one, as Forever's quest log marks with a + after the level.
+---C_QuestLog.IsEliteQuest is what Blizzard's own tag asks (Camelot's QuestUtilsOverrides); the
+---quest's tag is asked too, for a quest that one doesn't answer for. Probe both.
+---@param questID number?
+---@return boolean
+function Quests.IsElite(questID)
+    local log = C_QuestLog
+    if not (type(questID) == "number" and log) then
+        return false
+    end
+    if log.IsEliteQuest and log.IsEliteQuest(questID) == true then
+        return true
+    end
+    local tag = log.GetQuestTagInfo and log.GetQuestTagInfo(questID)
+    local elite = Constants and Constants.QuestConsts and Constants.QuestConsts.QUEST_INFO_ELITE_ID
+    return type(tag) == "table" and elite ~= nil and tag.tagID == elite
+end
+
+---A quest's level as the quest log writes it before a title: "[12]", or "[12+]" for an elite quest.
+---@param questID number?
+---@param level number
+---@return string
+function Quests.LevelTag(questID, level)
+    return "[" .. level .. (Quests.IsElite(questID) and "+" or "") .. "]"
+end
+
 ---The quest in the details pane. QuestInfo_Display fills it for a quest giver's offer and reward,
 ---and for the quest log on the map, where it's the log's selected quest.
 ---@return number?
