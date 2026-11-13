@@ -2,6 +2,8 @@
 
 Rules for anyone changing this repository, human or AI. `CLAUDE.md` imports this file; edit rules here only.
 
+Keep this file short. It says what exists and what the rules are. How a file works belongs in that file's header comment, and what a module does for players belongs in `README.md`.
+
 ## What Forever++ is
 
 A World of Warcraft addon for **WoW: Forever** that adds to and changes the default UI in small, separate modules.
@@ -9,8 +11,6 @@ A World of Warcraft addon for **WoW: Forever** that adds to and changes the defa
 - It enhances Blizzard's UI. It is **not** a UI replacement: no new unit frames, action bars, or skins of the whole interface.
 - Every change should look like Blizzard shipped it: Blizzard fonts, atlases, templates, colors, and spacing. A player should not be able to tell where Blizzard stops and Forever++ starts.
 - Every change should be seamless: no setup, no popups at login, sensible defaults, and nothing that breaks when a module is off.
-
-Names:
 
 | What | Value |
 | --- | --- |
@@ -22,40 +22,208 @@ Names:
 
 ## Project map
 
-- `ForeverPlusPlus/`: the shipped addon folder, linked into the client's `Interface\AddOns`.
-  - `ForeverPlusPlus.toc`: metadata and load order.
-  - `Bindings.xml`: keys in Blizzard's Key Bindings, under Forever++ (the game loads it by itself; it isn't in the TOC). Today Target Markers' ring.
-  - `Core.lua`: the shared `ns`: events (`ns.On`, `ns.Off`, `ns.OnUnit` and `module:OnUnit` for a UNIT_* event of one or two units, and `ns.HasEvent` before an event a patch may add or drop, and `module:OnWhile(when, events)` for events heard only while an option is on), `ns.AfterCombat`, saved settings (laid out by `Lib/Store.lua`), modules (`ns.NewModule`, `ns.SetEnabled`, and `module:NewPart` for a module made of parts the player turns on one by one, by a checkbox or, with `choices`, a dropdown whose "off" turns it off; `ns.PartOn` says whether one is on), timers that stop when their module (or part) turns off (`ns.Frames.Timer(module)` and `ns.Frames.Coalesce(fn, delay, module)`: Core cancels them after `OnDisable`, and they don't run while it's off), hooks that do nothing while a module is off (`module:Hook`, `module:HookScript`, `module:TooltipPostCall`, and `module:TooltipLinePreCall`, whose true leaves a tooltip line out; they skip a target this client doesn't have), migrations of saved settings (`ns.Migrate`, `ns.MoveSettings`), `ns.Print`, `module:Print` with `ns.ChatOption`, `ns.ResetOption` (back to the default, forgetting the choice), `ns.OnModuleChanged` (the player turned a module on or off or changed an option, for the public API's callbacks), and the locale table `ns.L`.
-  - `Commands.lua`: loaded right after `Core.lua`, since modules add to it as they load: `/fpp` (modules add subcommands with `ns.AddCommand`), `/fpp set` and `toggle` on any module's options, and the Defaults popup's resets of the profile in use only: `ns.ApplyPreset(enable, options)` (the plain defaults with those on top, based on no preset) and `ns.UsePreset(name)` (based on a preset from `Lib/Presets.lua`, which it then follows).
-  - `Locales/<language>/*.lua`: player-facing text, a file per category like `Modules/` (`Core`, `Automation`, `Character`, `Chat`, `Interface`, `Items`, `Map`, `Quests`, `System`, `Units`, `Tools`). `Locales/enUS/` has every key and is the fallback; another language's folder sets only the keys it translates.
-  - `Lib/*.lua`: shared services any module can use, loaded before the modules. `Store.lua` (`ns.Store`: the saved variables' layout and version, the steps that bring an older one up to date, and the `module.db` each module reads, through the profile in use: Default is the account's own `settings` and `data`, where they always were, and every other profile is a root of its own in `db.profiles[id]` with the same two tables (`Root`, `Roots` for all of them), and a root's `preset` the preset it's based on, which a setting the player hasn't set reads before its default (`Preset`, `SetPreset`, and `Base`, what a reset gives; a name this version lacks reads as none and stays saved); which one a character uses is `ForeverPlusPlusCharDB.profile`, and the account keeps `newCharacters` and `characters`, every character seen with its profile), `Presets.lua` (`ns.Presets`: named presets on top of the defaults, registered here (only Developer's Defaults, `developer`, so far) with `Register(name, { title, description, extends })`, a parent registered first so no chain loops, and each module's part declared in its own `module.presets`; `Value` and `Enabled` say what one says for a module's setting along its `extends` chain, nearest first (nil for nothing, a locked, always-on, or unavailable module, data, and `cvar` options), `Resolve` and `Flat` give all of it (`Flat` as `ns.ApplyPreset` takes it), `List`, `Title`, `Exists`, and `Buttons` the popup buttons, a menu once there are more than fit), `Profiles.lua` (`ns.Profiles`: the profiles, made from the defaults, as a copy, or based on a preset (`CreateFromPreset`, which writes nothing into its settings), based on another or none later (`Preset`, `SetPreset`: unlinking writes what the preset gave in as the player's own first), renamed, deleted (its characters back to Default), the characters on each and setting another's for its next login, New Characters Use, and switching live with Core's `ns.ChangeProfile`, waiting out combat; `/fpp profiles`), `ProfileShare.lua` (`ns.ProfileShare`: a profile as one line of text, compressed with `C_EncodingUtil` or plain, and pasted text checked against the modules' declared settings before it's imported; a profile based on a preset exports the link and the values it gives, and imports based on it, without the values it still gives, only where this version has that preset), `Profiler.lua` (`ns.Profiler`: while the Profiler page records, times calls into each module's code and charges them to it; Core's events and hooks, Nameplates' and ItemTooltip's callbacks, and timers go through it with what ran (`CallFrom`, so a module's time splits by source), a module wraps its own OnUpdate with `Profiler.Wrap` (inside its throttle, so only real runs count), and the worst frames are kept as spikes), `Colors.lua` (`ns.Colors`: colors modules share, `Colors.Code` for color codes in text, `Colors.Class` for a unit's class color, `Colors.LevelRange` for a level range against the player's, and `Colors.Faction` for Horde red and Alliance blue, and `Colors.STATS`, a color for each stat), `Secret.lua` (`ns.IsReadable`, `ns.IsText` for a readable string, `ns.IsNumber` for a readable number, `ns.IsTrue` and `ns.IsTrueOrSecret` for a flag that may be secret, `ns.AurasReadable` before reading an aura, `ns.EachAura` to walk a unit's auras after it, `ns.HealthStepCurve`), `Money.lua` (`ns.Money`: copper as coin text, and `ns.MoneyShort` rounded to whole gold for a narrow column), `Fonts.lua` (`ns.Fonts`: the game's fonts a font dropdown offers, and whether this client's language can use them), `Keys.lua` (`ns.Keys`: the Skip Key dropdown and whether its key is held), `Sounds.lua` (`ns.Sounds`: Blizzard's alert sounds every Sound dropdown offers (`CHOICES`), and `Play` for the one picked), `Confirm.lua` (`ns.Confirm`: a yes/no popup before something throws data away, and `ns.Prompt`: a popup that asks for a line of text or shows one to copy, `ns.PromptName` for a name), `Text.lua` (`ns.Text`: numbers with thousands separators (`Number`), font string width, tooltip lines, "3 Seconds" and "12m ago", "120 yds" (`Yards`), which of two versions is newer, text without its escape codes, the client's format strings as patterns, and a bar's text as the game's Status Text setting writes it (`StatusText`)), `GameData.lua` (`ns.GameData`: game data a patch can change, as sets of a seed the addon ships plus what play taught it, saved for the account; single item, spell, and map IDs Self Test checks; and Blizzard's "Requires Herbalism (75)" line read in any language), `Frames.lua` (`ns.Frames`: whether this client has an atlas or template, the box tooltips are drawn in, Blizzard's panel button (`Button`), saving and restoring a frame's anchors (`GetPoints`, `SetPoints`), our windows with a portrait (`PortraitWindow`, with `Inset` and `RowTexture` for their lists), Escape closing our windows, whether the player is in combat or moving (`PlayerActivity`), red error-frame text, running something once after a burst of calls (`Coalesce`), a timer that waits for one run at a time (`Timer`), and OnUpdate a few times a second (`Throttled`, `Watcher`)), `AddOns.lua` (`ns.AddOns`: wait for a load-on-demand addon), `Errors.lua` (`ns.Errors`: Error Catcher's counts and window, for the minimap button), `CVars.lua` (`ns.CVars`: set CVars and put the player's values back, waiting out combat, `Bind` for options that mirror a CVar, `Hold` to keep one at a value, and `Same` for two values the game counts as equal), `Nameplates.lua` (`ns.Nameplates`: plate added/removed/cast callbacks and Forever's plate parts), `PlateLabel.lua` and `FriendlyPlates.lua` (`ns.PlateLabel`, `ns.FriendlyPlates`: the name-only friendly plates Player Nameplates and NPC Nameplates share), `Units.lua` (`ns.Units`: in my group, a friend, a recent ally, a guildmate), `Players.lua` (`ns.Players`: the class, level, race, and guild of players seen in the group, guild roster, friends, who results, units, nameplates, and chat, saved for the account in a variable of its own (`ForeverPlusPlusPlayersDB`, as `ns.playersDB`) by realm name while a module uses it (`Use`, `Release`), read with `Get(guid, name)`), `ItemTooltip.lua` (`ns.ItemTooltip`: price lines together at the sell price, notes about them after every price line (`OnPriceNotes`), other item lines just above them, stack counts, Shift redraws, drawing one of Blizzard's lines again with something beside it, and `ColorText` in the quantity colors), `ItemButtons.lua` (`ns.ItemButtons`: the item buttons in bags, at a merchant, in the auction house's browse list, the loot window, and loot rolls, the bank's shown tab (`EachBankButton`, `HookBank`), quest reward choices (`EachRewardChoice`, `RewardIcon`), hooks that redraw with them (`HookLoot` listens for LOOT_OPENED itself), and our own textures over their icons (`Overlays`, `Tint`), with the options every mark on an item or action button icon shares, built by `CornerOption`, `SizeOption`, `PaddingOption`, and `PlaceOption` (style, then Corner, a size in px, step 2, up to 32, then Padding 0 to 10, 1 by default; then a Show On section of places, bags, bank, merchant, auction, loot, then the module's own), and `PlaceInCorner` and `MarkSize` to put the mark there at its size, in proportion to the icon it's on (the size option is a bag icon's)), `BagClicks.lua` (`ns.BagClicks`: secure overlays on items in Blizzard's bags whose right-click uses an item or casts a spell on it, out of combat), `Prices.lua` (`ns.Prices`: auction prices and items by name, from Item Tooltips' Auction Prices while it's on, for other modules, with `AgeColor` for a price's age in the player's Scan Age Color), `Providers.lua` (`ns.Providers`: what a module offers outside itself while it's on, by name, set in `OnEnable` and cleared in `OnDisable`, for `API.lua` to read without reaching into the module, with `Changed` and `OnChanged` for when it changes), `Disenchant.lua` (`ns.Disenchant`: which items can be disenchanted (the game's brackets, from the generated `DisenchantBrackets.lua`), what each gives (learned in play where not known) with its chance and amount, and their average value at given prices), `Professions.lua` (`ns.Professions`: the player's profession skills by skill line (and a rogue's Lockpicking), with a profession's skill and its rank's most as its window shows them (`Progress`), gathering difficulty colors, herbs and veins by name with the skill and item they give, chests by name with a locked one's Lockpicking (`Chest`, `LearnChest`), fishing pools by name and world object (`Pool`, `PoolByObject`, `LearnPool`), the kinds of node maps sort by (`KINDS`: herb, ore, treasure, fish; `Kind`, `LineKind`), veins that spawn in each other's spots (`SharesSpawn`: Silver in Tin's), the gathering skill an item comes from (`ItemSkill`), and the Skinning a creature's level needs, a recipe's yellow, green, and gray levels from its yellow and gray (`RecipeLevels`), the color they give at a skill (`LevelDifficulty`, in `DIFFICULTY`'s numbers), and their bar (`LevelBar`), and the professions window's recipe form (`RecipeForm`) and recipe rows: `EachRecipeRow`, `HookRecipeRows`, the recipe a row is about at its best known rank (`RowRecipe`, `BestRank`), and `NewRowColumn` for a column of a module's own at the rows' right end, taking space only while it's in use, with the recipe's name cut short before the columns), `WorldMap.lua` (`ns.WorldMap`: the world map once its addon has loaded, map data providers, walking up the map tree (`Up`, `Root`), a map's name, a map's size in yards (`Size`), a zone by name (`FindMap`), Blizzard's map pin (`SetWaypoint`, `CanWaypoint`), where the player stands, where a quest and the corpse are (`QuestPoint`, `CorpsePoint`), and how far and which way a spot is from the player, also in the next zone (`FromPlayer`), Blizzard's coordinates panel on it and the CVars behind it (`COORDS_CVARS`), and the player's side for map data), `MapTooltip.lua` (`ns.MapTooltip`: how every tooltip over the world map looks: white title (with its kind in gold at the right, when given), gold kind line, white details, label and value lines like the Sell Price line (`Pair`), gray notes, faction colors, and no-break text), `Instances.lua` (`ns.Instances`: the dungeons and raids with their levels (the lowest from the generated `InstanceLevels.lua` unless kept by hand), a row for each as maps list them, and their names in the player's language), `MapPins.lua` (`ns.MapPins`: layers of our own icons on the world map, through a map data provider, their art (`SetArt`: an atlas or item icon, round, tinted, ringed, or a hollow ring), Shift+clicks on an icon that let plain clicks through (`ShiftClick`), and plain clicks an icon takes itself (`Click`)), `DungeonMaps.lua` (`ns.DungeonMaps`: the dungeon maps the DungeonJournal addon draws, since the client has none: whether it's there and has an instance's map (`Has`, `Can`) and asking it to show one (`Open`), through what it leaves in reach, read when called and every call protected, never in combat), `Gathering.lua` (`ns.Gathering`: the herbs, veins, chests, and fishing pools the player gathers as they gather them (and a herb or vein their skill is too low for, from the game's error), with where they stood and the loot, told to modules that `Listen`, and the item each herb and vein gives taught to `ns.Professions`; and a map's remembered nodes, a gather within `RADIUS` yards of the same node counted again with its spot averaged (`Add`, `Nearest`, and `See` for one seen but not gathered), and nodes as a line of text to share and back (`Encode`, `Decode`, `Merge`)), `MinimapPins.lua` (`ns.MinimapPins`: what the minimap shows right now (`View`: the player's zone map and spot, its view radius, and its rotation) and turning zone-map spots into minimap spots and back (`ToMinimap`, `FromMinimap`), for our own icons on it, the names of the dots under the player's own mouse and where the mouse is (`MouseoverNames`, `CursorOffset`), and the minimap's gold ring around an icon (`NewRing`, `PlaceRing`), which world map pins use too, and its shape: whether an addon made it square (`Square`, from `GetMinimapShape`), and word when that changes (`ShapeChanged`, `OnShapeChanged`) to our buttons on its edge and LibDBIcon's), `EditMode.lua` (`ns.EditMode`: our own frames in Blizzard's Edit Mode, looking and working like Blizzard's: a selection box that turns gold when clicked, dragging with snapping, arrow-key nudging, and a settings dialog and right-click menu with scale, the frame's own settings (dropdowns, sliders, checkboxes), and reset position, and `RegisterModule` for a frame placed from its module's x, y, and scale settings, whose options marked `editMode = true` are those settings), `Chat.lua` (`ns.Chat`: the chat windows as they come and go, rewriting the lines they show, a chat line in its colors for an edit box, filters that hide chat lines (`AddFilter`), and the column of buttons beside the chat window, with `NewButton` in Blizzard's art, those that don't fit a short chat window listed in its speech bubble's menu instead, and `SetBadge` for what one has waiting, which the speech bubble shows while it's there), `TalentPlan.lua` (`ns.TalentPlan`: an ordered talent plan checked against Classic tree rules, the points each row needs (`RowGates`), talent points by level, plans as share strings, and build links from talentsforever.com and wowforevertalents.com read into a plan (`ParseLink`, `FromLink`), only when the game's tabs have the shape the link's numbering was written against), `Slash.lua` (`ns.Slash`: slash commands a module adds and takes away live, left to another addon that already has the same one), `SettingsKit.lua` (`ns.SettingsKit`: what a drawn Settings page is made of, for the Settings pages and a tool's `BuildPage`: the module categories in the Modules page's order (`CATEGORIES`, `CategoryOf`), the page title, checkboxes, buttons, undo arrows (`NewResetButton`), tooltips, stacks, a split list and pane, and the search box), `ItemStats.lua` (`ns.ItemStats`: an item's stats in short keys from the game's stat table, with its slot and levels, a stat weight score, and which stat a tooltip line is about (`LineStat`)), `Equipment.lua` (`ns.Equipment`: the slots an item type goes in, what's worn, whether the character can use an item, the weapon type worn in a slot (`WeaponSubclass`), and the worn items an item would replace, from the client's own item comparison or the slot rules), `Durability.lua` (`ns.Durability`: how whole each equipped item is (`Fraction`) and the most worn one (`Lowest`), and the warning level that makes and when a change of it should warn (`Level`, `ShouldWarn`)), `Talents.lua` (`ns.Talents`: the talent tabs with the points in each, and the dominant one), `ActionButtons.lua` (`ns.ActionButtons`: Blizzard's action buttons, what each slot holds, and our own marks over them), `Spellbook.lua` (`ns.Spellbook`: the spells the player knows by name, with every rank and its subtext, whether one is known (`IsKnown`), and the level a spell is learned at), `Quests.lua` (`ns.Quests`: which quest Blizzard's quest windows show (`DetailsID`, `GiverID`, and `GreetingButton` with its level) and a quest's level from the quest log), `QuestieDB.lua` (`ns.QuestieDB`: the one place we read the separate QuestieDB addon's quest, NPC, item, and object data, at run time through its `LibQuestieDB` API and never copied into this repo (`docs/questiedb.md`): whether it's there and fits (`Status`, `IsReady`, `Problem`, `OnReady`), records as our own copies with spawns 0-1 on a uiMapID (`Quest`, `Npc`, `Item`, `Object`, `Ids`, `IdsByName`, `UiMapID`, `DropRates`), every call protected, and `Notices` for a module that needs it, with `Require` to lock one off while it's missing), `Plugins.lua` (`ns.Plugins`: modules another addon adds through the public API: `Register` makes one and returns a handle that takes only the fields `docs/api.md` names, checked and copied as they're set, never our module table, so how our modules are written can keep changing; `Kit` the read-only helpers a plugin gets; and `Remember`, which keeps the settings of a plugin whose addon isn't loaded this session from being cleared), `Taxi.lua` (`ns.Taxi`: the open flight master's flight points, read once per frame for every module that asks, and a flight's estimated seconds (`FlightEstimate`) from the generated `TaxiRoutes.lua` at `SPEED`), `RealmTime.lua` (`ns.RealmTime`: how far the player's clock is from the realm's, in quarter hours (`Offset`), and a realm time moved to the player's clock, with the days it moved (`Clock` for an hour and minute, `Date` for a CalendarTime), and `IsToday`). They cost nothing until a module uses them.
-  - `Modules/<Category>/`: one change each (see "Add a module" in `README.md`), in a folder for its category: `Automation`, `Character`, `Chat`, `Interface`, `Items`, `Map`, `Quests`, `System`, `Units`, and `Tools`. A small module is one file; a bigger one gets a folder of files that share `module.internal`. Today: Player Nameplates, NPC Nameplates, Quest Nameplates, Druid Mana Bar (druids only: mana in the player frame's third-bar slot while in a form without it), Target Markers (a ring of raid icons at the cursor while a key from `Bindings.xml` is held, picking by direction like the ping wheel, a world marker with Shift; secure, so it works in combat), Simplified Dungeon Nameplates (`DungeonNameplates`: the game's Simplified nameplates CVar on for the kinds picked only inside dungeons and raids, the player's own value back outside), Console Variables (a folder: the tool page, its Popular list of CVars, and its locks, which keep a CVar at the player's value at login and whenever it changes while the module is on, off by default), Debug (every module's debug options and buttons on its own page in the sidebar while it's on, drawn by `Settings/Debug.lua`, off by default; off, its page and tools' commands are gone and debug options go back to their defaults), Self Test (a Debug button, no toggle), Gear Probe (a Debug button and `/fpp gearprobe`, no toggle: what the client says about gear, item comparison, talent tabs, and stats, saved for the upgrade arrows work), Screenshots (a Debug button and `/fpp shots`, no toggle: gallery screenshots of real windows; a module adds its own scene with `module.screenshot`), CPU Profiler (`Profiler`: a tool page, off by default), Fast Loot, Auto Repair, Auto Sell Junk, Auto Open Containers (opens the containers in the bags by themselves, when nothing is in the way), Item Tooltips (a folder: the module and its parts, Sell Price, Repair Cost, Item Count, Disenchant, Stat Colors, Compare Crafted Gear, and Auction Prices, with its auction house scan in `Scan.lua`), Waylaid Crates (a folder: the module, Bundle Costs, and its auction house category), Already Known, Appearance Icons (uncollected appearances), Unusable Items Tint, Upgrade Arrows (a folder: the module and its stat weight templates), Best Quest Reward, Easy Delete, Hide Beta Feedback (beta/PTR only), Gathering Tracking, Gathering Skill Tooltips (`ProfessionTooltips`), Auto Stow, Bag Slot Counter, Auto Gossip, Auto Quest, Tooltips, Auto Decline, Auto Release, Skip Cinematics, Auto Dismount, Fishing Cast, Auto Weapon Buff, Comprehend Scrolls, Auto Screenshot, Professions (a folder: the module and a part each for Recipe Colors, Skill-Ups Left, Skill Bar (the selected recipe's yellow, green, and gray levels as a bar, from the generated `Data.lua`), and Crafting Costs with Profit in Recipe List and the merchant prices it learns, and Unlearned Recipes (the open profession's recipes not known yet, added to Blizzard's own recipe list and Filter menu, with their learn skill from `Data.lua`)), Spell Ranks, Buff Timers, Macros (a folder: the module, which makes and deletes its macros and marks their buttons, and its Smart Buff macro), Class Colors, World Map (a folder: the module, its quick checkboxes in the world map's filter menu (`Filter.lua`), and a part each for Points of Interest (with its flight points, ley lines, and Blizzard icons in files of their own), Zone Info, Unexplored Areas, and Coordinates, with their map, zone, and map art data), Flight Timer, Hide Filter Reset, Square Minimap (a square mask and border in place of the round frame, saying so through `GetMinimapShape`), Waypoints (`/way` and a waypoint arrow), Compass Bar (a compass across the top of the screen, sized in Edit Mode, with the selected quest, the map pin, the corpse, the group, and, as the player picks, quests on the map, flight masters, Gathering Map's nodes through its provider, and rares on it), Gathering Map (a folder: the module, which remembers each herb, vein, chest, and fishing pool gathered for the account, its world map and minimap icons, and its page of nodes to show or hide for each character), Combat Alert, Macro Icon Search (a search box in the macro icon picker, over the icons of the player's spells and items), Movable Windows (drag Blizzard's windows with a key held, remembered always, for the session, or until closed), Hide Stance Bar (the stance bar faded out, its buttons not taking the mouse), Hide Error Messages (`HideErrors`: the error frame's UI_ERROR_MESSAGE heard in its place, and only the errors not hidden handed to it), Loot Rolls (the group loot rolls placed in Edit Mode, with their grow direction, spacing, and preview as Edit Mode settings, and the seconds left and roll counts on each), Movable Framerate, Local Time (the calendar's and a few other realm times of day in the player's time while the clock's Use Local Time is on), XP Bar Text, AddOns List, Error Catcher, Minimap Button (its menu of quick toggles, picked by the player with the Customize button in its settings), Currency Bar, Character Window (a folder: the module, its durability bars, and equipped weapon skill colors), Durability Warning (once when worn gear drops below a durability the player picks and again when it breaks: a chat line, red error-frame text, and a sound, each an option), Forever Quest Icons, Quest Tracker, Quest Levels, Quest Item Sparkles (keeps the CVar for the sparkle on quest items in the world on), Quest Pins (a folder: the module, its index of quest starts by map read from QuestieDB a few milliseconds a frame, the rules for which quests the player can take, its world map pins, and its NPC tooltip lines; needs QuestieDB, off by default), Talent Planner (a folder: the module, reading the tree, drawing on it, the plan bar, and the level-up reminder), Slash Commands (`Commands`: `/rl` and `/clear`), Chat Copy, Short Channel Names, Chat Levels, Quest Links (Questie's plain-text quests in chat made Blizzard quest links), Chat Font, Keep Chat Visible (`PersistentChat`: chat doesn't fade), Chat History, Chat Arrow Keys (Up and Down in the chat box recall what was sent, without Alt), Social Button, Whisper Window (a folder: the module and its window) (the last ten in `Chat`).
-  - `API.lua`: the public API other addons read, the global `ForeverPlusPlusAPI.v1` (documented in `docs/api.md`): thin, read-only wrappers over `Lib/` (auction prices, disenchanting, players seen, colors, instances, gathering, the map pin, modules and their options, the profile in use) and over what modules offer through `ns.Providers` while they're on (Upgrade Arrows' scores, Flight Timer's times and flights, Waypoints' arrow target, Gathering Map's nodes, Points of Interest's learned flight points), and callbacks (`READY`, `PRICES_UPDATED`, `UPGRADES_UPDATED`, `MODULE_TOGGLED`, `OPTION_CHANGED`, `WAYPOINT_CHANGED`, `GATHERING_NODES_UPDATED`, `GATHERED`, `FLIGHT_STARTED`, `FLIGHT_ENDED`, `PROFILE_CHANGED`, fired through `ns.API.Fire`). It reads modules and options but never changes them: they're the player's. The one thing a caller adds is a module of its own (`RegisterModule` and `GetPluginKit`, through `Lib/Plugins.lua`): what a plugin may set on its handle and what the kit holds is `docs/api.md`'s Plugins section, part of `v1`'s promise, so add to it with care. Every call is wrapped so an error of ours returns nil instead of breaking the caller, and returns copies, never our tables. `v1` only grows: never rename, remove, or change what a function or return value means; a breaking change is a `v2` beside it. Add a function here when `Lib/` gains data another addon could want, and to `docs/api.md` and the offline tests with it.
-  - `Changelog.lua`: the release notes as data (`ns.changelog`) for the Changelog page, since the game can't read `CHANGELOG.md` (at the repo root). Keep the two the same. An entry is `{ name, text }` with a module's title (or `L.CHANGELOG_SETTINGS`, `L.CHANGELOG_COMMANDS`) as its name, which the page's By Module view groups by; a plain line goes under General.
-  - `Settings/`: the Settings pages. `Settings.lua` has Modules as the top Forever++ entry (a list of the modules with a checkbox each, grouped under a label per category, and the selected one's description and options beside it), a page per module `BuildPage`, and what the other pages share (`ns.SettingsUI`); `Profiles.lua` the Profiles page right after it (this character's and new characters' profile, the profiles with who uses each, the preset each is based on (Based On), their characters, and Export and Import), `Debug.lua` draws the Debug module's page, and `Changelog.lua` and `About.lua` (version, links, commands) the rest.
-  - `Init.lua`: loaded last; calls `ns.Start()` at `PLAYER_LOGIN`.
-  - `Media/Icon.tga`: the addon icon (64x64, 32-bit uncompressed TGA), used by the TOC's `IconTexture` and the About page as `ns.icon`. Made from `docs/project-icon.png`, which the README shows.
-- `.github/workflows/check.yml`: on every push, checks Lua 5.1 syntax, runs `tests/run.lua`, checks ASCII and that the TOC and the files match, runs wowlua-ls (pinned, Forever flavor) and fails on any finding not in `tests/wowlua-baseline.txt`, then uploads the addon folder as a zip artifact. Pushing a `v*` tag also makes a GitHub release with the zip and uploads it to CurseForge (secret `CF_API_KEY`, variables `CF_PROJECT_ID` and `CF_GAME_VERSION_IDS`); bump `## Version` in the TOC to match first, and add the release's notes to `CHANGELOG.md` and `Changelog.lua` (the release stops if any of those is missing). A tag with a suffix (`v1.2.0-beta.1`) is a pre-release on GitHub and a beta on CurseForge. The GitHub release and the CurseForge upload are separate jobs: re-running the release job replaces the zip and notes, but re-run the CurseForge job only when it failed, or CurseForge gets a second file. Wago ([addons.wago.io/addons/foreverplusplus](https://addons.wago.io/addons/foreverplusplus)) imports each GitHub release by itself (its GitHub release import, through a webhook on the repo), so nobody uploads there by hand.
-- `.github/ISSUE_TEMPLATE/`: the bug report and feature request forms for GitHub issues.
-- `CHANGELOG.md`: each release's notes, read by the release jobs; `Changelog.lua` has the same notes for the game.
-- `LICENSE`: MIT.
-- `README.md`: for players and contributors: the module list, install, settings and commands, and "Add a module". Keep it short; rules and client detail belong here and in `docs/`.
-- `docs/forever-api.md`: what we know about the Forever client API, with sources and how sure we are.
-- `docs/api.md`: the public API for addon authors, its promises, every function, and the callbacks. Keep it the same as `API.lua`.
-- `docs/questiedb.md`: the QuestieDB addon's public API as read from its source (how to get it, its versions, its data's shapes and what it lacks), how `Lib/QuestieDB.lua` turns it into ours, and the in-game checks still to do. Never copy its data or code here.
-- `docs/stat-weights.md`: Upgrade Arrows' default stat weights for every talent tree, how each was worked out, and the sources.
-- `docs/description.md`: the project description on CurseForge and Wago. Nothing syncs it: CurseForge's upload API takes only files, and Wago's description is edited on its site, so paste it into both by hand after it changes. Its Modules and Commands sections are the README's tables as lists (without the developer-only commands); keep them the same, with links that work off GitHub.
-- `.luarc.json`: LuaLS settings (Lua 5.1 and the known globals).
-- `.wowluarc.json`: settings for [wowlua-ls](https://github.com/TradeSkillMaster/wowlua-ls), TradeSkillMaster's WoW-aware checker: the Forever flavor, so it checks secret values, and the folders it skips. It learns the addon's own secret guards (`ns.IsReadable`, `ns.IsText`, `ns.IsNumber`) from their `---@secret-guard` lines in `Lib/Secret.lua`.
-- `tests/`: offline tests (see "Verification" and `tests/README.md`): `run.lua` runs every spec in `spec/`, one per area, each in a fresh copy of the addon from `lib/env.lua`, with the checks in `lib/harness.lua`.
-- `tools/datagen/`: the generator of data files made from the client's database tables (not shipped). `lua5.1 tools/datagen/generate.lua [build]` downloads the tables it needs for a `wowf` build from wago.tools with curl (the latest build when none is given; `--latest` only prints it), caches them in `cache/` (ignored by git), and writes every generated file: Unexplored Areas' `Data.lua` (WorldMapOverlay, WorldMapOverlayTile, UiMapXMapArt, UiMap), Professions' `Data.lua` (SkillLineAbility, SkillLine, ItemEffect, ItemXItemEffect, ItemSparse, TradeSkillCategory: each recipe's yellow and gray levels, skill line, spell, and teaching item with its skill, and the Season of Discovery recipe categories Unlearned Recipes leaves out), `Lib/InstanceLevels.lua` (LFGDungeons, ContentTuning, Map, AreaTable: each instance's dungeon finder level), `Lib/DisenchantBrackets.lua` (ItemDisenchantLoot), `Lib/LockboxSkills.lua` (ItemSparse, Lock: each lockbox's Lockpicking), `Lib/TaxiRoutes.lua` (TaxiPath, TaxiPathNode: each direct flight's length and what flying through a stop saves), and `Reference.txt`, what the tables say about data kept by hand (the Map table's dungeons and raids against `Lib/Instances.lua`, TaxiNodes' flight points and TaxiPathNode's transport stops in zone percent, for Points of Interest's `Data.lua`), so a new build's diff shows what to check there. `BUILD` is the build they came from. Never edit a generated file by hand: change the generator (one module per file, listed in `generators.lua`) and run it again. Output is sorted, so the same build gives the same bytes. `summary.lua` counts the entries added, removed, and changed between two copies. `survey.lua [build]` prints what the tables hold for data kept by hand (locks, suffixes, sets, flights, levels, recipes, factions, disenchanting) against the addon's seeds; `docs/table-survey.md` is its write-up for one build.
-- `.github/workflows/table-data.yml`: daily and by hand, compares wago.tools' latest `wowf` build with `tools/datagen/BUILD`; when it's newer, regenerates, runs check.yml's syntax, ASCII, and offline test checks on the result, and opens a pull request from `data/build-<build>` (one per build; an older open one is closed as superseded). It alone may write (`contents` and `pull-requests` on its job). It needs "Allow GitHub Actions to create and approve pull requests" on (Settings > Actions > General), and Check doesn't run on its branch by itself. An unreachable wago.tools is a warning; a generator error fails the run.
-
 There is no build step or library folder. Plain Lua, loaded straight from the TOC; CI only zips the folder.
+
+### Repository
+
+| Path | What it is |
+| --- | --- |
+| `ForeverPlusPlus/` | The shipped addon, linked into the client's `Interface\AddOns`. |
+| `README.md` | For players and contributors: the module list, install, settings, commands, and "Add a module". |
+| `CHANGELOG.md` | Each release's notes, read by the release jobs. `ForeverPlusPlus/Changelog.lua` has the same notes for the game. |
+| `docs/forever-api.md` | What we know about the Forever client API, with sources and how sure we are. |
+| `docs/api.md` | The public API for addon authors. Keep it the same as `API.lua`. |
+| `docs/questiedb.md` | The QuestieDB addon's API as read from its source, how `Lib/QuestieDB.lua` uses it, and the in-game checks still to do. |
+| `docs/stat-weights.md` | Upgrade Arrows' default stat weights, how each was worked out, and the sources. |
+| `docs/description.md` | The project description on CurseForge and Wago. Nothing syncs it; paste it into both by hand after it changes. |
+| `docs/table-survey.md` | What the client's tables hold for data kept by hand, for one build (`tools/datagen/survey.lua`). |
+| `tests/` | Offline tests (see Verification and `tests/README.md`). |
+| `tools/datagen/` | Generates data files from the client's database tables (see Generated data). Not shipped. |
+| `.github/workflows/check.yml` | CI and releases (see Releases). |
+| `.github/workflows/table-data.yml` | Regenerates the table data for a new game build and opens a pull request. |
+| `.github/ISSUE_TEMPLATE/` | The bug report and feature request forms. |
+| `.luarc.json` | LuaLS settings: Lua 5.1 and the known globals. |
+| `.wowluarc.json` | Settings for [wowlua-ls](https://github.com/TradeSkillMaster/wowlua-ls), the WoW-aware checker: Forever flavor, and the folders it skips. |
+| `LICENSE` | MIT. |
+
+### The addon folder
+
+Load order is the TOC's: `Core.lua`, `Commands.lua`, `Locales/`, `Lib/`, `Modules/`, `API.lua`, `Changelog.lua`, `Settings/`, `Init.lua`.
+
+| Path | What it is |
+| --- | --- |
+| `ForeverPlusPlus.toc` | Metadata and load order. |
+| `Bindings.xml` | Keys in Blizzard's Key Bindings, under Forever++ (Target Markers' ring). The game loads it by itself; it isn't in the TOC. |
+| `Core.lua` | The shared `ns`: events, modules and parts, saved settings, hooks, timers, migrations, printing, and the locale table `ns.L`. |
+| `Commands.lua` | `/fpp` and its subcommands, `/fpp set` and `toggle`, and the Defaults popup's resets (`ns.ApplyPreset`, `ns.UsePreset`). |
+| `Locales/<language>/*.lua` | Player-facing text, a file per category. `enUS/` has every key and is the fallback; another language sets only what it translates. |
+| `Lib/*.lua` | Shared services any module can use. They cost nothing until a module uses them. |
+| `Modules/<Category>/` | One change each. |
+| `API.lua` | The public API, `ForeverPlusPlusAPI.v1`. |
+| `Changelog.lua` | The release notes as data (`ns.changelog`) for the Changelog page. An entry is `{ name, text }`, `name` a module's title (or `L.CHANGELOG_SETTINGS`, `L.CHANGELOG_COMMANDS`); a plain line goes under General. |
+| `Settings/` | The Settings pages: `Settings.lua` (Modules, and what the pages share as `ns.SettingsUI`), `Profiles.lua`, `Debug.lua`, `Changelog.lua`, `About.lua`. |
+| `Init.lua` | Loaded last; calls `ns.Start()` at `PLAYER_LOGIN`. |
+| `Media/Icon.tga` | The addon icon (64x64, 32-bit uncompressed TGA), made from `docs/project-icon.png`. |
+
+### Core
+
+What `Core.lua` gives every file through `ns`:
+
+- **Events:** `ns.On`, `ns.Off`, `ns.OnUnit` (a UNIT_* event of one or two units), `ns.HasEvent` (before an event a patch may add or drop).
+- **Modules:** `ns.NewModule`, `ns.SetEnabled`, `ns.OnModuleChanged`. A module made of parts uses `module:NewPart`; `ns.PartOn` says whether one is on.
+- **While a module is on:** `module:On`, `module:OnUnit`, `module:OnWhile(when, events)`, `module:Hook`, `module:HookScript`, `module:TooltipPostCall`, `module:TooltipLinePreCall`. These stop or do nothing while the module is off, and skip a target this client doesn't have.
+- **Timers:** `ns.Frames.Timer(module)` and `ns.Frames.Coalesce(fn, delay, module)` are cancelled when their module turns off.
+- **Settings:** `module.db`, `ns.SetOption`, `ns.ResetOption`, `ns.BaseValue`, `ns.Migrate`, `ns.MigrateCharacter`, `ns.MoveSettings`, `ns.ChangeProfile`.
+- **Combat:** `ns.AfterCombat(fn)` runs it now or once combat ends.
+- **Chat:** `ns.Print`, `module:Print` with `ns.ChatOption`.
+
+### Lib
+
+Each file's header comment says how it works. One line here says what it's for.
+
+**Saved data and settings**
+
+| File | `ns` | For |
+| --- | --- | --- |
+| `Store.lua` | `Store` | The saved variables' layout and version, the steps that bring an old one up to date, and the `module.db` each module reads through the profile in use. |
+| `Presets.lua` | `Presets` | Named presets on top of the defaults (today only Developer's Defaults, `developer`), each module's part declared in its own `module.presets`. |
+| `Profiles.lua` | `Profiles` | Profiles: made, copied, based on a preset, renamed, deleted, and switched live. |
+| `ProfileShare.lua` | `ProfileShare` | A profile as one line of text, and pasted text checked before it's imported. |
+| `GameData.lua` | `GameData` | Game data a patch can change: a seed the addon ships plus what play taught it, and single IDs Self Test checks. |
+| `CVars.lua` | `CVars` | Setting CVars and putting the player's values back, waiting out combat (`Set`, `Restore`, `Bind`, `Hold`, `OffNotice`). |
+| `Providers.lua` | `Providers` | What a module offers outside itself while it's on, by name, for `API.lua`. |
+| `Plugins.lua` | `Plugins` | Modules another addon adds through the public API: a checked handle, never our module table. |
+| `Players.lua` | `Players` | The class, level, race, and guild of players seen, saved in `ForeverPlusPlusPlayersDB` while a module uses it. |
+| `Prices.lua` | `Prices` | Auction prices and items by name, from Item Tooltips' Auction Prices. |
+
+**Values and text**
+
+| File | `ns` | For |
+| --- | --- | --- |
+| `Secret.lua` | `IsReadable`, `IsText`, `IsNumber`, `IsTrue`, `IsTrueOrSecret`, `AurasReadable`, `EachAura` | Guards for values that may be secret. |
+| `Colors.lua` | `Colors` | Shared colors: color codes, class, level range, faction, and one per stat. |
+| `Text.lua` | `Text` | Numbers, durations ("3 Seconds", "12m ago"), yards, version compare, and stripping escape codes. |
+| `Money.lua` | `Money`, `MoneyShort` | Copper as coin text. |
+| `Fonts.lua` | `Fonts` | The game's fonts a font dropdown offers. |
+| `Keys.lua` | `Keys` | The Skip Key dropdown and whether its key is held. |
+| `Sounds.lua` | `Sounds` | The alert sounds every Sound dropdown offers, and playing one. |
+| `RealmTime.lua` | `RealmTime` | Realm time moved to the player's clock. |
+| `Slash.lua` | `Slash` | Slash commands a module adds and takes away live. |
+| `Profiler.lua` | `Profiler` | Times calls into each module's code while the Profiler page records. |
+| `Errors.lua` | `Errors` | Error Catcher's counts and window, for the minimap button. |
+| `AddOns.lua` | `AddOns` | Waiting for a load-on-demand addon. |
+
+**Frames and windows**
+
+| File | `ns` | For |
+| --- | --- | --- |
+| `Frames.lua` | `Frames` | Atlas and template checks, Blizzard's panel button, saved anchors, our portrait windows, Escape to close, `Coalesce`, `Timer`, `Throttled`. |
+| `Confirm.lua` | `Confirm`, `Prompt`, `PromptName` | Yes/no and text popups. |
+| `EditMode.lua` | `EditMode` | Our own frames in Blizzard's Edit Mode, looking and working like Blizzard's (`RegisterModule`). |
+| `SettingsKit.lua` | `SettingsKit` | What a drawn Settings page is made of, for the Settings pages and a tool's `BuildPage`. |
+| `Chat.lua` | `Chat` | The chat windows, rewriting and filtering their lines, and the column of buttons beside them (`NewButton`, `SetBadge`). |
+| `ActionButtons.lua` | `ActionButtons` | Blizzard's action buttons, what each slot holds, and our marks over them. |
+
+**Items**
+
+| File | `ns` | For |
+| --- | --- | --- |
+| `ItemTooltip.lua` | `ItemTooltip` | Our lines on item tooltips, kept together at the sell price (`OnInfo`, `OnPrices`, `AddInfo`, `AddPrice`). |
+| `ItemButtons.lua` | `ItemButtons` | The item buttons in bags, bank, merchant, auction house, loot, and rolls, our marks on them, and the options every mark shares. |
+| `BagClicks.lua` | `BagClicks` | Secure overlays on bag items whose right-click uses an item or casts on it. |
+| `ItemStats.lua` | `ItemStats` | An item's stats in short keys, and a stat weight score. |
+| `Equipment.lua` | `Equipment` | Slots, what's worn, whether the character can use an item, and what an item would replace. |
+| `Durability.lua` | `Durability` | How whole each equipped item is, and when a drop should warn. |
+| `Disenchant.lua` | `Disenchant` | Which items disenchant, into what, and their average value. |
+
+**Character**
+
+| File | `ns` | For |
+| --- | --- | --- |
+| `Professions.lua` | `Professions` | Profession skills, gathering nodes by name, recipe levels and their bar, and the professions window's recipe rows. |
+| `Spellbook.lua` | `Spellbook` | The spells the player knows, with every rank. |
+| `Talents.lua` | `Talents` | The talent tabs and the points in each. |
+| `TalentPlan.lua` | `TalentPlan` | An ordered talent plan checked against the tree's rules, share strings, and build links. |
+| `Units.lua` | `Units` | Who a unit is: in my group, a friend, a recent ally, a guildmate. |
+
+**Nameplates**
+
+| File | `ns` | For |
+| --- | --- | --- |
+| `Nameplates.lua` | `Nameplates` | Plate added, removed, and cast callbacks, and Forever's plate parts. |
+| `PlateLabel.lua`, `FriendlyPlates.lua` | `PlateLabel`, `FriendlyPlates` | The name-only friendly plates Player Nameplates and NPC Nameplates share. |
+
+**Maps and the world**
+
+| File | `ns` | For |
+| --- | --- | --- |
+| `WorldMap.lua` | `WorldMap` | The world map, the map tree, map names and sizes, Blizzard's map pin, and where the player, a quest, and the corpse are. |
+| `MapTooltip.lua` | `MapTooltip` | How every tooltip over the world map looks. |
+| `MapPins.lua` | `MapPins` | Layers of our own icons on the world map, with `ShiftClick` and `Click`. |
+| `MinimapPins.lua` | `MinimapPins` | What the minimap shows, zone-map spots as minimap spots, its gold ring, and its shape. |
+| `Instances.lua` | `Instances` | The dungeons and raids with their levels and names. |
+| `DungeonMaps.lua` | `DungeonMaps` | Opening a dungeon's map in the DungeonJournal addon, since the client has none. |
+| `Gathering.lua` | `Gathering` | What the player gathers as they gather it, a map's remembered nodes, and nodes as shareable text. |
+| `Taxi.lua` | `Taxi` | The open flight master's flight points, and a flight's estimated time. |
+| `Quests.lua` | `Quests` | Which quest Blizzard's quest windows show, a quest's level, and whether it's a group quest. |
+| `QuestieDB.lua` | `QuestieDB` | The one place we read the separate QuestieDB addon, at run time (`Require` for a module that needs it). |
+
+**Generated** (never edit by hand): `InstanceLevels.lua`, `DisenchantBrackets.lua`, `LockboxSkills.lua`, `TaxiRoutes.lua`.
+
+### Modules
+
+- The module list, and what each does for players, is the table in `README.md`. A module's own file header says how it works.
+- A module is in `Modules/<Category>/`: `Automation`, `Character`, `Chat`, `Interface`, `Items`, `Map`, `Quests`, `System`, `Units`, or `Tools`. A small module is one file. A bigger one gets a folder of files that share `module.internal`.
+- A module made of parts (World Map, Item Tooltips, Professions, Waylaid Crates, Character Window) has a file per part in its folder.
+- A few module names differ from their titles: `DungeonNameplates` (Simplified Dungeon Nameplates), `HideErrors` (Hide Error Messages), `ProfessionTooltips` (Gathering Skill Tooltips), `PersistentChat` (Keep Chat Visible), `Commands` (Slash Commands), `Profiler` (CPU Profiler).
+- Self Test, Gear Probe, and Screenshots have no toggle: each is a button on the Debug page and a `/fpp` command while Debug is on. A module adds its own screenshot scene with `module.screenshot`.
+
+### The public API
+
+`API.lua` sets the global `ForeverPlusPlusAPI.v1`, documented in `docs/api.md`.
+
+- It is thin, read-only wrappers over `Lib/` and over what modules offer through `ns.Providers`, plus callbacks fired through `ns.API.Fire`.
+- It reads modules and options but never changes them: they're the player's.
+- The one thing a caller adds is a module of its own (`RegisterModule`, `GetPluginKit`, through `Lib/Plugins.lua`). What a plugin may set and what the kit holds is part of `v1`'s promise, so add to it with care.
+- Every call is wrapped, so an error of ours returns nil instead of breaking the caller. It returns copies, never our tables.
+- `v1` only grows: never rename, remove, or change what a function or return value means. A breaking change is a `v2` beside it.
+- Add a function when `Lib/` gains data another addon could want, and add it to `docs/api.md` and the offline tests too.
+
+### Releases
+
+`check.yml` runs on every push: Lua 5.1 syntax, `tests/run.lua`, ASCII, the TOC against the files, and wowlua-ls against `tests/wowlua-baseline.txt`. Then it uploads the addon folder as a zip artifact.
+
+Pushing a `v*` tag also releases:
+
+1. First bump `## Version` in the TOC to match, and add the release's notes to `CHANGELOG.md` and `Changelog.lua`. The release stops if any of those is missing.
+2. One job makes the GitHub release with the zip. A tag with a suffix (`v1.2.0-beta.1`) is a pre-release.
+3. A separate job uploads to CurseForge (secret `CF_API_KEY`, variables `CF_PROJECT_ID` and `CF_GAME_VERSION_IDS`); a suffixed tag is a beta there.
+4. Wago ([addons.wago.io/addons/foreverplusplus](https://addons.wago.io/addons/foreverplusplus)) imports each GitHub release by itself, through a webhook on the repo.
+
+Re-running the release job replaces the zip and notes. Re-run the CurseForge job only when it failed, or CurseForge gets a second file.
+
+### Generated data
+
+`lua5.1 tools/datagen/generate.lua [build]` downloads the tables it needs for a `wowf` build from wago.tools (the latest build when none is given; `--latest` only prints it), caches them in `cache/` (ignored by git), and writes every generated file:
+
+| File | From |
+| --- | --- |
+| Unexplored Areas' `Data.lua` | The map overlay and map art tables. |
+| Professions' `Data.lua` | Each recipe's yellow and gray levels, skill line, spell, and teaching item. |
+| `Lib/InstanceLevels.lua` | Each instance's dungeon finder level. |
+| `Lib/DisenchantBrackets.lua` | The disenchant loot table. |
+| `Lib/LockboxSkills.lua` | Each lockbox's Lockpicking. |
+| `Lib/TaxiRoutes.lua` | Each direct flight's length. |
+| `Reference.txt` | What the tables say about data kept by hand, so a new build's diff shows what to check. |
+
+- **Never edit a generated file by hand.** Change the generator (one module per file, listed in `generators.lua`) and run it again.
+- `BUILD` is the build they came from. Output is sorted, so the same build gives the same bytes.
+- `summary.lua` counts what changed between two copies. `survey.lua [build]` prints what the tables hold for data kept by hand.
+- `table-data.yml` runs daily and by hand. When wago.tools has a newer build than `BUILD`, it regenerates, runs the syntax, ASCII, and offline checks, and opens a pull request from `data/build-<build>`. It needs "Allow GitHub Actions to create and approve pull requests" on, and Check doesn't run on its branch by itself.
 
 ## The client
 
-- Client folder: `D:\BattleNet\World of Warcraft\_forever_\` (product `wowf`, version 1.60.1). The beta's `_classic_beta_` is gone; its `WTF` was copied over.
+- Client folder: `D:\BattleNet\World of Warcraft\_forever_\` (product `wowf`, version 1.60.1).
 - `Interface\AddOns\ForeverPlusPlus` there is a link to `ForeverPlusPlus/` in this repo, so edits show up after `/reload`.
 - **Treat the client folder as read only.** Never create, edit, or delete anything in it, including `WTF`, `Logs`, `Cache`, and other addons. Reading is fine.
 - Useful things to read there:
@@ -67,71 +235,193 @@ There is no build step or library folder. Plain Lua, loaded straight from the TO
 
 Forever is a Classic+ game (level 60 content) that runs the **modern Mainline (12.x "Midnight") client and UI**, not the Classic Era API. Assume Retail APIs and Retail rules, then check.
 
-- `WOW_PROJECT_ID` is `WOW_PROJECT_CAMELOT` (18) since build 70170 (it was `WOW_PROJECT_MAINLINE` before). Don't use it to detect Forever; comparing a Battle.net friend's `wowProjectID` with it, as Blizzard does, is fine. If a difference matters, use the interface number from `GetBuildInfo()` (range `[16000, 17000)`, and never "starts with 1": Classic Era is 11509), or better, probe for the API.
-- Classic-only globals are gone: `GetItemInfo`, `GetSpellInfo`, `UnitAura`, `SetDesaturation`, and similar. Use `C_Item`, `C_Spell`, `C_UnitAuras`, `C_Container`, `C_AddOns`, `C_Timer`, etc.
-- The UI is Mainline's: Edit Mode (`EditModeManagerFrame`, `C_EditMode`), the Settings panel (`Settings.RegisterCanvasLayoutCategory` / `RegisterVerticalLayoutCategory` + `Settings.RegisterAddOnCategory`), the `Menu` / `MenuUtil` context menus (`Menu.ModifyMenu` to add to Blizzard menus), `TooltipDataProcessor.AddTooltipPostCall`, `MicroMenu`, `AddonCompartmentFrame`, `ChatFrameUtil`, `BackdropTemplate`.
-- **Secret values apply** (`issecretvalue`, `C_Secrets`). Unit health, power, identity, auras, cooldowns, and casts can come back secret, mostly in combat and instances. Never compare, test (`if v then`), do arithmetic on, concatenate, `#`, or use as a table key a value that might be secret. Pass it straight to widget setters (`SetText`, `SetValue`, `SetMinMaxValues`). Don't read state back from Blizzard widgets (`GetText`, `GetValue`, `IsShown`, sizes) and branch on it.
-- `COMBAT_LOG_EVENT_UNFILTERED` never fires for addons. There is `C_DamageMeter` instead.
-- `UnitName` returns a **surname**, not a realm, as its second value (`C_PlayerInfo.ShouldDisplaySurname`). Don't treat it as a realm.
-- Talents/specs go through `C_SpecializationInfo`.
-- Ship one plain `ForeverPlusPlus.toc`; this addon targets Forever only, so it needs no suffixes. On build 70009 the client picks `_Camelot.toc` over `_Mainline.toc` and the plain TOC, and per-file `[AllowLoadGameType camelot]` and `mainline` match Forever while `standard` and `classic` don't (an earlier build loaded `_Mainline` instead, so recheck after patches).
-- It is a beta. APIs appear, change, and break between patches. Probe (`if C_Foo and C_Foo.Bar then`) instead of assuming, and when something only works on Forever, say so in a comment. (On 2026-09-23 SavedVariables didn't persist across reloads; they did by 2026-09-24. Recheck if settings stop sticking.)
+- **Detecting Forever.** `WOW_PROJECT_ID` is `WOW_PROJECT_CAMELOT` (18) since build 70170. Don't use it to detect Forever. If a difference matters, use the interface number from `GetBuildInfo()` (range `[16000, 17000)`, never "starts with 1": Classic Era is 11509), or better, probe for the API.
+- **Classic-only globals are gone:** `GetItemInfo`, `GetSpellInfo`, `UnitAura`, `SetDesaturation`, and similar. Use `C_Item`, `C_Spell`, `C_UnitAuras`, `C_Container`, `C_AddOns`, `C_Timer`.
+- **The UI is Mainline's:** Edit Mode, the Settings panel, the `Menu` / `MenuUtil` context menus (`Menu.ModifyMenu` to add to Blizzard's), `TooltipDataProcessor.AddTooltipPostCall`, `MicroMenu`, `AddonCompartmentFrame`, `ChatFrameUtil`, `BackdropTemplate`.
+- **Secret values apply** (`issecretvalue`, `C_Secrets`). Unit health, power, identity, auras, cooldowns, and casts can come back secret, mostly in combat and instances.
+  - Never compare, test (`if v then`), do arithmetic on, concatenate, `#`, or use as a table key a value that might be secret.
+  - Pass it straight to widget setters (`SetText`, `SetValue`, `SetMinMaxValues`).
+  - Don't read state back from Blizzard widgets (`GetText`, `GetValue`, `IsShown`, sizes) and branch on it.
+- **`COMBAT_LOG_EVENT_UNFILTERED` never fires for addons.** There is `C_DamageMeter` instead.
+- **`UnitName` returns a surname**, not a realm, as its second value. Don't treat it as a realm.
+- **Talents and specs** go through `C_SpecializationInfo`.
+- **One plain TOC.** Ship `ForeverPlusPlus.toc` with no suffixes; this addon targets Forever only.
+- **It is a beta.** APIs appear, change, and break between patches. Probe (`if C_Foo and C_Foo.Bar then`) instead of assuming, and when something only works on Forever, say so in a comment.
 
-When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or find an installed Forever addon that uses it. Don't guess from Classic Era or old Retail documentation. [docs/forever-api.md](docs/forever-api.md) has the detail behind this section: removed globals and their replacements, TOC loading, realms and surnames, talents, secret values, and open questions, each with its source. Keep the rules here short and record the evidence there.
+When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or find an installed Forever addon that uses it. Don't guess from Classic Era or old Retail documentation. [docs/forever-api.md](docs/forever-api.md) has the evidence behind this section; keep the rules here short and record the detail there.
 
 ## Working rules
 
 - Keep changes scoped to the request. Don't reformat or revert unrelated code.
 - One module per change the player can see. A module must work, and be removable, on its own.
-- Plumbing that a second module could want (tracking nameplates, changing CVars, secret-value helpers) goes in `Lib/`, not inside a module. Modules never reach into each other; they share only `Lib/`, `Core.lua`, and `Commands.lua`.
+- Plumbing that a second module could want goes in `Lib/`, not inside a module. Modules never reach into each other; they share only `Lib/`, `Core.lua`, and `Commands.lua`.
 - Default to on only for changes nearly everyone wants; otherwise `enabled = false`.
 - When replacing behavior, delete the old path: no shims or renamed-key fallbacks in module code. Rename or drop a setting freely; the core clears settings for modules and options that no longer exist, and a dropdown whose saved value isn't a choice any more goes back to its default.
-- When a release renames or merges a module or setting the player chose, or one holding data they built up (prices, learned flight points), migrate it: `ns.Migrate(version, fn)` in the module that now owns it moves the old saved values at login, before the core clears them. The saved file has a layout version (`Lib/Store.lua`), so each step runs once: give a new step the next version and raise `Store.VERSION` to it. Moving across modules is the same: the step moves `db.settings[old][key]` or `db.data[old][key]` to the new module, in every profile (`for _, root in ipairs(ns.Store.Roots(db))`, each with `root.settings` and `root.data`; `Store.Rename` already does). Data kept per character uses `ns.MigrateCharacter`. Only migrate from what a release shipped, not from unreleased work. A dropped setting needs nothing. Keep every migration, so a player updating from any older release keeps their settings. Dropping data that holds the player's own CVar values (a `saved` table) needs a step that puts them back first.
-- Game data a patch can change (item, spell, map, and quest IDs, node and NPC names, the skill something needs) goes through `ns.GameData`, not a bare table. Read it from the game where an API or tooltip line says it; otherwise ship it as a seed with `ns.GameData.New(name, seed, { kind = "item" })` and `set:Learn` what play shows, so a patch mends itself instead of breaking the module. A lone ID gets `ns.GameData.Spell(id, "Name")` (or `Item`, `Map`), which Self Test checks. Say where a seed came from (build and source) in a comment.
 - Add a new file to the TOC, after `Core.lua` and `Commands.lua` and before `Init.lua`: `Locales/` first (`enUS/` before other languages), then `Lib/`, then `Modules/`.
-- Update `README.md` in the same change when a module is added, removed, or changes what it does or its default, or when commands or install steps change. Update the module list in "Project map" above too, and `docs/description.md` with the README. The description has no New section; what's new is in the changelog.
-- Record things learned about the Forever client in `docs/forever-api.md`, tagged with how you know. Promote a fact to "How Forever differs from Classic" above only when it changes how code must be written.
+- Record things learned about the Forever client in `docs/forever-api.md`, tagged with how you know. Promote a fact to "How Forever differs from Classic" only when it changes how code must be written.
+
+**Docs to update with a change:**
+
+- A module added, removed, or changed in what it does or its default: its row in `README.md`, and the same text in `docs/description.md`. Keep a row to a sentence or two; options are explained in Settings.
+- Commands or install steps: `README.md` and `docs/description.md` (which leaves out the developer-only commands).
+- A new `Lib/` file: a row in the Lib tables above.
+- The description has no New section; what's new is in the changelog.
+
+**Game data a patch can change** (item, spell, map, and quest IDs, node and NPC names, the skill something needs) goes through `ns.GameData`, not a bare table.
+
+- Read it from the game where an API or tooltip line says it.
+- Otherwise ship it as a seed with `ns.GameData.New(name, seed, { kind = "item" })` and `set:Learn` what play shows, so a patch mends itself instead of breaking the module.
+- A lone ID gets `ns.GameData.Spell(id, "Name")` (or `Item`, `Map`), which Self Test checks.
+- Say where a seed came from (build and source) in a comment.
+
+**Migrations.** When a release renames or merges a module or setting the player chose, or one holding data they built up, migrate it.
+
+- `ns.Migrate(version, fn)`, in the module that now owns it, moves the old saved values at login, before the core clears them.
+- The saved file has a layout version (`Lib/Store.lua`), so each step runs once: give a new step the next version and raise `Store.VERSION` to it.
+- Move values in every profile: `for _, root in ipairs(ns.Store.Roots(db))`, each with `root.settings` and `root.data` (`Store.Rename` already does). Data kept per character uses `ns.MigrateCharacter`.
+- Only migrate from what a release shipped, not from unreleased work. A dropped setting needs nothing.
+- Keep every migration, so a player updating from any older release keeps their settings.
+- Dropping data that holds the player's own CVar values (a `saved` table) needs a step that puts them back first.
 
 ## Lua rules
 
 - Lua 5.1. ASCII only in `.lua` and `.toc` files. Four-space indents, LF endings (`.editorconfig`).
 - Start every file with `local addonName, ns = ...` (or `local _, ns = ...`). Modules share state through `ns`, never `_G`.
-- The only globals are `ForeverPlusPlusDB`, `ForeverPlusPlusPlayersDB`, and `ForeverPlusPlusCharDB`, `ForeverPlusPlusAPI` (the public API, set only by `API.lua`), the `SLASH_FOREVERPLUSPLUS*` names, and `SlashCmdList.FOREVERPLUSPLUS*` (`/fpp`, and the Waypoints and Commands modules' `FOREVERPLUSPLUS_WAY` and the like, set only while their option is on), and `ForeverPlusPlusScreenshotButton` (Auto Screenshot's button for the Screenshot key, since a click binding needs a named button), `ForeverPlusPlusSmartBuffButton` (the button Smart Buff's macro clicks to say why it can't buff someone, since `/click` needs a named button), `ForeverPlusPlusMarkerButton` (Target Markers' button, which its key in `Bindings.xml` clicks), `GetMinimapShape` (set by Square Minimap only while it squares the minimap and no other addon defines it, answering "SQUARE", the convention minimap button libraries read), `BINDING_HEADER_FOREVERPLUSPLUS` and the `BINDING_NAME_CLICK ...` name for that key (Blizzard's Key Bindings reads them), and `ForeverPlusPlusErrorCatcher`, `ForeverPlusPlusChatCopy`, and `ForeverPlusPlusWhisperWindow` (windows Escape closes, since `UISpecialFrames` holds names; see `ns.Frames.CloseOnEscape`). Add any new client global you use to `.luarc.json`; the `globals` spec fails on a global read that isn't Lua's or listed there, and on a write that isn't one of these.
 - Cache hot globals as file-level locals: `local pairs, CreateFrame = pairs, CreateFrame`.
-- Use `ns.On` / `ns.Off` for events, not a new frame per module. For events a module listens to while it's on, use `self:On(event, fn)`; they stop by themselves when it turns off.
-- A module that is off costs nothing: no frames, hooks, events, or `OnUpdate` until `OnEnable`. Every module turns on and off live, with no `/reload`: `OnDisable` undoes what `OnEnable` did (a module that only adds events with `self:On` or `self:OnWhile`, hooks with `self:Hook`, and timers given the module needs none, since those stop by themselves). A hook can't be removed, so add it with `self:Hook` / `self:HookScript` (Core), which hook once and do nothing while the module is off; a hook made another way checks `module.enabled` itself.
-- For events a module hears only while an option is on, declare them once at file load with `module:OnWhile(key, { EVENT = fn })` (or a function of `db` for `key`); Core turns them on and off with the module and the option. A handler given to `OnWhile` mustn't also be added with `module:On`, or the option turning off would stop it there too.
-- Read settings from `module.db`, which reads the defaults passed to `ns.NewModule` for anything the player hasn't set. What the player sets is saved even when it equals the default, so changing a default in a later release never overrides their choice; only a reset forgets it (`ns.ResetOption`, the undo arrow, Defaults, `module.db[key] = nil`), and then the new default reaches them, as it does everyone who never touched it. Code that puts a setting back by itself (a reset button, an invalid value) sets it to nil, never to the default. A default that is a table is data the module collects (prices, times), saved apart from settings and never reset by Defaults; list a data key in `module.perCharacter` to save it for each character on its own, or in `module.perProfile` when it's a choice like a setting that each profile keeps its own of (Movable Windows' positions, the Minimap Button's quick toggles). Settings and `module.perProfile` data follow the profile in use; a switch turns the modules off and on again, so a module mustn't keep a reference to its settings or profile data past `OnDisable`.
 - Annotate public functions with LuaLS `---@param` / `---@return`. Match the comment style of `Core.lua`: short, plain, and saying why.
-- Player-facing text goes through `ns.Print` and stays short. Anything a module says in chat by itself (not in reply to a command) goes through `module:Print` instead, with `chat = true` in its defaults and `ns.ChatOption(description)` in `module.options`, so the player gets a Chat Messages checkbox to silence it.
-- Every player-facing string (chat, Settings names, descriptions, dropdown choices) is `ns.L.KEY`, with the English in `Locales/enUS/` (the file for the module's category). Prefix a module's keys with its name (`FRIENDLYPLATES_...`). Use `%s` placeholders instead of joining pieces, since word order differs between languages.
+
+**Globals.** The addon sets only these. Add any new client global you read to `.luarc.json`; the `globals` spec fails on a read that isn't Lua's or listed there, and on a write that isn't one of these.
+
+| Global | Why |
+| --- | --- |
+| `ForeverPlusPlusDB`, `ForeverPlusPlusPlayersDB`, `ForeverPlusPlusCharDB` | Saved variables. |
+| `ForeverPlusPlusAPI` | The public API, set only by `API.lua`. |
+| `SLASH_FOREVERPLUSPLUS*`, `SlashCmdList.FOREVERPLUSPLUS*` | `/fpp`, and commands a module adds only while its option is on (`/way`, `/rl`). |
+| `ForeverPlusPlusScreenshotButton`, `ForeverPlusPlusSmartBuffButton`, `ForeverPlusPlusMarkerButton` | Buttons a key binding or `/click` needs by name. |
+| `BINDING_HEADER_FOREVERPLUSPLUS`, `BINDING_NAME_CLICK ...` | Blizzard's Key Bindings reads them. |
+| `ForeverPlusPlusErrorCatcher`, `ForeverPlusPlusChatCopy`, `ForeverPlusPlusWhisperWindow` | Windows Escape closes; `UISpecialFrames` holds names (`ns.Frames.CloseOnEscape`). |
+| `GetMinimapShape` | Set by Square Minimap only while it squares the minimap and no other addon defines it. |
+
+**Events and lifecycle**
+
+- Use `ns.On` / `ns.Off` for events, not a new frame per module. For events a module listens to while it's on, use `self:On(event, fn)`; they stop by themselves when it turns off.
+- A module that is off costs nothing: no frames, hooks, events, or `OnUpdate` until `OnEnable`.
+- Every module turns on and off live, with no `/reload`: `OnDisable` undoes what `OnEnable` did. A module that only uses `self:On`, `self:OnWhile`, `self:Hook`, and timers given the module needs no `OnDisable`.
+- A hook can't be removed, so add it with `self:Hook` / `self:HookScript`, which hook once and do nothing while the module is off. A hook made another way checks `module.enabled` itself.
+- For events heard only while an option is on, declare them once at file load with `module:OnWhile(key, { EVENT = fn })` (or a function of `db` for `key`). A handler given to `OnWhile` mustn't also be added with `module:On`.
+
+**Saved settings**
+
+- Read settings from `module.db`, which reads the defaults passed to `ns.NewModule` for anything the player hasn't set.
+- What the player sets is saved even when it equals the default, so changing a default in a later release never overrides their choice. Only a reset forgets it (`ns.ResetOption`, the undo arrow, Defaults, `module.db[key] = nil`).
+- Code that puts a setting back by itself (a reset button, an invalid value) sets it to nil, never to the default.
+- A default that is a table is data the module collects (prices, times): saved apart from settings and never reset by Defaults.
+  - List a data key in `module.perCharacter` to save it for each character on its own.
+  - List it in `module.perProfile` when it's a choice like a setting that each profile keeps its own of (Movable Windows' positions).
+- Settings and `perProfile` data follow the profile in use. A switch turns the modules off and on again, so a module mustn't keep a reference to its settings or profile data past `OnDisable`.
+
+**Text**
+
+- Every player-facing string is `ns.L.KEY`, with the English in `Locales/enUS/` (the file for the module's category). Prefix a module's keys with its name (`FRIENDLYPLATES_...`).
+- Use `%s` placeholders instead of joining pieces, since word order differs between languages.
+- Player-facing text goes through `ns.Print` and stays short.
+- Anything a module says in chat by itself (not in reply to a command) goes through `module:Print`, with `chat = true` in its defaults and `ns.ChatOption(description)` in `module.options`, so the player gets a Chat Messages checkbox.
 
 ## Touching Blizzard's UI
 
 The goal is to add to Blizzard frames without tainting or breaking them.
 
-- Hook, don't replace: `hooksecurefunc(obj, "Method", fn)`, `frame:HookScript("OnShow", fn)`. Never `SetScript` on a Blizzard object and never overwrite a Blizzard function or mixin method.
-- Never write fields onto Blizzard frames. Keep per-frame state in a weak-keyed table (`setmetatable({}, { __mode = "k" })`).
-- Add your own regions and child frames instead of changing Blizzard's. To hide Blizzard art, prefer `SetAlpha(0)` over `Hide()` / `SetParent`.
-- Calling one of Blizzard's own functions or mixin methods runs its code in our tainted call, so whatever it touches becomes ours. Call one only when nothing else does the job, never one that moves, shows, or sets up Blizzard's frames in combat, and check the source first: some only protect themselves out of combat (`EditModeManagerFrame:ClearSelectedSystem` uses a secure delegate only then, and in combat got `PlayerFrame:SetClampRectInsets()` blocked).
-- Don't move, resize, reparent, show, or hide protected frames (action buttons, unit frames, anything secure) in combat. Wrap the change in `ns.AfterCombat(fn)`, which runs it now or once combat ends.
-- Many Blizzard windows are load-on-demand (`Blizzard_*` addons). Hook them after they load: check `C_AddOns.IsAddOnLoaded` and otherwise wait for `ADDON_LOADED` with that name.
-- Look native: use `GameFontNormal` and related font objects, Blizzard atlases (`SetAtlas`), and Blizzard templates (`UIPanelButtonTemplate`, `UICheckButtonTemplate`, `BackdropTemplate` with Blizzard's own backdrop info) rather than custom art or fonts.
-- If a module ever needs options beyond `/fpp`, put them in Blizzard's Settings panel, not a custom window.
-- Lines we add to a tooltip look like Blizzard's Sell Price line: a white `Label:` on the left and its value at the right edge (`AddDoubleLine`), with details about the value in gray. Color carries meaning only (difficulty, age, class, faction), never decoration, and icons are Blizzard's art at text height (`|A:atlas:0:0|a`). On item tooltips, go through `ns.ItemTooltip`: facts about the item with `OnInfo` and `AddInfo`, prices with `OnPrices` and `AddPrice`, so our lines sit together above and at the sell price instead of trailing after Blizzard's. Recoloring Blizzard's own line (Profession Tooltips) beats adding a second one.
+- **Hook, don't replace:** `hooksecurefunc(obj, "Method", fn)`, `frame:HookScript("OnShow", fn)`. Never `SetScript` on a Blizzard object and never overwrite a Blizzard function or mixin method.
+- **Never write fields onto Blizzard frames.** Keep per-frame state in a weak-keyed table (`setmetatable({}, { __mode = "k" })`).
+- **Add your own regions and child frames** instead of changing Blizzard's. To hide Blizzard art, prefer `SetAlpha(0)` over `Hide()` / `SetParent`.
+- **Calling Blizzard's own functions taints.** One of Blizzard's functions or mixin methods runs in our tainted call, so whatever it touches becomes ours. Call one only when nothing else does the job, never one that moves, shows, or sets up Blizzard's frames in combat, and check the source first.
+- **Protected frames in combat.** Don't move, resize, reparent, show, or hide action buttons, unit frames, or anything secure in combat. Wrap the change in `ns.AfterCombat(fn)`.
+- **Load-on-demand windows.** Many Blizzard windows are `Blizzard_*` addons. Hook them after they load: check `C_AddOns.IsAddOnLoaded` and otherwise wait for `ADDON_LOADED` with that name.
+- **Look native:** `GameFontNormal` and related font objects, Blizzard atlases (`SetAtlas`), and Blizzard templates (`UIPanelButtonTemplate`, `UICheckButtonTemplate`, `BackdropTemplate` with Blizzard's own backdrop info), not custom art or fonts.
+- **Options live in Blizzard's Settings panel,** not a custom window.
+
+**Tooltip lines** we add look like Blizzard's Sell Price line:
+
+- A white `Label:` on the left and its value at the right edge (`AddDoubleLine`), with details about the value in gray.
+- Color carries meaning only (difficulty, age, class, faction), never decoration. Icons are Blizzard's art at text height (`|A:atlas:0:0|a`).
+- On item tooltips, go through `ns.ItemTooltip`: facts with `OnInfo` and `AddInfo`, prices with `OnPrices` and `AddPrice`, so our lines sit together at the sell price.
+- Recoloring Blizzard's own line beats adding a second one.
 
 ## Settings
 
-`Settings/` builds every page from what modules declare; modules don't create Settings UI themselves (except a `BuildPage` tool page, drawn with `ns.SettingsKit`). Details are in "Add a module" in `README.md`.
+`Settings/` builds every page from what modules declare. Modules don't create Settings UI themselves, except a `BuildPage` tool page drawn with `ns.SettingsKit`. "Add a module" in `README.md` has the step-by-step.
 
-- Keep the sidebar short: the top Forever++ entry is the Modules page, then Profiles, then tool pages (`BuildPage`, named by `module.pageTitle` or the title), Changelog, and About. A module never gets a sidebar entry for its options, and a page of a module the player turns on and off is in the sidebar only while it's on.
-- The Modules page is the only place modules turn on and off. Give every module a `module.category`: `automation`, `character`, `chat`, `interface`, `items`, `map`, `quests`, `system`, or `units` (anything else lands under Other); the categories show in alphabetical order. A module's folder is usually its category but needn't be: the tool pages in `Modules/Tools/` are in `system`, Auto Quest (`Modules/Quests/`) is in `automation`, Macro Icon Search (`Modules/Interface/`) in `character`, and Movable Framerate (`Modules/System/`) in `interface`. It appears in the list under that category's label, sorted by `module.title`; clicking it shows its title with an Enabled checkbox, its `description` (kept to four lines), notice, options, and buttons beside the list.
-- A module says for itself where else it shows: `module.quickToggle = "loot"` (or `npcs`, `world`, `nameplates`, `gathering`, `other`) puts it in that group of the Minimap Button's quick toggles by default (the player adds any other module, or takes one out, with the Customize button in its settings, whose menu lists every module by its category from `ns.SettingsKit` and keeps their picks as the Minimap Button's data), and `module.presets = { developer = { enabled = true, options = { key = value } } }` is what each preset (`Lib/Presets.lua`; today only Developer's Defaults) does to it: `enabled` true or false, and option values that fit their options. A preset that extends another needs only where it differs. Nothing elsewhere lists modules by name. A profile based on a preset reads its values for whatever the player hasn't set, so anything asking whether a setting is "at its default" (the undo arrow, a profile's counts) compares with `ns.BaseValue(module, key)`, never `module.defaults[key]`.
-- A tool with nothing to turn off sets `module.alwaysOn = true` and gets no checkbox. A module that only makes sense on some clients gives `module:IsAvailable()`; when that's false at login it stays off and out of Settings and `/fpp`.
-- Options go in `module.options` (`{ key, name, description }`, default in `defaults`): a checkbox, a dropdown with `choices`, or a slider with `min`, `max`, `step`, and `format`. `requires = key` nests an option under a checkbox option (or a dropdown, on while it isn't "off"), `shown = fn(db)` shows an option's row only while it's true (one that only matters with others set a certain way, like Player Nameplates' Icon and Level), and `slider = key` puts a checkbox's slider in its row, to keep long option lists short. They're greyed out while the module is off, and one with `available = fn` while `fn()` is false (another addon it needs isn't loaded). `editMode = true` moves one of a module with an Edit Mode frame (`ns.EditMode.RegisterModule`) into that frame's Edit Mode dialog and right-click menu, for settings about where and how the frame is laid out (Loot Rolls' grow and spacing); the Modules page shows a gray row saying they're in Edit Mode instead of them, and keeps what the module does. `debug = true` moves one to the Debug module's page (a checkbox or a dropdown only), where its `section` (`L.DEBUG_SECTION_DIAGNOSTICS` for a look at the addon's state, `_TOOLS` for a check or capture that runs, `_PREVIEWS` for made-up content that shows a module, `_LAYOUT` for guides drawn to line things up, or `_LOGGING` for printing what it does, and the same on `module.debugActions`) picks the header it sits under among every module's; one without goes under its module's title, after those. `added = "x.y.z"` (on a module or an option) is the version it first ships in, and `changed` (on an option) the version it last changed in a way players should notice; either marks it NEW on the Modules page until the player has clicked its module. A version after the last release in `Changelog.lua` isn't released yet, so only a development copy has it: those stay marked NEW whatever was clicked, so everything added since the release shows until it ships. Options of a new module aren't marked. A checkbox with `cvar = "name"` is one of Blizzard's own settings shown among the module's: it reads and sets that CVar, saves nothing of ours, takes the client's default, and Defaults leaves it alone (Coordinates' Player Coordinates). Set in combat, it reads the player's choice until combat ends, when the CVar changes and the module hears of it. Say so in its description, and prefer it to a notice when the setting is a plain on/off the module's options would naturally include. An option with `conflicts = { { key, when = fn(db), text } }` gets a gray row under it while `when(db)` is true, saying it and the option `key` can't both work as set (Movable Windows' Reset Key and Reset Click matching the drag), with a button that scrolls to that option and lights it up (no button when that option is the row right above or below); put it on the newer or rarer of the two, not both. With `module = "Name"`, `key` is another module's option and `when(db, otherDB)` gets that module's settings too (Appearance Icons' Corner against Upgrade Arrows' and Already Known's marks): the row shows only while both are on, and its button opens that module at the option. Settings reads the other module, so the module itself still doesn't. Buttons go in `module.actions`, after the options; one with a `section` sits at the top of that section instead, under its header (Gathering Map's Share and Forget buttons over its Chat Messages). React to changes in `module:OnOptionChanged(key)`. An option that isn't at its default gets an undo arrow at the end of its row that sets it back, so a module needs nothing for it.
-- A module that silently depends on a Blizzard setting sets `module.notice`: a gray row above the module's options while that setting is off, with a button that turns it on. For a CVar, use `ns.CVars.OffNotice`, one notice per CVar so each gets its own button. Give each thing one way in: a notice's tooltip says what doesn't work, not where else to turn it on, and a description doesn't repeat a notice. A notice with no `button` only says why the module does less (Error Catcher while another addon catches errors), or, with no `shown`, is always there: put a module's warnings and limits (out of combat only, an estimate) in one, not in its description, as Macros does. `module.notice` can be a list of notices. A module that has found it can't work (the game stops answering what it asks) gives `module:Problem()`, true while that lasts: its name shows red in the Modules list, on or off, a notice says why, and it calls `ns.RefreshSetting(module.name)` when that changes. It may turn itself off then. A module the game has broken outright sets `module.locked = true`: Core keeps it off whatever was saved and `ns.SetEnabled` won't turn it on, its checkbox is a padlock, and Settings shows only its description and notices, none of its options or buttons, until a fix or its removal. It says nothing in chat about it. A module that can't work without the QuestieDB addon calls `ns.QuestieDB.Require(module)` as its file loads instead of setting these itself: it gets QuestieDB's notices, a red name while QuestieDB is missing, off, or the wrong version, and while it's missing or off it's locked the same way, its padlock's tooltip (`module.lockedText`) saying to get QuestieDB.
-- Sliders use the same units and steps for the same kind of thing. Pixels (`L.ICONMARK_PIXELS`, "%d px") for something on an icon or frame of a known size: a mark on an item or action button icon (`ItemButtons.SizeOption`, 8 to 32 in steps of 2, scaled to the icon it's on by `MarkSize`), padding (0 to 10 in steps of 1, `ItemButtons.PaddingOption`), and minimap icons. A percent ("%d%%") for a size that follows something the game or the player sizes: nameplate parts (50 to 200 in steps of 10, on top of the game's nameplate size), Edit Mode scale (50 to 200 in steps of 10), a share of the text's size (Forever Quest Icons). Opacity is a percent in steps of 5. Times go through `ns.Text.Seconds`, `ns.Text.Minutes`, or `ns.Text.Hours`.
-- For a module with more than about five options, give them a `section` (an `ns.L` string). On the Modules page each change of section starts a header (options before the first section go under Options). So list options grouped in the order they should show: a general section first, the options most players change before the rare ones, and Chat Messages last. Nest an option that only matters while another is on with `requires`.
+### Pages
+
+- Keep the sidebar short: Modules (the top Forever++ entry), Profiles, tool pages (`BuildPage`, named by `module.pageTitle` or the title), Changelog, About.
+- A module never gets a sidebar entry for its options. A tool page of a module the player turns on and off is in the sidebar only while it's on.
+- The Modules page is the only place modules turn on and off. It lists them under their category, sorted by `module.title`. Clicking one shows its Enabled checkbox, `description` (kept to four lines), notices, options, and buttons.
+- Give every module a `module.category`: `automation`, `character`, `chat`, `interface`, `items`, `map`, `quests`, `system`, or `units`. It's usually its folder but needn't be: the tools in `Modules/Tools/` are in `system`, Auto Quest in `automation`, Macro Icon Search in `character`, Movable Framerate in `interface`.
+
+### What a module declares
+
+| Field | What it does |
+| --- | --- |
+| `module.quickToggle = "loot"` | Puts it in that group of the Minimap Button's quick toggles by default (`loot`, `npcs`, `world`, `nameplates`, `gathering`, `other`). |
+| `module.presets = { developer = { enabled, options } }` | What each preset does to it. Nothing elsewhere lists modules by name. |
+| `module.alwaysOn = true` | A tool with nothing to turn off; no checkbox. |
+| `module:IsAvailable()` | False at login keeps it off and out of Settings and `/fpp`. |
+| `module.added = "x.y.z"` | The version it first ships in; marks it NEW. |
+| `module.notice` | A gray row above its options (see Notices). |
+| `module:Problem()` | True while it can't work: its name shows red. |
+| `module.locked = true` | The game broke it outright: kept off, a padlock for a checkbox. |
+| `module.actions` | Buttons after the options. One with a `section` sits at the top of that section. |
+| `module:OnOptionChanged(key)` | Called when an option changes. |
+
+A profile based on a preset reads the preset's values for whatever the player hasn't set. So anything asking whether a setting is "at its default" compares with `ns.BaseValue(module, key)`, never `module.defaults[key]`.
+
+### Options
+
+An option is `{ key, name, description }` in `module.options`, with its default in the defaults table. It is a checkbox, a dropdown with `choices`, or a slider with `min`, `max`, `step`, and `format`. Options are greyed out while the module is off, and one that isn't at its default gets an undo arrow by itself.
+
+| Field | What it does |
+| --- | --- |
+| `requires = key` | Nests it under a checkbox option (or a dropdown, on while it isn't `"off"`). |
+| `slider = key` | Puts a checkbox's slider in its row. |
+| `shown = fn(db)` | Shows its row only while true. |
+| `available = fn` | Greyed out while `fn()` is false (another addon it needs isn't loaded). |
+| `section` | The header it sits under (see Sections). |
+| `added`, `changed` | The version it first shipped or last changed in; marks it NEW. Options of a new module aren't marked. |
+| `cvar = "name"` | A checkbox that is one of Blizzard's own settings: it reads and sets that CVar and saves nothing of ours. Say so in its description. |
+| `editMode = true` | Moves it into the module's Edit Mode dialog, for where and how its frame is laid out. |
+| `debug = true` | Moves it to the Debug page (a checkbox or dropdown only), under its `section`. |
+| `conflicts = { { key, when = fn(db), text } }` | A gray row under it while it and option `key` can't both work as set. With `module = "Name"`, `key` is another module's option. Put it on the newer or rarer of the two. |
+
+- **NEW marks** stay until the player has clicked the module. A version after the last release in `Changelog.lua` isn't released yet, so those stay marked whatever was clicked.
+- **Debug sections** are `L.DEBUG_SECTION_DIAGNOSTICS` (a look at the addon's state), `_TOOLS` (a check or capture that runs), `_PREVIEWS` (made-up content), `_LAYOUT` (guides), and `_LOGGING` (printing what it does). `module.debugActions` takes the same.
+- **A `cvar` option** set in combat reads the player's choice until combat ends. Prefer it to a notice when the setting is a plain on/off the module's options would naturally include.
+
+### Notices, problems, and locks
+
+- **Notice:** a module that silently depends on a Blizzard setting sets `module.notice`, a gray row with a button that turns the setting on. For a CVar, use `ns.CVars.OffNotice`, one notice per CVar. `module.notice` can be a list.
+- A notice with no `button` only says why the module does less. One with no `shown` is always there: put a module's warnings and limits (out of combat only, an estimate) in one, not in its description.
+- Give each thing one way in: a notice's tooltip says what doesn't work, not where else to turn it on, and a description doesn't repeat a notice.
+- **Problem:** a module that has found it can't work gives `module:Problem()`, with a notice saying why, and calls `ns.RefreshSetting(module.name)` when that changes.
+- **Locked:** `module.locked = true` keeps it off whatever was saved. Settings shows only its description and notices. It says nothing in chat about it.
+- **QuestieDB:** a module that needs it calls `ns.QuestieDB.Require(module)` as its file loads instead of setting these itself.
+
+### Sliders
+
+Use the same units and steps for the same kind of thing.
+
+| Kind | Unit | Range |
+| --- | --- | --- |
+| A mark on an item or action button icon | px (`L.ICONMARK_PIXELS`), `ItemButtons.SizeOption` | 8 to 32, step 2 |
+| Padding | px, `ItemButtons.PaddingOption` | 0 to 10, step 1 |
+| Nameplate parts, Edit Mode scale | `%d%%` | 50 to 200, step 10 |
+| Opacity | `%d%%` | step 5 |
+| Times | `ns.Text.Seconds`, `Minutes`, `Hours` | |
+
+Pixels are for something on an icon or frame of a known size. A percent is for a size that follows something the game or the player sizes.
+
+### Sections
+
+For a module with more than about five options, give them a `section` (an `ns.L` string). Each change of section starts a header, and options before the first section go under Options. List options in the order they should show: a general section first, the options most players change before the rare ones, and Chat Messages last.
 
 ## Git
 
@@ -141,7 +431,23 @@ The goal is to add to Blizzard frames without tainting or breaking them.
 
 ## Verification
 
-`tests/` holds the offline tests: a spec in `tests/spec/` for each area of pure-logic `Lib/` code (colors, text and time formatting, instances, map helpers, the minimap's shape, talent plans and tabs, quests, flight points, disenchanting, the saved variables, players seen, CVars put back, who a unit is, spell ranks, slash commands, modifier keys, the profiler's timing, realm time against the player's, profiles and their export text, presets and their `extends` chains and profiles based on them, the recipe rows' columns, recipe levels and their bar, gear durability and when it warns, the Sound choices, the QuestieDB reader against a made-up stub of its API, the DungeonJournal hand-off against a stub of it), Core's module lifecycle on stub frames and a stub clock (modules and parts turning on and off, `OnWhile`, dropdown parts, owned timers, `/fpp set`, presets and profiles based on one, switched live), the public API, and checks across the addon: no file writes a global the Lua rules don't allow (plainly or through `_G`), and every global it reads is Lua's or in `.luarc.json` (`globals`, from each file's bytecode), every `L.KEY` the code uses is defined in `Locales/enUS/` (`locales`), every file loads offline and every module's settings are well formed, with defaults that fit and `requires`, `slider`, and `conflicts` naming real options (`modules`), and the TOC's version, `Changelog.lua`, and `CHANGELOG.md` agree (`release`), and the rules here a machine can check exactly hold: each file's first line, no removed Classic globals, no `COMBAT_LOG_EVENT_UNFILTERED`, `WOW_PROJECT_ID` and `print` only where allowed, no tabs or trailing spaces (`rules`). They need only Lua 5.1, no client: `lua5.1 tests/run.lua` from the repo root (CI runs it after the syntax check), or `lua5.1 tests/run.lua store` for the specs with that in their name. Each spec gets a fresh copy of the addon with the real `Lib/` and `Locales/enUS/` files against stubbed WoW globals, so specs can't depend on each other; a Lib file that caches a global at load needs that global stubbed before it loads (`tests/lib/env.lua`, or `T.load` after the stub). `tests/README.md` says how to write one. Add a check when you change or add Lib logic that has no frames in it, a spec when you add a Lib file, and a check in `core` when you change how Core turns modules on and off; don't test frame or UI code. CI also runs wowlua-ls (`wowlua_ls check .`, release binaries on its GitHub page) for types and secret values; `tests/wowlua.lua` compares its findings with `tests/wowlua-baseline.txt` and fails on a new one. A new finding is usually a real problem: fix it, or, when it's the checker's mistake, add it with `--update` and say why in the commit. Fixing one means taking it out of the baseline too (`--update` does it).
+`tests/` holds the offline tests. They need only Lua 5.1, no client:
+
+```
+lua5.1 tests/run.lua          # every spec
+lua5.1 tests/run.lua store    # the specs with that in their name
+```
+
+- A spec in `tests/spec/` covers each area of pure-logic `Lib/` code, Core's module lifecycle on stub frames and a stub clock, and the public API.
+- Checks across the addon:
+  - `globals`: no file writes a global the Lua rules don't allow, and every global it reads is Lua's or in `.luarc.json`.
+  - `locales`: every `L.KEY` the code uses is defined in `Locales/enUS/`.
+  - `modules`: every file loads offline and every module's settings are well formed.
+  - `release`: the TOC's version, `Changelog.lua`, and `CHANGELOG.md` agree.
+  - `rules`: each file's first line, no removed Classic globals, no `COMBAT_LOG_EVENT_UNFILTERED`, `WOW_PROJECT_ID` and `print` only where allowed, no tabs or trailing spaces.
+- Each spec gets a fresh copy of the addon with the real `Lib/` and `Locales/enUS/` files against stubbed WoW globals, so specs can't depend on each other. A Lib file that caches a global at load needs that global stubbed before it loads. `tests/README.md` says how to write one.
+- What to add: a check when you change or add Lib logic that has no frames in it, a spec when you add a Lib file, and a check in `core` when you change how Core turns modules on and off. Don't test frame or UI code.
+- CI also runs wowlua-ls (`wowlua_ls check .`) for types and secret values. `tests/wowlua.lua` compares its findings with `tests/wowlua-baseline.txt` and fails on a new one. A new finding is usually a real problem: fix it, or, when it's the checker's mistake, add it with `--update` and say why in the commit. Fixing one means taking it out of the baseline too (`--update` does it).
 
 Before calling a change done:
 
