@@ -243,7 +243,7 @@ L.SQUAREMINIMAP_SUN_KEY = "Move the Sun"
 L.SQUAREMINIMAP_SUN_KEY_DESC = "Hold this key and drag the day and night indicator to move it. "
     .. "Right-click it with the key held to put it back."
 L.SQUAREMINIMAP_SUN_OFF = "Off"
-L.SQUAREMINIMAP_SUN_HINT = "<Drag to move it>\n<Right-click to put it back>"
+L.SQUAREMINIMAP_SUN_HINT = "<Drag to move it>\n<Right click to put it back>"
 L.SQUAREMINIMAP_SUN_RESET_NAME = "Day and Night Indicator"
 L.SQUAREMINIMAP_SUN_RESET = "Reset Position"
 L.SQUAREMINIMAP_SUN_RESET_DESC = "Put the day and night indicator back by the minimap's top right "
@@ -400,7 +400,7 @@ L.GATHERINGMAP_CLEAR_LEARNED_CONFIRM = "Forget every herb and vein Forever++ has
 L.GATHERINGMAP_CLEAR_LEARNED_DONE = "Learned herbs and veins cleared."
 L.GATHERINGMAP_FORGOT = "Forgot %d nodes." -- count
 L.GATHERINGMAP_FORGOT_ONE = "Forgot %s." -- node name
-L.GATHERINGMAP_FORGET_HINT = "<Shift-right-click to forget this node>"
+L.GATHERINGMAP_FORGET_HINT = "<Shift right click to forget this node>"
 L.GATHERINGMAP_JUST = "Just Gathered"
 L.GATHERINGMAP_JUST_DESC = "How a node you just gathered shows on this map while it's likely still "
     .. "gone: its icon faded, an empty ring, hidden, or as usual."

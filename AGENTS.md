@@ -364,7 +364,7 @@ The goal is to add to Blizzard frames without tainting or breaking them.
 - A module's own action on an icon is Shift+right-click (`shiftClick`), or a plain click (`click`) when the icon opens something.
 - Click hints show only while Shift is held, and `ns.MapPins` writes them. A module gives the words for its own action (`shiftHint`, `clickHint`) and never adds hint lines or a hints option itself.
 
-**Click hints**, on any tooltip, are written as Blizzard's own instruction lines are: green (`GREEN_FONT_COLOR`), in angle brackets, a hyphen in the click, sentence case, no full stop, one click to a line. `<Ctrl-click to set a map pin>`, `<Shift-right-click to forget this node>`. On a map tooltip use `ns.MapTooltip.Hint`. Prose in Settings descriptions keeps "Ctrl+click".
+**Click hints**, on any tooltip, are written as Blizzard's own instruction lines are: green (`GREEN_FONT_COLOR`), in angle brackets, the keys and the click as separate words with no hyphen or plus, no full stop, one click to a line. `<Ctrl click to set a map pin>`, `<Shift right click to forget this node>` (the client's own: `<Ctrl click directly on the map>`, `<Right click for Frame Settings>`). On a map tooltip use `ns.MapTooltip.Hint`. Prose in Settings descriptions keeps "Ctrl+click".
 
 ## Settings
 

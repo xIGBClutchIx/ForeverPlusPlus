@@ -41,10 +41,11 @@ L.KEY_NONE = "None"
 L.SKIP_KEY = "Skip Key" -- the option of every module that a held key skips
 
 -- Lib/Sounds.lua: the alert sounds, in every Sound dropdown
--- Click hints are written as Blizzard's instruction lines are: in angle brackets, a hyphen in the
--- click ("Shift-click"), sentence case, no full stop ("<Click to view map>", "<Right click for
--- frame settings>"). One click to a line.
-L.MAPPINS_HINT_WAYPOINT = "<Ctrl-click to set a map pin>"
+-- Click hints are written as Blizzard's instruction lines are: in angle brackets, the keys and the
+-- click as separate words with no hyphen or plus ("Ctrl click"), no full stop. From the client's
+-- own strings, dumped in game (build 70888, 2026-11-13): "<Ctrl click directly on the map>",
+-- "<Right Click to show map>", "<Right click for Frame Settings>". One click to a line.
+L.MAPPINS_HINT_WAYPOINT = "<Ctrl click to set a map pin>"
 L.SOUND_OFF = "Off"
 L.SOUND_BUZZ = "Error Buzz"
 L.SOUND_DENIED = "Denied"
