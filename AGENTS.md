@@ -2,7 +2,14 @@
 
 Rules for anyone changing this repository, human or AI. `CLAUDE.md` imports this file; edit rules here only.
 
-Keep this file short. It says what exists and what the rules are. How a file works belongs in that file's header comment, and what a module does for players belongs in `README.md`.
+Keep this file short. It says what exists and what the rules are. The detail is in other docs, and nothing we've learned gets dropped: move it there instead.
+
+| For | Read |
+| --- | --- |
+| What each `Lib/` file, `Core.lua`, and each module holds, function by function, and the CI, data, and test details | [docs/architecture.md](docs/architecture.md) |
+| Every Settings rule in full, with reasons, edge cases, and examples | [docs/settings.md](docs/settings.md) |
+| What we know about the Forever client, with sources | [docs/forever-api.md](docs/forever-api.md) |
+| What each module does for players, and "Add a module" step by step | [README.md](README.md) |
 
 ## What Forever++ is
 
@@ -31,6 +38,8 @@ There is no build step or library folder. Plain Lua, loaded straight from the TO
 | `ForeverPlusPlus/` | The shipped addon, linked into the client's `Interface\AddOns`. |
 | `README.md` | For players and contributors: the module list, install, settings, commands, and "Add a module". |
 | `CHANGELOG.md` | Each release's notes, read by the release jobs. `ForeverPlusPlus/Changelog.lua` has the same notes for the game. |
+| `docs/architecture.md` | The detail behind this project map: what every part of the addon holds. |
+| `docs/settings.md` | The Settings rules in full. |
 | `docs/forever-api.md` | What we know about the Forever client API, with sources and how sure we are. |
 | `docs/api.md` | The public API for addon authors. Keep it the same as `API.lua`. |
 | `docs/questiedb.md` | The QuestieDB addon's API as read from its source, how `Lib/QuestieDB.lua` uses it, and the in-game checks still to do. |
@@ -79,7 +88,7 @@ What `Core.lua` gives every file through `ns`:
 
 ### Lib
 
-Each file's header comment says how it works. One line here says what it's for.
+One line here says what each file is for. [docs/architecture.md](docs/architecture.md) lists what each one offers, and the file's header comment says how it works.
 
 **Saved data and settings**
 
@@ -172,7 +181,7 @@ Each file's header comment says how it works. One line here says what it's for.
 
 ### Modules
 
-- The module list, and what each does for players, is the table in `README.md`. A module's own file header says how it works.
+- The module list, and what each does for players, is the table in `README.md`. What each is in the code's terms is in [docs/architecture.md](docs/architecture.md).
 - A module is in `Modules/<Category>/`: `Automation`, `Character`, `Chat`, `Interface`, `Items`, `Map`, `Quests`, `System`, `Units`, or `Tools`. A small module is one file. A bigger one gets a folder of files that share `module.internal`.
 - A module made of parts (World Map, Item Tooltips, Professions, Waylaid Crates, Character Window) has a file per part in its folder.
 - A few module names differ from their titles: `DungeonNameplates` (Simplified Dungeon Nameplates), `HideErrors` (Hide Error Messages), `ProfessionTooltips` (Gathering Skill Tooltips), `PersistentChat` (Keep Chat Visible), `Commands` (Slash Commands), `Profiler` (CPU Profiler).
@@ -264,7 +273,9 @@ When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or f
 
 - A module added, removed, or changed in what it does or its default: its row in `README.md`, and the same text in `docs/description.md`. Keep a row to a sentence or two; options are explained in Settings.
 - Commands or install steps: `README.md` and `docs/description.md` (which leaves out the developer-only commands).
-- A new `Lib/` file: a row in the Lib tables above.
+- A new `Lib/` file, or one that gains something another module could use: a row in the Lib tables above, and its section in `docs/architecture.md`.
+- A new module, or one whose structure changes: its line in `docs/architecture.md`.
+- A new Settings rule or option field: the tables under Settings here, and the full rule in `docs/settings.md`.
 - The description has no New section; what's new is in the changelog.
 
 **Game data a patch can change** (item, spell, map, and quest IDs, node and NPC names, the skill something needs) goes through `ns.GameData`, not a bare table.
@@ -349,7 +360,7 @@ The goal is to add to Blizzard frames without tainting or breaking them.
 
 ## Settings
 
-`Settings/` builds every page from what modules declare. Modules don't create Settings UI themselves, except a `BuildPage` tool page drawn with `ns.SettingsKit`. "Add a module" in `README.md` has the step-by-step.
+`Settings/` builds every page from what modules declare. Modules don't create Settings UI themselves, except a `BuildPage` tool page drawn with `ns.SettingsKit`. "Add a module" in `README.md` has the step-by-step, and [docs/settings.md](docs/settings.md) has every rule below in full.
 
 ### Pages
 
