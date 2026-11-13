@@ -64,6 +64,9 @@ ns.changelog = {
                     .. "Maps turns it off." },
                 { L.GATHERINGTRACKING_TITLE, "Mute Swap Sound (off by default) silences the "
                     .. "tracking spell's sound each time Swap Between Both swaps." },
+                { L.TOOLTIPS_TITLE, "Hide Right-Click Hint (off by default) leaves the \"Right click "
+                    .. "for frame settings\" line off the tooltips of the player, target, focus, "
+                    .. "party, and raid frames." },
                 { L.TOOLTIPS_TITLE, "Hide Bobber Tooltip (off by default) hides the fishing "
                     .. "bobber's tooltip while you fish, so it doesn't cover the bobber with Anchor "
                     .. "to Cursor on." },

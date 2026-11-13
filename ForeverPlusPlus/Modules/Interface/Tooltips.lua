@@ -41,6 +41,7 @@ local module = ns.NewModule("Tooltips", L.TOOLTIPS_DESC, {
     hideInCombat = false, -- hide unit tooltips while in combat
     anchorCursor = false, -- tooltips at the mouse instead of the bottom right
     hideFishing = false, -- hide the bobber's tooltip while fishing
+    hideClickHint = false, -- leave "<Right click for frame settings>" off unit frames' tooltips
     hideHealthBar = false, -- hide the health bar under unit tooltips
     questLines = "show", -- "show", "units" (hidden on unit tooltips), "all" (and on objects)
 })
@@ -86,6 +87,8 @@ module.options = {
     { key = "hideInCombat", name = L.TOOLTIPS_HIDE_IN_COMBAT, description = L.TOOLTIPS_HIDE_IN_COMBAT_DESC,
         section = L.TOOLTIPS_SECTION_BEHAVIOR },
     { key = "hideFishing", name = L.TOOLTIPS_HIDE_FISHING, description = L.TOOLTIPS_HIDE_FISHING_DESC,
+        section = L.TOOLTIPS_SECTION_BEHAVIOR, added = "1.6.0" },
+    { key = "hideClickHint", name = L.TOOLTIPS_HIDE_CLICK_HINT, description = L.TOOLTIPS_HIDE_CLICK_HINT_DESC,
         section = L.TOOLTIPS_SECTION_BEHAVIOR, added = "1.6.0" },
     { key = "hideHealthBar", name = L.TOOLTIPS_HIDE_HEALTH_BAR,
         description = L.TOOLTIPS_HIDE_HEALTH_BAR_DESC, section = L.TOOLTIPS_SECTION_BEHAVIOR, added = "0.9.0" },
@@ -395,6 +398,20 @@ local function fishing()
     return ns.IsText(name) and name == C_Spell.GetSpellName(FISHING)
 end
 
+-- Hide Right-Click Hint: a unit frame's tooltip (player, target, focus, party, raid) ends with a
+-- blank line and "<Right click for frame settings>", added by UnitFrame_UpdateTooltip after the
+-- unit's own lines, not as tooltip data, so no line pre call can leave them out (wow-ui-source,
+-- forever branch, Blizzard_UnitFrame/Mainline/UnitFrame.lua). After it has run, the tooltip is
+-- filled again with the unit alone, as that function fills it, which drops the two lines.
+local function dropClickHint(frame)
+    if not module.db.hideClickHint or type(frame) ~= "table" or not frame.unit then
+        return
+    end
+    if GameTooltip:IsOwned(frame) and GameTooltip:SetUnit(frame.unit, frame.hideStatusOnTooltip) then
+        GameTooltip:Show()
+    end
+end
+
 -- A world object's tooltip: the bobber's, while fishing.
 local function onObject(tooltip)
     if module.db.hideFishing and tooltip == GameTooltip and fishing() then
@@ -584,6 +601,7 @@ function module:OnEnable()
     self:Hook(GameTooltip, "Show", onFriendTooltip)
     -- GameTooltip_SetDefaultAnchor is Blizzard's for every default-placed tooltip.
     self:Hook("GameTooltip_SetDefaultAnchor", onDefaultAnchor)
+    self:Hook("UnitFrame_UpdateTooltip", dropClickHint)
     self:HookScript(GameTooltip, "OnTooltipCleared", unfade)
     self:HookScript(GameTooltip, "OnHide", unfade)
     fadeHealthBar(self.db.hideHealthBar)

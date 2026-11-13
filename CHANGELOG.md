@@ -20,6 +20,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Movable Windows**: Drag From picks where a window can be grabbed: anywhere in it, as before, or only its title bar.
 - **World Map**: clicking a dungeon or raid icon opens its map in the DungeonJournal addon, if you have it. Points of Interest's Dungeon Maps turns it off.
 - **Gathering Tracking**: Mute Swap Sound (off by default) silences the tracking spell's sound each time Swap Between Both swaps.
+- **Tooltips**: Hide Right-Click Hint (off by default) leaves the "Right click for frame settings" line off the tooltips of the player, target, focus, party, and raid frames.
 - **Tooltips**: Hide Bobber Tooltip (off by default) hides the fishing bobber's tooltip while you fish, so it doesn't cover the bobber with Anchor to Cursor on.
 
 ### Changed
