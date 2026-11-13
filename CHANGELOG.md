@@ -17,6 +17,8 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Gathering Tracking**: Say When Turned Back On (off by default) says in chat when tracking has been turned back on for you. Its other chat option is now called Warning Messages.
 - **Flight Timer**: Estimated Times, on by default, shows a flight you haven't taken yet with the time the game's own flight paths give it, marked with ~, on the bar and the flight map's tooltip, until your own time replaces it.
 - **Professions**: Unlearned Recipes brings back Show Learned and Show Unlearned in the recipe list's Filter menu: the recipes you don't know yet show in the list itself, alone or among the ones you know, each with the skill it takes to learn and, on its page, the recipe item that teaches it with its auction price. An Unlearned submenu filters them by source, by when you can learn them, and to those whose item is in your bags. Season of Discovery's recipes, which the game still lists, are left out. A trainer recipe's skill is learned the first time you open its trainer; until then it's listed under Unknown.
+- **Movable Windows**: Drag From picks where a window can be grabbed: anywhere in it, as before, or only its title bar.
+- **Tooltips**: Hide Bobber Tooltip (off by default) hides the fishing bobber's tooltip while you fish, so it doesn't cover the bobber with Anchor to Cursor on.
 
 ### Changed
 
@@ -29,6 +31,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Fixed
 
+- **Movable Windows**: dragging a character or mount model, as in the dressing room, turns the model without moving the window too.
 - **Short Channel Names**: the chat box's cursor sits at the end of what you typed again. With a channel's name shortened it stood off to the right.
 - **Item Tooltips**: Disenchant knows every item the game can disenchant, such as blue gear at item level 5-10 and gear above 65. Where what it gives isn't known yet, the line says so and learns it from your own disenchants.
 - **Gathering Skill Tooltips**: every lockbox's Lockpicking comes from the game's own data, so boxes such as the Heavy Junkbox (250, not 175) and the Thorium Lockbox show the right skill before you've hovered one, and boxes like the Puzzle Box are known too.

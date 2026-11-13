@@ -19,6 +19,7 @@ local GetQuestDifficultyColor, FACTION_BAR_COLORS = GetQuestDifficultyColor, FAC
 local NORMAL_FONT_COLOR, TOOLTIP_DEFAULT_COLOR = NORMAL_FONT_COLOR, TOOLTIP_DEFAULT_COLOR
 local FACTION_HORDE, FACTION_ALLIANCE = FACTION_HORDE, FACTION_ALLIANCE
 local GameTooltip, InCombatLockdown = GameTooltip, InCombatLockdown
+local UnitChannelInfo, C_Spell, select = UnitChannelInfo, C_Spell, select
 
 local L = ns.L
 local readable = ns.IsReadable
@@ -39,6 +40,7 @@ local module = ns.NewModule("Tooltips", L.TOOLTIPS_DESC, {
     target = true,
     hideInCombat = false, -- hide unit tooltips while in combat
     anchorCursor = false, -- tooltips at the mouse instead of the bottom right
+    hideFishing = false, -- hide the bobber's tooltip while fishing
     hideHealthBar = false, -- hide the health bar under unit tooltips
     questLines = "show", -- "show", "units" (hidden on unit tooltips), "all" (and on objects)
 })
@@ -83,6 +85,8 @@ module.options = {
         section = L.TOOLTIPS_SECTION_BEHAVIOR },
     { key = "hideInCombat", name = L.TOOLTIPS_HIDE_IN_COMBAT, description = L.TOOLTIPS_HIDE_IN_COMBAT_DESC,
         section = L.TOOLTIPS_SECTION_BEHAVIOR },
+    { key = "hideFishing", name = L.TOOLTIPS_HIDE_FISHING, description = L.TOOLTIPS_HIDE_FISHING_DESC,
+        section = L.TOOLTIPS_SECTION_BEHAVIOR, added = "1.6.0" },
     { key = "hideHealthBar", name = L.TOOLTIPS_HIDE_HEALTH_BAR,
         description = L.TOOLTIPS_HIDE_HEALTH_BAR_DESC, section = L.TOOLTIPS_SECTION_BEHAVIOR, added = "0.9.0" },
     {
@@ -377,6 +381,28 @@ local function unfade()
     end
 end
 
+-- Hide Bobber Tooltip: while Fishing channels, the thing under the mouse is the bobber, and its
+-- tooltip (worse at the cursor, with Anchor to Cursor) sits over it just when it's watched for the
+-- splash. Any rank of Fishing counts, by the spell's name.
+local FISHING = ns.GameData.Spell(7620, "Fishing")
+
+local function fishing()
+    local spellID = select(8, UnitChannelInfo("player"))
+    if not ns.IsNumber(spellID) then
+        return false
+    end
+    local name = C_Spell.GetSpellName(spellID)
+    return ns.IsText(name) and name == C_Spell.GetSpellName(FISHING)
+end
+
+-- A world object's tooltip: the bobber's, while fishing.
+local function onObject(tooltip)
+    if module.db.hideFishing and tooltip == GameTooltip and fishing() then
+        faded = true
+        tooltip:SetAlpha(0)
+    end
+end
+
 local function onUnit(tooltip, data)
     -- Hide in Combat: the mouseover tooltip only; tooltips the player opens stay.
     if module.db.hideInCombat and tooltip == GameTooltip and InCombatLockdown() then
@@ -553,6 +579,7 @@ function module:OnEnable()
     end
     self:TooltipPostCall(Enum.TooltipDataType.Unit, onUnit)
     self:TooltipPostCall(Enum.TooltipDataType.Item, onItem)
+    self:TooltipPostCall(Enum.TooltipDataType.Object, onObject)
     -- The friends list's tooltip has no tooltip data for a post call, so after it shows.
     self:Hook(GameTooltip, "Show", onFriendTooltip)
     -- GameTooltip_SetDefaultAnchor is Blizzard's for every default-placed tooltip.

@@ -57,6 +57,11 @@ ns.changelog = {
                     .. "Season of Discovery's recipes, which the game still lists, are left out. "
                     .. "A trainer recipe's skill is learned the first time you open its trainer; "
                     .. "until then it's listed under Unknown." },
+                { L.MOVABLEWINDOWS_TITLE, "Drag From picks where a window can be grabbed: anywhere "
+                    .. "in it, as before, or only its title bar." },
+                { L.TOOLTIPS_TITLE, "Hide Bobber Tooltip (off by default) hides the fishing "
+                    .. "bobber's tooltip while you fish, so it doesn't cover the bobber with Anchor "
+                    .. "to Cursor on." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.SQUAREMINIMAP_TITLE, "The mail icon sits in the map's top left corner instead "
@@ -77,6 +82,8 @@ ns.changelog = {
                     .. "(Uldaman 35, not 41)." },
             } },
             { L.CHANGELOG_FIXED, {
+                { L.MOVABLEWINDOWS_TITLE, "Dragging a character or mount model, as in the "
+                    .. "dressing room, turns the model without moving the window too." },
                 { L.SHORTCHANNELNAMES_TITLE, "The chat box's cursor sits at the end of what you "
                     .. "typed again. With a channel's name shortened it stood off to the right." },
                 { L.ITEMTOOLTIPS_TITLE, "Disenchant knows every item the game can disenchant, "

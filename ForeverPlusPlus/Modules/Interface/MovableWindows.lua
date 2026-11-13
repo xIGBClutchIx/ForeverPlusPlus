@@ -17,6 +17,7 @@ local _, ns = ...
 
 local ipairs, pairs, type, setmetatable = ipairs, pairs, type, setmetatable
 local InCombatLockdown, UIParent, GetMouseFoci = InCombatLockdown, UIParent, GetMouseFoci
+local GetCursorPosition = GetCursorPosition
 local _G = _G
 
 local L = ns.L
@@ -25,6 +26,7 @@ local Keys = ns.Keys
 local module = ns.NewModule("MovableWindows", L.MOVABLEWINDOWS_DESC, {
     enabled = false,
     moveKey = "shift", -- held while dragging; "none" drags with the left button alone
+    area = "anywhere", -- where a drag can start: "anywhere" in the window, or its "title" bar only
     remember = "always", -- "always" (saved), "session" (until logout or /reload), or "never"
     -- (back to Blizzard's place when it closes)
     resetKey = "ctrl", -- held while clicking a window to put it back; "none" for the click alone
@@ -40,6 +42,14 @@ module.perProfile = { positions = true }
 
 module.options = {
     Keys.Option("moveKey", L.MOVABLEWINDOWS_KEY, L.MOVABLEWINDOWS_KEY_DESC),
+    {
+        key = "area", name = L.MOVABLEWINDOWS_AREA, description = L.MOVABLEWINDOWS_AREA_DESC,
+        choices = {
+            { "anywhere", L.MOVABLEWINDOWS_AREA_ANYWHERE },
+            { "title", L.MOVABLEWINDOWS_AREA_TITLE },
+        },
+        added = "1.6.0",
+    },
     {
         key = "remember", name = L.MOVABLEWINDOWS_REMEMBER, description = L.MOVABLEWINDOWS_REMEMBER_DESC,
         choices = {
@@ -201,6 +211,20 @@ local function resetWindow(frame)
     putBack(frame)
 end
 
+-- Whether the mouse is on a window's title bar: within TITLE_HEIGHT of its top edge, since not
+-- every window has a title bar of its own to ask (bags, the Escape menu).
+local TITLE_HEIGHT = 28
+
+local function onTitle(frame)
+    local top, scale = frame:GetTop(), frame:GetEffectiveScale()
+    if not (ns.IsNumber(top) and ns.IsNumber(scale)) or scale <= 0 then
+        return true
+    end
+    local _, y = GetCursorPosition()
+    y = y / scale
+    return y <= top and y >= top - TITLE_HEIGHT
+end
+
 local function startDrag(frame, button)
     if dragging or not canMove(frame) then
         return
@@ -214,6 +238,9 @@ local function startDrag(frame, button)
         return
     end
     if button ~= "LeftButton" or not held(db.moveKey) then
+        return
+    end
+    if db.area == "title" and not onTitle(frame) then
         return
     end
     if original[frame] == nil then
@@ -301,7 +328,11 @@ end
 -- the reset key held, finds the window it's in and drags or resets that, unless it's on something
 -- the player uses (a button, a checkbox, a text box, a slider, or a scrolling area such as the
 -- world map's canvas, which pans), which keeps the click.
-local USED = { Button = true, CheckButton = true, EditBox = true, Slider = true, ScrollFrame = true }
+-- A model keeps it too: dragging one turns it (the dressing room's character, a mount in the
+-- journal), so moving the window from it would do both at once.
+local USED = { Button = true, CheckButton = true, EditBox = true, Slider = true, ScrollFrame = true,
+    Model = true, PlayerModel = true, DressUpModel = true, TabardModel = true, CinematicModel = true,
+    ModelScene = true }
 local MAX_DEPTH = 20 -- frames to walk up from the one clicked
 
 local function windowAt()
