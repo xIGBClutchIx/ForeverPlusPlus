@@ -188,7 +188,7 @@ mklink /J "<WoW folder>\_forever_\Interface\AddOns\ForeverPlusPlus" "<this repo>
    - `module:OnWhile("optionKey", { EVENT = fn })`, once at file load, for events wanted only while an option is on. Don't also add those handlers with `self:On`.
 4. **Settings.** Read them from `module.db`. List options in `module.options` as `{ key, name, description }`, with the default in the defaults table:
    - A checkbox, a dropdown with `choices = { { value, label }, ... }`, or a slider with `min`, `max`, `step`, and `format` (a format string such as `"%d%%"`, or a function of the value).
-   - `requires = key` nests an option under a checkbox, `slider = key` puts a slider in a checkbox's row, `available = fn` greys one out while `fn()` is false, and `section` (a locale string) groups a long list.
+   - `requires = key` nests an option under a checkbox, `slider = key` puts a slider in a checkbox's row, `available = fn` greys one out while `fn()` is false (with `needs = text` saying what's missing in its tooltip), and `section` (a locale string) groups a long list.
    - `cvar = "name"` makes a checkbox one of Blizzard's own settings: it reads and sets that CVar and saves nothing.
    - `debug = true` moves one to the Debug page, under `section = ns.L.DEBUG_SECTION_PREVIEWS`, `_LAYOUT`, `_LOGGING`, `_TOOLS`, or `_DIAGNOSTICS`.
    - `added = "1.6.0"` (on the module or an option) marks it NEW for players updating to that version; `changed` does the same for an option that changed.

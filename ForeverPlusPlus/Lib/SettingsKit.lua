@@ -101,13 +101,13 @@ end
 ---The tooltip a row shows over itself and its controls (`...`), as Blizzard's settings rows do.
 ---@param row table
 ---@param title string
----@param text? string nothing shows without it
+---@param text? string|fun(): string nothing shows without it; a function is asked each time it shows
 function Kit.AddTooltip(row, title, text, ...)
     if not text or text == "" then
         return
     end
     local function enter()
-        Kit.ShowTooltip(row, title, text)
+        Kit.ShowTooltip(row, title, type(text) == "function" and text() or text)
     end
     local function leave()
         Kit.HideTooltip(row)

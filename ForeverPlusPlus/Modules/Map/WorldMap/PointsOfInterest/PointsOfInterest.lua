@@ -85,6 +85,7 @@ for _, rows in ipairs({
     { section = INSTANCES, {
         key = "dungeonMaps", name = L.POI_DUNGEON_MAPS, description = L.POI_DUNGEON_MAPS_DESC,
         added = "1.6.0", available = ns.DungeonMaps.Has,
+        needs = format(L.SETTINGS_NEEDS_ADDON, "DungeonJournal"),
     } },
     -- Ours, Blizzard's, or none: ours hide Blizzard's city icons, so there's no checkbox.
     { section = TRAVEL, {

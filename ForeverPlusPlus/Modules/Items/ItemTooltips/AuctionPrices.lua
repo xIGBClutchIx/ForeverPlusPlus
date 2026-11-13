@@ -85,6 +85,7 @@ module:AddOptions({
     {
         key = "auctionator", name = L.AUCTIONPRICES_AUCTIONATOR, description = L.AUCTIONPRICES_AUCTIONATOR_DESC,
         available = ns.Prices.AuctionatorLoaded, added = "1.0.0-beta.1",
+        needs = L.SETTINGS_NEEDS_ADDON:format("Auctionator"),
     },
     ns.ChatOption(L.AUCTIONPRICES_CHAT_DESC),
 })

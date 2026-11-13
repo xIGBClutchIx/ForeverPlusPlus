@@ -19,7 +19,7 @@ L.AUCTIONPRICES_SCAN_ON_OPEN_DESC = "Scan the whole auction house when you open 
 L.AUCTIONPRICES_AUCTIONATOR = "Use Auctionator's Prices"
 L.AUCTIONPRICES_AUCTIONATOR_DESC = "Show Auctionator's auction prices in tooltips, Professions' "
     .. "Crafting Costs, and Waylaid Crates, and don't scan. Your own saved prices are kept for when you turn this "
-    .. "off. Needs the Auctionator addon."
+    .. "off."
 L.AUCTIONPRICES_USING_AUCTIONATOR = "Auction prices come from Auctionator, so Forever++ doesn't scan. "
     .. "Turn off Use Auctionator's Prices to scan."
 L.AUCTIONPRICES_SCAN_AGE = "Scan Age"

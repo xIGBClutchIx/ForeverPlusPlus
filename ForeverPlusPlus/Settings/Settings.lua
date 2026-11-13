@@ -742,6 +742,17 @@ local function addOptionRow(view, module, option, byKey, done, gate)
         end
         return true
     end
+    -- While what it needs isn't there, its tooltip says what that is (`needs`), in red under the
+    -- description, so a greyed-out row explains itself.
+    local description = option.description
+    if option.available and option.needs then
+        description = function()
+            if option.available() then
+                return option.description
+            end
+            return format("%s\n\n%s", option.description or "", RED_FONT_COLOR:WrapTextInColorCode(option.needs))
+        end
+    end
     local depth, up = 0, parent
     while up do
         depth = depth + 1
@@ -787,7 +798,7 @@ local function addOptionRow(view, module, option, byKey, done, gate)
             box:SetChecked(module.db[option.key] and true or false)
             box:SetEnabled(on())
         end
-        addTooltip(row, option.name, option.description, box)
+        addTooltip(row, option.name, description, box)
         if not paired then
             return
         end
@@ -811,7 +822,7 @@ local function addOptionRow(view, module, option, byKey, done, gate)
             slider:SetValue(module.db[option.key])
             slider:SetEnabled(on())
         end
-        addTooltip(row, option.name, option.description, slider.Slider)
+        addTooltip(row, option.name, description, slider.Slider)
     elseif kind == "dropdown" then
         local dropdown = newDropdown(row, module, option, controlWidth(room))
         if not dropdown then
@@ -822,7 +833,7 @@ local function addOptionRow(view, module, option, byKey, done, gate)
             dropdown:GenerateMenu()
             dropdown:SetEnabled(on())
         end
-        addTooltip(row, option.name, option.description, dropdown)
+        addTooltip(row, option.name, description, dropdown)
     end
 end
 

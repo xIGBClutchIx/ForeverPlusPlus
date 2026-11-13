@@ -779,6 +779,7 @@ for _, option in ipairs(module.options) do
     option.section = SECTIONS[option.key]
     if ERROR_OPTIONS[option.key] then
         option.available = Errors.IsOn
+        option.needs = L.SETTINGS_NEEDS_MODULE:format(L.ERRORCATCHER_TITLE)
     end
 end
 module.actions[1].section = L.MINIMAPBUTTON_SECTION_TOGGLES

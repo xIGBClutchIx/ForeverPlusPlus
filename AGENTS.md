@@ -395,7 +395,8 @@ An option is `{ key, name, description }` in `module.options`, with its default 
 | `requires = key` | Nests it under a checkbox option (or a dropdown, on while it isn't `"off"`). |
 | `slider = key` | Puts a checkbox's slider in its row. |
 | `shown = fn(db)` | Shows its row only while true. |
-| `available = fn` | Greyed out while `fn()` is false (another addon it needs isn't loaded). |
+| `available = fn` | Greyed out while `fn()` is false (another addon or module it needs isn't there). Always give it `needs`. |
+| `needs = text` | What an `available` option needs, shown in red in its tooltip while it's greyed out (`L.SETTINGS_NEEDS_ADDON`, `L.SETTINGS_NEEDS_MODULE`). |
 | `section` | The header it sits under (see Sections). |
 | `added`, `changed` | The version it first shipped or last changed in; marks it NEW. Options of a new module aren't marked. |
 | `cvar = "name"` | A checkbox that is one of Blizzard's own settings: it reads and sets that CVar and saves nothing of ours. Say so in its description. |
