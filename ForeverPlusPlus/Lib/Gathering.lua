@@ -784,7 +784,10 @@ function Gathering.Encode(maps, keep)
         local nodes = {}
         for _, node in ipairs(maps[mapID]) do
             local letter = KIND_LETTERS[node.kind]
-            if letter and type(node.name) == "string" and (not keep or keep(node)) then
+            -- A name with one of the text's own separators would make the whole line unreadable,
+            -- so that node is left out and the rest still share (none is known to have one).
+            if letter and type(node.name) == "string" and not node.name:find("[/~]")
+                and (not keep or keep(node)) then
                 local key = letter .. node.name
                 local i = index[key]
                 if not i then

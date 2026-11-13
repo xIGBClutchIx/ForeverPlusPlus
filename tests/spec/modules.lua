@@ -131,6 +131,13 @@ local function text(value)
     return type(value) == "string" and value ~= ""
 end
 
+-- Every field an option may have (AGENTS.md's Options table, and what Core adds to a part's).
+local OPTION_FIELDS = {}
+for field in ([[key name description choices min max step format requires slider shown available
+    needs section subsection added changed cvar editMode debug conflicts part toggle]]):gmatch("%S+") do
+    OPTION_FIELDS[field] = true
+end
+
 local checked, linked, presetsDeclared = 0, 0, 0
 for _, name in ipairs(ns.order or {}) do
     local module = ns.modules[name]
@@ -186,6 +193,19 @@ for _, name in ipairs(ns.order or {}) do
         end
         if option.choices and option.min then
             problem("%s has both choices and a slider range; it can only be one", key)
+        end
+        -- AGENTS.md: a greyed-out option says what it needs, and only one that can be greyed does.
+        if option.available and not text(option.needs) then
+            problem("%s has `available` but no `needs` to say why it's greyed out", key)
+        end
+        if option.needs and not option.available then
+            problem("%s has `needs` but no `available`", key)
+        end
+        -- A field Settings doesn't know is a typo (`require`, `desc`) that would be ignored.
+        for field in pairs(option) do
+            if not OPTION_FIELDS[field] then
+                problem("%s has an unknown field `%s`", key, tostring(field))
+            end
         end
         if option.choices then
             local found = default == nil

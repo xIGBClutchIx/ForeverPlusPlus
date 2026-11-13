@@ -119,6 +119,18 @@ eq(coded[1429][1].name:find("|", 1, true), nil, "share: a pasted name brings in 
 local odd = Gathering.Decode("GM1/oCopper Vein/1429:0,7pt,1,1,1;0,1,1,zzzzzz,zzzzzz", 1000)
 eq(#odd[1429], 1, "share: a node off its map is left out")
 eq(odd[1429][1].time .. ":" .. odd[1429][1].count, "1000:1000000", "share: future time and huge count")
+-- A name with one of the text's own separators is left out, and the rest still decode.
+local awkward = { [1] = {
+    { name = "Odd/Name~X", kind = "ore", x = 0.5, y = 0.5, count = 1 },
+    { name = "Copper Vein", kind = "ore", x = 0.2, y = 0.2, count = 1 },
+} }
+local awkwardText, awkwardCount = Gathering.Encode(awkward)
+eq(awkwardCount, 1, "share: a name with a separator in it isn't shared")
+local awkwardBack = Gathering.Decode(awkwardText)
+eq(awkwardBack and awkwardBack[1][1].name, "Copper Vein", "share: and the others still decode")
+-- The format itself, so a change Encode and Decode share can't break strings players already hold.
+eq((Gathering.Encode({ [7] = { { name = "Tin Vein", kind = "ore", x = 0.5, y = 0.25, count = 2, time = 36 } } })),
+    "GM1/oTin Vein/7:0,3uw,1xg,2,10", "share: the text of one node")
 local edge = { [1] = { { name = "Copper Vein", kind = "ore", x = 1.02, y = -0.01, count = 1 } } }
 local edged = Gathering.Decode((Gathering.Encode(edge)))
 eq(edged[1][1].x .. ":" .. edged[1][1].y, "1:0", "share: a spot past the edge is kept on it")

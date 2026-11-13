@@ -121,6 +121,7 @@ L.SETTINGS_ENABLED = "Enabled" -- the module's own on/off checkbox, under its de
 -- The tooltip of the padlock in a locked module's checkbox's place
 L.SETTINGS_NEEDS_ADDON = "Needs the %s addon."
 L.SETTINGS_NEEDS_MODULE = "Needs the %s module turned on."
+L.SETTINGS_NEEDS_CLIENT = "This version of the game doesn't have what it needs."
 L.SETTINGS_LOCKED ="Turned off and locked: the game broke what this module does. Its settings say more."
 L.SETTINGS_OPTIONS = "Options" -- the header over its options
 L.SETTINGS_NO_OPTIONS = "This module has no options."
