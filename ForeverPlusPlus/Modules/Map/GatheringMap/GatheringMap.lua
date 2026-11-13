@@ -782,7 +782,7 @@ function internal.TooltipLines(node, yards, onDot)
         lines[#lines + 1] = Tip.Pair(L.GATHERINGMAP_TIP_DISTANCE, ns.Text.Yards(yards))
     end
     if wants("tipForget") then
-        -- On the world map a Shift+click also places the map pin; on the minimap it's a ping.
+        -- On the world map a Ctrl+click also places the map pin; on the minimap it's a ping.
         lines[#lines + 1] = Tip.Note(onDot and L.GATHERINGMAP_FORGET_HINT or L.GATHERINGMAP_MAP_HINT)
     end
     return lines

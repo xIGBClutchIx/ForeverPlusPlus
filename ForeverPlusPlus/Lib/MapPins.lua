@@ -68,22 +68,90 @@ end
 
 -- Pins ----------------------------------------------------------------------------------------
 
-local function onEnter(pin)
+local function showTooltip(pin)
     local info = pin.info
     local lines = info.lines
     if type(lines) == "function" then
         lines = lines(info)
     end
     ns.MapTooltip.Show(pin, info.title, lines, info.kind)
+end
+
+-- Clicks: a pin lets every click through to the map (zooming, changing maps) except the ones its
+-- `info` has something for, read when the click comes so a pooled pin needs no cleanup:
+--   `click(pin, button)`      a plain left click; the pin then takes every click on it
+--   `ctrlClick(pin)`          Ctrl+left click, the game's own gesture for the map pin
+--   `waypoint = true`         the same, putting Blizzard's map pin on the pin's own spot
+--   `shiftClick(pin, button)` a click with Shift held, either button
+-- A pin with only the last three takes clicks only while that key is held over it.
+
+local IsShiftKeyDown, IsControlKeyDown = IsShiftKeyDown, IsControlKeyDown
+
+local function takesClick(info)
+    if info.click then
+        return true
+    end
+    if (info.ctrlClick or info.waypoint) and IsControlKeyDown() then
+        return true
+    end
+    return info.shiftClick ~= nil and IsShiftKeyDown()
+end
+
+-- While the mouse is on the pin: takes clicks or lets them through as the keys held say, and
+-- shows its tooltip again when Shift goes up or down, for lines shown only with Shift.
+local function watchKeys(pin)
+    if pin.SetMouseClickEnabled then
+        pin:SetMouseClickEnabled(takesClick(pin.info))
+    end
+    local shift = IsShiftKeyDown() and true or false
+    if shift ~= pin.shiftWas then
+        local first = pin.shiftWas == nil
+        pin.shiftWas = shift
+        if not first and GameTooltip:IsOwned(pin) then
+            showTooltip(pin)
+        end
+    end
+end
+
+local function onMouseUp(pin, button)
+    local info = pin.info
+    if not info then
+        return
+    end
+    if IsControlKeyDown() and (info.ctrlClick or info.waypoint) then
+        if button ~= "LeftButton" then
+            return
+        end
+        if info.ctrlClick then
+            info.ctrlClick(pin)
+        elseif pin.mapID then
+            ns.WorldMap.SetWaypoint(pin.mapID, pin.x, pin.y)
+        end
+    elseif IsShiftKeyDown() and info.shiftClick then
+        info.shiftClick(pin, button)
+    elseif info.click and button == "LeftButton" then
+        info.click(pin, button)
+    end
+end
+
+local function onEnter(pin)
+    showTooltip(pin)
     -- An empty ring has nothing to light up: its art is hidden, and the highlight would fill it.
-    if not info.hollow then
+    if not pin.info.hollow then
         pin.highlight:Show()
     end
+    watchKeys(pin)
+    pin:SetScript("OnUpdate", watchKeys)
 end
 
 local function onLeave(pin)
     GameTooltip:Hide()
     pin.highlight:Hide()
+    pin:SetScript("OnUpdate", nil)
+    pin.shiftWas = nil
+    if pin.SetMouseClickEnabled then
+        pin:SetMouseClickEnabled(false)
+    end
 end
 
 local function newPin(canvas)
@@ -106,86 +174,8 @@ local function newPin(canvas)
     end
     pin:SetScript("OnEnter", onEnter)
     pin:SetScript("OnLeave", onLeave)
+    pin:SetScript("OnMouseUp", onMouseUp)
     return pin
-end
-
--- Shift-clicks ---------------------------------------------------------------------------------
--- A pin that does something on Shift+click takes clicks only while Shift is held over it, so a
--- plain click still goes through to the map (zooming, changing maps) or the minimap (a ping).
-
-local IsShiftKeyDown = IsShiftKeyDown
-
--- While the mouse is on the pin: takes clicks only with Shift held, and shows its tooltip again
--- when Shift goes up or down, for lines shown only with Shift.
-local function watchShift(pin)
-    local shift = IsShiftKeyDown() and true or false
-    if pin.SetMouseClickEnabled then
-        pin:SetMouseClickEnabled(pin.shiftClick ~= nil and shift)
-    end
-    if shift ~= pin.shiftWas then
-        local first = pin.shiftWas == nil
-        pin.shiftWas = shift
-        if not first and GameTooltip:IsOwned(pin) then
-            pin:GetScript("OnEnter")(pin)
-        end
-    end
-end
-
-local function onShiftClick(pin, button)
-    if IsShiftKeyDown() and pin.shiftClick then
-        pin.shiftClick(pin, button)
-    end
-end
-
----Has `fn(pin, button)` run when the pin is clicked with Shift held; a click without Shift goes
----through to what's under the pin. Nil `fn` stops it. The pin's OnEnter and OnLeave are hooked
----(HookScript), so its own tooltip scripts stay.
----@param pin table
----@param fn? fun(pin: table, button: string)
-function MapPins.ShiftClick(pin, fn)
-    pin.shiftClick = fn
-    if pin.shiftHooked or not fn then
-        return
-    end
-    pin.shiftHooked = true
-    pin:HookScript("OnEnter", function(self)
-        watchShift(self)
-        self:SetScript("OnUpdate", watchShift)
-    end)
-    pin:HookScript("OnLeave", function(self)
-        self:SetScript("OnUpdate", nil)
-        self.shiftWas = nil
-        if self.SetMouseClickEnabled then
-            self:SetMouseClickEnabled(false)
-        end
-    end)
-    pin:SetScript("OnMouseUp", onShiftClick)
-end
-
--- Clicks ---------------------------------------------------------------------------------------
--- A pin that does something on a plain click takes the mouse's clicks whole, so a click on it no
--- longer reaches the map under it (zooming, changing maps). Not for a pin with a Shift+click, which
--- turns its clicks on and off itself.
-
-local function onClick(pin, button)
-    if button == "LeftButton" and pin.click then
-        pin.click(pin, button)
-    end
-end
-
----Has `fn(pin, button)` run when the pin is left-clicked. Nil `fn` stops it, and clicks go through
----to what's under the pin again.
----@param pin table
----@param fn? fun(pin: table, button: string)
-function MapPins.Click(pin, fn)
-    pin.click = fn
-    if pin.SetMouseClickEnabled then
-        pin:SetMouseClickEnabled(fn ~= nil)
-    end
-    if fn and not pin.clickHooked then
-        pin.clickHooked = true
-        pin:SetScript("OnMouseUp", onClick)
-    end
 end
 
 -- Puts a pin at its place on the canvas, sized so the map's zoom doesn't change it on screen.
@@ -344,12 +334,8 @@ function Layer:Add(map, x, y, info)
         self.pins[self.count] = pin
     end
     pin.x, pin.y, pin.info = x, y, info
+    pin.mapID = map:GetMapID() -- for `waypoint`
     MapPins.SetArt(pin, info)
-    if info.shiftClick or pin.shiftClick then
-        MapPins.ShiftClick(pin, info.shiftClick)
-    elseif info.click or pin.click then
-        MapPins.Click(pin, info.click)
-    end
     -- Where Blizzard's own dungeon entrance icons go: above the map art and areas, below quests.
     local manager = map.GetPinFrameLevelsManager and map:GetPinFrameLevelsManager()
     if manager then
@@ -444,9 +430,10 @@ end
 ---`atlas`, `texture` (a file ID or path, such as an item icon) with `trim` to cut off an item
 ---icon's edge. Any pin can also have `round` (drawn round), `color` ({ r, g, b } it's tinted),
 ---`alpha`, `ring` (the minimap's gold ring around it), `hollow` (only the ring, its art
----hidden), and `shiftClick` (`fn(pin, button)` on a click with Shift held; see
----ShiftClick), or `click` (`fn(pin, button)` on a plain left click, which then doesn't reach the
----map; see Click). Call `layer:Enable()` to show it and
+---hidden), and what a click on it does (see Clicks above): `waypoint = true` (Ctrl+click puts
+---Blizzard's map pin on its spot) or `ctrlClick` (`fn(pin)` in its place), `shiftClick`
+---(`fn(pin, button)` with Shift held), and `click` (`fn(pin, button)` on a plain left click,
+---which then doesn't reach the map). Call `layer:Enable()` to show it and
 ---`layer:Disable()` to take it off.
 ---@param fill fun(mapID: number, add: fun(x: number, y: number, info: table))
 ---@return table layer

@@ -1,7 +1,7 @@
 -- Quest Pins on the world map: a layer of Lib/MapPins.lua with a ! at each place quests the player
 -- can take start, on the zone map shown and, on a continent map, the zones below it. Spawns of one
 -- giver that lie close together share a pin (up to CLUSTER_LIMIT a giver), and pins on the same
--- spot stack into one that lists every quest. Shift+click puts Blizzard's map pin on the pin's
+-- spot stack into one that lists every quest. Ctrl+click puts Blizzard's map pin on the pin's
 -- nearest spawn, Shift+right-click hides its quests for this character.
 local _, ns = ...
 
@@ -221,17 +221,23 @@ local function tooltipLines(info)
     return lines
 end
 
+-- Shift+right-click hides the pin's quests.
 local function shiftClick(pin, button)
     local info = pin.info
-    if not info then
+    if not info or button ~= "RightButton" then
         return
     end
-    if button == "RightButton" then
-        local ids = {}
-        for i, id in ipairs(info.quests) do
-            ids[i] = id
-        end
-        internal.Hide(ids)
+    local ids = {}
+    for i, id in ipairs(info.quests) do
+        ids[i] = id
+    end
+    internal.Hide(ids)
+end
+
+-- Ctrl+click puts Blizzard's map pin on the giver, as the game's own Ctrl+click drops one.
+local function ctrlClick(pin)
+    local info = pin.info
+    if not info then
         return
     end
     local ok, why = WorldMap.SetWaypoint(info.anchorMap, info.anchorX, info.anchorY)
@@ -342,7 +348,7 @@ local function fill(mapID, add)
             atlas = "QuestNormal", size = size, color = color, desaturated = color ~= nil or faded == "low",
             alpha = (faded and db.fadeAlpha or db.alpha) / 100, upcoming = upcoming,
             title = questLine(pin.quests[1]), kind = kind and KIND_NAME[kind] or nil,
-            lines = tooltipLines, shiftClick = shiftClick, quests = pin.quests, count = pin.count,
+            lines = tooltipLines, ctrlClick = ctrlClick, shiftClick = shiftClick, quests = pin.quests, count = pin.count,
             anchorMap = pin.map, anchorX = pin.sx, anchorY = pin.sy,
             giverKind = pin.kind, giverID = pin.id,
         })

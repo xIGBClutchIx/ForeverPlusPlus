@@ -168,7 +168,7 @@ One line here says what each file is for. [docs/architecture.md](docs/architectu
 | --- | --- | --- |
 | `WorldMap.lua` | `WorldMap` | The world map, the map tree, map names and sizes, Blizzard's map pin, and where the player, a quest, and the corpse are. |
 | `MapTooltip.lua` | `MapTooltip` | How every tooltip over the world map looks. |
-| `MapPins.lua` | `MapPins` | Layers of our own icons on the world map, with `ShiftClick` and `Click`. |
+| `MapPins.lua` | `MapPins` | Layers of our own icons on the world map, and what a click on one does (Ctrl+click for the map pin, as the game's own). |
 | `MinimapPins.lua` | `MinimapPins` | What the minimap shows, zone-map spots as minimap spots, its gold ring, and its shape. |
 | `Instances.lua` | `Instances` | The dungeons and raids with their levels and names. |
 | `DungeonMaps.lua` | `DungeonMaps` | Opening a dungeon's map in the DungeonJournal addon, since the client has none. |

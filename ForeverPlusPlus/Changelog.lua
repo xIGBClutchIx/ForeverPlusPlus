@@ -81,6 +81,11 @@ ns.changelog = {
                     .. "the node's tooltip too: a node that's gone or just gathered, a chest, or a "
                     .. "fishing pool. A new Skill Needed option shows the skill line in its "
                     .. "tooltips always, with Shift, or never." },
+                { L.WORLDMAP_TITLE, "Ctrl+click an icon on the world map to put the map pin on "
+                    .. "it, the same click the game uses anywhere else on the map. It works on "
+                    .. "every Points of Interest icon (dungeons, boats, flight masters, and the "
+                    .. "rest) and replaces Shift+click on Gathering Map's nodes and Quest Pins' "
+                    .. "pins. Shift+right-click still forgets a node or hides a quest pin." },
                 { L.WHISPERWINDOW_TITLE, "The reply box grows as you type, up to four lines, so a "
                     .. "long whisper can be read before it's sent. Drag the divider between the list "
                     .. "and the conversation to make the list wider or narrower. A whisper too long "

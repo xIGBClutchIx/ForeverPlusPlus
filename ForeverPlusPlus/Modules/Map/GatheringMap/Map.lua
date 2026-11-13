@@ -32,16 +32,19 @@ end
 -- The tables pins are given, kept from one draw to the next: pin i shows infos[i].
 local infos = {}
 
--- Shift+click puts Blizzard's map pin on the node; Shift+right-click forgets it.
+-- Ctrl+click puts Blizzard's map pin on the node, as the game's own Ctrl+click drops one (on its
+-- zone map, where the node is, also from a continent map); Shift+right-click forgets it.
+local function ctrlClick(pin)
+    local info = pin.info
+    if info and info.node then
+        ns.WorldMap.SetWaypoint(info.zone, info.node.x, info.node.y)
+    end
+end
+
 local function shiftClick(pin, button)
     local info = pin.info
-    if not (info and info.node) then
-        return
-    end
-    if button == "RightButton" then
+    if info and info.node and button == "RightButton" then
         internal.Forget(info.zone, info.node)
-    elseif button == "LeftButton" then
-        ns.WorldMap.SetWaypoint(info.zone, info.node.x, info.node.y)
     end
 end
 
@@ -53,7 +56,7 @@ end
 local function infoFor(i, node, size, zone)
     local info = infos[i]
     if not info then
-        info = { shiftClick = shiftClick }
+        info = { ctrlClick = ctrlClick, shiftClick = shiftClick }
         infos[i] = info
     end
     info.node, info.zone = node, zone

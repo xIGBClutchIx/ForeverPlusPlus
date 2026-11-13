@@ -573,10 +573,17 @@ end
 internal.isContinent = isContinent
 
 local function fill(mapID, add)
+    -- Every icon takes Ctrl+click for Blizzard's map pin on its own spot, as the game's Ctrl+click
+    -- on the map drops one: a dungeon's icon takes its clicks, so the game's never got through
+    -- there, and on the others the pin lands on the dock or flight master, not beside it.
+    local function addPin(x, y, info)
+        info.waypoint = true
+        add(x, y, info)
+    end
     if isContinent(mapID) then
-        fillContinent(mapID, add)
+        fillContinent(mapID, addPin)
     else
-        fillZone(mapID, add)
+        fillZone(mapID, addPin)
     end
 end
 
