@@ -97,7 +97,7 @@ local function onMouseDown(_, buttonName)
     end
     local speed = GetUnitSpeed("player")
     if not overWorld() or UnitExists("mouseover") or not ns.IsNumber(speed) or speed > 0
-        or UnitChannelInfo("player") or not poleEquipped() then
+        or ns.Units.PlayerCasting() or not poleEquipped() then
         lastClick = 0
         return
     end

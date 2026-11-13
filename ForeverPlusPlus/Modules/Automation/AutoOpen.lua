@@ -13,7 +13,6 @@ local _, ns = ...
 local format, pairs, ipairs, type, concat = string.format, pairs, ipairs, type, table.concat
 local C_Container = C_Container
 local InCombatLockdown, UnitIsDeadOrGhost, GetNumLootItems = InCombatLockdown, UnitIsDeadOrGhost, GetNumLootItems
-local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
 
 local L = ns.L
 
@@ -97,10 +96,7 @@ local function windowOpen()
 end
 
 -- A cast or channel under way. One the game won't tell us about counts as one.
-local function casting()
-    local cast, channel = UnitCastingInfo and UnitCastingInfo("player"), UnitChannelInfo and UnitChannelInfo("player")
-    return not ns.IsReadable(cast) or cast ~= nil or not ns.IsReadable(channel) or channel ~= nil
-end
+local casting = ns.Units.PlayerCasting
 
 local function freeSlots()
     local free = 0

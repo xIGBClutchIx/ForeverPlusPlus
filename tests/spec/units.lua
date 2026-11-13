@@ -28,6 +28,28 @@ UnitIsInMyGuild, UnitPlayerControlled = field("guild"), field("controlled")
 UnitLevel = field("level")
 UnitCreatureType = function(unit) return "Beast", units[unit] and units[unit].creature end
 UnitIsOtherPlayersPet = function() return false end
+
+-- The player: why now is a bad time to act for them, a hidden answer counting as busy.
+local me = {}
+InCombatLockdown = function() return me.combat or false end
+UnitIsDeadOrGhost = function() return me.dead end
+UnitOnTaxi = function() return me.taxi end
+UnitCastingInfo = function() return me.cast end
+UnitChannelInfo = function() return me.channel end
+T.load("Lib/Units", ns) -- again, after the stubs
+eq(ns.Units.PlayerBusy(), nil, "busy: free to act")
+eq(ns.Units.PlayerCasting(), false, "busy: not casting")
+me.channel = "Fishing"
+eq(ns.Units.PlayerBusy(), "casting", "busy: a channel")
+eq(ns.Units.PlayerCasting(), true, "busy: a channel is casting")
+me.channel, me.cast = nil, SECRET
+eq(ns.Units.PlayerBusy(), "casting", "busy: a cast the game hides counts")
+me.taxi = true
+eq(ns.Units.PlayerBusy(), "taxi", "busy: a flight comes before a cast")
+me.dead = SECRET
+eq(ns.Units.PlayerBusy(), "dead", "busy: dead, or hidden, before a flight")
+me.combat = true
+eq(ns.Units.PlayerBusy(), "combat", "busy: combat first")
 C_FriendList = {
     IsFriend = function(guid) return guid == "Player-1-AAAA" end,
     GetNumFriends = function() return 2 end,

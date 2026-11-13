@@ -8,8 +8,7 @@ local _, ns = ...
 local ipairs, type, tostring, pcall = ipairs, type, tostring, pcall
 local format = string.format
 local C_Minimap, C_Timer = C_Minimap, C_Timer
-local GetTime, InCombatLockdown, UnitIsDeadOrGhost, UnitOnTaxi = GetTime, InCombatLockdown, UnitIsDeadOrGhost, UnitOnTaxi
-local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
+local GetTime = GetTime
 
 local L = ns.L
 
@@ -138,13 +137,10 @@ local function scan()
     return index, ours, any
 end
 
--- Unit state can be secret; when it is, wait (ns.IsTrueOrSecret).
-local yes = ns.IsTrueOrSecret
-
--- Whether casting a tracking spell now would fail or get in the way.
+-- Whether casting a tracking spell now would fail or get in the way: in combat, dead, on a
+-- flight, or casting (a state the game hides counts, so it waits).
 local function busy()
-    return InCombatLockdown() or yes(UnitIsDeadOrGhost("player")) or yes(UnitOnTaxi("player"))
-        or yes(UnitCastingInfo("player")) or yes(UnitChannelInfo("player"))
+    return ns.Units.PlayerBusy() ~= nil
 end
 
 local blocked = false -- the client refused SetTracking from an addon; stop until /reload

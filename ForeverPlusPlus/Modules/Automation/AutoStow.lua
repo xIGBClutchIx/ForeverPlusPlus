@@ -13,7 +13,6 @@ local _, ns = ...
 -- player pressing the key.
 local GetSheathState, ToggleSheath = GetSheathState, ToggleSheath
 local UnitAffectingCombat, UnitIsDeadOrGhost = UnitAffectingCombat, UnitIsDeadOrGhost
-local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
 local IsInInstance, InCombatLockdown, GetTime = IsInInstance, InCombatLockdown, GetTime
 local format, tostring = string.format, tostring
 
@@ -81,7 +80,7 @@ local function log(text)
 end
 
 local function blocked()
-    return UnitAffectingCombat("player") or UnitIsDeadOrGhost("player")
+    return UnitAffectingCombat("player") or ns.IsTrueOrSecret(UnitIsDeadOrGhost("player"))
 end
 
 -- A dungeon, raid, battleground or arena.
@@ -137,9 +136,8 @@ function step()
         stopStow(state)
         return
     end
-    -- Sheathing mid-cast can interrupt it; wait for the cast to finish. The player's own cast,
-    -- out of combat, isn't secret.
-    if UnitCastingInfo("player") or UnitChannelInfo("player") then
+    -- Sheathing mid-cast can interrupt it; wait for the cast to finish (or for the game to say).
+    if ns.Units.PlayerCasting() then
         timer:Start(RETRY, step)
         return
     end
@@ -165,7 +163,7 @@ local function look()
     if stuck and state ~= stuck then
         stuck = nil
     end
-    if state == SHEATHED or stuck or UnitIsDeadOrGhost("player") then
+    if state == SHEATHED or stuck or ns.IsTrueOrSecret(UnitIsDeadOrGhost("player")) then
         drawnSince = nil
         return
     end

@@ -86,7 +86,7 @@ local function onError(_, _, message)
     end
     if action == "dismount" then
         -- Never drop the player out of the sky or off a flight.
-        if IsMounted() and not UnitOnTaxi("player") and not (IsFlying and IsFlying()) then
+        if IsMounted() and not ns.IsTrueOrSecret(UnitOnTaxi("player")) and not (IsFlying and IsFlying()) then
             Dismount()
         end
     else

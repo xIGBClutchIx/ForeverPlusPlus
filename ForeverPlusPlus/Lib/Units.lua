@@ -16,6 +16,36 @@ local readable = ns.IsReadable
 local Units = {}
 ns.Units = Units
 
+-- The player ------------------------------------------------------------------------------------
+-- For a module that does something by itself (casts, sheathes, opens): whether now is a bad time.
+-- The player's own state can be secret too, and an answer the game hides counts as busy, since
+-- waiting costs a moment and acting at the wrong time interrupts the player.
+
+local busy = ns.IsTrueOrSecret
+
+---Whether the player is casting or channelling, or the game won't say.
+---@return boolean
+function Units.PlayerCasting()
+    return busy(UnitCastingInfo and UnitCastingInfo("player"))
+        or busy(UnitChannelInfo and UnitChannelInfo("player"))
+end
+
+---Why the player can't be made to act right now, or nil when they can: "combat", "dead" (or a
+---ghost), "taxi" (on a flight), or "casting" (a cast or a channel).
+---@return string? reason
+function Units.PlayerBusy()
+    if InCombatLockdown() then
+        return "combat"
+    elseif busy(UnitIsDeadOrGhost("player")) then
+        return "dead"
+    elseif busy(UnitOnTaxi("player")) then
+        return "taxi"
+    elseif Units.PlayerCasting() then
+        return "casting"
+    end
+    return nil
+end
+
 ---Whether the unit is in the player's party or raid.
 ---@param unit string
 ---@return boolean
