@@ -330,8 +330,15 @@ local function onBlockedMessage()
     -- page picked). It reads every addon's entry, so the draw is tainted whoever's turn it is, and
     -- the helper then refuses each button's controller cursor spot. Nothing else is lost, and no
     -- addon can avoid it short of having no Settings entry (build 70888, 2026-11-13).
+    --
+    -- Nor any refusal by the controller navigation while the controller interface is off. What it
+    -- refuses is only where a controller's focus or cursor goes, which nobody is using then: an
+    -- addon opening Settings to its own page through Blizzard's own Settings.OpenToCategory gets
+    -- one each time (SettingsPanel:FocusContainer > SmartNavigation:EnterFocusGroup, which is
+    -- "secure only for now"; from the Minimap Button's menu, build 70888, 2026-11-13). With the
+    -- controller interface on it's worth knowing, so it's still caught.
     if stack and stack:find("Blizzard_GamepadSmartNavigation", 1, true)
-        and stack:find("Blizzard_CategoryList.lua", 1, true) then
+        and (stack:find("Blizzard_CategoryList.lua", 1, true) or not gamepadUI()) then
         busy = false
         return
     end
