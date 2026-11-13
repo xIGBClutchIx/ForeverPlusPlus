@@ -11,10 +11,6 @@ local L = ns.L
 
 local module = ns.modules.WorldMap
 
--- Blizzard's tag for the menu (WorldMapTrackingOptionsButtonMixin:SetupMenu,
--- Blizzard_WorldMapTemplates.lua: rootDescription:SetTag).
-local TAG = "MENU_WORLD_MAP_TRACKING"
-
 -- Points of Interest's kinds the menu offers, by their option keys: a list of keys is one checkbox
 -- for all of them, on while any is.
 local KINDS = {
@@ -46,12 +42,7 @@ local function setAll(keys, on)
     end
 end
 
-local function addEntries(_, root)
-    if not module.enabled then
-        return
-    end
-    root:CreateDivider()
-    root:CreateTitle(ns.title)
+local function addEntries(root)
     if ns.PartOn(module, "pointsOfInterest") then
         for _, kind in ipairs(KINDS) do
             root:CreateCheckbox(kind.name, function()
@@ -70,9 +61,7 @@ local function addEntries(_, root)
     end
 end
 
--- Added once at load: Blizzard's menus can't take an addition back, so the entries check whether
--- World Map is on each time the menu opens, and cost nothing until then. Probe: Menu.ModifyMenu is
--- Mainline's.
-if Menu and Menu.ModifyMenu then
-    Menu.ModifyMenu(TAG, addEntries)
-end
+-- First under the Forever++ title (Lib/WorldMap's AddFilter), while World Map is on.
+ns.WorldMap.AddFilter(1, function()
+    return module.enabled and true or false
+end, addEntries)

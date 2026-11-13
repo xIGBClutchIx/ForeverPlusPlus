@@ -377,25 +377,23 @@ local MENU_KINDS = {
     { key = "warEffort", name = L.QUESTPINS_WAR_EFFORT },
 }
 
-if Menu and Menu.ModifyMenu then
-    Menu.ModifyMenu("MENU_WORLD_MAP_TRACKING", function(_, root)
-        if not module.enabled then
-            return
-        end
-        local pins = root:CreateCheckbox(L.QUESTPINS_FILTER, function()
-            return module.db.pins
-        end, function()
-            ns.SetOption(module.name, "pins", not module.db.pins)
-        end)
-        -- Its submenu: a checkbox for each kind of quest, the same switches as in Settings.
-        for _, kind in ipairs(MENU_KINDS) do
-            pins:CreateCheckbox(kind.name, function()
-                return module.db[kind.key]
-            end, function()
-                ns.SetOption(module.name, kind.key, not module.db[kind.key])
-                -- Keep the menu open, to switch several.
-                return MenuResponse and MenuResponse.Refresh or nil
-            end)
-        end
-    end)
+-- Its submenu: a checkbox for each kind of quest, the same switches as in Settings.
+for _, kind in ipairs(MENU_KINDS) do
+    kind.get = function()
+        return module.db[kind.key]
+    end
+    kind.set = function(on)
+        ns.SetOption(module.name, kind.key, on)
+    end
 end
+
+-- Under the Forever++ title (Lib/WorldMap's AddFilter), after World Map's, while Quest Pins is on.
+WorldMap.AddFilter(2, function()
+    return module.enabled and true or false
+end, function(root)
+    WorldMap.FilterLayer(root, L.QUESTPINS_FILTER, function()
+        return module.db.pins
+    end, function(on)
+        ns.SetOption(module.name, "pins", on)
+    end, MENU_KINDS)
+end)

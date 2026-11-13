@@ -470,6 +470,86 @@ function WorldMap.SideName(side)
     return SIDE_NAMES[side]
 end
 
+-- The filter menu -------------------------------------------------------------------------------
+-- The funnel at the world map's top right. Every module's entries go under one Forever++ title,
+-- after Blizzard's own, in one fixed order, so the menu reads as one addon's whatever is on.
+-- Blizzard's menus can't take an addition back, so ours is made once, at the first AddFilter, and
+-- asks each module whether it has anything to show each time the menu opens. Probe: Menu.ModifyMenu
+-- and the checkbox API are Mainline's.
+
+-- Blizzard's tag for the menu (WorldMapTrackingOptionsButtonMixin:SetupMenu,
+-- Blizzard_WorldMapTemplates.lua: rootDescription:SetTag).
+local FILTER_TAG = "MENU_WORLD_MAP_TRACKING"
+
+local filters = {} -- { order, shown, build }, in order
+local filterAdded = false
+
+local function buildFilters(_, root)
+    local titled = false
+    for _, filter in ipairs(filters) do
+        if filter.shown() then
+            if not titled then
+                titled = true
+                root:CreateDivider()
+                root:CreateTitle(ns.title)
+            end
+            filter.build(root)
+        end
+    end
+end
+
+---Adds a module's entries to the world map's filter menu, under the Forever++ title. Call it once,
+---as the file loads: `shown()` says each time the menu opens whether the module has entries now
+---(it's on), and `build(root)` adds them. `order` places them among the other modules' (lowest
+---first).
+---@param order number
+---@param shown fun(): boolean
+---@param build fun(root: table)
+function WorldMap.AddFilter(order, shown, build)
+    filters[#filters + 1] = { order = order, shown = shown, build = build }
+    table.sort(filters, function(a, b)
+        return a.order < b.order
+    end)
+    if not filterAdded and Menu and Menu.ModifyMenu then
+        filterAdded = true
+        Menu.ModifyMenu(FILTER_TAG, buildFilters)
+    end
+end
+
+---A filter menu entry for a layer of icons: a checkbox that shows or hides the layer, with a
+---submenu of a checkbox for each kind of icon in it. Picking a kind keeps the menu open, to switch
+---several. A kind is `{ name, get = fn, set = fn(on), disabled = text? }`; with `disabled`, it's
+---greyed out and its tooltip says that text.
+---@param root table the menu, as `build` gets it
+---@param name string
+---@param get fun(): boolean
+---@param set fun(on: boolean)
+---@param kinds table[]
+function WorldMap.FilterLayer(root, name, get, set, kinds)
+    local box = root:CreateCheckbox(name, function()
+        return get() and true or false
+    end, function()
+        set(not get())
+    end)
+    for _, kind in ipairs(kinds) do
+        local entry = box:CreateCheckbox(kind.name, function()
+            return kind.get() and true or false
+        end, function()
+            kind.set(not kind.get())
+            return MenuResponse and MenuResponse.Refresh or nil
+        end)
+        if kind.disabled and entry.SetEnabled then
+            entry:SetEnabled(false)
+            if entry.SetTooltip then
+                entry:SetTooltip(function(tooltip)
+                    GameTooltip_SetTitle(tooltip, kind.name)
+                    GameTooltip_AddNormalLine(tooltip, kind.disabled)
+                end)
+            end
+        end
+    end
+end
+
 -- Blizzard's panels ---------------------------------------------------------------------------
 
 -- The CVars of Blizzard's checkboxes for the player's and the cursor's coordinates on the map

@@ -91,6 +91,10 @@ ns.changelog = {
                     .. "Shift over any of these icons to see what clicks do on it; the hints "
                     .. "are hidden otherwise, so Gathering Map's Click Hints and Quest Pins' "
                     .. "Click Hints on Pins options are gone." },
+                { L.WORLDMAP_TITLE, "World Map's, Gathering Map's, and Quest Pins' entries in the "
+                    .. "world map's filter menu sit together under one Forever++ heading. "
+                    .. "Gathering Map is one checkbox there, for Show on World Map, with its "
+                    .. "kinds in a submenu, as Quest Pins is." },
                 { L.WHISPERWINDOW_TITLE, "The reply box grows as you type, up to four lines, so a "
                     .. "long whisper can be read before it's sent. Drag the divider between the list "
                     .. "and the conversation to make the list wider or narrower. A whisper too long "
