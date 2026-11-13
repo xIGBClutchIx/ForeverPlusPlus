@@ -326,6 +326,15 @@ local function onBlockedMessage()
     busy = true
     messageAt = GetTime()
     local stack = readable(debugstack and debugstack(2), nil)
+    -- Not worth an entry: the Settings sidebar drawn again in combat (an entry's arrow clicked, a
+    -- page picked). It reads every addon's entry, so the draw is tainted whoever's turn it is, and
+    -- the helper then refuses each button's controller cursor spot. Nothing else is lost, and no
+    -- addon can avoid it short of having no Settings entry (build 70888, 2026-11-13).
+    if stack and stack:find("Blizzard_GamepadSmartNavigation", 1, true)
+        and stack:find("Blizzard_CategoryList.lua", 1, true) then
+        busy = false
+        return
+    end
     local frames = {}
     if stack then
         for file, line in stack:gmatch("([%w_]+%.lua)%]?:(%d+)") do
