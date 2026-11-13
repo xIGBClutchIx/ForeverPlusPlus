@@ -236,7 +236,8 @@ local function ctrlClick(pin)
     if not info then
         return
     end
-    local ok, why = WorldMap.SetWaypoint(info.anchorMap, info.anchorX, info.anchorY)
+    -- Named after the giver, for what shows the pin (the Waypoint arrow, the Compass Bar).
+    local ok, why = WorldMap.SetWaypoint(info.anchorMap, info.anchorX, info.anchorY, giverName(info))
     if not ok then
         ns.Print(why == "map" and L.QUESTPINS_NO_PIN_HERE or L.QUESTPINS_NO_PINS)
     end

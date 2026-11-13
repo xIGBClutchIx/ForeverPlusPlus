@@ -468,7 +468,9 @@ local function addPin()
         and cachedPin.position.x == pin.position.x and cachedPin.position.y == pin.position.y) then
         cachedPin = pin
     end
-    targets[#targets + 1] = { kind = L.COMPASSBAR_KIND_PIN, title = L.COMPASSBAR_PIN_TITLE,
+    -- Named for what it was set on (a Ctrl+click on a map icon, the note after /way), when it was.
+    targets[#targets + 1] = { kind = L.COMPASSBAR_KIND_PIN,
+        title = ns.WorldMap.WaypointNote(cachedPin) or L.COMPASSBAR_PIN_TITLE,
         art = artOf("pin"), point = cachedPin, important = true }
 end
 

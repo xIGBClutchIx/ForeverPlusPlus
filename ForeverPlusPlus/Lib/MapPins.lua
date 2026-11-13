@@ -155,7 +155,12 @@ local function onMouseUp(pin, button)
         if info.ctrlClick then
             info.ctrlClick(pin)
         elseif pin.mapID then
-            ns.WorldMap.SetWaypoint(pin.mapID, pin.x, pin.y)
+            -- Named after the icon, for what shows the pin (WorldMap.WaypointNote).
+            local title = info.title
+            if type(title) == "table" then
+                title = title[1]
+            end
+            ns.WorldMap.SetWaypoint(pin.mapID, pin.x, pin.y, title)
         end
     elseif IsShiftKeyDown() and info.shiftClick then
         info.shiftClick(pin, button)

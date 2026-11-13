@@ -9,7 +9,7 @@
 -- under the arrow, and /way share puts the pin's link in the chat box.
 local _, ns = ...
 
-local tonumber, format, floor, abs = tonumber, string.format, math.floor, math.abs
+local tonumber, format, floor = tonumber, string.format, math.floor
 local tconcat = table.concat
 local CreateFrame, UIParent, C_Map, C_QuestLog = CreateFrame, UIParent, C_Map, C_QuestLog
 local GetPlayerFacing, GetTime, UnitIsGhost = GetPlayerFacing, GetTime, UnitIsGhost
@@ -76,26 +76,9 @@ end
 
 local CLEAR = { clear = true, reset = true, off = true, remove = true }
 
--- The note typed after /way's coordinates, and the pin it was typed for: { mapID, x, y, text }.
--- Blizzard's pin has no label, so the note is ours, shown with the arrow while that pin stays.
-local note
-
--- How far apart (0 to 1) the pin and the note's spot may be and still be the same pin, for the
--- rounding the game's pin may do.
-local SAME_PIN = 0.0001
-
--- The note of this map pin, or nil when it isn't the pin the note was typed for.
-local function noteOf(pin)
-    if not (note and pin and pin.uiMapID == note[1] and pin.position) then
-        return nil
-    end
-    local x, y = pin.position.x, pin.position.y
-    if ns.IsNumber(x) and ns.IsNumber(y) and abs(x - note[2]) < SAME_PIN
-        and abs(y - note[3]) < SAME_PIN then
-        return note[4]
-    end
-    return nil
-end
+-- The note typed after /way's coordinates is the pin's name (WorldMap.SetWaypoint's text), kept
+-- by Lib/WorldMap with the names pins get from a Ctrl+click on a map icon: Blizzard's pin has no
+-- label, so it's shown with the arrow while that pin stays.
 
 -- Blizzard's link for the map pin, put in the chat edit box the way a shift-click on the pin does
 -- (WaypointLocationPinMixin, wow-ui-source `forever`), or the box opened with it when none is.
@@ -137,7 +120,6 @@ local function way(message)
     message = message or ""
     local list, ends = words(message)
     if #list == 1 and CLEAR[list[1]:lower()] then
-        note = nil
         C_Map.ClearUserWaypoint()
         ns.Print(L.WAYPOINTS_CLEARED)
         return
@@ -178,16 +160,12 @@ local function way(message)
             return
         end
     end
-    -- Set before the pin, whose USER_WAYPOINT_UPDATED redraws the arrow with it.
     local text = message:sub(ends[at + 1]):match("^[%s,]*(.-)%s*$")
-    local previous = note
-    note = text ~= "" and { mapID, x / 100, y / 100, text } or nil
-    if not WorldMap.SetWaypoint(mapID, x / 100, y / 100) then
-        note = previous
+    if not WorldMap.SetWaypoint(mapID, x / 100, y / 100, text) then
         ns.Print(format(L.WAYPOINTS_NOT_HERE, mapName(mapID)))
         return
     end
-    if note then
+    if text ~= "" then
         ns.Print(format(L.WAYPOINTS_SET_NOTE, text, mapName(mapID), x, y))
     else
         ns.Print(format(L.WAYPOINTS_SET, mapName(mapID), x, y))
@@ -267,7 +245,7 @@ local function destination()
     if not waypointRead then
         waypointRead = true
         cachedWaypoint = C_Map.GetUserWaypoint and C_Map.GetUserWaypoint()
-        cachedNote = noteOf(cachedWaypoint)
+        cachedNote = WorldMap.WaypointNote(cachedWaypoint)
     end
     return cachedWaypoint, cachedNote, cachedWaypoint ~= nil
 end
@@ -332,7 +310,6 @@ local function update()
             headedToPin = true
         elseif headedToPin and module.db.clearOnArrival then
             headedToPin = false
-            note = nil
             C_Map.ClearUserWaypoint() -- USER_WAYPOINT_UPDATED refreshes the arrow
         end
     end

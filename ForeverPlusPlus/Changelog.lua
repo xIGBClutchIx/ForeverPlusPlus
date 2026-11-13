@@ -85,7 +85,9 @@ ns.changelog = {
                     .. "it, the same click the game uses anywhere else on the map. It works on "
                     .. "every Points of Interest icon (dungeons, boats, flight masters, and the "
                     .. "rest) and replaces Shift+click on Gathering Map's nodes and Quest Pins' "
-                    .. "pins. Shift+right-click still forgets a node or hides a quest pin. Hold "
+                    .. "pins. Shift+right-click still forgets a node or hides a quest pin. The pin "
+                    .. "is named after what you clicked (the dungeon, the node, the quest giver), "
+                    .. "which the Waypoint arrow and the Compass Bar show. Hold "
                     .. "Shift over any of these icons to see what clicks do on it; the hints "
                     .. "are hidden otherwise, so Gathering Map's Click Hints and Quest Pins' "
                     .. "Click Hints on Pins options are gone." },

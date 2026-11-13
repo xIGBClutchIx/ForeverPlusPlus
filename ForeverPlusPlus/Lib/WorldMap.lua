@@ -178,15 +178,50 @@ function WorldMap.CanWaypoint()
     return C_Map and C_Map.SetUserWaypoint and C_Map.CanSetUserWaypointOnMap and true or false
 end
 
+-- The pin's name. Blizzard's map pin has no label, so what a pin was set on (a node, a quest
+-- giver, a dungeon, the note typed after /way) is kept here, with the spot it was set for. It's the pin's name only while the pin is still at that spot, so a pin
+-- the player moves or sets by hand has none, and nothing needs clearing. Not saved: it lasts
+-- until a /reload, as the note after /way always did.
+---@type { mapID: number, x: number, y: number, text: string }?
+local note
+
+-- How far apart (0 to 1) the pin and the note's spot may be and still be the same pin, for the
+-- rounding the game's pin may do.
+local SAME_PIN = 0.0001
+
+---The name the map pin was given when it was set (WorldMap.SetWaypoint's `text`), or nil for a
+---pin with none, one set another way, or no pin.
+---@param pin? table the pin (C_Map.GetUserWaypoint's), read now when not given
+---@return string?
+function WorldMap.WaypointNote(pin)
+    if not note then
+        return nil
+    end
+    if pin == nil then
+        pin = C_Map.GetUserWaypoint and C_Map.GetUserWaypoint()
+    end
+    if not (pin and pin.uiMapID == note.mapID and pin.position) then
+        return nil
+    end
+    local x, y = pin.position.x, pin.position.y
+    if ns.IsNumber(x) and ns.IsNumber(y) and math.abs(x - note.x) < SAME_PIN
+        and math.abs(y - note.y) < SAME_PIN then
+        return note.text
+    end
+    return nil
+end
+
 ---Puts Blizzard's map pin on `mapID` at x, y (0 to 1) and tracks it, so the game draws the pin
 ---and its marker in the world. False with why not: "unavailable" (this client can't), "range"
----(x or y outside 0 to 1), or "map" (no pin allowed on that map, like inside a dungeon).
+---(x or y outside 0 to 1), or "map" (no pin allowed on that map, like inside a dungeon). With
+---`text`, the pin has that name (WorldMap.WaypointNote) for whatever shows the pin.
 ---@param mapID number
 ---@param x number
 ---@param y number
+---@param text? string
 ---@return boolean ok
 ---@return string? reason
-function WorldMap.SetWaypoint(mapID, x, y)
+function WorldMap.SetWaypoint(mapID, x, y, text)
     if not WorldMap.CanWaypoint() then
         return false, "unavailable"
     end
@@ -202,6 +237,8 @@ function WorldMap.SetWaypoint(mapID, x, y)
     else
         point = { uiMapID = mapID, position = CreateVector2D(x, y) }
     end
+    -- Before the pin, whose USER_WAYPOINT_UPDATED redraws what shows it, with the name.
+    note = ns.IsText(text, true) and { mapID = mapID, x = x, y = y, text = text } or nil
     C_Map.SetUserWaypoint(point)
     if C_SuperTrack and C_SuperTrack.SetSuperTrackedUserWaypoint then
         C_SuperTrack.SetSuperTrackedUserWaypoint(true)

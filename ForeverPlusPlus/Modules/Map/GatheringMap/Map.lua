@@ -37,7 +37,7 @@ local infos = {}
 local function ctrlClick(pin)
     local info = pin.info
     if info and info.node then
-        ns.WorldMap.SetWaypoint(info.zone, info.node.x, info.node.y)
+        ns.WorldMap.SetWaypoint(info.zone, info.node.x, info.node.y, info.node.name)
     end
 end
 
