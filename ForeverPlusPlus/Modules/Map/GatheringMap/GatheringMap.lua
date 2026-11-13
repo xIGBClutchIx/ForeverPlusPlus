@@ -842,6 +842,10 @@ local function onMinimapTooltip(tooltip)
         local node, yards = nodeAtCursor(nil)
         if node then
             local title = internal.Title(node)
+            -- With nothing under the mouse the game's call leaves the tooltip without an owner,
+            -- and one without an owner never shows: owned again as Blizzard's own call owns it
+            -- (Minimap_OnUpdate), at the cursor.
+            tooltip:SetOwner(UIParent, "ANCHOR_CURSOR")
             tooltip:SetText(title[1], title[2].r, title[2].g, title[2].b)
             ns.MapTooltip.AddLines(tooltip, internal.TooltipLines(node, yards))
             tooltip:Show()
