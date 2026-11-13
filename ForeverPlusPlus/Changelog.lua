@@ -59,6 +59,8 @@ ns.changelog = {
                     .. "until then it's listed under Unknown." },
                 { L.MOVABLEWINDOWS_TITLE, "Drag From picks where a window can be grabbed: anywhere "
                     .. "in it, as before, or only its title bar." },
+                { L.GATHERINGTRACKING_TITLE, "Mute Swap Sound (off by default) silences the "
+                    .. "tracking spell's sound each time Swap Between Both swaps." },
                 { L.TOOLTIPS_TITLE, "Hide Bobber Tooltip (off by default) hides the fishing "
                     .. "bobber's tooltip while you fish, so it doesn't cover the bobber with Anchor "
                     .. "to Cursor on." },
