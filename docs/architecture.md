@@ -153,7 +153,7 @@ Generated files (never edited by hand; see Generated data): `InstanceLevels.lua`
 
 ### `WorldMap.lua`
 
-- `ns.WorldMap`: the world map once its addon has loaded, map data providers, walking up the map tree (`Up`, `Root`), a map's name, a map's size in yards (`Size`), a zone by name (`FindMap`), Blizzard's map pin (`SetWaypoint`, `CanWaypoint`), where the player stands, where a quest and the corpse are (`QuestPoint`, `CorpsePoint`), and how far and which way a spot is from the player, also in the next zone (`FromPlayer`), Blizzard's coordinates panel on it and the CVars behind it (`COORDS_CVARS`), and the player's side for map data.
+- `ns.WorldMap`: the world map once its addon has loaded, map data providers, walking up the map tree (`Up`, `Root`), a map's name, a map's size in yards (`Size`), a zone by name (`FindMap`), Blizzard's map pin (`SetWaypoint`, `CanWaypoint`) and the name it was set with, since the game's pin has no label (`WaypointNote`: the icon Ctrl+clicked or the note after `/way`, while the pin stays at that spot), where the player stands, where a quest and the corpse are (`QuestPoint`, `CorpsePoint`), and how far and which way a spot is from the player, also in the next zone (`FromPlayer`), Blizzard's coordinates panel on it and the CVars behind it (`COORDS_CVARS`), and the player's side for map data.
 
 ### `MapTooltip.lua`
 
