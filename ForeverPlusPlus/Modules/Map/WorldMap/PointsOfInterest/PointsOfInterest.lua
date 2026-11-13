@@ -26,6 +26,7 @@ local module = ns.modules.WorldMap:NewPart({
     raids = true,
     raidSize = 80,
     raidsWorld = true,
+    dungeonMaps = "auto", -- the addon a click on a dungeon or raid opens its map in, or "off"
     capitals = "ours", -- "ours" (and Blizzard's city icons hidden), "blizzard", or "off"
     capitalSize = 50,
     capitalsWorld = true,
@@ -80,6 +81,20 @@ chat.requires = "leyLines"
 for _, rows in ipairs({
     { section = INSTANCES, kind("dungeons", "dungeonSize", L.POI_DUNGEONS, L.POI_DUNGEONS_DESC) },
     { section = INSTANCES, kind("raids", "raidSize", L.POI_RAIDS, L.POI_RAIDS_DESC) },
+    -- The client has no dungeon maps, so a click hands the dungeon to an addon that draws them.
+    { section = INSTANCES, {
+        key = "dungeonMaps", name = L.POI_DUNGEON_MAPS, description = L.POI_DUNGEON_MAPS_DESC,
+        added = "1.6.0",
+        available = function()
+            return ns.DungeonMaps.Has("journal") or ns.DungeonMaps.Has("leatrix")
+        end,
+        choices = {
+            { "auto", L.POI_DUNGEON_MAPS_AUTO },
+            { "journal", L.POI_DUNGEON_MAPS_JOURNAL },
+            { "leatrix", L.POI_DUNGEON_MAPS_LEATRIX },
+            { "off", L.POI_DUNGEON_MAPS_OFF },
+        },
+    } },
     -- Ours, Blizzard's, or none: ours hide Blizzard's city icons, so there's no checkbox.
     { section = TRAVEL, {
         key = "capitals", name = L.POI_CAPITALS, description = L.POI_CAPITALS_DESC,
@@ -238,6 +253,46 @@ local function instanceTooltip(kindName, key, dungeons, raids)
     return place(instance.name), rows, rows
 end
 
+-- Dungeon Maps: the instances of a dungeon or raid icon that an addon can show a map of, each
+-- { id, name (English), title (the player's language), provider }. A place lists its parts.
+local PROVIDER_NAMES = { journal = L.POI_DUNGEON_MAPS_JOURNAL, leatrix = L.POI_DUNGEON_MAPS_LEATRIX }
+
+local function mapsOf(key)
+    local choice = module.db.dungeonMaps
+    local found = {}
+    if choice == "off" then
+        return found
+    end
+    local instance = internal.instances[key]
+    local seen = {}
+    for _, partKey in ipairs(instance.parts or { key }) do
+        local part = internal.instances[partKey]
+        local id, name = part[1], part[2]
+        local provider = not seen[id] and ns.DungeonMaps.Which(choice, id, name)
+        if provider then
+            seen[id] = true
+            found[#found + 1] = { id = id, name = name, title = ns.Instances.Name(part), provider = provider }
+        end
+    end
+    return found
+end
+
+-- A click on a dungeon or raid icon: its map, or a menu of them for a place with several.
+local function openMaps(pin, maps, title)
+    if #maps == 1 or not (MenuUtil and MenuUtil.CreateContextMenu) then
+        ns.DungeonMaps.Open(maps[1].provider, maps[1].id, maps[1].name)
+        return
+    end
+    MenuUtil.CreateContextMenu(pin, function(_, root)
+        root:CreateTitle(title)
+        for _, map in ipairs(maps) do
+            root:CreateButton(map.title, function()
+                ns.DungeonMaps.Open(map.provider, map.id, map.name)
+            end)
+        end
+    end)
+end
+
 -- Whether a travel point of this faction shows for the player.
 local function forPlayer(faction)
     return faction == "N" or faction == ns.WorldMap.PlayerSide() or module.db.otherFaction
@@ -287,6 +342,20 @@ local function pinFor(point, mapID, world)
         info.atlas = kindInfo.atlas
         info.title, info.lines, info.rows = instanceTooltip(
             kindName == "raid" and L.POI_RAID or L.POI_DUNGEON, point[4], dungeonsOn, raidsOn)
+        local maps = mapsOf(point[4])
+        if #maps > 0 then
+            local title = info.title
+            info.click = function(pin)
+                openMaps(pin, maps, title)
+            end
+            -- A copy: a place's lines are its rows too, which a city's tooltip takes in.
+            local lines = {}
+            for i, line in ipairs(info.lines) do
+                lines[i] = line
+            end
+            lines[#lines + 1] = MapTooltip.Note(format(L.POI_DUNGEON_MAPS_HINT, PROVIDER_NAMES[maps[1].provider]))
+            info.lines = lines
+        end
     elseif kindName == "flight" then
         if not forPlayer(point[4]) then
             return nil

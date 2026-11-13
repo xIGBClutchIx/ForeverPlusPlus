@@ -162,6 +162,32 @@ function MapPins.ShiftClick(pin, fn)
     pin:SetScript("OnMouseUp", onShiftClick)
 end
 
+-- Clicks ---------------------------------------------------------------------------------------
+-- A pin that does something on a plain click takes the mouse's clicks whole, so a click on it no
+-- longer reaches the map under it (zooming, changing maps). Not for a pin with a Shift+click, which
+-- turns its clicks on and off itself.
+
+local function onClick(pin, button)
+    if button == "LeftButton" and pin.click then
+        pin.click(pin, button)
+    end
+end
+
+---Has `fn(pin, button)` run when the pin is left-clicked. Nil `fn` stops it, and clicks go through
+---to what's under the pin again.
+---@param pin table
+---@param fn? fun(pin: table, button: string)
+function MapPins.Click(pin, fn)
+    pin.click = fn
+    if pin.SetMouseClickEnabled then
+        pin:SetMouseClickEnabled(fn ~= nil)
+    end
+    if fn and not pin.clickHooked then
+        pin.clickHooked = true
+        pin:SetScript("OnMouseUp", onClick)
+    end
+end
+
 -- Puts a pin at its place on the canvas, sized so the map's zoom doesn't change it on screen.
 local function place(pin, map)
     local canvas = map:GetCanvas()
@@ -321,6 +347,8 @@ function Layer:Add(map, x, y, info)
     MapPins.SetArt(pin, info)
     if info.shiftClick or pin.shiftClick then
         MapPins.ShiftClick(pin, info.shiftClick)
+    elseif info.click or pin.click then
+        MapPins.Click(pin, info.click)
     end
     -- Where Blizzard's own dungeon entrance icons go: above the map art and areas, below quests.
     local manager = map.GetPinFrameLevelsManager and map:GetPinFrameLevelsManager()
@@ -417,7 +445,8 @@ end
 ---icon's edge. Any pin can also have `round` (drawn round), `color` ({ r, g, b } it's tinted),
 ---`alpha`, `ring` (the minimap's gold ring around it), `hollow` (only the ring, its art
 ---hidden), and `shiftClick` (`fn(pin, button)` on a click with Shift held; see
----ShiftClick). Call `layer:Enable()` to show it and
+---ShiftClick), or `click` (`fn(pin, button)` on a plain left click, which then doesn't reach the
+---map; see Click). Call `layer:Enable()` to show it and
 ---`layer:Disable()` to take it off.
 ---@param fill fun(mapID: number, add: fun(x: number, y: number, info: table))
 ---@return table layer
