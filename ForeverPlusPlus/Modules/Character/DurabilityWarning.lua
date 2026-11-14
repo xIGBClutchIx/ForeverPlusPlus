@@ -37,10 +37,7 @@ module.options = {
     },
     { key = "broken", name = L.DURABILITYWARNING_BROKEN, description = L.DURABILITYWARNING_BROKEN_DESC },
     { key = "alert", name = L.DURABILITYWARNING_ALERT, description = L.DURABILITYWARNING_ALERT_DESC },
-    {
-        key = "sound", name = L.DURABILITYWARNING_SOUND, description = L.DURABILITYWARNING_SOUND_DESC,
-        choices = ns.Sounds.CHOICES,
-    },
+    ns.Sounds.Option("sound", L.DURABILITYWARNING_SOUND_DESC),
     ns.ChatOption(L.DURABILITYWARNING_CHAT_DESC),
 }
 

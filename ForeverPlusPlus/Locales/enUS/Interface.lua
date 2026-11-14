@@ -108,8 +108,11 @@ L.COMBATALERT_LEAVING_DESC = "Show a green alert when you leave combat."
 L.COMBATALERT_DURATION = "Duration"
 L.COMBATALERT_DURATION_DESC = "How long the text stays up before it has faded away."
 L.COMBATALERT_SOUND = "Play Sound"
-L.COMBATALERT_SOUND_DESC = "Play a sound with each alert: the raid warning going in and a soft "
-    .. "chime coming out, for when you're looking somewhere else."
+L.COMBATALERT_SOUND_DESC = "Play a sound with each alert, for when you're looking somewhere else."
+L.COMBATALERT_ENTER_SOUND = "Entering Sound"
+L.COMBATALERT_ENTER_SOUND_DESC = "The sound played as you enter combat."
+L.COMBATALERT_LEAVE_SOUND = "Leaving Sound"
+L.COMBATALERT_LEAVE_SOUND_DESC = "The sound played as you leave combat."
 
 -- MacroIconSearch
 L.MACROICONSEARCH_TITLE = "Macro Icon Search"

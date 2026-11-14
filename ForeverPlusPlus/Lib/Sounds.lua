@@ -1,5 +1,6 @@
--- Sounds: the alert sounds a module's Sound dropdown offers (Error Catcher, Durability Warning),
--- so each offers the same choices under the same names, and playing the one picked.
+-- Sounds: the alert sounds a module's Sound dropdown offers (Error Catcher, Durability Warning,
+-- Flight Timer, Combat Alert), so each offers the same choices under the same names, the
+-- dropdown itself (Sounds.Option), and playing the one picked.
 local _, ns = ...
 
 local L = ns.L
@@ -44,6 +45,22 @@ function Sounds.Sounds()
         list[#list + 1] = Sounds.CHOICES[i]
     end
     return list
+end
+
+---A module's Sound dropdown, so each is named and filled alike. Its default in the module's
+---defaults is a key of Sounds.CHOICES. Under a checkbox that already turns the sound off
+---(`extra.requires`), it leaves Off out.
+---@param key string the option's key
+---@param description string
+---@param extra table? more option fields (`requires`, `added`, `section`, a `name` of its own)
+---@return table option
+function Sounds.Option(key, description, extra)
+    local option = { key = key, name = L.SOUND_NAME, description = description }
+    for field, value in pairs(extra or {}) do
+        option[field] = value
+    end
+    option.choices = option.requires and Sounds.Sounds() or Sounds.CHOICES
+    return option
 end
 
 ---Plays the sound `key` (a key of Sounds.CHOICES) on the Master channel, so it's heard with

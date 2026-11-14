@@ -4,7 +4,7 @@
 -- (PLAYER_REGEN_DISABLED and PLAYER_REGEN_ENABLED), which is the same thing the log would say.
 local _, ns = ...
 
-local CreateFrame, UIParent, PlaySound, C_Timer = CreateFrame, UIParent, PlaySound, C_Timer
+local CreateFrame, UIParent, C_Timer = CreateFrame, UIParent, C_Timer
 
 local L = ns.L
 local Colors = ns.Colors
@@ -14,6 +14,9 @@ local module = ns.NewModule("CombatAlert", L.COMBATALERT_DESC, {
     entering = true,
     leaving = true,
     sound = false,
+    -- Keys of ns.Sounds.CHOICES: the raid warning going in, a softer chime coming out.
+    enterSound = "raidwarning",
+    leaveSound = "whisper",
     scale = 100, -- percent
     duration = 2, -- seconds
     x = 0, -- the text's offset from the center of the screen
@@ -34,6 +37,10 @@ module.options = {
     },
     { key = "sound", name = L.COMBATALERT_SOUND, description = L.COMBATALERT_SOUND_DESC,
         added = "0.9.0" },
+    ns.Sounds.Option("enterSound", L.COMBATALERT_ENTER_SOUND_DESC,
+        { name = L.COMBATALERT_ENTER_SOUND, requires = "sound", added = "1.6.0" }),
+    ns.Sounds.Option("leaveSound", L.COMBATALERT_LEAVE_SOUND_DESC,
+        { name = L.COMBATALERT_LEAVE_SOUND, requires = "sound", added = "1.6.0" }),
 }
 
 local WIDTH, HEIGHT = 400, 50
@@ -79,13 +86,10 @@ local function place()
 end
 
 -- Shows `text` in a color, floating up for the set time and fading out over the second half,
--- with the SOUNDKIT named `sound` when Play Sound is on (skipped if this client lacks it).
+-- with the sound picked for it when Play Sound is on.
 local function alert(text, color, sound)
     if module.db.sound then
-        local kit = SOUNDKIT and SOUNDKIT[sound]
-        if kit and PlaySound then
-            PlaySound(kit)
-        end
+        ns.Sounds.Play(sound)
     end
     frame.group:Stop()
     frame.text:SetText(text)
@@ -101,14 +105,13 @@ end
 
 local function entering()
     if module.db.entering then
-        alert(L.COMBATALERT_ENTER_TEXT, Colors.RED, "RAID_WARNING")
+        alert(L.COMBATALERT_ENTER_TEXT, Colors.RED, module.db.enterSound)
     end
 end
 
 local function leaving()
     if module.db.leaving then
-        -- A softer sound going out: the whisper chime, not the raid warning horn.
-        alert(L.COMBATALERT_LEAVE_TEXT, Colors.GUILD_GREEN, "TELL_MESSAGE")
+        alert(L.COMBATALERT_LEAVE_TEXT, Colors.GUILD_GREEN, module.db.leaveSound)
     end
 end
 

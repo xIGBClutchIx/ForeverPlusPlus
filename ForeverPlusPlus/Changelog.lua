@@ -51,6 +51,9 @@ ns.changelog = {
                 { L.FLIGHTTIMER_TITLE, "Sound on Landing has a Sound dropdown to pick another "
                     .. "sound; it still plays the ready check's unless you change it. Error "
                     .. "Catcher's and Durability Warning's Sound dropdowns offer Ready Check too." },
+                { L.COMBATALERT_TITLE, "Entering Sound and Leaving Sound pick the sound each alert "
+                    .. "plays, under Play Sound. They're the same two as before unless you change "
+                    .. "them, and are now heard with sound effects off." },
                 { L.FLIGHTTIMER_TITLE, "Estimated Times, on by default, shows a flight you haven't "
                     .. "taken yet with the time the game's own flight paths give it, marked with ~, on "
                     .. "the bar and the flight map's tooltip, until your own time replaces it." },

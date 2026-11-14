@@ -44,7 +44,6 @@ L.DURABILITYWARNING_BROKEN_DESC = "Warn once more when an item you wear breaks a
 L.DURABILITYWARNING_ALERT = "On-Screen Alert"
 L.DURABILITYWARNING_ALERT_DESC = "Show the warning in red in the middle of the screen, where the "
     .. "game says \"Inventory is full\"."
-L.DURABILITYWARNING_SOUND = "Sound"
 L.DURABILITYWARNING_SOUND_DESC = "Play a sound with the warning. Picking one plays it."
 L.DURABILITYWARNING_CHAT_DESC = "Say in chat which item is worn and how much is left. Gear that's "
     .. "already worn when you log in gets only this line, once you've loaded in."

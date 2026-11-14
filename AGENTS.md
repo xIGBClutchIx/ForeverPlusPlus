@@ -115,7 +115,7 @@ One line here says what each file is for. [docs/architecture.md](docs/architectu
 | `Money.lua` | `Money`, `MoneyShort` | Copper as coin text. |
 | `Fonts.lua` | `Fonts` | The game's fonts a font dropdown offers. |
 | `Keys.lua` | `Keys` | The Skip Key dropdown and whether its key is held. |
-| `Sounds.lua` | `Sounds` | The alert sounds every Sound dropdown offers, and playing one. |
+| `Sounds.lua` | `Sounds` | The alert sounds every Sound dropdown offers, the dropdown itself (`Option`), and playing one. |
 | `RealmTime.lua` | `RealmTime` | Realm time moved to the player's clock. |
 | `Slash.lua` | `Slash` | Slash commands a module adds and takes away live. |
 | `Profiler.lua` | `Profiler` | Times calls into each module's code while the Profiler page records. |

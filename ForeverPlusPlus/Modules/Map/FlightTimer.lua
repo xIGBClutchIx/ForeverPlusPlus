@@ -55,11 +55,8 @@ module.options = {
         key = "landingSound", name = L.FLIGHTTIMER_LANDING_SOUND,
         description = L.FLIGHTTIMER_LANDING_SOUND_DESC, added = "0.9.0", changed = "1.6.0",
     },
-    {
-        key = "landingSoundKind", name = L.FLIGHTTIMER_LANDING_SOUND_KIND,
-        description = L.FLIGHTTIMER_LANDING_SOUND_KIND_DESC, requires = "landingSound",
-        choices = ns.Sounds.Sounds(), added = "1.6.0",
-    },
+    ns.Sounds.Option("landingSoundKind", L.FLIGHTTIMER_LANDING_SOUND_KIND_DESC,
+        { requires = "landingSound", added = "1.6.0" }),
 }
 
 local WIDTH, HEIGHT = 208, 16 -- about Blizzard's cast bar

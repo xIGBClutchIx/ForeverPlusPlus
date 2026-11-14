@@ -896,11 +896,7 @@ local provider = {
 }
 
 module.options = {
-    {
-        key = "sound", name = L.ERRORCATCHER_SOUND, description = L.ERRORCATCHER_SOUND_DESC,
-        added = "1.3.1",
-        choices = ns.Sounds.CHOICES,
-    },
+    ns.Sounds.Option("sound", L.ERRORCATCHER_SOUND_DESC, { added = "1.3.1" }),
     {
         key = "taintLog", name = L.ERRORCATCHER_TAINT_LOG, description = L.ERRORCATCHER_TAINT_LOG_DESC,
         cvar = "taintLog", added = "1.5.0",

@@ -75,7 +75,7 @@ Generated files (never edited by hand; see Generated data): `InstanceLevels.lua`
 
 ### `Sounds.lua`
 
-- `ns.Sounds`: Blizzard's alert sounds every Sound dropdown offers (`CHOICES`), and `Play` for the one picked.
+- `ns.Sounds`: Blizzard's alert sounds every Sound dropdown offers (`CHOICES`, or `Sounds()` without Off), the dropdown a module's Sound option is (`Option(key, description, extra)`, named Sound unless `extra.name` says otherwise, without Off under a `requires` checkbox), and `Play` for the one picked. A module never calls `PlaySound` for an alert the player can pick.
 
 ### `Confirm.lua`
 
