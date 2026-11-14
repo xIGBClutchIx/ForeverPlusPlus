@@ -17,7 +17,7 @@ local _, ns = ...
 
 local ipairs, pairs, type, setmetatable = ipairs, pairs, type, setmetatable
 local InCombatLockdown, UIParent, GetMouseFoci = InCombatLockdown, UIParent, GetMouseFoci
-local GetCursorPosition = GetCursorPosition
+local GetCursorPosition, CreateFrame = GetCursorPosition, CreateFrame
 local _G = _G
 
 local L = ns.L
@@ -32,13 +32,15 @@ local module = ns.NewModule("MovableWindows", L.MOVABLEWINDOWS_DESC, {
     resetKey = "ctrl", -- held while clicking a window to put it back; "none" for the click alone
     resetClick = "right", -- "right", "middle", "left", or "off"
     positions = {}, -- window name -> { point, relativePoint, x, y }, for "always"
+    scaleKey = "ctrl", -- held while the mouse wheel resizes the window under it; "off" for never
+    scales = {}, -- window name -> its size as a percent of Blizzard's, for "always"
 })
 module.title = L.MOVABLEWINDOWS_TITLE
 module.category = "interface"
 module.presets = { developer = { enabled = true } }
 module.added = "1.0.0"
 -- Where windows go is a layout, so each profile keeps its own.
-module.perProfile = { positions = true }
+module.perProfile = { positions = true, scales = true }
 
 module.options = {
     Keys.Option("moveKey", L.MOVABLEWINDOWS_KEY, L.MOVABLEWINDOWS_KEY_DESC),
@@ -68,13 +70,26 @@ module.options = {
         },
     },
     Keys.Option("resetKey", L.MOVABLEWINDOWS_RESET_KEY, L.MOVABLEWINDOWS_RESET_KEY_DESC),
+    {
+        key = "scaleKey", name = L.MOVABLEWINDOWS_SCALE_KEY, description = L.MOVABLEWINDOWS_SCALE_KEY_DESC,
+        -- No None: the wheel alone scrolls lists and zooms the camera.
+        choices = {
+            { "shift", L.KEY_SHIFT },
+            { "ctrl", L.KEY_CTRL },
+            { "alt", L.KEY_ALT },
+            { "off", L.MOVABLEWINDOWS_CLICK_OFF },
+        },
+        added = "1.6.0",
+    },
 }
 
+local resetKeyOption = module.options[#module.options - 1]
+
 -- The key only matters while a click resets.
-module.options[#module.options].shown = function(db) return db.resetClick ~= "off" end
+resetKeyOption.shown = function(db) return db.resetClick ~= "off" end
 
 -- A left-click reset with the move key is a drag (see startDrag), so that reset never happens.
-module.options[#module.options].conflicts = {
+resetKeyOption.conflicts = {
     {
         key = "moveKey",
         when = function(db) return db.resetClick == "left" and db.resetKey == db.moveKey end,
@@ -139,9 +154,16 @@ local original = setmetatable({}, weak) -- window -> Blizzard's anchors before w
 local wasMovable = setmetatable({}, weak) -- window -> whether it was movable before we made it so
 local wasClamped = setmetatable({}, weak) -- window -> whether it was kept on screen before we did
 local wasUserPlaced = setmetatable({}, weak) -- window -> IsUserPlaced before a drag
+local baseScale = setmetatable({}, weak) -- window -> Blizzard's own scale, once we've resized it
 local session = {} -- name -> position, for "session" and "never"
+local sessionScales = {} -- name -> size percent, for "session" and "never"
 local dragging -- the window being dragged, if any
-local placing = false -- while we set a window's anchors ourselves, so the SetPoint hook keeps out
+local placing = false -- while we set a window's anchors or scale ourselves, so our hooks keep out
+
+-- Windows the wheel doesn't resize: the world map sizes itself as it's maximized and minimized,
+-- and the zone map's tab is only the handle of a map that wouldn't follow it.
+local NO_SCALE = { WorldMapFrame = true, BattlefieldMapTab = true }
+local SCALE_MIN, SCALE_MAX, SCALE_STEP = 50, 200, 5 -- percents of Blizzard's size; a step a notch
 
 -- Where the player left a window, or nil to leave it to Blizzard.
 local function positionOf(name)
@@ -149,6 +171,14 @@ local function positionOf(name)
         return module.db.positions[name]
     end
     return session[name]
+end
+
+-- The size the player gave a window, as a percent of Blizzard's, or nil for Blizzard's.
+local function scaleOf(name)
+    if module.db.remember == "always" then
+        return module.db.scales[name]
+    end
+    return sessionScales[name]
 end
 
 local function canMove(frame)
@@ -159,21 +189,31 @@ local function canMove(frame)
     return not (fullScreen and fullScreen(frame))
 end
 
--- Puts a window where the player left it, if they moved it.
+-- Puts a window where the player left it, at the size they gave it, if they moved or resized it.
 local function place(frame)
     if placing or frame == dragging or not module.enabled then
         return
     end
-    local p = positionOf(nameOf[frame])
-    if not (p and canMove(frame)) then
+    local name = nameOf[frame]
+    local p, percent = positionOf(name), scaleOf(name)
+    if not ((p or percent) and canMove(frame)) then
         return
     end
-    if original[frame] == nil then
-        original[frame] = ns.Frames.GetPoints(frame) -- Blizzard's, for a reset
-    end
     placing = true
-    frame:ClearAllPoints()
-    frame:SetPoint(p[1], UIParent, p[2], p[3], p[4])
+    if percent then
+        if baseScale[frame] == nil then
+            local scale = frame:GetScale()
+            baseScale[frame] = ns.IsNumber(scale) and scale > 0 and scale or 1 -- Blizzard's, for a reset
+        end
+        frame:SetScale(baseScale[frame] * percent / 100)
+    end
+    if p then
+        if original[frame] == nil then
+            original[frame] = ns.Frames.GetPoints(frame) -- Blizzard's, for a reset
+        end
+        frame:ClearAllPoints()
+        frame:SetPoint(p[1], UIParent, p[2], p[3], p[4])
+    end
     placing = false
 end
 
@@ -183,18 +223,25 @@ local function placeAll()
     end
 end
 
--- Blizzard's own anchors from before we first moved the window. The panel manager places its
--- panels again as they open; this covers the windows it doesn't, like bags.
+-- Blizzard's own anchors and scale from before we first changed the window. The panel manager
+-- places its panels again as they open; this covers the windows it doesn't, like bags.
 local function putBack(frame)
-    if original[frame] and canMove(frame) then
-        placing = true
-        ns.Frames.SetPoints(frame, original[frame])
-        placing = false
+    if not ((original[frame] or baseScale[frame]) and canMove(frame)) then
+        return
     end
+    placing = true
+    if baseScale[frame] then
+        frame:SetScale(baseScale[frame])
+        baseScale[frame] = nil
+    end
+    if original[frame] then
+        ns.Frames.SetPoints(frame, original[frame])
+    end
+    placing = false
 end
 
 local function putAllBack()
-    for frame in pairs(original) do
+    for frame in pairs(nameOf) do
         putBack(frame)
     end
 end
@@ -208,6 +255,8 @@ local function resetWindow(frame)
     local name = nameOf[frame]
     session[name] = nil
     module.db.positions[name] = nil
+    sessionScales[name] = nil
+    module.db.scales[name] = nil
     putBack(frame)
 end
 
@@ -281,8 +330,9 @@ end
 
 local function onHide(frame)
     stopDrag(frame)
-    if module.db.remember == "never" and session[nameOf[frame]] then
-        session[nameOf[frame]] = nil -- back to Blizzard's place for next time
+    local name = nameOf[frame]
+    if module.db.remember == "never" and (session[name] or sessionScales[name]) then
+        session[name], sessionScales[name] = nil, nil -- back to Blizzard's place and size for next time
         putBack(frame)
     end
 end
@@ -299,6 +349,19 @@ local function onSetPoint(frame)
     place(frame)
 end
 
+-- Blizzard scales some windows itself (bags, to fit the screen), which would undo a resize: its
+-- scale is the new one ours is a percent of.
+local function onSetScale(frame)
+    if placing or baseScale[frame] == nil then
+        return
+    end
+    local scale = frame:GetScale()
+    if ns.IsNumber(scale) and scale > 0 then
+        baseScale[frame] = scale
+        place(frame)
+    end
+end
+
 local function hook(name)
     local frame = _G[name]
     if type(frame) ~= "table" or nameOf[frame] or not frame.HookScript then
@@ -310,6 +373,7 @@ local function hook(name)
     module:HookScript(frame, "OnShow", place)
     module:HookScript(frame, "OnHide", onHide)
     module:Hook(frame, "SetPoint", onSetPoint)
+    module:Hook(frame, "SetScale", onSetScale)
     -- The title bar, where a window is most often grabbed, can take the click itself.
     local title = frame.TitleContainer
     if type(title) == "table" and title.HookScript then
@@ -375,6 +439,92 @@ local function onGlobalMouseUp()
     end
 end
 
+-- Resizing --------------------------------------------------------------------------------------
+-- With the scale key held, the mouse wheel makes the window under the mouse bigger or smaller. A
+-- window hears the wheel only if Blizzard gave it a wheel handler, and giving it one would be
+-- changing Blizzard's frame, so a frame of our own over the whole screen takes the wheel instead:
+-- it's shown only while the key is held, takes no clicks, and takes the wheel only while the mouse
+-- is over one of the windows. Which window is worked out from where the windows are, since our
+-- frame is what's under the mouse then.
+local STRATA = { BACKGROUND = 1, LOW = 2, MEDIUM = 3, HIGH = 4, DIALOG = 5, FULLSCREEN = 6,
+    FULLSCREEN_DIALOG = 7, TOOLTIP = 8 }
+local catcher -- our frame, made the first time the key is held
+local hovered -- the window under the mouse while the key is held
+
+-- The topmost window that can be resized under the mouse, or nil.
+local function windowUnderMouse()
+    local x, y = GetCursorPosition()
+    local best, bestRank
+    for frame, name in pairs(nameOf) do
+        if not NO_SCALE[name] and ns.IsTrue(frame:IsVisible()) then
+            local scale = frame:GetEffectiveScale()
+            local left, right, top, bottom = frame:GetLeft(), frame:GetRight(), frame:GetTop(), frame:GetBottom()
+            if ns.IsNumber(scale) and scale > 0 and ns.IsNumber(left) and ns.IsNumber(right)
+                and ns.IsNumber(top) and ns.IsNumber(bottom)
+                and x >= left * scale and x <= right * scale and y >= bottom * scale and y <= top * scale then
+                local rank = (STRATA[frame:GetFrameStrata()] or 0) * 10000 + frame:GetFrameLevel()
+                if not best or rank > bestRank then
+                    best, bestRank = frame, rank
+                end
+            end
+        end
+    end
+    return best
+end
+
+local function onWheel(_, delta)
+    local frame = hovered
+    if dragging or not (frame and canMove(frame)) then
+        return
+    end
+    local name = nameOf[frame]
+    local old = scaleOf(name) or 100
+    local new = old + (delta > 0 and SCALE_STEP or -SCALE_STEP)
+    new = new < SCALE_MIN and SCALE_MIN or new > SCALE_MAX and SCALE_MAX or new
+    if new == old then
+        return
+    end
+    -- A moved window's place is in its own units, which just changed size: kept where it is.
+    local p = positionOf(name)
+    if p then
+        p[3], p[4] = p[3] * old / new, p[4] * old / new
+    end
+    sessionScales[name] = new
+    if module.db.remember == "always" then
+        module.db.scales[name] = new
+    end
+    place(frame)
+end
+
+-- Runs each frame while the key is held. A key let go while the game wasn't looking (Alt+Tab)
+-- sends no event, so it's asked again here.
+local function watch(self)
+    if not (module.enabled and Keys.IsDown(module.db.scaleKey)) then
+        hovered = nil
+        self:Hide()
+        return
+    end
+    hovered = not dragging and windowUnderMouse() or nil
+    self:EnableMouseWheel(hovered ~= nil)
+end
+
+local function onModifier()
+    local want = Keys.IsDown(module.db.scaleKey)
+    if want and not catcher then
+        catcher = CreateFrame("Frame", nil, UIParent)
+        catcher:SetAllPoints(UIParent)
+        catcher:SetFrameStrata("TOOLTIP")
+        catcher:EnableMouse(false)
+        catcher:EnableMouseWheel(false)
+        catcher:SetScript("OnUpdate", watch)
+        catcher:SetScript("OnMouseWheel", onWheel)
+        catcher:Hide()
+    end
+    if catcher then
+        catcher:SetShown(want)
+    end
+end
+
 local function hookAll()
     for _, name in ipairs(NAMES) do
         hook(name)
@@ -388,8 +538,12 @@ module.actions = {
         description = L.MOVABLEWINDOWS_RESET_DESC,
         fn = function()
             module.db.positions = {}
+            module.db.scales = {}
             for name in pairs(session) do
                 session[name] = nil
+            end
+            for name in pairs(sessionScales) do
+                sessionScales[name] = nil
             end
             putAllBack()
             ns.Print(L.MOVABLEWINDOWS_RESET_DONE)
@@ -402,6 +556,7 @@ function module:OnEnable()
     self:On("ADDON_LOADED", hookAll)
     self:On("GLOBAL_MOUSE_DOWN", onGlobalMouseDown)
     self:On("GLOBAL_MOUSE_UP", onGlobalMouseUp)
+    self:On("MODIFIER_STATE_CHANGED", onModifier)
     -- Moves that waited out combat (a window holding protected frames).
     self:On("PLAYER_REGEN_ENABLED", placeAll)
 end
@@ -411,6 +566,10 @@ function module:OnDisable()
     if dragging then
         stopDrag(dragging)
     end
+    if catcher then
+        catcher:Hide()
+    end
+    hovered = nil
     putAllBack()
     for frame, movable in pairs(wasMovable) do
         if canMove(frame) then
@@ -433,6 +592,9 @@ function module:OnOptionChanged(key)
         if module.db.remember == "always" then
             for name, p in pairs(session) do
                 module.db.positions[name] = p
+            end
+            for name, percent in pairs(sessionScales) do
+                module.db.scales[name] = percent
             end
         end
     end

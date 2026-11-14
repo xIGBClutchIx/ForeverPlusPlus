@@ -78,6 +78,9 @@ ns.changelog = {
                     .. "until then it's listed under Unknown." },
                 { L.MOVABLEWINDOWS_TITLE, "Drag From picks where a window can be grabbed: anywhere "
                     .. "in it, as before, or only its title bar." },
+                { L.MOVABLEWINDOWS_TITLE, "Hold Ctrl and scroll the mouse wheel over a window to "
+                    .. "make it bigger or smaller. Resize Key picks another key or turns it off, "
+                    .. "and the size is remembered and reset the way a window's position is." },
                 { L.WORLDMAP_TITLE, "Clicking a dungeon or raid icon opens its map in "
                     .. "the DungeonJournal addon, if you have it. Points of Interest's Dungeon "
                     .. "Maps turns it off." },

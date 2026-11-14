@@ -324,7 +324,7 @@ What each module is, in the code's terms (what it does for players is in `README
 - **Gathering Map**: a folder: the module, which remembers each herb, vein, chest, and fishing pool gathered for the account, its world map and minimap icons, and its page of nodes to show or hide for each character.
 - **Combat Alert**
 - **Macro Icon Search**: a search box in the macro icon picker, over the icons of the player's spells and items.
-- **Movable Windows**: drag Blizzard's windows with a key held, remembered always, for the session, or until closed.
+- **Movable Windows**: drag Blizzard's windows with a key held, and resize one with a key and the mouse wheel (a frame of our own takes the wheel while the key is held, so no Blizzard frame gets a wheel handler), remembered always, for the session, or until closed.
 - **Hide Stance Bar**: the stance bar faded out, its buttons not taking the mouse.
 - **Hide Error Messages**: `HideErrors`: the error frame's UI_ERROR_MESSAGE heard in its place, and only the errors not hidden handed to it.
 - **Loot Rolls**: the group loot rolls placed in Edit Mode, with their grow direction, spacing, and preview as Edit Mode settings, and the seconds left and roll counts on each.

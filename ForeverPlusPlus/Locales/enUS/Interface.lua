@@ -154,10 +154,14 @@ L.MOVABLEWINDOWS_RESET_KEY_DESC = "The key to hold while you click to reset a wi
     .. "the click alone resets it."
 L.MOVABLEWINDOWS_RESET_IS_MOVE = "Left Click with the move key drags the window, so it can't "
     .. "reset it too. Pick another Reset Key or Reset Click."
+L.MOVABLEWINDOWS_SCALE_KEY = "Resize Key"
+L.MOVABLEWINDOWS_SCALE_KEY_DESC = "Hold this key and scroll the mouse wheel over a window to make "
+    .. "it bigger or smaller, from 50% to 200% of its usual size. The size is remembered the way "
+    .. "its position is, and the reset click puts it back. The world map isn't resized."
 L.MOVABLEWINDOWS_RESET = "Window Positions"
 L.MOVABLEWINDOWS_RESET_BUTTON = "Reset"
-L.MOVABLEWINDOWS_RESET_DESC = "Put every moved window back where Blizzard places it."
-L.MOVABLEWINDOWS_RESET_DONE = "Every window is back in its usual place."
+L.MOVABLEWINDOWS_RESET_DESC = "Put every moved or resized window back where Blizzard places it, at its usual size."
+L.MOVABLEWINDOWS_RESET_DONE = "Every window is back in its usual place, at its usual size."
 
 -- CurrencyBar
 L.CURRENCYBAR_TITLE = "Currency Bar"
