@@ -15,7 +15,7 @@
 -- nobody else notices it.
 local _, ns = ...
 
-local C_TooltipInfo, C_TradeSkillUI = C_TooltipInfo, C_TradeSkillUI
+local C_TooltipInfo, C_TradeSkillUI, C_SpellBook, Enum = C_TooltipInfo, C_TradeSkillUI, C_SpellBook, Enum
 
 local L = ns.L
 
@@ -50,8 +50,15 @@ function module:IsAvailable()
     return ns.BagClicks.IsAvailable()
 end
 
+-- Either answer will do. Unverified on Forever: that IsSpellKnown says yes for a skill line's spell
+-- like this one, so the spellbook itself is asked too.
 local function known()
-    return ns.Spellbook.IsKnown(COMPREHEND_SCROLL)
+    if ns.Spellbook.IsKnown(COMPREHEND_SCROLL) then
+        return true
+    end
+    local bank = Enum and Enum.SpellBookSpellBank and Enum.SpellBookSpellBank.Player
+    return C_SpellBook and C_SpellBook.IsSpellInSpellBook and bank ~= nil
+        and C_SpellBook.IsSpellInSpellBook(COMPREHEND_SCROLL, bank, false) and true or false
 end
 
 -- Probe: the skill line's own name, when the client has profession info for it.

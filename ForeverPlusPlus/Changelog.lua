@@ -10,6 +10,16 @@ local L = ns.L
 
 ns.changelog = {
     {
+        version = L.CHANGELOG_UNRELEASED,
+        sections = {
+            { L.CHANGELOG_FIXED, {
+                "Auto Weapon Buff and Comprehend Scrolls: with a bag addon that keeps Blizzard's "
+                    .. "bags open but out of sight, an item no longer sits unseen where Blizzard's "
+                    .. "bag would be, showing its tooltip through other windows.",
+            } },
+        },
+    },
+    {
         version = "1.6.0",
         date = "2026-11-14",
         sections = {

@@ -6,7 +6,7 @@
 -- Its right-click does what the module's attributes say; every other click, drag, and the tooltip
 -- go through to the bag slot as before. Secure buttons can't be placed in combat, so the overlays
 -- leave when combat starts and the bags work as Blizzard's until it ends. Bag addons that replace
--- Blizzard's bags get no overlays.
+-- Blizzard's bags get no overlays: only a bag that is on screen does.
 local _, ns = ...
 
 local C_Container = C_Container
@@ -139,9 +139,12 @@ function Set:Update()
     end
     local match = self.match
     for _, frame in pairs(ns.ItemButtons.Frames()) do
-        if frame:IsShown() and frame.EnumerateValidItems then
+        -- On screen, not only shown: a bag addon keeps Blizzard's bags shown under a hidden parent
+        -- or at no alpha, and an overlay there would be an unseen item over whatever is drawn in
+        -- that spot.
+        if frame:IsVisible() and frame:GetEffectiveAlpha() > 0 and frame.EnumerateValidItems then
             for _, button in frame:EnumerateValidItems() do
-                if button:IsShown() then
+                if button:IsVisible() then
                     local bag, slot = button:GetBagID(), button:GetID()
                     local itemID = C_Container.GetContainerItemID(bag, slot)
                     local value = itemID and match(itemID, bag, slot)
