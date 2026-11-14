@@ -55,6 +55,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Macros**: switching profiles, applying a preset, or Defaults no longer deletes a macro, which emptied its action bar slots. A macro is deleted only when you turn it off yourself.
 - **Settings**: the Changelog and About pages no longer drop out of the sidebar when a preset or a profile switch turns on several modules that have pages of their own.
 - **Error Catcher**: it also catches "Interface action failed because of an AddOn" when the game writes it to chat another way.
+- **Settings**: opening Forever++'s settings no longer leaves a yellow "Interface action failed because of an AddOn" line in chat. Nothing had failed: the game's controller navigation prints it whenever an addon opens Settings.
 
 ## 1.5.0 (2026-11-11)
 

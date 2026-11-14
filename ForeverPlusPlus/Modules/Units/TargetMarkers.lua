@@ -39,6 +39,7 @@ _G["BINDING_NAME_" .. BINDING] = L.TARGETMARKERS_BINDING
 
 local function openKeyBindings()
     if Settings and Settings.OpenToCategory and Settings.KEYBINDINGS_CATEGORY_ID then
+        ns.Chat.QuietRefusals() -- opening Settings from an addon prints a harmless yellow line
         Settings.OpenToCategory(Settings.KEYBINDINGS_CATEGORY_ID)
     end
 end

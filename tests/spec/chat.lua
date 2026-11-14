@@ -78,3 +78,47 @@ do
     eq(hooks[windows[1]], first, "on message: turned on again, the same hook, so it's hooked once")
     T.game.secret = nil
 end
+
+-- The yellow "Interface action failed" line: which refusals are harmless, and taking the line out.
+do
+    local Chat = ns.Chat
+    local controller = false
+    ns.Menus = { GamepadUI = function() return controller end }
+    local NAV = "[Interface/AddOns/Blizzard_GamepadSmartNavigation/SmartNavigation.lua]:84: in function"
+    local LIST = NAV .. "\n[Interface/AddOns/Blizzard_Settings_Shared/Blizzard_CategoryList.lua]:120:"
+    eq(Chat.HarmlessRefusal(NAV), true, "refusal: the controller navigation, controller interface off")
+    eq(Chat.HarmlessRefusal("[Interface/AddOns/Other/Other.lua]:5:"), false, "refusal: anything else is real")
+    eq(Chat.HarmlessRefusal(nil), false, "refusal: no stack")
+    controller = true
+    eq(Chat.HarmlessRefusal(NAV), false, "refusal: with the controller interface on it's worth knowing")
+    eq(Chat.HarmlessRefusal(LIST), true, "refusal: but not the Settings sidebar's")
+    controller = false
+
+    local stack, hook = NAV, nil
+    local lines = {}
+    INTERFACE_ACTION_BLOCKED = "Interface action failed because of an AddOn"
+    ChatFrameUtil = { AddSystemMessage = function() end }
+    hooksecurefunc = function(_, _, fn) hook = fn end
+    debugstack = function() return stack end
+    DEFAULT_CHAT_FRAME = { RemoveMessagesByPredicate = function(_, test)
+        for i = #lines, 1, -1 do
+            if test(lines[i]) then
+                table.remove(lines, i)
+            end
+        end
+    end }
+    Chat.QuietRefusals()
+    local first = hook
+    Chat.QuietRefusals()
+    eq(hook, first, "quiet: hooked once")
+    lines = { "hello", INTERFACE_ACTION_BLOCKED }
+    hook(INTERFACE_ACTION_BLOCKED)
+    eq(table.concat(lines, ","), "hello", "quiet: a harmless refusal's line is taken out")
+    stack = "[Interface/AddOns/Other/Other.lua]:5:"
+    lines = { "hello", INTERFACE_ACTION_BLOCKED }
+    hook(INTERFACE_ACTION_BLOCKED)
+    eq(#lines, 2, "quiet: a real one stays")
+    stack = NAV
+    hook("Something else")
+    eq(#lines, 2, "quiet: another system message is left alone")
+end

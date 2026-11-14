@@ -330,8 +330,7 @@ local function onBlockedMessage()
     -- one each time (SettingsPanel:FocusContainer > SmartNavigation:EnterFocusGroup, which is
     -- "secure only for now"; from the Minimap Button's menu, build 70888, 2026-11-13). With the
     -- controller interface on it's worth knowing, so it's still caught.
-    if stack and stack:find("Blizzard_GamepadSmartNavigation", 1, true)
-        and (stack:find("Blizzard_CategoryList.lua", 1, true) or not gamepadUI()) then
+    if ns.Chat.HarmlessRefusal(stack) then
         busy = false
         return
     end

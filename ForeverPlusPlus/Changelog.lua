@@ -162,6 +162,10 @@ ns.changelog = {
                     .. "have pages of their own." },
                 { L.ERRORCATCHER_TITLE, "It also catches \"Interface action failed because of an "
                     .. "AddOn\" when the game writes it to chat another way." },
+                { L.CHANGELOG_SETTINGS, "Opening Forever++'s settings no longer leaves a yellow "
+                    .. "\"Interface action failed because of an AddOn\" line in chat. Nothing had "
+                    .. "failed: the game's controller navigation prints it whenever an addon opens "
+                    .. "Settings." },
             } },
         },
     },

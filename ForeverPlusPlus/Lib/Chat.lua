@@ -338,6 +338,51 @@ local function filterApi(utilName, globalName)
     end
 end
 
+-- The yellow "Interface action failed because of an AddOn" line ---------------------------------
+-- Forever's controller navigation prints it whenever addon code reaches it (EnsureIsSecure in
+-- Blizzard_GamepadSmartNavigation), which opening Settings to one of our pages does every time:
+-- SettingsPanel focuses its list through SmartNavigation:EnterFocusGroup. With the controller
+-- interface off, what it refused is only where a controller's focus goes, which nobody is using,
+-- so the line reports nothing the player can act on.
+
+---Whether a stack is the controller navigation refusing addon code where nothing is lost: the
+---Settings sidebar drawn again (any addon with a Settings entry causes it), or any refusal while
+---the controller interface is off.
+---@param stack any
+---@return boolean
+function Chat.HarmlessRefusal(stack)
+    if not (ns.IsText(stack) and find(stack, "Blizzard_GamepadSmartNavigation", 1, true)) then
+        return false
+    end
+    return find(stack, "Blizzard_CategoryList.lua", 1, true) ~= nil or not ns.Menus.GamepadUI()
+end
+
+local quieted = false
+
+---Keeps that line out of chat when it's a harmless refusal (`HarmlessRefusal`), from the first
+---call on. The game writes it straight into the chat window with no event, so no filter sees it:
+---it's taken out again right after it's added. Any other cause still shows. The game writes the
+---line only the first time in a session, so after a harmless one is taken out, a later real one
+---isn't written either; Error Catcher still catches those.
+function Chat.QuietRefusals()
+    local util = _G.ChatFrameUtil
+    if quieted or not (util and util.AddSystemMessage and _G.hooksecurefunc and _G.debugstack) then
+        return
+    end
+    quieted = true
+    _G.hooksecurefunc(util, "AddSystemMessage", function(message)
+        local line, frame = _G.INTERFACE_ACTION_BLOCKED, _G.DEFAULT_CHAT_FRAME
+        if not (line and frame and frame.RemoveMessagesByPredicate and ns.IsText(message) and message == line) then
+            return
+        end
+        if Chat.HarmlessRefusal(_G.debugstack(2)) then
+            frame:RemoveMessagesByPredicate(function(text)
+                return ns.IsText(text) and text == line
+            end)
+        end
+    end)
+end
+
 ---Hides chat lines of `event` for which `fn(frame, event, ...)` returns true, in every chat
 ---window. Adding the same `fn` twice changes nothing. Returns false on a client without filters.
 ---@param event string such as "CHAT_MSG_WHISPER"

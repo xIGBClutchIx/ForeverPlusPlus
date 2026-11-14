@@ -72,6 +72,9 @@ local function open(category)
     if InCombatLockdown() then
         ns.Print(L.SETTINGS_AFTER_COMBAT)
     end
+    -- Opening Settings from an addon makes the controller navigation print its yellow "Interface
+    -- action failed" line, with nothing failed: kept out of chat (Lib/Chat.lua).
+    ns.Chat.QuietRefusals()
     ns.AfterCombat(function()
         -- Through the client when it can: it opens the panel from its own event, so Blizzard's
         -- pages (and the pooled rows they share) aren't set up while our code is running, which
