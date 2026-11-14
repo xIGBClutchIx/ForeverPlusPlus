@@ -4,7 +4,7 @@ local _, ns = ...
 
 local StaticPopupDialogs, StaticPopup_Show, YES, NO = StaticPopupDialogs, StaticPopup_Show, YES, NO
 local CANCEL, ACCEPT, CLOSE, strtrim, error = CANCEL, ACCEPT, CLOSE, strtrim, error
-local CreateFrame, UIParent, ipairs, format = CreateFrame, UIParent, ipairs, string.format
+local CreateFrame, UIParent, ipairs, format, max = CreateFrame, UIParent, ipairs, string.format, math.max
 
 -- A popup of our own -------------------------------------------------------------------------------
 -- With the controller interface on, one of Blizzard's popups shown by an addon runs the
@@ -13,7 +13,8 @@ local CreateFrame, UIParent, ipairs, format = CreateFrame, UIParent, ipairs, str
 -- asked in a frame of our own: the text, an optional text box, and up to four buttons. The mouse
 -- works it, a controller's A is its first button and B closes it, and Enter and Escape work in
 -- the text box.
-local WIDTH, PAD, BUTTON_WIDTH, BUTTON_GAP = 340, 18, 110, 8
+local WIDTH, PAD, BUTTON_WIDTH, BUTTON_GAP = 340, 18, 110, 8 -- the least the popup and a button are
+local BUTTON_PAD = 28 -- room around a button's text
 local own -- the frame, made the first time it's needed
 
 local function ownPopup()
@@ -80,6 +81,17 @@ end
 -- the box's text.
 local function ask(text, buttons, edit)
     local popup = ownPopup()
+    -- Every button as wide as the longest one's text needs, and the popup as wide as they need.
+    local count = #buttons
+    local width = BUTTON_WIDTH
+    for i, spec in ipairs(buttons) do
+        local button = popup.buttons[i]
+        button:SetText(spec.text)
+        width = max(width, (button:GetTextWidth() or 0) + BUTTON_PAD)
+    end
+    local popupWidth = max(WIDTH, (width + BUTTON_GAP) * count - BUTTON_GAP + PAD * 2)
+    popup:SetWidth(popupWidth)
+    popup.text:SetWidth(popupWidth - PAD * 2)
     popup.text:SetText(text)
     local y = PAD + popup.text:GetStringHeight() + 12
     local box = popup.box
@@ -91,15 +103,12 @@ local function ask(text, buttons, edit)
         box:SetText(edit.initial or "")
         y = y + 22 + 12
     end
-    local count = #buttons
-    local width = count > 3 and (WIDTH - PAD * 2 - BUTTON_GAP * (count - 1)) / count or BUTTON_WIDTH
     local left = -((width + BUTTON_GAP) * count - BUTTON_GAP) / 2
     for i, button in ipairs(popup.buttons) do
         local spec = buttons[i]
         button:SetShown(spec ~= nil)
         button:UnlockHighlight()
         if spec then
-            button:SetText(spec.text)
             button:SetWidth(width)
             button:ClearAllPoints()
             button:SetPoint("TOPLEFT", popup, "TOP", left + (i - 1) * (width + BUTTON_GAP), -y)
