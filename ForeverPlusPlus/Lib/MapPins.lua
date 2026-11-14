@@ -5,16 +5,64 @@
 -- Nothing is made until a layer is enabled.
 local _, ns = ...
 
-local ipairs, select, setmetatable, hooksecurefunc = ipairs, select, setmetatable, hooksecurefunc
+local ipairs, pairs, select, setmetatable, hooksecurefunc = ipairs, pairs, select, setmetatable, hooksecurefunc
 local CreateFrame = CreateFrame
 local C_Map, GameTooltip = C_Map, GameTooltip
 local CreateVector2D = CreateVector2D
+
+local L = ns.L
 
 local MapPins = {}
 ns.MapPins = MapPins
 
 local WorldMap = ns.WorldMap
 local worldMap = WorldMap.Get
+
+-- The options every module with icons on the world map has, with the same names, ranges, and
+-- steps in each. `extra` adds fields (`requires`, `added`) or replaces one, such as a
+-- `description` that says what the module's icons are.
+local function withExtra(option, extra)
+    for key, value in pairs(extra or {}) do
+        option[key] = value
+    end
+    return option
+end
+
+---The icons' size slider: 50 to 200 percent of their normal size, in steps of 10.
+---@param key string the module's option key
+---@param section? string
+---@param extra? table more fields for the option
+---@return table option
+function MapPins.SizeOption(key, section, extra)
+    return withExtra({
+        key = key, name = L.MAPPINS_SIZE, description = L.MAPPINS_SIZE_DESC, section = section,
+        min = 50, max = 200, step = 10, format = "%d%%",
+    }, extra)
+end
+
+---The icons' opacity slider: 10 to 100 percent, in steps of 5.
+---@param key string
+---@param section? string
+---@param extra? table
+---@return table option
+function MapPins.OpacityOption(key, section, extra)
+    return withExtra({
+        key = key, name = L.MAPPINS_OPACITY, description = L.MAPPINS_OPACITY_DESC, section = section,
+        min = 10, max = 100, step = 5, format = "%d%%",
+    }, extra)
+end
+
+---The On Continent Maps checkbox: whether the icons show on maps above a zone's too.
+---@param key string
+---@param section? string
+---@param extra? table
+---@return table option
+function MapPins.ContinentOption(key, section, extra)
+    return withExtra({
+        key = key, name = L.MAPPINS_CONTINENTS, description = L.MAPPINS_CONTINENTS_DESC,
+        section = section,
+    }, extra)
+end
 
 ---The first atlas in the list this client has, or the last one. For art that may not exist on
 ---every build.

@@ -66,11 +66,8 @@ ns.modules.WorldMap.internal.pointsOfInterest = internal
 -- shows on continents.
 local function kind(key, sizeKey, name, description)
     return { key = key, name = name, description = description, slider = sizeKey },
-        {
-            key = sizeKey, name = L.POI_SIZE, description = L.POI_SIZE_DESC, requires = key,
-            min = 50, max = 200, step = 10, format = "%d%%",
-        },
-        { key = key .. "World", name = L.POI_WORLD, description = L.POI_WORLD_DESC, requires = key }
+        ns.MapPins.SizeOption(sizeKey, nil, { requires = key }),
+        ns.MapPins.ContinentOption(key .. "World", nil, { requires = key })
 end
 
 -- Each row's options go under its `section`, a smaller header in the part's section in Settings.

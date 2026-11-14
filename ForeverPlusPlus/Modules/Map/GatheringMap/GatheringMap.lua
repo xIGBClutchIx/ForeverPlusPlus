@@ -234,20 +234,17 @@ module.options = {
         key = "worldMap", name = L.GATHERINGMAP_WORLDMAP, description = L.GATHERINGMAP_WORLDMAP_DESC,
         section = WORLD, slider = "mapSize",
     },
-    {
-        key = "mapSize", name = L.GATHERINGMAP_SIZE, description = L.GATHERINGMAP_MAP_SIZE_DESC,
-        section = WORLD, requires = "worldMap", min = 50, max = 200, step = 10, format = "%d%%",
-    },
-    {
-        key = "mapAlpha", name = L.GATHERINGMAP_ALPHA, description = L.GATHERINGMAP_ALPHA_DESC,
-        section = WORLD, requires = "worldMap", min = 10, max = 100, step = 5, format = "%d%%",
-    },
+    -- Its own words for the size: the minimap's icons have a size of their own, in pixels.
+    ns.MapPins.SizeOption("mapSize", WORLD, {
+        requires = "worldMap", description = L.GATHERINGMAP_MAP_SIZE_DESC,
+    }),
+    ns.MapPins.OpacityOption("mapAlpha", WORLD, { requires = "worldMap" }),
     justOption("justWorld", WORLD, "worldMap"),
     justAlphaOption("justWorldAlpha", "justWorld", WORLD, "worldMap"),
-    {
-        key = "mapContinents", name = L.GATHERINGMAP_CONTINENTS, description = L.GATHERINGMAP_CONTINENTS_DESC,
-        section = WORLD, requires = "worldMap",
-    },
+    -- Its own words here too: the icons are smaller on a continent.
+    ns.MapPins.ContinentOption("mapContinents", WORLD, {
+        requires = "worldMap", description = L.GATHERINGMAP_CONTINENTS_DESC,
+    }),
     (function()
         local option = tipOption("tipSkill", L.GATHERINGMAP_TIP_SKILL_NAME, L.GATHERINGMAP_TIP_SKILL_DESC)
         option.added = "1.6.0"

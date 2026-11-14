@@ -46,6 +46,14 @@ L.SKIP_KEY = "Skip Key" -- the option of every module that a held key skips
 -- own strings, dumped in game (build 70888, 2026-11-13): "<Ctrl click directly on the map>",
 -- "<Right Click to show map>", "<Right click for Frame Settings>". One click to a line.
 L.MAPPINS_HINT_WAYPOINT = "<Ctrl click to set a map pin>"
+-- The options of icons on the world map (Lib/MapPins.lua): their size, opacity, and whether
+-- continent maps show them, the same in every module that has them.
+L.MAPPINS_SIZE = "Icon Size"
+L.MAPPINS_SIZE_DESC = "How big the icons are, compared with their normal size."
+L.MAPPINS_OPACITY = "Opacity"
+L.MAPPINS_OPACITY_DESC = "How solid the icons are. Lower lets the map show through."
+L.MAPPINS_CONTINENTS = "On Continent Maps"
+L.MAPPINS_CONTINENTS_DESC = "Also show them on the continent and world maps, not only on zone maps."
 L.SOUND_NAME = "Sound"
 L.SOUND_OFF = "Off"
 L.SOUND_BUZZ = "Error Buzz"

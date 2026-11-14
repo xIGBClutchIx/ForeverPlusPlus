@@ -67,14 +67,13 @@ local PINS, KINDS, LEVELS, TOOLTIPS = L.QUESTPINS_SECTION_PINS, L.QUESTPINS_SECT
 
 module.options = {
     { key = "pins", name = L.QUESTPINS_PINS, description = L.QUESTPINS_PINS_DESC, section = PINS },
-    { key = "worldMap", name = L.QUESTPINS_WORLD_MAP, description = L.QUESTPINS_WORLD_MAP_DESC,
-        requires = "pins", section = PINS },
+    ns.MapPins.ContinentOption("worldMap", PINS, { requires = "pins" }),
     { key = "clusters", name = L.QUESTPINS_CLUSTERS, description = L.QUESTPINS_CLUSTERS_DESC,
         requires = "pins", section = PINS },
     { key = "clusterLimit", name = L.QUESTPINS_CLUSTER_LIMIT, description = L.QUESTPINS_CLUSTER_LIMIT_DESC,
         requires = "clusters", section = PINS, min = 1, max = 12, step = 1, format = "%d" },
-    { key = "size", name = L.QUESTPINS_SIZE, description = L.QUESTPINS_SIZE_DESC, requires = "pins",
-        section = PINS, min = 50, max = 150, step = 10, format = "%d%%" },
+    -- The shared names, with descriptions that call them pins as the rest of the module does.
+    ns.MapPins.SizeOption("size", PINS, { requires = "pins", description = L.QUESTPINS_SIZE_DESC }),
     {
         key = "color", name = L.QUESTPINS_COLOR, description = L.QUESTPINS_COLOR_DESC, requires = "pins",
         choices = {
@@ -84,8 +83,7 @@ module.options = {
         },
         section = PINS,
     },
-    { key = "alpha", name = L.QUESTPINS_ALPHA, description = L.QUESTPINS_ALPHA_DESC, requires = "pins",
-        section = PINS, min = 20, max = 100, step = 5, format = "%d%%" },
+    ns.MapPins.OpacityOption("alpha", PINS, { requires = "pins", description = L.QUESTPINS_ALPHA_DESC }),
 
     { key = "normal", name = L.QUESTPINS_NORMAL, description = L.QUESTPINS_NORMAL_DESC, requires = "pins",
         section = KINDS },
