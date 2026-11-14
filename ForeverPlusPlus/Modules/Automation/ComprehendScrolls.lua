@@ -11,11 +11,10 @@
 -- The known scrolls are a seed (ns.GameData); a scroll a patch adds is found by its "Requires
 -- Comprehension (N)" line, read in the client's language, and remembered for the account.
 --
--- On by default, but only a character who knows Comprehend Scroll (a Mage) gets overlays, so
--- nobody else notices it.
+-- On by default, but only a Mage gets overlays, so nobody else notices it.
 local _, ns = ...
 
-local C_TooltipInfo, C_TradeSkillUI, C_SpellBook, Enum = C_TooltipInfo, C_TradeSkillUI, C_SpellBook, Enum
+local C_TooltipInfo, C_TradeSkillUI, UnitClass = C_TooltipInfo, C_TradeSkillUI, UnitClass
 
 local L = ns.L
 
@@ -50,15 +49,12 @@ function module:IsAvailable()
     return ns.BagClicks.IsAvailable()
 end
 
--- Either answer will do. Unverified on Forever: that IsSpellKnown says yes for a skill line's spell
--- like this one, so the spellbook itself is asked too.
+-- Whether this character could read a scroll: a Mage. The class, not whether the game says the
+-- spell is known: that answer is Unverified on Forever for a skill line's spell like this one, and
+-- a wrong no would leave the scrolls doing nothing. A Mage without the spell is told so by the game.
 local function known()
-    if ns.Spellbook.IsKnown(COMPREHEND_SCROLL) then
-        return true
-    end
-    local bank = Enum and Enum.SpellBookSpellBank and Enum.SpellBookSpellBank.Player
-    return C_SpellBook and C_SpellBook.IsSpellInSpellBook and bank ~= nil
-        and C_SpellBook.IsSpellInSpellBook(COMPREHEND_SCROLL, bank, false) and true or false
+    local _, class = UnitClass("player")
+    return class == "MAGE"
 end
 
 -- Probe: the skill line's own name, when the client has profession info for it.
@@ -99,8 +95,7 @@ local function readTooltip(itemID, bag, slot)
     end
 end
 
--- Whether the player knows Comprehend Scroll, read again when their spells change: for anyone
--- else the bags aren't looked through at all.
+-- Whether the player is a Mage: for anyone else the bags aren't looked through at all.
 local knows = false
 
 local function match(itemID, bag, slot)
@@ -123,15 +118,9 @@ overlays = ns.BagClicks.New(module, match, click, function()
     return knows
 end)
 
-local function onSpells()
-    knows = known() and true or false
-    overlays.refresh()
-end
-
 function module:OnEnable()
-    knows = known() and true or false
+    knows = known()
     overlays:Enable()
-    self:On("SPELLS_CHANGED", onSpells)
 end
 
 function module:OnDisable()
