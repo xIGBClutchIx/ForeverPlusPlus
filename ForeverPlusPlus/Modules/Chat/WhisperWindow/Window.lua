@@ -268,11 +268,8 @@ end
 
 -- The right-click menu on a row. Probe: Mainline's menus.
 local function rowMenu(row)
-    if not (MenuUtil and MenuUtil.CreateContextMenu) then
-        return
-    end
     local conversation = row.conversation
-    MenuUtil.CreateContextMenu(row, function(_, root)
+    ns.Menus.Open(row, function(_, root)
         root:CreateTitle(conversation.display)
         if not conversation.bnet then
             root:CreateButton(L.WHISPERWINDOW_INVITE, function()
@@ -292,14 +289,14 @@ end
 -- Unverified in game). In combat the name gets this short menu of our own instead; out of combat
 -- it's Blizzard's, as before. True when it showed one. Probe: Mainline's menus.
 local function playerMenu(owner, link)
-    if not (MenuUtil and MenuUtil.CreateContextMenu and ns.IsText(link)) then
+    if not (ns.Menus.Available() and ns.IsText(link)) then
         return false
     end
     local kind, name = strsplit(":", link)
     if kind ~= "player" or not name or name == "" then
         return false
     end
-    MenuUtil.CreateContextMenu(owner, function(_, root)
+    ns.Menus.Open(owner, function(_, root)
         root:CreateTitle(name)
         root:CreateButton(L.WHISPERWINDOW_INVITE, function()
             internal.Invite({ name = name })

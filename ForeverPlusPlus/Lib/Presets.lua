@@ -256,11 +256,7 @@ end
 
 -- Shows the menu of every preset at the cursor. Probe: MenuUtil is Mainline's.
 local function showMenu(onPick)
-    local menu = MenuUtil
-    if not (menu and menu.CreateContextMenu) then
-        return
-    end
-    menu.CreateContextMenu(nil, function(_, root)
+    ns.Menus.Open(nil, function(_, root)
         for _, name in ipairs(order) do
             local button = root:CreateButton(registry[name].title, function()
                 onPick(name)

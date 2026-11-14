@@ -136,6 +136,11 @@ ns.changelog = {
                     .. "Whisper Window does.",
             } },
             { L.CHANGELOG_FIXED, {
+                "With the controller interface on, opening one of Forever++'s menus (the Minimap "
+                    .. "Button's, the Whisper Window's, a dungeon icon's on the world map, an Edit "
+                    .. "Mode frame's) no longer makes the game block actions and blame Forever++. "
+                    .. "Those menus are a plain list of our own then, which the mouse and the "
+                    .. "controller's D-pad, A, and B work.",
                 { L.MOVABLEWINDOWS_TITLE, "Dragging a character or mount model, as in the "
                     .. "dressing room, turns the model without moving the window too." },
                 { L.SHORTCHANNELNAMES_TITLE, "The chat box's cursor sits at the end of what you "

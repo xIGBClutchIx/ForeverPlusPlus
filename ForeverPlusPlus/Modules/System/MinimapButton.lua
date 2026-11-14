@@ -354,10 +354,8 @@ end
 
 -- The Customize button's menu, at the cursor, owned by the button so it closes with Settings.
 local function openCustomize()
-    if MenuUtil and MenuUtil.CreateContextMenu then
-        local owner = GetMouseFoci and GetMouseFoci()[1]
-        MenuUtil.CreateContextMenu(owner or UIParent, customizeItems)
-    end
+    local owner = GetMouseFoci and GetMouseFoci()[1]
+    ns.Menus.Open(owner or UIParent, customizeItems)
 end
 
 -- Menu Side's anchor: a corner of the menu on the cursor, the right one for Left and the left one
@@ -379,10 +377,16 @@ end
 -- the screen and pushed back on at the right. Left and Right put the corner they name there
 -- instead, through Blizzard_Menu's own OpenMenu (Gethe's `forever` branch, 2026-10-16).
 local function quickMenu(owner)
+    local side = module.db.menuSide
+    -- With the controller interface on, a menu of Blizzard's opened from here breaks the
+    -- controller's focus (see Lib/Menus.lua), so it's our own list, at the same place.
+    if ns.Menus.GamepadUI() then
+        ns.Menus.Open(owner, quickMenuItems, side ~= "auto" and AnchorUtil and menuAnchor(side) or nil)
+        return
+    end
     if not (MenuUtil and MenuUtil.CreateContextMenu) then
         return
     end
-    local side = module.db.menuSide
     if side ~= "auto" and Menu and Menu.GetManager and Menu.PopulateDescription
         and MenuUtil.CreateRootMenuDescription and MenuVariants and AnchorUtil and InputUtil
         and GetAppropriateTopLevelParent then

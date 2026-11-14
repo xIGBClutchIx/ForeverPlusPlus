@@ -334,9 +334,9 @@ local function newSelection(frame, info)
     end)
     -- Right-click, as on Blizzard's frames: a menu with the scale, the frame's settings, and reset.
     selection:SetScript("OnMouseUp", function(self, button)
-        if button == "RightButton" and MenuUtil and MenuUtil.CreateContextMenu then
+        if button == "RightButton" and ns.Menus.Available() then
             pick(frame)
-            MenuUtil.CreateContextMenu(self, function(_, root)
+            ns.Menus.Open(self, function(_, root)
                 root:CreateTitle(info.label)
                 local scale = info.scale
                 if scale then

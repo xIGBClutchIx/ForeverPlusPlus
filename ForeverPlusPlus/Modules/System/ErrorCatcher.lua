@@ -265,15 +265,7 @@ end
 
 -- What was going on when an action was blocked, since it comes with no stack: combat, the kind
 -- of instance, the frame under the mouse, the menus open, and whether the taint log was writing.
--- Whether the game shows its controller interface. Probe: C_InputInterfaceStyle is Forever's
--- (Blizzard_SharedXML's InputUtil.IsGamepadUIEnabled, Gethe forever branch).
-local function gamepadUI()
-    local C, types = _G.C_InputInterfaceStyle, Enum and Enum.InputDeviceInterfaceType
-    if not (C and C.GetCurrentStyle and types and types.Gamepad) then
-        return false
-    end
-    return ns.IsTrue(C.GetCurrentStyle() == types.Gamepad)
-end
+local gamepadUI = ns.Menus.GamepadUI
 
 local function blockedContext()
     local none = L.ERRORCATCHER_CONTEXT_NONE

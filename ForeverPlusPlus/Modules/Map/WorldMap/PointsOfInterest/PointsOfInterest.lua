@@ -264,11 +264,11 @@ end
 
 -- A click on a dungeon or raid icon: its map, or a menu of them for a place with several.
 local function openMaps(pin, maps, title)
-    if #maps == 1 or not (MenuUtil and MenuUtil.CreateContextMenu) then
+    if #maps == 1 or not ns.Menus.Available() then
         ns.DungeonMaps.Open(maps[1].name)
         return
     end
-    MenuUtil.CreateContextMenu(pin, function(_, root)
+    ns.Menus.Open(pin, function(_, root)
         root:CreateTitle(title)
         for _, map in ipairs(maps) do
             root:CreateButton(map.title, function()

@@ -70,9 +70,7 @@ local function rollFrame(i)
     return _G["GroupLootFrame" .. i]
 end
 
-local function gamepad()
-    return InputUtil and InputUtil.IsGamepadUIEnabled and InputUtil.IsGamepadUIEnabled() or false
-end
+local gamepad = ns.Menus.GamepadUI
 
 -- Places a roll (or an example of one) `k` rolls on from the first, at our scale.
 local function put(frame, k)

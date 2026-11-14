@@ -71,7 +71,6 @@
 1	ForeverPlusPlus/Modules/Interface/CurrencyBar.lua: warning[type-mismatch] expected `string?` for parameter 'textR', got `string | number`
 2	ForeverPlusPlus/Modules/Interface/LocalTime.lua: warning[missing-parameter] missing argument for parameter 'year'
 1	ForeverPlusPlus/Modules/Items/ItemTooltips/CraftedCompare.lua: warning[missing-fields] missing required field 'overrideItemLevel' in class 'TooltipComparisonItem'
-1	ForeverPlusPlus/Modules/System/MinimapButton.lua: warning[type-mismatch] expected `Region?` for parameter 'ownerRegion', got `ScriptRegion`
 1	ForeverPlusPlus/Modules/System/MinimapButton.lua: warning[type-mismatch] expected `RootMenuDescriptionProxy` for parameter 'description', got `RootMenuDescriptionProxy | MenuStyle1Mixin`
 1	ForeverPlusPlus/Modules/System/MinimapButton.lua: warning[type-mismatch] expected `RootMenuDescriptionProxy` for parameter 'menuDescriptionProxy', got `RootMenuDescriptionProxy | MenuStyle1Mixin`
 1	ForeverPlusPlus/Modules/Tools/SelfTest.lua: warning[type-mismatch] expected `CurveObjectBase?` for parameter '...', got `string`

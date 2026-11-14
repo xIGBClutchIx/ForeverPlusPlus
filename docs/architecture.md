@@ -91,6 +91,12 @@ Generated files (never edited by hand; see Generated data): `InstanceLevels.lua`
 - Single item, spell, and map IDs Self Test checks.
 - Blizzard's "Requires Herbalism (75)" line read in any language.
 
+### `Menus.lua`
+
+- `ns.Menus`: every context menu we open goes through `Open(owner, generator, anchor)`. `generator(owner, root)` describes it as Blizzard's menus are described (`CreateTitle`, `CreateDivider`, `CreateButton`, `CreateCheckbox`, `CreateRadio`, a button's own entries as its submenu, `SetTooltip`, `SetEnabled`).
+- With the controller interface off it's `MenuUtil.CreateContextMenu`. With it on (`GamepadUI`) it's a plain list of our own frames, since Blizzard's menu opened from addon code taints the controller's focus manager for the session (`docs/forever-api.md`). Ours takes the mouse, and the controller's D-pad, A, and B while it's open.
+- `Describe` gives the description as plain entries, with `IsEnabled` and `IsSelected` for one. Dropdowns in Settings and Blizzard's own menus we add entries to are still Blizzard's.
+
 ### `Frames.lua`
 
 - `ns.Frames`: whether this client has an atlas or template, the box tooltips are drawn in, Blizzard's panel button (`Button`), saving and restoring a frame's anchors (`GetPoints`, `SetPoints`), our windows with a portrait (`PortraitWindow`, which also makes one draggable, kept on screen, closed by Escape, back where the player left it from the `layout` table its module gives, and resizable with `resize`; with `Inset` and `RowTexture` for their lists), Escape closing our windows, whether the player is in combat or moving (`PlayerActivity`), red error-frame text, running something once after a burst of calls (`Coalesce`), a timer that waits for one run at a time (`Timer`), and OnUpdate a few times a second (`Throttled`, `Watcher`).
