@@ -15,7 +15,7 @@ local _, ns = ...
 
 local _G, ipairs, pairs, type, wipe, tonumber, tostring = _G, ipairs, pairs, type, wipe, tonumber, tostring
 local format, huge = string.format, math.huge
-local C_Container, C_AddOns, C_Item, UnitClass, UnitLevel = C_Container, C_AddOns, C_Item, UnitClass, UnitLevel
+local C_AddOns, C_Item, UnitClass, UnitLevel = C_AddOns, C_Item, UnitClass, UnitLevel
 
 local L = ns.L
 local ItemButtons, ItemStats, Equipment, Talents = ns.ItemButtons, ns.ItemStats, ns.Equipment, ns.Talents
@@ -483,63 +483,19 @@ local function clearArrows()
     rewardArrows:HideAll()
 end
 
--- Bags and bank ---------------------------------------------------------------------------------
+-- Bags, bank, merchants, the auction house, loot, and loot rolls -----------------------------------
 
 -- The reagent bag, which holds profession tools too.
 local REAGENT_BAG = ns.Bags.REAGENT
 
-local function updateBag(frame)
-    local on, skipReagent = module.db.bags, module.db.reagentBag
-    ItemButtons.EachBagButton(frame, function(_, icon, bag, slot)
-        local link = on and not (skipReagent and bag == REAGENT_BAG)
-            and C_Container.GetContainerItemLink(bag, slot)
-        setArrow(arrows, icon, link and markOf(link))
-    end)
-end
-
-local function updateBank()
-    local on = module.db.bank
-    ItemButtons.EachBankButton(function(icon, tab, slot)
-        local link = on and tab and C_Container.GetContainerItemLink(tab, slot)
-        setArrow(arrows, icon, link and markOf(link))
-    end)
-end
-
--- Merchants -------------------------------------------------------------------------------------
-
-local function updateMerchant()
-    local on = module.db.merchant
-    ItemButtons.EachMerchantItem(function(icon, index)
-        local link = on and _G.GetMerchantItemLink(index)
-        setArrow(arrows, icon, link and markOf(link))
-    end)
-end
-
--- The buyback tab reuses the same buttons.
-local function clearMerchant(icon)
-    setArrow(arrows, icon, false)
-end
-
--- Auction house ---------------------------------------------------------------------------------
-
--- A browse row's link has its random suffix ("of the Bear"), whose stats are most of what such an
--- item gives: judged without it, an upgrade showed as a downgrade.
-local function updateAuction()
-    local on = module.db.auction
-    ItemButtons.EachAuctionRow(function(icon, _, link)
-        setArrow(arrows, icon, on and link and markOf(link))
-    end)
-end
-
--- Loot ------------------------------------------------------------------------------------------
-
-local function markLoot(icon, _, link)
-    setArrow(arrows, icon, module.db.loot and link and markOf(link))
-end
-
-local function markRoll(icon, link)
-    setArrow(arrows, icon, module.db.loot and link and markOf(link))
-end
+-- An auction row's link has its random suffix ("of the Bear"), whose stats are most of what such
+-- an item gives: judged without it, an upgrade showed as a downgrade.
+local walk = ItemButtons.Walk(module, function(icon, link, place, bag)
+    if place == "bags" and bag == REAGENT_BAG and module.db.reagentBag then
+        link = false
+    end
+    setArrow(arrows, icon, link and markOf(link))
+end)
 
 -- Quest rewards ---------------------------------------------------------------------------------
 
@@ -730,17 +686,7 @@ end
 -- Module ----------------------------------------------------------------------------------------
 
 local function refresh()
-    ItemButtons.EachOpenBag(updateBag)
-    local bank = _G.BankFrame
-    if bank and bank:IsShown() then
-        updateBank()
-    end
-    if ItemButtons.MerchantShown() then
-        updateMerchant()
-    end
-    updateAuction()
-    ItemButtons.EachLootSlot(markLoot)
-    ItemButtons.EachRoll(markRoll)
+    walk:Refresh()
     local info = _G.QuestInfoFrame
     if info and info.rewardsFrame and info.rewardsFrame:IsVisible() then
         updateRewards(info.rewardsFrame)
@@ -828,12 +774,7 @@ function module:OnEnable()
     end)
     hasDownFile = ok and ns.IsNumber(fileID) and fileID > 0
     updateProfile()
-    ItemButtons.HookMerchant(self, updateMerchant, clearMerchant)
-    ItemButtons.HookBags(self, updateBag)
-    ItemButtons.HookBank(self, updateBank)
-    ItemButtons.HookLoot(self, markLoot)
-    ItemButtons.HookRolls(self, markRoll)
-    ItemButtons.HookAuction(self, updateAuction)
+    walk:Hook()
     self:Hook("QuestInfo_Display", onQuestDisplay)
     ItemTooltip.ReplaceLine(onNameLine, self)
     ItemTooltip.OnInfo(onTooltip, self)
@@ -854,7 +795,7 @@ end
 
 function module:OnDisable()
     ns.Providers.Set("upgrades", nil)
-    ItemButtons.CancelAuction(updateAuction)
+    walk:Stop()
     forgetScores()
     wipe(waiting)
     rewardsWaiting = nil

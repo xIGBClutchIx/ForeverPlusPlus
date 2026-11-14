@@ -25,6 +25,74 @@ do
             placed.point = point .. ":" .. relative .. ":" .. (x + 0) .. ":" .. (y + 0) -- no "-0"
         end,
     }
+    -- Walk: one function marks every place, told the link, the place, and what the place knows
+    -- of the slot; a place that's off, an empty slot, and the buyback tab clear the mark.
+    local IB = ns.ItemButtons
+    local real = {}
+    for _, name in ipairs({ "EachBagButton", "EachOpenBag", "EachBankButton", "EachMerchantItem",
+        "EachAuctionRow", "EachLootSlot", "EachRoll", "MerchantShown", "HookBags", "HookBank",
+        "HookMerchant", "HookLoot", "HookRolls", "HookAuction", "CancelAuction" }) do
+        real[name] = IB[name]
+    end
+    local hooked, buyback = {}, nil
+    IB.EachOpenBag = function(update) update({}) end
+    IB.EachBagButton = function(_, fn) fn(nil, "bagIcon", 0, 1) fn(nil, "emptyIcon", 0, 2) end
+    IB.EachBankButton = function(fn) fn("bankIcon", 6, 3) fn("oddIcon", nil, nil) end
+    IB.EachMerchantItem = function(fn) fn("merchantIcon", 4) end
+    IB.EachAuctionRow = function(fn) fn("auctionIcon", 77, "item:77::::::5") end
+    IB.EachLootSlot = function(fn) fn("lootIcon", 2, "item:9") end
+    IB.EachRoll = function(fn) fn("rollIcon", "item:10") end
+    IB.MerchantShown = function() return true end
+    for _, name in ipairs({ "HookBags", "HookBank", "HookLoot", "HookRolls", "HookAuction" }) do
+        IB[name] = function() hooked[#hooked + 1] = name end
+    end
+    IB.HookMerchant = function(_, _, clear)
+        hooked[#hooked + 1] = "HookMerchant"
+        buyback = clear
+    end
+    IB.CancelAuction = function() hooked[#hooked + 1] = "CancelAuction" end
+    T.env.C_Container = { GetContainerItemLink = function(bag, slot)
+        return slot ~= 2 and "item:" .. bag .. slot or nil
+    end }
+    T.env.GetMerchantItemLink = function(index) return "item:m" .. index end
+    T.env.BankFrame = { IsShown = function() return true end }
+    local seen = {}
+    local function note(icon, link, place, a, b)
+        seen[icon] = tostring(link) .. "@" .. place .. ":" .. tostring(a) .. ":" .. tostring(b)
+    end
+    local module = { db = { bags = true, bank = true, merchant = true, auction = true, loot = false } }
+    local walk = IB.Walk(module, note)
+    walk:Hook()
+    eq(#hooked, 6, "walk: every place is hooked")
+    eq(next(seen), nil, "walk: hooking marks nothing by itself")
+    walk:Refresh()
+    eq(seen.bagIcon, "item:01@bags:0:1", "walk: a bag slot, with its bag and slot")
+    eq(seen.emptyIcon, "nil@bags:0:2", "walk: an empty slot clears")
+    eq(seen.bankIcon, "item:63@bank:6:3", "walk: a bank slot, with its tab and slot")
+    eq(seen.oddIcon, "nil@bank:nil:nil", "walk: a bank button that can't say its slot clears")
+    eq(seen.merchantIcon, "item:m4@merchant:4:nil", "walk: a merchant's item, with its index")
+    eq(seen.auctionIcon, "item:77::::::5@auction:77:nil", "walk: an auction row, with its suffix and ID")
+    eq(seen.lootIcon .. " " .. seen.rollIcon, "false@loot:2:nil false@loot:nil:nil",
+        "walk: a place that's off clears, loot rolls with loot")
+    buyback("merchantIcon")
+    eq(seen.merchantIcon, "false@merchant:nil:nil", "walk: the buyback tab clears the merchant's buttons")
+    walk:Stop()
+    eq(hooked[#hooked], "CancelAuction", "walk: stopping stops waiting for the auction house")
+    -- Fewer places, and a module's own say on what's on.
+    seen, hooked = {}, {}
+    local few = IB.Walk(module, note, { places = { "bags", "loot" }, shows = function(place)
+        return place == "loot"
+    end })
+    few:Hook()
+    few:Refresh()
+    eq(#hooked == 3 and seen.bankIcon == nil and seen.merchantIcon == nil and seen.auctionIcon == nil, true,
+        "walk: only the places asked for")
+    eq(seen.bagIcon .. " " .. seen.lootIcon, "false@bags:0:1 item:9@loot:2:nil",
+        "walk: what's on can be the module's own to say")
+    for name, fn in pairs(real) do
+        IB[name] = fn
+    end
+
     ns.ItemButtons.PlaceMark(mark, icon(24), { size = 18, corner = "BOTTOMRIGHT", padding = 2 })
     eq(placed.size .. " " .. placed.point, "12x12 BOTTOMRIGHT:BOTTOMRIGHT:-2:2",
         "place mark: sized for the icon, left and up from the bottom right")

@@ -562,6 +562,117 @@ function ItemButtons.Tint(icon, color)
     return tint
 end
 
+-- Every place at once ----------------------------------------------------------------------------
+
+local PLACES = { "bags", "bank", "merchant", "auction", "loot" }
+
+---One walk over every place a module marks items in, so each module writes only what its mark
+---is. `mark(icon, link, place, a, b)` is called for each item button as its window draws: `link`
+---is the item's link, or false or nil for an empty slot or a place that is off (take the mark
+---off), and `place` is bags (`a`, `b` the bag and slot), bank (the tab and slot), merchant (`a` the
+---merchant's item index; false too when the Buyback tab draws on the same buttons), auction (the
+---link with the row's random suffix, `a` the item ID), or loot (`a` the loot slot, nil for a loot
+---roll). A place is on while `module.db[place]` is, the key its Show On checkbox has
+---(`PlaceOption`), unless `opts.shows(place)` answers. Make it once, as the file loads.
+---
+---`walk:Hook()` from OnEnable hooks each window; `walk:Refresh()` marks what's open, then and
+---after the answers or the options changed; `walk:Stop()` from OnDisable stops waiting for the
+---auction house. Taking the marks off then is the module's (`Overlays:HideAll`).
+---@param module table
+---@param mark fun(icon: table?, link: string|false|nil, place: string, a?: any, b?: any)
+---@param opts? { places: string[]?, shows: (fun(place: string): any)? } `places` for fewer than all five
+---@return table walk
+function ItemButtons.Walk(module, mark, opts)
+    local has = {}
+    for _, place in ipairs(opts and opts.places or PLACES) do
+        has[place] = true
+    end
+    local shows = opts and opts.shows or function(place)
+        return module.db[place]
+    end
+
+    local function updateBag(frame)
+        local on, linkOf = shows("bags"), _G.C_Container.GetContainerItemLink
+        ItemButtons.EachBagButton(frame, function(_, icon, bag, slot)
+            mark(icon, on and linkOf(bag, slot), "bags", bag, slot)
+        end)
+    end
+    local function updateBank()
+        local on, linkOf = shows("bank"), _G.C_Container.GetContainerItemLink
+        ItemButtons.EachBankButton(function(icon, tab, slot)
+            mark(icon, on and tab and linkOf(tab, slot), "bank", tab, slot)
+        end)
+    end
+    local function updateMerchant()
+        local on = shows("merchant")
+        ItemButtons.EachMerchantItem(function(icon, index)
+            mark(icon, on and _G.GetMerchantItemLink(index), "merchant", index)
+        end)
+    end
+    local function clearMerchant(icon)
+        mark(icon, false, "merchant")
+    end
+    local function updateAuction()
+        local on = shows("auction")
+        ItemButtons.EachAuctionRow(function(icon, itemID, link)
+            mark(icon, on and link, "auction", itemID)
+        end)
+    end
+    local function markLoot(icon, slot, link)
+        mark(icon, shows("loot") and link, "loot", slot)
+    end
+    local function markRoll(icon, link)
+        mark(icon, shows("loot") and link, "loot")
+    end
+
+    local walk = {}
+
+    function walk:Hook()
+        if has.merchant then
+            ItemButtons.HookMerchant(module, updateMerchant, clearMerchant)
+        end
+        if has.bags then
+            ItemButtons.HookBags(module, updateBag)
+        end
+        if has.bank then
+            ItemButtons.HookBank(module, updateBank)
+        end
+        if has.loot then
+            ItemButtons.HookLoot(module, markLoot)
+            ItemButtons.HookRolls(module, markRoll)
+        end
+        if has.auction then
+            ItemButtons.HookAuction(module, updateAuction)
+        end
+    end
+
+    function walk:Refresh()
+        if has.bags then
+            ItemButtons.EachOpenBag(updateBag)
+        end
+        local bank = _G.BankFrame
+        if has.bank and bank and bank:IsShown() then
+            updateBank()
+        end
+        if has.merchant and ItemButtons.MerchantShown() then
+            updateMerchant()
+        end
+        if has.auction then
+            updateAuction()
+        end
+        if has.loot then
+            ItemButtons.EachLootSlot(markLoot)
+            ItemButtons.EachRoll(markRoll)
+        end
+    end
+
+    function walk:Stop()
+        ItemButtons.CancelAuction(updateAuction)
+    end
+
+    return walk
+end
+
 ---An item's tooltip lines, or nil while the game has no tooltip for it yet (not cached), so that
 ---isn't taken for an answer.
 ---@param link string

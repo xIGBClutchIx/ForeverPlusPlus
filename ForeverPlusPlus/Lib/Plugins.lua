@@ -24,8 +24,7 @@ local addonName, ns = ...
 
 local type, pairs, ipairs, error, setmetatable, match = type, pairs, ipairs, error, setmetatable, string.match
 local pcall, tostring, format, huge, min, max = pcall, tostring, string.format, math.huge, math.min, math.max
-local select, _G = select, _G
-local C_Container = C_Container
+local select = select
 
 local L = ns.L
 
@@ -1016,64 +1015,22 @@ local function newMarks(module, test, look)
         }
     end
 
-    -- Shown in a place unless the module has a setting of its name that is off.
-    local function shows(where)
-        return active and module.db[where] ~= false
-    end
-
-    local function set(icon, link, where, how)
+    -- The walk over every place is ours (ItemButtons.Walk), as our own marking modules use it. A
+    -- place is on unless the module has a setting of its name that is off.
+    local walk = ItemButtons.Walk(module, function(icon, link, where)
         if not icon then
             return
         end
-        local mark = marks:Set(icon, link and shows(where) and run(link, where))
+        local mark = marks:Set(icon, link and run(link, where))
         if mark then
-            ItemButtons.PlaceMark(mark, icon, how)
+            ItemButtons.PlaceMark(mark, icon, place())
         end
-    end
-
-    local function updateBag(frame)
-        local how = place()
-        ItemButtons.EachBagButton(frame, function(_, icon, bag, slot)
-            set(icon, C_Container.GetContainerItemLink(bag, slot), "bags", how)
-        end)
-    end
-    local function updateBank()
-        local how = place()
-        ItemButtons.EachBankButton(function(icon, tab, slot)
-            set(icon, tab and slot and C_Container.GetContainerItemLink(tab, slot), "bank", how)
-        end)
-    end
-    local function updateMerchant()
-        local how = place()
-        ItemButtons.EachMerchantItem(function(icon, index)
-            set(icon, _G.GetMerchantItemLink(index), "merchant", how) -- there, or the walk does nothing
-        end)
-    end
-    local function clearMerchant(icon) -- the buyback tab draws on the same buttons
-        marks:Set(icon, false)
-    end
-    local function updateAuction()
-        local how = place()
-        ItemButtons.EachAuctionRow(function(icon, _, link)
-            set(icon, link, "auction", how)
-        end)
-    end
-    local function markLoot(icon, _, link)
-        set(icon, link, "loot", place())
-    end
-    local function markRoll(icon, link)
-        set(icon, link, "loot", place())
-    end
+    end, { shows = function(where)
+        return active and module.db[where] ~= false
+    end })
 
     local function refresh()
-        if ItemButtons.MerchantShown() then
-            updateMerchant()
-        end
-        updateAuction()
-        ItemButtons.EachOpenBag(updateBag)
-        updateBank()
-        ItemButtons.EachRoll(markRoll)
-        ItemButtons.EachLootSlot(markLoot)
+        walk:Refresh()
     end
     -- A merchant's links are missing until the game has loaded its items; look again once it has.
     local refreshSoon = ns.Frames.Coalesce(function()
@@ -1088,18 +1045,13 @@ local function newMarks(module, test, look)
     end
 
     local function hook()
-        ItemButtons.HookBags(module, updateBag)
-        ItemButtons.HookBank(module, updateBank)
-        ItemButtons.HookMerchant(module, updateMerchant, clearMerchant)
-        ItemButtons.HookLoot(module, markLoot)
-        ItemButtons.HookRolls(module, markRoll)
-        ItemButtons.HookAuction(module, updateAuction)
+        walk:Hook()
         module:On("GET_ITEM_INFO_RECEIVED", onItemInfo)
         refresh()
     end
     local function disable()
         active = false
-        ItemButtons.CancelAuction(updateAuction)
+        walk:Stop()
         marks:HideAll()
     end
     local list = states[module].marks

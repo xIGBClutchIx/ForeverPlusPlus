@@ -14,7 +14,7 @@
 local _, ns = ...
 
 local _G, wipe, select, pairs = _G, wipe, select, pairs
-local C_Item, C_Container = C_Item, C_Container
+local C_Item = C_Item
 
 local L = ns.L
 local ItemButtons = ns.ItemButtons
@@ -120,27 +120,7 @@ local tints = ItemButtons.Overlays(function(icon)
     return ItemButtons.Tint(icon, TINT)
 end)
 
--- Bags ------------------------------------------------------------------------------------------
-
-local function updateBag(frame)
-    local on = module.db.bags
-    ItemButtons.EachBagButton(frame, function(_, icon, bag, slot)
-        local link = on and C_Container.GetContainerItemLink(bag, slot)
-        tints:Set(icon, link and unusable(link))
-    end)
-end
-
--- Bank ------------------------------------------------------------------------------------------
-
-local function updateBank()
-    local on = module.db.bank
-    ItemButtons.EachBankButton(function(icon, tab, slot)
-        local link = on and tab and C_Container.GetContainerItemLink(tab, slot)
-        tints:Set(icon, link and unusable(link))
-    end)
-end
-
--- Merchants -------------------------------------------------------------------------------------
+-- Bags, bank, merchants, the auction house, loot, and loot rolls -----------------------------------
 
 -- Whether Blizzard already tints this merchant item red, so ours isn't laid on top of it.
 local function blizzardTinted(index)
@@ -149,54 +129,29 @@ local function blizzardTinted(index)
     return info and (info.isPurchasable == false or info.isUsable == false)
 end
 
-local function updateMerchant()
-    local on = module.db.merchant
-    ItemButtons.EachMerchantItem(function(icon, index)
-        local link = on and _G.GetMerchantItemLink(index)
-        tints:Set(icon, link and not blizzardTinted(index) and unusable(link))
-    end)
-end
-
--- The buyback tab reuses the same buttons, and Blizzard tints those itself.
-local function clearMerchant(icon)
-    tints:Set(icon, false)
-end
-
--- Auction house ---------------------------------------------------------------------------------
-
-local function updateAuction()
-    local on = module.db.auction
-    ItemButtons.EachAuctionRow(function(icon, itemID)
-        tints:Set(icon, on and itemID and unusable("item:" .. itemID))
-    end)
-end
-
--- Loot ------------------------------------------------------------------------------------------
-
--- Blizzard tints a slot you can't loot (locked) red itself, so ours isn't laid on top of it.
-local function tintLoot(icon, slot, link)
-    local locked = slot and _G.GetLootSlotInfo and select(6, _G.GetLootSlotInfo(slot))
-    tints:Set(icon, module.db.loot and link and not locked and unusable(link))
-end
-
-local function tintRoll(icon, link)
-    tints:Set(icon, module.db.loot and link and unusable(link))
-end
+-- `a` is the merchant's item index, the auction row's item ID, or the loot slot (ItemButtons.Walk).
+local walk = ItemButtons.Walk(module, function(icon, link, place, a)
+    if not link then
+        -- An empty slot, a place that's off, or the buyback tab, whose items Blizzard tints itself.
+        tints:Set(icon, false)
+        return
+    end
+    if place == "merchant" then
+        link = not blizzardTinted(a) and link
+    elseif place == "auction" then
+        link = a and "item:" .. a -- usable is the item's, whatever its random suffix
+    elseif place == "loot" then
+        -- Blizzard tints a slot you can't loot (locked) red itself, so ours isn't laid on top of it.
+        local locked = a and _G.GetLootSlotInfo and select(6, _G.GetLootSlotInfo(a))
+        link = not locked and link
+    end
+    tints:Set(icon, link and unusable(link))
+end)
 
 -- Module ----------------------------------------------------------------------------------------
 
 local function refresh()
-    ItemButtons.EachOpenBag(updateBag)
-    local bank = _G.BankFrame
-    if bank and bank:IsShown() then
-        updateBank()
-    end
-    if ItemButtons.MerchantShown() then
-        updateMerchant()
-    end
-    updateAuction()
-    ItemButtons.EachLootSlot(tintLoot)
-    ItemButtons.EachRoll(tintRoll)
+    walk:Refresh()
 end
 
 local forget
@@ -239,12 +194,7 @@ local function onItemInfo(_, itemID)
 end
 
 function module:OnEnable()
-    ItemButtons.HookMerchant(self, updateMerchant, clearMerchant)
-    ItemButtons.HookBags(self, updateBag)
-    ItemButtons.HookBank(self, updateBank)
-    ItemButtons.HookLoot(self, tintLoot)
-    ItemButtons.HookRolls(self, tintRoll)
-    ItemButtons.HookAuction(self, updateAuction)
+    walk:Hook()
     self:On("GET_ITEM_INFO_RECEIVED", onItemInfo) -- items without a tooltip yet weren't kept
     self:On("PLAYER_LEVEL_UP", onPlayerChanged)
     self:On("SKILL_LINES_CHANGED", onPlayerChanged)
@@ -253,7 +203,7 @@ function module:OnEnable()
 end
 
 function module:OnDisable()
-    ItemButtons.CancelAuction(updateAuction)
+    walk:Stop()
     forget = false
     wipe(results) -- you may level while it's off
     wipe(waiting)

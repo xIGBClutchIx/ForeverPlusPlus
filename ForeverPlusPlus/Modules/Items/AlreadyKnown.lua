@@ -11,7 +11,7 @@
 local _, ns = ...
 
 local _G, type, strfind = _G, type, strfind
-local C_Item, C_Container = C_Item, C_Container
+local C_Item = C_Item
 local C_ToyBox = C_ToyBox
 local GetTime = GetTime
 
@@ -204,38 +204,16 @@ local function clearMarks()
     checks:HideAll()
 end
 
--- Merchants -------------------------------------------------------------------------------------
+-- Merchants, the auction house, bags, loot, and loot rolls ------------------------------------------
+-- A loot roll is marked as its frame shows, before the player picks Need.
 
-local function updateMerchant()
-    local on = module.db.merchant
-    ItemButtons.EachMerchantItem(function(icon, index)
-        setMark(icon, on and itemKnown(_G.GetMerchantItemLink(index)))
-    end)
-end
-
--- The buyback tab reuses the same buttons.
-local function clearMerchant(icon)
-    setMark(icon, false)
-end
-
--- Auction house ---------------------------------------------------------------------------------
-
-local function updateAuction()
-    local on = module.db.auction
-    ItemButtons.EachAuctionRow(function(icon, itemID)
-        setMark(icon, on and itemID and itemKnown("item:" .. itemID))
-    end)
-end
-
--- Bags ------------------------------------------------------------------------------------------
-
-local function updateBag(frame)
-    local on = module.db.bags
-    ItemButtons.EachBagButton(frame, function(_, icon, bag, slot)
-        local link = on and C_Container.GetContainerItemLink(bag, slot)
-        setMark(icon, link and itemKnown(link))
-    end)
-end
+local walk = ItemButtons.Walk(module, function(icon, link, place, itemID)
+    if place == "auction" then
+        -- Known is the item's, whatever its random suffix.
+        link = link and itemID and "item:" .. itemID
+    end
+    setMark(icon, link and itemKnown(link))
+end, { places = { "merchant", "auction", "bags", "loot" } })
 
 -- Mail ------------------------------------------------------------------------------------------
 
@@ -283,32 +261,15 @@ local function updateOpenMail()
     end
 end
 
--- Loot ------------------------------------------------------------------------------------------
-
-local function markLoot(icon, _, link)
-    setMark(icon, module.db.loot and link and itemKnown(link))
-end
-
--- Loot rolls are marked as the frame shows, before the player picks Need.
-local function markRoll(icon, link)
-    setMark(icon, module.db.loot and link and itemKnown(link))
-end
-
 -- Module ----------------------------------------------------------------------------------------
 
 local function refresh()
-    if ItemButtons.MerchantShown() then
-        updateMerchant()
-    end
-    updateAuction()
-    ItemButtons.EachOpenBag(updateBag)
+    walk:Refresh()
     local mail = _G.MailFrame
     if mail and mail:IsShown() then
         updateInbox()
         updateOpenMail()
     end
-    ItemButtons.EachRoll(markRoll)
-    ItemButtons.EachLootSlot(markLoot)
 end
 
 local refreshSoon = ns.Frames.Coalesce(function()
@@ -333,21 +294,17 @@ local function onItemInfo(_, itemID)
 end
 
 function module:OnEnable()
-    ItemButtons.HookMerchant(self, updateMerchant, clearMerchant)
     -- Forever's mail frame redraws through its mixins (InboxMixin:Update, OpenMailMixin:Update,
     -- build 70338 on), not Classic's InboxFrame_Update and OpenMail_Update.
     self:Hook(_G.InboxFrame, "Update", updateInbox)
     self:Hook(_G.OpenMailFrame, "Update", updateOpenMail)
-    ItemButtons.HookBags(self, updateBag)
-    ItemButtons.HookLoot(self, markLoot)
-    ItemButtons.HookRolls(self, markRoll)
-    ItemButtons.HookAuction(self, updateAuction)
     self:On("GET_ITEM_INFO_RECEIVED", onItemInfo)
+    walk:Hook()
     refresh()
 end
 
 function module:OnDisable()
-    ItemButtons.CancelAuction(updateAuction)
+    walk:Stop()
     clearMarks()
 end
 

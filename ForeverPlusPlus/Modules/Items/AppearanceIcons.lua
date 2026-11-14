@@ -12,7 +12,7 @@
 local _, ns = ...
 
 local _G, pairs, wipe = _G, pairs, wipe
-local C_Item, C_Container, C_TradeSkillUI = C_Item, C_Container, C_TradeSkillUI
+local C_Item, C_TradeSkillUI = C_Item, C_TradeSkillUI
 local GetTime = GetTime
 
 local L = ns.L
@@ -178,54 +178,15 @@ local function setMark(icon, on)
     ItemButtons.PlaceMark(mark, icon, module.db)
 end
 
--- Bags and bank -----------------------------------------------------------------------------------
+-- Bags, bank, merchants, the auction house, loot, and loot rolls -----------------------------------
 
-local function updateBag(frame)
-    local on = module.db.bags
-    ItemButtons.EachBagButton(frame, function(_, icon, bag, slot)
-        local link = on and C_Container.GetContainerItemLink(bag, slot)
-        setMark(icon, link and uncollected(link))
-    end)
-end
-
-local function updateBank()
-    local on = module.db.bank
-    ItemButtons.EachBankButton(function(icon, tab, slot)
-        local link = on and tab and C_Container.GetContainerItemLink(tab, slot)
-        setMark(icon, link and uncollected(link))
-    end)
-end
-
--- Merchants -------------------------------------------------------------------------------------
-
-local function updateMerchant()
-    local on = module.db.merchant
-    ItemButtons.EachMerchantItem(function(icon, index)
-        setMark(icon, on and uncollected(_G.GetMerchantItemLink(index)))
-    end)
-end
-
--- The buyback tab reuses the same buttons.
-local function clearMerchant(icon)
-    setMark(icon, false)
-end
-
--- Auction house and loot ------------------------------------------------------------------------
-
-local function updateAuction()
-    local on = module.db.auction
-    ItemButtons.EachAuctionRow(function(icon, itemID)
-        setMark(icon, on and itemID and uncollected("item:" .. itemID))
-    end)
-end
-
-local function markLoot(icon, _, link)
-    setMark(icon, module.db.loot and link and uncollected(link))
-end
-
-local function markRoll(icon, link)
-    setMark(icon, module.db.loot and link and uncollected(link))
-end
+local walk = ItemButtons.Walk(module, function(icon, link, place, itemID)
+    if place == "auction" then
+        -- The appearance is the item's, whatever its random suffix.
+        link = link and itemID and "item:" .. itemID
+    end
+    setMark(icon, link and uncollected(link))
+end)
 
 -- Professions -------------------------------------------------------------------------------------
 -- The recipe list's rows have no item icon, so the mark goes on the row at text height, where the
@@ -321,17 +282,7 @@ end
 
 local function refresh()
     updateRecipes()
-    if ItemButtons.MerchantShown() then
-        updateMerchant()
-    end
-    updateAuction()
-    ItemButtons.EachOpenBag(updateBag)
-    local bank = _G.BankFrame
-    if bank and bank:IsShown() then
-        updateBank()
-    end
-    ItemButtons.EachRoll(markRoll)
-    ItemButtons.EachLootSlot(markLoot)
+    walk:Refresh()
 end
 
 local refreshSoon = ns.Frames.Coalesce(function()
@@ -365,12 +316,7 @@ function module:OnEnable()
     self:TooltipLinePreCall(TooltipDataProcessor and TooltipDataProcessor.AllTypes, skipLine)
     -- The professions window is a load-on-demand addon: its recipe rows are hooked once there.
     ns.Professions.WatchWindow(self, hookRecipes, refreshSoon)
-    ItemButtons.HookMerchant(self, updateMerchant, clearMerchant)
-    ItemButtons.HookBags(self, updateBag)
-    ItemButtons.HookBank(self, updateBank)
-    ItemButtons.HookLoot(self, markLoot)
-    ItemButtons.HookRolls(self, markRoll)
-    ItemButtons.HookAuction(self, updateAuction)
+    walk:Hook()
     self:On("GET_ITEM_INFO_RECEIVED", onItemInfo)
     self:On("PLAYER_EQUIPMENT_CHANGED", onCollectionChanged)
     for _, event in pairs({ "TRANSMOG_COLLECTION_UPDATED", "TRANSMOG_COLLECTION_SOURCE_ADDED" }) do
@@ -382,7 +328,7 @@ function module:OnEnable()
 end
 
 function module:OnDisable()
-    ItemButtons.CancelAuction(updateAuction)
+    walk:Stop()
     marks:HideAll()
     rowMarks:HideAll()
     endColumn:Use(false)

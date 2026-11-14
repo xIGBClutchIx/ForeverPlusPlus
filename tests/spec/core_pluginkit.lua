@@ -56,10 +56,12 @@ core.WorldMap = {
     end,
 }
 
--- Item buttons: one bag window with two slots, and overlays that remember what shows.
+-- Item buttons: the real walk over every place (ItemButtons.Walk), with one bag window of two
+-- slots for it to find and overlays that remember what shows.
 local shown, placed = {}, {}
 local iconOne, iconTwo = {}, {}
-core.ItemButtons = {
+T.load("Lib/ItemButtons", core)
+for name, fn in pairs({
     Overlays = function()
         return {
             Set = function(_, icon, on)
@@ -90,7 +92,9 @@ core.ItemButtons = {
     CancelAuction = function() end,
     CornerOption = function(description) return { key = "corner", name = "Corner", description = description,
         choices = { { "TOPLEFT", "Top Left" }, { "TOPRIGHT", "Top Right" } } } end,
-}
+}) do
+    core.ItemButtons[name] = fn
+end
 
 local editFrames = {}
 core.EditMode = {
