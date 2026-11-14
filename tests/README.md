@@ -18,7 +18,8 @@ On Windows: `"C:\Program Files (x86)\Lua\5.1\lua.exe" tests/run.lua`. CI runs `l
 | `lib/env.lua` | A fresh copy of the addon for each spec: stubbed WoW globals, an `ns`, the enUS Core and Map strings, and the pure-logic `Lib/` files. |
 | `lib/harness.lua` | The checks: `eq`, `same`, `near`, `ok`, `raises`. |
 | `lib/bytecode.lua` | The globals a file reads and writes, with their lines, and the strings in its code, from its Lua 5.1 bytecode (what `luac -l` lists as GETGLOBAL and SETGLOBAL), for the `globals` and `rules` specs. |
-| `spec/*.lua` | One spec per area: a Lib file (`text`, `store`, `prices`, `cvars`, `units`, ...), Core's module lifecycle (`core`), the public API (`api`), and checks across the addon (`globals`, `locales`, `modules`, `release`, `rules`). |
+| `lib/core.lua` | A fresh loaded Core for a spec, as `T.Core()`: the real `Core.lua` on stub frames and a stub clock (see The real Core). |
+| `spec/*.lua` | One spec per area: a Lib file (`text`, `store`, `prices`, `cvars`, `units`, ...), Core by area (the `core_*` specs), the public API (`api`), and checks across the addon (`globals`, `locales`, `modules`, `release`, `rules`). |
 
 ## A spec
 
@@ -46,6 +47,46 @@ What `T` holds:
   - `ok(value, what)`: anything but `nil` or `false`.
   - `raises(fn, pattern, what)`: `fn` errors, with `pattern` in the message.
 
+## The real Core
+
+`T.ns` has no Core: a Lib spec stubs the one or two `ns` functions its file calls. A spec that tests Core itself, or needs a real one, calls `T.Core()` (`lib/core.lua`). Each call loads the real `Core.lua`, `Commands.lua`, and the Lib files Core needs into an `ns` of its own, against stub frames and a clock for `C_Timer`. `lua5.1 tests/run.lua core` runs every Core spec:
+
+| Spec | What |
+| --- | --- |
+| `core_modules` | Modules and parts turning on and off, `OnWhile`, `PartOn`, a locked module. |
+| `core_frames` | A window's saved size, and timers a module or part owns (`Lib/Frames.lua`). |
+| `core_hooks` | A module's tooltip hooks. |
+| `core_settings` | A choice staying saved until a reset, and a `cvar` checkbox in and out of combat. |
+| `core_commands` | `/fpp set` and `toggle`, Defaults, a command whose module is off. |
+| `core_profiles` | Switching profiles live, and `ns.switching`. |
+| `core_presets` | A profile based on a preset. |
+| `core_plugins` | Another addon's module through `Lib/Plugins.lua`. |
+
+```lua
+local T = ...
+local eq = T.eq
+local c = T.Core()
+local core = c.ns
+local m = c.Modules()   -- the usual test modules, or make your own with core.NewModule
+c.Login()               -- or c.Login(savedDB)
+
+core.SetOption("Plain", "loud", true)
+eq(c.registered("PLAYER_MONEY"), true, "lifecycle: checkbox on: listened")
+```
+
+What `c` holds:
+
+- `c.ns`: the loaded `ns`. Nothing has logged in until `c.Login(db)`, which sets `ForeverPlusPlusDB` to `db` (nothing by default) and calls `ns.Start()`. Make modules before it.
+- `c.fire(event, ...)` fires an event on the stub frames, and `c.registered(event)` says whether any frame listens for it.
+- `c.wait(seconds)` moves the clock on and runs the timers that came due.
+- `c.inCombat`: set it to change what `InCombatLockdown` answers, then `c.fire("PLAYER_REGEN_ENABLED")` to end combat.
+- `c.cvars` and `c.refuse`: the client's CVars by name, and the ones it won't set.
+- `c.refreshed`: the module names Settings was asked to redraw. Set a new table to start over.
+- `c.count(key)` gives a handler that counts its calls in `c.heard[key]`.
+- `c.Modules()` makes the modules most Core specs act on and returns them by name: `plain` (a checkbox `loud` and a dropdown `mode`, each with `OnWhile` events), `host` with its parts `check`, `drop`, and `side`, `coords` (a `cvar` checkbox), `locked`, and `tool` (always on), with their timers and what their callbacks recorded. `lib/core.lua` says what each is for.
+
+A Core spec starts from a fresh login and builds the state its checks need, so one that fails doesn't take the others with it.
+
 ## wowlua-ls
 
 CI also runs [wowlua-ls](https://github.com/TradeSkillMaster/wowlua-ls) (the version is pinned in `.github/workflows/check.yml`; the repo root's `.wowluarc.json` sets the Forever flavor) and hands its output to `wowlua.lua`, which fails on any finding `wowlua-baseline.txt` doesn't list, and on one the baseline lists but that's gone. A finding there is its file, code, and message, with how many times it's there, without lines, so moving code doesn't count as new. Locally, with a release binary:
@@ -58,7 +99,7 @@ lua5.1 tests/wowlua.lua out.txt --update   # rewrite the baseline after a fix, o
 
 ## What to test
 
-Test pure logic: anything in `Lib/` with no frames, and Core's module lifecycle on the stub frames in `spec/core.lua`. Add a check when you change or add that logic, and a spec when you add a Lib file. Don't test frame or UI code; it needs the client.
+Test pure logic: anything in `Lib/` with no frames, and Core's module lifecycle on the stub frames of the `core_*` specs. Add a check when you change or add that logic, and a spec when you add a Lib file. Don't test frame or UI code; it needs the client.
 
 These specs check the whole addon:
 

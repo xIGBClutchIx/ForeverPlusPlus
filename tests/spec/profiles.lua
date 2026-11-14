@@ -1,5 +1,5 @@
 -- Profiles: making, naming, deleting, the characters on each, and switching (with Core's part
--- stubbed; spec/core.lua switches with the real one).
+-- stubbed; spec/core_profiles.lua switches with the real one).
 local T = ...
 local ns, eq, ok = T.ns, T.eq, T.ok
 

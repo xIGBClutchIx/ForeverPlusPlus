@@ -3,10 +3,7 @@ local T = ...
 local ns, eq, same, ok = T.ns, T.eq, T.same, T.ok
 
 ns.AddCommand = function() end
-ns.OptionKind = function(option) -- as Core's
-    if option.choices then return "dropdown" elseif option.min then return "slider" end
-    return "checkbox"
-end
+ns.OptionKind = T.Core().ns.OptionKind -- the real Core's
 ns.version = "1.6.0"
 ns.modules = {
     Win = { name = "Win", defaults = { enabled = false, size = 10, mode = "a", loud = false, x = 0,

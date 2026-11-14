@@ -178,10 +178,19 @@ function Env.New()
     for _, file in ipairs(Env.LIBS) do
         load("Lib/" .. file)
     end
-    return {
+    local T = {
         env = env, ns = ns, player = player, game = game, load = load, ADDON = Env.ADDON,
         ROOT = Env.ROOT, Toc = Env.Toc, Read = Env.Read, LuaFiles = Env.LuaFiles, DiskFiles = Env.DiskFiles,
     }
+
+    -- The real Core, loaded and not yet logged in, for a spec that tests it (tests/lib/core.lua).
+    -- It runs in this environment, so the stubs it sets are the spec's.
+    function T.Core()
+        local chunk = assert(loadfile("tests/lib/core.lua"))
+        setfenv(chunk, env)
+        return chunk(T)
+    end
+    return T
 end
 
 return Env
