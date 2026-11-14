@@ -91,7 +91,7 @@ A Core spec starts from a fresh login and builds the state its checks need, so o
 
 ## wowlua-ls
 
-CI also runs [wowlua-ls](https://github.com/TradeSkillMaster/wowlua-ls) (the version is pinned in `.github/workflows/check.yml`; the repo root's `.wowluarc.json` sets the Forever flavor) and hands its output to `wowlua.lua`, which fails on any finding `wowlua-baseline.txt` doesn't list, and on one the baseline lists but that's gone. A finding there is its file, code, and message, with how many times it's there, without lines, so moving code doesn't count as new. Locally, with a release binary:
+CI also runs [wowlua-ls](https://github.com/TradeSkillMaster/wowlua-ls) (the version is pinned in `.github/workflows/check.yml`; the repo root's `.wowluarc.json` sets the Forever flavor) and hands its output to `wowlua.lua`, which fails on any finding `wowlua-baseline.txt` doesn't list, and on one the baseline lists but that's gone. A finding there is its file, code, and message, with how many times it's there, without lines, so moving code doesn't count as new. The baseline's findings sit in groups under a comment saying why they stay; `--update` keeps the comments, drops a group with nothing left in it, and puts a new finding in a "Not sorted yet" group at the end, to move under the comment that fits. Locally, with a release binary:
 
 ```sh
 wowlua_ls check . > out.txt 2>&1

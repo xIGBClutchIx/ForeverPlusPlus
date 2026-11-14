@@ -6,7 +6,8 @@
 --
 -- A finding is its file, code, and message, without the line, so editing a file elsewhere doesn't
 -- move it. The baseline lists each with how many times it's there; fixing one shrinks it, and the
--- run says to drop it. See tests/README.md.
+-- run says to drop it. Its comments say why the findings under them stay; an update keeps them,
+-- and puts a new finding in a group of its own at the end. See tests/README.md.
 
 local BASELINE = "tests/wowlua-baseline.txt"
 
@@ -36,25 +37,75 @@ if not checked then
 end
 table.sort(order)
 
-if update then
-    local file = assert(io.open(BASELINE, "wb"))
-    file:write("# wowlua-ls findings known when this was written (tests/wowlua.lua --update).\n")
-    file:write("# count<TAB>file: severity[code] message\n")
-    for _, key in ipairs(order) do
-        file:write(found[key].count, "\t", key, "\n")
+-- The baseline: each finding's count, and the groups it's written in. A group is the "#" lines
+-- saying why its findings stay, then the findings; a blank line ends it. The first "#" lines, with
+-- no findings under them, are the file's header.
+local UNSORTED = "# Not sorted yet: move each under the comment that says why it stays, or fix it."
+local known, groups, group = {}, {}, nil
+local baseline = io.open(BASELINE, "rb")
+if baseline then
+    for line in baseline:lines() do
+        line = line:gsub("\r$", "")
+        local count, key = line:match("^(%d+)\t(.*)$")
+        if count then
+            known[key] = tonumber(count)
+            if not group then
+                group = { why = {}, keys = {} }
+                groups[#groups + 1] = group
+            end
+            group.keys[key], group.any = true, true
+        elseif line:match("^#") then
+            if not group or group.any then
+                group = { why = {}, keys = {} }
+                groups[#groups + 1] = group
+            end
+            group.why[#group.why + 1] = line
+        else
+            group = nil
+        end
     end
-    file:close()
-    print(("Wrote %d findings to %s."):format(#order, BASELINE))
-    os.exit(0)
+    baseline:close()
 end
 
-local known = {}
-for line in io.lines(BASELINE) do
-    line = line:gsub("\r$", "")
-    local count, key = line:match("^(%d+)\t(.*)$")
-    if count then
-        known[key] = tonumber(count)
+if update then
+    local file = assert(io.open(BASELINE, "wb"))
+    local header = groups[1] and not groups[1].any and table.remove(groups, 1)
+    for _, line in ipairs(header and header.why or {
+        "# wowlua-ls findings known when this was written (tests/wowlua.lua --update), under why each",
+        "# stays.",
+        "# count<TAB>file: severity[code] message",
+    }) do
+        file:write(line, "\n")
     end
+    -- Each group again with the findings still there, then the new ones in a group of their own.
+    local placed, unsorted = {}, 0
+    local function write(why, has)
+        local wrote = false
+        for _, key in ipairs(order) do
+            if not placed[key] and has(key) then
+                if not wrote then
+                    file:write("\n")
+                    for _, line in ipairs(why) do
+                        file:write(line, "\n")
+                    end
+                    wrote = true
+                end
+                placed[key] = true
+                file:write(found[key].count, "\t", key, "\n")
+            end
+        end
+    end
+    for _, entry in ipairs(groups) do
+        write(entry.why, function(key) return entry.keys[key] end)
+    end
+    for _, key in ipairs(order) do
+        unsorted = unsorted + (placed[key] and 0 or 1)
+    end
+    write({ UNSORTED }, function() return true end)
+    file:close()
+    print(("Wrote %d findings to %s%s."):format(#order, BASELINE,
+        unsorted > 0 and (", %d not sorted yet"):format(unsorted) or ""))
+    os.exit(0)
 end
 
 local new, gone = {}, {}
