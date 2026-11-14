@@ -21,7 +21,7 @@ function Errors.Changed()
 end
 
 ---Error Catcher's side: its counts and window while it's on, or nil when it turns off.
----@param provider? { session: fun(): number, saved: fun(): number, toggle: fun(), clearSession: fun(), clearAll: fun() }
+---@param provider? { session: (fun(): number), saved: (fun(): number), toggle: fun(), clearSession: fun(), clearAll: fun() }
 function Errors.Provide(provider)
     source = provider
     Errors.Changed()

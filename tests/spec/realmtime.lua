@@ -13,6 +13,7 @@ T.env.date = function()
     return here
 end
 local ns = {}
+T.load("Lib/Secret", ns)
 T.load("Lib/RealmTime", ns)
 local R = ns.RealmTime
 
@@ -27,6 +28,9 @@ eq(R.Offset(), 345, "realmtime: across the year, a quarter hour zone")
 here = { year = 2026, month = 11, day = 7, hour = 20, min = 0 }
 realm = { year = 2026, month = 11, monthDay = 7, weekday = 7, hour = 20, minute = 0 }
 eq(R.Offset(), 0, "realmtime: the same clock")
+realm = { year = 2026, month = 11, monthDay = 7, hour = 20 }
+eq(R.Offset(), nil, "realmtime: a realm time missing a part")
+realm = { year = 2026, month = 11, monthDay = 7, weekday = 7, hour = 20, minute = 0 }
 
 T.env.C_DateAndTime = {}
 T.load("Lib/RealmTime", ns)

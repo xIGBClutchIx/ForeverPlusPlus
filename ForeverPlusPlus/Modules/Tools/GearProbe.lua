@@ -461,7 +461,7 @@ local function checkConversions()
             add(name .. ": missing")
         end
     end
-    local ratingRates, sources = ns.ItemStats and ns.ItemStats.RatingRates and ns.ItemStats.RatingRates()
+    local ratingRates, sources = ns.ItemStats.RatingRates()
     dump("rating rates per point (Lib/ItemStats.lua)", ratingRates)
     dump("rating rate sources", sources)
 end

@@ -135,7 +135,7 @@ local trace -- fn(step, a, b, c) while a module logs what's heard, for finding o
 ---(spell ID, and whether it was the gather's cast), "failed" (spell ID), "refused" (the error and
 ---the node it's about), "loot" (the source GUID, how many items, and when it came), and "catch"
 ---(the pool a catch was from, and the object hovered). Nil to stop.
----@param fn? fun(step: string, a: any, b: any, c: any)
+---@param fn? fun(step: string, a: any, b?: any, c?: any)
 function Gathering.SetTrace(fn)
     trace = fn
 end

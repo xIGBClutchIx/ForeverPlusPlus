@@ -49,8 +49,13 @@ end
 function RealmTime.Offset()
     local realm = C_DateAndTime and C_DateAndTime.GetCurrentCalendarTime
         and C_DateAndTime.GetCurrentCalendarTime()
-    if not (realm and realm.year and realm.hour) then
+    if not realm then
         return nil
+    end
+    for _, key in ipairs({ "year", "month", "monthDay", "hour", "minute" }) do
+        if not ns.IsNumber(realm[key]) then
+            return nil -- missing, or secret: no arithmetic on it
+        end
     end
     local here = date("*t")
     local diff = (days(here.year, here.month, here.day) - days(realm.year, realm.month, realm.monthDay))

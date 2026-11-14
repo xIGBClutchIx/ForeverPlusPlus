@@ -355,7 +355,7 @@ end
 ---@param name string
 ---@param defaults table
 ---@param perCharacter? table<string, boolean>
----@param linked? table<string, { get: fun(): any, set: fun(value: any) }>
+---@param linked? table<string, { get: (fun(): any), set: fun(value: any) }>
 ---@param perProfile? table<string, boolean>
 ---@return table view
 function Store.Load(db, char, name, defaults, perCharacter, linked, perProfile)

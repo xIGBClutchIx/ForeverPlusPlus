@@ -296,7 +296,11 @@ local labelBase
 local function labelSize()
     if not labelBase then
         local font = _G.GameFontNormalSmall
-        local _, size = font and font:GetFont()
+        -- Not `font and font:GetFont()`: that keeps only the first value.
+        local size
+        if font then
+            size = select(2, font:GetFont())
+        end
         labelBase = size or 10
     end
     return floor(labelBase * module.db.markerSize / 16 + 0.5)
@@ -304,7 +308,10 @@ end
 
 local function setLabelFont(text, template, size)
     local font = _G[template]
-    local path, _, flags = font and font:GetFont()
+    local path, flags, _
+    if font then
+        path, _, flags = font:GetFont()
+    end
     text:SetFont(path or STANDARD_TEXT_FONT, size, flags or "")
 end
 
@@ -348,7 +355,7 @@ local function build()
             region:SetTextColor(color.r, color.g, color.b)
         elseif db.numbers and angle % 15 == 0 then
             region = fontString("GameFontHighlight", max(8, floor(height * 0.36)))
-            region:SetText(angle)
+            region:SetText(tostring(angle))
             region:SetTextColor(0.8, 0.76, 0.68)
         elseif db.ticks == "dots" and angle % 15 == 0 then
             region = texture()

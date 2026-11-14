@@ -109,6 +109,7 @@ local function share()
     end)
 end
 
+---@param message string
 local function way(message)
     if not (module.enabled and module.db.way) then
         return -- chat cached the command before it was turned off, on a client we couldn't clear

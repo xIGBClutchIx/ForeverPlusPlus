@@ -307,7 +307,7 @@ local function colorLevelLine(tooltip, data, unit, guildLine)
     for i = 2, #data.lines do
         local text = i ~= guildLine and lineText(data, i)
         if text and find(text, levelPattern) then
-            local changed, found = false
+            local changed, found = false, nil
             if db.levelColor then
                 local color = levelColor(level)
                 if color then

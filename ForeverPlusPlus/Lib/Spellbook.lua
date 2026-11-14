@@ -36,7 +36,7 @@ end
 function Spellbook.Rank(spellID)
     local text = C_Spell.GetSpellSubtext(spellID)
     local rank = ns.IsText(text) and strmatch(text, "%d+")
-    return rank and tonumber(rank)
+    return rank and tonumber(rank) or nil
 end
 
 -- The spell's name and subtext, or nil while the game hasn't loaded its data (it is asked for).

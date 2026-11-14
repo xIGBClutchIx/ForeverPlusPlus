@@ -714,7 +714,7 @@ end
 ---@param frame table
 ---@param label string the dialog's title and the right-click menu's
 ---@param onMove fun(x: number, y: number)
----@param options? { onChange: fun(active: boolean)?, scale: { min: number, max: number, step: number, format: string?, get: fun(): number, set: fun(value: number) }?, reset: fun()?, settings: table[]? }
+---@param options? { onChange: fun(active: boolean)?, scale: { min: number, max: number, step: number, format: string?, get: (fun(): number), set: fun(value: number) }?, reset: fun()?, settings: table[]? }
 --- onChange is called when Edit Mode opens or closes, and now if it's open. scale gives the
 --- dialog a scale slider; reset gives it a Reset To Default Position button. settings are the
 --- frame's own, in the dialog under the scale and in the right-click menu: each { name, kind =

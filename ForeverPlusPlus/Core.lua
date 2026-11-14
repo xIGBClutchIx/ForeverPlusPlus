@@ -815,9 +815,7 @@ local function optionChanged(module, key)
 end
 
 ---Tells a module one of its options changed, once its value is already saved (the presets set
----every value first, then tell each module).
----@param module table
----@param key string
+---every value first, then tell each module): `ns.OptionChanged(module, key)`.
 ns.OptionChanged = optionChanged
 
 local welcomed = {} -- functions to call when the welcome is seen, or reset to show again

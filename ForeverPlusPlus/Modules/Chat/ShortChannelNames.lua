@@ -132,6 +132,10 @@ local function chatTypePrefixes()
 end
 
 ---`text` with the first `from` in it, found as plain text, replaced by `to`.
+---@param text string
+---@param from string
+---@param to string
+---@return string
 local function swap(text, from, to)
     local first, last = find(text, from, 1, true)
     if not first then

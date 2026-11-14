@@ -219,7 +219,7 @@ function ItemStats.Get(link)
     if not (ns.IsNumber(itemID)) then
         return nil
     end
-    local name, _, _, level, minLevel = C_Item.GetItemInfo(link)
+    local name, _, _, itemLevel, minLevel = C_Item.GetItemInfo(link)
     if not ns.IsText(name, true) then
         if C_Item.RequestLoadItemDataByID then
             C_Item.RequestLoadItemDataByID(itemID)
@@ -232,7 +232,7 @@ function ItemStats.Get(link)
         slot = ns.IsText(equipLoc) and equipLoc or "",
         classID = ns.IsReadable(classID) and classID or nil,
         subclassID = ns.IsReadable(subclassID) and subclassID or nil,
-        level = ns.IsNumber(level) and level or 0,
+        level = ns.IsNumber(itemLevel) and itemLevel or 0,
         minLevel = ns.IsNumber(minLevel) and minLevel or 0,
         stats = ItemStats.Normalize(ns.IsReadable(raw) and raw or nil),
     }
