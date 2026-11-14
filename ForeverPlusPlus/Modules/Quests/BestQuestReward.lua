@@ -16,7 +16,9 @@ local ItemButtons = ns.ItemButtons
 
 local module = ns.NewModule("BestQuestReward", L.BESTQUESTREWARD_DESC, {
     enabled = true,
-    corner = "TOPLEFT", -- where the coin sits on a reward's icon
+    -- Where the coin sits on a reward's icon. Bottom left: Upgrade Arrows' arrow is top left on the
+    -- same buttons by default and the stack count is bottom right, so the coin covers neither.
+    corner = "BOTTOMLEFT",
 })
 module.title = L.BESTQUESTREWARD_TITLE
 module.category = "quests"

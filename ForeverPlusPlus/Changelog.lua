@@ -98,6 +98,9 @@ ns.changelog = {
                     .. "Each layer of icons is one checkbox there with its kinds in a submenu: "
                     .. "Points of Interest (now with Capital Cities and Spirit Healers), Quest "
                     .. "Pins, and Gathering Map." },
+                { L.BESTQUESTREWARD_TITLE, "The gold coin sits in the bottom left corner of the "
+                    .. "reward's icon, so it no longer covers Upgrade Arrows' arrow in the top "
+                    .. "left. A new Corner option moves it." },
                 { L.WHISPERWINDOW_TITLE, "The reply box grows as you type, up to four lines, so a "
                     .. "long whisper can be read before it's sent. Drag the divider between the list "
                     .. "and the conversation to make the list wider or narrower. A whisper too long "
