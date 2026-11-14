@@ -168,6 +168,8 @@ These come from Gathering Map, and return `nil` while it's off:
 
 An addon can add a module of its own to Forever++. It shows on the Modules page with its options, follows profiles, and turns on and off like a built-in one. This is the one place the API takes something from you; it still never lets you change Forever++'s own modules.
 
+**Experimental in 1.6.0.** Plugins are new, and `RegisterModule`, `GetPluginKit`, the handle, and the kit may still change in a later release, unlike the rest of `v1`. The changelog will say when they do, and when they're settled.
+
 List `## Dependencies: ForeverPlusPlus` in your TOC, and register while your files load. After `PLAYER_LOGIN` it is too late: Forever++ reads every module's saved settings once, then.
 
 ```lua

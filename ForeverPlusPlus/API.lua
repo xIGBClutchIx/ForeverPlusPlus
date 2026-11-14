@@ -1092,6 +1092,7 @@ end)
 
 -- Plugins ----------------------------------------------------------------------------------------
 -- The one thing a caller adds: a module of its own (Lib/Plugins.lua). It never changes ours.
+-- Experimental since 1.6.0 (docs/api.md says so): it may still change, unlike the rest of v1.
 
 ---Adds a module of another addon's to Forever++ and returns a handle on it (added in 1.6.0). For
 ---the time the plugin's files load, before PLAYER_LOGIN. A mistake (a name taken, defaults that

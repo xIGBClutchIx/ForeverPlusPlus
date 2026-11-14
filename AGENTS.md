@@ -195,7 +195,7 @@ One line here says what each file is for. [docs/architecture.md](docs/architectu
 
 - It is thin, read-only wrappers over `Lib/` and over what modules offer through `ns.Providers`, plus callbacks fired through `ns.API.Fire`.
 - It reads modules and options but never changes them: they're the player's.
-- The one thing a caller adds is a module of its own (`RegisterModule`, `GetPluginKit`, through `Lib/Plugins.lua`). What a plugin may set and what the kit holds is part of `v1`'s promise, so add to it with care.
+- The one thing a caller adds is a module of its own (`RegisterModule`, `GetPluginKit`, through `Lib/Plugins.lua`). It is marked experimental in `docs/api.md` since 1.6.0, so it may still change; once that mark is gone, what a plugin may set and what the kit holds is part of `v1`'s promise.
 - Every call is wrapped, so an error of ours returns nil instead of breaking the caller. It returns copies, never our tables.
 - `v1` only grows: never rename, remove, or change what a function or return value means. A breaking change is a `v2` beside it.
 - Add a function when `Lib/` gains data another addon could want, and add it to `docs/api.md` and the offline tests too.

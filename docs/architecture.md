@@ -369,7 +369,7 @@ What each module is, in the code's terms (what it does for players is in `README
 
 - The public API other addons read, the global `ForeverPlusPlusAPI.v1` (documented in `docs/api.md`): thin, read-only wrappers over `Lib/` (auction prices, disenchanting, players seen, colors, instances, gathering, the map pin, modules and their options, the profile in use) and over what modules offer through `ns.Providers` while they're on (Upgrade Arrows' scores, Flight Timer's times and flights, Waypoints' arrow target, Gathering Map's nodes, Points of Interest's learned flight points), and callbacks (`READY`, `PRICES_UPDATED`, `UPGRADES_UPDATED`, `MODULE_TOGGLED`, `OPTION_CHANGED`, `WAYPOINT_CHANGED`, `GATHERING_NODES_UPDATED`, `GATHERED`, `FLIGHT_STARTED`, `FLIGHT_ENDED`, `PROFILE_CHANGED`, fired through `ns.API.Fire`).
 - It reads modules and options but never changes them: they're the player's.
-- The one thing a caller adds is a module of its own (`RegisterModule` and `GetPluginKit`, through `Lib/Plugins.lua`): what a plugin may set on its handle and what the kit holds is `docs/api.md`'s Plugins section, part of `v1`'s promise, so add to it with care.
+- The one thing a caller adds is a module of its own (`RegisterModule` and `GetPluginKit`, through `Lib/Plugins.lua`): what a plugin may set on its handle and what the kit holds is `docs/api.md`'s Plugins section. It is marked experimental there since 1.6.0 and may still change; once the mark is gone it is part of `v1`'s promise.
 - Every call is wrapped so an error of ours returns nil instead of breaking the caller, and returns copies, never our tables.
 - `v1` only grows: never rename, remove, or change what a function or return value means.
 - A breaking change is a `v2` beside it.
