@@ -121,6 +121,17 @@ end
 eq(table.concat(broken, "\n  "), "", "modules: every file loads offline")
 eq(type(ns.modules) == "table" and #ns.order > 50, true, "modules: the modules are made")
 
+-- Migrations: with every file loaded, every step a module added is for a version the store has
+-- reached. One above Store.VERSION would run again at every login (Core adds its own two at
+-- login, for versions 2 and 3, so they aren't counted here).
+do
+    local highest, count = ns.Store.HighestStep()
+    eq(count >= 15, true, "migrations: the modules' steps are found")
+    eq(highest <= ns.Store.VERSION, true, "migrations: no step is for a version past Store.VERSION ("
+        .. tostring(highest) .. " against " .. tostring(ns.Store.VERSION) .. ")")
+    eq(highest, ns.Store.VERSION, "migrations: Store.VERSION is the newest step's version, not ahead of it")
+end
+
 local CATEGORIES = { automation = true, character = true, chat = true, interface = true, items = true,
     map = true, quests = true, system = true, units = true }
 local function version(text)

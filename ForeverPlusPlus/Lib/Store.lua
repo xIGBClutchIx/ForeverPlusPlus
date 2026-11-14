@@ -189,6 +189,24 @@ function Store.CharacterStep(version, fn)
     add(characterSteps, version, fn)
 end
 
+---The highest version any step added so far is for (0 with none), and how many there are. It must
+---never pass Store.VERSION: Upgrade marks the saved variables as that version, so a step above it
+---would run again at every login. The offline tests check it with every file loaded.
+---@return integer highest
+---@return integer count
+function Store.HighestStep()
+    local highest, count = 0, 0
+    for _, list in ipairs({ steps, characterSteps }) do
+        for _, step in ipairs(list) do
+            count = count + 1
+            if step.version > highest then
+                highest = step.version
+            end
+        end
+    end
+    return highest, count
+end
+
 ---Runs the steps the saved variables haven't had and marks them current. A fresh install (an empty
 ---table) has nothing to bring up to date.
 ---@param db table ForeverPlusPlusDB
