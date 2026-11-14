@@ -20,7 +20,7 @@ On Windows: `"C:\Program Files (x86)\Lua\5.1\lua.exe" tests/run.lua`. CI runs `l
 | `lib/harness.lua` | The checks: `eq`, `same`, `near`, `ok`, `raises`. |
 | `lib/bytecode.lua` | The globals a file reads and writes, with their lines, and the strings in its code, from its Lua 5.1 bytecode (what `luac -l` lists as GETGLOBAL and SETGLOBAL), for the `globals` and `rules` specs. |
 | `lib/core.lua` | A fresh loaded Core for a spec, as `T.Core()`: the real `Core.lua` on stub frames and a stub clock (see The real Core). |
-| `spec/*.lua` | One spec per area: a Lib file (`text`, `store`, `prices`, `cvars`, `units`, ...), Core by area (the `core_*` specs), the public API (`api`), and checks across the addon (`globals`, `locales`, `modules`, `release`, `rules`). |
+| `spec/*.lua` | One spec per area: a Lib file (`text`, `store`, `prices`, `cvars`, `units`, ...), Core by area (the `core_*` specs), the public API (`api`), what a plugin's module is handed (`plugins`), and checks across the addon (`docs`, `globals`, `locales`, `modules`, `release`, `rules`). |
 
 ## A spec
 

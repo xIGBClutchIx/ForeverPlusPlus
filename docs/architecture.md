@@ -247,7 +247,8 @@ Generated files (never edited by hand; see Generated data): `InstanceLevels.lua`
 ### `Plugins.lua`
 
 - `ns.Plugins`: modules another addon adds through the public API: `Register` makes one and returns a handle that takes only the fields `docs/api.md` names, checked and copied as they're set, never our module table, so how our modules are written can keep changing.
-- `Kit` the read-only helpers a plugin gets.
+- `Kit` the read-only helpers a plugin gets. A plugin's `db`, timer (`kit.Timer`), and map layer (`kit.NewMapLayer`) are small read-only tables of its own over Store's view, `Frames.Timer`, and `MapPins.New`, never those objects; a timer, a coalesced function, and a layer are made once, before `PLAYER_LOGIN`, for a module, and do nothing while it's off.
+- Three rules for everything a plugin hands over or calls: its arguments are checked where they're given (a mistake raises an error in its code), its functions are called guarded (`ns.Call`), and our work behind a call runs protected, returning nil on an error of ours. An icon a plugin adds to a layer reaches `MapPins` as a checked copy with only the fields `docs/api.md` lists.
 - `Remember`, which keeps the settings of a plugin whose addon isn't loaded this session from being cleared.
 
 ### `Taxi.lua`
