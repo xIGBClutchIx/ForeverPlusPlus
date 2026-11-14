@@ -26,6 +26,13 @@ local ONLY = {
     },
     -- Chat goes through ns.Print and module:Print.
     print = { ["ForeverPlusPlus/Core.lua"] = "ns.Print" },
+    -- Modules ask ns.Instances.Here, which guards the answer.
+    IsInInstance = {
+        ["ForeverPlusPlus/Lib/Instances.lua"] = "Instances.Here",
+        ["ForeverPlusPlus/Lib/Gathering.lua"] = "needs the first value alone, and whether it's hidden",
+        ["ForeverPlusPlus/Modules/System/ErrorCatcher.lua"] = "prints the raw answer with an error",
+        ["ForeverPlusPlus/Modules/Tools/SelfTest.lua"] = "reports it",
+    },
 }
 
 -- What a file's first line of code must be, after comments.

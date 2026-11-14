@@ -100,6 +100,24 @@ env.hooksecurefunc = function() end
 env.securecallfunction = function(fn, ...) return fn(...) end
 env.ForeverPlusPlusDB, env.ForeverPlusPlusPlayersDB, env.ForeverPlusPlusCharDB = nil, nil, nil
 
+-- What a file does to the game as it loads: frames made, Blizzard functions hooked, timers
+-- started. A module's file should do none of it, since a module that is off costs nothing.
+local cost = {}
+local loading
+local function counted(what)
+    return function()
+        if loading then
+            cost[loading] = cost[loading] or {}
+            cost[loading][what] = (cost[loading][what] or 0) + 1
+        end
+        return stub
+    end
+end
+env.CreateFrame = counted("CreateFrame")
+env.hooksecurefunc = counted("hooksecurefunc")
+env.C_Timer = { After = counted("C_Timer.After"), NewTimer = counted("C_Timer.NewTimer"),
+    NewTicker = counted("C_Timer.NewTicker") }
+
 local ns = {}
 local _, files = T.Toc()
 local loaded, broken = 0, {}
@@ -109,7 +127,17 @@ for _, path in ipairs(files) do
         local fine = chunk ~= nil
         if chunk then
             setfenv(chunk, env)
+            loading = path:gsub("\\", "/")
             fine, err = pcall(chunk, T.ADDON, ns)
+            loading = nil
+            if path == "Core.lua" and fine then
+                -- Events too: ns.On as a file loads listens from login on, whatever is off.
+                local on, tally = ns.On, counted("ns.On")
+                ns.On = function(...)
+                    tally()
+                    return on(...)
+                end
+            end
         end
         if fine then
             loaded = loaded + 1
@@ -120,6 +148,29 @@ for _, path in ipairs(files) do
 end
 eq(table.concat(broken, "\n  "), "", "modules: every file loads offline")
 eq(type(ns.modules) == "table" and #ns.order > 50, true, "modules: the modules are made")
+
+-- AGENTS.md: a module that is off costs nothing, and a Lib file nothing until a module uses it.
+-- So no file makes a frame, hooks Blizzard, starts a timer, or listens for an event as it
+-- loads, but for these, each with why.
+do
+    local ALLOWED = {
+        ["Core.lua CreateFrame"] = "the one frame every event comes through",
+        ["Lib/CVars.lua ns.On"] = "puts back the CVars of modules that are off, once at login",
+        ["Lib/Slash.lua ns.On"] = "notes when login is over, so a command added later is the player's doing",
+    }
+    local costs, counted = {}, 0
+    for path, what in pairs(cost) do
+        for name in pairs(what) do
+            counted = counted + 1
+            if not ALLOWED[path .. " " .. name] then
+                costs[#costs + 1] = path .. " (" .. name .. ")"
+            end
+        end
+    end
+    table.sort(costs)
+    eq(counted >= 1, true, "modules: what loading costs is counted")
+    eq(table.concat(costs, ", "), "", "modules: no file makes frames, hooks, timers, or listens as it loads")
+end
 
 -- Migrations: with every file loaded, every step a module added is for a version the store has
 -- reached. One above Store.VERSION would run again at every login (Core adds its own two at
