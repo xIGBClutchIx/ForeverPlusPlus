@@ -210,6 +210,30 @@ function internal.PlaceOnForm(form, order, region, fit)
     end
 end
 
+-- What Professions offers outside itself while it's on (ns.Providers), for the public API: a
+-- recipe's skill levels from the client's tables (Data.lua, loaded after this file, so read
+-- when asked).
+local provider = {
+    ---@param abilityID number a recipe's skillLineAbilityID
+    ---@return table? levels `{ yellow, green, gray }`
+    ---@return number? skillLine the profession's skill line
+    Levels = function(abilityID)
+        local entry = type(abilityID) == "number" and internal.recipes and internal.recipes[abilityID]
+        if not entry then
+            return nil
+        end
+        return ns.Professions.RecipeLevels(entry[1], entry[2]), entry[3]
+    end,
+}
+
+function module:OnEnable()
+    ns.Providers.Set("recipeLevels", provider)
+end
+
+function module:OnDisable()
+    ns.Providers.Set("recipeLevels", nil)
+end
+
 -- Crafting Costs prices what it can from auction prices, which only Item Tooltips' Auction Prices
 -- (or Auctionator through it) gives. Without them it counts merchant prices alone. A list, since
 -- parts add their own.

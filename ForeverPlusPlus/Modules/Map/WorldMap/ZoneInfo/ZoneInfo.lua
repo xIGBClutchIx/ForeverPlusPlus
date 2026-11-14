@@ -719,7 +719,36 @@ local function attach(map)
     driver:Show()
 end
 
+-- What Zone Info offers outside itself while it's on (ns.Providers), for the public API: a zone
+-- as a new table each time, never Data.lua's own.
+local function copyList(list)
+    local copy = {}
+    for i, id in ipairs(list or {}) do
+        copy[i] = id
+    end
+    return copy
+end
+
+local provider = {
+    ---@param mapID number a zone's map
+    ---@return table? zone
+    Zone = function(mapID)
+        local zone = type(mapID) == "number" and internal.zones[mapID]
+        if not zone then
+            return nil
+        end
+        local low, high = levelsOf(mapID, zone)
+        return {
+            minLevel = low, maxLevel = high,
+            fishing = zone.fish, fishingCoast = zone.fishHigh,
+            herbs = copyList(zone.herbs), ores = copyList(zone.ores),
+            side = zone.side,
+        }
+    end,
+}
+
 function module:OnEnable()
+    ns.Providers.Set("zoneInfo", provider)
     ns.WorldMap.WhenLoaded(attach)
     -- What the colors are measured against.
     self:On("PLAYER_LEVEL_UP", redraw)
@@ -732,6 +761,7 @@ function module:OnEnable()
 end
 
 function module:OnDisable()
+    ns.Providers.Set("zoneInfo", nil)
     ns.WorldMap.Cancel(attach)
     hovered = false
     unfadeLabel()
