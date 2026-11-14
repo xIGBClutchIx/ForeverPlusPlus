@@ -13,6 +13,7 @@ local module = ns.NewModule("AutoQuest", L.AUTOQUEST_DESC, {
     enabled = false,
     accept = true,
     repeatable = true,
+    trivial = false,
     shared = false,
     turnIn = true,
     pauseKey = "shift", -- "shift", "ctrl", "alt", or "none"
@@ -27,6 +28,10 @@ module.options = {
     {
         key = "repeatable", name = L.AUTOQUEST_REPEATABLE, description = L.AUTOQUEST_REPEATABLE_DESC,
         requires = "accept",
+    },
+    {
+        key = "trivial", name = L.AUTOQUEST_TRIVIAL, description = L.AUTOQUEST_TRIVIAL_DESC,
+        requires = "accept", added = "1.6.0",
     },
     { key = "shared", name = L.AUTOQUEST_SHARED, description = L.AUTOQUEST_SHARED_DESC, requires = "accept" },
     { key = "turnIn", name = L.AUTOQUEST_TURN_IN, description = L.AUTOQUEST_TURN_IN_DESC },
@@ -51,8 +56,9 @@ local function fromPlayer()
 end
 
 local function wantsAvailable(repeatable, trivial)
-    -- Gray quests show only with low-level quest tracking on; leave those for the player to pick.
-    return module.db.accept and not trivial and (module.db.repeatable or not repeatable)
+    -- Gray quests show only with low-level quest tracking on; they're left for the player to pick
+    -- unless Low-Level Quests is on.
+    return module.db.accept and (module.db.trivial or not trivial) and (module.db.repeatable or not repeatable)
 end
 
 -- A quest giver's list (gossip). Turns in a finished quest first, then takes a new one; the list

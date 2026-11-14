@@ -57,6 +57,8 @@ ns.changelog = {
                 { L.COMBATALERT_TITLE, "Entering Sound and Leaving Sound pick the sound each alert "
                     .. "plays, under Play Sound. They're the same two as before unless you change "
                     .. "them, and are now heard with sound effects off." },
+                { L.AUTOQUEST_TITLE, "Low-Level Quests (off by default) also takes quests far below "
+                    .. "your level from a quest giver's list, which it used to leave for you." },
                 { L.FLIGHTTIMER_TITLE, "Estimated Times, on by default, shows a flight you haven't "
                     .. "taken yet with the time the game's own flight paths give it, marked with ~, on "
                     .. "the bar and the flight map's tooltip, until your own time replaces it." },
