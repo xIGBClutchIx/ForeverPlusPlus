@@ -21,6 +21,38 @@ eq(Professions.LearnWhen("now"), "now", "when: now")
 eq(Professions.LearnWhen("rank"), "later", "when: past the rank is later")
 eq(Professions.LearnWhen("unknown"), "unknown", "when: its own group without a learn skill")
 
+-- The edges. One point short of the learn skill isn't now; soon is counted from the skill.
+eq(state(75, 74, 150, 25), "soon", "learn: one point short")
+eq(state(75, 50, 150, 25), "soon", "learn: exactly soon away")
+eq(state(75, 49, 150, 25), "later", "learn: one more than soon away")
+eq(state(76, 75, 150, 0), "later", "learn: nothing is soon with soon at 0")
+eq(state(75, 75, 150, 0), "now", "learn: but at the learn skill is still now")
+-- The rank's most: a recipe at it can be learned in this rank, one past it can't.
+eq(state(150, 140, 150, 25), "soon", "learn: at the rank's most")
+eq(state(151, 140, 150, 25), "rank", "learn: one past the rank's most")
+eq(state(151, 149, 150, 25), "rank", "learn: past the rank comes before soon")
+eq(state(151, 10, 150, 25), "rank", "learn: and before later")
+eq(state(140, 160, 150, 25), "now", "learn: a skill over the rank's most (from gear) can still learn")
+eq(state(155, 140, 0, 25), "soon", "learn: a rank's most of 0 isn't one")
+eq(state(155, 100, 0, 25), "later", "learn: and later without one")
+eq(state(155, 140, "150", 25), "soon", "learn: a rank's most that isn't a number isn't one")
+-- What isn't a number is unknown, not an error.
+eq(state("75", 75, 150, 25), "unknown", "learn: a learn skill as text")
+eq(state(75, "75", 150, 25), "unknown", "learn: a skill as text")
+eq(state(nil, nil, nil, 25), "unknown", "learn: nothing known")
+eq(state(false, 75, 150, 25), "unknown", "learn: a learn skill of false")
+
+eq(Professions.LearnWhen("soon"), "soon", "when: soon")
+eq(Professions.LearnWhen("later"), "later", "when: later")
+eq(Professions.LearnWhen(nil), nil, "when: no state, no group")
+eq(Professions.LearnWhen("never"), nil, "when: a state that isn't one")
+-- Every state LearnState gives is in one of the filter menu's groups.
+local WHEN = { now = true, soon = true, later = true, unknown = true }
+for _, args in ipairs({ { 75, 75, 150 }, { 90, 75, 150 }, { 140, 75, 150 }, { 155, 140, 150 }, { nil, 75, 150 } }) do
+    local got = state(args[1], args[2], args[3], 25)
+    ok(WHEN[Professions.LearnWhen(got)], "when: " .. got .. " has a group")
+end
+
 -- What a trainer's window taught, by the recipe's name.
 eq(Professions.TrainerSkill("Copper Chain Belt"), nil, "trainer: nothing before a trainer was seen")
 ok(Professions.LearnTrainerSkill("Copper Chain Belt", 35), "trainer: learned")

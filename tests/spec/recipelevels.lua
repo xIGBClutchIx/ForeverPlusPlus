@@ -70,3 +70,69 @@ eq(two.segments[1][1], D.OPTIMAL, "bar: flat recipe orange first")
 eq(two.segments[2][1], D.TRIVIAL, "bar: flat recipe gray next")
 near(two.segments[2][2], 0.5, "bar: flat recipe halves")
 ok(two.marker == 0.5, "bar: flat recipe marker at gray")
+
+-- More numbers that don't make sense, and the lowest that do.
+eq(Professions.RecipeLevels("45", 85), nil, "levels: yellow as text")
+eq(Professions.RecipeLevels(45, "85"), nil, "levels: gray as text")
+eq(Professions.RecipeLevels(-5, 85), nil, "levels: yellow below 0")
+eq(Professions.RecipeLevels(0.5, 85), nil, "levels: yellow below 1")
+eq(Professions.RecipeLevels(nil, nil), nil, "levels: nothing")
+local first = Professions.RecipeLevels(1, 1)
+eq(first and first.green, 1, "levels: yellow of 1 is the lowest")
+eq(Professions.LevelDifficulty(first, 1), D.TRIVIAL, "levels: gray from skill 1 then")
+
+-- Gray one past yellow: green is yellow's own level, so the recipe is never yellow, in the color
+-- and in the bar alike.
+local close = Professions.RecipeLevels(50, 51)
+eq(close.green, 50, "levels: green at yellow when gray is one past")
+eq(Professions.LevelDifficulty(close, 49), D.OPTIMAL, "levels: close recipe orange below")
+eq(Professions.LevelDifficulty(close, 50), D.EASY, "levels: close recipe green at yellow's level")
+eq(Professions.LevelDifficulty(close, 51), D.TRIVIAL, "levels: close recipe gray one later")
+local closeBar = Professions.LevelBar(close, 50)
+eq(#closeBar.segments, 3, "bar: close recipe has three colors")
+eq(closeBar.segments[2][1], D.EASY, "bar: close recipe skips yellow")
+
+-- Two past: one point of each.
+local pair = Professions.RecipeLevels(50, 52)
+eq(Professions.LevelDifficulty(pair, 50), D.MEDIUM, "levels: yellow for one point")
+eq(Professions.LevelDifficulty(pair, 51), D.EASY, "levels: then green for one")
+eq(Professions.LevelDifficulty(pair, 52), D.TRIVIAL, "levels: then gray")
+
+-- The bar's padding: half of yellow to gray rounded down, and never under 5.
+eq(Professions.LevelBar(Professions.RecipeLevels(50, 60)).from, 45, "bar: 10 apart pads 5")
+eq(Professions.LevelBar(Professions.RecipeLevels(50, 61)).from, 45, "bar: 11 apart still pads 5")
+eq(Professions.LevelBar(Professions.RecipeLevels(50, 62)).from, 44, "bar: 12 apart pads 6")
+eq(Professions.LevelBar(Professions.RecipeLevels(50, 62)).to, 68, "bar: and the same after gray")
+-- A recipe from skill 1 starts its bar below 1; the marker is still held on it.
+local low = Professions.LevelBar(Professions.RecipeLevels(1, 55), 1)
+eq(low.from, -26, "bar: starts below skill 1 for a first recipe")
+near(low.marker, 27 / 108, "bar: skill 1 on a first recipe")
+
+-- The marker at each end and at each color's start, and what isn't a skill.
+eq(Professions.LevelBar(stone, 25).marker, 0, "bar: marker at the bar's first skill")
+eq(Professions.LevelBar(stone, 105).marker, 1, "bar: marker at the bar's last skill")
+near(Professions.LevelBar(stone, 26).marker, 1 / 80, "bar: one point in")
+near(Professions.LevelBar(stone, 104).marker, 79 / 80, "bar: one point from the end")
+eq(Professions.LevelBar(stone, "55").marker, nil, "bar: text isn't a skill")
+for i, level in ipairs({ 45, 65, 85 }) do
+    near(Professions.LevelBar(stone, level).marker, bar.segments[i + 1][2],
+        "bar: marker at a color's start is at its left edge " .. i)
+end
+
+-- Whatever the recipe, the colors fill the bar with no gap: each starts where the last ended, and
+-- the color at a segment's level is the segment's.
+for _, numbers in ipairs({ { 45, 85 }, { 45, 80 }, { 1, 1 }, { 50, 51 }, { 50, 52 }, { 1, 300 }, { 299, 300 } }) do
+    local levels = Professions.RecipeLevels(numbers[1], numbers[2])
+    local each = Professions.LevelBar(levels)
+    local what = ("bar: %d to %d "):format(numbers[1], numbers[2])
+    local joined, colored = true, true
+    for i, segment in ipairs(each.segments) do
+        local left = i == 1 and 0 or each.segments[i - 1][3]
+        joined = joined and math.abs(segment[2] - left) < 1e-9 and segment[3] > segment[2]
+        -- The first segment starts before yellow, where the recipe is orange.
+        colored = colored and Professions.LevelDifficulty(levels, segment[4]) == segment[1]
+    end
+    eq(joined, true, what .. "has no gaps")
+    near(each.segments[#each.segments][3], 1, what .. "ends at the bar's end")
+    eq(colored, true, what .. "colors match the color at their level")
+end
