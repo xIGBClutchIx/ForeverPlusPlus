@@ -898,6 +898,37 @@ export("GetProfessionSkill", function(skillLine)
     return { rank = rank, level = level or rank, max = max, name = name }
 end)
 
+-- Recipes and zones --------------------------------------------------------------------------------
+-- Offered by Professions and by Zone Info (a part of World Map) while each is on.
+
+---The skill a recipe turns yellow, green, and gray at, from the client's tables, by the
+---skillLineAbilityID its recipe info gives (C_TradeSkillUI.GetRecipeInfo): { yellow, green, gray,
+---skillLine }. Nil for a recipe the tables don't have, or while Professions is off.
+export("GetRecipeLevels", function(skillLineAbilityID)
+    local recipes = ns.Providers.Get("recipeLevels")
+    if not (recipes and type(skillLineAbilityID) == "number") then
+        return nil
+    end
+    local levels, skillLine = recipes.Levels(skillLineAbilityID)
+    if not levels then
+        return nil
+    end
+    return { yellow = levels.yellow, green = levels.green, gray = levels.gray, skillLine = skillLine }
+end)
+
+---What Zone Info knows of a zone, by its map ID: { minLevel, maxLevel, fishing, fishingCoast,
+---herbs, ores, side }. The levels are nil for a city; `fishing` is the Fishing skill its water
+---needs and `fishingCoast` its coast's when that needs more; `herbs` and `ores` are lists of item
+---IDs; `side` is "A", "H", or "C" for contested. Nil for a map that isn't a zone it knows, or
+---while Zone Info is off.
+export("GetZoneInfo", function(mapID)
+    local zones = ns.Providers.Get("zoneInfo")
+    if not (zones and type(mapID) == "number") then
+        return nil
+    end
+    return zones.Zone(mapID)
+end)
+
 -- Callbacks --------------------------------------------------------------------------------------
 -- RegisterCallback(event, fn, owner): fn(event, ...) runs on each event. An owner (any value, such
 -- as the caller's addon table) can hold one function per event; without one, the function itself

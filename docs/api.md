@@ -142,6 +142,13 @@ Levels are the last ones seen, so they can be behind. Check `lastSeen`.
 | `GetFishingPoolByObject(objectID)` | The fishing pool a world object ID (from its GUID) was seen as, by name, or `nil`. |
 | `GetProfessionSkill(skillLine)` | The player's skill in a profession: `{ rank, level, max, name }`. `rank` counts gear and racial bonuses, `level` is what the profession window shows, and `max` is the most its rank allows. Takes 633 for a rogue's Lockpicking. `nil` without the profession. |
 
+## Recipes and zones
+
+| Function | Returns |
+| --- | --- |
+| `GetRecipeLevels(skillLineAbilityID)` | The skill a recipe turns yellow, green, and gray at, from the client's tables: `{ yellow, green, gray, skillLine }`. Takes the `skillLineAbilityID` of the recipe's info (`C_TradeSkillUI.GetRecipeInfo`). `nil` for a recipe the tables don't have, or while Professions is off. |
+| `GetZoneInfo(mapID)` | What Zone Info knows of a zone: `{ minLevel, maxLevel, fishing, fishingCoast, herbs, ores, side }`. The levels are `nil` for a city. `fishing` is the Fishing skill its water needs, and `fishingCoast` its coast's when that needs more. `herbs` and `ores` are lists of item IDs. `side` is `"A"`, `"H"`, or `"C"` for contested. `nil` for a map that isn't a zone it knows, or while World Map's Zone Info is off. |
+
 ## Talents
 
 Forever keeps Classic's three talent trees inside the Mainline talent system, so the game has no "spec" to ask for.

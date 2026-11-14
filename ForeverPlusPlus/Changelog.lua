@@ -18,6 +18,9 @@ ns.changelog = {
                     .. "Modules page with its options, follows profiles, and turns on and off like "
                     .. "a built-in one, with a note saying which addon it comes from. Thanks to "
                     .. "cyberox.",
+                "For addon authors: GetRecipeLevels gives the skill a recipe turns yellow, green, "
+                    .. "and gray at, and GetZoneInfo a zone's levels, fishing skill, herbs, ores, "
+                    .. "and side.",
                 "For addon authors: SetWaypoint takes an optional name for the pin, shown under "
                     .. "the Waypoint arrow and on the Compass Bar, and GetWaypoint returns it.",
                 { L.QUESTPINS_TITLE, "A new module, off by default, that needs the QuestieDB addon. "

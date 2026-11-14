@@ -437,6 +437,33 @@ do
     eq(v1.GetTalentTabs(), nil, "api: no talent tabs without the game's data")
     eq(v1.GetProfessionSkill(186), nil, "api: no profession without the game's data")
 
+    -- Recipe levels and zones, offered by Professions and Zone Info while they're on.
+    eq(v1.GetRecipeLevels(1688), nil, "api: no recipe levels while Professions is off")
+    ns.Providers.Set("recipeLevels", { Levels = function(id)
+        if id == 1688 then
+            return { yellow = 175, green = 200, gray = 225 }, 40
+        end
+    end })
+    local levels = v1.GetRecipeLevels(1688)
+    eq(levels and (levels.yellow .. ":" .. levels.green .. ":" .. levels.gray .. ":" .. levels.skillLine),
+        "175:200:225:40", "api: a recipe's levels and skill line")
+    eq(v1.GetRecipeLevels(7), nil, "api: nil for a recipe the tables don't have")
+    eq(v1.GetRecipeLevels("1688"), nil, "api: nil for an ID that isn't a number")
+    ns.Providers.Set("recipeLevels", nil)
+
+    eq(v1.GetZoneInfo(1411), nil, "api: no zone info while Zone Info is off")
+    ns.Providers.Set("zoneInfo", { Zone = function(mapID)
+        if mapID == 1411 then
+            return { minLevel = 1, maxLevel = 10, fishing = 1, herbs = { 2447 }, ores = {}, side = "H" }
+        end
+    end })
+    local zone = v1.GetZoneInfo(1411)
+    eq(zone and (zone.minLevel .. "-" .. zone.maxLevel .. ":" .. zone.side .. ":" .. zone.herbs[1]),
+        "1-10:H:2447", "api: a zone's levels, side, and herbs")
+    eq(v1.GetZoneInfo(5), nil, "api: nil for a map that isn't a zone it knows")
+    eq(v1.GetZoneInfo(nil), nil, "api: nil for no map")
+    ns.Providers.Set("zoneInfo", nil)
+
     -- The map pin.
     local mapPin
     C_Map = {
@@ -483,8 +510,8 @@ do
         GetInstances GetItemGatheringSkill GetItemScore GetItemUpgradeInfo GetKnownFlightPoints
         GetLevelColor GetModuleInfo GetModuleOption GetModules GetPlayerClassColor GetPlayerInfo
         GetPlayerPosition GetPluginKit GetPresets GetProfessionSkill GetProfile GetProfilePreset
-        GetSkinningSkill GetTalentTabs GetUpgradeProfile GetVersion GetWaypoint GetWaypointTarget
-        GetWorldNodeInfo HasAuctionPrices HasUpgradeScores IsModuleEnabled IsReady OpenSettings
+        GetRecipeLevels GetSkinningSkill GetTalentTabs GetUpgradeProfile GetVersion GetWaypoint
+        GetWaypointTarget GetWorldNodeInfo GetZoneInfo HasAuctionPrices HasUpgradeScores IsModuleEnabled IsReady OpenSettings
         RegisterCallback RegisterModule SetWaypoint UnregisterCallback]]
     local EVENTS = [[READY PRICES_UPDATED UPGRADES_UPDATED MODULE_TOGGLED OPTION_CHANGED WAYPOINT_CHANGED
         GATHERING_NODES_UPDATED GATHERED FLIGHT_STARTED FLIGHT_ENDED PROFILE_CHANGED]]
