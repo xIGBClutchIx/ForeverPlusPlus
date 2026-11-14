@@ -53,11 +53,16 @@ local function ownPopup()
         end)
     end
     if own.EnableGamePadButton then
+        -- The D-pad moves between the buttons, A presses the one it's on, and B closes.
         own:SetScript("OnGamePadButtonDown", function(_, button)
             if button == "PAD1" then
-                own.press(1)
+                own.press(own.focus)
             elseif button == "PAD2" then
                 own:Hide()
+            elseif button == "PADDLEFT" or button == "PADDRIGHT" then
+                own.buttons[own.focus]:UnlockHighlight()
+                own.focus = (own.focus - 1 + (button == "PADDRIGHT" and 1 or -1)) % own.count + 1
+                own.buttons[own.focus]:LockHighlight()
             end
         end)
         own:SetScript("OnShow", function(self)
@@ -92,6 +97,7 @@ local function ask(text, buttons, edit)
     for i, button in ipairs(popup.buttons) do
         local spec = buttons[i]
         button:SetShown(spec ~= nil)
+        button:UnlockHighlight()
         if spec then
             button:SetText(spec.text)
             button:SetWidth(width)
@@ -106,6 +112,11 @@ local function ask(text, buttons, edit)
         if spec and spec.fn then
             spec.fn(typed)
         end
+    end
+    popup.count, popup.focus = count, 1
+    -- Only a controller needs to see which button A presses.
+    if popup.EnableGamePadButton then
+        popup.buttons[1]:LockHighlight()
     end
     popup:SetHeight(y + 22 + PAD)
     popup:Show()
