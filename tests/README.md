@@ -16,6 +16,7 @@ On Windows: `"C:\Program Files (x86)\Lua\5.1\lua.exe" tests/run.lua`. CI runs `l
 | --- | --- |
 | `run.lua` | The runner. It finds every file in `spec/`, runs them in name order, and prints a line per spec and the totals. |
 | `lib/env.lua` | A fresh copy of the addon for each spec: stubbed WoW globals, an `ns`, the enUS Core and Map strings, and the pure-logic `Lib/` files. |
+| `lib/standin.lua` | The whole addon loaded offline, every file in the TOC, against a stand-in for each WoW global that isn't stubbed, for the `modules` and `migrations` specs (`T.Whole`). |
 | `lib/harness.lua` | The checks: `eq`, `same`, `near`, `ok`, `raises`. |
 | `lib/bytecode.lua` | The globals a file reads and writes, with their lines, and the strings in its code, from its Lua 5.1 bytecode (what `luac -l` lists as GETGLOBAL and SETGLOBAL), for the `globals` and `rules` specs. |
 | `lib/core.lua` | A fresh loaded Core for a spec, as `T.Core()`: the real `Core.lua` on stub frames and a stub clock (see The real Core). |
@@ -39,6 +40,7 @@ What `T` holds:
 - `T.ns`: the addon's `ns`, with the Lib files in `lib/env.lua`'s `LIBS` loaded.
 - `T.player` and `T.game`: tables the stubs read. The Lib files cache functions like `UnitLevel` at load, so change `T.player.level` rather than the function.
 - `T.load(path, into)`: loads one of the addon's files (`"Lib/Players"`, `"API"`) into `into` (`T.ns` by default), in this spec's environment. Use it for a file that needs stubs set first, or to load one again after changing a stub it caches.
+- `T.Whole(before)`: every file in the TOC but `Init.lua`, loaded into an `ns` of its own against a stand-in client; returns that `ns`, its globals, and a line for each file that didn't load. `before(env, stub)` sets the globals the spec's checks need first, since files keep them at load. Loading is all it does: no module is turned on. For a spec that needs the module files themselves, like a migration step.
 - `T.Toc()`, `T.Read(path)`: the TOC's fields and file list, and a file's text.
 - Checks. Each takes a short name, prefixed with the area (`"taxi: no nodes"`). A failure prints the spec's file and line, the name, and what it got.
   - `eq(got, want, what)`: equal with `==`.

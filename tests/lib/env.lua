@@ -5,6 +5,8 @@
 -- stay in that spec and never reach the next one. Lua's own libraries come from the real _G.
 local Env = {}
 
+local Standin = assert(loadfile("tests/lib/standin.lua"))()
+
 Env.ADDON = "ForeverPlusPlus"
 Env.ROOT = "ForeverPlusPlus/"
 
@@ -178,8 +180,16 @@ function Env.New()
     for _, file in ipairs(Env.LIBS) do
         load("Lib/" .. file)
     end
+    -- The whole addon, every file in the TOC, loaded into an `ns` of its own against a stand-in
+    -- client on top of this spec's globals (tests/lib/standin.lua). `before(env, stub)` sets the
+    -- globals the spec's checks need before the files load, and `around(path, ns, loaded)` runs
+    -- before each file (`loaded` nil) and after it (true or false).
+    local function whole(before, around)
+        local _, files = Env.Toc()
+        return Standin.Load(env, Env.ROOT, Env.ADDON, files, before, around)
+    end
     local T = {
-        env = env, ns = ns, player = player, game = game, load = load, ADDON = Env.ADDON,
+        env = env, ns = ns, player = player, game = game, load = load, Whole = whole, ADDON = Env.ADDON,
         ROOT = Env.ROOT, Toc = Env.Toc, Read = Env.Read, LuaFiles = Env.LuaFiles, DiskFiles = Env.DiskFiles,
     }
 

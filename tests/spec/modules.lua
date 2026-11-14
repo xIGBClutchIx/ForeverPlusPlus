@@ -6,146 +6,38 @@
 local T = ...
 local eq = T.eq
 
--- A stand-in for every WoW global the code reads that isn't stubbed here: calling it, indexing
--- it, or calling a method on it gives back the stand-in, so a file's top level runs without the
--- client. Only loading is tested this way; nothing here runs a module.
-local stub
-local meta = {
-    __index = function() return stub end,
-    __call = function() return stub end,
-    __concat = function(a, b)
-        return (a == stub and "" or tostring(a)) .. (b == stub and "" or tostring(b))
-    end,
-    __tostring = function() return "<stub>" end,
-}
-for _, op in ipairs({ "__add", "__sub", "__mul", "__div", "__mod", "__pow", "__unm" }) do
-    meta[op] = function() return 0 end
-end
-stub = setmetatable({}, meta)
-
--- Blizzard's colors (NORMAL_FONT_COLOR and the like): a ColorMixin's RGB and its fields.
-local function color()
-    local c = { r = 1, g = 0.82, b = 0, a = 1 }
-    function c.GetRGB() return c.r, c.g, c.b end
-    function c.GetRGBA() return c.r, c.g, c.b, c.a end
-    function c.GenerateHexColor() return "ffffd100" end
-    function c.WrapTextInColorCode(_, s) return s end
-    return c
-end
-
-local env = {}
-local real = _G
-setmetatable(env, { __index = function(self, key)
-    local value = real[key]
-    if value ~= nil then
-        return value
-    end
-    -- Blizzard's colors are ColorMixins, and its other all-caps globals are its strings.
-    if type(key) == "string" and key:match("_COLOR$") then
-        value = color()
-    elseif type(key) == "string" and key:match("^[%u%d_]+$") and key:match("%u") then
-        value = key
-    else
-        return stub
-    end
-    rawset(self, key, value)
-    return value
-end })
-env._G = env
-
--- Blizzard's string and table helpers, and the few functions whose answers files branch on.
-env.format, env.strlower, env.strupper = string.format, string.lower, string.upper
-env.strsub, env.strfind, env.strmatch, env.strlen, env.strrep = string.sub, string.find, string.match,
-    string.len, string.rep
-env.gsub, env.strbyte, env.strchar = string.gsub, string.byte, string.char
-env.tinsert, env.tremove, env.tconcat, env.sort = table.insert, table.remove, table.concat, table.sort
-env.floor, env.ceil, env.abs, env.max, env.min, env.mod = math.floor, math.ceil, math.abs, math.max,
-    math.min, math.fmod
-env.wipe = function(t)
-    for key in pairs(t) do
-        t[key] = nil
-    end
-    return t
-end
-env.strtrim = function(s) return (s:gsub("^%s+", ""):gsub("%s+$", "")) end
-env.strsplit = function(sep, s)
-    local parts = {}
-    for piece in (s .. sep):gmatch("(.-)" .. sep:gsub("%p", "%%%0")) do
-        parts[#parts + 1] = piece
-    end
-    return unpack(parts)
-end
-env.Mixin = function(object, ...)
-    for i = 1, select("#", ...) do
-        for key, value in pairs((select(i, ...))) do
-            object[key] = value
-        end
-    end
-    return object
-end
-env.CreateFromMixins = function(...) return env.Mixin({}, ...) end
-env.CopyTable = function(t)
-    local copy = {}
-    for key, value in pairs(t) do
-        copy[key] = type(value) == "table" and env.CopyTable(value) or value
-    end
-    return copy
-end
-env.GetLocale = function() return "enUS" end
-env.GetBuildInfo = function() return "1.60.1", "70790", "Nov 4 2026", 16001 end
-env.issecretvalue = function() return false end
-env.GetMoneyString = function(copper) return copper .. "c" end
-env.InCombatLockdown = function() return false end
-env.hooksecurefunc = function() end
-env.securecallfunction = function(fn, ...) return fn(...) end
-env.ForeverPlusPlusDB, env.ForeverPlusPlusPlayersDB, env.ForeverPlusPlusCharDB = nil, nil, nil
-
--- What a file does to the game as it loads: frames made, Blizzard functions hooked, timers
--- started. A module's file should do none of it, since a module that is off costs nothing.
+-- Every file but Init.lua, against a stand-in for every WoW global the code reads that isn't
+-- stubbed (tests/lib/standin.lua). Only loading is tested this way; nothing here runs a module.
+--
+-- What a file does to the game as it loads is counted on the way: frames made, Blizzard
+-- functions hooked, timers started, events listened for.
 local cost = {}
 local loading
-local function counted(what)
+local function counted(what, result)
     return function()
         if loading then
             cost[loading] = cost[loading] or {}
             cost[loading][what] = (cost[loading][what] or 0) + 1
         end
-        return stub
+        return result
     end
 end
-env.CreateFrame = counted("CreateFrame")
-env.hooksecurefunc = counted("hooksecurefunc")
-env.C_Timer = { After = counted("C_Timer.After"), NewTimer = counted("C_Timer.NewTimer"),
-    NewTicker = counted("C_Timer.NewTicker") }
-
-local ns = {}
-local _, files = T.Toc()
-local loaded, broken = 0, {}
-for _, path in ipairs(files) do
-    if path ~= "Init.lua" then -- it starts the addon at login
-        local chunk, err = loadfile(T.ROOT .. path)
-        local fine = chunk ~= nil
-        if chunk then
-            setfenv(chunk, env)
-            loading = path:gsub("\\", "/")
-            fine, err = pcall(chunk, T.ADDON, ns)
-            loading = nil
-            if path == "Core.lua" and fine then
-                -- Events too: ns.On as a file loads listens from login on, whatever is off.
-                local on, tally = ns.On, counted("ns.On")
-                ns.On = function(...)
-                    tally()
-                    return on(...)
-                end
-            end
-        end
-        if fine then
-            loaded = loaded + 1
-        else
-            broken[#broken + 1] = path .. ": " .. tostring(err)
+local ns, _, broken = T.Whole(function(env, stub)
+    env.CreateFrame = counted("CreateFrame", stub)
+    env.hooksecurefunc = counted("hooksecurefunc", stub)
+    env.C_Timer = { After = counted("C_Timer.After", stub), NewTimer = counted("C_Timer.NewTimer", stub),
+        NewTicker = counted("C_Timer.NewTicker", stub) }
+end, function(path, into, fine)
+    loading = fine == nil and path:gsub("\\", "/") or nil
+    if path == "Core.lua" and fine then
+        -- Events too: ns.On as a file loads listens from login on, whatever is off.
+        local on, tally = into.On, counted("ns.On")
+        into.On = function(...)
+            tally()
+            return on(...)
         end
     end
-end
+end)
 eq(table.concat(broken, "\n  "), "", "modules: every file loads offline")
 eq(type(ns.modules) == "table" and #ns.order > 50, true, "modules: the modules are made")
 
@@ -158,17 +50,17 @@ do
         ["Lib/CVars.lua ns.On"] = "puts back the CVars of modules that are off, once at login",
         ["Lib/Slash.lua ns.On"] = "notes when login is over, so a command added later is the player's doing",
     }
-    local costs, counted = {}, 0
+    local costs, found = {}, 0
     for path, what in pairs(cost) do
         for name in pairs(what) do
-            counted = counted + 1
+            found = found + 1
             if not ALLOWED[path .. " " .. name] then
                 costs[#costs + 1] = path .. " (" .. name .. ")"
             end
         end
     end
     table.sort(costs)
-    eq(counted >= 1, true, "modules: what loading costs is counted")
+    eq(found, 3, "modules: what loading costs is counted")
     eq(table.concat(costs, ", "), "", "modules: no file makes frames, hooks, timers, or listens as it loads")
 end
 
