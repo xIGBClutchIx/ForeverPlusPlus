@@ -10,7 +10,8 @@ local L = ns.L
 
 ns.changelog = {
     {
-        version = L.CHANGELOG_UNRELEASED,
+        version = "1.6.0",
+        date = "2026-11-14",
         sections = {
             { L.CHANGELOG_ADDED, {
                 "For addon authors: another addon can add a module of its own to Forever++ "
