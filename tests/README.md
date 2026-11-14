@@ -63,6 +63,7 @@ What `T` holds:
 | `core_profiles` | Switching profiles live, and `ns.switching`. |
 | `core_presets` | A profile based on a preset. |
 | `core_plugins` | Another addon's module through `Lib/Plugins.lua`. |
+| `core_pluginkit` | What a plugin shares with our modules: renamed settings, unit events, tooltip lines, the shared options, a map layer's filter entry, marks on items, and a frame in Edit Mode, against stand-ins for the libraries behind them. |
 
 ```lua
 local T = ...

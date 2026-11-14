@@ -24,6 +24,8 @@ local addonName, ns = ...
 
 local type, pairs, ipairs, error, setmetatable, match = type, pairs, ipairs, error, setmetatable, string.match
 local pcall, tostring, format, huge, min, max = pcall, tostring, string.format, math.huge, math.min, math.max
+local select, _G = select, _G
+local C_Container = C_Container
 
 local L = ns.L
 
@@ -138,7 +140,25 @@ local OPTION_FIELDS = {
     key = "string", name = "string", description = "string", section = "string", added = "string",
     requires = "string", slider = "string", choices = "table", shown = "function",
     min = "number", max = "number", step = "number", format = "string",
+    editMode = "boolean", -- in the Edit Mode dialog of the frame the kit's EditMode.Register gave it
 }
+
+-- A copy of an option one of our builders made (Sounds.Option, ItemButtons.SizeOption), for the
+-- kit's Options to hand a plugin: only the fields a plugin may set, and choices of its own, so it
+-- never holds a table our own dropdowns read.
+local function builtOption(option)
+    local copy = {}
+    for field in pairs(OPTION_FIELDS) do
+        copy[field] = option[field]
+    end
+    if option.choices then
+        copy.choices = {}
+        for i, choice in ipairs(option.choices) do
+            copy.choices[i] = { choice[1], choice[2] }
+        end
+    end
+    return copy
+end
 
 -- A copy of one option with only the fields above, checked against the module's defaults.
 local function copyOption(option, defaults, index)
@@ -265,11 +285,19 @@ end
 
 -- What a plugin may set on its handle: the type each takes.
 local FIELDS = {
-    title = "string", category = "string", added = "string",
+    title = "string", category = "string", added = "string", quickToggle = "string",
     options = "table", actions = "table", notice = "table", perCharacter = "table",
+    oldKeys = "table", oldNames = "table",
     OnEnable = "function", OnDisable = "function", OnOptionChanged = "function",
     IsAvailable = "function", Problem = "function",
 }
+
+-- The fields Core reads once, at PLAYER_LOGIN: set later, they'd do nothing.
+local AT_LOAD = { options = true, perCharacter = true, oldKeys = true, oldNames = true }
+
+-- The Minimap Button's quick toggle groups a module can join (its QUICK_GROUPS).
+local QUICK_GROUPS = { loot = true, npcs = true, world = true, nameplates = true, gathering = true,
+    other = true }
 
 local function setField(handle, key, value)
     local module = handles[handle]
@@ -293,10 +321,38 @@ local function setField(handle, key, value)
         end
         return
     end
-    if started() and (key == "options" or key == "perCharacter") then
+    if started() and AT_LOAD[key] then
         fail(key .. " is set while the plugin loads, before PLAYER_LOGIN", 2)
     end
-    if key == "options" then
+    if key == "quickToggle" then
+        if not QUICK_GROUPS[value] then
+            fail("quickToggle is loot, npcs, world, nameplates, gathering, or other", 2)
+        end
+        module.quickToggle = value
+    elseif key == "oldKeys" then
+        -- { new = "old" }: a setting or data this version renamed, moved at login (Migrate).
+        local keys = {}
+        for new, old in pairs(value) do
+            if type(new) ~= "string" or new == "enabled" or module.defaults[new] == nil then
+                fail("oldKeys names one of the module's defaults, then the name it had", 2)
+            end
+            if type(old) ~= "string" or old == "enabled" or module.defaults[old] ~= nil then
+                fail("oldKeys." .. new .. " is the old name, one the defaults no longer have", 2)
+            end
+            keys[new] = old
+        end
+        states[module].oldKeys = keys
+    elseif key == "oldNames" then
+        -- The names this module had in older versions of the plugin.
+        local names = {}
+        for index, old in ipairs(value) do
+            if type(old) ~= "string" or not match(old, NAME) or old == module.name then
+                fail("oldNames lists the names the module had before", 2)
+            end
+            names[index] = old
+        end
+        states[module].oldNames = names
+    elseif key == "options" then
         module.options = copyOptions(value, module.defaults)
     elseif key == "actions" then
         module.actions = copyActions(value)
@@ -376,6 +432,11 @@ local function listen(module, event, fn)
     return true
 end
 
+local function listenUnit(module, event, units, fn)
+    module:OnUnit(event, units, fn)
+    return true
+end
+
 -- The module methods a handle has, with the handle in the module's place. Each checks what it's
 -- given before Core sees it: Core trusts our own modules with these, and a wrong value would
 -- error deep in it, or sit in a list it walks on every event.
@@ -394,6 +455,44 @@ local function addMethods(handle, module)
             return false
         end
         return safe(listen, module, event, fn) or false
+    end
+
+    -- A unit event for one or two units, which the game then sends for no others.
+    function handle.OnUnit(self, event, units, fn)
+        check(self, type(event) == "string" and type(units) == "table" and type(units[1]) == "string"
+            and (units[2] == nil or type(units[2]) == "string") and units[3] == nil
+            and type(fn) == "function", "OnUnit(event, { unit, unit2 }, fn)")
+        if not module.enabled or not safe(ns.HasEvent, event) then
+            return false
+        end
+        return safe(listenUnit, module, event, { units[1], units[2] }, fn) or false
+    end
+
+    -- Lines on item tooltips, with ours at the sell price (Lib/ItemTooltip.lua). Its hooks can't
+    -- come off, so each of the plugin's functions gets one wrapper that does nothing while the
+    -- module is off, the same one however often it asks.
+    local tooltipFns = { OnInfo = {}, OnPrices = {} }
+    local function onItemTooltip(self, fn, where, usage)
+        check(self, type(fn) == "function", usage)
+        local wrapper = tooltipFns[where][fn]
+        if not wrapper then
+            local run = guarded(fn)
+            wrapper = function(tooltip, data)
+                if module.enabled then
+                    run(tooltip, data)
+                end
+            end
+            tooltipFns[where][fn] = wrapper
+        end
+        safe(ns.ItemTooltip[where], wrapper, module)
+    end
+
+    function handle.OnItemInfo(self, fn)
+        onItemTooltip(self, fn, "OnInfo", "OnItemInfo(fn)")
+    end
+
+    function handle.OnItemPrices(self, fn)
+        onItemTooltip(self, fn, "OnPrices", "OnItemPrices(fn)")
     end
 
     function handle.Hook(self, target, method, fn)
@@ -475,16 +574,23 @@ function Plugins.Register(name, description, defaults, addon)
 
     local handle = {}
     addMethods(handle, module)
-    local state = { layers = {} }
+    local state = { layers = {}, marks = {}, frames = {} }
     states[module] = state
     -- The plugin's OnDisable, then what the kit put up for it: a map layer left on would show
-    -- while the module is off, with nothing for the player to turn it off with.
+    -- while the module is off, with nothing for the player to turn it off with. The same goes
+    -- for its marks on items and its frames' boxes in Edit Mode.
     function module.OnDisable()
         if state.OnDisable then
             state.OnDisable(handle)
         end
         for _, layer in ipairs(state.layers) do
             safe(layer.Disable, layer)
+        end
+        for _, marks in ipairs(state.marks) do
+            safe(marks.Disable)
+        end
+        for frame in pairs(state.frames) do
+            safe(ns.EditMode.Unregister, frame)
         end
     end
     handles[handle], modules[module] = module, handle
@@ -516,6 +622,57 @@ function Plugins.Remember(db, known)
     end
     for name in pairs(db.plugins) do
         known[name] = true
+    end
+end
+
+-- Moves `t[old]` to `t[new]` for each renamed key, where the new one isn't set and the value is of
+-- the new default's type; the old key goes either way.
+local function moveKeys(t, keys, defaults)
+    if type(t) ~= "table" then
+        return
+    end
+    for new, old in pairs(keys) do
+        local value = t[old]
+        if value ~= nil then
+            if t[new] == nil and type(value) == type(defaults[new]) then
+                t[new] = value
+            end
+            t[old] = nil
+        end
+    end
+end
+
+---Moves what the player saved under a plugin module's old name (`oldNames`) and its settings' old
+---names (`oldKeys`) to where they now go, in every profile, before Store.Prune clears what no
+---module has. It has no version to run once by: a move leaves nothing behind to move again. An
+---old name is only one a plugin had, never a module of ours or one that's loaded.
+---@param db table ForeverPlusPlusDB
+---@param char table ForeverPlusPlusCharDB
+function Plugins.Migrate(db, char)
+    local seen = type(db.plugins) == "table" and db.plugins or {}
+    local charData = type(char.data) == "table" and char.data or {}
+    for name, module in pairs(ns.modules) do
+        local state = states[module]
+        if state then
+            for _, old in ipairs(state.oldNames or {}) do
+                if seen[old] and not ns.modules[old] then
+                    ns.Store.Rename(db, { [old] = name })
+                    if charData[old] ~= nil and charData[name] == nil then
+                        charData[name] = charData[old]
+                    end
+                    -- `seen` keeps the old name, so the next character's own data moves too.
+                    charData[old] = nil
+                end
+            end
+            if state.oldKeys then
+                for _, root in ipairs(ns.Store.Roots(db)) do
+                    moveKeys(type(root.settings) == "table" and root.settings[name], state.oldKeys,
+                        module.defaults)
+                    moveKeys(type(root.data) == "table" and root.data[name], state.oldKeys, module.defaults)
+                end
+                moveKeys(charData[name], state.oldKeys, module.defaults)
+            end
+        end
     end
 end
 
@@ -690,8 +847,39 @@ local function copyIcon(x, y, info)
     return icon
 end
 
+local FILTER_ORDER = 100 -- in the map's filter menu, after every module of ours
+
+-- A setting of the module's that is true or false, for a filter menu checkbox to turn.
+local function toggleKey(module, key, what)
+    if type(key) ~= "string" or key == "enabled" or type(module.defaults[key]) ~= "boolean" then
+        fail(what .. " is one of the module's defaults that is true or false", 5)
+    end
+    return key
+end
+
+-- What NewMapLayer's `filter` asks for, checked and copied: `{ name, key, kinds = { { name, key } } }`.
+local function copyFilter(module, filter)
+    if type(filter) ~= "table" or type(filter.name) ~= "string" then
+        fail("NewMapLayer's filter is { name, key, kinds }", 4)
+    end
+    local copy = { name = filter.name, key = toggleKey(module, filter.key, "filter.key"), kinds = {} }
+    if filter.kinds ~= nil and type(filter.kinds) ~= "table" then
+        fail("filter.kinds is a list of { name, key }", 4)
+    end
+    for index, kind in ipairs(filter.kinds or {}) do
+        if type(kind) ~= "table" or type(kind.name) ~= "string" then
+            fail("filter.kinds is a list of { name, key }", 4)
+        end
+        copy.kinds[index] = { name = kind.name, key = toggleKey(module, kind.key, "a kind's key") }
+    end
+    return copy
+end
+
 -- A plugin's map layer: three methods over one of ours (MapPins.New), which stays out of reach.
-local function newLayer(module, fill)
+-- With `filter`, the layer has a checkbox in the map's filter menu under the Forever++ title while
+-- the module is on, as our own layers do, and shows only while that setting is on.
+local function newLayer(module, fill, filter)
+    filter = filter ~= nil and copyFilter(module, filter) or nil
     local run = guarded(fill)
     local layer = ns.MapPins.New(function(mapID, add)
         -- `add` works only while `fill` runs: kept and called later, it would put an icon on
@@ -711,6 +899,40 @@ local function newLayer(module, fill)
     end)
     local layers = states[module].layers
     layers[#layers + 1] = layer
+    -- Shows the layer when the module is on and the filter's setting (if any) says so, and takes
+    -- it off the map otherwise.
+    local function show()
+        if module.enabled and (not filter or module.db[filter.key]) then
+            safe(layer.Enable, layer)
+            return true
+        end
+        safe(layer.Disable, layer)
+        return false
+    end
+    if filter then
+        local kinds = {}
+        for index, kind in ipairs(filter.kinds) do
+            kinds[index] = {
+                name = kind.name,
+                get = function() return module.db[kind.key] end,
+                set = function(on)
+                    ns.SetOption(module.name, kind.key, on and true or false)
+                    safe(layer.Refresh, layer)
+                end,
+            }
+        end
+        safe(ns.WorldMap.AddFilter, FILTER_ORDER, function()
+            return module.enabled and true or false
+        end, function(root)
+            ns.WorldMap.FilterLayer(root, filter.name, function()
+                return module.db[filter.key]
+            end, function(on)
+                -- As from the Settings page, so the plugin hears of it in OnOptionChanged.
+                ns.SetOption(module.name, filter.key, on and true or false)
+                show()
+            end, kinds)
+        end)
+    end
     local wrapper
     local function check(self, usage)
         if self ~= wrapper then
@@ -718,14 +940,12 @@ local function newLayer(module, fill)
         end
     end
     wrapper = readOnly({
-        -- Only while the module is on; it comes off by itself when the module turns off.
+        -- Only while the module is on; it comes off by itself when the module turns off. With a
+        -- filter, only while its setting is on too: calling this again after that changed (from
+        -- OnOptionChanged) shows or hides the layer to match.
         Enable = function(self)
             check(self, "Enable()")
-            if not module.enabled then
-                return false
-            end
-            safe(layer.Enable, layer)
-            return true
+            return show()
         end,
         Disable = function(self)
             check(self, "Disable()")
@@ -739,7 +959,231 @@ local function newLayer(module, fill)
     return wrapper
 end
 
+-- Marks on items -------------------------------------------------------------------------------
+
+-- Where a plugin's marks go, and the size, corner, and padding they take when the module has no
+-- setting of that name: what our own marks default to.
+local MARK_PLACES = { "bags", "bank", "merchant", "auction", "loot" }
+local MARK_LOOK = { size = 14, corner = "TOPLEFT", padding = 1 }
+local MARK_CORNERS = { TOPLEFT = true, TOPRIGHT = true, BOTTOMLEFT = true, BOTTOMRIGHT = true }
+
+-- A plugin's marks on item icons: three methods over Lib/ItemButtons.lua, which finds Blizzard's
+-- item buttons and keeps our textures off their frames. `test(link, place)` says whether an item
+-- gets the mark. The plugin never sees a button or a texture.
+local function newMarks(module, test, look)
+    if type(look) ~= "table" or (type(look.atlas) ~= "string" and type(look.texture) ~= "string"
+        and not finite(look.texture)) then
+        fail("NewItemMarks(test, module, look): look needs an atlas or a texture", 3)
+    end
+    local color = look.color
+    if color ~= nil and (type(color) ~= "table"
+        or not (finite(color[1]) and finite(color[2]) and finite(color[3]))) then
+        fail("NewItemMarks: look.color is { r, g, b }", 3)
+    end
+    local atlas = type(look.atlas) == "string" and look.atlas or nil
+    local texture, r, g, b = look.texture, color and color[1], color and color[2], color and color[3]
+    local run = guarded(test, false)
+    local ItemButtons = ns.ItemButtons
+    local active = false
+
+    local marks = ItemButtons.Overlays(function(icon)
+        local mark = icon:GetParent():CreateTexture(nil, "OVERLAY", nil, 7)
+        if atlas then
+            mark:SetAtlas(atlas)
+        else
+            mark:SetTexture(texture)
+        end
+        if r then
+            mark:SetVertexColor(r, g, b)
+        end
+        return mark
+    end)
+
+    -- The module's own Size, Corner, and Padding settings where its defaults have them (the
+    -- kit's Options make the options), ours otherwise.
+    local function setting(key, ok)
+        local value = module.db[key]
+        if value == nil or not ok(value) then
+            return MARK_LOOK[key]
+        end
+        return value
+    end
+    local function place()
+        return {
+            size = setting("size", finite),
+            corner = setting("corner", function(value) return MARK_CORNERS[value] end),
+            padding = setting("padding", finite),
+        }
+    end
+
+    -- Shown in a place unless the module has a setting of its name that is off.
+    local function shows(where)
+        return active and module.db[where] ~= false
+    end
+
+    local function set(icon, link, where, how)
+        if not icon then
+            return
+        end
+        local mark = marks:Set(icon, link and shows(where) and run(link, where))
+        if mark then
+            ItemButtons.PlaceMark(mark, icon, how)
+        end
+    end
+
+    local function updateBag(frame)
+        local how = place()
+        ItemButtons.EachBagButton(frame, function(_, icon, bag, slot)
+            set(icon, C_Container.GetContainerItemLink(bag, slot), "bags", how)
+        end)
+    end
+    local function updateBank()
+        local how = place()
+        ItemButtons.EachBankButton(function(icon, tab, slot)
+            set(icon, tab and slot and C_Container.GetContainerItemLink(tab, slot), "bank", how)
+        end)
+    end
+    local function updateMerchant()
+        local how = place()
+        ItemButtons.EachMerchantItem(function(icon, index)
+            set(icon, _G.GetMerchantItemLink(index), "merchant", how) -- there, or the walk does nothing
+        end)
+    end
+    local function clearMerchant(icon) -- the buyback tab draws on the same buttons
+        marks:Set(icon, false)
+    end
+    local function updateAuction()
+        local how = place()
+        ItemButtons.EachAuctionRow(function(icon, _, link)
+            set(icon, link, "auction", how)
+        end)
+    end
+    local function markLoot(icon, _, link)
+        set(icon, link, "loot", place())
+    end
+    local function markRoll(icon, link)
+        set(icon, link, "loot", place())
+    end
+
+    local function refresh()
+        if ItemButtons.MerchantShown() then
+            updateMerchant()
+        end
+        updateAuction()
+        ItemButtons.EachOpenBag(updateBag)
+        updateBank()
+        ItemButtons.EachRoll(markRoll)
+        ItemButtons.EachLootSlot(markLoot)
+    end
+    -- A merchant's links are missing until the game has loaded its items; look again once it has.
+    local refreshSoon = ns.Frames.Coalesce(function()
+        if active then
+            refresh()
+        end
+    end, 0.5, module)
+    local function onItemInfo()
+        if active and ItemButtons.MerchantShown() then
+            refreshSoon()
+        end
+    end
+
+    local function hook()
+        ItemButtons.HookBags(module, updateBag)
+        ItemButtons.HookBank(module, updateBank)
+        ItemButtons.HookMerchant(module, updateMerchant, clearMerchant)
+        ItemButtons.HookLoot(module, markLoot)
+        ItemButtons.HookRolls(module, markRoll)
+        ItemButtons.HookAuction(module, updateAuction)
+        module:On("GET_ITEM_INFO_RECEIVED", onItemInfo)
+        refresh()
+    end
+    local function disable()
+        active = false
+        ItemButtons.CancelAuction(updateAuction)
+        marks:HideAll()
+    end
+    local list = states[module].marks
+    list[#list + 1] = { Disable = disable }
+
+    local wrapper
+    local function check(self, usage)
+        if self ~= wrapper then
+            fail("call it as marks:" .. usage, 3)
+        end
+    end
+    wrapper = readOnly({
+        -- Only while the module is on; the marks come off by themselves when it turns off.
+        Enable = function(self)
+            check(self, "Enable()")
+            if not module.enabled then
+                return false
+            end
+            active = true
+            safe(hook)
+            return true
+        end,
+        Disable = function(self)
+            check(self, "Disable()")
+            safe(disable)
+        end,
+        -- After what `test` answers changed, or one of the module's mark settings.
+        Refresh = function(self)
+            check(self, "Refresh()")
+            if active then
+                safe(refresh)
+            end
+        end,
+    }, "a plugin's item marks")
+    return wrapper
+end
+
+-- Edit Mode --------------------------------------------------------------------------------------
+
+-- Whether the module's defaults have what a frame in Edit Mode is placed and sized from.
+local function placedFromSettings(module)
+    local defaults = module.defaults
+    return finite(defaults.x) and finite(defaults.y) and finite(defaults.scale)
+        and defaults.scale >= 50 and defaults.scale <= 200
+end
+
+local function isProtected(frame)
+    return frame:IsProtected()
+end
+
 -- The rest -------------------------------------------------------------------------------------
+
+-- A color for an item tooltip line as Lib/ItemTooltip.lua takes it: one of its names, or a copy of
+-- { r, g, b }. White for none.
+local LINE_COLORS = { gray = true, white = true, gold = true }
+
+local function lineColor(color, usage)
+    if color == nil then
+        return "white"
+    elseif LINE_COLORS[color] then
+        return color
+    elseif type(color) == "table" and finite(color[1]) and finite(color[2]) and finite(color[3]) then
+        return { color[1], color[2], color[3] }
+    end
+    fail("ItemTooltip." .. usage .. ": color is gray, white, gold, or { r, g, b }", 3)
+end
+
+local function lineAlign(align, usage)
+    if align == nil then
+        return "right"
+    elseif align ~= "right" and align ~= "inline" then
+        fail("ItemTooltip." .. usage .. ": align is right or inline", 3)
+    end
+    return align
+end
+
+-- The text arguments of one of the kit's option builders.
+local function texts(usage, ...)
+    for i = 1, select("#", ...) do
+        if type((select(i, ...))) ~= "string" then
+            fail("Options." .. usage, 3)
+        end
+    end
+end
 
 -- A read-only table of some of a library's functions, by name, each called protected. The
 -- library is looked up when one is called, so a function it lacks answers nil.
@@ -809,11 +1253,134 @@ function Plugins.Kit()
         IsText = ns.IsText,
         IsNumber = ns.IsNumber,
         -- The world map
-        NewMapLayer = function(fill, handle)
+        NewMapLayer = function(fill, handle, filter)
             if type(fill) ~= "function" then
-                fail("NewMapLayer(fill, module)", 2)
+                fail("NewMapLayer(fill, module, filter)", 2)
             end
-            return newLayer(ownerAtLoad(handle, "NewMapLayer"), fill)
+            return newLayer(ownerAtLoad(handle, "NewMapLayer"), fill, filter)
+        end,
+        -- Marks on items
+        NewItemMarks = function(test, handle, look)
+            if type(test) ~= "function" then
+                fail("NewItemMarks(test, module, look)", 2)
+            end
+            return newMarks(ownerAtLoad(handle, "NewItemMarks"), test, look)
+        end,
+        -- Item tooltips: lines in the style of ours, for a function given to module:OnItemInfo or
+        -- module:OnItemPrices.
+        ItemTooltip = readOnly({
+            AddInfo = function(tooltip, label, text, color, align)
+                if type(tooltip) ~= "table" or type(label) ~= "string"
+                    or (type(text) ~= "string" and not finite(text)) then
+                    fail("ItemTooltip.AddInfo(tooltip, label, text, color, align)", 2)
+                end
+                safe(ns.ItemTooltip.AddInfo, tooltip, label, tostring(text), lineAlign(align, "AddInfo"),
+                    lineColor(color, "AddInfo"))
+            end,
+            AddPrice = function(tooltip, data, label, copper, align)
+                if type(tooltip) ~= "table" or type(data) ~= "table" or type(label) ~= "string"
+                    or not (finite(copper) and copper >= 0) then
+                    fail("ItemTooltip.AddPrice(tooltip, data, label, copper, align)", 2)
+                end
+                safe(ns.ItemTooltip.AddPrice, tooltip, data, label, copper, "stack",
+                    lineAlign(align, "AddPrice"), "gray")
+            end,
+            ItemID = function(data)
+                return type(data) == "table" and safe(ns.ItemTooltip.ItemID, data) or nil
+            end,
+        }, "the kit's ItemTooltip"),
+        -- Edit Mode: a frame of the plugin's own, moved and sized like Blizzard's.
+        EditMode = readOnly({
+            Register = function(handle, frame, label, apply, onChange)
+                local module = Plugins.Module(handle)
+                if not module or type(frame) ~= "table" or type(frame.SetPoint) ~= "function"
+                    or type(label) ~= "string" or type(apply) ~= "function"
+                    or (onChange ~= nil and type(onChange) ~= "function") then
+                    fail("EditMode.Register(module, frame, label, apply, onChange)", 2)
+                end
+                if not placedFromSettings(module) then
+                    fail("EditMode.Register needs the defaults x, y, and scale (50 to 200)", 2)
+                end
+                -- Moving a protected frame in combat is blocked, and one of Blizzard's isn't ours
+                -- to move at all.
+                if safe(isProtected, frame) ~= false then
+                    fail("EditMode.Register is for a frame of your own that isn't protected", 2)
+                end
+                if not module.enabled then
+                    return false
+                end
+                states[module].frames[frame] = true
+                safe(ns.EditMode.RegisterModule, module, frame, label, guarded(apply),
+                    onChange and guarded(onChange) or nil)
+                return true
+            end,
+            Place = function(frame, x, y)
+                if type(frame) ~= "table" or not (finite(x) and finite(y)) then
+                    fail("EditMode.Place(frame, x, y)", 2)
+                end
+                safe(ns.EditMode.Place, frame, x, y)
+            end,
+            IsActive = function()
+                return safe(ns.EditMode.IsActive) and true or false
+            end,
+        }, "the kit's EditMode"),
+        -- Options every module names and fills alike, each a new table for `module.options`
+        Options = readOnly({
+            Sound = function(key, description, requires)
+                texts("Sound(key, description, requires)", key, description, requires or "")
+                return builtOption(ns.Sounds.Option(key, description, { requires = requires }))
+            end,
+            Key = function(key, name, description)
+                texts("Key(key, name, description)", key, name, description)
+                return builtOption(ns.Keys.Option(key, name, description))
+            end,
+            Chat = function(description)
+                texts("Chat(description)", description)
+                return builtOption(ns.ChatOption(description))
+            end,
+            MarkCorner = function(description)
+                texts("MarkCorner(description)", description)
+                return builtOption(ns.ItemButtons.CornerOption(description))
+            end,
+            MarkSize = function(name, description)
+                texts("MarkSize(name, description)", name, description)
+                return builtOption(ns.ItemButtons.SizeOption(name, description))
+            end,
+            MarkPadding = function()
+                return builtOption(ns.ItemButtons.PaddingOption())
+            end,
+            MarkPlace = function(place, description)
+                texts("MarkPlace(place, description)", place, description)
+                local known = false
+                for _, name in ipairs(MARK_PLACES) do
+                    known = known or name == place
+                end
+                if not known then
+                    fail("Options.MarkPlace: place is bags, bank, merchant, auction, or loot", 2)
+                end
+                return builtOption(ns.ItemButtons.PlaceOption(place, description))
+            end,
+            MapIconSize = function(key)
+                texts("MapIconSize(key)", key)
+                return builtOption(ns.MapPins.SizeOption(key))
+            end,
+            MapIconOpacity = function(key)
+                texts("MapIconOpacity(key)", key)
+                return builtOption(ns.MapPins.OpacityOption(key))
+            end,
+            MapOnContinents = function(key)
+                texts("MapOnContinents(key)", key)
+                return builtOption(ns.MapPins.ContinentOption(key))
+            end,
+        }, "the kit's Options"),
+        -- What the Sound and Key options' settings mean
+        PlaySound = function(key)
+            if type(key) == "string" then
+                safe(ns.Sounds.Play, key)
+            end
+        end,
+        IsKeyDown = function(key)
+            return type(key) == "string" and safe(ns.Keys.IsDown, key) or false
         end,
         SetWaypoint = function(map, x, y, name)
             if not (finite(x) and finite(y)) then

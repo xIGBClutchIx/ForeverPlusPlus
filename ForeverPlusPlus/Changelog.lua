@@ -16,8 +16,10 @@ ns.changelog = {
                 "For addon authors: another addon can add a module of its own to Forever++ "
                     .. "through the public API (RegisterModule and GetPluginKit). It shows on the "
                     .. "Modules page with its options, follows profiles, and turns on and off like "
-                    .. "a built-in one, with a note saying which addon it comes from. Thanks to "
-                    .. "cyberox.",
+                    .. "a built-in one, with a note saying which addon it comes from. It can add "
+                    .. "icons to the world map and its filter menu, marks on items, lines on item "
+                    .. "tooltips, and a frame in Edit Mode, with the same options Forever++'s own "
+                    .. "modules have. Thanks to cyberox.",
                 "For addon authors: GetRecipeLevels gives the skill a recipe turns yellow, green, "
                     .. "and gray at, and GetZoneInfo a zone's levels, fishing skill, herbs, ores, "
                     .. "and side.",
