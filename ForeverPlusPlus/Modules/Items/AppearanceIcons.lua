@@ -359,20 +359,12 @@ local function onCollectionChanged()
     refreshSoon()
 end
 
--- The professions window is a load-on-demand addon: hook its recipe rows once they're there.
-local function onProfessions()
-    hookRecipes()
-    refreshSoon()
-end
-
 function module:OnEnable()
     hasAtlas = ns.Frames.HasAtlas(ATLAS)
     -- Probe: line pre calls are Mainline's; the line has no kind of its own, so every kind is asked.
     self:TooltipLinePreCall(TooltipDataProcessor and TooltipDataProcessor.AllTypes, skipLine)
-    hookRecipes()
-    self:On("ADDON_LOADED", onProfessions)
-    self:On("TRADE_SKILL_SHOW", onProfessions)
-    self:On("TRADE_SKILL_LIST_UPDATE", onProfessions)
+    -- The professions window is a load-on-demand addon: its recipe rows are hooked once there.
+    ns.Professions.WatchWindow(self, hookRecipes, refreshSoon)
     ItemButtons.HookMerchant(self, updateMerchant, clearMerchant)
     ItemButtons.HookBags(self, updateBag)
     ItemButtons.HookBank(self, updateBank)

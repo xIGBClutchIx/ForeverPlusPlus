@@ -169,17 +169,8 @@ end
 -- Once for a burst: the list update comes many times as the window fills.
 local catchUpSoon = ns.Frames.Coalesce(catchUp, nil, module)
 
-local function onEvent()
-    if hook() then
-        catchUpSoon()
-    end
-end
-
 function module:OnEnable()
-    hook()
-    self:On("ADDON_LOADED", onEvent)
-    self:On("TRADE_SKILL_SHOW", onEvent)
-    self:On("TRADE_SKILL_LIST_UPDATE", onEvent)
+    Professions.WatchWindow(self, hook, catchUpSoon)
     -- A skill-up changes how many are left.
     self:On("SKILL_LINES_CHANGED", catchUpSoon)
     self:On("CHAT_MSG_SKILL", catchUpSoon)

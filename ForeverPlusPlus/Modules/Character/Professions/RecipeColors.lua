@@ -99,17 +99,12 @@ end
 local catchUpSoon = ns.Frames.Coalesce(catchUp, nil, module)
 
 -- The rows' mixin is in a load-on-demand Blizzard addon: hooked once it's there.
-local function onEvent()
-    if Professions.HookRecipeRows(module, ROW_HOOKS) then
-        catchUpSoon()
-    end
+local function hook()
+    return Professions.HookRecipeRows(module, ROW_HOOKS)
 end
 
 function module:OnEnable()
-    Professions.HookRecipeRows(self, ROW_HOOKS)
-    self:On("ADDON_LOADED", onEvent)
-    self:On("TRADE_SKILL_SHOW", onEvent)
-    self:On("TRADE_SKILL_LIST_UPDATE", onEvent)
+    Professions.WatchWindow(self, hook, catchUpSoon)
     catchUp()
 end
 

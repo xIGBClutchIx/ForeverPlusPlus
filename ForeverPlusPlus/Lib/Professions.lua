@@ -981,6 +981,26 @@ function Professions.HookRecipeRows(module, hooks)
     return true
 end
 
+---Keeps a module's hooks on the professions window, which is a load-on-demand addon another
+---addon may open first: `hook()` runs now and each time the window loads, opens, or lists its
+---recipes, and `catchUp` after it unless it returned false (nothing to hook yet). Call it in
+---OnEnable; the events stop with the module. Give `catchUp` a Frames.Coalesce function, since
+---the list update comes many times as the window fills.
+---@param module table
+---@param hook fun(): boolean? false while what it hooks isn't there
+---@param catchUp function draws what the window shows now
+function Professions.WatchWindow(module, hook, catchUp)
+    local function onEvent()
+        if hook() ~= false then
+            catchUp()
+        end
+    end
+    hook()
+    module:On("ADDON_LOADED", onEvent)
+    module:On("TRADE_SKILL_SHOW", onEvent)
+    module:On("TRADE_SKILL_LIST_UPDATE", onEvent)
+end
+
 ---The recipe to show for `info`: a recipe with ranks stands for the best rank the player knows, as
 ---Blizzard's form and list show it. Probe: Professions.GetHighestLearnedRecipe is Blizzard's own
 ---global `Professions` (Blizzard_ProfessionsTemplates, Mainline), not this table.

@@ -121,3 +121,25 @@ _G.Professions = nil
 eq(Professions.RecipeForm(), nil, "rows: no recipe form before Blizzard's has loaded")
 ProfessionsFrame.CraftingPage.SchematicForm = node
 eq(Professions.RecipeForm(), node, "rows: the crafting page's recipe form")
+
+-- WatchWindow: the hook now and on each of the window's events, the catch-up unless it had
+-- nothing to hook.
+do
+    local events, hooked, caught, there = {}, 0, 0, false
+    local watcher = { On = function(_, event, fn) events[event] = fn end }
+    Professions.WatchWindow(watcher, function()
+        hooked = hooked + 1
+        return there
+    end, function() caught = caught + 1 end)
+    eq(hooked .. ":" .. caught, "1:0", "watch: hooks at once, and draws nothing itself")
+    ok(events.ADDON_LOADED and events.TRADE_SKILL_SHOW and events.TRADE_SKILL_LIST_UPDATE,
+        "watch: listens for the window loading, opening, and listing")
+    events.TRADE_SKILL_SHOW()
+    eq(hooked .. ":" .. caught, "2:0", "watch: no catch-up while there's nothing to hook")
+    there = true
+    events.TRADE_SKILL_LIST_UPDATE()
+    eq(hooked .. ":" .. caught, "3:1", "watch: catches up once hooked")
+    there = nil -- a hook that returns nothing counts as done
+    events.ADDON_LOADED()
+    eq(caught, 2, "watch: a hook with no answer catches up too")
+end
