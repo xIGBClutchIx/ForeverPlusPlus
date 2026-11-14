@@ -436,6 +436,7 @@ Use the same units and steps for the same kind of thing.
 | A mark on an item or action button icon | px (`L.ICONMARK_PIXELS`), `ItemButtons.SizeOption` | 8 to 32, step 2 |
 | Padding | px, `ItemButtons.PaddingOption` | 0 to 10, step 1 |
 | Nameplate parts, Edit Mode scale | `%d%%` | 50 to 200, step 10 |
+| Icons on the world map | `MapPins.SizeOption`, `OpacityOption`, `ContinentOption` | 50 to 200, step 10; opacity 10 to 100 |
 | Opacity | `%d%%` | step 5 |
 | Times | `ns.Text.Seconds`, `Minutes`, `Hours` | |
 
