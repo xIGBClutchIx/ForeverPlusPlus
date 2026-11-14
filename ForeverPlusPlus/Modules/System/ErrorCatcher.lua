@@ -35,6 +35,7 @@ local module = ns.NewModule("ErrorCatcher", L.ERRORCATCHER_DESC, {
         -- oldest first: { kind, message, stack, locals, count, session, first, time }
         errors = {},
     },
+    layout = {}, -- data: where the window was left
 })
 module.title = L.ERRORCATCHER_TITLE
 module.category = "system"
@@ -767,18 +768,12 @@ local WINDOW_NAME = "ForeverPlusPlusErrorCatcher"
 local LIST_WIDTH = 270
 
 local function newWindow()
-    local f = ns.Frames.PortraitWindow(WINDOW_NAME, L.ERRORCATCHER_TITLE)
+    local f = ns.Frames.PortraitWindow(WINDOW_NAME, L.ERRORCATCHER_TITLE, {
+        width = 780,
+        height = 500,
+        layout = function() return module.db.layout end,
+    })
     window = f
-    f:SetSize(780, 500)
-    f:SetPoint("CENTER")
-    f:SetFrameStrata("DIALOG")
-    f:SetToplevel(true)
-    f:SetClampedToScreen(true)
-    f:SetMovable(true)
-    f:EnableMouse(true)
-    f:SetScript("OnMouseDown", f.StartMoving)
-    f:SetScript("OnMouseUp", f.StopMovingOrSizing)
-    ns.Frames.CloseOnEscape(f)
 
     -- Beside the portrait: how many errors, and which sessions the list shows.
     f.summary = f:CreateFontString(nil, "OVERLAY", "GameFontHighlight")

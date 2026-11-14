@@ -37,6 +37,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **World Map**: Unexplored Areas' map data is up to date with the game's build 70938.
 - **Professions**: recipe levels are up to date with the game's build 70938, which changed when 26 recipes turn gray.
 - **World Map**: dungeons' and raids' lowest levels come from the game's dungeon finder data, so they're right before you've opened the finder (Uldaman 35, not 41).
+- **Error Catcher** and **Copy Chat**: their windows open where you last left them, as the Whisper Window does.
 
 ### Fixed
 

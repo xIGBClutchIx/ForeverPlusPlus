@@ -119,6 +119,14 @@ do
     core.OpenSettings = function() return true end
     local Frames = core.Frames
 
+    -- A window's saved size: kept within its bounds, the default when none (or junk) was saved.
+    eq(Frames.WindowSize(nil, 640, 480, 1200), 640, "window: no saved size is the default")
+    eq(Frames.WindowSize("wide", 640, 480, 1200), 640, "window: nor is one that isn't a number")
+    eq(Frames.WindowSize(700, 640, 480, 1200), 700, "window: a saved size is kept")
+    eq(Frames.WindowSize(100, 640, 480, 1200), 480, "window: not below the least")
+    eq(Frames.WindowSize(5000, 640, 480, 1200), 1200, "window: nor above the most")
+    eq(Frames.WindowSize(5000, 640), 5000, "window: no bounds, no clamp")
+
     -- A module with a checkbox and a dropdown option, each driving events through OnWhile.
     local heard = {}
     local function count(key)

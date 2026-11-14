@@ -404,31 +404,6 @@ end
 
 -- The window ------------------------------------------------------------------------------------
 
-local function savePlace()
-    -- Saved here, not in the game's layout cache, which a moved named frame would go into.
-    if window.SetUserPlaced then
-        window:SetUserPlaced(false)
-    end
-    local point, _, relativePoint, x, y = window:GetPoint(1)
-    local layout = module.db.layout
-    layout.point, layout.relativePoint, layout.x, layout.y = point, relativePoint, x, y
-    layout.width, layout.height = window:GetWidth(), window:GetHeight()
-end
-
-local function place()
-    local layout = module.db.layout
-    window:ClearAllPoints()
-    if layout.point then
-        window:SetPoint(layout.point, UIParent, layout.relativePoint or layout.point, layout.x or 0,
-            layout.y or 0)
-    else
-        window:SetPoint("CENTER")
-    end
-    local width = layout.width and max(MIN_WIDTH, min(MAX_WIDTH, layout.width)) or WIDTH
-    local height = layout.height and max(MIN_HEIGHT, min(MAX_HEIGHT, layout.height)) or HEIGHT
-    window:SetSize(width, height)
-end
-
 -- The list at the width the player dragged it to, as far as the window's own width leaves room
 -- for the conversation beside it. A narrower window shows it narrower without forgetting it.
 local function sizeList()
@@ -479,24 +454,6 @@ local function newDivider(f, listInset)
     end
     divider:SetScript("OnMouseUp", stop)
     divider:SetScript("OnHide", stop)
-end
-
--- Blizzard's resize grip in the bottom right corner. Probe: Mainline's template.
-local function addResizeGrip(f)
-    f:SetResizable(true)
-    if f.SetResizeBounds then
-        f:SetResizeBounds(MIN_WIDTH, MIN_HEIGHT, MAX_WIDTH, MAX_HEIGHT)
-    end
-    if not Frames.HasTemplate("PanelResizeButtonTemplate") then
-        return
-    end
-    local grip = CreateFrame("Button", nil, f, "PanelResizeButtonTemplate")
-    grip:SetPoint("BOTTOMRIGHT", -2, 2)
-    grip:SetFrameLevel(f:GetFrameLevel() + 10)
-    if grip.Init then
-        pcall(grip.Init, grip, f, MIN_WIDTH, MIN_HEIGHT, MAX_WIDTH, MAX_HEIGHT)
-    end
-    grip:HookScript("OnMouseUp", savePlace)
 end
 
 -- What you sent this session, newest last, for Up and Down in the reply box like the chat's.
@@ -676,20 +633,14 @@ local function newMessages(parent)
 end
 
 local function newWindow()
-    local f = Frames.PortraitWindow(WINDOW_NAME, L.WHISPERWINDOW_WINDOW_TITLE)
+    local f = Frames.PortraitWindow(WINDOW_NAME, L.WHISPERWINDOW_WINDOW_TITLE, {
+        width = WIDTH,
+        height = HEIGHT,
+        strata = "HIGH",
+        layout = function() return module.db.layout end,
+        resize = { MIN_WIDTH, MIN_HEIGHT, MAX_WIDTH, MAX_HEIGHT },
+    })
     window = f
-    f:SetFrameStrata("HIGH")
-    f:SetToplevel(true)
-    f:SetClampedToScreen(true)
-    f:SetMovable(true)
-    f:EnableMouse(true)
-    f:SetScript("OnMouseDown", f.StartMoving)
-    f:SetScript("OnMouseUp", function(self)
-        self:StopMovingOrSizing()
-        savePlace()
-    end)
-    Frames.CloseOnEscape(f)
-    addResizeGrip(f)
 
     f.summary = f:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     f.summary:SetPoint("TOPLEFT", 66, -38)
@@ -771,7 +722,6 @@ local function newWindow()
         watcher:Hide()
         f.edit:ClearFocus()
     end)
-    place()
     sizeList()
     f:Hide()
     return f

@@ -93,7 +93,7 @@ Generated files (never edited by hand; see Generated data): `InstanceLevels.lua`
 
 ### `Frames.lua`
 
-- `ns.Frames`: whether this client has an atlas or template, the box tooltips are drawn in, Blizzard's panel button (`Button`), saving and restoring a frame's anchors (`GetPoints`, `SetPoints`), our windows with a portrait (`PortraitWindow`, with `Inset` and `RowTexture` for their lists), Escape closing our windows, whether the player is in combat or moving (`PlayerActivity`), red error-frame text, running something once after a burst of calls (`Coalesce`), a timer that waits for one run at a time (`Timer`), and OnUpdate a few times a second (`Throttled`, `Watcher`).
+- `ns.Frames`: whether this client has an atlas or template, the box tooltips are drawn in, Blizzard's panel button (`Button`), saving and restoring a frame's anchors (`GetPoints`, `SetPoints`), our windows with a portrait (`PortraitWindow`, which also makes one draggable, kept on screen, closed by Escape, back where the player left it from the `layout` table its module gives, and resizable with `resize`; with `Inset` and `RowTexture` for their lists), Escape closing our windows, whether the player is in combat or moving (`PlayerActivity`), red error-frame text, running something once after a burst of calls (`Coalesce`), a timer that waits for one run at a time (`Timer`), and OnUpdate a few times a second (`Throttled`, `Watcher`).
 
 ### `AddOns.lua`
 

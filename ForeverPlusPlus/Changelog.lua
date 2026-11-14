@@ -115,6 +115,8 @@ ns.changelog = {
                 { L.WORLDMAP_TITLE, "Dungeons' and raids' lowest levels come from the game's "
                     .. "dungeon finder data, so they're right before you've opened the finder "
                     .. "(Uldaman 35, not 41)." },
+                "Error Catcher's and Copy Chat's windows open where you last left them, as the "
+                    .. "Whisper Window does.",
             } },
             { L.CHANGELOG_FIXED, {
                 { L.MOVABLEWINDOWS_TITLE, "Dragging a character or mount model, as in the "

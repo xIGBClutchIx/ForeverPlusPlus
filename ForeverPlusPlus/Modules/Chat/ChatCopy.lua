@@ -21,6 +21,7 @@ local Chat = ns.Chat
 
 local module = ns.NewModule("ChatCopy", L.CHATCOPY_DESC, {
     stamps = false,
+    layout = {}, -- data: where the window was left
 })
 module.title = L.CHATCOPY_TITLE
 module.category = "chat"
@@ -127,16 +128,11 @@ end
 
 local function newWindow()
     -- Named so Escape can close it (ns.Frames.CloseOnEscape).
-    local f = ns.Frames.PortraitWindow("ForeverPlusPlusChatCopy", L.CHATCOPY_TITLE)
-    f:SetSize(540, 420)
-    f:SetPoint("CENTER")
-    f:SetFrameStrata("DIALOG")
-    f:SetClampedToScreen(true)
-    f:SetMovable(true)
-    f:EnableMouse(true)
-    f:SetScript("OnMouseDown", f.StartMoving)
-    f:SetScript("OnMouseUp", f.StopMovingOrSizing)
-    ns.Frames.CloseOnEscape(f)
+    local f = ns.Frames.PortraitWindow("ForeverPlusPlusChatCopy", L.CHATCOPY_TITLE, {
+        width = 540,
+        height = 420,
+        layout = function() return module.db.layout end,
+    })
 
     -- The text in the window's sunken box, below the portrait.
     local inset = f.Inset or ns.Frames.Inset(f)

@@ -6,7 +6,7 @@ local _, ns = ...
 
 local select, ipairs, tinsert, CreateFrame, C_Timer = select, ipairs, table.insert, CreateFrame, C_Timer
 local pcall, UIParent, format = pcall, UIParent, string.format
-local setmetatable, type, InCombatLockdown = setmetatable, type, InCombatLockdown
+local setmetatable, type, unpack, InCombatLockdown = setmetatable, type, unpack, InCombatLockdown
 
 local Frames = {}
 ns.Frames = Frames
@@ -79,13 +79,106 @@ function Frames.CloseOnEscape(frame)
     tinsert(UISpecialFrames, name)
 end
 
+-- Where the player left a window, and how big, into the table its module keeps for it.
+local function saveWindow(frame, opts)
+    -- Saved here, not in the game's layout cache, which a moved named frame would go into.
+    if frame.SetUserPlaced then
+        frame:SetUserPlaced(false)
+    end
+    local layout = opts.layout and opts.layout()
+    if not layout then
+        return
+    end
+    local point, _, relativePoint, x, y = frame:GetPoint(1)
+    layout.point, layout.relativePoint, layout.x, layout.y = point, relativePoint, x, y
+    if opts.resize then
+        layout.width, layout.height = frame:GetWidth(), frame:GetHeight()
+    end
+end
+
+---What a saved size comes back as: within the bounds, or the default when none was saved.
+---@param saved number?
+---@param default number
+---@param least number?
+---@param most number?
+---@return number
+function Frames.WindowSize(saved, default, least, most)
+    if type(saved) ~= "number" then
+        return default
+    end
+    if least and saved < least then
+        return least
+    end
+    if most and saved > most then
+        return most
+    end
+    return saved
+end
+
+-- Blizzard's resize grip in the bottom right corner. Probe: Mainline's template.
+local function addResizeGrip(frame, opts)
+    local minWidth, minHeight, maxWidth, maxHeight = unpack(opts.resize)
+    frame:SetResizable(true)
+    if frame.SetResizeBounds then
+        frame:SetResizeBounds(minWidth, minHeight, maxWidth, maxHeight)
+    end
+    if not Frames.HasTemplate("PanelResizeButtonTemplate") then
+        return
+    end
+    local grip = CreateFrame("Button", nil, frame, "PanelResizeButtonTemplate")
+    grip:SetPoint("BOTTOMRIGHT", -2, 2)
+    grip:SetFrameLevel(frame:GetFrameLevel() + 10)
+    if grip.Init then
+        pcall(grip.Init, grip, frame, minWidth, minHeight, maxWidth, maxHeight)
+    end
+    grip:HookScript("OnMouseUp", function()
+        saveWindow(frame, opts)
+    end)
+end
+
+-- What every window of ours does alike: dragged by any part of it, kept on the screen, closed by
+-- Escape, and back where the player left it.
+local function setUpWindow(frame, opts)
+    frame:SetFrameStrata(opts.strata or "DIALOG")
+    frame:SetToplevel(true)
+    frame:SetClampedToScreen(true)
+    frame:SetMovable(true)
+    frame:EnableMouse(true)
+    frame:SetScript("OnMouseDown", frame.StartMoving)
+    frame:SetScript("OnMouseUp", function(self)
+        self:StopMovingOrSizing()
+        saveWindow(self, opts)
+    end)
+    Frames.CloseOnEscape(frame)
+
+    local layout = opts.layout and opts.layout() or {}
+    frame:ClearAllPoints()
+    if layout.point then
+        frame:SetPoint(layout.point, UIParent, layout.relativePoint or layout.point, layout.x or 0,
+            layout.y or 0)
+    else
+        frame:SetPoint("CENTER")
+    end
+    local bounds = opts.resize or {}
+    frame:SetSize(Frames.WindowSize(layout.width, opts.width, bounds[1], bounds[3]),
+        Frames.WindowSize(layout.height, opts.height, bounds[2], bounds[4]))
+    if opts.resize then
+        addResizeGrip(frame, opts)
+    end
+end
+
 ---One of our windows in Blizzard's frame with a portrait (the addon's icon), a sunken box, and a
 ---strip for buttons at the bottom, as the game's own lists use. Probe: an older template if this
----client doesn't have it. Named, so Escape can close it (Frames.CloseOnEscape).
+---client doesn't have it. Named, so Escape closes it. It's dragged by any part of it, stays on
+---the screen, and comes back where the player left it when its module gives `layout`.
+---
+---`layout` is a function, not the table: the module's saved data mustn't be kept past a profile
+---switch. Give the table a default of `{}` in the module's defaults, which makes it data.
 ---@param name string the window's global name
 ---@param title string
+---@param opts { width: number, height: number, strata: string?, layout: (fun(): table)?, resize: number[]? } `resize` is the least width and height, then the most, and adds Blizzard's grip
 ---@return table frame
-function Frames.PortraitWindow(name, title)
+function Frames.PortraitWindow(name, title, opts)
     local ok, f = pcall(CreateFrame, "Frame", name, UIParent, "ButtonFrameTemplate")
     if not (ok and f) then
         f = CreateFrame("Frame", name, UIParent, "BasicFrameTemplateWithInset")
@@ -112,6 +205,7 @@ function Frames.PortraitWindow(name, title)
     elseif f.TitleText then
         f.TitleText:SetText(title)
     end
+    setUpWindow(f, opts)
     return f
 end
 
