@@ -92,6 +92,8 @@ do
     controller = true
     eq(Chat.HarmlessRefusal(NAV), false, "refusal: with the controller interface on it's worth knowing")
     eq(Chat.HarmlessRefusal(LIST), true, "refusal: but not the Settings sidebar's")
+    eq(Chat.HarmlessRefusal(NAV .. "\n[Interface/AddOns/Blizzard_Settings_Shared/Blizzard_SettingsPanel.lua]:1041:"),
+        true, "refusal: nor picking a page in Settings")
     controller = false
 
     local stack, hook = NAV, nil

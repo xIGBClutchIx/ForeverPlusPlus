@@ -1531,6 +1531,10 @@ function ns.RegisterSettings()
     if not (Settings and Settings.RegisterCanvasLayoutCategory and Settings.RegisterAddOnCategory) then
         return
     end
+    -- From here on Settings holds our pages, and picking one makes the controller navigation
+    -- print its yellow "Interface action failed" line with nothing failed, however Settings was
+    -- opened: kept out of chat (Lib/Chat.lua).
+    ns.Chat.QuietRefusals()
     local subpages = Settings.RegisterCanvasLayoutSubcategory ~= nil
     local order = byTitle()
     trackNew(order)

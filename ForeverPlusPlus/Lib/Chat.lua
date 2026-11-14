@@ -343,18 +343,22 @@ end
 -- Blizzard_GamepadSmartNavigation), which opening Settings to one of our pages does every time:
 -- SettingsPanel focuses its list through SmartNavigation:EnterFocusGroup. With the controller
 -- interface off, what it refused is only where a controller's focus goes, which nobody is using,
--- so the line reports nothing the player can act on.
+-- so the line reports nothing the player can act on. Picking one of our pages in the sidebar does
+-- it too, however Settings was opened (Cameron, build 70888, 2026-11-14).
 
----Whether a stack is the controller navigation refusing addon code where nothing is lost: the
----Settings sidebar drawn again (any addon with a Settings entry causes it), or any refusal while
----the controller interface is off.
+---Whether a stack is the controller navigation refusing addon code where nothing is lost: inside
+---Blizzard's Settings panel, or any refusal while the controller interface is off. The panel
+---lists every addon's entry, so its sidebar and the page it shows are tainted whoever's turn it
+---is: picking a page (SettingsPanelMixin:FocusContainer, Blizzard_Settings_Shared) or drawing the
+---sidebar again (Blizzard_CategoryList.lua) is refused for any addon with a Settings entry.
 ---@param stack any
 ---@return boolean
 function Chat.HarmlessRefusal(stack)
     if not (ns.IsText(stack) and find(stack, "Blizzard_GamepadSmartNavigation", 1, true)) then
         return false
     end
-    return find(stack, "Blizzard_CategoryList.lua", 1, true) ~= nil or not ns.Menus.GamepadUI()
+    return find(stack, "Blizzard_Settings", 1, true) ~= nil
+        or find(stack, "Blizzard_CategoryList.lua", 1, true) ~= nil or not ns.Menus.GamepadUI()
 end
 
 local quieted = false
