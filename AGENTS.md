@@ -470,7 +470,7 @@ lua5.1 tests/run.lua store    # the specs with that in their name
   - `release`: the TOC's version, `Changelog.lua`, and `CHANGELOG.md` agree.
   - `rules`: each file's first line, no removed Classic globals, no `COMBAT_LOG_EVENT_UNFILTERED`, `WOW_PROJECT_ID`, `print`, and `IsInInstance` only where allowed, no tabs or trailing spaces.
 - Each spec gets a fresh copy of the addon with the real `Lib/` and `Locales/enUS/` files against stubbed WoW globals, so specs can't depend on each other. A Lib file that caches a global at load needs that global stubbed before it loads. `tests/README.md` says how to write one.
-- What to add: a check when you change or add Lib logic that has no frames in it, a spec when you add a Lib file, and a check in `core` when you change how Core turns modules on and off. Don't test frame or UI code.
+- What to add: a check when you change or add Lib logic that has no frames in it, a spec when you add a Lib file, and a check in the `core_*` specs (each on a fresh real Core, `T.Core()`) when you change how Core turns modules on and off. Don't test frame or UI code.
 - CI also runs wowlua-ls (`wowlua_ls check .`) for types and secret values. `tests/wowlua.lua` compares its findings with `tests/wowlua-baseline.txt` and fails on a new one. A new finding is usually a real problem: fix it, or, when it's the checker's mistake, add it with `--update` and say why in the commit. Fixing one means taking it out of the baseline too (`--update` does it).
 
 Before calling a change done:
