@@ -68,7 +68,7 @@ end
 local linkSoon = ns.Frames.Coalesce(linkPending, nil, module)
 
 local function onMessage(frame, text)
-    if not ns.IsText(text) or rewrite(text) == text then
+    if rewrite(text) == text then
         return
     end
     pending[frame] = true
@@ -80,9 +80,7 @@ function module:IsAvailable()
 end
 
 function module:OnEnable()
-    Chat.EachWindow(self, function(frame)
-        module:Hook(frame, "AddMessage", onMessage)
-    end)
+    Chat.OnMessage(self, onMessage)
 end
 
 -- Lines already linked go back to plain text, so turning the module off undoes it.

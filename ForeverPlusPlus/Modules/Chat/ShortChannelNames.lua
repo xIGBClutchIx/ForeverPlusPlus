@@ -164,9 +164,6 @@ local function rewrite(text)
 end
 
 local function onMessage(frame, text)
-    if not ns.IsText(text) then
-        return
-    end
     local short = rewrite(text)
     if short == text then
         return
@@ -261,8 +258,7 @@ end
 
 function module:OnEnable()
     -- Every window, and one added later.
-    Chat.EachWindow(self, function(frame)
-        module:Hook(frame, "AddMessage", onMessage)
+    Chat.OnMessage(self, onMessage, function(frame)
         local editBox = frame.editBox or _G[(frame:GetName() or "") .. "EditBox"]
         module:Hook(editBox, "UpdateHeader", onUpdateHeader)
     end)

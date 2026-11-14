@@ -53,3 +53,28 @@ eq(stamp("[%H:%M:%S] ", "[21:05:09] hi"), "[21:05:09] ", "timestamp in brackets"
 eq(stamp("%I:%M %p ", "9:41 PM hi"), "9:41 PM ", "timestamp with AM or PM")
 eq(stamp("%I:%M ", "|Haddon:x|h09:41 |h hi"), nil, "timestamp not inside a link")
 eq(stamp("%H:%M ", "[Bob]: 12:30 tonight"), nil, "timestamp only at the start")
+
+-- Chat.OnMessage: one hook a function on each window, called only with text that can be read.
+do
+    T.game.secret = "<secret>"
+    local windows = { {}, {} }
+    Chat.EachWindow = function(_, fn)
+        for _, window in ipairs(windows) do
+            fn(window)
+        end
+    end
+    local hooks, seen, visited = {}, {}, 0
+    local watcher = { Hook = function(_, frame, method, fn) hooks[frame] = method == "AddMessage" and fn end }
+    local function onMessage(frame, text) seen[#seen + 1] = text end
+    Chat.OnMessage(watcher, onMessage, function() visited = visited + 1 end)
+    eq(visited, 2, "on message: the module's own work on each window")
+    local first = hooks[windows[1]]
+    eq(first ~= nil and first == hooks[windows[2]], true, "on message: the same hook on every window")
+    first(windows[1], "hello")
+    first(windows[1], T.game.secret)
+    first(windows[1], nil)
+    eq(table.concat(seen, ","), "hello", "on message: a line the game hides is skipped")
+    Chat.OnMessage(watcher, onMessage)
+    eq(hooks[windows[1]], first, "on message: turned on again, the same hook, so it's hooked once")
+    T.game.secret = nil
+end

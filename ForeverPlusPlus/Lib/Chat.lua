@@ -65,6 +65,33 @@ function Chat.EachWindow(module, fn)
     end
 end
 
+local readers = setmetatable({}, { __mode = "k" }) -- fn -> its hook, so each is hooked once
+
+---Calls `fn(frame, text)` after each line a chat window adds, in every window (and ones added
+---later), while the module is on. Only for a line that can be read: one the game hides is
+---skipped. Call it from `OnEnable`. It uses Chat.EachWindow, which a module has one of, so what
+---else the module does to each window goes in `each`.
+---@param module table
+---@param fn fun(frame: table, text: string)
+---@param each? fun(frame: table)
+function Chat.OnMessage(module, fn, each)
+    local hook = readers[fn]
+    if not hook then
+        hook = function(frame, text)
+            if ns.IsText(text) then
+                fn(frame, text)
+            end
+        end
+        readers[fn] = hook
+    end
+    Chat.EachWindow(module, function(frame)
+        module:Hook(frame, "AddMessage", hook)
+        if each then
+            each(frame)
+        end
+    end)
+end
+
 ---Rewrites the lines a chat window already shows: each readable line `test` accepts becomes
 ---`rewrite(line)`, keeping its color and links. Does nothing on a client without TransformMessages.
 ---Each rewritten line counts as new, so one that had faded out shows again until it fades; there's

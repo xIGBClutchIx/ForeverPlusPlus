@@ -76,9 +76,6 @@ end
 local tagSoon = ns.Frames.Coalesce(tagPending, nil, module)
 
 local function onMessage(frame, text)
-    if not ns.IsText(text) then
-        return
-    end
     local id = match(text, "|Hplayer:[^:|]*:(%d+)")
     if not id then
         return
@@ -131,9 +128,7 @@ end
 
 function module:OnEnable()
     ns.Players.Use(self)
-    Chat.EachWindow(self, function(frame)
-        module:Hook(frame, "AddMessage", onMessage)
-    end)
+    Chat.OnMessage(self, onMessage)
 end
 
 -- Lines already tagged lose their levels, so turning the module off undoes it.

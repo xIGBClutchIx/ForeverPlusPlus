@@ -197,7 +197,7 @@ Generated files (never edited by hand; see Generated data): `InstanceLevels.lua`
 
 ### `Chat.lua`
 
-- `ns.Chat`: the chat windows as they come and go, rewriting the lines they show, a chat line in its colors for an edit box, filters that hide chat lines (`AddFilter`), and the column of buttons beside the chat window, with `NewButton` in Blizzard's art, those that don't fit a short chat window listed in its speech bubble's menu instead, and `SetBadge` for what one has waiting, which the speech bubble shows while it's there.
+- `ns.Chat`: the chat windows as they come and go (`EachWindow`), each line a window adds that can be read (`OnMessage`, which a module uses instead of hooking `AddMessage` itself), rewriting the lines they show (`Transform`), a chat line in its colors for an edit box, filters that hide chat lines (`AddFilter`), and the column of buttons beside the chat window, with `NewButton` in Blizzard's art, those that don't fit a short chat window listed in its speech bubble's menu instead, and `SetBadge` for what one has waiting, which the speech bubble shows while it's there.
 
 ### `TalentPlan.lua`
 
