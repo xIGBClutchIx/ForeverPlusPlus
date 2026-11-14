@@ -317,7 +317,7 @@ function internal.createUI()
         dropdown = CreateFrame("DropdownButton", nil, bar, "WowStyle1DropdownTemplate")
         dropdown:SetWidth(170)
         dropdown:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMRIGHT", -48, 8)
-        dropdown:SetupMenu(setupMenu)
+        ns.Menus.SetupDropdown(dropdown, setupMenu)
         ui.dropdown = dropdown
     end
 

@@ -46,7 +46,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Fixed
 
-- With the controller interface on, opening one of Forever++'s menus (the Minimap Button's, the Whisper Window's, a dungeon icon's on the world map, an Edit Mode frame's) no longer makes the game block actions and blame Forever++. Those menus are a plain list of our own then, which the mouse and the controller's D-pad, A, and B work.
+- With the controller interface on, opening one of Forever++'s menus, dropdowns, or confirmation popups no longer makes the game block actions and blame Forever++. They are plain frames of our own then, which the mouse and the controller's D-pad, A, and B work.
 - **Movable Windows**: dragging a character or mount model, as in the dressing room, turns the model without moving the window too.
 - **Short Channel Names**: the chat box's cursor sits at the end of what you typed again. With a channel's name shortened it stood off to the right.
 - **Item Tooltips**: Disenchant knows every item the game can disenchant, such as blue gear at item level 5-10 and gear above 65. Where what it gives isn't known yet, the line says so and learns it from your own disenchants.

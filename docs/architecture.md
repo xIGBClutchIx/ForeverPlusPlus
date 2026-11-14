@@ -95,7 +95,9 @@ Generated files (never edited by hand; see Generated data): `InstanceLevels.lua`
 
 - `ns.Menus`: every context menu we open goes through `Open(owner, generator, anchor)`. `generator(owner, root)` describes it as Blizzard's menus are described (`CreateTitle`, `CreateDivider`, `CreateButton`, `CreateCheckbox`, `CreateRadio`, a button's own entries as its submenu, `SetTooltip`, `SetEnabled`).
 - With the controller interface off it's `MenuUtil.CreateContextMenu`. With it on (`GamepadUI`) it's a plain list of our own frames, since Blizzard's menu opened from addon code taints the controller's focus manager for the session (`docs/forever-api.md`). Ours takes the mouse, and the controller's D-pad, A, and B while it's open.
-- `Describe` gives the description as plain entries, with `IsEnabled` and `IsSelected` for one. Dropdowns in Settings and Blizzard's own menus we add entries to are still Blizzard's.
+- `SetupDropdown(dropdown, generator)` takes the place of a Blizzard dropdown button's `SetupMenu`: the button, its text, and the wheel stay Blizzard's, and only what drops down is ours with the controller interface on (`OpenMenu` replaced on our own frame).
+- `Describe` gives the description as plain entries, with `IsEnabled` and `IsSelected` for one. Blizzard's own menus we add entries to (the world map's filter menu) are still Blizzard's, opened by Blizzard.
+- `Lib/Confirm.lua` does the same for popups: Blizzard's `StaticPopup`, or one frame of our own with the controller interface on.
 
 ### `Frames.lua`
 

@@ -505,7 +505,7 @@ local function newSettingRow(setting)
         if ok and dropdown and dropdown.SetupMenu then
             dropdown:SetWidth(200)
             dropdown:SetPoint("LEFT", label, "LEFT", 90, 0)
-            dropdown:SetupMenu(function(_, root)
+            ns.Menus.SetupDropdown(dropdown, function(_, root)
                 for _, choice in ipairs(setting.choices) do
                     root:CreateRadio(choice[2], function() return setting.get() == choice[1] end, function()
                         call(setting.set, choice[1])

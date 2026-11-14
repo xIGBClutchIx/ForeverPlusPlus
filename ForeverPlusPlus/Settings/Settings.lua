@@ -568,7 +568,7 @@ local function newDropdown(parent, module, option, width)
         return
     end
     dropdown:SetWidth(width)
-    dropdown:SetupMenu(function(_, root)
+    ns.Menus.SetupDropdown(dropdown, function(_, root)
         for _, choice in ipairs(option.choices) do
             root:CreateRadio(choice[2], function(value)
                 return module.db[option.key] == value

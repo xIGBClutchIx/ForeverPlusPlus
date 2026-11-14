@@ -127,8 +127,8 @@ One line here says what each file is for. [docs/architecture.md](docs/architectu
 | File | `ns` | For |
 | --- | --- | --- |
 | `Frames.lua` | `Frames` | Atlas and template checks, Blizzard's panel button, saved anchors, our portrait windows, Escape to close, `Coalesce`, `Timer`, `Throttled`. |
-| `Menus.lua` | `Menus` | A context menu at the cursor (`Open`): Blizzard's, or a list of our own while the controller interface is on (`GamepadUI`), where Blizzard's opened by an addon breaks the controller's focus. Never `MenuUtil.CreateContextMenu` directly. |
-| `Confirm.lua` | `Confirm`, `Prompt`, `PromptName` | Yes/no and text popups. |
+| `Menus.lua` | `Menus` | A context menu at the cursor (`Open`): Blizzard's, or a list of our own while the controller interface is on (`GamepadUI`), where Blizzard's opened by an addon breaks the controller's focus. A dropdown's menu goes through `SetupDropdown`. Never `MenuUtil.CreateContextMenu` or a dropdown's `SetupMenu` directly. |
+| `Confirm.lua` | `Confirm`, `Prompt`, `PromptName` | Yes/no and text popups: Blizzard's, or a frame of our own while the controller interface is on. Never `StaticPopup_Show` directly. |
 | `EditMode.lua` | `EditMode` | Our own frames in Blizzard's Edit Mode, looking and working like Blizzard's (`RegisterModule`). |
 | `SettingsKit.lua` | `SettingsKit` | What a drawn Settings page is made of, for the Settings pages and a tool's `BuildPage`. |
 | `Chat.lua` | `Chat` | The chat windows, rewriting and filtering their lines, and the column of buttons beside them (`NewButton`, `SetBadge`). |

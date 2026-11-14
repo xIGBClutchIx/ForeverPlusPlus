@@ -325,7 +325,7 @@ local function updateSets()
         setsDropdown:SetWidth(130)
         setsDropdown:SetPoint("LEFT", list.DisableAllButton, "RIGHT", 8, 0)
         setsDropdown:SetDefaultText(L.ADDONSLIST_SETS_BUTTON)
-        setsDropdown:SetupMenu(setupSetsMenu)
+        ns.Menus.SetupDropdown(setsDropdown, setupSetsMenu)
     end
     if setsDropdown then
         setsDropdown:SetShown(want and true or false)

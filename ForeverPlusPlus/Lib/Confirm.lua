@@ -4,6 +4,120 @@ local _, ns = ...
 
 local StaticPopupDialogs, StaticPopup_Show, YES, NO = StaticPopupDialogs, StaticPopup_Show, YES, NO
 local CANCEL, ACCEPT, CLOSE, strtrim, error = CANCEL, ACCEPT, CLOSE, strtrim, error
+local CreateFrame, UIParent, ipairs, format = CreateFrame, UIParent, ipairs, string.format
+
+-- A popup of our own -------------------------------------------------------------------------------
+-- With the controller interface on, one of Blizzard's popups shown by an addon runs the
+-- controller's focus manager tainted, as a menu does (StaticPopupGamepad's HandlePopupShow; see
+-- Lib/Menus.lua), and the game then blocks its own actions and blames us. So then the question is
+-- asked in a frame of our own: the text, an optional text box, and up to four buttons. The mouse
+-- works it, a controller's A is its first button and B closes it, and Enter and Escape work in
+-- the text box.
+local WIDTH, PAD, BUTTON_WIDTH, BUTTON_GAP = 340, 18, 110, 8
+local own -- the frame, made the first time it's needed
+
+local function ownPopup()
+    if own then
+        return own
+    end
+    local template = ns.Frames.HasTemplate("TooltipBackdropTemplate") and "TooltipBackdropTemplate" or nil
+    own = CreateFrame("Frame", nil, UIParent, template)
+    own:SetFrameStrata("FULLSCREEN_DIALOG")
+    own:SetFrameLevel(200)
+    own:SetWidth(WIDTH)
+    own:SetPoint("TOP", UIParent, "TOP", 0, -135) -- where Blizzard's first popup sits
+    own:EnableMouse(true)
+    own:Hide()
+    if not template then
+        local back = own:CreateTexture(nil, "BACKGROUND")
+        back:SetAllPoints()
+        back:SetColorTexture(0.05, 0.05, 0.05, 0.95)
+    end
+    own.text = own:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    own.text:SetPoint("TOP", 0, -PAD)
+    own.text:SetWidth(WIDTH - PAD * 2)
+    own.box = CreateFrame("EditBox", nil, own, ns.Frames.HasTemplate("InputBoxTemplate") and "InputBoxTemplate" or nil)
+    own.box:SetSize(WIDTH - PAD * 3, 22)
+    own.box:SetAutoFocus(false)
+    own.box:SetFontObject("ChatFontNormal")
+    own.box:SetScript("OnEscapePressed", function()
+        own:Hide()
+    end)
+    own.box:SetScript("OnEnterPressed", function()
+        own.press(1)
+    end)
+    own.buttons = {}
+    for i = 1, 4 do
+        own.buttons[i] = ns.Frames.Button(own, nil, BUTTON_WIDTH, function()
+            own.press(i)
+        end)
+    end
+    if own.EnableGamePadButton then
+        own:SetScript("OnGamePadButtonDown", function(_, button)
+            if button == "PAD1" then
+                own.press(1)
+            elseif button == "PAD2" then
+                own:Hide()
+            end
+        end)
+        own:SetScript("OnShow", function(self)
+            self:EnableGamePadButton(true)
+        end)
+        own:SetScript("OnHide", function(self)
+            self:EnableGamePadButton(false)
+        end)
+    end
+    return own
+end
+
+-- Asks in our own popup. `buttons` is a list of `{ text, fn }` in the order they show, a `fn` of
+-- false for one that only closes; `edit`, when given, is `{ initial, long }` and each `fn` gets
+-- the box's text.
+local function ask(text, buttons, edit)
+    local popup = ownPopup()
+    popup.text:SetText(text)
+    local y = PAD + popup.text:GetStringHeight() + 12
+    local box = popup.box
+    box:SetShown(edit ~= nil)
+    if edit then
+        box:ClearAllPoints()
+        box:SetPoint("TOP", 0, -y)
+        box:SetMaxLetters(edit.long and 0 or 2000)
+        box:SetText(edit.initial or "")
+        y = y + 22 + 12
+    end
+    local count = #buttons
+    local width = count > 3 and (WIDTH - PAD * 2 - BUTTON_GAP * (count - 1)) / count or BUTTON_WIDTH
+    local left = -((width + BUTTON_GAP) * count - BUTTON_GAP) / 2
+    for i, button in ipairs(popup.buttons) do
+        local spec = buttons[i]
+        button:SetShown(spec ~= nil)
+        if spec then
+            button:SetText(spec.text)
+            button:SetWidth(width)
+            button:ClearAllPoints()
+            button:SetPoint("TOPLEFT", popup, "TOP", left + (i - 1) * (width + BUTTON_GAP), -y)
+        end
+    end
+    popup.press = function(index)
+        local spec = buttons[index]
+        local typed = edit and box:GetText() or nil
+        popup:Hide()
+        if spec and spec.fn then
+            spec.fn(typed)
+        end
+    end
+    popup:SetHeight(y + 22 + PAD)
+    popup:Show()
+    if edit then
+        box:HighlightText()
+        box:SetFocus()
+    end
+end
+
+local function gamepad()
+    return ns.Menus.GamepadUI()
+end
 
 -- Shows our popup for `key`, made from `build()` the first time the key is used, so a key always
 -- has the same buttons. Its text is this call's, since callers format names into it. `textArg`
@@ -29,6 +143,10 @@ end
 ---@param onAccept function
 ---@param textArg? string
 function ns.Confirm(key, text, onAccept, textArg)
+    if gamepad() then
+        ask(textArg and format(text, textArg) or text, { { text = YES, fn = onAccept }, { text = NO, fn = false } })
+        return
+    end
     -- Probe: StaticPopup is Blizzard's confirmation dialog; without it, just do it.
     if not (StaticPopupDialogs and StaticPopup_Show) then
         onAccept()
@@ -62,6 +180,16 @@ local choices = {} -- key -> { onFirst, onSecond, onThird } of the latest ns.Con
 ---@param third? string the right button
 ---@param onThird? function
 function ns.ConfirmChoice(key, text, first, onFirst, second, onSecond, third, onThird)
+    if gamepad() then
+        local buttons = {
+            { text = first, fn = onFirst }, { text = CANCEL, fn = false }, { text = second, fn = onSecond },
+        }
+        if third then
+            buttons[4] = { text = third, fn = onThird }
+        end
+        ask(text, buttons)
+        return
+    end
     -- Probe: as ns.Confirm. Without the popup, do nothing: there's no way to know which.
     if not (StaticPopupDialogs and StaticPopup_Show) then
         return
@@ -129,6 +257,12 @@ end
 ---@param onAccept? fun(text: string)
 ---@param long? boolean no limit on the text's length, for a string as long as a node export
 function ns.Prompt(key, text, initial, onAccept, long)
+    if gamepad() then
+        local buttons = onAccept and { { text = ACCEPT, fn = onAccept }, { text = CANCEL, fn = false } }
+            or { { text = CLOSE, fn = false } }
+        ask(text, buttons, { initial = initial, long = long })
+        return
+    end
     if not (StaticPopupDialogs and StaticPopup_Show) then
         return
     end

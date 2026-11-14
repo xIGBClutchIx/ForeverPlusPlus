@@ -313,7 +313,7 @@ local function newDropdown(frame, width, fill)
         local ok, dropdown = pcall(CreateFrame, "DropdownButton", nil, frame, "WowStyle1DropdownTemplate")
         if ok and dropdown and dropdown.SetupMenu then
             dropdown:SetWidth(width)
-            dropdown:SetupMenu(function(_, root)
+            ns.Menus.SetupDropdown(dropdown, function(_, root)
                 fill(root)
             end)
             return dropdown

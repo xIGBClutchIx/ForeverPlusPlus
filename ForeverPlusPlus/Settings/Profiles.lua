@@ -70,7 +70,7 @@ local function newDropdown(parent, width, list, get, set)
         return
     end
     dropdown:SetWidth(width)
-    dropdown:SetupMenu(function(_, root)
+    ns.Menus.SetupDropdown(dropdown, function(_, root)
         for _, entry in ipairs(list()) do
             root:CreateRadio(entry[2], function(value)
                 return get() == value

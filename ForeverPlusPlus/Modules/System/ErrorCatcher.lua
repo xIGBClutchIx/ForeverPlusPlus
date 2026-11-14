@@ -683,7 +683,7 @@ local function newFilter(parent)
     local ok, dropdown = pcall(CreateFrame, "DropdownButton", nil, parent, "WowStyle1DropdownTemplate")
     if ok and dropdown and dropdown.SetupMenu then
         dropdown:SetWidth(180)
-        dropdown:SetupMenu(function(_, root)
+        ns.Menus.SetupDropdown(dropdown, function(_, root)
             for _, choice in ipairs(FILTERS) do
                 root:CreateRadio(format(L.ERRORCATCHER_FILTER, choice[2], #filtered(choice[1])),
                     function(value)

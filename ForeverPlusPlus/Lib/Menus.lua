@@ -23,6 +23,7 @@ local _, ns = ...
 
 local ipairs, type, setmetatable, rawget, unpack, max = ipairs, type, setmetatable, rawget, unpack, math.max
 local CreateFrame, UIParent, GetCursorPosition, GameTooltip = CreateFrame, UIParent, GetCursorPosition, GameTooltip
+local GetTime = GetTime
 local _G = _G
 
 local Menus = {}
@@ -136,6 +137,9 @@ local ARROW = { "common-dropdown-icon-next", "common-icon-forwardarrow", "NPE_Ar
 
 local levels = {} -- depth -> its frame
 local owner -- the frame the open menu belongs to, or nil while none is open
+local afterPick -- called after each pick in the open menu (a dropdown's text follows it)
+local radiosClose = false -- a dropdown's menu closes on a radio pick, as Blizzard's does
+local closedOwner, closedAt -- the owner of the menu a click just closed, and when
 local focus = { depth = 0, index = 0 } -- the row a controller is on
 
 local close, fill
@@ -223,11 +227,18 @@ local function pick(row)
     if not fn then
         return
     end
-    local stays = entry.kind ~= "button"
+    local stays = entry.kind == "checkbox" or (entry.kind == "radio" and not radiosClose)
+    local after = afterPick
     local response = fn(rawget(entry, "data"))
     local refresh = _G.MenuResponse and _G.MenuResponse.Refresh
     if response ~= nil then
         stays = refresh ~= nil and response == refresh
+    end
+    if after then
+        after()
+    end
+    if not owner then
+        return -- the pick closed it (its window went away)
     end
     if stays then
         repaint()
@@ -332,6 +343,8 @@ local function onMouseDown()
             return
         end
     end
+    -- A click on the dropdown it hangs from closes it; that click mustn't open it again.
+    closedOwner, closedAt = owner, GetTime()
     close()
 end
 
@@ -440,7 +453,7 @@ function close()
     if not owner then
         return
     end
-    owner = nil
+    owner, afterPick, radiosClose = nil, nil, false
     ns.Off("GLOBAL_MOUSE_DOWN", onMouseDown)
     hideFrom(1)
     if levels[1].EnableGamePadButton then
@@ -490,4 +503,31 @@ function Menus.Open(menuOwner, generator, anchor)
         focus.depth, focus.index = 1, 0
     end
     return true
+end
+
+---Gives one of Blizzard's dropdown buttons (a `DropdownButton` frame we made from
+---`WowStyle1DropdownTemplate`) its menu, in place of its own `SetupMenu`. The button, its text,
+---and the mouse wheel stay Blizzard's; only opening changes: with the controller interface on, the
+---list that drops down is our own. `OpenMenu` is replaced on our own frame, never on the mixin.
+---@param dropdown table
+---@param generator fun(owner: any, root: table)
+function Menus.SetupDropdown(dropdown, generator)
+    dropdown:SetupMenu(generator)
+    local blizzardOpen = dropdown.OpenMenu
+    dropdown.OpenMenu = function(self)
+        if not Menus.GamepadUI() then
+            return blizzardOpen(self)
+        end
+        if not self:IsEnabled() or (closedOwner == self and closedAt == GetTime()) then
+            return
+        end
+        local util = _G.AnchorUtil
+        Menus.Open(self, generator, util and util.CreateAnchor and util.CreateAnchor("TOPLEFT", self, "BOTTOMLEFT", 0, 0) or nil)
+        if owner == self then
+            radiosClose = true
+            afterPick = function()
+                self:GenerateMenu() -- its text follows the pick
+            end
+        end
+    end
 end
