@@ -60,9 +60,8 @@ ns.changelog = {
                     .. "plays, under Play Sound. They're the same two as before unless you change "
                     .. "them, and are now heard with sound effects off." },
                 { L.QUESTNAMEPLATES_TITLE, "Item Drops, on by default, also marks creatures that drop "
-                    .. "an item one of your quests asks for, with how many you have. The game only "
-                    .. "marks a creature that is itself the objective, so this needs the QuestieDB "
-                    .. "addon." },
+                    .. "an item one of your quests asks for, with how many you have. Needs the "
+                    .. "QuestieDB addon." },
                 { L.AUTOQUEST_TITLE, "Low-Level Quests (off by default) also takes quests far below "
                     .. "your level from a quest giver's list, which it used to leave for you." },
                 { L.FLIGHTTIMER_TITLE, "Estimated Times, on by default, shows a flight you haven't "
@@ -138,8 +137,8 @@ ns.changelog = {
             { L.CHANGELOG_FIXED, {
                 "With the controller interface on, opening one of Forever++'s menus, dropdowns, "
                     .. "or confirmation popups no longer makes the game block actions and blame "
-                    .. "Forever++. They are plain frames of our own then, which the mouse and the "
-                    .. "controller's D-pad, A, and B work.",
+                    .. "Forever++. They are Forever++'s own frames then, worked with the mouse or "
+                    .. "the controller's D-pad, A, and B.",
                 { L.MOVABLEWINDOWS_TITLE, "Dragging a character or mount model, as in the "
                     .. "dressing room, turns the model without moving the window too." },
                 { L.SHORTCHANNELNAMES_TITLE, "The chat box's cursor sits at the end of what you "
@@ -164,8 +163,7 @@ ns.changelog = {
                     .. "AddOn\" when the game writes it to chat another way." },
                 { L.CHANGELOG_SETTINGS, "Opening Forever++'s settings no longer leaves a yellow "
                     .. "\"Interface action failed because of an AddOn\" line in chat. Nothing had "
-                    .. "failed: the game's controller navigation prints it whenever an addon opens "
-                    .. "Settings." },
+                    .. "failed." },
             } },
         },
     },

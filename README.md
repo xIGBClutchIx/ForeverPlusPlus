@@ -85,7 +85,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Quest Levels | Shows a quest's level before its name ([12], with a + for group quests) in a quest giver's list and the quest's details. Can color it by difficulty. |
 | Quest Pins | Needs the [QuestieDB](https://github.com/Questie/questiedb) addon. Puts a ! on the world map where each quest you can still take starts, colored by kind, and lists an NPC's quests in its tooltip. Options pick which kinds and levels show. Off by default. |
 | Quest Item Sparkles | Keeps the sparkle on quest items you can pick up in the world, even after a graphics preset turns it off. Off by default. |
-| Quest Nameplates | Shows a quest icon and your progress (3/8) beside the health bar of creatures you need for a quest, counting your party's progress if you like. |
+| Quest Nameplates | Shows a quest icon and your progress (3/8) beside the health bar of creatures you need for a quest, counting your party's progress if you like. With the QuestieDB addon, creatures that drop a quest's item are marked too. |
 | **System** | |
 | Hide Beta Feedback | Hides the beta's "Press F6 to submit an issue" tooltip line and feedback buttons. Off by default, and only on beta and PTR clients. |
 | AddOns List | Shows the AddOns list without category headers, enabled addons first. Can search notes and save addon sets. |

@@ -19,7 +19,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Gathering Tracking**: Say When Turned Back On (off by default) says in chat when tracking has been turned back on for you. Its other chat option is now called Warning Messages.
 - **Flight Timer**: Sound on Landing has a Sound dropdown to pick another sound; it still plays the ready check's unless you change it. Error Catcher's and Durability Warning's Sound dropdowns offer Ready Check too.
 - **Combat Alert**: Entering Sound and Leaving Sound pick the sound each alert plays, under Play Sound. They're the same two as before unless you change them, and are now heard with sound effects off.
-- **Quest Nameplates**: Item Drops, on by default, also marks creatures that drop an item one of your quests asks for, with how many you have. The game only marks a creature that is itself the objective, so this needs the QuestieDB addon.
+- **Quest Nameplates**: Item Drops, on by default, also marks creatures that drop an item one of your quests asks for, with how many you have. Needs the QuestieDB addon.
 - **Auto Quest**: Low-Level Quests (off by default) also takes quests far below your level from a quest giver's list, which it used to leave for you.
 - **Flight Timer**: Estimated Times, on by default, shows a flight you haven't taken yet with the time the game's own flight paths give it, marked with ~, on the bar and the flight map's tooltip, until your own time replaces it.
 - **Professions**: Unlearned Recipes brings back Show Learned and Show Unlearned in the recipe list's Filter menu: the recipes you don't know yet show in the list itself, alone or among the ones you know, each with the skill it takes to learn and, on its page, the recipe item that teaches it with its auction price. An Unlearned submenu filters them by source, by when you can learn them, and to those whose item is in your bags. Season of Discovery's recipes, which the game still lists, are left out. A trainer recipe's skill is learned the first time you open its trainer; until then it's listed under Unknown.
@@ -46,7 +46,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Fixed
 
-- With the controller interface on, opening one of Forever++'s menus, dropdowns, or confirmation popups no longer makes the game block actions and blame Forever++. They are plain frames of our own then, which the mouse and the controller's D-pad, A, and B work.
+- With the controller interface on, opening one of Forever++'s menus, dropdowns, or confirmation popups no longer makes the game block actions and blame Forever++. They are Forever++'s own frames then, worked with the mouse or the controller's D-pad, A, and B.
 - **Movable Windows**: dragging a character or mount model, as in the dressing room, turns the model without moving the window too.
 - **Short Channel Names**: the chat box's cursor sits at the end of what you typed again. With a channel's name shortened it stood off to the right.
 - **Item Tooltips**: Disenchant knows every item the game can disenchant, such as blue gear at item level 5-10 and gear above 65. Where what it gives isn't known yet, the line says so and learns it from your own disenchants.
@@ -55,7 +55,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Macros**: switching profiles, applying a preset, or Defaults no longer deletes a macro, which emptied its action bar slots. A macro is deleted only when you turn it off yourself.
 - **Settings**: the Changelog and About pages no longer drop out of the sidebar when a preset or a profile switch turns on several modules that have pages of their own.
 - **Error Catcher**: it also catches "Interface action failed because of an AddOn" when the game writes it to chat another way.
-- **Settings**: opening Forever++'s settings no longer leaves a yellow "Interface action failed because of an AddOn" line in chat. Nothing had failed: the game's controller navigation prints it whenever an addon opens Settings.
+- **Settings**: opening Forever++'s settings no longer leaves a yellow "Interface action failed because of an AddOn" line in chat. Nothing had failed.
 
 ## 1.5.0 (2026-11-11)
 
