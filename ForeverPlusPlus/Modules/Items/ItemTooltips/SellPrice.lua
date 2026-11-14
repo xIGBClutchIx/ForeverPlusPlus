@@ -2,8 +2,6 @@
 -- shows one item (or the other way round). Forever's own line prices one item only.
 local _, ns = ...
 
-local select = select
-local C_Item = C_Item
 local SELL_PRICE = SELL_PRICE
 
 local L = ns.L
@@ -27,8 +25,7 @@ module:AddOptions({
 -- One item's vendor price. Item info has it per item; the line's own price is the fallback
 -- while item info isn't cached (Forever's line prices one item).
 local function unitPrice(data, lineData)
-    local price = select(11, C_Item.GetItemInfo(data.id))
-    return price or lineData.price
+    return ns.Prices.Vendor(data.id) or lineData.price
 end
 
 local function drawSellPrice(tooltip, data, lineData)

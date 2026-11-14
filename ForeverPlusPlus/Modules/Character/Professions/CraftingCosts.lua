@@ -99,7 +99,7 @@ local function craftedValue(itemID)
     if price then
         return price, false, seenAt
     end
-    local sell = select(11, C_Item.GetItemInfo(itemID))
+    local sell = ns.Prices.Vendor(itemID)
     if sell and sell > 0 then
         return sell, true
     end

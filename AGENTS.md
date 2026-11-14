@@ -103,7 +103,7 @@ One line here says what each file is for. [docs/architecture.md](docs/architectu
 | `Providers.lua` | `Providers` | What a module offers outside itself while it's on, by name, for `API.lua`. |
 | `Plugins.lua` | `Plugins` | Modules another addon adds through the public API: a checked handle, never our module table. |
 | `Players.lua` | `Players` | The class, level, race, and guild of players seen, saved in `ForeverPlusPlusPlayersDB` while a module uses it. |
-| `Prices.lua` | `Prices` | Auction prices and items by name, from Item Tooltips' Auction Prices. |
+| `Prices.lua` | `Prices` | Auction prices and items by name, from Item Tooltips' Auction Prices, and what a vendor pays (`Vendor`). |
 
 **Values and text**
 
@@ -170,8 +170,8 @@ One line here says what each file is for. [docs/architecture.md](docs/architectu
 | `WorldMap.lua` | `WorldMap` | The world map, the map tree, map names and sizes, Blizzard's map pin and its name, where the player, a quest, and the corpse are, and our one group in its filter menu (`AddFilter`). |
 | `MapTooltip.lua` | `MapTooltip` | How every tooltip over the world map looks. |
 | `MapPins.lua` | `MapPins` | Layers of our own icons on the world map, and what a click on one does (Ctrl+click for the map pin, as the game's own). |
-| `MinimapPins.lua` | `MinimapPins` | What the minimap shows, zone-map spots as minimap spots, its gold ring, and its shape. |
-| `Instances.lua` | `Instances` | The dungeons and raids with their levels and names. |
+| `MinimapPins.lua` | `MinimapPins` | What the minimap shows, zone-map spots as minimap spots, its gold ring, its shape, and its tracking menu (`EachTracking`). |
+| `Instances.lua` | `Instances` | The dungeons and raids with their levels and names, and the kind of instance the player is in (`Here`). |
 | `DungeonMaps.lua` | `DungeonMaps` | Opening a dungeon's map in the DungeonJournal addon, since the client has none. |
 | `Gathering.lua` | `Gathering` | What the player gathers as they gather it, a map's remembered nodes, and nodes as shareable text. |
 | `Taxi.lua` | `Taxi` | The open flight master's flight points, and a flight's estimated time. |

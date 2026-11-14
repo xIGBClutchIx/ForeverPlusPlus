@@ -8,7 +8,7 @@ local _, ns = ...
 
 local C_Item = C_Item
 local floor, format, tonumber, type, pairs, ipairs = math.floor, string.format, tonumber, type, pairs, ipairs
-local pcall, time = pcall, time
+local pcall, time, select = pcall, time, select
 
 local Prices = {}
 ns.Prices = Prices
@@ -174,6 +174,18 @@ function Prices.Auction(itemID)
         return auctionatorPrice(itemID)
     end
     return source.price(itemID)
+end
+
+---What a vendor pays for one of an item, in copper: 0 for an item with no sell price, and nil
+---while the game hasn't loaded the item yet (ask again after GET_ITEM_INFO_RECEIVED).
+---@param item number|string an item ID or link
+---@return number|nil copper
+function Prices.Vendor(item)
+    if not (item and C_Item and C_Item.GetItemInfo) then
+        return nil
+    end
+    local price = select(11, C_Item.GetItemInfo(item))
+    return type(price) == "number" and price or nil
 end
 
 ---An item's ID from its name: from the client's item cache, or else among the items with an

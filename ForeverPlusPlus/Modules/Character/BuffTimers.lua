@@ -8,7 +8,7 @@ local _, ns = ...
 local ipairs, pairs, type, setmetatable, floor, pcall = ipairs, pairs, type, setmetatable, math.floor, pcall
 local sort, huge = table.sort, math.huge
 local GetCVarBool = C_CVar and C_CVar.GetCVarBool or GetCVarBool
-local C_UnitAuras, C_Minimap = C_UnitAuras, C_Minimap
+local C_UnitAuras = C_UnitAuras
 
 local L = ns.L
 local readable = ns.IsReadable
@@ -216,13 +216,12 @@ local trackingSpells = {}
 
 local function readTracking()
     trackingSpells = {}
-    for i = 1, C_Minimap and C_Minimap.GetNumTrackingTypes and C_Minimap.GetNumTrackingTypes() or 0 do
-        local info = C_Minimap.GetTrackingInfo(i)
-        local spellID = type(info) == "table" and info.spellID
+    ns.MinimapPins.EachTracking(function(info)
+        local spellID = info.spellID
         if spellID and spellID > 0 then
             trackingSpells[spellID] = true
         end
-    end
+    end)
 end
 
 -- Whether one of Blizzard's buff infos (a button's buttonInfo, or BuffFrame.auraInfo) is a tracking

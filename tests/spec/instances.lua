@@ -43,3 +43,25 @@ end
 eq(Instances.Levels(Instances.byKey.mc, true), "60", "compact single")
 eq(Instances.Icon(Instances.byKey.mc, 14), "|A:Raid:14:14|a", "raid icon")
 eq(Instances.Icon(Instances.byKey.brd, 14), "|A:Dungeon:14:14|a", "dungeon icon")
+
+-- Where the player is: the game's kind of instance, nil in the world or when it won't say.
+do
+    game.secret = "<secret>"
+    local inside, kind
+    eq(Instances.Here(), nil, "here: nil on a client without IsInInstance")
+    IsInInstance = function() return inside, kind end
+    inside, kind = false, "none"
+    eq(Instances.Here(), nil, "here: nil out in the world")
+    inside, kind = true, "party"
+    eq(Instances.Here(), "party", "here: a dungeon")
+    inside, kind = true, "pvp"
+    eq(Instances.Here(), "pvp", "here: a battleground")
+    inside, kind = true, "none"
+    eq(Instances.Here(), nil, "here: inside with no kind is the world")
+    inside, kind = game.secret, "raid"
+    eq(Instances.Here(), nil, "here: nil while the game hides whether you're inside")
+    inside, kind = true, game.secret
+    eq(Instances.Here(), nil, "here: nil while it hides the kind")
+    IsInInstance = nil
+    game.secret = nil
+end

@@ -2,7 +2,7 @@
 -- they sold for. Hold the Skip Key (Shift by default) while opening the merchant to skip it.
 local _, ns = ...
 
-local format, select = string.format, select
+local format = string.format
 local C_Container, C_Item = C_Container, C_Item
 local GetNumBuybackItems, GetBuybackItemLink = GetNumBuybackItems, GetBuybackItemLink
 
@@ -65,7 +65,7 @@ local function onMerchantShow()
             if limit and sold >= limit then
                 left = left + 1
             else
-                local price = select(11, C_Item.GetItemInfo(info.hyperlink)) or 0
+                local price = ns.Prices.Vendor(info.hyperlink) or 0
                 total = total + price * (info.stackCount or 1)
                 sold = sold + 1
                 C_Container.UseContainerItem(bag, slot)

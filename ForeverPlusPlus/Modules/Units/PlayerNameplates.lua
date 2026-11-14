@@ -4,7 +4,7 @@
 local _, ns = ...
 
 local ipairs, GetGuildInfo = ipairs, GetGuildInfo
-local UnitClass, UnitIsUnit, IsInInstance = UnitClass, UnitIsUnit, IsInInstance
+local UnitClass, UnitIsUnit = UnitClass, UnitIsUnit
 
 local L = ns.L
 local readable = ns.IsReadable
@@ -272,17 +272,9 @@ module.notice = {
 -- forbidden plate showing up says so too, until the next loading screen.
 local forbiddenSeen = false
 
-local function inInstance()
-    if not IsInInstance then
-        return false, nil
-    end
-    local inside, kind = IsInInstance()
-    return inside and true or false, kind
-end
-
 local function blizzardPlatesHere()
-    local inside, kind = inInstance()
-    return inside and (kind == "party" or kind == "raid" or forbiddenSeen)
+    local kind = ns.Instances.Here()
+    return kind ~= nil and (kind == "party" or kind == "raid" or forbiddenSeen)
 end
 
 -- Blizzard's names-only mode (its Show Only Name checkbox) drops the bar entirely, so on our plates
@@ -332,7 +324,7 @@ local whileInstanceNames = {
 }
 if ns.HasEvent("FORBIDDEN_NAME_PLATE_UNIT_ADDED") then
     whileInstanceNames.FORBIDDEN_NAME_PLATE_UNIT_ADDED = function()
-        if not forbiddenSeen and inInstance() then
+        if not forbiddenSeen and ns.Instances.Here() then
             forbiddenSeen = true
             plates:ApplyCVars(true)
         end

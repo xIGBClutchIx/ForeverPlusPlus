@@ -3,8 +3,7 @@
 -- or someone resurrecting you. Arenas are left alone, since the game doesn't release there.
 local _, ns = ...
 
-local select = select
-local IsInInstance, UnitIsDead, UnitIsGhost = IsInInstance, UnitIsDead, UnitIsGhost
+local UnitIsDead, UnitIsGhost = UnitIsDead, UnitIsGhost
 local UnitHasIncomingResurrection, HasNoReleaseAura = UnitHasIncomingResurrection, HasNoReleaseAura
 local RepopMe, C_DeathInfo = RepopMe, C_DeathInfo
 
@@ -50,7 +49,7 @@ local function cancel()
 end
 
 local function inBattleground()
-    return select(2, IsInInstance()) == "pvp"
+    return ns.Instances.Here() == "pvp"
 end
 
 local function canSelfResurrect()

@@ -138,3 +138,17 @@ eq(unscanned.items[7], nil, "prices: and its prices with it, having no age")
 local zeroScan = { scannedAt = 0, prices = { [7] = 4800 } }
 Prices.PackHouse(zeroScan)
 eq(zeroScan.items[7], nil, "prices: a house scanned at 0 drops its old prices")
+
+-- What a vendor pays: the eleventh value of the item's info, nil until the game has it.
+eq(Prices.Vendor(2589), nil, "vendor: nothing on a client without item info")
+local sells = { [2589] = 13, [6948] = 0 }
+C_Item.GetItemInfo = function(item)
+    local price = sells[item]
+    if price then
+        return "name", "link", 1, 1, 1, "type", "subtype", 20, "", 0, price
+    end
+end
+eq(Prices.Vendor(2589), 13, "vendor: an item's sell price")
+eq(Prices.Vendor(6948), 0, "vendor: 0 for an item that doesn't sell, not nil")
+eq(Prices.Vendor(999), nil, "vendor: nil while the item isn't loaded")
+eq(Prices.Vendor(nil), nil, "vendor: nil for no item")

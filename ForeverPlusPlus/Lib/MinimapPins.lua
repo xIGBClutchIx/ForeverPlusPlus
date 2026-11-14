@@ -206,6 +206,22 @@ local function mouseoverText()
     return ns.IsText(text, true) and text or nil
 end
 
+---Calls `fn(info, index)` for each entry of the minimap's tracking menu (Find Herbs, a hunter's
+---tracks, the town filters): `info.spellID`, `info.active`, `info.type`. Nothing on a client
+---without the list. GetTrackingInfo has no secret values.
+---@param fn fun(info: table, index: number)
+function MinimapPins.EachTracking(fn)
+    if not (C_Minimap and C_Minimap.GetNumTrackingTypes and C_Minimap.GetTrackingInfo) then
+        return
+    end
+    for i = 1, C_Minimap.GetNumTrackingTypes() do
+        local info = C_Minimap.GetTrackingInfo(i)
+        if type(info) == "table" then
+            fn(info, i)
+        end
+    end
+end
+
 ---The names the game gives for its dots under the mouse on the minimap, one a row (overlapping
 ---dots each add one), as plain text, or nil where there are none.
 ---@return string[]?

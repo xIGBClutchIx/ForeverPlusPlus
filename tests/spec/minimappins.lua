@@ -119,6 +119,18 @@ do
 end
 
 do
+    -- The tracking menu's entries, skipping what isn't one.
+    local seen = {}
+    Pins.EachTracking(function(info, index) seen[#seen + 1] = index .. "=" .. info.spellID end)
+    eq(#seen, 0, "tracking: nothing on a client without the list")
+    local list = { { spellID = 2383 }, false, { spellID = 2580 } }
+    C_Minimap.GetNumTrackingTypes = function() return #list end
+    C_Minimap.GetTrackingInfo = function(i) return list[i] end
+    Pins.EachTracking(function(info, index) seen[#seen + 1] = index .. "=" .. info.spellID end)
+    eq(table.concat(seen, ","), "1=2383,3=2580", "tracking: each entry with its index, the empty one skipped")
+end
+
+do
     eq(Pins.Square(), false, "minimappins: round without GetMinimapShape")
     eq(Pins.Inside(80, 80), false, "minimappins: a corner is off a round minimap")
     eq(Pins.Inside(60, 60), true, "minimappins: inside the circle")

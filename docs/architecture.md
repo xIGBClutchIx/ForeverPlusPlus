@@ -146,7 +146,7 @@ Generated files (never edited by hand; see Generated data): `InstanceLevels.lua`
 
 ### `Prices.lua`
 
-- `ns.Prices`: auction prices and items by name, from Item Tooltips' Auction Prices while it's on, for other modules, with `AgeColor` for a price's age in the player's Scan Age Color.
+- `ns.Prices`: what a vendor pays for an item (`Vendor`: 0 for no sell price, nil while the item isn't loaded; a module never reads the eleventh value of the item's info itself), and auction prices and items by name, from Item Tooltips' Auction Prices while it's on, for other modules, with `AgeColor` for a price's age in the player's Scan Age Color.
 
 ### `Providers.lua`
 
@@ -171,7 +171,7 @@ Generated files (never edited by hand; see Generated data): `InstanceLevels.lua`
 
 ### `Instances.lua`
 
-- `ns.Instances`: the dungeons and raids with their levels (the lowest from the generated `InstanceLevels.lua` unless kept by hand), a row for each as maps list them, and their names in the player's language.
+- `ns.Instances`: the kind of instance the player is in (`Here`: "party", "raid", "pvp", "arena", or nil in the world or while the game won't say; modules ask it instead of `IsInInstance`), and the dungeons and raids with their levels (the lowest from the generated `InstanceLevels.lua` unless kept by hand), a row for each as maps list them, and their names in the player's language.
 
 ### `MapPins.lua`
 
@@ -189,7 +189,7 @@ Generated files (never edited by hand; see Generated data): `InstanceLevels.lua`
 
 ### `MinimapPins.lua`
 
-- `ns.MinimapPins`: what the minimap shows right now (`View`: the player's zone map and spot, its view radius, and its rotation) and turning zone-map spots into minimap spots and back (`ToMinimap`, `FromMinimap`), for our own icons on it, the names of the dots under the player's own mouse and where the mouse is (`MouseoverNames`, `CursorOffset`), and the minimap's gold ring around an icon (`NewRing`, `PlaceRing`), which world map pins use too, and its shape: whether an addon made it square (`Square`, from `GetMinimapShape`), and word when that changes (`ShapeChanged`, `OnShapeChanged`) to our buttons on its edge and LibDBIcon's.
+- `ns.MinimapPins`: the entries of the minimap's tracking menu (`EachTracking`), and what the minimap shows right now (`View`: the player's zone map and spot, its view radius, and its rotation) and turning zone-map spots into minimap spots and back (`ToMinimap`, `FromMinimap`), for our own icons on it, the names of the dots under the player's own mouse and where the mouse is (`MouseoverNames`, `CursorOffset`), and the minimap's gold ring around an icon (`NewRing`, `PlaceRing`), which world map pins use too, and its shape: whether an addon made it square (`Square`, from `GetMinimapShape`), and word when that changes (`ShapeChanged`, `OnShapeChanged`) to our buttons on its edge and LibDBIcon's.
 
 ### `EditMode.lua`
 

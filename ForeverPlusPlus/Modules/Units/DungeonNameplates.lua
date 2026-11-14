@@ -13,7 +13,7 @@
 local _, ns = ...
 
 local ipairs = ipairs
-local C_CVar, IsInInstance = C_CVar, IsInInstance
+local C_CVar = C_CVar
 
 local L = ns.L
 local CVars = ns.CVars
@@ -80,10 +80,7 @@ end
 -- Whether the player is somewhere it applies: a dungeon or raid, or with the option a
 -- battleground or arena.
 local function inside()
-    local here, kind = IsInInstance()
-    if not here then
-        return false
-    end
+    local kind = ns.Instances.Here()
     return kind == "party" or kind == "raid"
         or (module.db.battlegrounds and (kind == "pvp" or kind == "arena")) or false
 end

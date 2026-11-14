@@ -119,21 +119,18 @@ module.options[#module.options].name = L.GATHERINGTRACKING_CHAT
 -- changes as spells are learned. GetTrackingInfo has no secret values.
 local function scan()
     local index, ours, any = {}, nil, false
-    for i = 1, C_Minimap.GetNumTrackingTypes() do
-        local info = C_Minimap.GetTrackingInfo(i)
-        if type(info) == "table" then
-            local spellID = info.spellID
+    ns.MinimapPins.EachTracking(function(info, i)
+        local spellID = info.spellID
+        if spellID == HERBS or spellID == MINERALS then
+            index[spellID] = i
+        end
+        if info.active and (info.type == "spell" or (spellID and spellID > 0)) then
+            any = true
             if spellID == HERBS or spellID == MINERALS then
-                index[spellID] = i
-            end
-            if info.active and (info.type == "spell" or (spellID and spellID > 0)) then
-                any = true
-                if spellID == HERBS or spellID == MINERALS then
-                    ours = spellID
-                end
+                ours = spellID
             end
         end
-    end
+    end)
     return index, ours, any
 end
 

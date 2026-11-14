@@ -9,7 +9,7 @@
 local _, ns = ...
 
 local pairs, ipairs, type, time, format, tostring = pairs, ipairs, type, time, string.format, tostring
-local C_Minimap, C_Map, IsShiftKeyDown = C_Minimap, C_Map, IsShiftKeyDown
+local C_Map, IsShiftKeyDown = C_Map, IsShiftKeyDown
 local Minimap, GameTooltip, NORMAL_FONT_COLOR = Minimap, GameTooltip, NORMAL_FONT_COLOR
 local ITEM_MIN_SKILL, setmetatable = ITEM_MIN_SKILL, setmetatable
 
@@ -396,16 +396,15 @@ local tracking = {} -- kind -> true while its tracking spell is on
 
 local function readTracking()
     tracking = {}
-    for i = 1, C_Minimap.GetNumTrackingTypes() do
-        local info = C_Minimap.GetTrackingInfo(i)
-        if type(info) == "table" and info.active then
+    ns.MinimapPins.EachTracking(function(info)
+        if info.active then
             if info.spellID == HERBS then
                 tracking.herb = true
             elseif info.spellID == MINERALS then
                 tracking.ore = true
             end
         end
-    end
+    end)
 end
 
 local function onTracking()

@@ -13,7 +13,7 @@ local _, ns = ...
 -- player pressing the key.
 local GetSheathState, ToggleSheath = GetSheathState, ToggleSheath
 local UnitAffectingCombat, UnitIsDeadOrGhost = UnitAffectingCombat, UnitIsDeadOrGhost
-local IsInInstance, InCombatLockdown, GetTime = IsInInstance, InCombatLockdown, GetTime
+local InCombatLockdown, GetTime = InCombatLockdown, GetTime
 local format, tostring = string.format, tostring
 
 local L = ns.L
@@ -85,8 +85,7 @@ end
 
 -- A dungeon, raid, battleground or arena.
 local function inInstance()
-    local inside, kind = IsInInstance()
-    return inside and kind ~= "none"
+    return ns.Instances.Here() ~= nil
 end
 
 -- Ends the stow under way. `state` is left alone until it changes (a toggle didn't move it).

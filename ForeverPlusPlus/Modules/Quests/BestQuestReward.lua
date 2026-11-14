@@ -78,8 +78,8 @@ local function choiceValue(choice)
     if not itemID then
         return nil
     end
-    local price = select(11, C_Item.GetItemInfo(itemID))
-    if type(price) ~= "number" then
+    local price = ns.Prices.Vendor(itemID)
+    if not price then
         C_Item.RequestLoadItemDataByID(itemID)
         return nil
     end

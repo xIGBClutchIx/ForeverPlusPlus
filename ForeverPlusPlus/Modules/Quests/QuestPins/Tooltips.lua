@@ -3,7 +3,7 @@
 local _, ns = ...
 
 local type, ipairs, tonumber, format, sort = type, ipairs, tonumber, string.format, table.sort
-local C_QuestLog, GameTooltip, IsInInstance = C_QuestLog, GameTooltip, IsInInstance
+local C_QuestLog, GameTooltip = C_QuestLog, GameTooltip
 local GetQuestDifficultyColor, NORMAL_FONT_COLOR = GetQuestDifficultyColor, NORMAL_FONT_COLOR
 
 local QuestieDB = ns.QuestieDB
@@ -28,7 +28,7 @@ end
 local function onUnit(tooltip, data)
     local db = module.db
     if tooltip ~= GameTooltip or not db.npcTooltips or not internal.ready
-        or (tooltip.IsForbidden and tooltip:IsForbidden()) or IsInInstance() then
+        or (tooltip.IsForbidden and tooltip:IsForbidden()) or ns.Instances.Here() then
         return
     end
     local id = data and npcID(data.guid)

@@ -191,6 +191,20 @@ end
 ---walk.
 ns.Instances.Refresh = refresh
 
+---The kind of instance the player is in, as the game names it: "party" (a dungeon), "raid", "pvp"
+---(a battleground), "arena", or "scenario". Nil out in the world, and while the game won't say.
+---@return string?
+function ns.Instances.Here()
+    if not IsInInstance then
+        return nil
+    end
+    local inside, kind = IsInInstance()
+    if ns.IsTrue(inside) and ns.IsText(kind) and kind ~= "none" then
+        return kind
+    end
+    return nil
+end
+
 ---Blizzard's dungeon or raid entrance icon for an instance, as text to put before its name.
 ---@param instance table an entry of `byKey`, or one shaped like it
 ---@param size number pixels
