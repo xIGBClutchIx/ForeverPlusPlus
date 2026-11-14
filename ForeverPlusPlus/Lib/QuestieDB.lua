@@ -704,6 +704,35 @@ function QuestieDB.DropRates(itemID)
     return next(out) and out or nil
 end
 
+---The creatures that drop the items a quest asks for, as far as QuestieDB knows: a list of
+---`{ itemID, name, index, npcs = { [npcID] = true } }`, one for each item objective a creature
+---drops. `index` is the item's place among the quest's item objectives, for matching it with the
+---quest log's when its name doesn't. Empty when no creature drops any; nil for an unknown quest.
+---@param questID number
+---@return table[]|nil
+function QuestieDB.QuestDrops(questID)
+    local quest = QuestieDB.Quest(questID)
+    if not quest then
+        return nil
+    end
+    local out, index = {}, 0
+    for _, objective in ipairs(quest.objectives) do
+        if objective.kind == "item" then
+            index = index + 1
+            local item = QuestieDB.Item(objective.id)
+            local npcs
+            for _, npc in ipairs(item and item.npcDrops or {}) do
+                npcs = npcs or {}
+                npcs[npc] = true
+            end
+            if npcs then
+                out[#out + 1] = { itemID = objective.id, name = item.name, index = index, npcs = npcs }
+            end
+        end
+    end
+    return out
+end
+
 -- Settings ------------------------------------------------------------------------------------
 
 ---The gray rows a module that needs QuestieDB puts in `module.notice`: that it needs the addon,

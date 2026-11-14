@@ -347,6 +347,12 @@ same(Q.DropRates(700001), { [800002] = 25.5, [800003] = 3 }, "questiedb: Wowhead
 same(Q.DropRates(700009), { [800001] = 1 }, "questiedb: CMaNGOS's for an item Wowhead's lack")
 eq(Q.DropRates(1), nil, "questiedb: no drop rates")
 
+same(Q.QuestDrops(900001), {
+    { itemID = 700001, name = "Shiny Bits", index = 1, npcs = { [800002] = true, [800003] = true } },
+}, "questiedb: the creatures that drop a quest's items")
+same(Q.QuestDrops(900002), {}, "questiedb: a quest with no item to drop")
+eq(Q.QuestDrops(1), nil, "questiedb: no drops for an unknown quest")
+
 -- A change on their side: errors become nil, and a support table that isn't Lua is no table.
 local erring = newLib()
 erring.Quest.GetAll = function() error("changed") end

@@ -6,6 +6,7 @@ local _, ns = ...
 
 local UnitInParty, UnitInRaid, UnitGUID, UnitIsInMyGuild = UnitInParty, UnitInRaid, UnitGUID, UnitIsInMyGuild
 local C_FriendList, C_BattleNet, C_TooltipInfo, type = C_FriendList, C_BattleNet, C_TooltipInfo, type
+local tonumber = tonumber
 local C_RecentAllies, C_GuildInfo, IsInGuild, IsGuildMember = C_RecentAllies, C_GuildInfo, IsInGuild, IsGuildMember
 local BNGetNumFriends, GetNumGuildMembers, GetGuildRosterInfo = BNGetNumFriends, GetNumGuildMembers, GetGuildRosterInfo
 local UnitPlayerControlled, UnitCreatureType, UnitIsOtherPlayersPet = UnitPlayerControlled, UnitCreatureType, UnitIsOtherPlayersPet
@@ -329,4 +330,16 @@ function Units.Title(unit)
         return nil
     end
     return text
+end
+
+---The NPC's ID from a creature's (or vehicle's) GUID, or nil for anything else. A secret GUID, in
+---combat or an instance, isn't read.
+---@param guid any
+---@return number?
+function Units.NpcID(guid)
+    if not ns.IsText(guid) then
+        return nil
+    end
+    return tonumber(guid:match("^Creature%-%d+%-%d+%-%d+%-%d+%-(%d+)%-"))
+        or tonumber(guid:match("^Vehicle%-%d+%-%d+%-%d+%-%d+%-(%d+)%-"))
 end

@@ -76,6 +76,7 @@ Not entity fields: whole tables through `LibQuestieDB.Support.Get(name)`, which 
 | `Ids(kind)`, `IdsByName(kind, name)` | our own copies of the ID lists (`kind` is `"Quest"`, `"Npc"`, `"Item"`, `"Object"`) |
 | `UiMapID(areaID)` | the uiMapID QuestieDB's ZoneDB maps an area to, or nil |
 | `DropRates(itemID)` | `{ [npcID] = percent }`: Wowhead's numbers, else CMaNGOS's, or nil |
+| `QuestDrops(questID)` | `{ { itemID, name, index, npcs = { [npcID] = true } } }`: each item objective a creature drops, from the item's `npcDrops`; nil for an unknown quest |
 
 A quest also has `flags` and `specialFlags` (QuestieDB's masks, 0 for none), `repeatable` (special flag 1, or the daily, weekly, or monthly quest flag), `raid` (quest flag 64), and `minRep` and `maxRep` (`{ id, value }`: a faction and the reputation it needs at least, or less than). Quest Pins compares those with `C_Reputation.GetFactionDataByID`'s `currentStanding`, which is unchecked on Forever.
 

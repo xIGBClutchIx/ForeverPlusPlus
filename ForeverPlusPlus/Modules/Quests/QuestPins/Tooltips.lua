@@ -2,22 +2,13 @@
 -- in the log that are ready to turn in to it (?), from QuestieDB's lists for that NPC.
 local _, ns = ...
 
-local type, ipairs, tonumber, format, sort = type, ipairs, tonumber, string.format, table.sort
+local type, ipairs, format, sort = type, ipairs, string.format, table.sort
 local C_QuestLog, GameTooltip = C_QuestLog, GameTooltip
 local GetQuestDifficultyColor, NORMAL_FONT_COLOR = GetQuestDifficultyColor, NORMAL_FONT_COLOR
 
 local QuestieDB = ns.QuestieDB
 local module = ns.modules.QuestPins
 local internal = module.internal
-
--- The NPC's ID from a unit GUID in tooltip data, or nil (a secret GUID in combat isn't read).
-local function npcID(guid)
-    if not ns.IsText(guid) then
-        return nil
-    end
-    return tonumber(guid:match("^Creature%-%d+%-%d+%-%d+%-%d+%-(%d+)%-"))
-        or tonumber(guid:match("^Vehicle%-%d+%-%d+%-%d+%-%d+%-(%d+)%-"))
-end
 
 local function row(id, marker)
     local title = internal.Title(id)
@@ -31,7 +22,7 @@ local function onUnit(tooltip, data)
         or (tooltip.IsForbidden and tooltip:IsForbidden()) or ns.Instances.Here() then
         return
     end
-    local id = data and npcID(data.guid)
+    local id = data and ns.Units.NpcID(data.guid)
     local npc = id and QuestieDB.Npc(id)
     if not npc then
         return

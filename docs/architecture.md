@@ -117,7 +117,7 @@ Generated files (never edited by hand; see Generated data): `InstanceLevels.lua`
 
 ### `Units.lua`
 
-- `ns.Units`: in my group, a friend, a recent ally, a guildmate.
+- `ns.Units`: in my group, a friend, a recent ally, a guildmate. `NpcID(guid)` is a creature's NPC ID out of its GUID.
 - The player's own state, for a module that acts by itself (casts, sheathes, opens): `PlayerBusy` gives why now is a bad time ("combat", "dead", "taxi", "casting") or nil, and `PlayerCasting` whether a cast or channel is under way. An answer the game hides counts as busy, so a module waits instead of interrupting. Every module asks here, never the unit calls directly: five used to, with three different guards.
 
 ### `Bags.lua`
@@ -243,7 +243,7 @@ Generated files (never edited by hand; see Generated data): `InstanceLevels.lua`
 
 ### `QuestieDB.lua`
 
-- `ns.QuestieDB`: the one place we read the separate QuestieDB addon's quest, NPC, item, and object data, at run time through its `LibQuestieDB` API and never copied into this repo (`docs/questiedb.md`): whether it's there and fits (`Status`, `IsReady`, `Problem`, `OnReady`), records as our own copies with spawns 0-1 on a uiMapID (`Quest`, `Npc`, `Item`, `Object`, `Ids`, `IdsByName`, `UiMapID`, `DropRates`), every call protected, and `Notices` for a module that needs it, with `Require` to lock one off while it's missing.
+- `ns.QuestieDB`: the one place we read the separate QuestieDB addon's quest, NPC, item, and object data, at run time through its `LibQuestieDB` API and never copied into this repo (`docs/questiedb.md`): whether it's there and fits (`Status`, `IsReady`, `Problem`, `OnReady`), records as our own copies with spawns 0-1 on a uiMapID (`Quest`, `Npc`, `Item`, `Object`, `Ids`, `IdsByName`, `UiMapID`, `DropRates`, and `QuestDrops` for the creatures that drop a quest's items), every call protected, and `Notices` for a module that needs it, with `Require` to lock one off while it's missing.
 
 ### `Plugins.lua`
 

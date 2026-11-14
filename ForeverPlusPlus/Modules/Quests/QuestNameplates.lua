@@ -10,10 +10,11 @@ local ipairs, pairs, setmetatable, tonumber, unpack, floor, max = ipairs, pairs,
 local tostring, type = tostring, type
 local CreateFrame, C_TooltipInfo, C_QuestLog, UnitName = CreateFrame, C_TooltipInfo, C_QuestLog,
     UnitName
-local UnitIsPlayer = UnitIsPlayer
+local UnitIsPlayer, UnitGUID = UnitIsPlayer, UnitGUID
 
 local L = ns.L
 local Nameplates = ns.Nameplates
+local QuestieDB = ns.QuestieDB
 local readable = ns.IsReadable
 
 local module = ns.NewModule("QuestNameplates", L.QUESTNAMEPLATES_DESC, {
@@ -22,6 +23,7 @@ local module = ns.NewModule("QuestNameplates", L.QUESTNAMEPLATES_DESC, {
     party = "combined", -- whose progress: "own", "combined" (the party's added up), or "lowest"
     completed = true, -- keep a green check on creatures whose objective is done
     completedCount = true, -- and its final count beside it
+    drops = true, -- creatures that only drop a quest's item too, with QuestieDB
     side = "left", -- which side of the bar: "left" or "right"
     size = 90, -- a percent, of ICON_SIZE; 90 since the icon grew with the nameplate size
     testIcons = false, -- debug: made-up progress on every creature's plate
@@ -55,6 +57,11 @@ module.options = {
     {
         key = "completedCount", name = L.QUESTNAMEPLATES_COMPLETEDCOUNT, description = L.QUESTNAMEPLATES_COMPLETEDCOUNT_DESC,
         requires = "completed",
+    },
+    {
+        key = "drops", name = L.QUESTNAMEPLATES_DROPS, description = L.QUESTNAMEPLATES_DROPS_DESC,
+        available = QuestieDB.IsAvailable, needs = L.SETTINGS_NEEDS_ADDON:format("QuestieDB"),
+        added = "1.6.0",
     },
     {
         key = "side", name = L.QUESTNAMEPLATES_SIDE, description = L.QUESTNAMEPLATES_SIDE_DESC,
@@ -194,7 +201,7 @@ end
 -- instance), so the plate keeps what it shows.
 -- In a group the tooltip puts a QuestPlayer line with a name (the player's own too) before each
 -- member's objectives; lines before any name are the player's.
-local function scan(unit)
+local function scanTooltip(unit)
     -- No UnitIsRelatedToActiveQuest pre-filter: it probably says false once the objective is done,
     -- and the check for done objectives needs the tooltip's finished lines.
     if not (C_TooltipInfo and C_TooltipInfo.GetUnit) then
@@ -260,6 +267,115 @@ local function scan(unit)
         return doneCurrent, doneNeeded, "done", donePercent
     end
     return false
+end
+
+-- Item Drops: the game's tooltip names a creature's quest only when the creature itself is the
+-- objective, so one that just drops an item a quest asks for has no objective lines. QuestieDB
+-- knows which creatures drop each quest's items, and the quest log how many the player has.
+local dropQuests = {} -- quest ID -> QuestieDB.QuestDrops, or false; kept, since a quest's items don't change
+local dropNpcs -- NPC ID -> a list of { questID, drop } for the quests in the log; nil until needed
+
+local function indexDrops()
+    dropNpcs = {}
+    if not (QuestieDB.IsReady() and C_QuestLog and C_QuestLog.GetNumQuestLogEntries and C_QuestLog.GetInfo
+        and C_QuestLog.GetQuestObjectives) then
+        return
+    end
+    for index = 1, (C_QuestLog.GetNumQuestLogEntries()) do
+        local info = C_QuestLog.GetInfo(index)
+        local questID = info and not info.isHeader and info.questID
+        if type(questID) == "number" then
+            local drops = dropQuests[questID]
+            if drops == nil then
+                drops = QuestieDB.QuestDrops(questID) or false
+                dropQuests[questID] = drops
+            end
+            for _, drop in ipairs(drops or {}) do
+                for npc in pairs(drop.npcs) do
+                    local list = dropNpcs[npc]
+                    if not list then
+                        list = {}
+                        dropNpcs[npc] = list
+                    end
+                    list[#list + 1] = { questID, drop }
+                end
+            end
+        end
+    end
+end
+
+-- How many of a quest's item the player has, as `current, needed`, from the quest log's own
+-- objective: the one that names the item, or else the item objective in the same place as
+-- QuestieDB's. Nil when the log has none to match.
+local function dropProgress(questID, drop)
+    local named, placed
+    local place = 0
+    for _, objective in ipairs(C_QuestLog.GetQuestObjectives(questID) or {}) do
+        if ns.IsText(objective.type) and objective.type == "item" then
+            place = place + 1
+            if place == drop.index then
+                placed = objective
+            end
+            if not named and drop.name and ns.IsText(objective.text) and objective.text:find(drop.name, 1, true) then
+                named = objective
+            end
+        end
+    end
+    local objective = named or placed
+    if objective and ns.IsNumber(objective.numFulfilled) and ns.IsNumber(objective.numRequired)
+        and objective.numRequired > 0 then
+        return objective.numFulfilled, objective.numRequired
+    end
+    return nil
+end
+
+-- The first quest item this creature drops that the player still needs, as scanTooltip returns it:
+-- nil while the game won't say which creature it is.
+local function scanDrops(unit)
+    local guid = UnitGUID(unit)
+    if not ns.IsText(guid) then
+        return nil
+    end
+    local id = ns.Units.NpcID(guid)
+    if not id then
+        return false
+    end
+    if not dropNpcs then
+        indexDrops()
+    end
+    local doneCurrent, doneNeeded
+    for _, entry in ipairs(dropNpcs[id] or {}) do
+        local current, needed = dropProgress(entry[1], entry[2])
+        if current then
+            if current < needed then
+                return current, needed, "item"
+            end
+            if not doneCurrent then
+                doneCurrent, doneNeeded = current, needed
+            end
+        end
+    end
+    if doneCurrent then
+        return doneCurrent, doneNeeded, "done"
+    end
+    return false
+end
+
+-- What a plate shows: the tooltip's objective, or with Item Drops on, a quest item the creature
+-- drops when the tooltip has nothing left to do.
+local function scan(unit)
+    local current, needed, kind, percent = scanTooltip(unit)
+    if current == nil or not module.db.drops or (current and kind ~= "done") then
+        return current, needed, kind, percent
+    end
+    local dropCurrent, dropNeeded, dropKind = scanDrops(unit)
+    if dropCurrent == nil and not current then
+        return nil -- can't tell: the plate keeps what it shows
+    end
+    if dropCurrent and (dropKind ~= "done" or not current) then
+        return dropCurrent, dropNeeded, dropKind
+    end
+    return current, needed, kind, percent
 end
 
 local function create(frame)
@@ -432,6 +548,7 @@ end
 -- Quest events come in bursts, so the plates are refreshed once after they settle.
 local refreshSoon = ns.Frames.Coalesce(function()
     kinds = nil -- the quest log changed: index its objectives again
+    dropNpcs = nil
     if module.enabled then
         Nameplates.ForEach(update)
     end
@@ -445,8 +562,17 @@ local function onCVarUpdate(_, cvar)
     end
 end
 
+-- QuestieDB may load on demand: the plates are looked at again once it can be read.
+local function wantDrops()
+    if module.db.drops then
+        QuestieDB.OnReady(refreshSoon)
+    end
+end
+
 function module:OnEnable()
     kinds = nil
+    dropNpcs = nil
+    wantDrops()
     Nameplates.Register(self, {
         OnAdded = update,
         OnRemoved = function(_, frame)
@@ -468,10 +594,14 @@ end
 
 function module:OnDisable()
     Nameplates.Unregister(self)
+    QuestieDB.Cancel(refreshSoon)
 end
 
-function module:OnOptionChanged()
+function module:OnOptionChanged(key)
     if self.enabled then
+        if key == "drops" then
+            wantDrops()
+        end
         -- The look changed, so every plate is laid out again, not only those whose count did.
         for _, box in pairs(indicators) do
             box.shows = nil

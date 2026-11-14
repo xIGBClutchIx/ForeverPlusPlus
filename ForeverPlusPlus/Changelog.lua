@@ -59,6 +59,10 @@ ns.changelog = {
                 { L.COMBATALERT_TITLE, "Entering Sound and Leaving Sound pick the sound each alert "
                     .. "plays, under Play Sound. They're the same two as before unless you change "
                     .. "them, and are now heard with sound effects off." },
+                { L.QUESTNAMEPLATES_TITLE, "Item Drops, on by default, also marks creatures that drop "
+                    .. "an item one of your quests asks for, with how many you have. The game only "
+                    .. "marks a creature that is itself the objective, so this needs the QuestieDB "
+                    .. "addon." },
                 { L.AUTOQUEST_TITLE, "Low-Level Quests (off by default) also takes quests far below "
                     .. "your level from a quest giver's list, which it used to leave for you." },
                 { L.FLIGHTTIMER_TITLE, "Estimated Times, on by default, shows a flight you haven't "
