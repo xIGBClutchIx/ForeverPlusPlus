@@ -133,6 +133,18 @@ function ItemButtons.PlaceInCorner(mark, icon, corner, padding)
     mark:SetPoint(corner, icon, corner, x, y)
 end
 
+---Sizes and places a mark as its module's Size, Corner, and Padding options say (`db.size`,
+---`db.corner`, `db.padding`): the size in proportion to the icon, in from the corner picked.
+---@param mark table a Texture
+---@param icon table the region it sits on
+---@param db table the module's settings
+---@param reference? number the icon width `db.size` is for (a bag icon unless given)
+function ItemButtons.PlaceMark(mark, icon, db, reference)
+    local size = ItemButtons.MarkSize(icon, db.size, reference)
+    mark:SetSize(size, size)
+    ItemButtons.PlaceInCorner(mark, icon, db.corner, db.padding)
+end
+
 local bagFrames
 
 ---Blizzard's bag windows that are there: the combined bags, then one per bag. FrameXML makes

@@ -195,9 +195,7 @@ local function setMark(icon, on)
     tints:Set(icon, on and style ~= "check")
     local check = checks:Set(icon, on and style ~= "tint")
     if check then
-        local size = ItemButtons.MarkSize(icon, db.size)
-        check:SetSize(size, size)
-        ItemButtons.PlaceInCorner(check, icon, db.corner, db.padding)
+        ItemButtons.PlaceMark(check, icon, db)
     end
 end
 

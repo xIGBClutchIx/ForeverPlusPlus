@@ -15,6 +15,22 @@ do
     eq(MarkSize(icon(45), 18, 45), 18, "mark size: against its own reference")
     eq(MarkSize(icon(0), 18), 18, "mark size: an icon not laid out yet gets the size as set")
     eq(MarkSize(nil, 18), 18, "mark size: no icon")
+
+    -- PlaceMark: the size in proportion, in from the corner the module's options pick.
+    local placed = {}
+    local mark = {
+        SetSize = function(_, width, height) placed.size = width .. "x" .. height end,
+        ClearAllPoints = function() placed.point = nil end,
+        SetPoint = function(_, point, _, relative, x, y)
+            placed.point = point .. ":" .. relative .. ":" .. (x + 0) .. ":" .. (y + 0) -- no "-0"
+        end,
+    }
+    ns.ItemButtons.PlaceMark(mark, icon(24), { size = 18, corner = "BOTTOMRIGHT", padding = 2 })
+    eq(placed.size .. " " .. placed.point, "12x12 BOTTOMRIGHT:BOTTOMRIGHT:-2:2",
+        "place mark: sized for the icon, left and up from the bottom right")
+    ns.ItemButtons.PlaceMark(mark, icon(45), { size = 18, corner = "TOPLEFT" }, 45)
+    eq(placed.size .. " " .. placed.point, "18x18 TOPLEFT:TOPLEFT:0:0",
+        "place mark: its own reference, and no padding")
 end
 
 local stats = ItemStats.Normalize({

@@ -174,10 +174,8 @@ local function setMark(icon, on)
         return
     end
     -- Icon Size is a bag icon's; other icons get it in proportion.
-    local size = ItemButtons.MarkSize(icon, module.db.size)
     mark:SetAtlas(ATLAS)
-    mark:SetSize(size, size)
-    ItemButtons.PlaceInCorner(mark, icon, module.db.corner, module.db.padding)
+    ItemButtons.PlaceMark(mark, icon, module.db)
 end
 
 -- Bags and bank -----------------------------------------------------------------------------------

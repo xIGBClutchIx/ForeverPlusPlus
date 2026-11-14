@@ -162,9 +162,7 @@ local function mark(button, on)
     frame.badge:SetShown(not tint)
     -- Inside the button's corner: past its edge, the next button over draws on top of it. Badge
     -- Size is a standard action button's; smaller or bigger bars get it in proportion.
-    local size = ItemButtons.MarkSize(frame, db.size, ACTION_BUTTON)
-    frame.badge:SetSize(size, size)
-    ItemButtons.PlaceInCorner(frame.badge, frame, db.corner, db.padding)
+    ItemButtons.PlaceMark(frame.badge, frame, db, ACTION_BUTTON)
 end
 
 -- The spellbook scan's own row on the Profiler page. Profiler.Call keeps one result, so the
