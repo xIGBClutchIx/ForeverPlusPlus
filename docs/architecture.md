@@ -237,7 +237,7 @@ Generated files (never edited by hand; see Generated data): `InstanceLevels.lua`
 
 ### `Quests.lua`
 
-- `ns.Quests`: which quest Blizzard's quest windows show (`DetailsID`, `GiverID`, and `GreetingButton` with its level) and a quest's level from the quest log.
+- `ns.Quests`: the quest the map and arrow follow (`Selected`), which quest Blizzard's quest windows show (`DetailsID`, `GiverID`, and `GreetingButton` with its level) and a quest's level from the quest log.
 - What every module writes for a quest: `DifficultyLevel(questID, fallback)` (the game's, then the log's, then the fallback, such as QuestieDB's), `Title(questID, fallback)`, `IsElite`, and `LevelTag(questID, level)`, "[12]" or "[12+]" for a group quest. One source, so two modules can't tag the same quest differently.
 
 ### `QuestieDB.lua`

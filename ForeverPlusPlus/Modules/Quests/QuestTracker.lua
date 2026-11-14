@@ -505,16 +505,14 @@ local function sortWatches()
         ids[i] = quest.id
     end
     -- Untracking a quest can drop it as the quest the map and arrow follow, so put that back.
-    local super = C_SuperTrack and C_SuperTrack.GetSuperTrackedQuestID
-        and C_SuperTrack.GetSuperTrackedQuestID()
+    local super = ns.Quests.Selected()
     for i = from, to, step do
         C_QuestLog.RemoveQuestWatch(ids[i])
     end
     for i = from, to, step do
         C_QuestLog.AddQuestWatch(ids[i])
     end
-    if super and super ~= 0 and C_SuperTrack.SetSuperTrackedQuestID
-        and C_SuperTrack.GetSuperTrackedQuestID() ~= super then
+    if super and C_SuperTrack.SetSuperTrackedQuestID and ns.Quests.Selected() ~= super then
         C_SuperTrack.SetSuperTrackedQuestID(super)
     end
     -- Check the order once the client has it. Wrong the first time means quests go to the other
@@ -677,8 +675,7 @@ local function filterZone()
     filteredZone = zone
     zone = zone:lower()
     local headers = questHeaders()
-    local super = C_SuperTrack and C_SuperTrack.GetSuperTrackedQuestID
-        and C_SuperTrack.GetSuperTrackedQuestID()
+    local super = ns.Quests.Selected()
     -- A quest not under any header (or under a collapsed one) shows, rather than going unseen.
     local here = C_Map and C_Map.GetBestMapForUnit and zoneMap(C_Map.GetBestMapForUnit("player"))
     local function belongs(questID)

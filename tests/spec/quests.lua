@@ -60,3 +60,22 @@ do
     id, level = Quests.GreetingButton(button(3, 0))
     eq(id == 403 and level == nil, true, "quests: an available one without the level function")
 end
+
+do
+    -- The quest the map follows: none is 0, and the game may hide it.
+    local Quests = ns.Quests
+    T.game.secret = "<secret>"
+    C_SuperTrack = nil
+    eq(Quests.Selected(), nil, "selected: nil on a client without it")
+    local tracked
+    C_SuperTrack = { GetSuperTrackedQuestID = function() return tracked end }
+    tracked = 0
+    eq(Quests.Selected(), nil, "selected: 0 is no quest")
+    tracked = 783
+    eq(Quests.Selected(), 783, "selected: the quest followed")
+    tracked = T.game.secret
+    eq(Quests.Selected(), nil, "selected: nil while the game hides it")
+    tracked = nil
+    eq(Quests.Selected(), nil, "selected: nil with no answer")
+    T.game.secret = nil
+end

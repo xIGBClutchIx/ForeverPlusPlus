@@ -8,6 +8,21 @@ local select, type = select, type
 local Quests = {}
 ns.Quests = Quests
 
+---The quest the map and the game's arrow follow (the super-tracked one, picked by clicking it in
+---the tracker), or nil with none, while the game hides it, or on a client without it.
+---@return number? questID
+function Quests.Selected()
+    local track = C_SuperTrack
+    if not (track and track.GetSuperTrackedQuestID) then
+        return nil
+    end
+    local questID = track.GetSuperTrackedQuestID()
+    if ns.IsNumber(questID) and questID ~= 0 then
+        return questID
+    end
+    return nil
+end
+
 ---The quest's level as the quest log has it, or nil while the log doesn't have it (or the quest
 ---isn't in it).
 ---@param questID number?

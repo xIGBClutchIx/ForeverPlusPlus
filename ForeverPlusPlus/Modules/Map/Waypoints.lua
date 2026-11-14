@@ -189,14 +189,7 @@ local QUEST_INTERVAL = 1 -- seconds between looking up where the selected quest 
 
 -- The quest selected on the map (the super-tracked one) while Follow Selected Quest is on.
 local function selectedQuest()
-    if not (module.db.quest and C_SuperTrack and C_SuperTrack.GetSuperTrackedQuestID) then
-        return nil
-    end
-    local questID = C_SuperTrack.GetSuperTrackedQuestID()
-    if questID and questID ~= 0 then
-        return questID
-    end
-    return nil
+    return module.db.quest and ns.Quests.Selected() or nil
 end
 
 -- Whether the arrow should point to the corpse: a ghost with Point to Corpse on.

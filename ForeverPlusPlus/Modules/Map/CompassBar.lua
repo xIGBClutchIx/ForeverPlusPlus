@@ -390,15 +390,7 @@ local function near(x, y, px, py)
     return yards <= module.db.maxDistance * NEAR
 end
 
-local function selectedQuest()
-    if not (C_SuperTrack and C_SuperTrack.GetSuperTrackedQuestID) then
-        return nil
-    end
-    local questID = C_SuperTrack.GetSuperTrackedQuestID()
-    if readable(questID) and questID and questID ~= 0 then
-        return questID
-    end
-end
+local selectedQuest = ns.Quests.Selected
 
 local function questTitle(questID)
     local title = C_QuestLog.GetTitleForQuestID and C_QuestLog.GetTitleForQuestID(questID)
