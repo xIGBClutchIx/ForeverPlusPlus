@@ -481,8 +481,9 @@ export("GetUpgradeProfile", function()
 end)
 
 -- Flight Timer -----------------------------------------------------------------------------------
--- Offered by Flight Timer while it's on. Flight points are the game's node IDs (C_TaxiMap's
--- nodeID), and a time is known once the player has flown that route.
+-- Offered by Flight Timer while it's on, but for the estimate, which needs only the paths the
+-- addon ships. Flight points are the game's node IDs (C_TaxiMap's nodeID), and a time is known
+-- once the player has flown that route.
 
 ---Seconds the flight from one flight point to another takes, once it has been flown, or nil.
 export("GetFlightTime", function(fromNodeID, toNodeID)
@@ -494,14 +495,13 @@ export("GetFlightTime", function(fromNodeID, toNodeID)
 end)
 
 ---Estimated seconds of the direct flight from one flight point to another, from the game's own
----flight paths, flown or not, or nil when no direct path joins them (or Flight Timer is off).
+---flight paths, flown or not, or nil when no direct path joins them. The paths ship with the
+---addon (Lib/TaxiRoutes.lua), so this answers whether or not Flight Timer is on.
 export("GetFlightEstimate", function(fromNodeID, toNodeID)
-    local flights = ns.Providers.Get("flights")
-    if not (flights and flights.Estimate and type(fromNodeID) == "number"
-        and type(toNodeID) == "number") then
+    if type(fromNodeID) ~= "number" or type(toNodeID) ~= "number" then
         return nil
     end
-    return flights.Estimate(fromNodeID, toNodeID)
+    return (ns.Taxi.FlightEstimate({ fromNodeID, toNodeID }))
 end)
 
 ---The flight underway: { fromNodeID, toNodeID, duration (nil the first time a route is flown),

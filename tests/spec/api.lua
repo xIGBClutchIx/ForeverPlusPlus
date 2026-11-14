@@ -352,19 +352,21 @@ do
     local flying = v1.GetCurrentFlight()
     eq(flying and flying.duration == 95 and flying.remaining, 0, "api: the flight underway, never below 0 left")
     eq(flying.estimate, nil, "api: no estimate for a timed flight")
-    eq(v1.GetFlightEstimate(1, 2), nil, "api: no estimates from an older provider")
     ns.Providers.Set("flights", {
         Time = function() return nil end,
-        Estimate = function(from, to) return from == 2 and to == 6 and 259 or nil end,
         Current = function() return { from = 2, to = 6, estimate = 259, elapsed = 10 } end,
     })
-    eq(v1.GetFlightEstimate(2, 6), 259, "api: a flight estimate")
+    -- Stormwind to Ironforge, from the paths the addon ships.
+    local estimate = ns.Taxi.FlightEstimate({ 2, 6 })
+    eq(type(estimate) == "number" and estimate > 60, true, "api: the shipped paths give an estimate")
+    eq(v1.GetFlightEstimate(2, 6), estimate, "api: a flight estimate")
+    eq(v1.GetFlightEstimate(2, 999999), nil, "api: no estimate without a direct path")
     eq(v1.GetFlightEstimate("2", 6), nil, "api: estimates take node IDs")
     flying = v1.GetCurrentFlight()
     eq(flying.duration == nil and flying.remaining == nil and flying.estimate, 259,
         "api: a first flight's estimate, its duration still unknown")
     ns.Providers.Set("flights", nil)
-    eq(v1.GetFlightEstimate(2, 6), nil, "api: no estimates while Flight Timer is off")
+    eq(v1.GetFlightEstimate(2, 6), estimate, "api: estimates answer with Flight Timer off too")
 
     -- Gathering Map's nodes, while it offers them, copied.
     eq(v1.GetGatheringMaps(), nil, "api: no nodes while Gathering Map is off")

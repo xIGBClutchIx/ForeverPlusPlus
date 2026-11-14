@@ -484,11 +484,6 @@ local provider = {
     Time = function(from, to)
         return timed(from, to)
     end,
-    -- Estimated seconds of the direct flight between two flight point IDs, from the game's flight
-    -- paths, whether or not it has been flown or Estimated Times is on. Nil without a direct path.
-    Estimate = function(from, to)
-        return (ns.Taxi.FlightEstimate({ from, to }))
-    end,
     -- The flight underway: from and to node IDs, its length in seconds (nil the first time it's
     -- flown), the estimate it's counted down by instead the first time (nil without one), and the
     -- seconds since it took off. Nil when not flying.
