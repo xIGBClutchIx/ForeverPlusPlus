@@ -333,8 +333,12 @@ local function update()
     local rounded = floor(yards + 0.5)
     -- Fed every turn; the estimator keeps a sample a few times a second and forgets the old ones
     -- by itself when the arrow was down a while or the target jumped.
-    local seconds = module.db.eta and arrival:Add(GetTime(), yards) or nil
-    seconds = seconds and ns.Arrival.Round(seconds) or nil
+    local seconds
+    if module.db.eta then
+        local now = GetTime()
+        arrival:Add(now, yards)
+        seconds = arrival:Countdown(now) -- whole seconds, counting down one at a time
+    end
     if rounded ~= shownYards or seconds ~= shownSeconds then
         shownYards, shownSeconds = rounded, seconds
         frame.distance:SetText(distanceLine(yards, seconds))

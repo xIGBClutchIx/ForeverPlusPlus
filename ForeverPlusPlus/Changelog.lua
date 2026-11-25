@@ -24,6 +24,8 @@ ns.changelog = {
                 { L.UNUSABLEITEMSTINT_TITLE, "Tints items in the bags and bank of the Baganator, GW2 "
                     .. "UI, Bagnon, Bagnonium, BetterBags, and ArkInventory addons too, as in the "
                     .. "game's own." },
+                { L.WAYPOINTS_TITLE, "Show Time to Arrive counts down every second, not in steps "
+                    .. "of five seconds on a trip over a minute." },
             } },
             { L.CHANGELOG_FIXED, {
                 { L.AUTOOPEN_TITLE, "A right click in the bags works with the Baganator, GW2 UI, "

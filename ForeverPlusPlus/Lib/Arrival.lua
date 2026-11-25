@@ -7,7 +7,7 @@
 -- No frames and no game calls; the caller gives the clock.
 local _, ns = ...
 
-local setmetatable, abs, floor = setmetatable, math.abs, math.floor
+local setmetatable, abs, floor, max = setmetatable, math.abs, math.floor, math.max
 
 local Arrival = {}
 ns.Arrival = Arrival
@@ -20,6 +20,7 @@ local MAX_GAP = 1.5 -- seconds without a sample after which the old ones say not
 local MAX_SPEED = 100 -- yards a second; a bigger jump is a teleport or a new target
 local MAX_SECONDS = 3600 -- an hour away isn't worth a clock
 local STEADY = 0.5 -- each half of the window must close at this share of the whole's rate
+local DRIFT = 0.03 -- the share of the estimate the shown clock may be off before it's set again
 
 local Estimator = {}
 Estimator.__index = Estimator
@@ -34,6 +35,7 @@ end
 function Estimator:Reset()
     self.count = 0
     self.seconds = nil
+    self.shownAt = nil
 end
 
 -- The seconds left by the samples kept, or nil.
@@ -95,13 +97,22 @@ function Estimator:Add(now, distance)
     return self.seconds
 end
 
----An estimate rounded for showing, so a clock doesn't flicker between seconds on a long trip:
----to five seconds from a minute up, to the second under it.
----@param seconds number
----@return number
-function Arrival.Round(seconds)
-    if seconds >= 60 then
-        return floor(seconds / 5 + 0.5) * 5
+---The estimate as a clock to show: whole seconds that count down one at a time, as a clock should,
+---and don't flicker with every small change in the rate. It starts at the estimate and runs with
+---the caller's clock, and is set to the estimate again only once the two are more than DRIFT (or
+---a second) apart. Nil while there's no estimate. Call it after Add.
+---@param now number the clock given to Add
+---@return number? seconds
+function Estimator:Countdown(now)
+    local seconds = self.seconds
+    if not seconds then
+        self.shownAt = nil
+        return nil
     end
-    return floor(seconds + 0.5)
+    local shown = self.shownAt and self.shownSeconds - (now - self.shownAt)
+    if not shown or abs(shown - seconds) > max(1, seconds * DRIFT) then
+        self.shownAt, self.shownSeconds = now, seconds
+        shown = seconds
+    end
+    return max(0, floor(shown + 0.5))
 end

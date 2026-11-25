@@ -321,7 +321,7 @@ Generated files, in `Lib/Generated/` (never edited by hand; see Generated data):
 
 ### `Arrival.lua`
 
-- `ns.Arrival`: an estimator (`New`) fed the distance to a target as often as its owner likes (`Add(now, yards)`, which keeps a sample every quarter second over the last four), answering with the seconds left at the rate the distance has been closing, or nil while there's too little to go on, the player isn't getting closer, or the rate differs too much between the two halves of the window. A gap in the samples or a jump no travel explains starts it over, as `Reset` does. `Round` steadies an estimate for showing. No frames or game calls; Waypoints' Show Time to Arrive uses it.
+- `ns.Arrival`: an estimator (`New`) fed the distance to a target as often as its owner likes (`Add(now, yards)`, which keeps a sample every quarter second over the last four), answering with the seconds left at the rate the distance has been closing, or nil while there's too little to go on, the player isn't getting closer, or the rate differs too much between the two halves of the window. A gap in the samples or a jump no travel explains starts it over, as `Reset` does. `Countdown(now)` is the estimate as a clock to show: whole seconds counting down one at a time, set to the estimate again only when the two drift more than 3% (or a second) apart. No frames or game calls; Waypoints' Show Time to Arrive uses it.
 
 ## Modules
 

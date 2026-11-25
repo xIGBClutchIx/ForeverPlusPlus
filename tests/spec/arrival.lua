@@ -100,7 +100,27 @@ do -- too far to be worth a clock
     end), nil, "arrival: more than an hour away")
 end
 
-eq(Arrival.Round(44.6), 45, "arrival: under a minute, to the second")
-eq(Arrival.Round(59.4), 59, "arrival: 59 seconds")
-eq(Arrival.Round(62), 60, "arrival: from a minute, to five seconds")
-eq(Arrival.Round(183), 185, "arrival: three minutes")
+do -- the clock to show counts down by the second and ignores small changes in the estimate
+    local est = Arrival.New()
+    eq(est:Countdown(0), nil, "arrival: no clock without an estimate")
+    est.seconds = 400.4
+    eq(est:Countdown(10), 400, "arrival: the clock starts at the estimate")
+    est.seconds = 396 -- 3.4 seconds off what the clock says a second later: within 3%
+    eq(est:Countdown(11), 399, "arrival: the clock counts down a second at a time")
+    est.seconds = 405
+    eq(est:Countdown(12), 398, "arrival: a small change in the estimate doesn't move the clock")
+    est.seconds = 350 -- the player sped up
+    eq(est:Countdown(13), 350, "arrival: a big change sets the clock to the estimate")
+    eq(est:Countdown(14.2), 349, "arrival: and it counts down from there")
+    est.seconds = 10
+    eq(est:Countdown(15), 10, "arrival: near the end")
+    est.seconds = 7.5 -- more than a second off the 9 it would say
+    eq(est:Countdown(16), 8, "arrival: near the end the clock stays within a second of the estimate")
+    est.seconds = nil
+    eq(est:Countdown(17), nil, "arrival: no estimate, no clock")
+    est.seconds = 200
+    eq(est:Countdown(30), 200, "arrival: a new estimate starts a new clock")
+    est:Reset()
+    est.seconds = 90
+    eq(est:Countdown(31), 90, "arrival: a reset forgets the clock")
+end
