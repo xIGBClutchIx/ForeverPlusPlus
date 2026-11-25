@@ -7,7 +7,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Changed
 
 - **Upgrade Arrows**, **Already Known**, **Appearance Icons**, and **Unusable Items Tint**: mark items in the bags and bank of Baganator, GW2 UI, Bagnon, Bagnonium, BetterBags, and ArkInventory too.
-- **Waypoints**: Show Time to Arrive counts down every second.
+- **Waypoints**: Show Time to Arrive counts down every second, and is steadier: it eases to a new estimate instead of jumping, never counts up, and stays through a quick turn.
 
 ### Fixed
 

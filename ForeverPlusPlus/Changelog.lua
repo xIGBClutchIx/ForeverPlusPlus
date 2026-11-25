@@ -16,7 +16,9 @@ ns.changelog = {
                 "Upgrade Arrows, Already Known, Appearance Icons, and Unusable Items Tint mark "
                     .. "items in the bags and bank of Baganator, GW2 UI, Bagnon, Bagnonium, "
                     .. "BetterBags, and ArkInventory too.",
-                { L.WAYPOINTS_TITLE, "Show Time to Arrive counts down every second." },
+                { L.WAYPOINTS_TITLE, "Show Time to Arrive counts down every second, and is "
+                    .. "steadier: it eases to a new estimate instead of jumping, never counts up, "
+                    .. "and stays through a quick turn." },
             } },
             { L.CHANGELOG_FIXED, {
                 "A right click for Auto Open Containers, Comprehend Scrolls, and Auto Weapon Buff "
