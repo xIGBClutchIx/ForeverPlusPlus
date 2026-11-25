@@ -214,8 +214,8 @@ end
 ---player's own items, `bank` true for one in its bank. Does nothing without a bag addon.
 ---@param fn fun(button: table, icon: table?, bag: number, slot: number, bank: boolean)
 function ItemButtons.EachAddonBagButton(fn)
-    ns.BagAddons.EachButton(function(button, bag, slot, bank)
-        fn(button, ItemButtons.ButtonIcon(button), bag, slot, bank)
+    ns.BagAddons.EachButton(function(button, bag, slot, bank, art)
+        fn(button, ItemButtons.ButtonIcon(art or button), bag, slot, bank)
     end)
 end
 
