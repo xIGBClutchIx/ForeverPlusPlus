@@ -32,7 +32,8 @@ do
     local real = {}
     for _, name in ipairs({ "EachBagButton", "EachOpenBag", "EachBankButton", "EachMerchantItem",
         "EachAuctionRow", "EachLootSlot", "EachRoll", "MerchantShown", "HookBags", "HookBank",
-        "HookMerchant", "HookLoot", "HookRolls", "HookAuction", "CancelAuction" }) do
+        "HookMerchant", "HookLoot", "HookRolls", "HookAuction", "CancelAuction", "EachAddonBagButton",
+        "HookAddonBags" }) do
         real[name] = IB[name]
     end
     local hooked, buyback = {}, nil
@@ -44,7 +45,12 @@ do
     IB.EachLootSlot = function(fn) fn("lootIcon", 2, "item:9") end
     IB.EachRoll = function(fn) fn("rollIcon", "item:10") end
     IB.MerchantShown = function() return true end
-    for _, name in ipairs({ "HookBags", "HookBank", "HookLoot", "HookRolls", "HookAuction" }) do
+    -- A bag addon's buttons (Baganator, GW2 UI): one in its bags, one in its bank.
+    IB.EachAddonBagButton = function(fn)
+        fn(nil, "addonBagIcon", 1, 4, false)
+        fn(nil, "addonBankIcon", 7, 5, true)
+    end
+    for _, name in ipairs({ "HookBags", "HookBank", "HookLoot", "HookRolls", "HookAuction", "HookAddonBags" }) do
         IB[name] = function() hooked[#hooked + 1] = name end
     end
     IB.HookMerchant = function(_, _, clear)
@@ -64,13 +70,15 @@ do
     local module = { db = { bags = true, bank = true, merchant = true, auction = true, loot = false } }
     local walk = IB.Walk(module, note)
     walk:Hook()
-    eq(#hooked, 6, "walk: every place is hooked")
+    eq(#hooked, 7, "walk: every place is hooked, and a bag addon's bags")
     eq(next(seen), nil, "walk: hooking marks nothing by itself")
     walk:Refresh()
     eq(seen.bagIcon, "item:01@bags:0:1", "walk: a bag slot, with its bag and slot")
     eq(seen.emptyIcon, "nil@bags:0:2", "walk: an empty slot clears")
     eq(seen.bankIcon, "item:63@bank:6:3", "walk: a bank slot, with its tab and slot")
     eq(seen.oddIcon, "nil@bank:nil:nil", "walk: a bank button that can't say its slot clears")
+    eq(seen.addonBagIcon .. " " .. seen.addonBankIcon, "item:14@bags:1:4 item:75@bank:7:5",
+        "walk: a bag addon's bags and bank, with their bag and slot")
     eq(seen.merchantIcon, "item:m4@merchant:4:nil", "walk: a merchant's item, with its index")
     eq(seen.auctionIcon, "item:77::::::5@auction:77:nil", "walk: an auction row, with its suffix and ID")
     eq(seen.lootIcon .. " " .. seen.rollIcon, "false@loot:2:nil false@loot:nil:nil",
@@ -86,7 +94,7 @@ do
     end })
     few:Hook()
     few:Refresh()
-    eq(#hooked == 3 and seen.bankIcon == nil and seen.merchantIcon == nil and seen.auctionIcon == nil, true,
+    eq(#hooked == 4 and seen.bankIcon == nil and seen.addonBankIcon == nil and seen.merchantIcon == nil and seen.auctionIcon == nil, true,
         "walk: only the places asked for")
     eq(seen.bagIcon .. " " .. seen.lootIcon, "false@bags:0:1 item:9@loot:2:nil",
         "walk: what's on can be the module's own to say")

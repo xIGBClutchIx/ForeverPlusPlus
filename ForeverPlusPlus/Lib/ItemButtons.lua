@@ -160,6 +160,19 @@ function ItemButtons.Frames()
     return bagFrames
 end
 
+---An item button's icon texture: `icon` (Mainline's ItemButton), `Icon`, or the one named after
+---the button (a plain Button from the template, as GW2 UI makes on some clients).
+---@param button table
+---@return table?
+function ItemButtons.ButtonIcon(button)
+    local icon = button.icon or button.Icon
+    if not icon and button.GetName then
+        local name = button:GetName()
+        icon = name and _G[name .. "IconTexture"]
+    end
+    return icon
+end
+
 ---Calls `fn(button, icon, bag, slot)` for each item button in a bag window.
 ---@param frame table a bag window from `ItemButtons.Frames`
 ---@param fn function
@@ -191,6 +204,34 @@ function ItemButtons.EachOpenBag(update)
             update(frame)
         end
     end
+end
+
+-- Bag addons ------------------------------------------------------------------------------------
+-- Baganator's and GW2 UI's own bag buttons (Lib/BagAddons.lua), for while one of them draws the
+-- bags instead of Blizzard's windows above.
+
+---Calls `fn(button, icon, bag, slot, bank)` for each item button a bag addon shows for the
+---player's own items, `bank` true for one in its bank. Does nothing without a bag addon.
+---@param fn fun(button: table, icon: table?, bag: number, slot: number, bank: boolean)
+function ItemButtons.EachAddonBagButton(fn)
+    ns.BagAddons.EachButton(function(button, bag, slot, bank, art)
+        fn(button, ItemButtons.ButtonIcon(art or button), bag, slot, bank)
+    end)
+end
+
+local addonBagUpdates = weak() -- update -> it coalesced, the same one every OnEnable
+
+---Runs `update()` on the next frame whenever a bag addon's bags show, hide, or lay their items
+---out again, while `module` is on. Call it from OnEnable.
+---@param module table
+---@param update fun()
+function ItemButtons.HookAddonBags(module, update)
+    local coalesced = addonBagUpdates[update]
+    if not coalesced then
+        coalesced = ns.Frames.Coalesce(update, nil, module)
+        addonBagUpdates[update] = coalesced
+    end
+    ns.BagAddons.Watch(module, coalesced)
 end
 
 -- Bank --------------------------------------------------------------------------------------------
@@ -660,6 +701,19 @@ function ItemButtons.Walk(module, mark, opts)
             mark(icon, on and tab and linkOf(tab, slot), "bank", tab, slot)
         end)
     end
+    -- A bag addon's buttons (Lib/BagAddons.lua): its bags as bags, its bank as the bank, each
+    -- with its bag and slot. Marked again each time it lays them out, since its buttons can show
+    -- another slot then.
+    local function updateAddonBags()
+        local bags, bank, linkOf = shows("bags"), shows("bank"), _G.C_Container.GetContainerItemLink
+        ItemButtons.EachAddonBagButton(function(_, icon, bag, slot, inBank)
+            local place = inBank and "bank" or "bags"
+            if has[place] then
+                local on = inBank and bank or bags
+                mark(icon, on and linkOf(bag, slot), place, bag, slot)
+            end
+        end)
+    end
     local function updateMerchant()
         local on = shows("merchant")
         ItemButtons.EachMerchantItem(function(icon, index)
@@ -694,6 +748,9 @@ function ItemButtons.Walk(module, mark, opts)
         if has.bank then
             ItemButtons.HookBank(module, updateBank)
         end
+        if has.bags or has.bank then
+            ItemButtons.HookAddonBags(module, updateAddonBags)
+        end
         if has.loot then
             ItemButtons.HookLoot(module, markLoot)
             ItemButtons.HookRolls(module, markRoll)
@@ -710,6 +767,9 @@ function ItemButtons.Walk(module, mark, opts)
         local bank = _G.BankFrame
         if has.bank and bank and bank:IsShown() then
             updateBank()
+        end
+        if has.bags or has.bank then
+            updateAddonBags() -- nothing without a bag addon
         end
         if has.merchant and ItemButtons.MerchantShown() then
             updateMerchant()

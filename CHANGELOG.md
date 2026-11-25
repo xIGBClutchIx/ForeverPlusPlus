@@ -2,6 +2,16 @@
 
 What changed in each release of Forever++. The same notes show in game under Settings > AddOns > Forever++ > Changelog, from [`ForeverPlusPlus/Changelog.lua`](ForeverPlusPlus/Changelog.lua); change both together.
 
+## Unreleased
+
+### Changed
+
+- **Upgrade Arrows**, **Already Known**, **Appearance Icons**, and **Unusable Items Tint**: mark items in the bags and bank of the Baganator, GW2 UI, Bagnon, Bagnonium, BetterBags, and ArkInventory addons too, as they do in the game's own.
+
+### Fixed
+
+- **Auto Open Containers**, **Comprehend Scrolls**, and **Auto Weapon Buff**: a right click in the bags works with the Baganator, GW2 UI, Bagnon, Bagnonium, BetterBags, and ArkInventory addons' bags too, so Pick Lock no longer says "Item is locked" there.
+
 ## 1.9.0 (2026-11-24)
 
 ### Added
