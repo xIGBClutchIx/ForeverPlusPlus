@@ -22,8 +22,8 @@ ns.changelog = {
             { L.CHANGELOG_FIXED, {
                 { L.WAYPOINTS_TITLE, "Show Time to Arrive shows the whole time (\"6:40\"), not "
                     .. "only its minutes. It also counts down every second and is steadier: it "
-                    .. "eases to a new estimate instead of jumping, never counts up, and stays "
-                    .. "through a quick turn." },
+                    .. "eases to a new estimate instead of jumping, and stays through a quick "
+                    .. "turn." },
             } },
         },
     },

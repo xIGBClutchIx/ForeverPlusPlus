@@ -10,7 +10,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Fixed
 
-- **Waypoints**: Show Time to Arrive shows the whole time ("6:40"), not only its minutes. It also counts down every second and is steadier: it eases to a new estimate instead of jumping, never counts up, and stays through a quick turn.
+- **Waypoints**: Show Time to Arrive shows the whole time ("6:40"), not only its minutes. It also counts down every second and is steadier: it eases to a new estimate instead of jumping, and stays through a quick turn.
 
 ## 1.9.0 (2026-11-24)
 

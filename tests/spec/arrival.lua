@@ -100,7 +100,7 @@ do -- too far to be worth a clock
     end), nil, "arrival: more than an hour away")
 end
 
-do -- the clock to show counts down, never up, and walks to a changed estimate instead of jumping
+do -- the clock to show walks to a changed estimate, down or up, instead of jumping
     local est = Arrival.New()
     eq(est:Countdown(0), nil, "arrival: no clock without an estimate")
     est.seconds = 400.4
@@ -110,7 +110,7 @@ do -- the clock to show counts down, never up, and walks to a changed estimate i
     est.seconds = 370 -- a straighter line
     eq(est:Countdown(12), 397, "arrival: behind the estimate, the clock runs twice as fast")
     est.seconds = 420 -- a sidestep
-    eq(est:Countdown(13), 397, "arrival: ahead of the estimate, the clock stops and never goes up")
+    eq(est:Countdown(13), 398, "arrival: ahead of the estimate, the clock counts back up a second")
     est.seconds = 200 -- mounted up
     eq(est:Countdown(14), 200, "arrival: a change too big to walk off sets the clock at once")
     est.seconds = nil -- a turn: no steady rate for a moment
@@ -123,7 +123,7 @@ do -- the clock to show counts down, never up, and walks to a changed estimate i
     est.seconds = 5
     eq(est:Countdown(20), 5, "arrival: set again near the end")
     est.seconds = 8
-    eq(est:Countdown(21), 5, "arrival: the last seconds never jump")
+    eq(est:Countdown(21), 6, "arrival: the last seconds never jump")
     eq(est:Countdown(30), 8, "arrival: a gap in the calls starts the clock again")
     est:Reset()
     est.seconds = 90

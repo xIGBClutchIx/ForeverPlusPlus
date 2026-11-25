@@ -100,11 +100,11 @@ function Estimator:Add(now, distance)
     return self.seconds
 end
 
----The estimate as a clock to show: whole seconds that count down, never up, and don't jump about
----as the rate changes with every turn and sidestep. It starts at the estimate and runs with the
----caller's clock. While the two are within DRIFT (or a second) it just runs; farther apart it runs
----faster or stops until they meet; and only a change too big to walk off (SNAP, a mount or a new
----road) sets it to the estimate at once. It keeps running for HOLD seconds without an estimate, so
+---The estimate as a clock to show: whole seconds that don't jump about as the rate changes with
+---every turn and sidestep. It starts at the estimate and runs with the caller's clock. While the
+---two are within DRIFT (or a second) it just runs; farther apart it walks to the estimate a second
+---at a time, down twice as fast or back up (a detour makes the trip longer, and the clock says
+---so); and only a change too big to walk off (SNAP, a mount or a new road) sets it at once. It keeps running for HOLD seconds without an estimate, so
 ---a turn doesn't blink it away. Nil with no estimate for longer. Call it after Add, as often.
 ---@param now number the clock given to Add
 ---@return number? seconds
@@ -127,7 +127,7 @@ function Estimator:Countdown(now)
         if not off or abs(off) > max(SNAP_SECONDS, seconds * SNAP) then
             shown = seconds
         elseif abs(off) > max(1, seconds * DRIFT) then
-            shown = shown - dt + max(-dt, min(dt, off)) -- twice as fast, or stopped
+            shown = shown - dt + max(-dt, min(2 * dt, off)) -- twice as fast, or back up as fast
         else
             shown = shown - dt
         end
