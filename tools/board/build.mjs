@@ -437,6 +437,14 @@ for (const [key, d] of Object.entries(dispatched)) {
     const shas = [];
     const sha = usable && findCommit(d.commit);
     if (sha) { shas.push(sha); }
+    // Work of several commits lists them all, since a merged branch's commits can't be told apart
+    // from main's by its tip alone.
+    if (usable && Array.isArray(d.commits)) {
+        for (const prefix of d.commits) {
+            const found = findCommit(prefix);
+            if (found) { shas.push(found); }
+        }
+    }
     if (d.branch) {
         for (const c of wip.commits) { if (c.branch === d.branch) { shas.push(c.sha); } }
     }
