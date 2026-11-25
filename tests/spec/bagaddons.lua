@@ -264,3 +264,64 @@ eq(calls, before + 2, "bagaddons: told when BetterBags draws the bags")
 module.events.BAG_UPDATE_DELAYED()
 eq(#messages, 2, "bagaddons: BetterBags' draws listened to once")
 loadedAddOns.BetterBags = nil
+
+-- ArkInventory ------------------------------------------------------------------------------
+
+local BAG, BANK, VAULT = 1, 3, 4
+local offline = { [BAG] = false, [BANK] = true, [VAULT] = false }
+local arkFrames = {
+    { button(0, 6), BAG },
+    { button(2, 3, { visible = false }), BAG },
+    { button(7, 1), BANK },
+    { button(1, 2), VAULT }, -- its guild bank: not container buttons
+}
+local updated
+ArkInventory = {
+    Const = { Location = { Bag = BAG, Bank = BANK, Vault = VAULT } },
+    API = {
+        ItemFrameUpdated = function() end,
+        LocationIsOffline = function(loc)
+            return offline[loc]
+        end,
+        ItemFrameLoadedIterate = function()
+            local i = 0
+            return function()
+                i = i + 1
+                local entry = arkFrames[i]
+                if entry then
+                    return "ARKINV_Frame" .. entry[2] .. "Item" .. i, entry[1], entry[2], 1, i
+                end
+            end
+        end,
+    },
+}
+hooksecurefunc = function(t, key, fn)
+    local original = t[key]
+    t[key] = function(...)
+        original(...)
+        fn(...)
+    end
+    updated = t[key]
+end
+ARKINV_Frame1, ARKINV_Frame3 = window(true), window(true)
+eq(BagAddons.Loaded(), false, "bagaddons: ArkInventory without the addon loaded")
+loadedAddOns.ArkInventory = true
+eq(BagAddons.Loaded(), true, "bagaddons: ArkInventory loaded")
+same(walk(), { "0:6" }, "bagaddons: ArkInventory's bag frames on screen, not its bank away from a banker or its guild bank")
+eq(BagAddons.BankShown(), false, "bagaddons: ArkInventory's bank shown away from a banker isn't open")
+offline[BANK] = false
+same(walk(), { "0:6", "7:1:bank" }, "bagaddons: ArkInventory's bank at a banker")
+eq(BagAddons.BankShown(), true, "bagaddons: ArkInventory's bank open at a banker")
+offline[BAG] = true
+same(walk(), { "7:1:bank" }, "bagaddons: not ArkInventory's bags while they show another character's")
+before = calls
+module.events.BAG_UPDATE_DELAYED()
+ok(ARKINV_Frame1.scripts.OnShow and ARKINV_Frame3.scripts.OnHide, "bagaddons: ArkInventory's windows hooked")
+ok(updated, "bagaddons: ArkInventory's ItemFrameUpdated hooked through its API")
+ArkInventory.API.ItemFrameUpdated(arkFrames[1][1], BAG, 1, 6)
+eq(calls, before + 2, "bagaddons: told when ArkInventory draws a frame again")
+ArkInventory.API.ItemFrameLoadedIterate = function()
+    error("not set up yet")
+end
+same(walk(), {}, "bagaddons: ArkInventory's walk failing walks nothing")
+loadedAddOns.ArkInventory = nil

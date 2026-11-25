@@ -10,7 +10,7 @@
 -- know of each, with versions and sources, is in docs/forever-api.md (Bags and the bank).
 local _, ns = ...
 
-local _G, ipairs, pairs, type, setmetatable, rawget = _G, ipairs, pairs, type, setmetatable, rawget
+local _G, ipairs, pairs, type, setmetatable, rawget, pcall = _G, ipairs, pairs, type, setmetatable, rawget, pcall
 local max = math.max
 
 local BagAddons = {}
@@ -213,6 +213,62 @@ ADAPTERS[#ADAPTERS + 1] = {
         if type(events) == "table" and type(events.RegisterMessage) == "function" then
             events:RegisterMessage("bags/Draw/Backpack/Done", notify)
             events:RegisterMessage("bags/Draw/Bank/Done", notify)
+        end
+    end,
+}
+
+-- ArkInventory (3.12.17, its ArkInventory_Camelot.toc for Forever), through its public API
+-- (Core/ArkInventoryAPI.lua): ItemFrameLoadedIterate walks every item frame it made, with its
+-- window (location) id, and LocationIsOffline says whether a window shows another character's
+-- items or the bank away from a banker. Each frame is fixed to one slot of its window, made from
+-- ContainerFrameItemButtonTemplate with its slot as ID, under a bag frame whose ID is the bag.
+-- Only its Bag and Bank windows hold container buttons. Its API says to hear a frame drawn
+-- again with hooksecurefunc(ArkInventory.API, "ItemFrameUpdated", fn), as this does. Its windows
+-- are ARKINV_Frame<location>.
+ADAPTERS[#ADAPTERS + 1] = {
+    name = "ArkInventory",
+    get = function()
+        local ark = loaded("ArkInventory") and _G.ArkInventory
+        local api = type(ark) == "table" and ark.API
+        local const = type(ark) == "table" and type(ark.Const) == "table" and ark.Const.Location
+        if type(api) == "table" and type(api.ItemFrameLoadedIterate) == "function"
+            and type(api.LocationIsOffline) == "function" and type(const) == "table"
+            and type(const.Bag) == "number" and type(const.Bank) == "number" then
+            return ark
+        end
+    end,
+    each = function(ark, visit)
+        local api, loc = ark.API, ark.Const.Location
+        local online = {
+            [loc.Bag] = api.LocationIsOffline(loc.Bag) == false,
+            [loc.Bank] = api.LocationIsOffline(loc.Bank) == false,
+        }
+        -- Its walk is its own code: one that fails (before its windows are set up) walks nothing,
+        -- and our callbacks run after it, outside the pcall.
+        local frames = {}
+        pcall(function()
+            for _, frame, window in api.ItemFrameLoadedIterate() do
+                if online[window] then
+                    frames[#frames + 1] = frame
+                end
+            end
+        end)
+        for _, frame in ipairs(frames) do
+            visit(frame)
+        end
+    end,
+    windows = function(ark, fn)
+        local loc = ark.Const.Location
+        fn(_G["ARKINV_Frame" .. loc.Bag], false)
+        fn(_G["ARKINV_Frame" .. loc.Bank], true)
+    end,
+    bankOpen = function(ark)
+        local bank = ark.Const.Location.Bank
+        return ark.API.LocationIsOffline(bank) == false and shown(_G["ARKINV_Frame" .. bank])
+    end,
+    listen = function(ark, notify)
+        if type(_G.hooksecurefunc) == "function" and type(ark.API.ItemFrameUpdated) == "function" then
+            _G.hooksecurefunc(ark.API, "ItemFrameUpdated", notify)
         end
     end,
 }
