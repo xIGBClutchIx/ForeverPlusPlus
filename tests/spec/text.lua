@@ -30,6 +30,12 @@ AbbreviateNumbers = function(n) return (n / 1000) .. "K" end
 IN_GAME_NAVIGATION_RANGE = "%s yards"
 eq(ns.Text.Yards(1500), "1.5K yards", "Yards in the game's words, shortened")
 eq(ns.Text.Yards(999), "999 yards", "Yards under 1000 aren't shortened")
+IN_GAME_NAVIGATION_RANGE = "%s |4yd:yds" -- Forever's own, its plural escape left open
+eq(ns.Text.Yards(120), "120 |4yd:yds;", "Yards closes the game's open plural escape")
+IN_GAME_NAVIGATION_RANGE = "%s |4yd:yds;"
+eq(ns.Text.Yards(120), "120 |4yd:yds;", "Yards leaves a closed plural escape alone")
+IN_GAME_NAVIGATION_RANGE = "%s |4yd:yds; away"
+eq(ns.Text.Yards(120), "120 |4yd:yds; away", "Yards leaves text after a closed escape alone")
 AbbreviateNumbers, IN_GAME_NAVIGATION_RANGE = nil, nil
 eq(ns.Text.NewerVersion("0.8.0", "0.7.0"), true, "newer version")
 eq(ns.Text.NewerVersion("0.10.0", "0.9.2"), true, "newer version by number, not text")

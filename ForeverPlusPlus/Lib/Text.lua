@@ -113,13 +113,20 @@ end
 
 ---A distance in yards as Blizzard's own waypoint marker writes it ("120 yds",
 ---IN_GAME_NAVIGATION_RANGE), rounded, with big numbers shortened where the client can ("1.2K").
+---Forever's string is "%s |4yd:yds": a plural escape left open, which the game ends at the end of
+---the text. Left open it takes whatever is written after it as more of its forms ("120 yds, 6:40"
+---showed as "120 yds, 6"), so it's closed here and the text is safe to put anything after.
 ---@param yards number
 ---@return string
 function Text.Yards(yards)
     yards = floor(yards + 0.5)
     local short = _G.AbbreviateNumbers
     local text = yards >= 1000 and short and short(yards) or tostring(yards)
-    return format(_G.IN_GAME_NAVIGATION_RANGE or L.TEXT_YARDS, text)
+    text = format(_G.IN_GAME_NAVIGATION_RANGE or L.TEXT_YARDS, text)
+    if find(text, "|4[^;]*$") then
+        text = text .. ";"
+    end
+    return text
 end
 
 ---A length of time as a clock: "0:42", "12:05", and from an hour "1:02:05".

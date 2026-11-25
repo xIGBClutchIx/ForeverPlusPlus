@@ -11,6 +11,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Fixed
 
 - **Auto Open Containers**, **Comprehend Scrolls**, and **Auto Weapon Buff**: a right click in the bags works with the Baganator, GW2 UI, Bagnon, Bagnonium, BetterBags, and ArkInventory addons' bags too, so Pick Lock no longer says "Item is locked" there.
+- **Waypoints**: Show Time to Arrive shows the whole time after the distance, "2.8K yds, 6:40", not only its minutes ("2.8K yds, 6").
 
 ## 1.9.0 (2026-11-24)
 

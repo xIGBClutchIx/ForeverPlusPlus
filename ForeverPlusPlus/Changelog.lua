@@ -33,6 +33,8 @@ ns.changelog = {
                     .. "GW2 UI, Bagnon, Bagnonium, BetterBags, and ArkInventory addons' bags too." },
                 { L.AUTOWEAPONBUFF_TITLE, "A right click in the bags works with the Baganator, GW2 "
                     .. "UI, Bagnon, Bagnonium, BetterBags, and ArkInventory addons' bags too." },
+                { L.WAYPOINTS_TITLE, "Show Time to Arrive shows the whole time after the distance, "
+                    .. "\"2.8K yds, 6:40\", not only its minutes (\"2.8K yds, 6\")." },
             } },
         },
     },
