@@ -505,7 +505,10 @@ for (const issue of issues) {
 }
 for (const c of conversations) {
     c.last = latestOf(c.date, ...c.posts.map((p) => p.date));
-    c.replied = c.posts.some((p) => p.mine) || undefined;
+    // The state file's `replied` ("cf:<id>" or "gh:issue:<n>" -> a date) records a reply the feeds
+    // can't show: CurseForge's lists only a thread's first reply.
+    const key = c.source === 'github' ? 'gh:issue:' + c.number : 'cf:' + c.id.slice(3);
+    c.replied = c.posts.some((p) => p.mine) || Boolean((inbox.replied || {})[key]) || undefined;
 }
 const conversationById = new Map(conversations.map((c) => [c.id, c]));
 
