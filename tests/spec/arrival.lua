@@ -100,26 +100,31 @@ do -- too far to be worth a clock
     end), nil, "arrival: more than an hour away")
 end
 
-do -- the clock to show counts down by the second and ignores small changes in the estimate
+do -- the clock to show counts down, never up, and walks to a changed estimate instead of jumping
     local est = Arrival.New()
     eq(est:Countdown(0), nil, "arrival: no clock without an estimate")
     est.seconds = 400.4
     eq(est:Countdown(10), 400, "arrival: the clock starts at the estimate")
     est.seconds = 396 -- 3.4 seconds off what the clock says a second later: within 3%
-    eq(est:Countdown(11), 399, "arrival: the clock counts down a second at a time")
-    est.seconds = 405
-    eq(est:Countdown(12), 398, "arrival: a small change in the estimate doesn't move the clock")
-    est.seconds = 350 -- the player sped up
-    eq(est:Countdown(13), 350, "arrival: a big change sets the clock to the estimate")
-    eq(est:Countdown(14.2), 349, "arrival: and it counts down from there")
-    est.seconds = 10
-    eq(est:Countdown(15), 10, "arrival: near the end")
-    est.seconds = 7.5 -- more than a second off the 9 it would say
-    eq(est:Countdown(16), 8, "arrival: near the end the clock stays within a second of the estimate")
-    est.seconds = nil
-    eq(est:Countdown(17), nil, "arrival: no estimate, no clock")
-    est.seconds = 200
-    eq(est:Countdown(30), 200, "arrival: a new estimate starts a new clock")
+    eq(est:Countdown(11), 399, "arrival: a small change in the estimate doesn't move the clock")
+    est.seconds = 370 -- a straighter line
+    eq(est:Countdown(12), 397, "arrival: behind the estimate, the clock runs twice as fast")
+    est.seconds = 420 -- a sidestep
+    eq(est:Countdown(13), 397, "arrival: ahead of the estimate, the clock stops and never goes up")
+    est.seconds = 200 -- mounted up
+    eq(est:Countdown(14), 200, "arrival: a change too big to walk off sets the clock at once")
+    est.seconds = nil -- a turn: no steady rate for a moment
+    eq(est:Countdown(15), 199, "arrival: the clock keeps running a moment without an estimate")
+    eq(est:Countdown(16), 198, "arrival: counting down as before")
+    eq(est:Countdown(17), 197, "arrival: for three seconds")
+    eq(est:Countdown(18), nil, "arrival: and then there's no clock")
+    est.seconds = 90
+    eq(est:Countdown(19), 90, "arrival: a new estimate starts a new clock")
+    est.seconds = 5
+    eq(est:Countdown(20), 5, "arrival: set again near the end")
+    est.seconds = 8
+    eq(est:Countdown(21), 5, "arrival: the last seconds never jump")
+    eq(est:Countdown(30), 8, "arrival: a gap in the calls starts the clock again")
     est:Reset()
     est.seconds = 90
     eq(est:Countdown(31), 90, "arrival: a reset forgets the clock")

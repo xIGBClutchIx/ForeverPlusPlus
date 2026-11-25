@@ -7,7 +7,7 @@
 -- No frames and no game calls; the caller gives the clock.
 local _, ns = ...
 
-local setmetatable, abs, floor, max = setmetatable, math.abs, math.floor, math.max
+local setmetatable, abs, floor, max, min = setmetatable, math.abs, math.floor, math.max, math.min
 
 local Arrival = {}
 ns.Arrival = Arrival
@@ -20,7 +20,10 @@ local MAX_GAP = 1.5 -- seconds without a sample after which the old ones say not
 local MAX_SPEED = 100 -- yards a second; a bigger jump is a teleport or a new target
 local MAX_SECONDS = 3600 -- an hour away isn't worth a clock
 local STEADY = 0.5 -- each half of the window must close at this share of the whole's rate
-local DRIFT = 0.03 -- the share of the estimate the shown clock may be off before it's set again
+local DRIFT = 0.03 -- the share of the estimate the shown clock may be off and still just run
+local SNAP = 0.25 -- the share it may be off before it's set to the estimate outright
+local SNAP_SECONDS = 10 -- and the least that takes, so the last seconds never jump
+local HOLD = 3 -- seconds the shown clock keeps running with no estimate
 
 local Estimator = {}
 Estimator.__index = Estimator
@@ -35,7 +38,7 @@ end
 function Estimator:Reset()
     self.count = 0
     self.seconds = nil
-    self.shownAt = nil
+    self.shownSeconds = nil
 end
 
 -- The seconds left by the samples kept, or nil.
@@ -97,22 +100,38 @@ function Estimator:Add(now, distance)
     return self.seconds
 end
 
----The estimate as a clock to show: whole seconds that count down one at a time, as a clock should,
----and don't flicker with every small change in the rate. It starts at the estimate and runs with
----the caller's clock, and is set to the estimate again only once the two are more than DRIFT (or
----a second) apart. Nil while there's no estimate. Call it after Add.
+---The estimate as a clock to show: whole seconds that count down, never up, and don't jump about
+---as the rate changes with every turn and sidestep. It starts at the estimate and runs with the
+---caller's clock. While the two are within DRIFT (or a second) it just runs; farther apart it runs
+---faster or stops until they meet; and only a change too big to walk off (SNAP, a mount or a new
+---road) sets it to the estimate at once. It keeps running for HOLD seconds without an estimate, so
+---a turn doesn't blink it away. Nil with no estimate for longer. Call it after Add, as often.
 ---@param now number the clock given to Add
 ---@return number? seconds
 function Estimator:Countdown(now)
     local seconds = self.seconds
+    local shown = self.shownSeconds
+    local dt = shown and now - self.shownAt
+    if dt and (dt < 0 or dt > MAX_GAP) then
+        shown = nil
+    end
     if not seconds then
-        self.shownAt = nil
-        return nil
+        if not shown or now - self.estimatedAt > HOLD then
+            self.shownSeconds = nil
+            return nil
+        end
+        shown = shown - dt
+    else
+        self.estimatedAt = now
+        local off = shown and seconds - (shown - dt) -- above 0: the clock is ahead of the estimate
+        if not off or abs(off) > max(SNAP_SECONDS, seconds * SNAP) then
+            shown = seconds
+        elseif abs(off) > max(1, seconds * DRIFT) then
+            shown = shown - dt + max(-dt, min(dt, off)) -- twice as fast, or stopped
+        else
+            shown = shown - dt
+        end
     end
-    local shown = self.shownAt and self.shownSeconds - (now - self.shownAt)
-    if not shown or abs(shown - seconds) > max(1, seconds * DRIFT) then
-        self.shownAt, self.shownSeconds = now, seconds
-        shown = seconds
-    end
+    self.shownSeconds, self.shownAt = shown, now
     return max(0, floor(shown + 0.5))
 end
