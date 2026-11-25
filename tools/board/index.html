@@ -734,7 +734,8 @@ function diffTable(patch, filePath) {
 const NOTE = { generated: 'Generated data with too many changed lines to read here.', binary: 'A binary file.', moved: 'Moved with no changes.' };
 function diffBody(file, more) {
     if (file.patch) {
-        return [diffTable(file.patch, file.path), file.cut && el('div', { class: 'file-note' }, 'This diff is long, so only its first part is kept here.', more && el('a', { href: more, text: 'See all of it on GitHub' }))];
+        // Only what is there: append() would write a missing note as the word "undefined".
+        return [diffTable(file.patch, file.path), file.cut && el('div', { class: 'file-note' }, 'This diff is long, so only its first part is kept here.', more && el('a', { href: more, text: 'See all of it on GitHub' }))].filter(Boolean);
     }
     return [el('div', { class: 'file-note' }, NOTE[file.note] || 'No diff kept.', more && el('a', { href: more, text: 'See it on GitHub' }))];
 }
@@ -765,7 +766,7 @@ function fileBlock(file, ctx, open) {
             for (const p of file.pieces) {
                 const c = D.commitBySha.get(p.sha);
                 body.append(el('div', { class: 'piece-head' }, c ? commitWords(c) : null, c ? shaLink(c) : short(p.sha)),
-                    diffBody({ ...p, path: file.path }, c && commitUrl(c)));
+                    ...diffBody({ ...p, path: file.path }, c && commitUrl(c)));
             }
         } else {
             body.append(...diffBody(file, ctx.more));
