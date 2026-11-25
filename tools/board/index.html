@@ -3,16 +3,20 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@500;600;700&display=swap">
 <style>
 /* Layout: one working surface, dark by choice (the project's own navy and gold). A sticky bar of
-   four views (Board, Changes, Compare, Comments); the board is four columns that become one
-   column with a picker on a phone; a request opens as a side sheet (full screen on a phone)
-   holding its story and its diffs. Everything that has a page elsewhere is a link to it. */
+   four views: Work (every request and report, by where it stands), Next release (what shipping
+   now would hold, and the steps to ship it), Releases (each release, or a range of them), and
+   Comments (the conversations work comes from, with the work each led to). Work is four columns
+   that become one column with a picker on a phone. An item opens as a side sheet (full screen on
+   a phone) telling its story: the conversation, where it stands, the next step, and what was
+   built, as one diff of all its commits with each commit a click away. Everything that has a
+   page elsewhere is a link to it. */
 :root {
     --bg: #04060b; --surface: #0a0e18; --surface-2: #121826; --line: #1e273b;
     --ink: #e6eaf4; --ink-2: #a6b0c6; --ink-3: #8690a9;
     --accent: #78a4ff; --accent-ink: #04060b; --accent-soft: #13224a;
     --gold: #e6ba52; --gold-line: #8b6b1b;
-    --tint-blue: #111f44; --tint-red: #371616; --tint-gold: #2e250b; --tint-green: #0d2a1b; --tint-gray: #171e2f;
-    --dot-open: #8690a9; --dot-progress: #78a4ff; --dot-ready: #e6ba52; --dot-shipped: #4fc88a; --dot-bug: #f27f71;
+    --tint-blue: #111f44; --tint-red: #371616; --tint-gold: #2e250b; --tint-green: #0d2a1b; --tint-gray: #171e2f; --tint-orange: #33200d;
+    --dot-open: #8690a9; --dot-progress: #78a4ff; --dot-local: #f0a868; --dot-ready: #e6ba52; --dot-shipped: #4fc88a; --dot-bug: #f27f71;
     --add-bg: #0b2416; --add-ln: #113420; --del-bg: #2d1311; --del-ln: #421c18; --hunk-bg: #101a33;
     --syn-kw: #c792ea; --syn-str: #8fd69a; --syn-num: #f0a868; --syn-com: #6f7c98; --syn-fn: #82aaff; --syn-lit: #ff8fb5;
     --font-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
@@ -22,7 +26,7 @@
     color-scheme: dark;
 }
 
-body { background: var(--bg); color: var(--ink); font: 400 15px/1.5 var(--font-body); }
+body { background: var(--bg); color: var(--ink); font: 400 15px/1.5 var(--font-body); margin: 0; overflow-x: hidden; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
 .fb * { box-sizing: border-box; }
 .fb button, .fb select, .fb input { font: inherit; color: inherit; }
@@ -44,7 +48,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
 .tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
 .tabs::-webkit-scrollbar { display: none; }
-.tab { background: none; border: 0; border-bottom: 2px solid transparent; padding: 11px 12px 9px; font-weight: 500; color: var(--ink-2); white-space: nowrap; }
+.tab { background: none; border: 0; border-bottom: 2px solid transparent; padding: 12px 12px 10px; min-height: 44px; font-weight: 500; color: var(--ink-2); white-space: nowrap; }
 .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--gold); }
 .tab .count { margin-left: 6px; font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
 main.wrap { padding-block: 18px 64px; display: flex; flex-direction: column; gap: 18px; }
@@ -54,74 +58,88 @@ h3 { font: 600 12px/1.3 var(--font-body); letter-spacing: 0.07em; text-transform
 /* Controls */
 .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .controls > * { min-width: 0; }
-.field { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 7px 10px; min-height: 38px; }
+.field { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 7px 10px; min-height: 40px; }
 input.field { flex: 1 1 200px; }
 select.field { max-width: 100%; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.chip { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px; font-size: 13px; min-height: 32px; }
+.chip { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: 13px; min-height: 36px; }
 .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-.btn { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 7px 12px; font-weight: 500; min-height: 38px; }
+.btn { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 7px 12px; font-weight: 500; min-height: 40px; }
 .btn:hover, .chip:hover, .field:hover { border-color: var(--ink-3); }
-.linkbtn { background: none; border: 0; padding: 0; color: var(--accent); text-align: left; }
-.linkbtn:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+.fb .linkbtn { background: none; border: 0; padding: 0; color: var(--accent); text-align: left; }
+.fb .linkbtn.small { font-size: 13px; }
+.fb .linkbtn:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; max-width: 100%; }
+.seg button { background: var(--surface); border: 0; padding: 6px 12px; min-height: 38px; font-size: 13.5px; color: var(--ink-2); }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--surface-2); color: var(--ink); font-weight: 600; }
 
 /* Tags: a faint tint with normal text; the dot carries the meaning */
-.tag, .fb a.tag { display: inline-flex; align-items: center; gap: 5px; background: var(--tint-gray); color: var(--ink); border-radius: 5px; padding: 1px 7px; font-size: 12px; line-height: 1.6; white-space: nowrap; }
+.tag, .fb a.tag { display: inline-flex; align-items: center; gap: 5px; background: var(--tint-gray); color: var(--ink); border-radius: 5px; padding: 1px 7px; font-size: 12px; line-height: 1.6; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 .tag::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--dot, transparent); flex: none; }
 .tag.plain::before { display: none; }
 .tag.bug, .tag.fix { background: var(--tint-red); --dot: var(--dot-bug); }
 .tag.request, .tag.feat, .tag.progress { background: var(--tint-blue); --dot: var(--dot-progress); }
-.tag.version { background: var(--tint-green); --dot: var(--dot-shipped); }
+.tag.version, .tag.done { background: var(--tint-green); --dot: var(--dot-shipped); }
 .tag.ready { background: var(--tint-gold); --dot: var(--dot-ready); }
+.tag.local { background: var(--tint-orange); --dot: var(--dot-local); }
 .tag.open { --dot: var(--dot-open); }
-.tag.local { background: var(--tint-gold); }
-
-/* Board */
-.pick { display: none; }
-.cols { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; align-items: start; }
-.col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-.col-head { display: flex; align-items: baseline; gap: 8px; padding: 2px 2px 6px; border-bottom: 2px solid var(--dot); }
-.col-head h2 { font-size: 15px; }
-.col-head .n { color: var(--ink-3); font-size: 13px; font-variant-numeric: tabular-nums; }
-.col-head p { margin: 0 0 0 auto; font-size: 12px; color: var(--ink-3); text-align: right; }
-.col[data-col="open"] { --dot: var(--dot-open); }
-.col[data-col="progress"] { --dot: var(--dot-progress); }
-.col[data-col="ready"] { --dot: var(--dot-ready); }
-.col[data-col="shipped"] { --dot: var(--dot-shipped); }
-.group { font: 600 12px/1 var(--font-mono); padding: 8px 2px 0; }
-.card { display: flex; flex-direction: column; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; cursor: pointer; }
-.card:hover { border-color: var(--accent); }
-.fb .card a.title { color: var(--ink); font-weight: 500; line-height: 1.35; overflow-wrap: anywhere; }
-.card .row { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
-.card .foot { font-size: 12.5px; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 2px 10px; }
-.fb .card .foot a { color: var(--ink-2); }
-.empty { border: 1px dashed var(--line); border-radius: var(--radius); padding: 14px 12px; color: var(--ink-3); font-size: 13.5px; }
-
-/* Releases strip */
-.strip { display: flex; align-items: flex-end; gap: 3px; overflow-x: auto; padding: 6px 0 2px; }
-.rel { flex: none; width: 30px; background: none; border: 0; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; justify-content: flex-end; height: 86px; }
-.rel i { display: block; width: 18px; background: var(--line); border-radius: 3px 3px 0 0; }
-.rel span { font: 400 9.5px/1 var(--font-mono); color: var(--ink-3); writing-mode: vertical-rl; transform: rotate(180deg); height: 34px; overflow: hidden; }
-.rel:hover i { background: var(--ink-3); }
-.rel[aria-pressed="true"] i { background: var(--gold); }
-.rel[aria-pressed="true"] span { color: var(--ink); font-weight: 600; }
-.rel.in-range i { background: var(--gold-line); }
-.rel.unreleased:not([aria-pressed="true"]) i { background: var(--accent-soft); outline: 1px dashed var(--accent); outline-offset: -1px; }
 
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.section { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .figures { display: flex; flex-wrap: wrap; gap: 6px 22px; color: var(--ink-2); font-size: 14px; align-items: baseline; }
 .figures b { font: 600 17px/1 var(--font-display); color: var(--ink); margin-right: 5px; font-variant-numeric: tabular-nums; }
 .plus, .figures b.plus { color: var(--dot-shipped); } .minus, .figures b.minus { color: var(--dot-bug); }
 .split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 18px; align-items: start; }
-.section { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.empty { border: 1px dashed var(--line); border-radius: var(--radius); padding: 14px 12px; color: var(--ink-3); font-size: 13.5px; }
+.callout { border: 1px solid var(--line); border-left: 3px solid var(--gold); border-radius: var(--radius); background: var(--surface); padding: 10px 14px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.callout b { font-weight: 600; }
+.callout.calm { border-left-color: var(--dot-shipped); }
+
+/* Work: where everything stands, then the columns */
+.stages { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.stage { background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--dot); border-radius: var(--radius); padding: 8px 12px 10px; text-align: left; display: flex; flex-direction: column; gap: 1px; min-width: 0; min-height: 44px; }
+.stage:hover { border-color: var(--ink-3); border-top-color: var(--dot); }
+.stage b { font: 600 22px/1.15 var(--font-display); font-variant-numeric: tabular-nums; }
+.stage span { font-weight: 600; font-size: 13.5px; }
+.stage small { color: var(--ink-3); font-size: 12px; }
+.stage[aria-pressed="true"] { background: var(--surface-2); border-color: var(--ink-3); border-top-color: var(--dot); }
+[data-stage="open"] { --dot: var(--dot-open); } [data-stage="progress"] { --dot: var(--dot-progress); }
+[data-stage="local"] { --dot: var(--dot-local); } [data-stage="pushed"], [data-stage="ready"] { --dot: var(--dot-ready); }
+[data-stage="shipped"] { --dot: var(--dot-shipped); }
+.cols { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; align-items: start; }
+.col { display: flex; flex-direction: column; gap: 8px; min-width: 0; scroll-margin-top: 60px; }
+.col-head { display: flex; align-items: baseline; gap: 8px; padding: 2px 2px 6px; border-bottom: 2px solid var(--dot); }
+.col-head h2 { font-size: 15px; }
+.col-head .n { color: var(--ink-3); font-size: 13px; font-variant-numeric: tabular-nums; }
+.group { font: 600 12px/1.3 var(--font-mono); padding: 8px 2px 0; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.card { display: flex; flex-direction: column; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; cursor: pointer; min-width: 0; }
+.card:hover { border-color: var(--accent); }
+.fb .card a.title { color: var(--ink); font-weight: 500; line-height: 1.35; overflow-wrap: anywhere; }
+.card .row { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; min-width: 0; }
+.card .foot, .line-foot { font-size: 12.5px; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 2px 10px; }
+.fb .card .foot a { color: var(--ink-2); }
+
+/* Lists of items (in a release, in the next one, a thread's work) */
+.items { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
+.iline { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; padding: 9px 12px; min-width: 0; }
+.iline + .iline { border-top: 1px solid var(--line); }
+.iline .t { flex: 1 1 240px; min-width: 0; overflow-wrap: anywhere; }
+.iline .t a { color: var(--ink); font-weight: 500; }
+.steps { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; counter-reset: step; }
+.steps li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 2px 10px; align-items: baseline; font-size: 14px; }
+.steps li::before { counter-increment: step; content: counter(step); display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--dot-ready); color: var(--ink); font-size: 12px; font-weight: 600; }
+.steps li.done::before { border-color: var(--dot-shipped); background: var(--tint-green); }
+.steps li.done > div > b { color: var(--ink-2); font-weight: 500; }
+.steps li > div { min-width: 0; overflow-wrap: anywhere; }
+.steps li .muted { display: block; font-size: 13px; }
+
+/* Release notes */
 .notes { display: flex; flex-direction: column; gap: 12px; }
 .notes ul { margin: 6px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 7px; }
 .notes li { font-size: 14px; line-height: 1.45; overflow-wrap: anywhere; }
 .notes li b { font-weight: 600; color: var(--gold); }
 .notes code, .prose code { font: 0.88em var(--font-mono); background: var(--surface-2); padding: 1px 4px; border-radius: 4px; }
-.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
-.seg button { background: var(--surface); border: 0; padding: 6px 12px; min-height: 34px; font-size: 13.5px; color: var(--ink-2); }
-.seg button[aria-pressed="true"] { background: var(--surface-2); color: var(--ink); font-weight: 600; }
 
 /* Commits */
 .commits { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
@@ -130,19 +148,24 @@ select.field { max-width: 100%; }
 .day:first-child { border-top: 0; }
 .commit-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 10px; align-items: baseline; padding-right: 12px; }
 .commit-row:hover { background: var(--surface-2); }
-.commit-head { display: flex; gap: 8px; align-items: baseline; text-align: left; background: none; border: 0; padding: 9px 0 9px 12px; min-width: 0; }
-.commit-head .what { overflow-wrap: anywhere; line-height: 1.4; min-width: 0; }
-.commit-head .scope { font: 600 0.86em var(--font-mono); margin-right: 6px; color: var(--gold); }
+.commit-head { display: flex; gap: 8px; align-items: baseline; text-align: left; background: none; border: 0; padding: 10px 0 10px 12px; min-width: 0; min-height: 44px; }
+.what { overflow-wrap: anywhere; line-height: 1.4; min-width: 0; }
+.scope { font: 600 0.86em var(--font-mono); margin-right: 6px; color: var(--gold); }
 .commit-row .meta { font: 12px var(--font-mono); color: var(--ink-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .commit-row .extra { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 5px 8px; padding: 0 0 8px 12px; font-size: 12.5px; align-items: center; }
 .commit-body { border-top: 1px solid var(--line); background: var(--bg); padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+
+/* Diffs */
+.diffs { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .file { border: 1px solid var(--line); border-radius: 6px; background: var(--surface); overflow: hidden; min-width: 0; }
 .file-top { display: flex; gap: 10px; align-items: baseline; background: var(--surface-2); padding-right: 10px; }
-.file-head { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; flex: 1 1 auto; min-width: 0; text-align: left; background: none; border: 0; padding: 6px 0 6px 10px; }
+.file-head { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; flex: 1 1 auto; min-width: 0; text-align: left; background: none; border: 0; padding: 9px 0 9px 10px; min-height: 40px; }
 .file-head .path { font: 12.5px var(--font-mono); overflow-wrap: anywhere; min-width: 0; }
+.file-head .dir { color: var(--ink-3); }
 .file-top .stat { font: 12px var(--font-mono); white-space: nowrap; }
 .file-top a { font-size: 12px; white-space: nowrap; }
 .file-note { padding: 8px 10px; font-size: 13px; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+.piece-head { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; padding: 6px 10px; border-top: 1px solid var(--line); background: var(--surface); font-size: 13px; }
 .scroll { overflow-x: auto; }
 table.diff { border-collapse: collapse; width: 100%; font: 12.5px/1.5 var(--font-mono); tab-size: 4; }
 .diff td { padding: 0 8px; vertical-align: top; height: 19px; }
@@ -161,9 +184,9 @@ table.diff { border-collapse: collapse; width: 100%; font: 12.5px/1.5 var(--font
 .hljs-literal, .hljs-symbol, .hljs-code { color: var(--syn-lit); }
 .hljs-strong { font-weight: 600; } .hljs-emphasis { font-style: italic; }
 
-/* Files of a release or a range */
+/* Files of a range of releases */
 .frows { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
-.frow { display: grid; grid-template-columns: minmax(0, 1fr) 44px 60px 60px; gap: 0 6px; align-items: baseline; padding: 6px 10px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.frow { display: grid; grid-template-columns: minmax(0, 1fr) 44px 60px 60px; gap: 0 6px; align-items: baseline; padding: 8px 10px; font-size: 13px; font-variant-numeric: tabular-nums; }
 .frow + .frow, .frow + .fhist, .fhist + .frow { border-top: 1px solid var(--line); }
 .frow > span { text-align: right; white-space: nowrap; font-family: var(--font-mono); font-size: 12px; }
 .frow.head { color: var(--ink-3); font-weight: 600; font-size: 12px; background: var(--surface-2); }
@@ -173,56 +196,80 @@ table.diff { border-collapse: collapse; width: 100%; font: 12.5px/1.5 var(--font
 .fhist { background: var(--bg); padding: 10px; display: flex; flex-direction: column; gap: 12px; }
 .hist-item { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .hist-line { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; font-size: 13px; }
-.branches .frow { grid-template-columns: minmax(0, 1fr) 44px 70px; }
 
-/* Comments */
-.threads { display: flex; flex-direction: column; gap: 8px; }
-.thread { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-.thread .who { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 13px; color: var(--ink-3); }
-.fb .thread .who a.name { color: var(--ink); font-weight: 600; }
+/* Releases: the list beside the release */
+.rel-layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 18px; align-items: start; }
+.rel-list { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); overflow: hidden; position: sticky; top: 60px; max-height: calc(100vh - 80px); overflow-y: auto; }
+.fb a.rel-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 8px; padding: 8px 12px; color: var(--ink); align-items: baseline; }
+.fb a.rel-row:hover { background: var(--surface-2); text-decoration: none; }
+.rel-row + .rel-row { border-top: 1px solid var(--line); }
+.rel-row b { font: 600 14px var(--font-mono); }
+.rel-row small { color: var(--ink-3); font-size: 12px; white-space: nowrap; }
+.rel-row[aria-current="true"] { background: var(--surface-2); box-shadow: inset 3px 0 0 var(--gold); }
+.rel-pick { display: none; }
+
+/* Conversations */
+.threads { display: flex; flex-direction: column; gap: 10px; }
+.thread { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.thread.quiet { border-left: 3px solid var(--dot-ready); }
+.who { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 13px; color: var(--ink-3); }
+.fb .who a.name, .who .name { color: var(--ink); font-weight: 600; }
+.thread-title { font-weight: 600; overflow-wrap: anywhere; }
 .prose { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; max-width: 75ch; }
-.quote { border-left: 2px solid var(--line); padding-left: 12px; color: var(--ink-2); }
+.clamp { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: var(--lines, 6); overflow: hidden; }
+.posts { display: flex; flex-direction: column; gap: 8px; }
+.post { border-left: 2px solid var(--line); padding: 2px 0 2px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.post.mine { border-left-color: var(--gold); }
+.post.first { border-left-color: var(--ink-3); }
+.post .prose { color: var(--ink-2); font-size: 14px; }
+.post.first .prose { color: var(--ink); font-size: 15px; }
+.work-of { display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--line); padding-top: 10px; }
 
-/* A request's sheet */
-dialog.sheet { margin: 0 0 0 auto; height: 100dvh; max-height: 100dvh; width: min(880px, 100vw); max-width: 100vw; border: 0; border-left: 1px solid var(--line); padding: 0; background: var(--bg); color: var(--ink); }
+/* An item's sheet */
+dialog.sheet { margin: 0 0 0 auto; height: 100dvh; max-height: 100dvh; width: min(920px, 100vw); max-width: 100vw; border: 0; border-left: 1px solid var(--line); padding: 0; background: var(--bg); color: var(--ink); }
 dialog.sheet::backdrop { background: rgba(0, 0, 0, 0.6); }
-.sheet-in { display: flex; flex-direction: column; gap: 18px; padding: calc(16px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(40px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.sheet-in { display: flex; flex-direction: column; gap: 20px; padding: calc(16px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(40px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
 .sheet-top { display: flex; gap: 12px; align-items: flex-start; }
 .sheet-top h2 { flex: 1 1 auto; min-width: 0; font-size: 21px; overflow-wrap: anywhere; }
-.track { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.track { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
 .step { border-top: 3px solid var(--line); padding-top: 6px; font-size: 12.5px; color: var(--ink-3); min-width: 0; overflow-wrap: anywhere; }
 .step b { display: block; color: var(--ink-2); font-weight: 600; font-size: 13px; }
 .step.done { border-top-color: var(--dot-shipped); } .step.done b { color: var(--ink); }
 .step.now { border-top-color: var(--dot-ready); } .step.now b { color: var(--ink); }
 
 @media (max-width: 900px) {
-    .split { grid-template-columns: minmax(0, 1fr); }
+    .split, .rel-layout { grid-template-columns: minmax(0, 1fr); }
+    .rel-list { display: none; }
+    .rel-pick { display: flex; }
     .cols { grid-template-columns: minmax(0, 1fr); }
-    .pick { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
-    .pick .chip { flex: none; }
     .cols[data-show] .col { display: none; }
     .cols[data-show="open"] .col[data-col="open"], .cols[data-show="progress"] .col[data-col="progress"],
     .cols[data-show="ready"] .col[data-col="ready"], .cols[data-show="shipped"] .col[data-col="shipped"] { display: flex; }
-    .col-head p { display: none; }
+    .stages { display: flex; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+    .stages::-webkit-scrollbar { display: none; }
+    .stage { flex: 0 0 132px; }
     .places { margin-left: 0; }
 }
 @media (max-width: 560px) {
     .top h1 { font-size: 22px; }
     .panel { padding: 12px; }
+    .thread { padding: 12px; }
     .commit-row { grid-template-columns: minmax(0, 1fr); padding-right: 0; }
-    .commit-head { flex-wrap: wrap; padding: 9px 12px 2px; }
+    .commit-head { flex-wrap: wrap; padding: 10px 12px 2px; }
     .commit-row .meta { padding: 0 12px 8px; }
     .commit-row .extra { padding: 0 12px 8px; }
     .commit-body, .fhist { padding: 6px; }
+    .file-top { flex-wrap: wrap; padding: 0 10px 6px 0; }
+    .file-top .stat { padding-left: 10px; }
     table.diff { font-size: 11.5px; }
     .diff td { padding: 0 6px; }
     .diff td.ln { min-width: 28px; padding: 0 4px; }
     .diff td.ln.old { display: none; }
-    .frow { grid-template-columns: minmax(0, 1fr) 30px 50px 50px; padding: 6px 8px; }
+    .frow { grid-template-columns: minmax(0, 1fr) 30px 50px 50px; padding: 8px; }
     dialog.sheet { border-left: 0; }
-    .track { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 4px; }
+    .track { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 4px; }
 }
-@media (prefers-reduced-motion: no-preference) { .card, .chip, .btn { transition: border-color 0.12s; } }
+@media (prefers-reduced-motion: no-preference) { .card, .chip, .btn, .stage { transition: border-color 0.12s; } }
 </style>
 
 <div class="fb" id="app">
@@ -233,13 +280,13 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, 0.6); }
     </header>
     <div class="bar">
         <nav class="tabs wrap" role="tablist" aria-label="Views">
-            <button class="tab" role="tab" data-view="board" id="tab-board">Board</button>
-            <button class="tab" role="tab" data-view="changes" id="tab-changes">Changes</button>
-            <button class="tab" role="tab" data-view="compare" id="tab-compare">Compare</button>
-            <button class="tab" role="tab" data-view="feedback" id="tab-feedback">Comments</button>
+            <button class="tab" role="tab" data-view="work" id="tab-work">Work</button>
+            <button class="tab" role="tab" data-view="ship" id="tab-ship">Next release</button>
+            <button class="tab" role="tab" data-view="releases" id="tab-releases">Releases</button>
+            <button class="tab" role="tab" data-view="comments" id="tab-comments">Comments</button>
         </nav>
     </div>
-    <main class="wrap" id="view"><div class="empty">Loading the board. Issues and requests appear here in four columns: Open, In progress, In the next release, and Shipped.</div></main>
+    <main class="wrap" id="view"><div class="empty">Loading the board: every request and report by where it stands, what the next release would hold, the releases, and the comments the work came from.</div></main>
     <dialog class="sheet" id="sheet" aria-label="Request"><div class="sheet-in fb" id="sheet-in"></div></dialog>
 </div>
 
@@ -249,12 +296,20 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, 0.6); }
 'use strict';
 
 const UNRELEASED = 'Unreleased', WIP = 'In progress';
-const VIEWS = ['board', 'changes', 'compare', 'feedback'];
+const VIEWS = ['work', 'ship', 'releases', 'comments'];
+// Old links keep working.
+const ALIAS = { board: 'work', changes: 'releases', compare: 'releases', feedback: 'comments', 'release-unreleased': 'ship' };
+// Where a piece of work stands, in the order it moves.
+const STAGES = [
+    { id: 'open', name: 'Waiting', hint: 'Nothing made yet', col: 'open' },
+    { id: 'progress', name: 'In progress', hint: 'On a branch', col: 'progress' },
+    { id: 'local', name: 'Not pushed', hint: 'On main, only here', col: 'ready' },
+    { id: 'pushed', name: 'Not released', hint: 'Pushed, not tagged', col: 'ready' },
+    { id: 'shipped', name: 'Released', hint: 'In a release', col: 'shipped' },
+];
 const COLS = [
-    { id: 'open', name: 'Open', hint: 'Nothing made for it yet' },
-    { id: 'progress', name: 'In progress', hint: 'On a branch, not merged' },
-    { id: 'ready', name: 'In the next release', hint: 'Merged, not released' },
-    { id: 'shipped', name: 'Shipped', hint: 'In a release' },
+    { id: 'open', name: 'Waiting' }, { id: 'progress', name: 'In progress' },
+    { id: 'ready', name: 'Next release' }, { id: 'shipped', name: 'Released' },
 ];
 const KIND = { bug: 'Bug', request: 'Request', issue: 'Issue', pull: 'Pull request' };
 const app = document.getElementById('app');
@@ -262,11 +317,11 @@ const view = document.getElementById('view');
 const sheet = document.getElementById('sheet');
 const sheetIn = document.getElementById('sheet-in');
 
-const D = { patches: new Map() };
+const D = { files: new Map() };
 const S = {
-    view: 'board', boardQuery: '', boardSource: 'all', boardKind: 'all', boardCol: null, shippedAll: false,
-    release: null, pane: 'commits', types: new Set(), scope: '', commitQuery: '',
-    from: null, to: null, waitingOnly: false, feedbackQuery: '',
+    view: 'work', boardQuery: '', boardSource: 'all', boardKind: 'all', boardCol: null, shippedAll: false,
+    release: null, compareFrom: '', comparePane: 'files', pane: 'together', itemPane: 'together', types: new Set(), scope: '', commitQuery: '',
+    threadFilter: 'all', threadSource: 'all', threadQuery: '',
 };
 
 // When this viewer last opened the board, to mark what moved since. Only a convenience.
@@ -300,6 +355,7 @@ function el(tag, props, ...kids) {
 const tag = (text, cls) => el('span', { class: 'tag ' + (cls || 'plain'), text });
 // A link when there is somewhere to go, plain text when there isn't.
 const link = (href, text, cls) => (href ? el('a', { href, text, class: cls }) : el('span', { text, class: cls }));
+const stop = (e) => e.stopPropagation();
 
 const ET = 'America/New_York';
 const dayFmt = new Intl.DateTimeFormat('en-US', { timeZone: ET, month: 'short', day: 'numeric' });
@@ -309,22 +365,24 @@ const day = (iso) => (iso ? dayFmt.format(new Date(iso)) : '');
 const dayYear = (iso) => (iso ? dayYearFmt.format(new Date(iso)) : '');
 // A release's date is a calendar day, not a moment: keep it from sliding a day in another zone.
 const calendarDay = (ymd) => (ymd ? dayYearFmt.format(new Date(ymd + 'T12:00:00-05:00')) : '');
+const dayStart = (ymd) => new Date(ymd + 'T00:00:00-05:00').toISOString();
 const count = (n, one, many) => n.toLocaleString('en-US') + ' ' + (n === 1 ? one : many || one + 's');
 const short = (sha) => sha.slice(0, 8);
 const slug = (version) => version.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+const isNew = (iso) => !!(lastVisit && iso && iso > lastVisit);
 
 // Where things live outside the board.
 const repoUrl = () => D.board.repo.url || '';
-const pushed = (c) => repoUrl() && !c.local && c.release !== WIP;
+const pushed = (c) => !!(repoUrl() && c && !c.local && c.release !== WIP);
 const commitUrl = (c) => (pushed(c) ? repoUrl() + '/commit/' + c.sha : null);
-const fileUrl = (c, f) => (!pushed(c) ? null : f.status === 'deleted' ? commitUrl(c)
-    : repoUrl() + '/blob/' + c.sha + '/' + f.path.split('/').map(encodeURIComponent).join('/'));
+const blobUrl = (ref, p) => repoUrl() + '/blob/' + ref + '/' + p.split('/').map(encodeURIComponent).join('/');
 const releaseUrl = (r) => (repoUrl() && r.tag ? repoUrl() + '/releases/tag/' + encodeURIComponent(r.tag) : null);
 const authorUrl = (source, name) => (!name ? null : source === 'github' ? 'https://github.com/' + encodeURIComponent(name)
     : 'https://www.curseforge.com/members/' + encodeURIComponent(name));
+const releaseHash = (version) => (version === UNRELEASED ? '#ship' : '#release-' + slug(version));
 function versionTag(version) {
     if (!D.releaseByVersion.has(version)) { return tag(version, 'version'); }
-    return el('a', { class: 'tag version', href: '#release-' + slug(version), text: version, onclick: (e) => e.stopPropagation() });
+    return el('a', { class: 'tag version', href: releaseHash(version), text: version, onclick: stop });
 }
 
 // Text with `code`, **bold**, links, and #12 as a link to that request.
@@ -337,13 +395,238 @@ function inline(text, into) {
         else if (m[2] != null) { into.append(el('strong', { text: m[2] })); }
         else if (m[3] != null) { into.append(el('a', { href: m[4], text: m[3].replace(/`/g, '') })); }
         else if (m[5] != null) { into.append(el('a', { href: m[5], text: m[5] })); }
-        else if (D.itemByNumber.has(Number(m[6]))) { into.append(el('a', { href: '#item-gh-' + m[6], text: '#' + m[6] })); }
+        else if (D.itemById.has('gh-' + m[6])) { into.append(el('a', { href: '#item-gh-' + m[6], text: '#' + m[6] })); }
         else if (repoUrl()) { into.append(el('a', { href: repoUrl() + '/issues/' + m[6], text: '#' + m[6] })); }
         else { into.append(m[0]); }
         at = re.lastIndex;
     }
     if (at < text.length) { into.append(text.slice(at)); }
     return into;
+}
+
+// A long text cut to a few lines, with a button to show the rest.
+function clamped(text, lines) {
+    const box = inline(text, el('div', { class: 'prose clamp', style: '--lines:' + lines }));
+    const wrap = el('div', { class: 'section' }, box);
+    if (text.split('\n').length > lines || text.length > lines * 90) {
+        const more = el('button', { class: 'linkbtn small', text: 'Show all of it', onclick: (e) => {
+            stop(e);
+            const open = box.classList.toggle('clamp');
+            more.textContent = open ? 'Show all of it' : 'Show less';
+        } });
+        wrap.append(more);
+    }
+    return wrap;
+}
+
+function segmented(options, current, onPick, label) {
+    const box = el('div', { class: 'seg', role: 'group', 'aria-label': label || 'Show' });
+    for (const [id, text] of options) {
+        const btn = el('button', { 'aria-pressed': id === current ? 'true' : 'false', text, onclick: () => {
+            for (const b of box.children) { b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'); }
+            onPick(id);
+        } });
+        box.append(btn);
+    }
+    return box;
+}
+
+function wrapToggle() {
+    const on = () => app.classList.contains('wraplines');
+    const b = el('button', { class: 'chip', 'aria-pressed': on() ? 'true' : 'false', text: 'Wrap long lines',
+        onclick: () => { app.classList.toggle('wraplines'); b.setAttribute('aria-pressed', on() ? 'true' : 'false'); } });
+    return b;
+}
+
+function figures(parts) {
+    return el('div', { class: 'figures' }, parts.filter(Boolean).map((p) => (p.nodeType ? p
+        : el('span', null, el('b', { class: p.cls, text: p.n }), p.label))));
+}
+const numbers = (files, adds, dels, extra) => figures([
+    ...(extra || []),
+    { n: files.toLocaleString('en-US'), label: files === 1 ? 'file' : 'files' },
+    { n: '+' + adds.toLocaleString('en-US'), label: 'added', cls: 'plus' },
+    { n: '-' + dels.toLocaleString('en-US'), label: 'removed', cls: 'minus' },
+]);
+
+// Data files, each fetched once.
+function load(name) {
+    if (!D.files.has(name)) {
+        D.files.set(name, fetch('data/' + name).then((r) => {
+            if (!r.ok) { throw new Error('missing'); }
+            return r.json();
+        }).catch((err) => { D.files.delete(name); throw err; }));
+    }
+    return D.files.get(name);
+}
+const fileOf = (version) => (version === UNRELEASED ? 'unreleased' : version);
+const loadPatches = (version) => load('patch-' + fileOf(version) + '.json');
+const loadDiff = (version) => load('diff-' + fileOf(version) + '.json');
+const loadWork = (id) => load('work-' + id + '.json');
+// Something that loads: shows a line while it does, then what `draw` makes of it.
+function later(promise, draw, what) {
+    const box = el('div', { class: 'section' }, el('div', { class: 'file-note', text: 'Loading ' + what }));
+    promise.then((data) => box.replaceChildren(...[].concat(draw(data)).filter(Boolean))).catch(() => {
+        box.replaceChildren(el('div', { class: 'file-note', text: 'The ' + what + ' could not be loaded. Switch views and back to try again.' }));
+    });
+    return box;
+}
+
+// Work ---------------------------------------------------------------------------------------
+
+const stageOf = (i) => (i.status === 'ready' ? (i.pushed ? 'pushed' : 'local') : i.status);
+const convoOf = (i) => (i.thread ? D.convoById.get(i.thread) : null);
+const sourceTag = (item) => el('a', { class: 'tag plain', href: item.url, text: item.source === 'github' ? 'GitHub #' + item.number : 'CurseForge', onclick: stop });
+const kindTag = (item) => tag(KIND[item.kind] || item.kind, item.kind === 'bug' ? 'bug' : item.kind === 'request' ? 'request' : 'plain');
+function stageTag(item) {
+    switch (stageOf(item)) {
+        case 'open': return tag('waiting', 'open');
+        case 'progress': return tag(item.branch || 'in progress', 'progress');
+        case 'local': return el('a', { class: 'tag local', href: '#ship', text: 'on main, not pushed', onclick: stop });
+        case 'pushed': return el('a', { class: 'tag ready', href: '#ship', text: 'in the next release', onclick: stop });
+        case 'shipped': return item.version ? versionTag(item.version) : tag('done', 'done');
+        default: return tag('closed without a change', 'open');
+    }
+}
+const workLine = (item) => (item.work ? [count(item.commits.length, 'commit') + ', ',
+    el('span', { class: 'plus', text: '+' + item.work.adds }), ' ', el('span', { class: 'minus', text: '-' + item.work.dels })] : null);
+
+// Whether the person who asked heard back after it shipped. A closed GitHub issue told them;
+// on CurseForge only a reply of ours dated after the release counts (the feed shows only some).
+function owed(item) {
+    const convo = convoOf(item);
+    if (item.status !== 'shipped' || !convo || convo.mine) { return false; }
+    if (convo.source === 'github') { return convo.state === 'open'; }
+    const rel = D.releaseByVersion.get(item.version);
+    if (!rel || !rel.date) { return false; }
+    const since = dayStart(rel.date);
+    return !convo.posts.some((p) => p.mine && p.date >= since);
+}
+
+// The one thing that moves it on, as words with links.
+function nextStep(item) {
+    const convo = convoOf(item);
+    const who = item.author || 'them';
+    const where = item.source === 'github' ? 'GitHub' : 'CurseForge';
+    switch (stageOf(item)) {
+        case 'open':
+            if (convo && !convo.mine && !convo.replied) { return ['Reply to ' + who + ' on ' + where + ', or start on it. ', el('span', { class: 'muted', text: 'No reply of yours seen yet.' })]; }
+            return [item.note ? 'Where it stands: ' + item.note + '.' : 'Start on it, or close it with a reply.'];
+        case 'progress': return ['Review ', el('code', { text: item.branch || 'its branch' }), ' and merge it into main.'];
+        case 'local': return [el('a', { href: '#ship', text: 'Push main' }), ', then it goes out with the next release. Tell ' + who + ' on ' + where + ' once it does.'];
+        case 'pushed': return [el('a', { href: '#ship', text: 'Release it' }), ': it is pushed and waiting for the next tag. Tell ' + who + ' on ' + where + ' once it is out.'];
+        case 'shipped':
+            if (owed(item)) {
+                return convo.source === 'github' ? ['It shipped in ' + item.version + ' but the issue is still open: close it with a reply.']
+                    : ['Tell ' + who + ' it is out in ' + item.version + '. ', el('span', { class: 'muted', text: 'No reply of yours seen since it shipped (CurseForge\'s feed shows only some replies).' })];
+            }
+            return null;
+        default: return null;
+    }
+}
+
+function card(item) {
+    const convo = convoOf(item);
+    const siblings = convo ? convo.items.length : 0;
+    return el('article', { class: 'card', onclick: (e) => { if (!e.target.closest('a')) { location.hash = 'item-' + item.id; } } },
+        el('div', { class: 'row' }, sourceTag(item), kindTag(item), stageTag(item), isNew(item.updated) && tag('new since your last visit', 'ready')),
+        el('a', { class: 'title', href: '#item-' + item.id, text: item.title }),
+        el('div', { class: 'foot' }, link(authorUrl(item.source, item.author), item.author, null), el('span', { text: day(item.opened) }),
+            item.work ? el('span', null, workLine(item)) : null,
+            convo && convo.posts.length ? el('span', { text: count(convo.posts.length, 'reply', 'replies') }) : null,
+            siblings > 1 ? el('span', { text: '1 of ' + siblings + ' from one ' + (convo.source === 'github' ? 'issue' : 'comment') }) : null));
+}
+
+function filteredItems() {
+    const q = S.boardQuery.trim().toLowerCase();
+    return D.board.items.filter((i) => (S.boardSource === 'all' || i.source === S.boardSource)
+        && (S.boardKind === 'all' || i.kind === S.boardKind)
+        && (!q || (i.title + ' ' + i.author + ' ' + (i.number || '') + ' ' + (i.branch || '') + ' ' + ((convoOf(i) || {}).text || '')).toLowerCase().includes(q)));
+}
+
+// The banner that says what to do next with the project as a whole.
+function projectStep() {
+    const b = D.board;
+    const items = b.items;
+    const progress = items.filter((i) => i.status === 'progress');
+    const ready = items.filter((i) => i.status === 'ready');
+    const parts = [];
+    if (b.unpushed) { parts.push([el('b', { text: count(b.unpushed, 'commit') + ' on main not pushed.' }), ' Push main so the next release can go out.']); }
+    else if (b.unreleased) { parts.push([el('b', { text: count(b.unreleased, 'commit') + ' since ' + b.latest + ', all pushed.' }), ' Ready to tag when you are.']); }
+    if (progress.length) { parts.push([count(progress.length, 'request') + ' on a branch, waiting for review: ', progress.map((i, n) => [n ? ', ' : '', el('a', { href: '#item-' + i.id, text: i.branch || i.title })])]); }
+    if (!parts.length) { return el('div', { class: 'callout calm' }, el('div', { text: 'Everything made is released. Nothing is waiting on main or a branch.' })); }
+    return el('div', { class: 'callout' }, parts.map((p) => el('div', null, p)),
+        (b.unreleased || ready.length) ? el('div', { class: 'small' }, el('a', { href: '#ship', text: 'See the next release and the steps to ship it' })) : null);
+}
+
+function renderWork() {
+    const items = filteredItems();
+    const by = (stage) => items.filter((i) => stageOf(i) === stage);
+    if (!S.boardCol) { S.boardCol = (COLS.find((c) => c.id !== 'shipped' && items.some((i) => STAGES.find((s) => s.id === stageOf(i))?.col === c.id)) || COLS[3]).id; }
+
+    const cols = el('div', { class: 'cols', 'data-show': S.boardCol });
+    const tiles = el('div', { class: 'stages', role: 'group', 'aria-label': 'Where the work stands' });
+    for (const s of STAGES) {
+        const n = by(s.id).length;
+        tiles.append(el('button', { class: 'stage', 'data-stage': s.id, 'data-col': s.col, 'aria-pressed': S.boardCol === s.col ? 'true' : 'false',
+            onclick: () => {
+                S.boardCol = s.col; cols.dataset.show = s.col;
+                for (const t of tiles.children) { t.setAttribute('aria-pressed', t.dataset.col === s.col ? 'true' : 'false'); }
+                if (!window.matchMedia('(max-width: 900px)').matches) { document.getElementById('col-' + s.col).scrollIntoView({ block: 'start', behavior: 'smooth' }); }
+            } }, el('b', { text: n }), el('span', { text: s.name }), el('small', { text: s.hint })));
+    }
+    for (const c of COLS) {
+        const list = items.filter((i) => STAGES.find((s) => s.id === stageOf(i))?.col === c.id);
+        const col = el('section', { class: 'col', 'data-col': c.id, 'data-stage': c.id, id: 'col-' + c.id },
+            el('div', { class: 'col-head' }, el('h2', { text: c.name }), el('span', { class: 'n', text: list.length })));
+        if (!list.length) {
+            col.append(el('div', { class: 'empty', text: {
+                open: 'Nothing waiting.', progress: 'Nothing on a branch right now.',
+                ready: 'Nothing merged since ' + (D.board.latest || 'the last release') + '.', shipped: 'Nothing released matches.',
+            }[c.id] }));
+        } else if (c.id === 'ready') {
+            for (const [stage, title] of [['local', 'On main, not pushed'], ['pushed', 'Pushed, not released']]) {
+                const part = list.filter((i) => stageOf(i) === stage);
+                if (!part.length) { continue; }
+                col.append(el('div', { class: 'group' }, tag(title, stage === 'local' ? 'local' : 'ready')), ...part.map(card));
+            }
+        } else if (c.id === 'shipped') {
+            const order = D.releases.map((r) => r.version);
+            const sorted = [...list].sort((a, b) => (order.indexOf(a.version || '') - order.indexOf(b.version || '')) || (a.opened < b.opened ? 1 : -1));
+            const cap = S.shippedAll ? sorted.length : 12;
+            let last = null;
+            for (const item of sorted.slice(0, cap)) {
+                const v = item.version || 'Closed as done';
+                if (v !== last) {
+                    const r = D.releaseByVersion.get(v);
+                    col.append(el('div', { class: 'group' }, r ? el('a', { href: releaseHash(v), text: v }) : v,
+                        r && r.date ? el('span', { class: 'muted', text: calendarDay(r.date) }) : null));
+                    last = v;
+                }
+                col.append(card(item));
+            }
+            if (sorted.length > cap) {
+                col.append(el('button', { class: 'btn', text: 'Show all ' + sorted.length, onclick: () => { S.shippedAll = true; render(); } }));
+            }
+        } else {
+            col.append(...list.map(card));
+        }
+        cols.append(col);
+    }
+
+    const source = el('select', { class: 'field', id: 'board-source', 'aria-label': 'Where it was reported', onchange: (e) => { S.boardSource = e.target.value; render(); } },
+        [['all', 'GitHub and CurseForge'], ['github', 'GitHub'], ['curseforge', 'CurseForge']].map(([v, t]) => el('option', { value: v, text: t, selected: S.boardSource === v })));
+    const kind = el('select', { class: 'field', id: 'board-kind', 'aria-label': 'Kind', onchange: (e) => { S.boardKind = e.target.value; render(); } },
+        [['all', 'Bugs and requests'], ['bug', 'Bugs'], ['request', 'Requests'], ['pull', 'Pull requests']].map(([v, t]) => el('option', { value: v, text: t, selected: S.boardKind === v })));
+    const search = el('input', { class: 'field', id: 'board-search', type: 'search', placeholder: 'Search requests, reports, branches', 'aria-label': 'Search the work', value: S.boardQuery,
+        oninput: (e) => { S.boardQuery = e.target.value; const pos = e.target.selectionStart; render(); const again = document.getElementById('board-search'); again.focus(); again.setSelectionRange(pos, pos); } });
+    view.replaceChildren(projectStep(), tiles, el('div', { class: 'controls' }, search, source, kind), cols);
+
+    const declined = by('declined');
+    if (declined.length) {
+        view.append(el('div', { class: 'section' }, el('h3', { text: 'Closed without a change' }),
+            el('div', { class: 'cols' }, declined.map(card))));
+    }
 }
 
 // Diffs ----------------------------------------------------------------------------------------
@@ -355,27 +638,14 @@ function highlight(code, lang) {
     try { return h.highlight(code, { language: lang, ignoreIllegals: true }).value; } catch { return null; }
 }
 
-function patchName(release) {
-    return 'patch-' + (release === UNRELEASED ? 'unreleased' : release === WIP ? 'wip' : release) + '.json';
-}
-function loadPatches(release) {
-    if (!D.patches.has(release)) {
-        D.patches.set(release, fetch('data/' + patchName(release)).then((r) => {
-            if (!r.ok) { throw new Error('missing'); }
-            return r.json();
-        }).catch((err) => { D.patches.delete(release); throw err; }));
-    }
-    return D.patches.get(release);
-}
-
-function diffTable(file) {
-    const lang = LANG[(file.path.split('.').pop() || '').toLowerCase()];
+function diffTable(patch, filePath) {
+    const lang = LANG[(filePath.split('.').pop() || '').toLowerCase()];
     const table = el('table', { class: 'diff' });
-    const lines = file.patch.split('\n');
+    const rows = patch.split('\n');
     let o = 0, n = 0, i = 0;
     function draw(until) {
-        for (; i < lines.length && i < until; i++) {
-            const line = lines[i];
+        for (; i < rows.length && i < until; i++) {
+            const line = rows[i];
             const c = line[0];
             if (c === '@') {
                 const m = /^@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@/.exec(line);
@@ -386,6 +656,7 @@ function diffTable(file) {
             if (c === '\\') { continue; }
             const code = el('td', { class: 'code' });
             const text = line.slice(1);
+            // highlight.js escapes the code it's given, so its HTML holds no markup from the diff.
             const html = highlight(text, lang);
             if (html != null) { code.innerHTML = html; } else { code.textContent = text; }
             table.append(el('tr', { class: c === '+' ? 'add' : c === '-' ? 'del' : '' },
@@ -394,10 +665,10 @@ function diffTable(file) {
             if (c !== '+') { o++; }
             if (c !== '-') { n++; }
         }
-        if (i < lines.length) {
+        if (i < rows.length) {
             const row = el('tr', { class: 'more' });
             row.append(el('td', { colspan: 3 }, el('button', {
-                class: 'linkbtn', text: 'Show ' + count(lines.length - i, 'more line'),
+                class: 'linkbtn', text: 'Show ' + count(rows.length - i, 'more line'),
                 onclick: () => { row.remove(); draw(Infinity); },
             })));
             table.append(row);
@@ -407,56 +678,99 @@ function diffTable(file) {
     return el('div', { class: 'scroll' }, table);
 }
 
-// One file of a commit: its path, numbers, a link to the file at that commit, and its diff.
-function fileBlock(file, commit, open) {
+const NOTE = { generated: 'Generated data with too many changed lines to read here.', binary: 'A binary file.', moved: 'Moved with no changes.' };
+function diffBody(file, more) {
+    if (file.patch) {
+        return [diffTable(file.patch, file.path), file.cut && el('div', { class: 'file-note' }, 'This diff is long, so only its first part is kept here.', more && el('a', { href: more, text: 'See all of it on GitHub' }))];
+    }
+    return [el('div', { class: 'file-note' }, NOTE[file.note] || 'No diff kept.', more && el('a', { href: more, text: 'See it on GitHub' }))];
+}
+
+// One file: its path, numbers, a link to it on GitHub, and its diff, drawn when it's opened.
+// A file of combined work with `pieces` shows each commit's own change to it in turn.
+// `ctx` says where it lives: url(file) for the file, more for the whole diff on GitHub.
+function fileBlock(file, ctx, open) {
     const box = el('div', { class: 'file' });
     const label = { added: 'new', deleted: 'deleted', renamed: 'renamed' }[file.status];
     const body = el('div', { hidden: true });
-    const url = fileUrl(commit, file);
+    const url = ctx.url ? ctx.url(file) : null;
+    const cut = file.path.lastIndexOf('/');
     let drawn = false;
     const head = el('button', { class: 'file-head', onclick: () => box.show(body.hidden) },
-        el('span', { class: 'path', text: file.path }), label && tag(label), file.generated && tag('generated'));
+        el('span', { class: 'path' }, cut > 0 ? el('span', { class: 'dir', text: file.path.slice(0, cut + 1) }) : null, file.path.slice(cut + 1)),
+        label && tag(label), file.from && el('span', { class: 'muted small', text: 'from ' + file.from }), file.generated && tag('generated'),
+        file.pieces && tag(count(file.pieces.length, 'commit') + ' shown apart'));
     box.show = (on) => {
         body.hidden = !on;
         head.setAttribute('aria-expanded', on ? 'true' : 'false');
         if (!on || drawn) { return; }
         drawn = true;
-        if (file.patch) {
-            body.append(diffTable(file));
-            if (file.cut) { body.append(el('div', { class: 'file-note' }, 'This diff is long, so only its first part is kept here.', url && el('a', { href: commitUrl(commit), text: 'See all of it on GitHub' }))); }
+        if (file.pieces) {
+            body.append(el('div', { class: 'file-note', text: 'Other commits changed this file in between, so each of this work\'s changes to it is shown on its own.' }));
+            for (const p of file.pieces) {
+                const c = D.commitBySha.get(p.sha);
+                body.append(el('div', { class: 'piece-head' }, c ? commitWords(c) : null, c ? shaLink(c) : short(p.sha)),
+                    diffBody({ ...p, path: file.path }, c && commitUrl(c)));
+            }
         } else {
-            body.append(el('div', { class: 'file-note' }, {
-                generated: 'Generated data with too many changed lines to read here.', binary: 'A binary file.', moved: 'Moved with no changes.',
-            }[file.note] || 'No diff kept.', url && el('a', { href: commitUrl(commit), text: 'See the commit on GitHub' })));
+            body.append(...diffBody(file, ctx.more));
         }
     };
     box.append(el('div', { class: 'file-top' }, head,
         el('span', { class: 'stat' }, el('span', { class: 'plus', text: '+' + file.adds }), ' ', el('span', { class: 'minus', text: '-' + file.dels })),
-        url && el('a', { href: url, text: file.status === 'deleted' ? 'Commit' : 'File', title: 'Open this file as of this commit on GitHub' })), body);
+        url && el('a', { href: url, text: 'File', title: 'Open this file on GitHub', onclick: stop })), body);
     box.show(open);
     return box;
 }
 
-// The line a commit is named by: its type, module, words, and its hash as a link.
+// Many files' diffs: closed past a few, with a button to open them all, and the rest of a long
+// list behind "Show all".
+function fileList(files, ctx) {
+    const box = el('div', { class: 'diffs' });
+    const lines = files.reduce((n, f) => n + f.adds + f.dels, 0);
+    const open = files.length <= 4 && lines <= 400;
+    let cap = 60;
+    let blocks = [];
+    let allOpen = open;
+    const toggle = files.length > 1 && el('button', { class: 'linkbtn small', text: open ? 'Close every file' : 'Open every file', onclick: () => {
+        allOpen = !allOpen;
+        for (const b of blocks) { b.show(allOpen); }
+        toggle.textContent = allOpen ? 'Close every file' : 'Open every file';
+    } });
+    const list = el('div', { class: 'diffs' });
+    function draw() {
+        blocks = files.slice(0, cap).map((f) => fileBlock(f, ctx, allOpen));
+        list.replaceChildren(...blocks);
+        if (files.length > cap) {
+            list.append(el('button', { class: 'btn', text: 'Show all ' + count(files.length, 'file'), onclick: () => { cap = Infinity; draw(); } }));
+        }
+        if (!files.length) { list.append(el('div', { class: 'empty', text: 'No files changed.' })); }
+    }
+    draw();
+    box.append(el('div', { class: 'controls' }, toggle, ctx.more && el('a', { class: 'small', href: ctx.more, text: 'The same diff on GitHub' })), list);
+    return box;
+}
+
+// The line a commit is named by: its type, module, and words.
 function commitWords(c) {
     return [tag(c.type, c.type === 'feat' ? 'feat' : c.type === 'fix' ? 'fix' : 'plain'),
         el('span', { class: 'what' }, c.scope && el('span', { class: 'scope', text: c.scope }), c.summary)];
 }
-function shaLink(c) {
-    return link(commitUrl(c), short(c.sha));
-}
+const shaLink = (c) => link(commitUrl(c), short(c.sha));
+const commitCtx = (c) => ({ url: (f) => (!pushed(c) ? null : f.status === 'deleted' ? commitUrl(c) : blobUrl(c.sha, f.path)), more: commitUrl(c) });
 
-// A commit row that opens to its files' diffs.
-function commitRow(c) {
+// A commit row that opens to its files' diffs; `files(c)` loads them (its release's patch file by default).
+function commitRow(c, files) {
     const row = el('div', { class: 'commit' });
     const body = el('div', { class: 'commit-body', hidden: true });
     let asked = false;
     const extra = [];
     if (c.release === WIP && c.branch) { extra.push(tag(c.branch, 'progress')); }
-    if (c.local) { extra.push(tag('not pushed', 'local plain')); }
+    if (c.local) { extra.push(tag('not pushed', 'local')); }
     if (c.by) { extra.push(tag('by ' + c.by)); }
     for (const n of c.refs || []) {
-        if (D.itemByNumber.has(n)) { extra.push(el('a', { href: '#item-gh-' + n, text: '#' + n + ' ' + D.itemByNumber.get(n).title })); }
+        const item = D.itemById.get('gh-' + n);
+        if (item) { extra.push(el('a', { href: '#item-gh-' + n, text: '#' + n + ' ' + item.title })); }
     }
     const head = el('button', { class: 'commit-head', 'aria-expanded': 'false', onclick: toggle }, commitWords(c));
     function toggle() {
@@ -464,20 +778,12 @@ function commitRow(c) {
         head.setAttribute('aria-expanded', body.hidden ? 'false' : 'true');
         if (body.hidden || asked) { return; }
         asked = true;
-        body.append(el('div', { class: 'file-note', text: 'Loading the diff' }));
-        loadPatches(c.release).then((p) => {
-            const files = p.commits[c.sha] || [];
-            const lines = files.reduce((n, f) => n + f.adds + f.dels, 0);
-            const blocks = files.map((f) => fileBlock(f, c, files.length <= 4 && lines <= 400));
-            let allOpen = false;
-            const all = files.length > 1 && el('button', { class: 'linkbtn', text: 'Open every file', onclick: () => {
-                allOpen = !allOpen;
-                for (const b of blocks) { b.show(allOpen); }
-                all.textContent = allOpen ? 'Close every file' : 'Open every file';
-            } });
-            body.replaceChildren(el('div', { class: 'file-note' }, el('span', { text: count(files.length, 'file') + ', ' + dayYear(c.date) }),
+        body.replaceChildren(el('div', { class: 'file-note', text: 'Loading the diff' }));
+        (files ? files(c) : loadPatches(c.release).then((p) => p.commits[c.sha] || [])).then((list) => {
+            body.replaceChildren(el('div', { class: 'file-note' }, el('span', { text: count(list.length, 'file') + ', ' + dayYear(c.date) }),
                 commitUrl(c) && el('a', { href: commitUrl(c), text: 'Commit on GitHub' }),
-                c.release !== WIP && el('a', { href: '#release-' + slug(c.release), text: c.release === UNRELEASED ? 'Not released yet' : 'In ' + c.release }), all), ...blocks);
+                c.release !== WIP && el('a', { href: releaseHash(c.release), text: c.release === UNRELEASED ? 'In the next release' : 'In ' + c.release })),
+                fileList(list, commitCtx(c)));
         }).catch(() => {
             asked = false;
             body.replaceChildren(el('div', { class: 'file-note', text: 'The diff could not be loaded. Close and open the commit to try again.' }));
@@ -504,8 +810,8 @@ function commitList(all, opts) {
         let last = '';
         for (const c of shown.slice(0, limit)) {
             const d = dayYear(c.date);
-            if (d !== last && !opts.plain) { list.append(el('div', { class: 'day', text: d })); last = d; }
-            list.append(commitRow(c));
+            if (d !== last) { list.append(el('div', { class: 'day', text: d })); last = d; }
+            list.append(commitRow(c, opts.files));
         }
         if (!shown.length) { list.append(el('div', { class: 'file-note', text: all.length ? 'No commit matches.' : 'No commits.' })); }
         if (shown.length > limit) {
@@ -541,15 +847,316 @@ function commitList(all, opts) {
     return box;
 }
 
+function notesBlock(sections, withVersion, empty) {
+    const box = el('div', { class: 'notes' });
+    for (const s of sections) {
+        box.append(el('div', null, s.heading && el('h3', { text: s.heading }), el('ul', null, s.entries.map((e) => {
+            const li = el('li');
+            if (withVersion && e.version) { li.append(versionTag(e.version), ' '); }
+            if (e.name) { li.append(el('b', { text: e.name }), ' '); }
+            return inline(e.text, li);
+        }))));
+    }
+    if (!sections.length) { box.append(el('div', { class: 'muted', text: empty || 'No release notes written for this.' })); }
+    return box;
+}
+
+// Items as lines, for a release, the next one, or a thread.
+function itemLines(list, extra) {
+    return el('div', { class: 'items' }, list.map((i) => el('div', { class: 'iline' },
+        kindTag(i), el('span', { class: 't' }, el('a', { href: '#item-' + i.id, text: i.title })),
+        stageTag(i), extra ? extra(i) : el('span', { class: 'muted small' }, link(authorUrl(i.source, i.author), i.author)))));
+}
+
+// A conversation ------------------------------------------------------------------------------
+
+// One post of a conversation; `lines` is how many show before "Show all of it".
+function post(p, cls, source, convo, lines) {
+    const name = p.mine ? 'You' : p.name || p.user;
+    return el('div', { class: 'post ' + cls },
+        el('div', { class: 'who' }, p.mine ? el('span', { class: 'name', text: name }) : link(authorUrl(source, p.user), name, 'name'),
+            el('span', { text: timeFmt.format(new Date(p.date)) + ' ET' }), p.url ? el('a', { href: p.url, text: 'on GitHub', onclick: stop }) : null,
+            isNew(p.date) ? tag('new since your last visit', 'ready') : null),
+        cls.includes('first') && convo && convo.title ? el('div', { class: 'thread-title', text: convo.title }) : null,
+        clamped(p.text || '(no text)', lines || (cls.includes('first') ? 14 : 8)));
+}
+
+function conversationBlock(convo) {
+    const where = convo.source === 'github' ? 'GitHub' : 'CurseForge';
+    return el('div', { class: 'posts' },
+        post({ user: convo.user, name: convo.author, mine: convo.mine, date: convo.date, text: convo.text }, 'first', convo.source, convo),
+        convo.posts.map((p) => post(p, p.mine ? 'mine' : '', convo.source)),
+        convo.source === 'curseforge' ? el('div', { class: 'muted small' }, 'CurseForge\'s feed shows only the first reply of a thread, so there may be more on the site. ', el('a', { href: convo.url, text: 'Open the comments' })) : null,
+        convo.source === 'github' ? el('div', { class: 'small' }, el('a', { href: convo.url, text: 'Open on ' + where })) : null);
+}
+
+// An item's sheet ----------------------------------------------------------------------------
+
+function openItem(item) {
+    const made = item.commits.map((s) => D.commitBySha.get(s)).filter(Boolean);
+    const merged = made.filter((c) => c.release !== WIP);
+    const rel = item.version && D.releaseByVersion.get(item.version);
+    const stage = stageOf(item);
+    const convo = convoOf(item);
+    const rank = { open: 0, progress: 1, local: 2, pushed: 3, shipped: 4, declined: 0 }[stage];
+    const steps = [
+        ['Reported', [day(item.opened) + ' by ', link(authorUrl(item.source, item.author), item.author)]],
+        ['Started', made.length ? day(made[0].date) + (item.branch && !merged.length ? ' on ' + item.branch : '') : item.note ? 'Looked into' : 'Not yet'],
+        ['On main', merged.length ? day(merged[merged.length - 1].date) : stage === 'shipped' ? 'Yes' : 'Not yet'],
+        ['Pushed', rank >= 3 ? 'Yes' : merged.length ? 'Not yet, only here' : 'Not yet'],
+        ['Released', stage !== 'shipped' ? 'Not yet' : !rel ? 'Closed as done'
+            : [el('a', { href: releaseHash(rel.version), text: rel.version }), rel.date ? ', ' + calendarDay(rel.date) : '']],
+    ];
+    const track = el('div', { class: 'track' }, steps.map(([name, text], i) =>
+        el('div', { class: 'step ' + (i <= rank ? 'done' : i === rank + 1 && stage !== 'declined' ? 'now' : '') }, el('b', { text: name }), text)));
+    const step = nextStep(item);
+
+    const body = [
+        el('div', { class: 'sheet-top' },
+            el('h2', { text: item.title }),
+            el('button', { class: 'btn', text: 'Close', onclick: closeItem })),
+        el('div', { class: 'chips' }, sourceTag(item), kindTag(item), stageTag(item),
+            item.state === 'open' && stage === 'shipped' ? tag('still open on GitHub', 'open') : null,
+            el('a', { href: item.url, text: item.source === 'github' ? 'Open on GitHub' : 'Open CurseForge comments' }),
+            rel && releaseUrl(rel) ? el('a', { href: releaseUrl(rel), text: rel.version + ' on GitHub' }) : null),
+        track,
+        step ? el('div', { class: 'callout' }, el('div', null, el('b', { text: 'Next: ' }), step))
+            : stage === 'shipped' ? el('div', { class: 'callout calm' }, el('div', { text: 'Done: released, and ' + (item.author || 'they') + ' heard back.' })) : null,
+    ];
+
+    if (convo) {
+        const siblings = convo.items.filter((id) => id !== item.id).map((id) => D.itemById.get(id)).filter(Boolean);
+        body.push(el('div', { class: 'section' }, el('h3', { text: 'The conversation' }), conversationBlock(convo)));
+        if (siblings.length) {
+            body.push(el('div', { class: 'section' }, el('h3', { text: 'Also made from this ' + (convo.source === 'github' ? 'issue' : 'comment') }), itemLines(siblings, (i) => i.work ? el('span', { class: 'muted small' }, workLine(i)) : null)));
+        }
+    } else if (item.body) {
+        body.push(el('div', { class: 'section' }, el('h3', { text: 'What ' + item.author + ' wrote' }), clamped(item.body, 14)));
+    }
+
+    const built = el('div', { class: 'section' }, el('h3', { text: 'What was built' }));
+    if (item.notes.length) { built.append(notesBlock([{ heading: '', entries: item.notes }], true)); }
+    if (item.branches) { built.append(el('div', { class: 'chips small' }, el('span', { class: 'muted', text: 'Branches:' }), item.branches.map((b) => tag(b, 'progress')))); }
+    if (!made.length) {
+        built.append(el('div', { class: 'empty', text: item.status === 'shipped'
+            ? 'No commit is linked to this, so it was closed as done by hand.'
+            : 'Nothing made for it yet. Commits are linked when their message names the issue, a reply of ours links them, or the inbox task hands the request a branch.' }));
+    } else {
+        const w = item.work || { files: 0, adds: 0, dels: 0 };
+        const content = el('div', { class: 'section' });
+        const draw = () => {
+            content.replaceChildren(S.itemPane === 'commits'
+                ? commitList(made, { files: (c) => loadWork(item.id).then((x) => x.commits[c.sha] || []) })
+                : later(loadWork(item.id), (x) => {
+                    const tip = D.commitBySha.get(x.to);
+                    const ok = tip && pushed(tip);
+                    return [!x.exact ? el('div', { class: 'muted small', text: x.to ? 'Other commits changed some of these files in between; those files show each of this work\'s commits apart.' : 'These commits are not one line of history, so each file shows each commit\'s change to it.' }) : null,
+                        fileList(x.files, { url: (f) => (ok && f.status !== 'deleted' ? blobUrl(x.to, f.path) : null), more: ok && x.from && x.exact ? repoUrl() + '/compare/' + x.from + '...' + x.to : null })];
+                }, 'the changes'));
+        };
+        built.append(numbers(w.files, w.adds, w.dels, [{ n: made.length, label: made.length === 1 ? 'commit' : 'commits' }]),
+            el('div', { class: 'controls' }, segmented([['together', 'All changes together'], ['commits', 'Commit by commit']], S.itemPane, (id) => { S.itemPane = id; draw(); }), wrapToggle()),
+            content);
+        draw();
+    }
+    body.push(built);
+
+    sheetIn.replaceChildren(...body.filter(Boolean));
+    if (!sheet.open) { if (sheet.showModal) { sheet.showModal(); } else { sheet.setAttribute('open', ''); } }
+    sheet.scrollTop = 0;
+}
+function closeItem() {
+    if (sheet.open) { sheet.close(); }
+}
+sheet.addEventListener('close', () => { if (location.hash.startsWith('#item-')) { location.hash = S.view; } });
+sheet.addEventListener('click', (e) => { if (e.target === sheet) { closeItem(); } });
+
+// A release's changes: all together, or commit by commit -------------------------------------
+
+function changesBlock(r) {
+    const commits = D.commits.filter((c) => c.release === r.version);
+    const net = r.net || { files: r.files.length, adds: r.adds, dels: r.dels };
+    const content = el('div', { class: 'section' });
+    const base = repoUrl();
+    const reachable = r.tag || !D.board.unpushed;
+    const ctx = {
+        url: (f) => (base && reachable && f.status !== 'deleted' ? blobUrl(r.tag || D.board.head.sha, f.path) : null),
+        more: base && r.prev && reachable ? base + '/compare/' + r.prev + '...' + (r.tag || D.board.head.sha) : null,
+    };
+    const draw = () => {
+        content.replaceChildren(S.pane === 'commits' ? commitList(commits, { filters: true })
+            : later(loadDiff(r.version), (d) => fileList(d.files, ctx), 'the diff'));
+    };
+    draw();
+    return el('div', { class: 'section' },
+        el('h3', { text: 'The changes' }),
+        el('div', { class: 'controls' }, segmented([['together', 'All together, ' + count(net.files, 'file')], ['commits', 'Commit by commit, ' + r.commits]], S.pane, (id) => { S.pane = id; draw(); }), wrapToggle()),
+        content);
+}
+
+// Next release ---------------------------------------------------------------------------------
+
+function renderShip() {
+    const b = D.board;
+    const r = D.releaseByVersion.get(UNRELEASED);
+    const items = b.items.filter((i) => i.status === 'ready');
+    const progress = b.items.filter((i) => i.status === 'progress');
+    const owedList = b.items.filter(owed);
+    const net = r.net || { files: 0, adds: 0, dels: 0 };
+    const tocBumped = b.next.toc && b.next.toc !== b.latest;
+    const hasNotes = b.next.notes > 0;
+
+    // The steps, in the order AGENTS.md's Releases section gives them.
+    const steps = [
+        { done: !progress.length, what: progress.length ? 'Merge or leave out the work on branches' : 'No work waiting on a branch',
+            more: progress.length ? progress.map((i, n) => [n ? ', ' : '', el('a', { href: '#item-' + i.id, text: i.branch || i.title })]) : null },
+        { done: !b.unpushed, what: b.unpushed ? 'Push main: ' + count(b.unpushed, 'commit') + ' are only here' : b.remote ? 'Main is pushed' : 'No remote to push to',
+            more: b.unpushed ? 'git push origin main' : null },
+        { done: hasNotes && b.next.gameNotes, what: hasNotes ? 'Release notes written: ' + count(b.next.notes, 'entry', 'entries') + ' in CHANGELOG.md' : 'Write the release notes',
+            more: !b.next.gameNotes ? 'ForeverPlusPlus/Changelog.lua has no unreleased entry yet; it needs the same notes.' : hasNotes ? 'The same notes are in Changelog.lua; give both the new version and date.' : 'CHANGELOG.md and Changelog.lua both need them.' },
+        { done: tocBumped, what: tocBumped ? 'The TOC says ' + b.next.toc : 'Bump ## Version in the TOC (it still says ' + (b.next.toc || '?') + ')' },
+        { done: false, what: 'Tag it and push the tag', more: 'git tag vX.Y.Z && git push origin vX.Y.Z: GitHub, CurseForge, and Wago take it from there.' },
+        { done: !items.length && !owedList.length, what: items.length ? 'Tell ' + count(new Set(items.map((i) => i.author)).size, 'person', 'people') + ' it is out' : 'Nobody waiting to hear about it',
+            more: items.length ? items.map((i, n) => [n ? ', ' : '', el('a', { href: '#item-' + i.id, text: i.author || i.title })]) : null },
+    ];
+
+    const top = el('div', { class: 'panel' },
+        el('div', { class: 'controls' }, el('h2', { text: 'Next release' }), el('span', { class: 'muted', text: 'everything on main since ' + (b.latest || 'the start') })),
+        r.commits ? numbers(net.files, net.adds, net.dels, [{ n: r.commits, label: r.commits === 1 ? 'commit' : 'commits' },
+            b.unpushed ? el('span', null, tag(count(b.unpushed, 'commit') + ' not pushed', 'local')) : el('span', null, tag('all pushed', 'done'))])
+            : el('div', { class: 'muted', text: 'Nothing on main since ' + b.latest + '.' }),
+        el('div', { class: 'split' },
+            el('div', { class: 'section' }, el('h3', { text: 'To ship it' }),
+                el('ol', { class: 'steps' }, steps.map((s) => el('li', { class: s.done ? 'done' : '' },
+                    el('div', null, el('b', { text: s.what }), s.more ? el('span', { class: 'muted' }, typeof s.more === 'string' ? s.more : s.more) : null))))),
+            el('div', { class: 'section' },
+                el('h3', { text: 'What it answers' }),
+                items.length ? itemLines(items) : el('div', { class: 'empty', text: 'No request or report is in it yet.' }),
+                el('h3', { text: 'Release notes so far' }),
+                notesBlock(r.sections, false, 'No notes under Unreleased in CHANGELOG.md yet.'))));
+
+    view.replaceChildren(top);
+    if (owedList.length) {
+        view.append(el('div', { class: 'section' }, el('h3', { text: 'Already released, still owed a reply' }),
+            itemLines(owedList, (i) => el('span', { class: 'muted small' }, i.version + ', ' + i.author))));
+    }
+    if (r.commits) { view.append(el('div', { class: 'panel' }, changesBlock(r))); }
+
+    const branches = b.branches || [];
+    if (branches.length || progress.length) {
+        const known = new Map(b.items.filter((i) => i.branch).map((i) => [i.branch, i]));
+        view.append(el('div', { class: 'section' }, el('h3', { text: 'Branches not merged into main' }),
+            el('div', { class: 'items' }, branches.map((br) => {
+                const item = known.get(br.name);
+                return el('div', { class: 'iline' }, tag(br.name, 'progress'),
+                    el('span', { class: 't' }, item ? el('a', { href: '#item-' + item.id, text: item.title }) : el('span', { class: 'muted', text: br.subject })),
+                    el('span', { class: 'muted small', text: count(br.ahead, 'commit') + ' ahead, ' + day(br.date) }));
+            }))));
+    }
+}
+
+// Releases -------------------------------------------------------------------------------------
+
+function answeredBy(version) {
+    return D.board.items.filter((i) => i.status === 'shipped' && i.version === version);
+}
+
+function renderReleases() {
+    const tagged = D.releases.filter((r) => r.tag);
+    if (!tagged.length) { view.replaceChildren(el('div', { class: 'empty', text: 'No release is tagged yet.' })); return; }
+    if (!S.release || !D.releaseByVersion.has(S.release) || S.release === UNRELEASED) { S.release = tagged[0].version; }
+    const r = D.releaseByVersion.get(S.release);
+    const idx = (v) => D.releases.findIndex((x) => x.version === v); // 0 is the newest
+    if (S.compareFrom && idx(S.compareFrom) <= idx(r.version)) { S.compareFrom = ''; }
+    const pick = (v) => { S.types.clear(); S.scope = ''; S.commitQuery = ''; location.hash = 'release-' + slug(v); };
+
+    const list = el('nav', { class: 'rel-list', 'aria-label': 'Releases' },
+        el('a', { class: 'rel-row', href: '#ship' }, el('b', { text: 'Next' }), el('small', { text: count(D.board.unreleased, 'commit') })),
+        tagged.map((x) => el('a', { class: 'rel-row', href: '#release-' + slug(x.version), 'aria-current': x.version === r.version ? 'true' : 'false' },
+            el('b', { text: x.version }), el('small', { text: calendarDay(x.date) }))));
+    const select = el('select', { class: 'field', id: 'release-pick', 'aria-label': 'Release', onchange: (e) => pick(e.target.value) },
+        tagged.map((x) => el('option', { value: x.version, selected: x.version === r.version, text: x.version + (x.date ? ', ' + calendarDay(x.date) : '') })));
+    const older = D.releases.slice(idx(r.version) + 1).filter((x) => x.tag);
+    const compare = older.length ? el('select', { class: 'field', id: 'compare-from', 'aria-label': 'Compare with an older release', onchange: (e) => { S.compareFrom = e.target.value; render(); } },
+        el('option', { value: '', text: 'Just this release' }),
+        older.slice(1).map((x) => el('option', { value: x.version, selected: S.compareFrom === x.version, text: 'Everything since ' + x.version }))) : null;
+
+    const page = el('div', { class: 'section' }, el('div', { class: 'controls rel-pick' }, select), S.compareFrom ? compareBody(S.compareFrom, r, compare) : releaseBody(r, compare));
+    view.replaceChildren(el('div', { class: 'rel-layout' }, list, page));
+    const current = list.querySelector('[aria-current="true"]');
+    if (current) { requestAnimationFrame(() => { if (list.scrollHeight > list.clientHeight) { current.scrollIntoView({ block: 'nearest' }); } }); }
+}
+
+function releaseBody(r, compare) {
+    const net = r.net || { files: r.files.length, adds: r.adds, dels: r.dels };
+    const answered = answeredBy(r.version);
+    return el('div', { class: 'panel' },
+        el('div', { class: 'controls' }, el('h2', { text: 'Forever++ ' + r.version }), r.date ? el('span', { class: 'muted', text: calendarDay(r.date) }) : null,
+            releaseUrl(r) && el('a', { class: 'small', href: releaseUrl(r), text: 'Release on GitHub' })),
+        numbers(net.files, net.adds, net.dels, [{ n: r.commits, label: r.commits === 1 ? 'commit' : 'commits' }]),
+        compare ? el('div', { class: 'controls' }, compare) : null,
+        el('div', { class: 'split' },
+            el('div', { class: 'section' }, el('h3', { text: 'Release notes' }), notesBlock(r.sections)),
+            el('div', { class: 'section' }, el('h3', { text: 'Requests and reports it answered' }),
+                answered.length ? itemLines(answered) : el('div', { class: 'muted', text: 'None linked.' }))),
+        changesBlock(r));
+}
+
+// Several releases at once: their notes, the files their commits touched, and the commits.
+function compareBody(fromVersion, toRel, compare) {
+    const idx = (v) => D.releases.findIndex((x) => x.version === v);
+    const range = D.releases.slice(idx(toRel.version), idx(fromVersion)); // newer first, "from" left out
+    const inRange = new Set(range.map((x) => x.version));
+    const commits = D.commits.filter((c) => inRange.has(c.release));
+    const files = new Map();
+    for (const x of range) {
+        for (const [p, a, d, n] of x.files) {
+            const t = files.get(p) || [p, 0, 0, 0];
+            t[1] += a; t[2] += d; t[3] += n;
+            files.set(p, t);
+        }
+    }
+    const list = [...files.values()].sort((a, b) => b[1] + b[2] - a[1] - a[2]);
+    const headings = [];
+    for (const x of range) {
+        for (const s of x.sections) {
+            let h = headings.find((y) => y.heading === s.heading);
+            if (!h) { h = { heading: s.heading, entries: [] }; headings.push(h); }
+            h.entries.push(...s.entries.map((e) => ({ ...e, version: x.version })));
+        }
+    }
+    const first = ['Added', 'Changed', 'Fixed'];
+    headings.sort((a, b) => (first.indexOf(a.heading) + 1 || 9) - (first.indexOf(b.heading) + 1 || 9));
+    const answered = D.board.items.filter((i) => i.status === 'shipped' && inRange.has(i.version));
+    const base = repoUrl();
+    const from = D.releaseByVersion.get(fromVersion);
+    const whole = base ? base + '/compare/' + from.tag + '...' + toRel.tag : null;
+    const content = el('div', { class: 'section' });
+    const draw = () => content.replaceChildren(S.comparePane === 'commits' ? commitList(commits, { filters: true, limit: 80 }) : fileRows(list, range.map((x) => x.version)));
+    draw();
+    return el('div', { class: 'panel' },
+        el('div', { class: 'controls' }, el('h2', { text: fromVersion + ' to ' + toRel.version }), whole && el('a', { class: 'small', href: whole, text: 'The whole diff on GitHub' })),
+        figures([{ n: range.length, label: 'releases' }, { n: commits.length.toLocaleString('en-US'), label: 'commits' }, { n: list.length.toLocaleString('en-US'), label: 'files touched' }]),
+        el('div', { class: 'controls' }, compare),
+        el('div', { class: 'chips small' }, el('span', { class: 'muted', text: 'Releases in it:' }), [...range].reverse().map((x) => versionTag(x.version))),
+        el('div', { class: 'split' },
+            el('div', { class: 'section' }, el('h3', { text: 'What changed for players' }), notesBlock(headings, true)),
+            el('div', { class: 'section' }, el('h3', { text: 'Requests and reports answered' }), answered.length ? itemLines(answered, (i) => versionTag(i.version)) : el('div', { class: 'muted', text: 'None linked.' }))),
+        el('div', { class: 'section' }, el('h3', { text: 'The changes' }),
+            el('div', { class: 'controls' }, segmented([['files', 'Files, ' + list.length], ['commits', 'Commits, ' + commits.length]], S.comparePane, (id) => { S.comparePane = id; draw(); }), wrapToggle()),
+            el('div', { class: 'muted small', text: 'Across several releases, each file opens to every change made to it in order; lines are summed over the commits. GitHub has the net diff.' }),
+            content));
+}
+
 // The files a set of releases touched. A file opens to every change made to it in them.
-function fileRows(fileList, versions) {
+function fileRows(list, versions) {
     let cap = 25;
     const box = el('div', { class: 'section' });
     const rows = el('div', { class: 'frows' });
     function draw() {
-        const top = fileList.length ? fileList[0][1] + fileList[0][2] : 1;
+        const top = list.length ? list[0][1] + list[0][2] : 1;
         rows.replaceChildren(el('div', { class: 'frow head' }, el('div', { text: 'File' }), el('span', { text: 'Commits', title: 'Commits' }), el('span', { text: 'Added' }), el('span', { text: 'Removed' })));
-        for (const [p, a, d, n] of fileList.slice(0, cap)) {
+        for (const [p, a, d, n] of list.slice(0, cap)) {
             let hist = null;
             const btn = el('button', { class: 'linkbtn', 'aria-expanded': 'false', text: p, onclick: () => {
                 if (hist) { hist.remove(); hist = null; btn.setAttribute('aria-expanded', 'false'); return; }
@@ -562,31 +1169,31 @@ function fileRows(fileList, versions) {
                 el('span', { text: n }), el('span', { class: 'plus', text: '+' + a }), el('span', { class: 'minus', text: '-' + d }));
             rows.append(row);
         }
-        if (!fileList.length) { rows.append(el('div', { class: 'file-note', text: 'No files changed.' })); }
+        if (!list.length) { rows.append(el('div', { class: 'file-note', text: 'No files changed.' })); }
     }
     draw();
     box.append(rows);
-    if (fileList.length > cap) {
-        box.append(el('button', { class: 'btn', text: 'Show all ' + count(fileList.length, 'file'), onclick: (e) => { cap = Infinity; draw(); e.target.remove(); } }));
+    if (list.length > cap) {
+        box.append(el('button', { class: 'btn', text: 'Show all ' + count(list.length, 'file'), onclick: (e) => { cap = Infinity; draw(); e.target.remove(); } }));
     }
     return box;
 }
 
-function fileHistory(path, versions) {
+function fileHistory(filePath, versions) {
     const box = el('div', { class: 'fhist' }, el('div', { class: 'file-note', text: versions.length > 3 ? 'Loading this file\'s changes across ' + versions.length + ' releases' : 'Loading this file\'s changes' }));
     Promise.all(versions.map(loadPatches)).then((all) => {
         const found = [];
         for (const p of all) {
             for (const [sha, files] of Object.entries(p.commits)) {
                 const c = D.commitBySha.get(sha);
-                for (const f of files) { if (c && (f.path === path || f.from === path)) { found.push([c, f]); } }
+                for (const f of files) { if (c && (f.path === filePath || f.from === filePath)) { found.push([c, f]); } }
             }
         }
         found.sort((a, b) => (a[0].date < b[0].date ? 1 : -1));
         const open = found.length <= 3;
         box.replaceChildren(...found.map(([c, f]) => el('div', { class: 'hist-item' },
             el('div', { class: 'hist-line' }, commitWords(c), el('span', { class: 'muted' }, shaLink(c), ', ', day(c.date)), versions.length > 1 && versionTag(c.release)),
-            fileBlock(f, c, open && f.adds + f.dels <= 300))));
+            fileBlock(f, commitCtx(c), open && f.adds + f.dels <= 300))));
         if (!found.length) { box.replaceChildren(el('div', { class: 'file-note', text: 'No change to this file was found.' })); }
     }).catch(() => {
         box.replaceChildren(el('div', { class: 'file-note', text: 'This file\'s changes could not be loaded.' }));
@@ -594,325 +1201,60 @@ function fileHistory(path, versions) {
     return box;
 }
 
-function notesBlock(sections, withVersion) {
-    const box = el('div', { class: 'notes' });
-    for (const s of sections) {
-        box.append(el('div', null, s.heading && el('h3', { text: s.heading }), el('ul', null, s.entries.map((e) => {
-            const li = el('li');
-            if (withVersion && e.version) { li.append(versionTag(e.version), ' '); }
-            if (e.name) { li.append(el('b', { text: e.name }), ' '); }
-            return inline(e.text, li);
-        }))));
-    }
-    if (!sections.length) { box.append(el('div', { class: 'muted', text: 'No release notes written for this.' })); }
-    return box;
-}
-
-// Board ----------------------------------------------------------------------------------------
-
-const sourceTag = (item) => el('a', { class: 'tag plain', href: item.url, text: item.source === 'github' ? 'GitHub #' + item.number : 'CurseForge', onclick: (e) => e.stopPropagation() });
-const kindTag = (item) => tag(KIND[item.kind] || item.kind, item.kind === 'bug' ? 'bug' : item.kind === 'request' ? 'request' : 'plain');
-
-function card(item) {
-    const where = item.status === 'shipped' ? (item.version ? versionTag(item.version) : null)
-        : item.status === 'ready' ? el('a', { class: 'tag ready', href: '#release-unreleased', text: 'next release', onclick: (e) => e.stopPropagation() })
-        : item.status === 'progress' ? tag(item.branch || 'in progress', 'progress') : null;
-    const moved = lastVisit && item.updated && item.updated > lastVisit;
-    return el('article', { class: 'card', onclick: (e) => { if (!e.target.closest('a')) { location.hash = 'item-' + item.id; } } },
-        el('div', { class: 'row' }, sourceTag(item), kindTag(item), where, moved && tag('new since your last visit', 'ready')),
-        el('a', { class: 'title', href: '#item-' + item.id, text: item.title }),
-        el('div', { class: 'foot' }, link(authorUrl(item.source, item.author), item.author), el('span', { text: day(item.opened) }),
-            item.commits.length ? el('span', { text: count(item.commits.length, 'commit') }) : null));
-}
-
-function renderBoard() {
-    const q = S.boardQuery.trim().toLowerCase();
-    const items = D.board.items.filter((i) => (S.boardSource === 'all' || i.source === S.boardSource)
-        && (S.boardKind === 'all' || i.kind === S.boardKind)
-        && (!q || (i.title + ' ' + i.author + ' ' + i.body + ' ' + (i.number || '')).toLowerCase().includes(q)));
-    const by = (status) => items.filter((i) => i.status === status);
-    if (!S.boardCol) { S.boardCol = (COLS.find((c) => c.id !== 'shipped' && by(c.id).length) || COLS[3]).id; }
-
-    const cols = el('div', { class: 'cols', 'data-show': S.boardCol });
-    const pick = el('div', { class: 'pick', role: 'group', 'aria-label': 'Column' });
-    for (const c of COLS) {
-        const list = by(c.id);
-        const chip = el('button', { class: 'chip', 'aria-pressed': S.boardCol === c.id ? 'true' : 'false', text: c.name + ' ' + list.length,
-            onclick: () => { S.boardCol = c.id; cols.dataset.show = c.id; for (const b of pick.children) { b.setAttribute('aria-pressed', b === chip ? 'true' : 'false'); } } });
-        pick.append(chip);
-        const col = el('section', { class: 'col', 'data-col': c.id, id: 'col-' + c.id },
-            el('div', { class: 'col-head' }, el('h2', { text: c.name }), el('span', { class: 'n', text: list.length }), el('p', { text: c.hint })));
-        if (!list.length) {
-            col.append(el('div', { class: 'empty', text: {
-                open: 'Nothing waiting.', progress: 'Nothing on a branch right now.',
-                ready: 'Nothing merged since ' + (D.board.latest || 'the last release') + '.', shipped: 'Nothing shipped matches.',
-            }[c.id] }));
-        } else if (c.id === 'shipped') {
-            const order = D.releases.map((r) => r.version);
-            const sorted = [...list].sort((a, b) => (order.indexOf(a.version || '') - order.indexOf(b.version || '')) || (a.opened < b.opened ? 1 : -1));
-            const cap = S.shippedAll ? sorted.length : 12;
-            let last = null;
-            for (const item of sorted.slice(0, cap)) {
-                const v = item.version || 'Closed as done';
-                if (v !== last) {
-                    const r = D.releaseByVersion.get(v);
-                    col.append(el('div', { class: 'group' }, r ? el('a', { href: '#release-' + slug(v), text: v }) : v,
-                        r && r.date ? el('span', { class: 'muted', text: '  ' + calendarDay(r.date) }) : null));
-                    last = v;
-                }
-                col.append(card(item));
-            }
-            if (sorted.length > cap) {
-                col.append(el('button', { class: 'btn', text: 'Show all ' + sorted.length, onclick: () => { S.shippedAll = true; render(); } }));
-            }
-        } else {
-            for (const item of list) { col.append(card(item)); }
-        }
-        cols.append(col);
-    }
-
-    const source = el('select', { class: 'field', id: 'board-source', 'aria-label': 'Where it was reported', onchange: (e) => { S.boardSource = e.target.value; render(); } },
-        [['all', 'GitHub and CurseForge'], ['github', 'GitHub'], ['curseforge', 'CurseForge']].map(([v, t]) => el('option', { value: v, text: t, selected: S.boardSource === v })));
-    const kind = el('select', { class: 'field', id: 'board-kind', 'aria-label': 'Kind', onchange: (e) => { S.boardKind = e.target.value; render(); } },
-        [['all', 'Bugs and requests'], ['bug', 'Bugs'], ['request', 'Requests'], ['pull', 'Pull requests']].map(([v, t]) => el('option', { value: v, text: t, selected: S.boardKind === v })));
-    const search = el('input', { class: 'field', id: 'board-search', type: 'search', placeholder: 'Search issues and requests', 'aria-label': 'Search issues and requests', value: S.boardQuery,
-        oninput: (e) => { S.boardQuery = e.target.value; const pos = e.target.selectionStart; render(); const again = document.getElementById('board-search'); again.focus(); again.setSelectionRange(pos, pos); } });
-    view.replaceChildren(el('div', { class: 'controls' }, search, source, kind), pick, cols);
-
-    const declined = by('declined');
-    if (declined.length) {
-        view.append(el('div', { class: 'section' }, el('h3', { text: 'Closed without a change' }),
-            el('div', { class: 'cols' }, declined.map(card))));
-    }
-}
-
-// A request's sheet ----------------------------------------------------------------------------
-
-function openItem(item) {
-    const made = item.commits.map((s) => D.commitBySha.get(s)).filter(Boolean);
-    const merged = made.filter((c) => c.release !== WIP);
-    const rel = item.version && D.releaseByVersion.get(item.version);
-    const rank = { open: 0, progress: 1, ready: 2, shipped: 3, declined: 0 }[item.status];
-    const where = item.source === 'github' ? 'GitHub' : 'CurseForge';
-    const steps = [
-        ['Reported', [day(item.opened) + ' by ', link(authorUrl(item.source, item.author), item.author)]],
-        ['Started', made.length ? day(made[0].date) + (item.branch && !merged.length ? ' on ' + item.branch : '') : item.note ? 'Looked into' : 'Not yet'],
-        ['Merged', merged.length ? day(merged[merged.length - 1].date) + ', ' + count(merged.length, 'commit') : 'Not yet'],
-        ['Released', item.status !== 'shipped' ? 'Not yet' : !rel ? 'Closed as done'
-            : [el('a', { href: '#release-' + slug(rel.version), text: rel.version }), rel.date ? ', ' + calendarDay(rel.date) : '']],
-    ];
-    const track = el('div', { class: 'track' }, steps.map(([name, text], i) =>
-        el('div', { class: 'step ' + (i <= rank ? 'done' : i === rank + 1 && item.status !== 'declined' ? 'now' : '') }, el('b', { text: name }), text)));
-
-    const body = [
-        el('div', { class: 'sheet-top' },
-            el('h2', { text: item.title }),
-            el('button', { class: 'btn', text: 'Close', onclick: closeItem })),
-        el('div', { class: 'chips' }, sourceTag(item), kindTag(item),
-            item.state === 'open' && item.status === 'shipped' ? tag('still open on ' + where, 'open') : null,
-            item.status === 'declined' ? tag('closed without a change', 'open') : null,
-            el('a', { href: item.url, text: item.source === 'github' ? 'Open on GitHub' : 'Open CurseForge comments' }),
-            rel && releaseUrl(rel) ? el('a', { href: releaseUrl(rel), text: rel.version + ' on GitHub' }) : null),
-        track,
-    ];
-    if (item.note) { body.push(el('div', { class: 'section' }, el('h3', { text: 'Where it stands' }), el('div', { class: 'prose', text: item.note }))); }
-    if (item.body) { body.push(el('div', { class: 'section' }, el('h3', { text: 'What ' + item.author + ' wrote' }), inline(item.body, el('div', { class: 'prose quote' })))); }
-    if (item.reply) {
-        body.push(el('div', { class: 'section' },
-            el('h3', null, 'Reply, ' + day(item.reply.date), item.reply.url ? [' · ', el('a', { href: item.reply.url, text: 'on ' + where })] : null),
-            inline(item.reply.text, el('div', { class: 'prose' }))));
-    }
-    if (item.notes.length) {
-        body.push(el('div', { class: 'section' }, el('h3', { text: 'In the release notes' }),
-            notesBlock([{ heading: '', entries: item.notes }], true)));
-    }
-    body.push(el('div', { class: 'section' },
-        el('h3', { text: made.length ? 'The changes, ' + count(made.length, 'commit') : 'The changes' }),
-        made.length ? commitList(made, { plain: true }) : el('div', { class: 'empty', text: 'No commit is linked to this yet. A commit is linked when its message names the issue, the reply links it, or the inbox task recorded it.' })));
-    sheetIn.replaceChildren(...body);
-    if (!sheet.open) { if (sheet.showModal) { sheet.showModal(); } else { sheet.setAttribute('open', ''); } }
-    sheet.scrollTop = 0;
-}
-function closeItem() {
-    if (sheet.open) { sheet.close(); }
-}
-sheet.addEventListener('close', () => { if (location.hash.startsWith('#item-')) { location.hash = S.view; } });
-sheet.addEventListener('click', (e) => { if (e.target === sheet) { closeItem(); } });
-
-// Changes --------------------------------------------------------------------------------------
-
-function strip(isOn, isRange, onPick) {
-    const max = Math.max(1, ...D.releases.map((r) => r.commits));
-    const box = el('div', { class: 'strip', role: 'group', 'aria-label': 'Releases, oldest first' });
-    for (const r of [...D.releases].reverse()) {
-        box.append(el('button', {
-            class: 'rel' + (r.version === UNRELEASED ? ' unreleased' : '') + (isRange && isRange(r) ? ' in-range' : ''),
-            'aria-pressed': isOn(r) ? 'true' : 'false', title: r.version + ', ' + count(r.commits, 'commit'),
-            'aria-label': r.version + ', ' + count(r.commits, 'commit'), onclick: () => onPick(r),
-        }, el('i', { style: 'height:' + Math.round(4 + 40 * Math.sqrt(r.commits / max)) + 'px' }),
-            el('span', { text: r.version === UNRELEASED ? 'next' : r.version })));
-    }
-    requestAnimationFrame(() => { box.scrollLeft = box.scrollWidth; });
-    return box;
-}
-
-function wrapToggle() {
-    const on = () => app.classList.contains('wraplines');
-    const b = el('button', { class: 'chip', 'aria-pressed': on() ? 'true' : 'false', text: 'Wrap long lines',
-        onclick: () => { app.classList.toggle('wraplines'); b.setAttribute('aria-pressed', on() ? 'true' : 'false'); } });
-    return b;
-}
-
-// Commits or Files, for a release or a range.
-function paneSwitch(commits, files) {
-    return el('div', { class: 'seg', role: 'group', 'aria-label': 'Show' },
-        [['commits', 'Commits ' + commits], ['files', 'Files ' + files]].map(([id, text]) =>
-            el('button', { 'aria-pressed': S.pane === id ? 'true' : 'false', text, onclick: () => { S.pane = id; render(); } })));
-}
-
-function renderChanges() {
-    if (!S.release || !D.releaseByVersion.has(S.release)) {
-        S.release = D.releases[0].commits ? D.releases[0].version : (D.releases[1] || D.releases[0]).version;
-    }
-    const r = D.releaseByVersion.get(S.release);
-    const commits = D.commits.filter((c) => c.release === r.version);
-    const pickRelease = (v) => { S.types.clear(); S.scope = ''; S.commitQuery = ''; location.hash = 'release-' + slug(v); };
-    const select = el('select', { class: 'field', id: 'release-pick', 'aria-label': 'Release', onchange: (e) => pickRelease(e.target.value) },
-        D.releases.map((x) => el('option', { value: x.version, selected: x.version === r.version,
-            text: x.version === UNRELEASED ? 'Since ' + (D.board.latest || 'the start') + ' (' + count(x.commits, 'commit') + ')' : x.version + (x.date ? ', ' + calendarDay(x.date) : '') })));
-    const title = r.version === UNRELEASED ? 'Since ' + (D.board.latest || 'the start') : 'Forever++ ' + r.version;
-    const base = repoUrl();
-    const compare = base && r.prev && (r.tag || !D.board.unpushed) ? base + '/compare/' + r.prev + '...' + (r.tag || 'main') : null;
-    const requests = D.board.items.filter((i) => (r.version === UNRELEASED ? i.status === 'ready' : i.status === 'shipped' && i.version === r.version));
-    const panel = el('div', { class: 'panel' },
-        el('div', { class: 'controls' }, el('h2', { text: title }),
-            r.version === UNRELEASED ? tag('not released', 'ready') : r.date ? el('span', { class: 'muted', text: calendarDay(r.date) }) : null),
-        el('div', { class: 'figures' },
-            el('span', null, el('b', { text: r.commits.toLocaleString('en-US') }), r.commits === 1 ? 'commit' : 'commits'),
-            el('span', null, el('b', { text: r.files.length.toLocaleString('en-US') }), r.files.length === 1 ? 'file' : 'files'),
-            el('span', null, el('b', { class: 'plus', text: '+' + r.adds.toLocaleString('en-US') }), 'added'),
-            el('span', null, el('b', { class: 'minus', text: '-' + r.dels.toLocaleString('en-US') }), 'removed'),
-            releaseUrl(r) && el('a', { href: releaseUrl(r), text: 'Release on GitHub' }),
-            compare && el('a', { href: compare, text: 'Whole diff on GitHub' }),
-            r.prev && el('a', { href: '#release-' + slug(r.prev.slice(1)), text: 'Before it: ' + r.prev.slice(1) })),
-        el('div', { class: 'split' },
-            el('div', { class: 'section' },
-                requests.length ? [el('h3', { text: 'Requests and reports it answers' }),
-                    el('div', { class: 'notes' }, el('ul', null, requests.map((i) => el('li', null, kindTag(i), ' ', el('a', { href: '#item-' + i.id, text: i.title }), el('span', { class: 'muted', text: ' ' + i.author })))))] : null,
-                el('h3', { text: 'Release notes' }), notesBlock(r.sections)),
-            el('div', { class: 'section' }, el('div', { class: 'controls' }, paneSwitch(r.commits, r.files.length)),
-                S.pane === 'files' ? fileRows(r.files, [r.version]) : commitList(commits, { filters: true }))));
-    view.replaceChildren(
-        el('div', { class: 'section' }, strip((x) => x.version === r.version, null, (x) => pickRelease(x.version)),
-            el('div', { class: 'controls' }, select, wrapToggle())),
-        panel);
-
-    const branches = D.board.branches || [];
-    if (branches.length) {
-        const list = el('div', { class: 'frows branches' }, el('div', { class: 'frow head' }, el('div', { text: 'Branch' }), el('span', { text: 'Ahead' }), el('span', { text: 'Last' })));
-        for (const b of branches) {
-            list.append(el('div', { class: 'frow' }, el('div', null, el('div', { style: 'font: 12.5px var(--font-mono); overflow-wrap: anywhere', text: b.name }), el('div', { class: 'muted small', text: b.subject })),
-                el('span', { text: b.ahead }), el('span', { text: day(b.date) })));
-        }
-        view.append(el('details', { class: 'panel' }, el('summary', { text: count(branches.length, 'local branch', 'local branches') + ' not merged into main' }), list));
-    }
-}
-
-// Compare --------------------------------------------------------------------------------------
-
-function renderCompare() {
-    const tagged = D.releases.filter((r) => r.tag);
-    if (tagged.length < 2) { view.replaceChildren(el('div', { class: 'empty', text: 'Comparing needs two releases.' })); return; }
-    const idx = (v) => D.releases.findIndex((r) => r.version === v); // 0 is the newest
-    if (idx(S.to) < 0) { S.to = tagged[0].version; }
-    if (idx(S.from) < 0) { S.from = tagged[1].version; }
-    if (idx(S.from) <= idx(S.to)) { // keep "from" the older one
-        const older = D.releases[idx(S.to) + 1];
-        if (older) { S.from = older.version; } else { S.to = D.releases[idx(S.from) - 1].version; }
-    }
-    const range = D.releases.slice(idx(S.to), idx(S.from)); // newer first, "from" itself left out
-    const inRange = new Set(range.map((r) => r.version));
-    const commits = D.commits.filter((c) => inRange.has(c.release));
-
-    const files = new Map();
-    for (const r of range) {
-        for (const [p, a, d, n] of r.files) {
-            const t = files.get(p) || [p, 0, 0, 0];
-            t[1] += a; t[2] += d; t[3] += n;
-            files.set(p, t);
-        }
-    }
-    const fileList = [...files.values()].sort((a, b) => b[1] + b[2] - a[1] - a[2]);
-    const adds = range.reduce((n, r) => n + r.adds, 0), dels = range.reduce((n, r) => n + r.dels, 0);
-
-    const headings = [];
-    for (const r of range) {
-        for (const s of r.sections) {
-            let h = headings.find((x) => x.heading === s.heading);
-            if (!h) { h = { heading: s.heading, entries: [] }; headings.push(h); }
-            h.entries.push(...s.entries.map((e) => ({ ...e, version: range.length > 1 ? r.version : null })));
-        }
-    }
-    const first = ['Added', 'Changed', 'Fixed'];
-    headings.sort((a, b) => (first.indexOf(a.heading) + 1 || 9) - (first.indexOf(b.heading) + 1 || 9));
-
-    const option = (r, sel) => el('option', { value: r.version, selected: r.version === sel, text: r.version === UNRELEASED ? 'main, not released' : r.version + (r.date ? ', ' + calendarDay(r.date) : '') });
-    const from = el('select', { class: 'field', id: 'compare-from', 'aria-label': 'From version', onchange: (e) => { S.from = e.target.value; if (idx(S.from) <= idx(S.to)) { S.to = D.releases[idx(S.from) - 1].version; } render(); } },
-        D.releases.slice(1).filter((r) => r.tag).map((r) => option(r, S.from)));
-    const to = el('select', { class: 'field', id: 'compare-to', 'aria-label': 'To version', onchange: (e) => { S.to = e.target.value; render(); } },
-        D.releases.map((r) => option(r, S.to)));
-    const fromRel = D.releaseByVersion.get(S.from), toRel = D.releaseByVersion.get(S.to);
-    const base = repoUrl();
-    const whole = base && (toRel.tag || !D.board.unpushed) ? base + '/compare/' + fromRel.tag + '...' + (toRel.tag || 'main') : null;
-
-    view.replaceChildren(
-        el('div', { class: 'section' },
-            strip((r) => r.version === S.to, (r) => inRange.has(r.version) && r.version !== S.to, (r) => {
-                if (idx(r.version) < idx(S.to)) { S.to = r.version; } else if (r.tag) { S.from = r.version; if (idx(S.from) <= idx(S.to)) { S.to = D.releases[idx(S.from) - 1].version; } }
-                render();
-            }),
-            el('div', { class: 'controls' }, el('label', { for: 'compare-from', class: 'muted', text: 'From' }), from, el('label', { for: 'compare-to', class: 'muted', text: 'to' }), to, wrapToggle())),
-        el('div', { class: 'panel' },
-            el('h2', { text: S.from + ' to ' + (S.to === UNRELEASED ? 'main' : S.to) }),
-            el('div', { class: 'figures' },
-                el('span', null, el('b', { text: range.length }), range.length === 1 ? 'release' : 'releases'),
-                el('span', null, el('b', { text: commits.length.toLocaleString('en-US') }), commits.length === 1 ? 'commit' : 'commits'),
-                el('span', null, el('b', { text: fileList.length.toLocaleString('en-US') }), fileList.length === 1 ? 'file touched' : 'files touched'),
-                el('span', null, el('b', { class: 'plus', text: '+' + adds.toLocaleString('en-US') }), 'added'),
-                el('span', null, el('b', { class: 'minus', text: '-' + dels.toLocaleString('en-US') }), 'removed'),
-                whole && el('a', { href: whole, text: 'Whole diff on GitHub' })),
-            el('div', { class: 'chips small' }, el('span', { class: 'muted', text: 'Releases in it:' }), [...range].reverse().map((r) => versionTag(r.version))),
-            el('div', { class: 'muted small', text: 'Lines are summed over every commit, so a line changed twice counts twice.' }),
-            el('div', { class: 'split' },
-                el('div', { class: 'section' }, el('h3', { text: 'What changed for players' }), notesBlock(headings, true)),
-                el('div', { class: 'section' }, el('div', { class: 'controls' }, paneSwitch(commits.length, fileList.length)),
-                    S.pane === 'files' ? fileRows(fileList, range.map((r) => r.version)) : commitList(commits, { filters: true, limit: 80 })))));
-}
-
 // Comments -------------------------------------------------------------------------------------
 
-function renderFeedback() {
-    const q = S.feedbackQuery.trim().toLowerCase();
-    const waiting = D.comments.filter((t) => t.waiting).length;
-    const shown = D.comments.filter((t) => (!S.waitingOnly || t.waiting) && (!q || (t.author + ' ' + t.text).toLowerCase().includes(q)));
-    const search = el('input', { class: 'field', id: 'feedback-search', type: 'search', placeholder: 'Search CurseForge comments', 'aria-label': 'Search CurseForge comments', value: S.feedbackQuery,
-        oninput: (e) => { S.feedbackQuery = e.target.value; const pos = e.target.selectionStart; render(); const again = document.getElementById('feedback-search'); again.focus(); again.setSelectionRange(pos, pos); } });
-    const only = el('button', { class: 'chip', 'aria-pressed': S.waitingOnly ? 'true' : 'false', text: 'No reply seen ' + waiting, onclick: () => { S.waitingOnly = !S.waitingOnly; render(); } });
-    const list = el('div', { class: 'threads' }, shown.map((t) => {
-        const item = t.item && D.itemById.get(t.item);
-        return el('article', { class: 'thread' },
-            el('div', { class: 'who' }, link(authorUrl('curseforge', t.user), t.author, 'name'), el('span', { text: dayYear(t.date) }),
-                t.waiting ? tag('no reply seen', 'ready') : t.reply ? tag('replied', 'version') : null,
-                t.replies ? el('span', { text: count(t.replies, 'reply', 'replies') }) : null,
-                lastVisit && t.last > lastVisit ? tag('new since your last visit', 'ready') : null,
-                item ? el('a', { href: '#item-' + item.id, text: 'On the board' }) : null),
-            inline(t.text, el('div', { class: 'prose' })),
-            t.reply ? inline(t.reply, el('div', { class: 'prose quote' })) : null);
-    }));
-    if (!shown.length) { list.append(el('div', { class: 'empty', text: S.waitingOnly ? 'Every thread shows a reply.' : 'No comment matches.' })); }
+// The work a conversation led to: anything past waiting, or with commits.
+const ledTo = (convo) => convo.items.map((id) => D.itemById.get(id)).filter((i) => i && (i.commits.length || (i.status !== 'open' && i.status !== 'declined')));
+// Someone else's thread with no reply of ours seen and nothing made from it.
+const needsLook = (convo) => !convo.mine && !convo.replied && !ledTo(convo).length;
+
+function threadCard(convo) {
+    const items = convo.items.map((id) => D.itemById.get(id)).filter(Boolean);
+    const led = ledTo(convo);
+    const where = convo.source === 'github' ? 'GitHub #' + convo.number : 'CurseForge';
+    const state = convo.mine ? tag('your post', 'plain')
+        : convo.replied ? tag('replied', 'done') : tag('no reply seen', 'ready');
+    const work = led.length ? tag(led.length === 1 ? 'led to work' : 'led to ' + led.length + ' pieces of work', 'progress')
+        : items.length ? tag('waiting', 'open') : convo.mine ? null : tag('no work', 'open');
+    return el('article', { class: 'thread' + (needsLook(convo) ? ' quiet' : '') },
+        el('div', { class: 'who' }, el('a', { class: 'tag plain', href: convo.url, text: where }), state, work,
+            el('span', { text: 'last ' + day(convo.last) }), isNew(convo.last) ? tag('new since your last visit', 'ready') : null),
+        el('div', { class: 'posts' },
+            post({ user: convo.user, name: convo.author, mine: convo.mine, date: convo.date, text: convo.text }, 'first', convo.source, convo, 5),
+            convo.posts.map((p) => post(p, p.mine ? 'mine' : '', convo.source, null, 3))),
+        items.length ? el('div', { class: 'work-of' }, el('h3', { text: items.length === 1 ? 'The work' : 'The work, ' + items.length + ' pieces' }),
+            itemLines(items, (i) => (i.work ? el('span', { class: 'muted small' }, workLine(i)) : null))) : null);
+}
+
+function renderComments() {
+    const q = S.threadQuery.trim().toLowerCase();
+    const bySource = D.comments.filter((t) => S.threadSource === 'all' || t.source === S.threadSource);
+    const filters = [
+        ['all', 'All', () => true],
+        ['look', 'Need a look', needsLook],
+        ['work', 'Led to work', (t) => ledTo(t).length > 0],
+        ['none', 'No work', (t) => !t.mine && !ledTo(t).length],
+    ];
+    const test = (filters.find((f) => f[0] === S.threadFilter) || filters[0])[2];
+    const shown = bySource.filter((t) => test(t) && (!q || (t.author + ' ' + (t.title || '') + ' ' + t.text + ' ' + t.posts.map((p) => p.text).join(' ')).toLowerCase().includes(q)));
+    const chips = el('div', { class: 'chips', role: 'group', 'aria-label': 'Show' }, filters.map(([id, name, f]) =>
+        el('button', { class: 'chip', 'aria-pressed': S.threadFilter === id ? 'true' : 'false', text: name + ' ' + bySource.filter(f).length, onclick: () => { S.threadFilter = id; render(); } })));
+    const search = el('input', { class: 'field', id: 'thread-search', type: 'search', placeholder: 'Search comments and issues', 'aria-label': 'Search comments and issues', value: S.threadQuery,
+        oninput: (e) => { S.threadQuery = e.target.value; const pos = e.target.selectionStart; render(); const again = document.getElementById('thread-search'); again.focus(); again.setSelectionRange(pos, pos); } });
+    const source = el('select', { class: 'field', id: 'thread-source', 'aria-label': 'Where', onchange: (e) => { S.threadSource = e.target.value; render(); } },
+        [['all', 'CurseForge and GitHub'], ['curseforge', 'CurseForge comments'], ['github', 'GitHub issues']].map(([v, t]) => el('option', { value: v, text: t, selected: S.threadSource === v })));
+    let cap = 40;
+    const list = el('div', { class: 'threads' });
+    const draw = () => {
+        list.replaceChildren(...shown.slice(0, cap).map(threadCard));
+        if (shown.length > cap) { list.append(el('button', { class: 'btn', text: 'Show all ' + shown.length, onclick: () => { cap = Infinity; draw(); } })); }
+        if (!shown.length) { list.append(el('div', { class: 'empty', text: S.threadFilter === 'look' ? 'Every thread has a reply or work.' : 'No conversation matches.' })); }
+    };
+    draw();
     view.replaceChildren(
-        el('div', { class: 'controls' }, search, only, el('a', { href: D.board.curseforge, text: 'Open on CurseForge' })),
-        el('div', { class: 'muted small', text: 'CurseForge threads, newest activity first. Its feed leaves out some replies, so a thread marked "no reply seen" may have one on the site.' }),
+        el('div', { class: 'controls' }, search, source, el('a', { class: 'small', href: D.board.curseforge, text: 'CurseForge comments' })),
+        chips,
+        el('div', { class: 'muted small', text: 'Newest activity first. A thread "needs a look" when no reply of yours is seen and nothing was made from it. CurseForge\'s feed shows only the first reply of each thread, so one marked "no reply seen" may have a reply on the site.' }),
         list);
 }
 
@@ -922,8 +1264,8 @@ function renderStanding() {
     const b = D.board;
     const latest = D.releaseByVersion.get(b.latest);
     const parts = [];
-    if (latest) { parts.push(el('span', null, el('a', { href: '#release-' + slug(b.latest) }, el('b', { text: b.latest })), ' released ' + calendarDay(latest.date))); }
-    parts.push(el('span', null, el('a', { href: '#release-unreleased' }, el('b', { text: b.unreleased }), b.unreleased === 1 ? ' commit since' : ' commits since'), b.unpushed ? ', ' + b.unpushed + ' not pushed' : ''));
+    if (latest) { parts.push(el('span', null, el('a', { href: releaseHash(b.latest) }, el('b', { text: b.latest })), ' released ' + calendarDay(latest.date))); }
+    parts.push(el('span', null, el('a', { href: '#ship' }, el('b', { text: b.unreleased }), b.unreleased === 1 ? ' commit since' : ' commits since'), b.unpushed ? ', ' + b.unpushed + ' not pushed' : ''));
     parts.push(el('span', { text: 'Data from ' + timeFmt.format(new Date(b.generated)) + ' ET' }));
     const stale = Object.entries(b.sources || {}).filter(([, v]) => v !== 'ok').map(([k]) => k);
     if (stale.length) { parts.push(el('span', null, tag((stale.includes('curseforge') ? 'CurseForge' : 'GitHub') + ' could not be read, showing the last copy', 'ready'))); }
@@ -933,8 +1275,11 @@ function renderStanding() {
         base && el('a', { href: base, text: 'GitHub' }), base && el('a', { href: base + '/issues', text: 'Issues' }),
         base && el('a', { href: base + '/releases', text: 'Releases' }), b.curseforge && el('a', { href: b.curseforge, text: 'CurseForge' }),
     ].filter(Boolean));
-    const live = b.items.filter((i) => i.status === 'open' || i.status === 'progress' || i.status === 'ready').length;
-    const counts = { board: live, changes: b.unreleased };
+    const counts = {
+        work: b.items.filter((i) => ['open', 'progress', 'ready'].includes(i.status)).length,
+        ship: b.unreleased,
+        comments: D.comments.filter(needsLook).length,
+    };
     for (const [id, n] of Object.entries(counts)) {
         const tab = document.getElementById('tab-' + id);
         tab.querySelector('.count')?.remove();
@@ -944,26 +1289,29 @@ function renderStanding() {
 
 function render() {
     for (const tab of document.querySelectorAll('.tab')) { tab.setAttribute('aria-selected', tab.dataset.view === S.view ? 'true' : 'false'); }
-    ({ board: renderBoard, changes: renderChanges, compare: renderCompare, feedback: renderFeedback })[S.view]();
+    ({ work: renderWork, ship: renderShip, releases: renderReleases, comments: renderComments })[S.view]();
 }
 
 function route() {
-    const name = location.hash.slice(1);
+    let name = location.hash.slice(1);
     if (!D.board) { return; }
     if (name.startsWith('item-')) {
         const item = D.itemById.get(name.slice(5));
         if (item) { if (!view.dataset.drawn) { render(); view.dataset.drawn = '1'; } openItem(item); return; }
     }
     closeItem();
+    name = ALIAS[name] || name;
+    const before = S.view + S.release;
     if (name.startsWith('release-') && D.releaseBySlug.has(name.slice(8))) {
-        S.view = 'changes';
-        S.release = D.releaseBySlug.get(name.slice(8));
+        S.view = 'releases';
+        if (S.release !== D.releaseBySlug.get(name.slice(8))) { S.release = D.releaseBySlug.get(name.slice(8)); S.compareFrom = ''; S.pane = 'together'; }
     } else if (VIEWS.includes(name)) {
+        if (name !== S.view) { S.pane = 'together'; }
         S.view = name;
     }
     view.dataset.drawn = '1';
     render();
-    if (name.startsWith('release-')) { window.scrollTo(0, 0); }
+    if (before !== S.view + S.release) { window.scrollTo(0, 0); }
 }
 for (const tab of document.querySelectorAll('.tab')) {
     tab.addEventListener('click', () => { if (location.hash.slice(1) === tab.dataset.view) { route(); } else { location.hash = tab.dataset.view; } });
@@ -971,14 +1319,13 @@ for (const tab of document.querySelectorAll('.tab')) {
 window.addEventListener('hashchange', route);
 if (window.matchMedia('(max-width: 720px)').matches) { app.classList.add('wraplines'); }
 
-const get = (name) => fetch('data/' + name).then((r) => { if (!r.ok) { throw new Error(name); } return r.json(); });
-Promise.all([get('board.json'), get('commits.json'), get('releases.json'), get('comments.json')]).then(([board, commits, releases, comments]) => {
+Promise.all(['board.json', 'commits.json', 'releases.json', 'comments.json'].map(load)).then(([board, commits, releases, comments]) => {
     Object.assign(D, { board, commits, releases, comments });
     D.commitBySha = new Map(commits.map((c) => [c.sha, c]));
     D.releaseByVersion = new Map(releases.map((r) => [r.version, r]));
     D.releaseBySlug = new Map(releases.map((r) => [slug(r.version), r.version]));
     D.itemById = new Map(board.items.map((i) => [i.id, i]));
-    D.itemByNumber = new Map(board.items.filter((i) => i.number).map((i) => [i.number, i]));
+    D.convoById = new Map(comments.map((c) => [c.id, c]));
     renderStanding();
     route();
 }).catch(() => {
