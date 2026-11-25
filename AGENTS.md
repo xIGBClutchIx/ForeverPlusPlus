@@ -48,6 +48,7 @@ There is no build step or library folder. Plain Lua, loaded straight from the TO
 | `docs/table-survey.md` | What the client's tables hold for data kept by hand, for one build (`tools/datagen/survey.lua`). |
 | `tests/` | Offline tests (see Verification and `tests/README.md`). |
 | `tools/datagen/` | Generates data files from the client's database tables (see Generated data). Not shipped. |
+| `tools/board/` | The Forever++ Board, a private Claude artifact: `index.html` is its page, and `build.mjs` (Node) writes its data from git, `CHANGELOG.md`, GitHub, and CurseForge into `out/`, which git ignores. Its header says how to run and publish it. Not shipped. |
 | `.github/workflows/check.yml` | CI and releases (see Releases). |
 | `.github/workflows/table-data.yml` | Regenerates the table data for a new game build and opens a pull request. |
 | `.github/ISSUE_TEMPLATE/` | The bug report and feature request forms. |
