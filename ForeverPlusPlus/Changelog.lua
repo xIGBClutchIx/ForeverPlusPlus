@@ -10,6 +10,19 @@ local L = ns.L
 
 ns.changelog = {
     {
+        version = L.CHANGELOG_UNRELEASED,
+        sections = {
+            { L.CHANGELOG_FIXED, {
+                { L.AUTOOPEN_TITLE, "A right click in the bags works with the Baganator and GW2 UI "
+                    .. "addons' bags too, so Pick Lock no longer says \"Item is locked\" there." },
+                { L.COMPREHENDSCROLLS_TITLE, "A right click on a scroll works with the Baganator and "
+                    .. "GW2 UI addons' bags too." },
+                { L.AUTOWEAPONBUFF_TITLE, "A right click in the bags works with the Baganator and GW2 "
+                    .. "UI addons' bags too." },
+            } },
+        },
+    },
+    {
         version = "1.9.0", date = "2026-11-24",
         sections = {
             { L.CHANGELOG_ADDED, {

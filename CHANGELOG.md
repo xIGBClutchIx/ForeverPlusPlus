@@ -2,6 +2,12 @@
 
 What changed in each release of Forever++. The same notes show in game under Settings > AddOns > Forever++ > Changelog, from [`ForeverPlusPlus/Changelog.lua`](ForeverPlusPlus/Changelog.lua); change both together.
 
+## Unreleased
+
+### Fixed
+
+- **Auto Open Containers**, **Comprehend Scrolls**, and **Auto Weapon Buff**: a right click in the bags works with the Baganator and GW2 UI addons' bags too, so Pick Lock no longer says "Item is locked" there.
+
 ## 1.9.0 (2026-11-24)
 
 ### Added

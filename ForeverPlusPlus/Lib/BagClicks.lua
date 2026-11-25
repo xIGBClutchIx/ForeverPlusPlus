@@ -5,8 +5,10 @@
 -- ADDON_ACTION_FORBIDDEN there), so this lays an invisible secure button over each matching item.
 -- Its right-click does what the module's attributes say; every other click, drag, and the tooltip
 -- go through to the bag slot as before. Secure buttons can't be placed in combat, so the overlays
--- leave when combat starts and the bags work as Blizzard's until it ends. Bag addons that replace
--- Blizzard's bags get no overlays: only a bag that is on screen does.
+-- leave when combat starts and the bags work as Blizzard's until it ends. Only a bag that is on
+-- screen gets overlays: Blizzard's, or a bag addon's whose buttons Lib/BagAddons.lua knows
+-- (Baganator, GW2 UI). The overlays are ours, on UIParent, never children of the other addon's
+-- frames, so its windows stay free to hide in combat and nothing of its own is changed.
 local _, ns = ...
 
 local C_Container = C_Container
@@ -28,10 +30,11 @@ local function busy()
             return true
         end
     end
-    return false
+    return ns.BagAddons.BankShown()
 end
 
-local ABOVE = { BACKGROUND = "LOW", LOW = "MEDIUM", MEDIUM = "HIGH", HIGH = "DIALOG" }
+local ABOVE = { BACKGROUND = "LOW", LOW = "MEDIUM", MEDIUM = "HIGH", HIGH = "DIALOG", DIALOG = "FULLSCREEN",
+    FULLSCREEN = "FULLSCREEN_DIALOG" }
 
 local info = {} -- overlay -> { set, bag, slot, button, value, handled }
 
@@ -42,7 +45,14 @@ local function onPreClick(self, mouseButton, down)
     local handled = false
     if not InCombatLockdown() then
         self:SetAttribute("type2", nil)
-        if mouseButton == "RightButton" and not IsModifierKeyDown() and not busy() then
+        -- A bag addon may have shown another slot on the button since the overlay was laid
+        -- (Baganator lays its views out again with the same buttons): then it's only a click on
+        -- that button, and the overlays are laid again.
+        local button = data.button
+        local moved = button.GetBagID and (button:GetBagID() ~= data.bag or button:GetID() ~= data.slot)
+        if moved then
+            data.set:Refresh()
+        elseif mouseButton == "RightButton" and not IsModifierKeyDown() and not busy() then
             handled = data.set.click(self, data.value, data.bag, data.slot, down) and true or false
         end
     end
@@ -162,6 +172,13 @@ function Set:Update()
             end
         end
     end
+    ns.BagAddons.EachButton(function(button, bag, slot, bank)
+        local itemID = not bank and C_Container.GetContainerItemID(bag, slot)
+        local value = itemID and match(itemID, bag, slot)
+        if value then
+            self:Place(button, bag, slot, value)
+        end
+    end)
 end
 
 ---Updates the overlays on the next frame, once however many times it's called before then (bags
@@ -179,6 +196,7 @@ function Set:Enable()
         module:HookScript(frame, "OnShow", refresh)
         module:HookScript(frame, "OnHide", refresh)
     end
+    ns.BagAddons.Watch(module, refresh)
     module:On("BAG_UPDATE_DELAYED", refresh)
     module:On("PLAYER_REGEN_ENABLED", refresh)
     -- Fires just before combat lockdown starts, the last moment secure buttons can move.
@@ -216,7 +234,7 @@ function BagClicks.New(module, match, click, wanted)
     return set
 end
 
----Whether Blizzard's bags are there to lay overlays on.
+---Whether Blizzard's bags are there to lay overlays on (a bag addon's buttons get them too).
 ---@return boolean
 function BagClicks.IsAvailable()
     return C_Container and C_Container.GetContainerItemID and C_Container.PickupContainerItem

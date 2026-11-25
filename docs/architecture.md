@@ -185,7 +185,12 @@ Generated files, in `Lib/Generated/` (never edited by hand; see Generated data):
 
 ### `BagClicks.lua`
 
-- `ns.BagClicks`: secure overlays on items in Blizzard's bags whose right-click uses an item or casts a spell on it, out of combat.
+- `ns.BagClicks`: secure overlays on items in Blizzard's bags, and a bag addon's (`BagAddons`), whose right-click uses an item or casts a spell on it, out of combat. The overlays sit on UIParent, never in the other addon's frames. A click on an overlay whose button shows another slot by now (Baganator lays its views out again with the same buttons) goes to the button, and the overlays are laid again.
+
+### `BagAddons.lua`
+
+- `ns.BagAddons`: the item buttons of bag addons that replace Blizzard's bags, Baganator and GW2 UI, for `BagClicks` and `ItemButtons`. Both make the player's live bag buttons from `ContainerFrameItemButtonTemplate`, so each says its bag and slot.
+- `Loaded()` says whether one is there; `EachButton(fn)` calls `fn(button, bag, slot, bank)` for each such button on screen (not ones showing another character's bags, nor bag slots); `BankShown()` says whether its bank window is open; `Watch(module, fn)` calls `fn` while the module is on when their windows show or hide, a Baganator view is laid out (`ViewComplete`), and on BAG_UPDATE_DELAYED. Baganator is read through `Baganator.API.Skins.GetAllFrames`, GW2 UI through `GW2_ADDON.ForEachOwnBagItemButton`; neither has an API for this, so nothing of theirs is changed or hooked but their windows' OnShow and OnHide. What we know of both, with sources, is in [forever-api.md](forever-api.md#bags-and-the-bank).
 
 ### `Prices.lua`
 

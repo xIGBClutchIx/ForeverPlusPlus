@@ -146,7 +146,8 @@ One line here says what each file is for. [docs/architecture.md](docs/architectu
 | `ItemTooltip.lua` | `ItemTooltip` | Our lines on item tooltips, kept together at the sell price (`OnInfo`, `OnPrices`, `AddInfo`, `AddPrice`). |
 | `Bags.lua` | `Bags` | Walking every slot of the player's bags (`Each`), the free slots, and which bag is the reagent bag. |
 | `ItemButtons.lua` | `ItemButtons` | The item buttons in bags, bank, merchant, auction house, loot, and rolls, our marks on them, one walk over all of those for a module that marks items (`Walk`), and the options every mark shares. |
-| `BagClicks.lua` | `BagClicks` | Secure overlays on bag items whose right-click uses an item or casts on it. |
+| `BagClicks.lua` | `BagClicks` | Secure overlays on bag items whose right-click uses an item or casts on it, in Blizzard's bags and a bag addon's. |
+| `BagAddons.lua` | `BagAddons` | The item buttons of the bag addons that replace Blizzard's bags (Baganator, GW2 UI), and when they redraw (`EachButton`, `Watch`). |
 | `ItemStats.lua` | `ItemStats` | An item's stats in short keys, and a stat weight score. |
 | `Equipment.lua` | `Equipment` | Slots, what's worn, whether the character can use an item, and what an item would replace. |
 | `Durability.lua` | `Durability` | How whole each equipped item is, and when a drop should warn. |
