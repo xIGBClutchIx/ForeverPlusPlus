@@ -96,22 +96,27 @@ select.field { max-width: 100%; }
 .callout b { font-weight: 600; }
 .callout.calm { border-left-color: var(--dot-shipped); }
 
-/* Work: where everything stands, then the columns */
-.stages { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
-.stage { background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--dot); border-radius: var(--radius); padding: 8px 12px 10px; text-align: left; display: flex; flex-direction: column; gap: 1px; min-width: 0; min-height: 44px; }
-.stage:hover { border-color: var(--ink-3); border-top-color: var(--dot); }
-.stage b { font: 600 22px/1.15 var(--font-display); font-variant-numeric: tabular-nums; }
-.stage span { font-weight: 600; font-size: 13.5px; }
-.stage small { color: var(--ink-3); font-size: 12px; }
-.stage[aria-pressed="true"] { background: var(--surface-2); border-color: var(--ink-3); border-top-color: var(--dot); }
+/* Work: what to do next, then the columns. A column's head says how much is in it; on a phone the
+   heads give way to a row of four buttons that pick the one column shown. */
+.todo { gap: 8px; }
+.todo ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.todo li { display: grid; grid-template-columns: 8px minmax(0, 1fr); gap: 0 10px; align-items: baseline; overflow-wrap: anywhere; }
+.todo li::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--dot); transform: translateY(-1px); }
 [data-stage="open"] { --dot: var(--dot-open); } [data-stage="progress"] { --dot: var(--dot-progress); }
 [data-stage="local"] { --dot: var(--dot-local); } [data-stage="pushed"], [data-stage="ready"] { --dot: var(--dot-ready); }
 [data-stage="shipped"] { --dot: var(--dot-shipped); }
+.picker { display: none; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.pick { background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--dot); border-radius: var(--radius); padding: 6px 8px 8px; text-align: left; display: flex; flex-direction: column; gap: 2px; min-width: 0; min-height: 60px; }
+.pick b { font: 600 20px/1.15 var(--font-display); font-variant-numeric: tabular-nums; }
+.pick span { font-size: 12px; font-weight: 600; line-height: 1.25; color: var(--ink-2); }
+.pick[aria-pressed="true"] { background: var(--surface-2); border-color: var(--ink-3); border-top-color: var(--dot); }
+.pick[aria-pressed="true"] span { color: var(--ink); }
 .cols { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; align-items: start; }
-.col { display: flex; flex-direction: column; gap: 8px; min-width: 0; scroll-margin-top: 60px; }
-.col-head { display: flex; align-items: baseline; gap: 8px; padding: 2px 2px 6px; border-bottom: 2px solid var(--dot); }
+.col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.col-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; padding: 0 2px 8px; border-bottom: 2px solid var(--dot); }
+.col-head .n { font: 600 22px/1 var(--font-display); font-variant-numeric: tabular-nums; }
 .col-head h2 { font-size: 15px; }
-.col-head .n { color: var(--ink-3); font-size: 13px; font-variant-numeric: tabular-nums; }
+.col-head small { color: var(--ink-3); font-size: 12.5px; margin-left: auto; }
 .group { font: 600 12px/1.3 var(--font-mono); padding: 8px 2px 0; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
 .card { display: flex; flex-direction: column; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; cursor: pointer; min-width: 0; }
 .card:hover { border-color: var(--accent); }
@@ -126,13 +131,20 @@ select.field { max-width: 100%; }
 .iline + .iline { border-top: 1px solid var(--line); }
 .iline .t { flex: 1 1 240px; min-width: 0; overflow-wrap: anywhere; }
 .iline .t a { color: var(--ink); font-weight: 500; }
-.steps { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; counter-reset: step; }
-.steps li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 2px 10px; align-items: baseline; font-size: 14px; }
-.steps li::before { counter-increment: step; content: counter(step); display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--dot-ready); color: var(--ink); font-size: 12px; font-weight: 600; }
-.steps li.done::before { border-color: var(--dot-shipped); background: var(--tint-green); }
-.steps li.done > div > b { color: var(--ink-2); font-weight: 500; }
+.items.tight .iline { padding: 8px 10px; }
+.items.tight .iline .t { flex-basis: 150px; font-size: 14px; line-height: 1.35; }
+/* The steps to ship: done ones are ticked and quiet, the first one left stands out. */
+.steps { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; counter-reset: step; }
+.steps li { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 2px 10px; align-items: baseline; font-size: 14px; }
+.steps li::before { counter-increment: step; content: counter(step); display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line); color: var(--ink-2); font-size: 12px; font-weight: 600; }
+.steps li > div > b { font-weight: 500; }
+.steps li.done::before { content: "\2713"; border-color: var(--dot-shipped); background: var(--tint-green); color: var(--ink); }
+.steps li.done > div > b { color: var(--ink-3); font-weight: 400; }
+.steps li.now::before { border-color: var(--gold); background: var(--gold); color: var(--accent-ink); }
+.steps li.now > div > b { font-weight: 600; }
 .steps li > div { min-width: 0; overflow-wrap: anywhere; }
 .steps li .muted { display: block; font-size: 13px; }
+.steps code { font: 0.92em var(--font-mono); background: var(--surface-2); color: var(--ink); padding: 2px 6px; border-radius: 4px; user-select: all; }
 
 /* Release notes */
 .notes { display: flex; flex-direction: column; gap: 12px; }
@@ -228,14 +240,19 @@ table.diff { border-collapse: collapse; width: 100%; font: 12.5px/1.5 var(--font
 /* An item's sheet */
 dialog.sheet { margin: 0 0 0 auto; height: 100dvh; max-height: 100dvh; width: min(920px, 100vw); max-width: 100vw; border: 0; border-left: 1px solid var(--line); padding: 0; background: var(--bg); color: var(--ink); }
 dialog.sheet::backdrop { background: rgba(0, 0, 0, 0.6); }
-.sheet-in { display: flex; flex-direction: column; gap: 20px; padding: calc(16px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(40px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
-.sheet-top { display: flex; gap: 12px; align-items: flex-start; }
-.sheet-top h2 { flex: 1 1 auto; min-width: 0; font-size: 21px; overflow-wrap: anywhere; }
+.sheet-in { display: flex; flex-direction: column; gap: 18px; padding: 0 max(16px, env(safe-area-inset-right, 0px)) calc(40px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.fb .sheet-in:focus-visible { outline: none; }
+/* Stays at the top while the sheet scrolls, so Close is always in reach. */
+.sheet-bar { position: sticky; top: 0; z-index: 2; background: var(--bg); border-bottom: 1px solid var(--line); display: flex; gap: 8px; align-items: center; padding: calc(10px + env(safe-area-inset-top, 0px)) 0 10px; }
+.sheet-bar .chips { flex: 1 1 auto; min-width: 0; }
+.sheet-in h2 { font-size: 21px; overflow-wrap: anywhere; }
+.sheet-in .section { scroll-margin-top: 92px; }
+.links { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 14px; align-items: baseline; }
 .track { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
-.step { border-top: 3px solid var(--line); padding-top: 6px; font-size: 12.5px; color: var(--ink-3); min-width: 0; overflow-wrap: anywhere; }
+.step { border: 0 solid var(--line); border-top-width: 3px; padding-top: 6px; font-size: 12.5px; color: var(--ink-3); min-width: 0; overflow-wrap: anywhere; }
 .step b { display: block; color: var(--ink-2); font-weight: 600; font-size: 13px; }
-.step.done { border-top-color: var(--dot-shipped); } .step.done b { color: var(--ink); }
-.step.now { border-top-color: var(--dot-ready); } .step.now b { color: var(--ink); }
+.step.done { border-color: var(--dot-shipped); } .step.done b { color: var(--ink); }
+.step.now { border-color: var(--dot-ready); } .step.now b { color: var(--ink); }
 
 @media (max-width: 900px) {
     .split, .rel-layout { grid-template-columns: minmax(0, 1fr); }
@@ -245,13 +262,21 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, 0.6); }
     .cols[data-show] .col { display: none; }
     .cols[data-show="open"] .col[data-col="open"], .cols[data-show="progress"] .col[data-col="progress"],
     .cols[data-show="ready"] .col[data-col="ready"], .cols[data-show="shipped"] .col[data-col="shipped"] { display: flex; }
-    .stages { display: flex; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
-    .stages::-webkit-scrollbar { display: none; }
-    .stage { flex: 0 0 132px; }
+    .picker { display: grid; }
+    .col-head { display: none; }
     .places { margin-left: 0; }
 }
 @media (max-width: 560px) {
-    .top h1 { font-size: 22px; }
+    .top { padding-block: 14px 6px; gap: 4px 14px; }
+    .top h1 { font-size: 22px; flex-basis: 100%; }
+    .standing, .places { font-size: 13px; gap: 2px 12px; }
+    .tabs { gap: 0; justify-content: space-between; }
+    .tab { padding-inline: 6px; font-size: 14px; }
+    .tab .count { margin-left: 4px; }
+    .controls input.field { flex-basis: 100%; }
+    .controls select.field { flex: 1 1 120px; }
+    .track { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    .step { border-top-width: 0; border-left-width: 3px; padding: 3px 0 3px 10px; display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 0 8px; align-items: baseline; }
     .panel { padding: 12px; }
     .thread { padding: 12px; }
     .commit-row { grid-template-columns: minmax(0, 1fr); padding-right: 0; }
@@ -267,9 +292,8 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, 0.6); }
     .diff td.ln.old { display: none; }
     .frow { grid-template-columns: minmax(0, 1fr) 30px 50px 50px; padding: 8px; }
     dialog.sheet { border-left: 0; }
-    .track { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 4px; }
 }
-@media (prefers-reduced-motion: no-preference) { .card, .chip, .btn, .stage { transition: border-color 0.12s; } }
+@media (prefers-reduced-motion: no-preference) { .card, .chip, .btn, .pick { transition: border-color 0.12s; } }
 </style>
 
 <div class="fb" id="app">
@@ -287,7 +311,7 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, 0.6); }
         </nav>
     </div>
     <main class="wrap" id="view"><div class="empty">Loading the board: every request and report by where it stands, what the next release would hold, the releases, and the comments the work came from.</div></main>
-    <dialog class="sheet" id="sheet" aria-label="Request"><div class="sheet-in fb" id="sheet-in"></div></dialog>
+    <dialog class="sheet" id="sheet" aria-label="Request"><div class="sheet-in fb" id="sheet-in" tabindex="-1" autofocus></div></dialog>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -299,18 +323,14 @@ const UNRELEASED = 'Unreleased', WIP = 'In progress';
 const VIEWS = ['work', 'ship', 'releases', 'comments'];
 // Old links keep working.
 const ALIAS = { board: 'work', changes: 'releases', compare: 'releases', feedback: 'comments', 'release-unreleased': 'ship' };
-// Where a piece of work stands, in the order it moves.
-const STAGES = [
-    { id: 'open', name: 'Waiting', hint: 'Nothing made yet', col: 'open' },
-    { id: 'progress', name: 'In progress', hint: 'On a branch', col: 'progress' },
-    { id: 'local', name: 'Not pushed', hint: 'On main, only here', col: 'ready' },
-    { id: 'pushed', name: 'Not released', hint: 'Pushed, not tagged', col: 'ready' },
-    { id: 'shipped', name: 'Released', hint: 'In a release', col: 'shipped' },
-];
+// Where a piece of work stands, in the order it moves. `short` is the name on a phone's picker.
 const COLS = [
-    { id: 'open', name: 'Waiting' }, { id: 'progress', name: 'In progress' },
-    { id: 'ready', name: 'Next release' }, { id: 'shipped', name: 'Released' },
+    { id: 'open', name: 'Waiting', hint: 'Nothing made yet' },
+    { id: 'progress', name: 'In progress', hint: 'On a branch' },
+    { id: 'ready', name: 'Next release', short: 'Unreleased', hint: 'On main, not tagged' },
+    { id: 'shipped', name: 'Released', hint: 'In a release' },
 ];
+const COL_OF = { open: 'open', progress: 'progress', local: 'ready', pushed: 'ready', shipped: 'shipped' };
 const KIND = { bug: 'Bug', request: 'Request', issue: 'Issue', pull: 'Pull request' };
 const app = document.getElementById('app');
 const view = document.getElementById('view');
@@ -321,7 +341,7 @@ const D = { files: new Map() };
 const S = {
     view: 'work', boardQuery: '', boardSource: 'all', boardKind: 'all', boardCol: null, shippedAll: false,
     release: null, compareFrom: '', comparePane: 'files', pane: 'together', itemPane: 'together', types: new Set(), scope: '', commitQuery: '',
-    threadFilter: 'all', threadSource: 'all', threadQuery: '',
+    threadFilter: null, threadSource: 'all', threadQuery: '',
 };
 
 // When this viewer last opened the board, to mark what moved since. Only a convenience.
@@ -385,9 +405,10 @@ function versionTag(version) {
     return el('a', { class: 'tag version', href: releaseHash(version), text: version, onclick: stop });
 }
 
-// Text with `code`, **bold**, links, and #12 as a link to that request.
+// Text with `code`, **bold**, links, #12 as a link to that request, and a "## heading" line (an
+// issue form's questions) in bold without its marks.
 function inline(text, into) {
-    const re = /`([^`\n]+)`|\*\*([^*\n]+)\*\*|\[([^\]\n]+)\]\((https:\/\/[^)\s]+)\)|(https:\/\/[^\s<>)\]"']+)|#(\d+)\b/g;
+    const re = /`([^`\n]+)`|\*\*([^*\n]+)\*\*|\[([^\]\n]+)\]\((https:\/\/[^)\s]+)\)|(https:\/\/[^\s<>)\]"']+)|#(\d+)\b|^#{1,6} +([^\n]+)$/gm;
     let at = 0, m;
     while ((m = re.exec(text))) {
         if (m.index > at) { into.append(text.slice(at, m.index)); }
@@ -395,6 +416,7 @@ function inline(text, into) {
         else if (m[2] != null) { into.append(el('strong', { text: m[2] })); }
         else if (m[3] != null) { into.append(el('a', { href: m[4], text: m[3].replace(/`/g, '') })); }
         else if (m[5] != null) { into.append(el('a', { href: m[5], text: m[5] })); }
+        else if (m[7] != null) { into.append(el('strong', { text: m[7] })); }
         else if (D.itemById.has('gh-' + m[6])) { into.append(el('a', { href: '#item-gh-' + m[6], text: '#' + m[6] })); }
         else if (repoUrl()) { into.append(el('a', { href: repoUrl() + '/issues/' + m[6], text: '#' + m[6] })); }
         else { into.append(m[0]); }
@@ -525,11 +547,25 @@ function nextStep(item) {
     }
 }
 
+// What a card or line adds to its column's own name: the branch, and what is owed to the person
+// who asked.
+function flags(item) {
+    const convo = convoOf(item);
+    const stage = stageOf(item);
+    return [
+        stage === 'progress' && tag(item.branch || 'on a branch', 'progress'),
+        stage === 'open' && convo && !convo.mine && !convo.replied && tag('no reply seen', 'ready'),
+        stage === 'declined' && stageTag(item),
+        owed(item) && tag('owed a reply', 'local'),
+        isNew(item.updated) && tag('new', 'ready'),
+    ];
+}
+
 function card(item) {
     const convo = convoOf(item);
     const siblings = convo ? convo.items.length : 0;
     return el('article', { class: 'card', onclick: (e) => { if (!e.target.closest('a')) { location.hash = 'item-' + item.id; } } },
-        el('div', { class: 'row' }, sourceTag(item), kindTag(item), stageTag(item), isNew(item.updated) && tag('new since your last visit', 'ready')),
+        el('div', { class: 'row' }, sourceTag(item), kindTag(item), flags(item)),
         el('a', { class: 'title', href: '#item-' + item.id, text: item.title }),
         el('div', { class: 'foot' }, link(authorUrl(item.source, item.author), item.author, null), el('span', { text: day(item.opened) }),
             item.work ? el('span', null, workLine(item)) : null,
@@ -544,41 +580,46 @@ function filteredItems() {
         && (!q || (i.title + ' ' + i.author + ' ' + (i.number || '') + ' ' + (i.branch || '') + ' ' + ((convoOf(i) || {}).text || '')).toLowerCase().includes(q)));
 }
 
-// The banner that says what to do next with the project as a whole.
+// What to do next with the project as a whole, most pressing first: people waiting on a word,
+// work waiting on a review, then what is left to push, release, and tell.
 function projectStep() {
     const b = D.board;
-    const items = b.items;
-    const progress = items.filter((i) => i.status === 'progress');
-    const ready = items.filter((i) => i.status === 'ready');
-    const parts = [];
-    if (b.unpushed) { parts.push([el('b', { text: count(b.unpushed, 'commit') + ' on main not pushed.' }), ' Push main so the next release can go out.']); }
-    else if (b.unreleased) { parts.push([el('b', { text: count(b.unreleased, 'commit') + ' since ' + b.latest + ', all pushed.' }), ' Ready to tag when you are.']); }
-    if (progress.length) { parts.push([count(progress.length, 'request') + ' on a branch, waiting for review: ', progress.map((i, n) => [n ? ', ' : '', el('a', { href: '#item-' + i.id, text: i.branch || i.title })])]); }
-    if (!parts.length) { return el('div', { class: 'callout calm' }, el('div', { text: 'Everything made is released. Nothing is waiting on main or a branch.' })); }
-    return el('div', { class: 'callout' }, parts.map((p) => el('div', null, p)),
-        (b.unreleased || ready.length) ? el('div', { class: 'small' }, el('a', { href: '#ship', text: 'See the next release and the steps to ship it' })) : null);
+    const progress = b.items.filter((i) => i.status === 'progress');
+    const look = D.comments.filter(needsLook);
+    const owedList = b.items.filter(owed);
+    const rows = [];
+    const row = (stage, lead, ...rest) => rows.push(el('li', { 'data-stage': stage }, el('div', null, el('b', { text: lead }), ' ', rest)));
+    const names = (list, text) => list.map((i, n) => [n ? ', ' : '', el('a', { href: '#item-' + i.id, text: text(i) })]);
+    if (look.length) {
+        row('open', count(look.length, 'conversation') + ' with no reply and no work.',
+            el('a', { href: '#comments', text: look.length === 1 ? 'Read it' : 'Read them', onclick: () => { S.threadFilter = 'look'; } }));
+    }
+    if (progress.length) { row('progress', count(progress.length, 'branch', 'branches') + ' to review and merge:', names(progress, (i) => i.branch || i.title)); }
+    if (b.unpushed) { row('local', count(b.unpushed, 'commit') + ' on main not pushed.', 'Push main, then release. ', el('a', { href: '#ship', text: 'Steps to ship' })); }
+    else if (b.unreleased) { row('ready', count(b.unreleased, 'commit') + ' since ' + b.latest + ', all pushed.', 'Ready to tag. ', el('a', { href: '#ship', text: 'Steps to ship' })); }
+    if (owedList.length) { row('shipped', count(owedList.length, 'released request') + ' with no word back to:', names(owedList, (i) => i.author || i.title)); }
+    if (!rows.length) { return el('div', { class: 'callout calm' }, el('div', { text: 'Nothing to do: everything made is released, and everyone heard back.' })); }
+    return el('div', { class: 'callout todo' }, el('h3', { text: 'What to do next' }), el('ul', null, rows));
 }
 
 function renderWork() {
     const items = filteredItems();
     const by = (stage) => items.filter((i) => stageOf(i) === stage);
-    if (!S.boardCol) { S.boardCol = (COLS.find((c) => c.id !== 'shipped' && items.some((i) => STAGES.find((s) => s.id === stageOf(i))?.col === c.id)) || COLS[3]).id; }
+    const inCol = (id) => items.filter((i) => COL_OF[stageOf(i)] === id);
+    if (!S.boardCol) { S.boardCol = (COLS.find((c) => c.id !== 'shipped' && inCol(c.id).length) || COLS[3]).id; }
 
     const cols = el('div', { class: 'cols', 'data-show': S.boardCol });
-    const tiles = el('div', { class: 'stages', role: 'group', 'aria-label': 'Where the work stands' });
-    for (const s of STAGES) {
-        const n = by(s.id).length;
-        tiles.append(el('button', { class: 'stage', 'data-stage': s.id, 'data-col': s.col, 'aria-pressed': S.boardCol === s.col ? 'true' : 'false',
-            onclick: () => {
-                S.boardCol = s.col; cols.dataset.show = s.col;
-                for (const t of tiles.children) { t.setAttribute('aria-pressed', t.dataset.col === s.col ? 'true' : 'false'); }
-                if (!window.matchMedia('(max-width: 900px)').matches) { document.getElementById('col-' + s.col).scrollIntoView({ block: 'start', behavior: 'smooth' }); }
-            } }, el('b', { text: n }), el('span', { text: s.name }), el('small', { text: s.hint })));
-    }
+    const picker = el('div', { class: 'picker', role: 'group', 'aria-label': 'Which stage to show' });
     for (const c of COLS) {
-        const list = items.filter((i) => STAGES.find((s) => s.id === stageOf(i))?.col === c.id);
-        const col = el('section', { class: 'col', 'data-col': c.id, 'data-stage': c.id, id: 'col-' + c.id },
-            el('div', { class: 'col-head' }, el('h2', { text: c.name }), el('span', { class: 'n', text: list.length })));
+        const list = inCol(c.id);
+        picker.append(el('button', { class: 'pick', 'data-stage': c.id, 'aria-pressed': S.boardCol === c.id ? 'true' : 'false',
+            onclick: (e) => {
+                S.boardCol = c.id; cols.dataset.show = c.id;
+                for (const t of picker.children) { t.setAttribute('aria-pressed', t === e.currentTarget ? 'true' : 'false'); }
+            } }, el('b', { text: list.length }), el('span', { text: c.short || c.name })));
+        const col = el('section', { class: 'col', 'data-col': c.id, 'data-stage': c.id },
+            el('div', { class: 'col-head' }, el('span', { class: 'n', text: list.length }), el('h2', { text: c.name }),
+                c.id === 'ready' && D.board.unreleased ? el('small', null, el('a', { href: '#ship', text: 'Steps to ship' })) : el('small', { text: c.hint })));
         if (!list.length) {
             col.append(el('div', { class: 'empty', text: {
                 open: 'Nothing waiting.', progress: 'Nothing on a branch right now.',
@@ -593,18 +634,22 @@ function renderWork() {
         } else if (c.id === 'shipped') {
             const order = D.releases.map((r) => r.version);
             const sorted = [...list].sort((a, b) => (order.indexOf(a.version || '') - order.indexOf(b.version || '')) || (a.opened < b.opened ? 1 : -1));
-            const cap = S.shippedAll ? sorted.length : 12;
-            let last = null;
+            // What is released is history: a line each, by release, the newest few until asked.
+            const cap = S.shippedAll ? sorted.length : 15;
+            let last = null, group = [];
+            const flush = () => { if (group.length) { col.append(itemLines(group, flags, 'tight')); group = []; } };
             for (const item of sorted.slice(0, cap)) {
                 const v = item.version || 'Closed as done';
                 if (v !== last) {
+                    flush();
                     const r = D.releaseByVersion.get(v);
                     col.append(el('div', { class: 'group' }, r ? el('a', { href: releaseHash(v), text: v }) : v,
                         r && r.date ? el('span', { class: 'muted', text: calendarDay(r.date) }) : null));
                     last = v;
                 }
-                col.append(card(item));
+                group.push(item);
             }
+            flush();
             if (sorted.length > cap) {
                 col.append(el('button', { class: 'btn', text: 'Show all ' + sorted.length, onclick: () => { S.shippedAll = true; render(); } }));
             }
@@ -615,12 +660,12 @@ function renderWork() {
     }
 
     const source = el('select', { class: 'field', id: 'board-source', 'aria-label': 'Where it was reported', onchange: (e) => { S.boardSource = e.target.value; render(); } },
-        [['all', 'GitHub and CurseForge'], ['github', 'GitHub'], ['curseforge', 'CurseForge']].map(([v, t]) => el('option', { value: v, text: t, selected: S.boardSource === v })));
+        [['all', 'Any source'], ['github', 'GitHub'], ['curseforge', 'CurseForge']].map(([v, t]) => el('option', { value: v, text: t, selected: S.boardSource === v })));
     const kind = el('select', { class: 'field', id: 'board-kind', 'aria-label': 'Kind', onchange: (e) => { S.boardKind = e.target.value; render(); } },
-        [['all', 'Bugs and requests'], ['bug', 'Bugs'], ['request', 'Requests'], ['pull', 'Pull requests']].map(([v, t]) => el('option', { value: v, text: t, selected: S.boardKind === v })));
+        [['all', 'Any kind'], ['bug', 'Bugs'], ['request', 'Requests'], ['pull', 'Pull requests']].map(([v, t]) => el('option', { value: v, text: t, selected: S.boardKind === v })));
     const search = el('input', { class: 'field', id: 'board-search', type: 'search', placeholder: 'Search requests, reports, branches', 'aria-label': 'Search the work', value: S.boardQuery,
         oninput: (e) => { S.boardQuery = e.target.value; const pos = e.target.selectionStart; render(); const again = document.getElementById('board-search'); again.focus(); again.setSelectionRange(pos, pos); } });
-    view.replaceChildren(projectStep(), tiles, el('div', { class: 'controls' }, search, source, kind), cols);
+    view.replaceChildren(projectStep(), el('div', { class: 'controls' }, search, source, kind), picker, cols);
 
     const declined = by('declined');
     if (declined.length) {
@@ -862,10 +907,11 @@ function notesBlock(sections, withVersion, empty) {
 }
 
 // Items as lines, for a release, the next one, or a thread.
-function itemLines(list, extra) {
-    return el('div', { class: 'items' }, list.map((i) => el('div', { class: 'iline' },
+// `tight` is for a narrow column, where the place a line is in already says its stage.
+function itemLines(list, extra, tight) {
+    return el('div', { class: 'items' + (tight ? ' tight' : '') }, list.map((i) => el('div', { class: 'iline' },
         kindTag(i), el('span', { class: 't' }, el('a', { href: '#item-' + i.id, text: i.title })),
-        stageTag(i), extra ? extra(i) : el('span', { class: 'muted small' }, link(authorUrl(i.source, i.author), i.author)))));
+        tight ? null : stageTag(i), extra ? extra(i) : el('span', { class: 'muted small' }, link(authorUrl(i.source, i.author), i.author)))));
 }
 
 // A conversation ------------------------------------------------------------------------------
@@ -876,18 +922,16 @@ function post(p, cls, source, convo, lines) {
     return el('div', { class: 'post ' + cls },
         el('div', { class: 'who' }, p.mine ? el('span', { class: 'name', text: name }) : link(authorUrl(source, p.user), name, 'name'),
             el('span', { text: timeFmt.format(new Date(p.date)) + ' ET' }), p.url ? el('a', { href: p.url, text: 'on GitHub', onclick: stop }) : null,
-            isNew(p.date) ? tag('new since your last visit', 'ready') : null),
+            isNew(p.date) ? tag('new', 'ready') : null),
         cls.includes('first') && convo && convo.title ? el('div', { class: 'thread-title', text: convo.title }) : null,
         clamped(p.text || '(no text)', lines || (cls.includes('first') ? 14 : 8)));
 }
 
 function conversationBlock(convo) {
-    const where = convo.source === 'github' ? 'GitHub' : 'CurseForge';
     return el('div', { class: 'posts' },
         post({ user: convo.user, name: convo.author, mine: convo.mine, date: convo.date, text: convo.text }, 'first', convo.source, convo),
         convo.posts.map((p) => post(p, p.mine ? 'mine' : '', convo.source)),
-        convo.source === 'curseforge' ? el('div', { class: 'muted small' }, 'CurseForge\'s feed shows only the first reply of a thread, so there may be more on the site. ', el('a', { href: convo.url, text: 'Open the comments' })) : null,
-        convo.source === 'github' ? el('div', { class: 'small' }, el('a', { href: convo.url, text: 'Open on ' + where })) : null);
+        convo.source === 'curseforge' ? el('div', { class: 'muted small', text: 'CurseForge\'s feed shows only the first reply of a thread, so there may be more on the site.' }) : null);
 }
 
 // An item's sheet ----------------------------------------------------------------------------
@@ -908,25 +952,32 @@ function openItem(item) {
             : [el('a', { href: releaseHash(rel.version), text: rel.version }), rel.date ? ', ' + calendarDay(rel.date) : '']],
     ];
     const track = el('div', { class: 'track' }, steps.map(([name, text], i) =>
-        el('div', { class: 'step ' + (i <= rank ? 'done' : i === rank + 1 && stage !== 'declined' ? 'now' : '') }, el('b', { text: name }), text)));
+        el('div', { class: 'step ' + (i <= rank ? 'done' : i === rank + 1 && stage !== 'declined' ? 'now' : '') }, el('b', { text: name }), el('span', null, text))));
     const step = nextStep(item);
 
+    const built = el('div', { class: 'section' }, el('h3', { text: 'What was built' }));
+    const talk = convo ? el('div', { class: 'section' }, el('h3', { text: 'The conversation' }), conversationBlock(convo)) : null;
+    const jump = (to, text) => el('button', { class: 'linkbtn', text, onclick: () => to.scrollIntoView({ block: 'start' }) });
     const body = [
-        el('div', { class: 'sheet-top' },
-            el('h2', { text: item.title }),
+        el('div', { class: 'sheet-bar' },
+            el('div', { class: 'chips' }, sourceTag(item), kindTag(item), stageTag(item),
+                item.state === 'open' && stage === 'shipped' ? tag('still open on GitHub', 'open') : null),
             el('button', { class: 'btn', text: 'Close', onclick: closeItem })),
-        el('div', { class: 'chips' }, sourceTag(item), kindTag(item), stageTag(item),
-            item.state === 'open' && stage === 'shipped' ? tag('still open on GitHub', 'open') : null,
-            el('a', { href: item.url, text: item.source === 'github' ? 'Open on GitHub' : 'Open CurseForge comments' }),
-            rel && releaseUrl(rel) ? el('a', { href: releaseUrl(rel), text: rel.version + ' on GitHub' }) : null),
+        el('h2', { text: item.title }),
         track,
         step ? el('div', { class: 'callout' }, el('div', null, el('b', { text: 'Next: ' }), step))
             : stage === 'shipped' ? el('div', { class: 'callout calm' }, el('div', { text: 'Done: released, and ' + (item.author || 'they') + ' heard back.' })) : null,
+        // The long parts are a tap away, and so are this item's pages elsewhere.
+        el('div', { class: 'links' },
+            talk && convo.posts.length > 1 ? jump(talk, 'The conversation, ' + count(convo.posts.length + 1, 'post')) : null,
+            made.length && convo ? jump(built, 'What was built, ' + count(made.length, 'commit')) : null,
+            el('a', { href: item.url, text: item.source === 'github' ? 'Issue on GitHub' : 'Comments on CurseForge' }),
+            rel && releaseUrl(rel) ? el('a', { href: releaseUrl(rel), text: 'Release ' + rel.version + ' on GitHub' }) : null),
     ];
 
     if (convo) {
         const siblings = convo.items.filter((id) => id !== item.id).map((id) => D.itemById.get(id)).filter(Boolean);
-        body.push(el('div', { class: 'section' }, el('h3', { text: 'The conversation' }), conversationBlock(convo)));
+        body.push(talk);
         if (siblings.length) {
             body.push(el('div', { class: 'section' }, el('h3', { text: 'Also made from this ' + (convo.source === 'github' ? 'issue' : 'comment') }), itemLines(siblings, (i) => i.work ? el('span', { class: 'muted small' }, workLine(i)) : null)));
         }
@@ -934,7 +985,6 @@ function openItem(item) {
         body.push(el('div', { class: 'section' }, el('h3', { text: 'What ' + item.author + ' wrote' }), clamped(item.body, 14)));
     }
 
-    const built = el('div', { class: 'section' }, el('h3', { text: 'What was built' }));
     if (item.notes.length) { built.append(notesBlock([{ heading: '', entries: item.notes }], true)); }
     if (item.branches) { built.append(el('div', { class: 'chips small' }, el('span', { class: 'muted', text: 'Branches:' }), item.branches.map((b) => tag(b, 'progress')))); }
     if (!made.length) {
@@ -1006,29 +1056,32 @@ function renderShip() {
     const tocBumped = b.next.toc && b.next.toc !== b.latest;
     const hasNotes = b.next.notes > 0;
 
-    // The steps, in the order AGENTS.md's Releases section gives them.
+    // The steps, in the order AGENTS.md's Releases section gives them. Once the TOC has the new
+    // version, the tag's command names it.
+    const v = tocBumped ? 'v' + b.next.toc : 'vX.Y.Z';
     const steps = [
         { done: !progress.length, what: progress.length ? 'Merge or leave out the work on branches' : 'No work waiting on a branch',
             more: progress.length ? progress.map((i, n) => [n ? ', ' : '', el('a', { href: '#item-' + i.id, text: i.branch || i.title })]) : null },
-        { done: !b.unpushed, what: b.unpushed ? 'Push main: ' + count(b.unpushed, 'commit') + ' are only here' : b.remote ? 'Main is pushed' : 'No remote to push to',
-            more: b.unpushed ? 'git push origin main' : null },
+        { done: !b.unpushed, what: b.unpushed ? 'Push main: ' + count(b.unpushed, 'commit') + (b.unpushed === 1 ? ' is' : ' are') + ' only here' : b.remote ? 'Main is pushed' : 'No remote to push to',
+            more: b.unpushed ? el('code', { text: 'git push origin main' }) : null },
         { done: hasNotes && b.next.gameNotes, what: hasNotes ? 'Release notes written: ' + count(b.next.notes, 'entry', 'entries') + ' in CHANGELOG.md' : 'Write the release notes',
             more: !b.next.gameNotes ? 'ForeverPlusPlus/Changelog.lua has no unreleased entry yet; it needs the same notes.' : hasNotes ? 'The same notes are in Changelog.lua; give both the new version and date.' : 'CHANGELOG.md and Changelog.lua both need them.' },
         { done: tocBumped, what: tocBumped ? 'The TOC says ' + b.next.toc : 'Bump ## Version in the TOC (it still says ' + (b.next.toc || '?') + ')' },
-        { done: false, what: 'Tag it and push the tag', more: 'git tag vX.Y.Z && git push origin vX.Y.Z: GitHub, CurseForge, and Wago take it from there.' },
-        { done: !items.length && !owedList.length, what: items.length ? 'Tell ' + count(new Set(items.map((i) => i.author)).size, 'person', 'people') + ' it is out' : 'Nobody waiting to hear about it',
+        { done: false, what: 'Tag it and push the tag', more: [el('code', { text: 'git tag ' + v + ' && git push origin ' + v }), el('span', { class: 'muted', text: 'GitHub, CurseForge, and Wago take it from there.' })] },
+        { done: !items.length && !owedList.length, what: items.length ? 'Tell ' + count(new Set(items.map((i) => i.author)).size, 'person', 'people') + ' it is out' : owedList.length ? 'Tell those still owed a reply (below)' : 'Nobody waiting to hear about it',
             more: items.length ? items.map((i, n) => [n ? ', ' : '', el('a', { href: '#item-' + i.id, text: i.author || i.title })]) : null },
     ];
+    const now = steps.findIndex((s) => !s.done);
 
     const top = el('div', { class: 'panel' },
         el('div', { class: 'controls' }, el('h2', { text: 'Next release' }), el('span', { class: 'muted', text: 'everything on main since ' + (b.latest || 'the start') })),
         r.commits ? numbers(net.files, net.adds, net.dels, [{ n: r.commits, label: r.commits === 1 ? 'commit' : 'commits' },
-            b.unpushed ? el('span', null, tag(count(b.unpushed, 'commit') + ' not pushed', 'local')) : el('span', null, tag('all pushed', 'done'))])
+            b.unpushed ? el('span', null, tag(b.unpushed === r.commits ? 'none pushed' : b.unpushed + ' not pushed', 'local')) : el('span', null, tag('all pushed', 'done'))])
             : el('div', { class: 'muted', text: 'Nothing on main since ' + b.latest + '.' }),
         el('div', { class: 'split' },
             el('div', { class: 'section' }, el('h3', { text: 'To ship it' }),
-                el('ol', { class: 'steps' }, steps.map((s) => el('li', { class: s.done ? 'done' : '' },
-                    el('div', null, el('b', { text: s.what }), s.more ? el('span', { class: 'muted' }, typeof s.more === 'string' ? s.more : s.more) : null))))),
+                el('ol', { class: 'steps' }, steps.map((s, n) => el('li', { class: s.done ? 'done' : n === now ? 'now' : '' },
+                    el('div', null, el('b', { text: s.what }), s.more ? el('span', { class: 'muted' }, s.more) : null))))),
             el('div', { class: 'section' },
                 el('h3', { text: 'What it answers' }),
                 items.length ? itemLines(items) : el('div', { class: 'empty', text: 'No request or report is in it yet.' }),
@@ -1218,7 +1271,7 @@ function threadCard(convo) {
         : items.length ? tag('waiting', 'open') : convo.mine ? null : tag('no work', 'open');
     return el('article', { class: 'thread' + (needsLook(convo) ? ' quiet' : '') },
         el('div', { class: 'who' }, el('a', { class: 'tag plain', href: convo.url, text: where }), state, work,
-            el('span', { text: 'last ' + day(convo.last) }), isNew(convo.last) ? tag('new since your last visit', 'ready') : null),
+            el('span', { text: 'last ' + day(convo.last) }), isNew(convo.last) ? tag('new', 'ready') : null),
         el('div', { class: 'posts' },
             post({ user: convo.user, name: convo.author, mine: convo.mine, date: convo.date, text: convo.text }, 'first', convo.source, convo, 5),
             convo.posts.map((p) => post(p, p.mine ? 'mine' : '', convo.source, null, 3))),
@@ -1235,6 +1288,8 @@ function renderComments() {
         ['work', 'Led to work', (t) => ledTo(t).length > 0],
         ['none', 'No work', (t) => !t.mine && !ledTo(t).length],
     ];
+    // Opens on what needs a look, the number the tab shows, when anything does.
+    if (!S.threadFilter) { S.threadFilter = D.comments.some(needsLook) ? 'look' : 'all'; }
     const test = (filters.find((f) => f[0] === S.threadFilter) || filters[0])[2];
     const shown = bySource.filter((t) => test(t) && (!q || (t.author + ' ' + (t.title || '') + ' ' + t.text + ' ' + t.posts.map((p) => p.text).join(' ')).toLowerCase().includes(q)));
     const chips = el('div', { class: 'chips', role: 'group', 'aria-label': 'Show' }, filters.map(([id, name, f]) =>
@@ -1242,7 +1297,7 @@ function renderComments() {
     const search = el('input', { class: 'field', id: 'thread-search', type: 'search', placeholder: 'Search comments and issues', 'aria-label': 'Search comments and issues', value: S.threadQuery,
         oninput: (e) => { S.threadQuery = e.target.value; const pos = e.target.selectionStart; render(); const again = document.getElementById('thread-search'); again.focus(); again.setSelectionRange(pos, pos); } });
     const source = el('select', { class: 'field', id: 'thread-source', 'aria-label': 'Where', onchange: (e) => { S.threadSource = e.target.value; render(); } },
-        [['all', 'CurseForge and GitHub'], ['curseforge', 'CurseForge comments'], ['github', 'GitHub issues']].map(([v, t]) => el('option', { value: v, text: t, selected: S.threadSource === v })));
+        [['all', 'Any source'], ['curseforge', 'CurseForge'], ['github', 'GitHub']].map(([v, t]) => el('option', { value: v, text: t, selected: S.threadSource === v })));
     let cap = 40;
     const list = el('div', { class: 'threads' });
     const draw = () => {
@@ -1252,10 +1307,10 @@ function renderComments() {
     };
     draw();
     view.replaceChildren(
-        el('div', { class: 'controls' }, search, source, el('a', { class: 'small', href: D.board.curseforge, text: 'CurseForge comments' })),
         chips,
-        el('div', { class: 'muted small', text: 'Newest activity first. A thread "needs a look" when no reply of yours is seen and nothing was made from it. CurseForge\'s feed shows only the first reply of each thread, so one marked "no reply seen" may have a reply on the site.' }),
-        list);
+        el('div', { class: 'controls' }, search, source),
+        list,
+        el('div', { class: 'muted small', text: 'Newest activity first. A thread needs a look when no reply of yours is seen and nothing was made from it. CurseForge\'s feed shows only the first reply of each thread, so one marked "no reply seen" may have a reply on the site.' }));
 }
 
 // Shell ----------------------------------------------------------------------------------------
@@ -1264,9 +1319,9 @@ function renderStanding() {
     const b = D.board;
     const latest = D.releaseByVersion.get(b.latest);
     const parts = [];
-    if (latest) { parts.push(el('span', null, el('a', { href: releaseHash(b.latest) }, el('b', { text: b.latest })), ' released ' + calendarDay(latest.date))); }
-    parts.push(el('span', null, el('a', { href: '#ship' }, el('b', { text: b.unreleased }), b.unreleased === 1 ? ' commit since' : ' commits since'), b.unpushed ? ', ' + b.unpushed + ' not pushed' : ''));
-    parts.push(el('span', { text: 'Data from ' + timeFmt.format(new Date(b.generated)) + ' ET' }));
+    // What is unreleased is the Next release tab's number and the Work view's first lines, not here.
+    if (latest) { parts.push(el('span', null, el('a', { href: releaseHash(b.latest) }, el('b', { text: b.latest })), ' released ' + day(latest.date + 'T12:00:00-05:00'))); }
+    parts.push(el('span', { text: 'as of ' + timeFmt.format(new Date(b.generated)) + ' ET' }));
     const stale = Object.entries(b.sources || {}).filter(([, v]) => v !== 'ok').map(([k]) => k);
     if (stale.length) { parts.push(el('span', null, tag((stale.includes('curseforge') ? 'CurseForge' : 'GitHub') + ' could not be read, showing the last copy', 'ready'))); }
     document.getElementById('standing').replaceChildren(...parts);
