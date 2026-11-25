@@ -21,6 +21,11 @@ local function loaded(name)
     return C and C.IsAddOnLoaded and C.IsAddOnLoaded(name) and true or false
 end
 
+-- Another addon's global, by name: the type checker knows only the client's own.
+local function global(name)
+    return _G[name]
+end
+
 local function shown(frame)
     return type(frame) == "table" and type(frame.IsShown) == "function" and frame:IsShown() and true or false
 end
@@ -60,7 +65,7 @@ local ADAPTERS = {}
 ADAPTERS[#ADAPTERS + 1] = {
     name = "Baganator",
     get = function()
-        local b = loaded("Baganator") and _G.Baganator
+        local b = loaded("Baganator") and global("Baganator")
         local skins = type(b) == "table" and type(b.API) == "table" and b.API.Skins
         if type(skins) == "table" and type(skins.GetAllFrames) == "function" then
             return b
@@ -101,7 +106,7 @@ ADAPTERS[#ADAPTERS + 1] = {
 ADAPTERS[#ADAPTERS + 1] = {
     name = "GW2_UI",
     get = function()
-        local gw = loaded("GW2_UI") and _G.GW2_ADDON
+        local gw = loaded("GW2_UI") and global("GW2_ADDON")
         if type(gw) == "table" and type(gw.ForEachOwnBagItemButton) == "function" then
             return gw
         end
@@ -110,8 +115,8 @@ ADAPTERS[#ADAPTERS + 1] = {
         gw.ForEachOwnBagItemButton(visit)
     end,
     windows = function(_, fn)
-        fn(_G.GwBagFrame, false)
-        fn(_G.GwBankFrame, true)
+        fn(global("GwBagFrame"), false)
+        fn(global("GwBankFrame"), true)
     end,
 }
 
@@ -133,7 +138,7 @@ local function bagnon(addon)
     return {
         name = addon,
         get = function()
-            local b = loaded(addon) and _G[addon]
+            local b = loaded(addon) and global(addon)
             if type(b) == "table" and type(b.Frames) == "table" and type(b.Frames.Get) == "function" then
                 return b
             end
@@ -228,7 +233,7 @@ ADAPTERS[#ADAPTERS + 1] = {
 ADAPTERS[#ADAPTERS + 1] = {
     name = "ArkInventory",
     get = function()
-        local ark = loaded("ArkInventory") and _G.ArkInventory
+        local ark = loaded("ArkInventory") and global("ArkInventory")
         local api = type(ark) == "table" and ark.API
         local const = type(ark) == "table" and type(ark.Const) == "table" and ark.Const.Location
         if type(api) == "table" and type(api.ItemFrameLoadedIterate) == "function"
