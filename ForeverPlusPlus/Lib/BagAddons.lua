@@ -174,6 +174,49 @@ end
 ADAPTERS[#ADAPTERS + 1] = bagnon("Bagnon")
 ADAPTERS[#ADAPTERS + 1] = bagnon("Bagnonium")
 
+-- BetterBags (v0.9.5, its BetterBags_Camelot.toc for Forever): an AceAddon whose modules its
+-- plugins reach with GetModule. Each item is two buttons from ContainerFrameItemButtonTemplate:
+-- the one clicked (`button`), set once to one bag and slot through Blizzard's Initialize, and
+-- below it the one that draws the icon (`_decoration`), so marks go on that one. Every item it
+-- made is in the ItemFrame module's `activeItems`, read here; its own items for no slot (a
+-- section's header) say slot 0. It draws the bags again on its messages bags/Draw/Backpack/Done
+-- and bags/Draw/Bank/Done, which plugins hear with the Events module's RegisterMessage. It has
+-- no view of another character's bags, and shows its bank only at a banker.
+ADAPTERS[#ADAPTERS + 1] = {
+    name = "BetterBags",
+    get = function()
+        local ace = loaded("BetterBags") and _G.LibStub and _G.LibStub("AceAddon-3.0", true)
+        local bb = ace and ace:GetAddon("BetterBags", true)
+        local items = bb and type(bb.GetModule) == "function" and bb:GetModule("ItemFrame", true)
+        if type(items) == "table" and type(items.activeItems) == "table" then
+            return bb
+        end
+    end,
+    each = function(bb, visit)
+        for item in pairs(bb:GetModule("ItemFrame").activeItems) do
+            if type(item) == "table" then
+                visit(item.button, item._decoration)
+            end
+        end
+    end,
+    windows = function(bb, fn)
+        local bags = type(bb.Bags) == "table" and bb.Bags or {}
+        fn(type(bags.Backpack) == "table" and bags.Backpack.frame, false)
+        fn(type(bags.Bank) == "table" and bags.Bank.frame, true)
+    end,
+    bankOpen = function(bb)
+        local bank = type(bb.Bags) == "table" and bb.Bags.Bank
+        return bb.atBank == true and type(bank) == "table" and shown(bank.frame) or false
+    end,
+    listen = function(bb, notify)
+        local events = bb:GetModule("Events", true)
+        if type(events) == "table" and type(events.RegisterMessage) == "function" then
+            events:RegisterMessage("bags/Draw/Backpack/Done", notify)
+            events:RegisterMessage("bags/Draw/Bank/Done", notify)
+        end
+    end,
+}
+
 -- The walk -------------------------------------------------------------------------------------
 
 -- Calls fn(adapter, handle) for each adapter whose addon is there.

@@ -203,3 +203,64 @@ registry[1].frame = inventory
 same(walk(), { "0:1", "4:2" }, "bagaddons: Bagnonium's bag buttons")
 loadedAddOns.Bagnonium = nil
 eq(BagAddons.Loaded(), false, "bagaddons: none loaded again")
+
+-- BetterBags --------------------------------------------------------------------------------
+
+-- Its items: the button clicked, and the one under it that draws the icon.
+local function bbItem(bag, slot, opts)
+    return { button = button(bag, slot, opts), _decoration = { art = bag .. ":" .. slot } }
+end
+
+local messages = {}
+local bbBackpack, bbBank = window(true), window(false)
+local betterBags = {
+    atBank = false,
+    Bags = { Backpack = { frame = bbBackpack }, Bank = { frame = bbBank } },
+    modules = {
+        ItemFrame = { activeItems = {} },
+        Events = {
+            RegisterMessage = function(_, message, fn)
+                messages[#messages + 1] = message
+                messages[message] = fn
+            end,
+        },
+    },
+}
+function betterBags:GetModule(name)
+    return self.modules[name]
+end
+for _, item in ipairs({ bbItem(0, 2), bbItem(3, 1), bbItem(-3, 0), bbItem(2, 4, { visible = false }), bbItem(7, 9) }) do
+    betterBags.modules.ItemFrame.activeItems[item] = true
+end
+LibStub = function(major)
+    return major == "AceAddon-3.0" and {
+        GetAddon = function(_, name)
+            return name == "BetterBags" and betterBags or nil
+        end,
+    } or nil
+end
+eq(BagAddons.Loaded(), false, "bagaddons: BetterBags without the addon loaded")
+loadedAddOns.BetterBags = true
+eq(BagAddons.Loaded(), true, "bagaddons: BetterBags loaded")
+local seen = {}
+BagAddons.EachButton(function(_, bag, slot, bank, art)
+    seen[#seen + 1] = bag .. ":" .. slot .. (bank and ":bank" or "") .. "@" .. (art and art.art or "")
+end)
+table.sort(seen)
+same(seen, { "0:2@0:2", "3:1@3:1", "7:9:bank@7:9" },
+    "bagaddons: BetterBags' items on screen with the button that draws each, not one for no slot")
+eq(BagAddons.BankShown(), false, "bagaddons: BetterBags' bank closed")
+bbBank.shown = true
+eq(BagAddons.BankShown(), false, "bagaddons: BetterBags' bank window isn't open away from a banker")
+betterBags.atBank = true
+eq(BagAddons.BankShown(), true, "bagaddons: BetterBags' bank open at a banker")
+before = calls
+module.events.BAG_UPDATE_DELAYED()
+same({ messages[1], messages[2] }, { "bags/Draw/Backpack/Done", "bags/Draw/Bank/Done" },
+    "bagaddons: BetterBags' draws listened to")
+ok(bbBackpack.scripts.OnShow and bbBank.scripts.OnHide, "bagaddons: BetterBags' windows hooked")
+messages["bags/Draw/Backpack/Done"]({})
+eq(calls, before + 2, "bagaddons: told when BetterBags draws the bags")
+module.events.BAG_UPDATE_DELAYED()
+eq(#messages, 2, "bagaddons: BetterBags' draws listened to once")
+loadedAddOns.BetterBags = nil

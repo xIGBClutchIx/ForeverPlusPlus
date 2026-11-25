@@ -14,22 +14,22 @@ ns.changelog = {
         sections = {
             { L.CHANGELOG_CHANGED, {
                 { L.UPGRADEARROWS_TITLE, "Marks gear in the bags and bank of the Baganator, GW2 UI, "
-                    .. "Bagnon, and Bagnonium addons too, as in the game's own." },
+                    .. "Bagnon, Bagnonium, and BetterBags addons too, as in the game's own." },
                 { L.ALREADYKNOWN_TITLE, "Marks items in the bags of the Baganator, GW2 UI, Bagnon, "
-                    .. "and Bagnonium addons too, as in the game's own." },
+                    .. "Bagnonium, and BetterBags addons too, as in the game's own." },
                 { L.APPEARANCEICONS_TITLE, "Marks gear in the bags and bank of the Baganator, GW2 UI, "
-                    .. "Bagnon, and Bagnonium addons too, as in the game's own." },
+                    .. "Bagnon, Bagnonium, and BetterBags addons too, as in the game's own." },
                 { L.UNUSABLEITEMSTINT_TITLE, "Tints items in the bags and bank of the Baganator, GW2 "
-                    .. "UI, Bagnon, and Bagnonium addons too, as in the game's own." },
+                    .. "UI, Bagnon, Bagnonium, and BetterBags addons too, as in the game's own." },
             } },
             { L.CHANGELOG_FIXED, {
                 { L.AUTOOPEN_TITLE, "A right click in the bags works with the Baganator, GW2 UI, "
-                    .. "Bagnon, and Bagnonium addons' bags too, so Pick Lock no longer says \"Item "
-                    .. "is locked\" there." },
+                    .. "Bagnon, Bagnonium, and BetterBags addons' bags too, so Pick Lock no longer "
+                    .. "says \"Item is locked\" there." },
                 { L.COMPREHENDSCROLLS_TITLE, "A right click on a scroll works with the Baganator, "
-                    .. "GW2 UI, Bagnon, and Bagnonium addons' bags too." },
+                    .. "GW2 UI, Bagnon, Bagnonium, and BetterBags addons' bags too." },
                 { L.AUTOWEAPONBUFF_TITLE, "A right click in the bags works with the Baganator, GW2 "
-                    .. "UI, Bagnon, and Bagnonium addons' bags too." },
+                    .. "UI, Bagnon, Bagnonium, and BetterBags addons' bags too." },
             } },
         },
     },
