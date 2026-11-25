@@ -6,11 +6,11 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Changed
 
-- **Upgrade Arrows**, **Already Known**, **Appearance Icons**, and **Unusable Items Tint**: mark items in the Baganator and GW2 UI addons' bags and bank too, as they do in the game's own.
+- **Upgrade Arrows**, **Already Known**, **Appearance Icons**, and **Unusable Items Tint**: mark items in the bags and bank of the Baganator, GW2 UI, Bagnon, and Bagnonium addons too, as they do in the game's own.
 
 ### Fixed
 
-- **Auto Open Containers**, **Comprehend Scrolls**, and **Auto Weapon Buff**: a right click in the bags works with the Baganator and GW2 UI addons' bags too, so Pick Lock no longer says "Item is locked" there.
+- **Auto Open Containers**, **Comprehend Scrolls**, and **Auto Weapon Buff**: a right click in the bags works with the Baganator, GW2 UI, Bagnon, and Bagnonium addons' bags too, so Pick Lock no longer says "Item is locked" there.
 
 ## 1.9.0 (2026-11-24)
 

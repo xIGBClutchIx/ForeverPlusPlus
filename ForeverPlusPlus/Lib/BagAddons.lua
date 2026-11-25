@@ -10,7 +10,7 @@
 -- know of each, with versions and sources, is in docs/forever-api.md (Bags and the bank).
 local _, ns = ...
 
-local _G, ipairs, pairs, type, setmetatable = _G, ipairs, pairs, type, setmetatable
+local _G, ipairs, pairs, type, setmetatable, rawget = _G, ipairs, pairs, type, setmetatable, rawget
 local max = math.max
 
 local BagAddons = {}
@@ -114,6 +114,65 @@ ADAPTERS[#ADAPTERS + 1] = {
         fn(_G.GwBankFrame, true)
     end,
 }
+
+-- Bagnon and Bagnonium (12.1.13), two looks over one core, BagBrother, each with its own global.
+-- No API for their buttons, so this reads, and never calls anything that lays out: the window from
+-- its frames registry (`Frames:Get(id)`, a frame once `[0]` is there), the buttons its item group
+-- shows (`ItemGroup.buttons`, ContainerFrameItemButtonTemplate, each fixed to one slot under a
+-- frame whose ID is the bag), and whether a bag is another character's or the bank's away from a
+-- banker (`frame:IsCached(bag)`). Only the bags and the bank: its guild bank's buttons say their
+-- tab as their bag. Nothing tells other addons it laid them out, but each layout hides and shows
+-- its buttons again, so their OnShow and OnHide do.
+local function bagnon(addon)
+    local function window(b, id)
+        local frame = b.Frames:Get(id)
+        if type(frame) == "table" and frame[0] and type(frame.IsCached) == "function" then
+            return frame
+        end
+    end
+    return {
+        name = addon,
+        get = function()
+            local b = loaded(addon) and _G[addon]
+            if type(b) == "table" and type(b.Frames) == "table" and type(b.Frames.Get) == "function" then
+                return b
+            end
+        end,
+        buttons = function(b, fn)
+            for _, id in ipairs({ "inventory", "bank" }) do
+                local frame = window(b, id)
+                local group = frame and rawget(frame, "ItemGroup")
+                local list = type(group) == "table" and rawget(group, "buttons")
+                if type(list) == "table" then
+                    for _, button in ipairs(list) do
+                        fn(button, frame)
+                    end
+                end
+            end
+        end,
+        each = function(b, visit, self)
+            self.buttons(b, function(button, frame)
+                local bag = type(button) == "table" and button.GetBagID and button:GetBagID()
+                if type(bag) == "number" and not frame:IsCached(bag) then
+                    visit(button)
+                end
+            end)
+        end,
+        hookButtons = function(b, hook, self)
+            self.buttons(b, hook)
+        end,
+        windows = function(b, fn)
+            fn(window(b, "inventory"), false)
+            fn(window(b, "bank"), true)
+        end,
+        bankOpen = function(b)
+            local bank = window(b, "bank")
+            return bank and shown(bank) and not bank:IsCached() or false
+        end,
+    }
+end
+ADAPTERS[#ADAPTERS + 1] = bagnon("Bagnon")
+ADAPTERS[#ADAPTERS + 1] = bagnon("Bagnonium")
 
 -- The walk -------------------------------------------------------------------------------------
 

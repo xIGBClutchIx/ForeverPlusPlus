@@ -7,7 +7,7 @@
 -- go through to the bag slot as before. Secure buttons can't be placed in combat, so the overlays
 -- leave when combat starts and the bags work as Blizzard's until it ends. Only a bag that is on
 -- screen gets overlays: Blizzard's, or a bag addon's whose buttons Lib/BagAddons.lua knows
--- (Baganator, GW2 UI). The overlays are ours, on UIParent, never children of the other addon's
+-- (Baganator, GW2 UI, Bagnon, and the others listed there). The overlays are ours, on UIParent, never children of the other addon's
 -- frames, so its windows stay free to hide in combat and nothing of its own is changed.
 local _, ns = ...
 
