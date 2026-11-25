@@ -2,45 +2,23 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@500;600;700&display=swap">
 <style>
-/* Layout: one working surface. A sticky bar of four views (Board, Changes, Compare, Comments);
-   the board is four columns that become one column with a picker on a phone; a request opens
-   as a side sheet (full screen on a phone) holding its story and its diffs. */
+/* Layout: one working surface, dark by choice (the project's own navy and gold). A sticky bar of
+   four views (Board, Changes, Compare, Comments); the board is four columns that become one
+   column with a picker on a phone; a request opens as a side sheet (full screen on a phone)
+   holding its story and its diffs. Everything that has a page elsewhere is a link to it. */
 :root {
-    --bg: #f2f4f9; --surface: #ffffff; --surface-2: #e8ecf4; --line: #d3d9e6;
-    --ink: #121a2c; --ink-2: #47526a; --ink-3: #6b7690;
-    --accent: #1b52c2; --accent-ink: #ffffff; --accent-soft: #e2eafb;
-    --gold: #8a6100; --gold-line: #cfa63a;
-    --tint-blue: #e2eafb; --tint-red: #fbe5e2; --tint-gold: #f7edcf; --tint-green: #dff3e6; --tint-gray: #e8ecf4;
-    --dot-open: #7b869e; --dot-progress: #2f6be0; --dot-ready: #c49212; --dot-shipped: #2a9158; --dot-bug: #cf4a3c;
-    --add-bg: #e2f5e7; --add-ln: #c9ecd2; --del-bg: #fce8e5; --del-ln: #f6d2cd; --hunk-bg: #e8eefb;
-    --syn-kw: #8a2fb8; --syn-str: #1a7a3e; --syn-num: #a8520a; --syn-com: #7a8499; --syn-fn: #1b52c2; --syn-lit: #b0306b;
+    --bg: #04060b; --surface: #0a0e18; --surface-2: #121826; --line: #1e273b;
+    --ink: #e6eaf4; --ink-2: #a6b0c6; --ink-3: #8690a9;
+    --accent: #78a4ff; --accent-ink: #04060b; --accent-soft: #13224a;
+    --gold: #e6ba52; --gold-line: #8b6b1b;
+    --tint-blue: #111f44; --tint-red: #371616; --tint-gold: #2e250b; --tint-green: #0d2a1b; --tint-gray: #171e2f;
+    --dot-open: #8690a9; --dot-progress: #78a4ff; --dot-ready: #e6ba52; --dot-shipped: #4fc88a; --dot-bug: #f27f71;
+    --add-bg: #0b2416; --add-ln: #113420; --del-bg: #2d1311; --del-ln: #421c18; --hunk-bg: #101a33;
+    --syn-kw: #c792ea; --syn-str: #8fd69a; --syn-num: #f0a868; --syn-com: #6f7c98; --syn-fn: #82aaff; --syn-lit: #ff8fb5;
     --font-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
     --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
     --font-mono: "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
     --radius: 8px;
-}
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-        --bg: #090e1b; --surface: #111829; --surface-2: #19223a; --line: #27324f;
-        --ink: #e7ebf5; --ink-2: #a9b3c9; --ink-3: #7e89a3;
-        --accent: #7aa5ff; --accent-ink: #0a0f1c; --accent-soft: #172850;
-        --gold: #e4b84f; --gold-line: #8f6f1c;
-        --tint-blue: #172850; --tint-red: #3a1a1a; --tint-gold: #332a0f; --tint-green: #12301f; --tint-gray: #1c2640;
-        --dot-open: #8a95ad; --dot-progress: #6f9dff; --dot-ready: #e4b84f; --dot-shipped: #4cc385; --dot-bug: #f07a6c;
-        --add-bg: #10291b; --add-ln: #173a26; --del-bg: #331715; --del-ln: #47201c; --hunk-bg: #16213d;
-        --syn-kw: #c792ea; --syn-str: #8fd69a; --syn-num: #f0a868; --syn-com: #72809c; --syn-fn: #82aaff; --syn-lit: #ff8fb5;
-        color-scheme: dark;
-    }
-}
-:root[data-theme="dark"] {
-    --bg: #090e1b; --surface: #111829; --surface-2: #19223a; --line: #27324f;
-    --ink: #e7ebf5; --ink-2: #a9b3c9; --ink-3: #7e89a3;
-    --accent: #7aa5ff; --accent-ink: #0a0f1c; --accent-soft: #172850;
-    --gold: #e4b84f; --gold-line: #8f6f1c;
-    --tint-blue: #172850; --tint-red: #3a1a1a; --tint-gold: #332a0f; --tint-green: #12301f; --tint-gray: #1c2640;
-    --dot-open: #8a95ad; --dot-progress: #6f9dff; --dot-ready: #e4b84f; --dot-shipped: #4cc385; --dot-bug: #f07a6c;
-    --add-bg: #10291b; --add-ln: #173a26; --del-bg: #331715; --del-ln: #47201c; --hunk-bg: #16213d;
-    --syn-kw: #c792ea; --syn-str: #8fd69a; --syn-num: #f0a868; --syn-com: #72809c; --syn-fn: #82aaff; --syn-lit: #ff8fb5;
     color-scheme: dark;
 }
 
@@ -49,12 +27,12 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .fb * { box-sizing: border-box; }
 .fb button, .fb select, .fb input { font: inherit; color: inherit; }
 .fb button { cursor: pointer; }
-.fb a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+.fb a { color: var(--accent); text-decoration: none; }
+.fb a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
 .fb :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 .wrap { max-width: 1320px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-.mono { font-family: var(--font-mono); font-size: 0.86em; }
 .muted { color: var(--ink-3); }
-.num { font-variant-numeric: tabular-nums; }
+.small { font-size: 13px; }
 
 /* Top: name, where the project stands, the views */
 .top { padding-block: 20px 12px; display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: baseline; }
@@ -62,11 +40,12 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .top h1 span { color: var(--gold); }
 .standing { display: flex; flex-wrap: wrap; gap: 4px 16px; color: var(--ink-2); font-size: 13.5px; }
 .standing b { color: var(--ink); font-weight: 600; }
+.places { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13.5px; margin-left: auto; }
 .bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
 .tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
 .tabs::-webkit-scrollbar { display: none; }
 .tab { background: none; border: 0; border-bottom: 2px solid transparent; padding: 11px 12px 9px; font-weight: 500; color: var(--ink-2); white-space: nowrap; }
-.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--gold); }
 .tab .count { margin-left: 6px; font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
 main.wrap { padding-block: 18px 64px; display: flex; flex-direction: column; gap: 18px; }
 h2 { font: 600 19px/1.25 var(--font-display); margin: 0; text-wrap: balance; }
@@ -78,23 +57,22 @@ h3 { font: 600 12px/1.3 var(--font-body); letter-spacing: 0.07em; text-transform
 .field { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 7px 10px; min-height: 38px; }
 input.field { flex: 1 1 200px; }
 select.field { max-width: 100%; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .chip { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px; font-size: 13px; min-height: 32px; }
 .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .btn { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 7px 12px; font-weight: 500; min-height: 38px; }
-.btn:hover, .chip:hover { border-color: var(--ink-3); }
-.linkbtn { background: none; border: 0; padding: 0; color: var(--accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+.btn:hover, .chip:hover, .field:hover { border-color: var(--ink-3); }
+.linkbtn { background: none; border: 0; padding: 0; color: var(--accent); text-align: left; }
+.linkbtn:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
 
 /* Tags: a faint tint with normal text; the dot carries the meaning */
-.tag { display: inline-flex; align-items: center; gap: 5px; background: var(--tint-gray); border-radius: 5px; padding: 1px 7px; font-size: 12px; line-height: 1.6; white-space: nowrap; }
+.tag, .fb a.tag { display: inline-flex; align-items: center; gap: 5px; background: var(--tint-gray); color: var(--ink); border-radius: 5px; padding: 1px 7px; font-size: 12px; line-height: 1.6; white-space: nowrap; }
 .tag::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--dot, transparent); flex: none; }
 .tag.plain::before { display: none; }
-.tag.bug { background: var(--tint-red); --dot: var(--dot-bug); }
-.tag.request, .tag.feat { background: var(--tint-blue); --dot: var(--dot-progress); }
-.tag.fix { background: var(--tint-red); --dot: var(--dot-bug); }
+.tag.bug, .tag.fix { background: var(--tint-red); --dot: var(--dot-bug); }
+.tag.request, .tag.feat, .tag.progress { background: var(--tint-blue); --dot: var(--dot-progress); }
 .tag.version { background: var(--tint-green); --dot: var(--dot-shipped); }
 .tag.ready { background: var(--tint-gold); --dot: var(--dot-ready); }
-.tag.progress { background: var(--tint-blue); --dot: var(--dot-progress); }
 .tag.open { --dot: var(--dot-open); }
 .tag.local { background: var(--tint-gold); }
 
@@ -110,12 +88,13 @@ select.field { max-width: 100%; }
 .col[data-col="progress"] { --dot: var(--dot-progress); }
 .col[data-col="ready"] { --dot: var(--dot-ready); }
 .col[data-col="shipped"] { --dot: var(--dot-shipped); }
-.group { font: 600 12px/1 var(--font-mono); color: var(--ink-3); padding: 8px 2px 0; }
-.card { display: flex; flex-direction: column; gap: 6px; text-align: left; width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; }
+.group { font: 600 12px/1 var(--font-mono); padding: 8px 2px 0; }
+.card { display: flex; flex-direction: column; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; cursor: pointer; }
 .card:hover { border-color: var(--accent); }
-.card .title { font-weight: 500; line-height: 1.35; overflow-wrap: anywhere; }
+.fb .card a.title { color: var(--ink); font-weight: 500; line-height: 1.35; overflow-wrap: anywhere; }
 .card .row { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
 .card .foot { font-size: 12.5px; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 2px 10px; }
+.fb .card .foot a { color: var(--ink-2); }
 .empty { border: 1px dashed var(--line); border-radius: var(--radius); padding: 14px 12px; color: var(--ink-3); font-size: 13.5px; }
 
 /* Releases strip */
@@ -124,39 +103,46 @@ select.field { max-width: 100%; }
 .rel i { display: block; width: 18px; background: var(--line); border-radius: 3px 3px 0 0; }
 .rel span { font: 400 9.5px/1 var(--font-mono); color: var(--ink-3); writing-mode: vertical-rl; transform: rotate(180deg); height: 34px; overflow: hidden; }
 .rel:hover i { background: var(--ink-3); }
-.rel[aria-pressed="true"] i { background: var(--accent); }
+.rel[aria-pressed="true"] i { background: var(--gold); }
 .rel[aria-pressed="true"] span { color: var(--ink); font-weight: 600; }
-.rel.in-range i { background: var(--accent); opacity: 0.55; }
-.rel.unreleased i { background: var(--gold-line); }
+.rel.in-range i { background: var(--gold-line); }
+.rel.unreleased:not([aria-pressed="true"]) i { background: var(--accent-soft); outline: 1px dashed var(--accent); outline-offset: -1px; }
 
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-.figures { display: flex; flex-wrap: wrap; gap: 6px 22px; color: var(--ink-2); font-size: 14px; }
+.figures { display: flex; flex-wrap: wrap; gap: 6px 22px; color: var(--ink-2); font-size: 14px; align-items: baseline; }
 .figures b { font: 600 17px/1 var(--font-display); color: var(--ink); margin-right: 5px; font-variant-numeric: tabular-nums; }
-.plus { color: var(--dot-shipped); } .minus { color: var(--dot-bug); }
+.plus, .figures b.plus { color: var(--dot-shipped); } .minus, .figures b.minus { color: var(--dot-bug); }
 .split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 18px; align-items: start; }
+.section { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .notes { display: flex; flex-direction: column; gap: 12px; }
 .notes ul { margin: 6px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 7px; }
 .notes li { font-size: 14px; line-height: 1.45; overflow-wrap: anywhere; }
 .notes li b { font-weight: 600; color: var(--gold); }
 .notes code, .prose code { font: 0.88em var(--font-mono); background: var(--surface-2); padding: 1px 4px; border-radius: 4px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.seg button { background: var(--surface); border: 0; padding: 6px 12px; min-height: 34px; font-size: 13.5px; color: var(--ink-2); }
+.seg button[aria-pressed="true"] { background: var(--surface-2); color: var(--ink); font-weight: 600; }
 
 /* Commits */
 .commits { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
 .commit + .commit, .day { border-top: 1px solid var(--line); }
 .day { padding: 6px 12px; background: var(--surface-2); font-size: 12px; color: var(--ink-2); font-weight: 600; }
 .day:first-child { border-top: 0; }
-.commit-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 10px; align-items: baseline; width: 100%; text-align: left; background: none; border: 0; padding: 9px 12px; }
-.commit-head:hover { background: var(--surface-2); }
-.commit-head .what { overflow-wrap: anywhere; line-height: 1.4; }
-.commit-head .what .scope { font: 600 0.86em var(--font-mono); margin-right: 6px; }
-.commit-head .meta { font-size: 12px; color: var(--ink-3); white-space: nowrap; font-variant-numeric: tabular-nums; text-align: right; }
-.commit-head .extra { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: 5px; }
+.commit-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 10px; align-items: baseline; padding-right: 12px; }
+.commit-row:hover { background: var(--surface-2); }
+.commit-head { display: flex; gap: 8px; align-items: baseline; text-align: left; background: none; border: 0; padding: 9px 0 9px 12px; min-width: 0; }
+.commit-head .what { overflow-wrap: anywhere; line-height: 1.4; min-width: 0; }
+.commit-head .scope { font: 600 0.86em var(--font-mono); margin-right: 6px; color: var(--gold); }
+.commit-row .meta { font: 12px var(--font-mono); color: var(--ink-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.commit-row .extra { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 5px 8px; padding: 0 0 8px 12px; font-size: 12.5px; align-items: center; }
 .commit-body { border-top: 1px solid var(--line); background: var(--bg); padding: 10px; display: flex; flex-direction: column; gap: 8px; }
 .file { border: 1px solid var(--line); border-radius: 6px; background: var(--surface); overflow: hidden; min-width: 0; }
-.file-head { display: flex; gap: 8px; align-items: baseline; width: 100%; text-align: left; background: var(--surface-2); border: 0; padding: 6px 10px; }
-.file-head .path { font: 12.5px var(--font-mono); overflow-wrap: anywhere; flex: 1 1 auto; min-width: 0; }
-.file-head .stat { font: 12px var(--font-mono); white-space: nowrap; }
-.file-note { padding: 8px 10px; font-size: 13px; color: var(--ink-3); }
+.file-top { display: flex; gap: 10px; align-items: baseline; background: var(--surface-2); padding-right: 10px; }
+.file-head { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; flex: 1 1 auto; min-width: 0; text-align: left; background: none; border: 0; padding: 6px 0 6px 10px; }
+.file-head .path { font: 12.5px var(--font-mono); overflow-wrap: anywhere; min-width: 0; }
+.file-top .stat { font: 12px var(--font-mono); white-space: nowrap; }
+.file-top a { font-size: 12px; white-space: nowrap; }
+.file-note { padding: 8px 10px; font-size: 13px; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
 .scroll { overflow-x: auto; }
 table.diff { border-collapse: collapse; width: 100%; font: 12.5px/1.5 var(--font-mono); tab-size: 4; }
 .diff td { padding: 0 8px; vertical-align: top; height: 19px; }
@@ -165,7 +151,7 @@ table.diff { border-collapse: collapse; width: 100%; font: 12.5px/1.5 var(--font
 .fb.wraplines .diff td.code { white-space: pre-wrap; overflow-wrap: anywhere; }
 .diff tr.add td.code { background: var(--add-bg); } .diff tr.add td.ln { background: var(--add-ln); }
 .diff tr.del td.code { background: var(--del-bg); } .diff tr.del td.ln { background: var(--del-ln); }
-.diff tr.hunk td { background: var(--hunk-bg); color: var(--ink-2); padding-block: 2px; }
+.diff tr.hunk td { background: var(--hunk-bg); color: var(--ink-2); padding-block: 2px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .diff tr.more td { padding: 8px; text-align: center; }
 .hljs-keyword, .hljs-selector-tag, .hljs-section { color: var(--syn-kw); }
 .hljs-string, .hljs-regexp, .hljs-addition { color: var(--syn-str); }
@@ -175,33 +161,39 @@ table.diff { border-collapse: collapse; width: 100%; font: 12.5px/1.5 var(--font
 .hljs-literal, .hljs-symbol, .hljs-code { color: var(--syn-lit); }
 .hljs-strong { font-weight: 600; } .hljs-emphasis { font-style: italic; }
 
-/* Files table */
-.files { width: 100%; border-collapse: collapse; font-size: 13px; }
-.files td, .files th { padding: 5px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.files th { font-weight: 600; color: var(--ink-3); font-size: 12px; }
-.files td:first-child, .files th:first-child { text-align: left; white-space: normal; overflow-wrap: anywhere; font-family: var(--font-mono); font-size: 12.5px; }
-.files .weight { display: block; height: 3px; background: var(--accent); border-radius: 2px; margin-top: 3px; }
+/* Files of a release or a range */
+.frows { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+.frow { display: grid; grid-template-columns: minmax(0, 1fr) 44px 60px 60px; gap: 0 6px; align-items: baseline; padding: 6px 10px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.frow + .frow, .frow + .fhist, .fhist + .frow { border-top: 1px solid var(--line); }
+.frow > span { text-align: right; white-space: nowrap; font-family: var(--font-mono); font-size: 12px; }
+.frow.head { color: var(--ink-3); font-weight: 600; font-size: 12px; background: var(--surface-2); }
+.frow.head > span { font-family: var(--font-body); }
+.frow .linkbtn { font: 12.5px var(--font-mono); overflow-wrap: anywhere; color: var(--ink); }
+.frow .weight { display: block; height: 3px; background: var(--gold-line); border-radius: 2px; margin-top: 3px; }
+.fhist { background: var(--bg); padding: 10px; display: flex; flex-direction: column; gap: 12px; }
+.hist-item { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.hist-line { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; font-size: 13px; }
+.branches .frow { grid-template-columns: minmax(0, 1fr) 44px 70px; }
 
 /* Comments */
 .threads { display: flex; flex-direction: column; gap: 8px; }
 .thread { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; display: flex; flex-direction: column; gap: 8px; }
 .thread .who { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 13px; color: var(--ink-3); }
-.thread .who b { color: var(--ink); font-weight: 600; }
+.fb .thread .who a.name { color: var(--ink); font-weight: 600; }
 .prose { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; max-width: 75ch; }
 .quote { border-left: 2px solid var(--line); padding-left: 12px; color: var(--ink-2); }
 
 /* A request's sheet */
-dialog.sheet { margin: 0 0 0 auto; height: 100dvh; max-height: 100dvh; width: min(860px, 100vw); max-width: 100vw; border: 0; border-left: 1px solid var(--line); padding: 0; background: var(--bg); color: var(--ink); }
-dialog.sheet::backdrop { background: rgba(5, 9, 20, 0.5); }
+dialog.sheet { margin: 0 0 0 auto; height: 100dvh; max-height: 100dvh; width: min(880px, 100vw); max-width: 100vw; border: 0; border-left: 1px solid var(--line); padding: 0; background: var(--bg); color: var(--ink); }
+dialog.sheet::backdrop { background: rgba(0, 0, 0, 0.6); }
 .sheet-in { display: flex; flex-direction: column; gap: 18px; padding: calc(16px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(40px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
 .sheet-top { display: flex; gap: 12px; align-items: flex-start; }
 .sheet-top h2 { flex: 1 1 auto; min-width: 0; font-size: 21px; overflow-wrap: anywhere; }
 .track { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
-.step { border-top: 3px solid var(--line); padding-top: 6px; font-size: 12.5px; color: var(--ink-3); min-width: 0; }
+.step { border-top: 3px solid var(--line); padding-top: 6px; font-size: 12.5px; color: var(--ink-3); min-width: 0; overflow-wrap: anywhere; }
 .step b { display: block; color: var(--ink-2); font-weight: 600; font-size: 13px; }
 .step.done { border-top-color: var(--dot-shipped); } .step.done b { color: var(--ink); }
 .step.now { border-top-color: var(--dot-ready); } .step.now b { color: var(--ink); }
-.section { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 
 @media (max-width: 900px) {
     .split { grid-template-columns: minmax(0, 1fr); }
@@ -212,18 +204,21 @@ dialog.sheet::backdrop { background: rgba(5, 9, 20, 0.5); }
     .cols[data-show="open"] .col[data-col="open"], .cols[data-show="progress"] .col[data-col="progress"],
     .cols[data-show="ready"] .col[data-col="ready"], .cols[data-show="shipped"] .col[data-col="shipped"] { display: flex; }
     .col-head p { display: none; }
+    .places { margin-left: 0; }
 }
 @media (max-width: 560px) {
     .top h1 { font-size: 22px; }
     .panel { padding: 12px; }
-    .commit-head { grid-template-columns: auto minmax(0, 1fr); }
-    .commit-head .what { grid-column: 1 / -1; grid-row: 2; }
-    .commit-head .meta { text-align: right; }
-    .commit-head .extra { grid-column: 1 / -1; }
-    .commit-body { padding: 6px; }
+    .commit-row { grid-template-columns: minmax(0, 1fr); padding-right: 0; }
+    .commit-head { flex-wrap: wrap; padding: 9px 12px 2px; }
+    .commit-row .meta { padding: 0 12px 8px; }
+    .commit-row .extra { padding: 0 12px 8px; }
+    .commit-body, .fhist { padding: 6px; }
     table.diff { font-size: 11.5px; }
+    .diff td { padding: 0 6px; }
     .diff td.ln { min-width: 28px; padding: 0 4px; }
     .diff td.ln.old { display: none; }
+    .frow { grid-template-columns: minmax(0, 1fr) 30px 50px 50px; padding: 6px 8px; }
     dialog.sheet { border-left: 0; }
     .track { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 4px; }
 }
@@ -234,6 +229,7 @@ dialog.sheet::backdrop { background: rgba(5, 9, 20, 0.5); }
     <header class="top wrap">
         <h1>Forever<span>++</span> Board</h1>
         <div class="standing" id="standing"><span>Reading the project's issues, commits and releases</span></div>
+        <nav class="places" id="places" aria-label="The project elsewhere"></nav>
     </header>
     <div class="bar">
         <nav class="tabs wrap" role="tablist" aria-label="Views">
@@ -269,8 +265,16 @@ const sheetIn = document.getElementById('sheet-in');
 const D = { patches: new Map() };
 const S = {
     view: 'board', boardQuery: '', boardSource: 'all', boardKind: 'all', boardCol: null, shippedAll: false,
-    release: null, types: new Set(), commitQuery: '', from: null, to: null, waitingOnly: false, feedbackQuery: '',
+    release: null, pane: 'commits', types: new Set(), scope: '', commitQuery: '',
+    from: null, to: null, waitingOnly: false, feedbackQuery: '',
 };
+
+// When this viewer last opened the board, to mark what moved since. Only a convenience.
+let lastVisit = null;
+try {
+    lastVisit = localStorage.getItem('fpp-board-visit');
+    localStorage.setItem('fpp-board-visit', new Date().toISOString());
+} catch { /* no storage here */ }
 
 // Building blocks ------------------------------------------------------------------------------
 
@@ -294,6 +298,8 @@ function el(tag, props, ...kids) {
     return n;
 }
 const tag = (text, cls) => el('span', { class: 'tag ' + (cls || 'plain'), text });
+// A link when there is somewhere to go, plain text when there isn't.
+const link = (href, text, cls) => (href ? el('a', { href, text, class: cls }) : el('span', { text, class: cls }));
 
 const ET = 'America/New_York';
 const dayFmt = new Intl.DateTimeFormat('en-US', { timeZone: ET, month: 'short', day: 'numeric' });
@@ -305,17 +311,34 @@ const dayYear = (iso) => (iso ? dayYearFmt.format(new Date(iso)) : '');
 const calendarDay = (ymd) => (ymd ? dayYearFmt.format(new Date(ymd + 'T12:00:00-05:00')) : '');
 const count = (n, one, many) => n.toLocaleString('en-US') + ' ' + (n === 1 ? one : many || one + 's');
 const short = (sha) => sha.slice(0, 8);
+const slug = (version) => version.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
-// Text with `code`, **bold**, links, and (#12) as a link to that request.
+// Where things live outside the board.
+const repoUrl = () => D.board.repo.url || '';
+const pushed = (c) => repoUrl() && !c.local && c.release !== WIP;
+const commitUrl = (c) => (pushed(c) ? repoUrl() + '/commit/' + c.sha : null);
+const fileUrl = (c, f) => (!pushed(c) ? null : f.status === 'deleted' ? commitUrl(c)
+    : repoUrl() + '/blob/' + c.sha + '/' + f.path.split('/').map(encodeURIComponent).join('/'));
+const releaseUrl = (r) => (repoUrl() && r.tag ? repoUrl() + '/releases/tag/' + encodeURIComponent(r.tag) : null);
+const authorUrl = (source, name) => (!name ? null : source === 'github' ? 'https://github.com/' + encodeURIComponent(name)
+    : 'https://www.curseforge.com/members/' + encodeURIComponent(name));
+function versionTag(version) {
+    if (!D.releaseByVersion.has(version)) { return tag(version, 'version'); }
+    return el('a', { class: 'tag version', href: '#release-' + slug(version), text: version, onclick: (e) => e.stopPropagation() });
+}
+
+// Text with `code`, **bold**, links, and #12 as a link to that request.
 function inline(text, into) {
-    const re = /`([^`\n]+)`|\*\*([^*\n]+)\*\*|\[([^\]\n]+)\]\((https:\/\/[^)\s]+)\)|#(\d+)\b/g;
+    const re = /`([^`\n]+)`|\*\*([^*\n]+)\*\*|\[([^\]\n]+)\]\((https:\/\/[^)\s]+)\)|(https:\/\/[^\s<>)\]"']+)|#(\d+)\b/g;
     let at = 0, m;
     while ((m = re.exec(text))) {
         if (m.index > at) { into.append(text.slice(at, m.index)); }
         if (m[1] != null) { into.append(el('code', { text: m[1] })); }
         else if (m[2] != null) { into.append(el('strong', { text: m[2] })); }
         else if (m[3] != null) { into.append(el('a', { href: m[4], text: m[3].replace(/`/g, '') })); }
-        else if (D.itemByNumber.has(Number(m[5]))) { into.append(el('a', { href: '#item-gh-' + m[5], text: '#' + m[5] })); }
+        else if (m[5] != null) { into.append(el('a', { href: m[5], text: m[5] })); }
+        else if (D.itemByNumber.has(Number(m[6]))) { into.append(el('a', { href: '#item-gh-' + m[6], text: '#' + m[6] })); }
+        else if (repoUrl()) { into.append(el('a', { href: repoUrl() + '/issues/' + m[6], text: '#' + m[6] })); }
         else { into.append(m[0]); }
         at = re.lastIndex;
     }
@@ -350,7 +373,6 @@ function diffTable(file) {
     const table = el('table', { class: 'diff' });
     const lines = file.patch.split('\n');
     let o = 0, n = 0, i = 0;
-    const FIRST = 500;
     function draw(until) {
         for (; i < lines.length && i < until; i++) {
             const line = lines[i];
@@ -362,12 +384,11 @@ function diffTable(file) {
                 continue;
             }
             if (c === '\\') { continue; }
-            const cls = c === '+' ? 'add' : c === '-' ? 'del' : '';
             const code = el('td', { class: 'code' });
             const text = line.slice(1);
             const html = highlight(text, lang);
             if (html != null) { code.innerHTML = html; } else { code.textContent = text; }
-            table.append(el('tr', { class: cls },
+            table.append(el('tr', { class: c === '+' ? 'add' : c === '-' ? 'del' : '' },
                 el('td', { class: 'ln old', text: c === '+' ? '' : o }),
                 el('td', { class: 'ln', text: c === '-' ? '' : n }), code));
             if (c !== '+') { o++; }
@@ -382,36 +403,47 @@ function diffTable(file) {
             table.append(row);
         }
     }
-    draw(FIRST);
+    draw(500);
     return el('div', { class: 'scroll' }, table);
 }
 
-function fileBlock(file, open) {
+// One file of a commit: its path, numbers, a link to the file at that commit, and its diff.
+function fileBlock(file, commit, open) {
     const box = el('div', { class: 'file' });
     const label = { added: 'new', deleted: 'deleted', renamed: 'renamed' }[file.status];
     const body = el('div', { hidden: true });
+    const url = fileUrl(commit, file);
     let drawn = false;
-    const show = (on) => {
+    const head = el('button', { class: 'file-head', onclick: () => box.show(body.hidden) },
+        el('span', { class: 'path', text: file.path }), label && tag(label), file.generated && tag('generated'));
+    box.show = (on) => {
         body.hidden = !on;
         head.setAttribute('aria-expanded', on ? 'true' : 'false');
         if (!on || drawn) { return; }
         drawn = true;
         if (file.patch) {
             body.append(diffTable(file));
-            if (file.cut) { body.append(el('div', { class: 'file-note', text: 'This diff is long, so only its first part is kept here.' })); }
+            if (file.cut) { body.append(el('div', { class: 'file-note' }, 'This diff is long, so only its first part is kept here.', url && el('a', { href: commitUrl(commit), text: 'See all of it on GitHub' }))); }
         } else {
-            body.append(el('div', { class: 'file-note', text: {
-                generated: 'Generated data. Its diff is left out.', binary: 'A binary file.', moved: 'Moved with no changes.',
-            }[file.note] || 'No diff kept.' }));
+            body.append(el('div', { class: 'file-note' }, {
+                generated: 'Generated data with too many changed lines to read here.', binary: 'A binary file.', moved: 'Moved with no changes.',
+            }[file.note] || 'No diff kept.', url && el('a', { href: commitUrl(commit), text: 'See the commit on GitHub' })));
         }
     };
-    const head = el('button', { class: 'file-head', onclick: () => show(body.hidden) },
-        el('span', { class: 'path', text: file.path }),
-        label && tag(label),
-        el('span', { class: 'stat' }, el('span', { class: 'plus', text: '+' + file.adds }), ' ', el('span', { class: 'minus', text: '-' + file.dels })));
-    box.append(head, body);
-    show(open);
+    box.append(el('div', { class: 'file-top' }, head,
+        el('span', { class: 'stat' }, el('span', { class: 'plus', text: '+' + file.adds }), ' ', el('span', { class: 'minus', text: '-' + file.dels })),
+        url && el('a', { href: url, text: file.status === 'deleted' ? 'Commit' : 'File', title: 'Open this file as of this commit on GitHub' })), body);
+    box.show(open);
     return box;
+}
+
+// The line a commit is named by: its type, module, words, and its hash as a link.
+function commitWords(c) {
+    return [tag(c.type, c.type === 'feat' ? 'feat' : c.type === 'fix' ? 'fix' : 'plain'),
+        el('span', { class: 'what' }, c.scope && el('span', { class: 'scope', text: c.scope }), c.summary)];
+}
+function shaLink(c) {
+    return link(commitUrl(c), short(c.sha));
 }
 
 // A commit row that opens to its files' diffs.
@@ -424,13 +456,9 @@ function commitRow(c) {
     if (c.local) { extra.push(tag('not pushed', 'local plain')); }
     if (c.by) { extra.push(tag('by ' + c.by)); }
     for (const n of c.refs || []) {
-        if (D.itemByNumber.has(n)) { extra.push(el('a', { href: '#item-gh-' + n, text: '#' + n, onclick: (e) => e.stopPropagation() })); }
+        if (D.itemByNumber.has(n)) { extra.push(el('a', { href: '#item-gh-' + n, text: '#' + n + ' ' + D.itemByNumber.get(n).title })); }
     }
-    const head = el('button', { class: 'commit-head', 'aria-expanded': 'false', onclick: toggle },
-        el('span', { class: 'kind' }, tag(c.type, c.type === 'feat' ? 'feat' : c.type === 'fix' ? 'fix' : 'plain')),
-        el('span', { class: 'what' }, c.scope && el('span', { class: 'scope', text: c.scope }), c.summary),
-        el('span', { class: 'meta' }, short(c.sha), ' · ', el('span', { class: 'plus', text: '+' + c.adds }), ' ', el('span', { class: 'minus', text: '-' + c.dels })),
-        extra.length ? el('span', { class: 'extra' }, extra) : null);
+    const head = el('button', { class: 'commit-head', 'aria-expanded': 'false', onclick: toggle }, commitWords(c));
     function toggle() {
         body.hidden = !body.hidden;
         head.setAttribute('aria-expanded', body.hidden ? 'false' : 'true');
@@ -440,22 +468,28 @@ function commitRow(c) {
         loadPatches(c.release).then((p) => {
             const files = p.commits[c.sha] || [];
             const lines = files.reduce((n, f) => n + f.adds + f.dels, 0);
-            const open = files.length <= 4 && lines <= 400;
-            const links = el('div', { class: 'file-note' }, count(files.length, 'file'), ', ', dayYear(c.date));
-            if (D.board.repo.url && !c.local && c.release !== WIP) {
-                links.append(' · ', el('a', { href: D.board.repo.url + '/commit/' + c.sha, text: 'Open on GitHub' }));
-            }
-            body.replaceChildren(links, ...files.map((f) => fileBlock(f, open)));
+            const blocks = files.map((f) => fileBlock(f, c, files.length <= 4 && lines <= 400));
+            let allOpen = false;
+            const all = files.length > 1 && el('button', { class: 'linkbtn', text: 'Open every file', onclick: () => {
+                allOpen = !allOpen;
+                for (const b of blocks) { b.show(allOpen); }
+                all.textContent = allOpen ? 'Close every file' : 'Open every file';
+            } });
+            body.replaceChildren(el('div', { class: 'file-note' }, el('span', { text: count(files.length, 'file') + ', ' + dayYear(c.date) }),
+                commitUrl(c) && el('a', { href: commitUrl(c), text: 'Commit on GitHub' }),
+                c.release !== WIP && el('a', { href: '#release-' + slug(c.release), text: c.release === UNRELEASED ? 'Not released yet' : 'In ' + c.release }), all), ...blocks);
         }).catch(() => {
             asked = false;
             body.replaceChildren(el('div', { class: 'file-note', text: 'The diff could not be loaded. Close and open the commit to try again.' }));
         });
     }
-    row.append(head, body);
+    row.append(el('div', { class: 'commit-row' }, head,
+        el('span', { class: 'meta' }, shaLink(c), ' ', el('span', { class: 'plus', text: '+' + c.adds }), ' ', el('span', { class: 'minus', text: '-' + c.dels })),
+        extra.length ? el('span', { class: 'extra' }, extra) : null), body);
     return row;
 }
 
-// A list of commits under day headings, with a type and text filter when `filters` is set.
+// A list of commits under day headings, with type, module, and text filters when `filters` is set.
 function commitList(all, opts) {
     opts = opts || {};
     const box = el('div', { class: 'section' });
@@ -463,8 +497,9 @@ function commitList(all, opts) {
     let limit = opts.limit || 150;
     function draw() {
         const q = S.commitQuery.trim().toLowerCase();
-        const shown = all.filter((c) => (!opts.filters || !S.types.size || S.types.has(c.type))
-            && (!opts.filters || !q || (c.scope + ' ' + c.summary + ' ' + c.sha).toLowerCase().includes(q)));
+        const shown = !opts.filters ? all : all.filter((c) => (!S.types.size || S.types.has(c.type))
+            && (!S.scope || c.scope === S.scope)
+            && (!q || (c.scope + ' ' + c.summary + ' ' + c.sha).toLowerCase().includes(q)));
         list.replaceChildren();
         let last = '';
         for (const c of shown.slice(0, limit)) {
@@ -481,29 +516,90 @@ function commitList(all, opts) {
         }
     }
     if (opts.filters && all.length > 6) {
-        const types = [...new Set(all.map((c) => c.type))].sort((a, b) => all.filter((c) => c.type === b).length - all.filter((c) => c.type === a).length);
-        for (const t of [...S.types]) { if (!types.includes(t)) { S.types.delete(t); } }
-        const chips = el('div', { class: 'chips' }, types.map((t) => {
-            const chip = el('button', { class: 'chip', 'aria-pressed': S.types.has(t) ? 'true' : 'false',
-                text: t + ' ' + all.filter((c) => c.type === t).length,
+        const tally = (key) => {
+            const m = new Map();
+            for (const c of all) { if (c[key]) { m.set(c[key], (m.get(c[key]) || 0) + 1); } }
+            return [...m].sort((a, b) => b[1] - a[1]);
+        };
+        const types = tally('type'), scopes = tally('scope');
+        for (const t of [...S.types]) { if (!types.some(([name]) => name === t)) { S.types.delete(t); } }
+        if (!scopes.some(([name]) => name === S.scope)) { S.scope = ''; }
+        const chips = el('div', { class: 'chips' }, types.map(([t, n]) => {
+            const chip = el('button', { class: 'chip', 'aria-pressed': S.types.has(t) ? 'true' : 'false', text: t + ' ' + n,
                 onclick: () => { if (S.types.has(t)) { S.types.delete(t); } else { S.types.add(t); } chip.setAttribute('aria-pressed', S.types.has(t) ? 'true' : 'false'); draw(); } });
             return chip;
         }));
-        const input = el('input', { class: 'field', id: 'commit-filter', type: 'search', placeholder: 'Filter commits by module or words', 'aria-label': 'Filter commits', value: S.commitQuery,
+        const input = el('input', { class: 'field', id: 'commit-filter', type: 'search', placeholder: 'Filter commits by words', 'aria-label': 'Filter commits', value: S.commitQuery,
             oninput: (e) => { S.commitQuery = e.target.value; draw(); } });
-        box.append(el('div', { class: 'controls' }, input), chips);
+        const scope = el('select', { class: 'field', id: 'commit-scope', 'aria-label': 'Module', onchange: (e) => { S.scope = e.target.value; draw(); } },
+            el('option', { value: '', text: 'Every module' }),
+            scopes.map(([name, n]) => el('option', { value: name, text: name + ' (' + n + ')', selected: S.scope === name })));
+        box.append(el('div', { class: 'controls' }, input, scope), chips);
     }
     draw();
     box.append(list);
     return box;
 }
 
+// The files a set of releases touched. A file opens to every change made to it in them.
+function fileRows(fileList, versions) {
+    let cap = 25;
+    const box = el('div', { class: 'section' });
+    const rows = el('div', { class: 'frows' });
+    function draw() {
+        const top = fileList.length ? fileList[0][1] + fileList[0][2] : 1;
+        rows.replaceChildren(el('div', { class: 'frow head' }, el('div', { text: 'File' }), el('span', { text: 'Commits', title: 'Commits' }), el('span', { text: 'Added' }), el('span', { text: 'Removed' })));
+        for (const [p, a, d, n] of fileList.slice(0, cap)) {
+            let hist = null;
+            const btn = el('button', { class: 'linkbtn', 'aria-expanded': 'false', text: p, onclick: () => {
+                if (hist) { hist.remove(); hist = null; btn.setAttribute('aria-expanded', 'false'); return; }
+                hist = fileHistory(p, versions);
+                row.after(hist);
+                btn.setAttribute('aria-expanded', 'true');
+            } });
+            const row = el('div', { class: 'frow' },
+                el('div', null, btn, el('span', { class: 'weight', style: 'width:' + Math.max(1, Math.round(100 * (a + d) / top)) + '%' })),
+                el('span', { text: n }), el('span', { class: 'plus', text: '+' + a }), el('span', { class: 'minus', text: '-' + d }));
+            rows.append(row);
+        }
+        if (!fileList.length) { rows.append(el('div', { class: 'file-note', text: 'No files changed.' })); }
+    }
+    draw();
+    box.append(rows);
+    if (fileList.length > cap) {
+        box.append(el('button', { class: 'btn', text: 'Show all ' + count(fileList.length, 'file'), onclick: (e) => { cap = Infinity; draw(); e.target.remove(); } }));
+    }
+    return box;
+}
+
+function fileHistory(path, versions) {
+    const box = el('div', { class: 'fhist' }, el('div', { class: 'file-note', text: versions.length > 3 ? 'Loading this file\'s changes across ' + versions.length + ' releases' : 'Loading this file\'s changes' }));
+    Promise.all(versions.map(loadPatches)).then((all) => {
+        const found = [];
+        for (const p of all) {
+            for (const [sha, files] of Object.entries(p.commits)) {
+                const c = D.commitBySha.get(sha);
+                for (const f of files) { if (c && (f.path === path || f.from === path)) { found.push([c, f]); } }
+            }
+        }
+        found.sort((a, b) => (a[0].date < b[0].date ? 1 : -1));
+        const open = found.length <= 3;
+        box.replaceChildren(...found.map(([c, f]) => el('div', { class: 'hist-item' },
+            el('div', { class: 'hist-line' }, commitWords(c), el('span', { class: 'muted' }, shaLink(c), ', ', day(c.date)), versions.length > 1 && versionTag(c.release)),
+            fileBlock(f, c, open && f.adds + f.dels <= 300))));
+        if (!found.length) { box.replaceChildren(el('div', { class: 'file-note', text: 'No change to this file was found.' })); }
+    }).catch(() => {
+        box.replaceChildren(el('div', { class: 'file-note', text: 'This file\'s changes could not be loaded.' }));
+    });
+    return box;
+}
+
 function notesBlock(sections, withVersion) {
     const box = el('div', { class: 'notes' });
     for (const s of sections) {
-        box.append(el('div', null, el('h3', { text: s.heading }), el('ul', null, s.entries.map((e) => {
+        box.append(el('div', null, s.heading && el('h3', { text: s.heading }), el('ul', null, s.entries.map((e) => {
             const li = el('li');
-            if (withVersion && e.version) { li.append(tag(e.version, 'version'), ' '); }
+            if (withVersion && e.version) { li.append(versionTag(e.version), ' '); }
             if (e.name) { li.append(el('b', { text: e.name }), ' '); }
             return inline(e.text, li);
         }))));
@@ -514,17 +610,18 @@ function notesBlock(sections, withVersion) {
 
 // Board ----------------------------------------------------------------------------------------
 
+const sourceTag = (item) => el('a', { class: 'tag plain', href: item.url, text: item.source === 'github' ? 'GitHub #' + item.number : 'CurseForge', onclick: (e) => e.stopPropagation() });
+const kindTag = (item) => tag(KIND[item.kind] || item.kind, item.kind === 'bug' ? 'bug' : item.kind === 'request' ? 'request' : 'plain');
+
 function card(item) {
-    const where = item.status === 'shipped' ? (item.version ? tag(item.version, 'version') : null)
-        : item.status === 'ready' ? tag('next release', 'ready')
+    const where = item.status === 'shipped' ? (item.version ? versionTag(item.version) : null)
+        : item.status === 'ready' ? el('a', { class: 'tag ready', href: '#release-unreleased', text: 'next release', onclick: (e) => e.stopPropagation() })
         : item.status === 'progress' ? tag(item.branch || 'in progress', 'progress') : null;
-    return el('button', { class: 'card', onclick: () => { location.hash = 'item-' + item.id; } },
-        el('span', { class: 'row' },
-            tag(item.source === 'github' ? 'GitHub #' + item.number : 'CurseForge'),
-            tag(KIND[item.kind] || item.kind, item.kind === 'bug' ? 'bug' : item.kind === 'request' ? 'request' : 'plain'),
-            where),
-        el('span', { class: 'title', text: item.title }),
-        el('span', { class: 'foot' }, el('span', { text: item.author }), el('span', { text: day(item.opened) }),
+    const moved = lastVisit && item.updated && item.updated > lastVisit;
+    return el('article', { class: 'card', onclick: (e) => { if (!e.target.closest('a')) { location.hash = 'item-' + item.id; } } },
+        el('div', { class: 'row' }, sourceTag(item), kindTag(item), where, moved && tag('new since your last visit', 'ready')),
+        el('a', { class: 'title', href: '#item-' + item.id, text: item.title }),
+        el('div', { class: 'foot' }, link(authorUrl(item.source, item.author), item.author), el('span', { text: day(item.opened) }),
             item.commits.length ? el('span', { text: count(item.commits.length, 'commit') }) : null));
 }
 
@@ -557,7 +654,12 @@ function renderBoard() {
             let last = null;
             for (const item of sorted.slice(0, cap)) {
                 const v = item.version || 'Closed as done';
-                if (v !== last) { col.append(el('div', { class: 'group', text: v })); last = v; }
+                if (v !== last) {
+                    const r = D.releaseByVersion.get(v);
+                    col.append(el('div', { class: 'group' }, r ? el('a', { href: '#release-' + slug(v), text: v }) : v,
+                        r && r.date ? el('span', { class: 'muted', text: '  ' + calendarDay(r.date) }) : null));
+                    last = v;
+                }
                 col.append(card(item));
             }
             if (sorted.length > cap) {
@@ -591,11 +693,13 @@ function openItem(item) {
     const merged = made.filter((c) => c.release !== WIP);
     const rel = item.version && D.releaseByVersion.get(item.version);
     const rank = { open: 0, progress: 1, ready: 2, shipped: 3, declined: 0 }[item.status];
+    const where = item.source === 'github' ? 'GitHub' : 'CurseForge';
     const steps = [
-        ['Reported', day(item.opened) + ' by ' + item.author],
+        ['Reported', [day(item.opened) + ' by ', link(authorUrl(item.source, item.author), item.author)]],
         ['Started', made.length ? day(made[0].date) + (item.branch && !merged.length ? ' on ' + item.branch : '') : item.note ? 'Looked into' : 'Not yet'],
         ['Merged', merged.length ? day(merged[merged.length - 1].date) + ', ' + count(merged.length, 'commit') : 'Not yet'],
-        ['Released', item.status === 'shipped' ? (item.version ? item.version + (rel && rel.date ? ', ' + calendarDay(rel.date) : '') : 'Closed as done') : 'Not yet'],
+        ['Released', item.status !== 'shipped' ? 'Not yet' : !rel ? 'Closed as done'
+            : [el('a', { href: '#release-' + slug(rel.version), text: rel.version }), rel.date ? ', ' + calendarDay(rel.date) : '']],
     ];
     const track = el('div', { class: 'track' }, steps.map(([name, text], i) =>
         el('div', { class: 'step ' + (i <= rank ? 'done' : i === rank + 1 && item.status !== 'declined' ? 'now' : '') }, el('b', { text: name }), text)));
@@ -604,17 +708,20 @@ function openItem(item) {
         el('div', { class: 'sheet-top' },
             el('h2', { text: item.title }),
             el('button', { class: 'btn', text: 'Close', onclick: closeItem })),
-        el('div', { class: 'chips' },
-            tag(item.source === 'github' ? 'GitHub #' + item.number : 'CurseForge'),
-            tag(KIND[item.kind] || item.kind, item.kind === 'bug' ? 'bug' : item.kind === 'request' ? 'request' : 'plain'),
-            item.state === 'open' && item.status === 'shipped' ? tag('still open on ' + (item.source === 'github' ? 'GitHub' : 'CurseForge'), 'open') : null,
+        el('div', { class: 'chips' }, sourceTag(item), kindTag(item),
+            item.state === 'open' && item.status === 'shipped' ? tag('still open on ' + where, 'open') : null,
             item.status === 'declined' ? tag('closed without a change', 'open') : null,
-            el('a', { href: item.url, text: item.source === 'github' ? 'Open on GitHub' : 'Open CurseForge comments' })),
+            el('a', { href: item.url, text: item.source === 'github' ? 'Open on GitHub' : 'Open CurseForge comments' }),
+            rel && releaseUrl(rel) ? el('a', { href: releaseUrl(rel), text: rel.version + ' on GitHub' }) : null),
         track,
     ];
     if (item.note) { body.push(el('div', { class: 'section' }, el('h3', { text: 'Where it stands' }), el('div', { class: 'prose', text: item.note }))); }
     if (item.body) { body.push(el('div', { class: 'section' }, el('h3', { text: 'What ' + item.author + ' wrote' }), inline(item.body, el('div', { class: 'prose quote' })))); }
-    if (item.reply) { body.push(el('div', { class: 'section' }, el('h3', { text: 'Reply, ' + day(item.reply.date) }), inline(item.reply.text, el('div', { class: 'prose' })))); }
+    if (item.reply) {
+        body.push(el('div', { class: 'section' },
+            el('h3', null, 'Reply, ' + day(item.reply.date), item.reply.url ? [' · ', el('a', { href: item.reply.url, text: 'on ' + where })] : null),
+            inline(item.reply.text, el('div', { class: 'prose' }))));
+    }
     if (item.notes.length) {
         body.push(el('div', { class: 'section' }, el('h3', { text: 'In the release notes' }),
             notesBlock([{ heading: '', entries: item.notes }], true)));
@@ -623,7 +730,6 @@ function openItem(item) {
         el('h3', { text: made.length ? 'The changes, ' + count(made.length, 'commit') : 'The changes' }),
         made.length ? commitList(made, { plain: true }) : el('div', { class: 'empty', text: 'No commit is linked to this yet. A commit is linked when its message names the issue, the reply links it, or the inbox task recorded it.' })));
     sheetIn.replaceChildren(...body);
-    sheetIn.querySelectorAll('.notes h3').forEach((h) => { if (!h.textContent) { h.remove(); } });
     if (!sheet.open) { if (sheet.showModal) { sheet.showModal(); } else { sheet.setAttribute('open', ''); } }
     sheet.scrollTop = 0;
 }
@@ -650,19 +756,34 @@ function strip(isOn, isRange, onPick) {
     return box;
 }
 
+function wrapToggle() {
+    const on = () => app.classList.contains('wraplines');
+    const b = el('button', { class: 'chip', 'aria-pressed': on() ? 'true' : 'false', text: 'Wrap long lines',
+        onclick: () => { app.classList.toggle('wraplines'); b.setAttribute('aria-pressed', on() ? 'true' : 'false'); } });
+    return b;
+}
+
+// Commits or Files, for a release or a range.
+function paneSwitch(commits, files) {
+    return el('div', { class: 'seg', role: 'group', 'aria-label': 'Show' },
+        [['commits', 'Commits ' + commits], ['files', 'Files ' + files]].map(([id, text]) =>
+            el('button', { 'aria-pressed': S.pane === id ? 'true' : 'false', text, onclick: () => { S.pane = id; render(); } })));
+}
+
 function renderChanges() {
     if (!S.release || !D.releaseByVersion.has(S.release)) {
         S.release = D.releases[0].commits ? D.releases[0].version : (D.releases[1] || D.releases[0]).version;
     }
     const r = D.releaseByVersion.get(S.release);
     const commits = D.commits.filter((c) => c.release === r.version);
-    const pickRelease = (v) => { S.release = v; S.types.clear(); S.commitQuery = ''; render(); };
+    const pickRelease = (v) => { S.types.clear(); S.scope = ''; S.commitQuery = ''; location.hash = 'release-' + slug(v); };
     const select = el('select', { class: 'field', id: 'release-pick', 'aria-label': 'Release', onchange: (e) => pickRelease(e.target.value) },
         D.releases.map((x) => el('option', { value: x.version, selected: x.version === r.version,
             text: x.version === UNRELEASED ? 'Since ' + (D.board.latest || 'the start') + ' (' + count(x.commits, 'commit') + ')' : x.version + (x.date ? ', ' + calendarDay(x.date) : '') })));
     const title = r.version === UNRELEASED ? 'Since ' + (D.board.latest || 'the start') : 'Forever++ ' + r.version;
-    const base = D.board.repo.url;
+    const base = repoUrl();
     const compare = base && r.prev && (r.tag || !D.board.unpushed) ? base + '/compare/' + r.prev + '...' + (r.tag || 'main') : null;
+    const requests = D.board.items.filter((i) => (r.version === UNRELEASED ? i.status === 'ready' : i.status === 'shipped' && i.version === r.version));
     const panel = el('div', { class: 'panel' },
         el('div', { class: 'controls' }, el('h2', { text: title }),
             r.version === UNRELEASED ? tag('not released', 'ready') : r.date ? el('span', { class: 'muted', text: calendarDay(r.date) }) : null),
@@ -671,10 +792,16 @@ function renderChanges() {
             el('span', null, el('b', { text: r.files.length.toLocaleString('en-US') }), r.files.length === 1 ? 'file' : 'files'),
             el('span', null, el('b', { class: 'plus', text: '+' + r.adds.toLocaleString('en-US') }), 'added'),
             el('span', null, el('b', { class: 'minus', text: '-' + r.dels.toLocaleString('en-US') }), 'removed'),
-            compare ? el('a', { href: compare, text: 'Whole diff on GitHub' }) : null),
+            releaseUrl(r) && el('a', { href: releaseUrl(r), text: 'Release on GitHub' }),
+            compare && el('a', { href: compare, text: 'Whole diff on GitHub' }),
+            r.prev && el('a', { href: '#release-' + slug(r.prev.slice(1)), text: 'Before it: ' + r.prev.slice(1) })),
         el('div', { class: 'split' },
-            el('div', { class: 'section' }, el('h3', { text: 'Release notes' }), notesBlock(r.sections)),
-            el('div', { class: 'section' }, el('h3', { text: 'Commits' }), commitList(commits, { filters: true }))));
+            el('div', { class: 'section' },
+                requests.length ? [el('h3', { text: 'Requests and reports it answers' }),
+                    el('div', { class: 'notes' }, el('ul', null, requests.map((i) => el('li', null, kindTag(i), ' ', el('a', { href: '#item-' + i.id, text: i.title }), el('span', { class: 'muted', text: ' ' + i.author })))))] : null,
+                el('h3', { text: 'Release notes' }), notesBlock(r.sections)),
+            el('div', { class: 'section' }, el('div', { class: 'controls' }, paneSwitch(r.commits, r.files.length)),
+                S.pane === 'files' ? fileRows(r.files, [r.version]) : commitList(commits, { filters: true }))));
     view.replaceChildren(
         el('div', { class: 'section' }, strip((x) => x.version === r.version, null, (x) => pickRelease(x.version)),
             el('div', { class: 'controls' }, select, wrapToggle())),
@@ -682,20 +809,13 @@ function renderChanges() {
 
     const branches = D.board.branches || [];
     if (branches.length) {
-        const list = el('table', { class: 'files' }, el('tr', null, el('th', { text: 'Branch' }), el('th', { text: 'Ahead' }), el('th', { text: 'Last commit' })));
+        const list = el('div', { class: 'frows branches' }, el('div', { class: 'frow head' }, el('div', { text: 'Branch' }), el('span', { text: 'Ahead' }), el('span', { text: 'Last' })));
         for (const b of branches) {
-            list.append(el('tr', null, el('td', null, b.name, el('div', { class: 'muted', style: 'font-family: var(--font-body)', text: b.subject })),
-                el('td', { text: b.ahead }), el('td', { text: day(b.date) })));
+            list.append(el('div', { class: 'frow' }, el('div', null, el('div', { style: 'font: 12.5px var(--font-mono); overflow-wrap: anywhere', text: b.name }), el('div', { class: 'muted small', text: b.subject })),
+                el('span', { text: b.ahead }), el('span', { text: day(b.date) })));
         }
-        view.append(el('details', { class: 'panel' }, el('summary', { text: count(branches.length, 'branch', 'branches') + ' not merged into main' }), el('div', { class: 'scroll' }, list)));
+        view.append(el('details', { class: 'panel' }, el('summary', { text: count(branches.length, 'local branch', 'local branches') + ' not merged into main' }), list));
     }
-}
-
-function wrapToggle() {
-    const on = () => app.classList.contains('wraplines');
-    const b = el('button', { class: 'chip', 'aria-pressed': on() ? 'true' : 'false', text: 'Wrap long lines',
-        onclick: () => { app.classList.toggle('wraplines'); b.setAttribute('aria-pressed', on() ? 'true' : 'false'); } });
-    return b;
 }
 
 // Compare --------------------------------------------------------------------------------------
@@ -742,22 +862,8 @@ function renderCompare() {
     const to = el('select', { class: 'field', id: 'compare-to', 'aria-label': 'To version', onchange: (e) => { S.to = e.target.value; render(); } },
         D.releases.map((r) => option(r, S.to)));
     const fromRel = D.releaseByVersion.get(S.from), toRel = D.releaseByVersion.get(S.to);
-    const base = D.board.repo.url;
-    const link = base && (toRel.tag || !D.board.unpushed) ? base + '/compare/' + fromRel.tag + '...' + (toRel.tag || 'main') : null;
-
-    let cap = 25;
-    const table = el('table', { class: 'files' });
-    const drawFiles = () => {
-        const top = fileList.length ? fileList[0][1] + fileList[0][2] : 1;
-        table.replaceChildren(el('tr', null, el('th', { text: 'File' }), el('th', { text: 'Commits' }), el('th', { text: 'Added' }), el('th', { text: 'Removed' })));
-        for (const [p, a, d, n] of fileList.slice(0, cap)) {
-            table.append(el('tr', null,
-                el('td', null, p, el('span', { class: 'weight', style: 'width:' + Math.max(1, Math.round(100 * (a + d) / top)) + '%' })),
-                el('td', { text: n }), el('td', { class: 'plus', text: '+' + a }), el('td', { class: 'minus', text: '-' + d })));
-        }
-    };
-    drawFiles();
-    const moreFiles = fileList.length > cap ? el('button', { class: 'btn', text: 'Show all ' + count(fileList.length, 'file'), onclick: (e) => { cap = Infinity; drawFiles(); e.target.remove(); } }) : null;
+    const base = repoUrl();
+    const whole = base && (toRel.tag || !D.board.unpushed) ? base + '/compare/' + fromRel.tag + '...' + (toRel.tag || 'main') : null;
 
     view.replaceChildren(
         el('div', { class: 'section' },
@@ -774,12 +880,13 @@ function renderCompare() {
                 el('span', null, el('b', { text: fileList.length.toLocaleString('en-US') }), fileList.length === 1 ? 'file touched' : 'files touched'),
                 el('span', null, el('b', { class: 'plus', text: '+' + adds.toLocaleString('en-US') }), 'added'),
                 el('span', null, el('b', { class: 'minus', text: '-' + dels.toLocaleString('en-US') }), 'removed'),
-                link ? el('a', { href: link, text: 'Whole diff on GitHub' }) : null),
-            el('div', { class: 'muted', style: 'font-size: 13px', text: 'Lines are summed over every commit, so a line changed twice counts twice.' }),
+                whole && el('a', { href: whole, text: 'Whole diff on GitHub' })),
+            el('div', { class: 'chips small' }, el('span', { class: 'muted', text: 'Releases in it:' }), [...range].reverse().map((r) => versionTag(r.version))),
+            el('div', { class: 'muted small', text: 'Lines are summed over every commit, so a line changed twice counts twice.' }),
             el('div', { class: 'split' },
                 el('div', { class: 'section' }, el('h3', { text: 'What changed for players' }), notesBlock(headings, true)),
-                el('div', { class: 'section' }, el('h3', { text: 'Files changed most' }), el('div', { class: 'scroll' }, table), moreFiles))),
-        el('div', { class: 'section' }, el('h3', { text: 'Every commit' }), commitList(commits, { filters: true, limit: 80 })));
+                el('div', { class: 'section' }, el('div', { class: 'controls' }, paneSwitch(commits.length, fileList.length)),
+                    S.pane === 'files' ? fileRows(fileList, range.map((r) => r.version)) : commitList(commits, { filters: true, limit: 80 })))));
 }
 
 // Comments -------------------------------------------------------------------------------------
@@ -794,17 +901,18 @@ function renderFeedback() {
     const list = el('div', { class: 'threads' }, shown.map((t) => {
         const item = t.item && D.itemById.get(t.item);
         return el('article', { class: 'thread' },
-            el('div', { class: 'who' }, el('b', { text: t.author }), el('span', { text: dayYear(t.date) }),
+            el('div', { class: 'who' }, link(authorUrl('curseforge', t.user), t.author, 'name'), el('span', { text: dayYear(t.date) }),
                 t.waiting ? tag('no reply seen', 'ready') : t.reply ? tag('replied', 'version') : null,
                 t.replies ? el('span', { text: count(t.replies, 'reply', 'replies') }) : null,
+                lastVisit && t.last > lastVisit ? tag('new since your last visit', 'ready') : null,
                 item ? el('a', { href: '#item-' + item.id, text: 'On the board' }) : null),
-            el('div', { class: 'prose', text: t.text }),
-            t.reply ? el('div', { class: 'prose quote', text: t.reply }) : null);
+            inline(t.text, el('div', { class: 'prose' })),
+            t.reply ? inline(t.reply, el('div', { class: 'prose quote' })) : null);
     }));
     if (!shown.length) { list.append(el('div', { class: 'empty', text: S.waitingOnly ? 'Every thread shows a reply.' : 'No comment matches.' })); }
     view.replaceChildren(
         el('div', { class: 'controls' }, search, only, el('a', { href: D.board.curseforge, text: 'Open on CurseForge' })),
-        el('div', { class: 'muted', style: 'font-size: 13px', text: 'CurseForge threads, newest activity first. Its feed leaves out some replies, so a thread marked "no reply seen" may have one on the site.' }),
+        el('div', { class: 'muted small', text: 'CurseForge threads, newest activity first. Its feed leaves out some replies, so a thread marked "no reply seen" may have one on the site.' }),
         list);
 }
 
@@ -814,12 +922,17 @@ function renderStanding() {
     const b = D.board;
     const latest = D.releaseByVersion.get(b.latest);
     const parts = [];
-    if (latest) { parts.push(el('span', null, el('b', { text: b.latest }), ' released ' + calendarDay(latest.date))); }
-    parts.push(el('span', null, el('b', { text: b.unreleased }), b.unreleased === 1 ? ' commit since' : ' commits since', b.unpushed ? ', ' + b.unpushed + ' not pushed' : ''));
+    if (latest) { parts.push(el('span', null, el('a', { href: '#release-' + slug(b.latest) }, el('b', { text: b.latest })), ' released ' + calendarDay(latest.date))); }
+    parts.push(el('span', null, el('a', { href: '#release-unreleased' }, el('b', { text: b.unreleased }), b.unreleased === 1 ? ' commit since' : ' commits since'), b.unpushed ? ', ' + b.unpushed + ' not pushed' : ''));
     parts.push(el('span', { text: 'Data from ' + timeFmt.format(new Date(b.generated)) + ' ET' }));
     const stale = Object.entries(b.sources || {}).filter(([, v]) => v !== 'ok').map(([k]) => k);
     if (stale.length) { parts.push(el('span', null, tag((stale.includes('curseforge') ? 'CurseForge' : 'GitHub') + ' could not be read, showing the last copy', 'ready'))); }
     document.getElementById('standing').replaceChildren(...parts);
+    const base = repoUrl();
+    document.getElementById('places').replaceChildren(...[
+        base && el('a', { href: base, text: 'GitHub' }), base && el('a', { href: base + '/issues', text: 'Issues' }),
+        base && el('a', { href: base + '/releases', text: 'Releases' }), b.curseforge && el('a', { href: b.curseforge, text: 'CurseForge' }),
+    ].filter(Boolean));
     const live = b.items.filter((i) => i.status === 'open' || i.status === 'progress' || i.status === 'ready').length;
     const counts = { board: live, changes: b.unreleased };
     for (const [id, n] of Object.entries(counts)) {
@@ -842,9 +955,15 @@ function route() {
         if (item) { if (!view.dataset.drawn) { render(); view.dataset.drawn = '1'; } openItem(item); return; }
     }
     closeItem();
-    S.view = VIEWS.includes(name) ? name : S.view;
+    if (name.startsWith('release-') && D.releaseBySlug.has(name.slice(8))) {
+        S.view = 'changes';
+        S.release = D.releaseBySlug.get(name.slice(8));
+    } else if (VIEWS.includes(name)) {
+        S.view = name;
+    }
     view.dataset.drawn = '1';
     render();
+    if (name.startsWith('release-')) { window.scrollTo(0, 0); }
 }
 for (const tab of document.querySelectorAll('.tab')) {
     tab.addEventListener('click', () => { if (location.hash.slice(1) === tab.dataset.view) { route(); } else { location.hash = tab.dataset.view; } });
@@ -857,6 +976,7 @@ Promise.all([get('board.json'), get('commits.json'), get('releases.json'), get('
     Object.assign(D, { board, commits, releases, comments });
     D.commitBySha = new Map(commits.map((c) => [c.sha, c]));
     D.releaseByVersion = new Map(releases.map((r) => [r.version, r]));
+    D.releaseBySlug = new Map(releases.map((r) => [slug(r.version), r.version]));
     D.itemById = new Map(board.items.map((i) => [i.id, i]));
     D.itemByNumber = new Map(board.items.filter((i) => i.number).map((i) => [i.number, i]));
     renderStanding();

@@ -38,7 +38,8 @@ const UNRELEASED = 'Unreleased';
 const WIP = 'In progress';
 const MAX_PATCH = 80000; // bytes of one file's diff kept; a longer one is cut at a line
 const MAX_TEXT = 2400; // letters of a request's or reply's text kept
-// Generated data: counted in a commit's numbers, but its diff is left out.
+const MAX_GENERATED = 400; // changed lines up to which a generated file's diff is kept
+// Generated data: counted in a commit's numbers, and its diff is kept only when it's small.
 const GENERATED = [
     'ForeverPlusPlus/Lib/Generated',
     'ForeverPlusPlus/Modules/Map/WorldMap/UnexploredAreas/Data.lua',
@@ -159,16 +160,11 @@ function findCommit(prefix) {
 
 // Diffs ---------------------------------------------------------------------------------------
 
-function readPatches(range) {
-    const exclude = GENERATED.map((g) => ':(exclude)' + g);
-    const text = git('log', '-p', '--no-merges', '-M', '--no-color', '--no-ext-diff',
-        '--format=%x01%H', range, '--', '.', ...exclude);
-    const bySha = new Map();
-    for (const chunk of text.split('\x01').slice(1)) {
-        const parts = chunk.split(/^diff --git /m);
-        const sha = parts[0].trim();
-        const files = new Map();
-        for (const part of parts.slice(1)) {
+// The files of one commit's diff text, as git writes it: path -> { status, from, patch, cut }.
+function fileDiffs(text) {
+    const files = new Map();
+    {
+        for (const part of text.split(/^diff --git /m).slice(1)) {
             const at = part.search(/^@@ /m);
             const header = at >= 0 ? part.slice(0, at) : part;
             const to = /^\+\+\+ b\/(.+)$/m.exec(header) || /^rename to (.+)$/m.exec(header)
@@ -187,9 +183,26 @@ function readPatches(range) {
             }
             files.set(to[1].trim(), { status, from: from ? from[1].trim() : undefined, patch, cut });
         }
-        bySha.set(sha, files);
+    }
+    return files;
+}
+
+function readPatches(range) {
+    const exclude = GENERATED.map((g) => ':(exclude)' + g);
+    const text = git('log', '-p', '--no-merges', '-M', '--no-color', '--no-ext-diff',
+        '--format=%x01%H', range, '--', '.', ...exclude);
+    const bySha = new Map();
+    for (const chunk of text.split('\x01').slice(1)) {
+        bySha.set(chunk.slice(0, chunk.indexOf('\n')).trim(), fileDiffs(chunk));
     }
     return bySha;
+}
+
+// A generated file's diff is kept when the change is small enough to read, like one new item.
+function generatedDiff(sha, file) {
+    if (file.binary || file.adds + file.dels > MAX_GENERATED) { return null; }
+    const text = git('show', '-M', '--no-color', '--no-ext-diff', '--format=', sha, '--', file.path);
+    return fileDiffs(text).get(file.path) || null;
 }
 
 function patchFile(release) {
@@ -198,11 +211,13 @@ function patchFile(release) {
     for (const c of release.commits) {
         const diffs = patches.get(c.sha) || new Map();
         result[c.sha] = c.files.map((f) => {
-            const d = diffs.get(f.path);
+            const generated = isGenerated(f.path);
+            const d = generated ? generatedDiff(c.sha, f) : diffs.get(f.path);
             const entry = { path: f.path, adds: f.adds, dels: f.dels, status: d ? d.status : 'changed' };
+            if (generated) { entry.generated = true; }
             if (d && d.from) { entry.from = d.from; }
             if (d && d.patch) { entry.patch = d.patch; if (d.cut) { entry.cut = true; } }
-            else if (isGenerated(f.path)) { entry.note = 'generated'; }
+            else if (generated) { entry.note = 'generated'; }
             else if (f.binary) { entry.note = 'binary'; }
             else { entry.note = 'moved'; }
             return entry;
@@ -364,7 +379,8 @@ for (const issue of issues) {
             where = { status: 'shipped', version: said[said.length - 1] };
         } else { where = { status: 'declined' }; }
     }
-    const reply = mine[mine.length - 1];
+    // The reply that says the most, not the one-line "Out in 1.9.0" an issue is closed with.
+    const reply = mine.reduce((best, c) => (!best || c.body.length > best.body.length ? c : best), null);
     items.push({
         id: 'gh-' + issue.number, source: 'github', number: issue.number,
         kind: labels.includes('bug') ? 'bug' : labels.includes('enhancement') ? 'request' : 'issue',
@@ -373,7 +389,7 @@ for (const issue of issues) {
         state: issue.state === 'OPEN' ? 'open' : 'closed', ...where,
         branch: handed && handed.branch || null,
         body: clip(issue.body), comments: (issue.comments || []).length,
-        reply: reply ? { date: reply.createdAt, text: clip(reply.body) } : null,
+        reply: reply ? { date: reply.createdAt, text: clip(reply.body), url: reply.url || null } : null,
         commits: linked, notes: noted,
     });
 }
@@ -449,6 +465,7 @@ const comments = cfThreads.map((t) => {
     const last = replies[replies.length - 1];
     return {
         id: String(t.id), author: t.author ? t.author.displayName || t.author.username : '',
+        user: t.author ? t.author.username : '',
         date: iso(t.datePosted), text: clip(t.text), replies: replies.length,
         // The feed doesn't list every reply of a thread, so this is "none seen", not "none".
         waiting: !isOwner(t.author && t.author.username) && !mine.length,
