@@ -85,6 +85,8 @@ for name, fn in pairs({
     EachLootSlot = function() end,
     MerchantShown = function() return false end,
     HookBags = function() end,
+    EachAddonBagButton = function() end,
+    HookAddonBags = function() end,
     HookBank = function() end,
     HookMerchant = function() end,
     HookLoot = function() end,

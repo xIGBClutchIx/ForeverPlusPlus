@@ -12,6 +12,16 @@ ns.changelog = {
     {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
+            { L.CHANGELOG_CHANGED, {
+                { L.UPGRADEARROWS_TITLE, "Marks gear in the Baganator and GW2 UI addons' bags and bank "
+                    .. "too, as in the game's own." },
+                { L.ALREADYKNOWN_TITLE, "Marks items in the Baganator and GW2 UI addons' bags too, as "
+                    .. "in the game's own." },
+                { L.APPEARANCEICONS_TITLE, "Marks gear in the Baganator and GW2 UI addons' bags and bank "
+                    .. "too, as in the game's own." },
+                { L.UNUSABLEITEMSTINT_TITLE, "Tints items in the Baganator and GW2 UI addons' bags and "
+                    .. "bank too, as in the game's own." },
+            } },
             { L.CHANGELOG_FIXED, {
                 { L.AUTOOPEN_TITLE, "A right click in the bags works with the Baganator and GW2 UI "
                     .. "addons' bags too, so Pick Lock no longer says \"Item is locked\" there." },
