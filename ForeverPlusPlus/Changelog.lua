@@ -13,19 +13,17 @@ ns.changelog = {
         version = "1.9.1", date = "2026-11-25",
         sections = {
             { L.CHANGELOG_CHANGED, {
-                "Upgrade Arrows, Already Known, Appearance Icons, and Unusable Items Tint mark "
-                    .. "items in the bags and bank of Baganator, GW2 UI, Bagnon, Bagnonium, "
-                    .. "BetterBags, and ArkInventory too.",
-                { L.WAYPOINTS_TITLE, "Show Time to Arrive counts down every second, and is "
-                    .. "steadier: it eases to a new estimate instead of jumping, never counts up, "
-                    .. "and stays through a quick turn." },
+                "Baganator, GW2 UI, Bagnon, Bagnonium, BetterBags, and ArkInventory now work with "
+                    .. "Forever++. Upgrade Arrows, Already Known, Appearance Icons, and Unusable "
+                    .. "Items Tint mark items in their bags and bank, and right clicks for Auto "
+                    .. "Open Containers, Comprehend Scrolls, and Auto Weapon Buff work there too, "
+                    .. "so Pick Lock no longer says \"Item is locked\".",
             } },
             { L.CHANGELOG_FIXED, {
-                "A right click for Auto Open Containers, Comprehend Scrolls, and Auto Weapon Buff "
-                    .. "works in those bag addons' bags too, so Pick Lock no longer says \"Item is "
-                    .. "locked\" there.",
                 { L.WAYPOINTS_TITLE, "Show Time to Arrive shows the whole time (\"6:40\"), not "
-                    .. "only its minutes." },
+                    .. "only its minutes. It also counts down every second and is steadier: it "
+                    .. "eases to a new estimate instead of jumping, never counts up, and stays "
+                    .. "through a quick turn." },
             } },
         },
     },
