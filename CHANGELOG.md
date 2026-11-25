@@ -2,17 +2,17 @@
 
 What changed in each release of Forever++. The same notes show in game under Settings > AddOns > Forever++ > Changelog, from [`ForeverPlusPlus/Changelog.lua`](ForeverPlusPlus/Changelog.lua); change both together.
 
-## Unreleased
+## 1.9.1 (2026-11-25)
 
 ### Changed
 
-- **Upgrade Arrows**, **Already Known**, **Appearance Icons**, and **Unusable Items Tint**: mark items in the bags and bank of the Baganator, GW2 UI, Bagnon, Bagnonium, BetterBags, and ArkInventory addons too, as they do in the game's own.
-- **Waypoints**: Show Time to Arrive counts down every second, not in steps of five seconds on a trip over a minute.
+- **Upgrade Arrows**, **Already Known**, **Appearance Icons**, and **Unusable Items Tint**: mark items in the bags and bank of Baganator, GW2 UI, Bagnon, Bagnonium, BetterBags, and ArkInventory too.
+- **Waypoints**: Show Time to Arrive counts down every second.
 
 ### Fixed
 
-- **Auto Open Containers**, **Comprehend Scrolls**, and **Auto Weapon Buff**: a right click in the bags works with the Baganator, GW2 UI, Bagnon, Bagnonium, BetterBags, and ArkInventory addons' bags too, so Pick Lock no longer says "Item is locked" there.
-- **Waypoints**: Show Time to Arrive shows the whole time after the distance, "2.8K yds, 6:40", not only its minutes ("2.8K yds, 6").
+- **Auto Open Containers**, **Comprehend Scrolls**, and **Auto Weapon Buff**: a right click works in those bag addons' bags too, so Pick Lock no longer says "Item is locked" there.
+- **Waypoints**: Show Time to Arrive shows the whole time ("6:40"), not only its minutes.
 
 ## 1.9.0 (2026-11-24)
 

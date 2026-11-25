@@ -10,33 +10,20 @@ local L = ns.L
 
 ns.changelog = {
     {
-        version = L.CHANGELOG_UNRELEASED,
+        version = "1.9.1", date = "2026-11-25",
         sections = {
             { L.CHANGELOG_CHANGED, {
-                { L.UPGRADEARROWS_TITLE, "Marks gear in the bags and bank of the Baganator, GW2 UI, "
-                    .. "Bagnon, Bagnonium, BetterBags, and ArkInventory addons too, as in the game's "
-                    .. "own." },
-                { L.ALREADYKNOWN_TITLE, "Marks items in the bags of the Baganator, GW2 UI, Bagnon, "
-                    .. "Bagnonium, BetterBags, and ArkInventory addons too, as in the game's own." },
-                { L.APPEARANCEICONS_TITLE, "Marks gear in the bags and bank of the Baganator, GW2 UI, "
-                    .. "Bagnon, Bagnonium, BetterBags, and ArkInventory addons too, as in the game's "
-                    .. "own." },
-                { L.UNUSABLEITEMSTINT_TITLE, "Tints items in the bags and bank of the Baganator, GW2 "
-                    .. "UI, Bagnon, Bagnonium, BetterBags, and ArkInventory addons too, as in the "
-                    .. "game's own." },
-                { L.WAYPOINTS_TITLE, "Show Time to Arrive counts down every second, not in steps "
-                    .. "of five seconds on a trip over a minute." },
+                "Upgrade Arrows, Already Known, Appearance Icons, and Unusable Items Tint mark "
+                    .. "items in the bags and bank of Baganator, GW2 UI, Bagnon, Bagnonium, "
+                    .. "BetterBags, and ArkInventory too.",
+                { L.WAYPOINTS_TITLE, "Show Time to Arrive counts down every second." },
             } },
             { L.CHANGELOG_FIXED, {
-                { L.AUTOOPEN_TITLE, "A right click in the bags works with the Baganator, GW2 UI, "
-                    .. "Bagnon, Bagnonium, BetterBags, and ArkInventory addons' bags too, so Pick "
-                    .. "Lock no longer says \"Item is locked\" there." },
-                { L.COMPREHENDSCROLLS_TITLE, "A right click on a scroll works with the Baganator, "
-                    .. "GW2 UI, Bagnon, Bagnonium, BetterBags, and ArkInventory addons' bags too." },
-                { L.AUTOWEAPONBUFF_TITLE, "A right click in the bags works with the Baganator, GW2 "
-                    .. "UI, Bagnon, Bagnonium, BetterBags, and ArkInventory addons' bags too." },
-                { L.WAYPOINTS_TITLE, "Show Time to Arrive shows the whole time after the distance, "
-                    .. "\"2.8K yds, 6:40\", not only its minutes (\"2.8K yds, 6\")." },
+                "A right click for Auto Open Containers, Comprehend Scrolls, and Auto Weapon Buff "
+                    .. "works in those bag addons' bags too, so Pick Lock no longer says \"Item is "
+                    .. "locked\" there.",
+                { L.WAYPOINTS_TITLE, "Show Time to Arrive shows the whole time (\"6:40\"), not "
+                    .. "only its minutes." },
             } },
         },
     },
