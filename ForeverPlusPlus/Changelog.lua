@@ -10,6 +10,17 @@ local L = ns.L
 
 ns.changelog = {
     {
+        version = L.CHANGELOG_UNRELEASED,
+        sections = {
+            { L.CHANGELOG_ADDED, {
+                { L.DISENCHANTICONS_TITLE, "A new module, off by default, that marks the items you can "
+                    .. "disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By "
+                    .. "default only on a character with Enchanting, and Skip Items Worth More Sold "
+                    .. "leaves out what a vendor pays more for." },
+            } },
+        },
+    },
+    {
         version = "1.9.1", date = "2026-11-25",
         sections = {
             { L.CHANGELOG_CHANGED, {

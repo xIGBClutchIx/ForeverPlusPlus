@@ -13,6 +13,8 @@ ns.Data.spells = {
     OPENING = { 3365, "Opening" },
     PICK_LOCK = { 1804, "Pick Lock" },
     FISHING = { 7620, "Fishing" },
+    -- Enchanting's SkillLineAbility, build 70888.
+    DISENCHANT = { 13262, "Disenchant" },
     -- Minimap tracking.
     FIND_HERBS = { 2383, "Find Herbs" },
     FIND_MINERALS = { 2580, "Find Minerals" },
