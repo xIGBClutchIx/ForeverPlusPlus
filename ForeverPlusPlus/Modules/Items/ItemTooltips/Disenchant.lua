@@ -104,7 +104,7 @@ end
 -- a chest's loot opened around it is never taken for one. Probe: the lock during the cast and
 -- GetLootSourceInfo's "Item-" GUID are Mainline's; unverified on Forever.
 
-local DISENCHANT_SPELL = ns.GameData.Spell(13262, "Disenchant") -- Enchanting's SkillLineAbility, 70888
+local DISENCHANT_SPELL = ns.Data.Spell("DISENCHANT")
 local TRADE_GOODS, ENCHANTING = 7, 12
 local WAIT = 5 -- seconds after the cast for its loot
 

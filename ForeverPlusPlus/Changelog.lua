@@ -17,6 +17,10 @@ ns.changelog = {
                     .. "button with your free bag slots while the controller interface is on, "
                     .. "since it hides the bag buttons. Move it in Edit Mode, and point at it for "
                     .. "each bag's free slots." },
+                { L.DISENCHANTICONS_TITLE, "A new module, off by default, that marks the items you can "
+                    .. "disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By "
+                    .. "default only on a character with Enchanting, and Skip Items Worth More Sold "
+                    .. "leaves out what a vendor pays more for." },
             } },
         },
     },

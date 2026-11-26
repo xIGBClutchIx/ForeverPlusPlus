@@ -7,6 +7,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Added
 
 - **Bag Slot Counter**: Bag Button on Screen (on by default) shows a backpack button with your free bag slots while the controller interface is on, since it hides the bag buttons. Move it in Edit Mode, and point at it for each bag's free slots.
+- **Disenchant Icons**: A new module, off by default, that marks the items you can disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By default only on a character with Enchanting, and Skip Items Worth More Sold leaves out what a vendor pays more for.
 
 ## 1.9.1 (2026-11-25)
 

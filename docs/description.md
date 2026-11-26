@@ -106,6 +106,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 - **Appearance Icons**: Marks gear whose appearance you haven't collected with Blizzard's transmogrifier icon, in bags, the bank, merchants, the auction house, loot, and on recipes that make it.
 - **Auction Totals**: On the auction house's Auctions page, shows next to Cancel Auction what your auctions are listed for in all, and how much has sold.
 - **Bag Slot Counter**: Shows free bag slots on the backpack button, or each bag's own count, turning orange when few are left and red at 0. With the controller interface, which hides the bag buttons, a backpack button of its own shows the count, placed in Edit Mode.
+- **Disenchant Icons**: Marks the items you can disenchant with the Disenchant icon, in bags, the bank, the auction house, and loot, by default only on a character with Enchanting. Off by default.
 - **Easy Delete**: Types DELETE for you when you destroy a good item, so Yes is a single click. Off by default.
 - **Item Tooltips**: Adds lines to item tooltips, each with its own checkbox.
   - **Sell Price**: for the whole stack.
