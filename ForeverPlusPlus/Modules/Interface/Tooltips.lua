@@ -621,6 +621,20 @@ local function nameIcon(tooltip, data, icon)
     end
 end
 
+-- The icon of the spell, or else the item, called `name`: a spell the character knows and an
+-- item the client has seen are found by name. Nil for a name that's neither, or can't be read.
+local function iconByName(name)
+    if not ns.IsText(name, true) then
+        return nil
+    end
+    name = ns.Text.Plain(name)
+    local icon = C_Spell and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(name)
+    if not icon and C_Item.GetItemInfoInstant then
+        icon = select(5, C_Item.GetItemInfoInstant(name))
+    end
+    return icon
+end
+
 local function onSpell(tooltip, data)
     if not (module.db.nameIcon and data and C_Spell and C_Spell.GetSpellTexture) then
         return
@@ -628,6 +642,10 @@ local function onSpell(tooltip, data)
     local id = data.id
     if readable(id) and id then
         nameIcon(tooltip, data, C_Spell.GetSpellTexture(id))
+    else
+        -- A spell tooltip with no ID of its own (a macro's, on some clients): by its name.
+        local lines = readable(data.lines) and type(data.lines) == "table" and data.lines
+        nameIcon(tooltip, data, iconByName(lines and lines[1] and lines[1].leftText))
     end
 end
 
@@ -642,14 +660,18 @@ local function onMacro(tooltip, data)
     local lines = readable(data.lines) and type(data.lines) == "table" and data.lines
     local first = lines and lines[1]
     local kind, id = first and first.tooltipType, first and first.tooltipID
-    if not (readable(kind) and readable(id) and kind and id) then
-        return
+    if readable(kind) and readable(id) and kind and id then
+        if kind == Enum.TooltipDataType.Spell and C_Spell and C_Spell.GetSpellTexture then
+            nameIcon(tooltip, data, C_Spell.GetSpellTexture(id))
+            return
+        elseif kind == Enum.TooltipDataType.Item and C_Item.GetItemIconByID then
+            nameIcon(tooltip, data, C_Item.GetItemIconByID(id))
+            return
+        end
     end
-    if kind == Enum.TooltipDataType.Spell and C_Spell and C_Spell.GetSpellTexture then
-        nameIcon(tooltip, data, C_Spell.GetSpellTexture(id))
-    elseif kind == Enum.TooltipDataType.Item and C_Item.GetItemIconByID then
-        nameIcon(tooltip, data, C_Item.GetItemIconByID(id))
-    end
+    -- This client's macro tooltips don't say (seen in game 2026-11-26: Smart Buff's macro got no
+    -- icon): the tooltip's first line is the spell's or item's name, which finds its icon.
+    nameIcon(tooltip, data, iconByName(first and first.leftText))
 end
 
 -- Class and Side on One Row: a player's class line and the side line right after it go on one
