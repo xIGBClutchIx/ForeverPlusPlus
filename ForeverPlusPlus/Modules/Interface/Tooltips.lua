@@ -20,7 +20,7 @@ local NORMAL_FONT_COLOR, TOOLTIP_DEFAULT_COLOR = NORMAL_FONT_COLOR, TOOLTIP_DEFA
 local FACTION_HORDE, FACTION_ALLIANCE = FACTION_HORDE, FACTION_ALLIANCE
 local GameTooltip, InCombatLockdown = GameTooltip, InCombatLockdown
 local UnitChannelInfo, C_Spell, select = UnitChannelInfo, C_Spell, select
-local GetActionInfo = GetActionInfo
+local GetActionInfo, C_MountJournal, C_PetJournal = GetActionInfo, C_MountJournal, C_PetJournal
 
 local L = ns.L
 local readable = ns.IsReadable
@@ -685,6 +685,81 @@ local function onSetToy(tooltip, itemID)
     end
 end
 
+-- Writes the first line of a tooltip the game has just filled: `name` with `icon` in front. The
+-- name is wider by its icon, so the tooltip sizes itself again.
+local function writeName(tooltip, icon, name)
+    local line = leftLine(tooltip, 1)
+    if line and icon and readable(icon) and ns.IsText(name, true) then
+        line:SetText("|T" .. icon .. ":0|t " .. name)
+        tooltip:Show()
+    end
+end
+
+-- A mount's icon and name from the spell that summons it: the journal's, or else the spell's own.
+local function mountBySpell(spellID)
+    local journal = C_MountJournal
+    if journal and journal.GetMountFromSpell and journal.GetMountInfoByID then
+        local mountID = journal.GetMountFromSpell(spellID)
+        if mountID then
+            local name, _, icon = journal.GetMountInfoByID(mountID)
+            if icon then
+                return icon, name
+            end
+        end
+    end
+    if C_Spell and C_Spell.GetSpellTexture then
+        return C_Spell.GetSpellTexture(spellID), C_Spell.GetSpellName and C_Spell.GetSpellName(spellID)
+    end
+end
+
+-- A mount: one more tooltip kind of its own (seen in game 2026-11-26: no icon). After the game
+-- fills the tooltip from the mount's spell, and from the mount tooltip's own post call, whose ID
+-- may be the mount's or its spell's.
+local function onSetMount(tooltip, spellID)
+    if module.db.nameIcon and readable(spellID) and spellID then
+        writeName(tooltip, mountBySpell(spellID))
+    end
+end
+
+local function onMount(tooltip, data)
+    if not (module.db.nameIcon and data) then
+        return
+    end
+    local id = data.id
+    local icon
+    if readable(id) and id then
+        if C_MountJournal and C_MountJournal.GetMountInfoByID then
+            icon = select(3, C_MountJournal.GetMountInfoByID(id))
+        end
+        icon = icon or (C_Spell and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(id)) or nil
+    end
+    if not icon then
+        local lines = readable(data.lines) and type(data.lines) == "table" and data.lines
+        icon = iconByName(lines and lines[1] and lines[1].leftText)
+    end
+    nameIcon(tooltip, data, icon)
+end
+
+-- A companion pet: the same, from the pet journal. A pet the player named shows that name.
+local function onSetPet(tooltip, petID)
+    if not (module.db.nameIcon and readable(petID) and petID and C_PetJournal and C_PetJournal.GetPetInfoByPetID) then
+        return
+    end
+    local _, customName, _, _, _, _, _, name, icon = C_PetJournal.GetPetInfoByPetID(petID)
+    writeName(tooltip, icon, ns.IsText(customName, true) and customName or name)
+end
+
+local function onPet(tooltip, data)
+    if not (module.db.nameIcon and data and C_PetJournal and C_PetJournal.GetPetInfoBySpeciesID) then
+        return
+    end
+    local id = data.id
+    if readable(id) and id then
+        local _, icon = C_PetJournal.GetPetInfoBySpeciesID(id)
+        nameIcon(tooltip, data, icon)
+    end
+end
+
 -- A buff or debuff: a spell with a tooltip kind of its own. Its ID can be secret in combat, and
 -- then it gets no icon.
 local function onAura(tooltip, data)
@@ -1083,6 +1158,10 @@ function module:OnEnable()
     self:Hook(GameTooltip, "SetAction", onSetAction)
     self:TooltipPostCall(Enum.TooltipDataType.Toy, onToy)
     self:Hook(GameTooltip, "SetToyByItemID", onSetToy)
+    self:TooltipPostCall(Enum.TooltipDataType.Mount, onMount)
+    self:Hook(GameTooltip, "SetMountBySpellID", onSetMount)
+    self:TooltipPostCall(Enum.TooltipDataType.CompanionPet, onPet)
+    self:Hook(GameTooltip, "SetCompanionPet", onSetPet)
     self:TooltipPostCall(Enum.TooltipDataType.UnitAura, onAura)
     -- Probe: every line of every tooltip, for a player's class line.
     if TooltipDataProcessor and TooltipDataProcessor.AllTypes then
