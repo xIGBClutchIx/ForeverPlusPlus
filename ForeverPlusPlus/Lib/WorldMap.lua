@@ -22,30 +22,22 @@ function WorldMap.Get()
 end
 
 ---Shows another map in the world map, as picking it in the map's own dropdown does. Not in
----combat: SetMapID is Blizzard's own, run in our call, and the map it then lays out has pins the
----game protects there. It's the only way to change the map, so out of combat it's called.
+---combat: the map it then lays out has pins the game protects there.
 ---
----With the controller interface on that isn't good enough: a map changed from our code is left
----tainted, and the controller's own code then refuses to close it ("action blocked", seen in
----game 2026-11-16). There the game is asked to open the map on it instead (C_Map.OpenWorldMap,
----which tells the map with an event, WORLD_MAP_OPEN, so the change is made by Blizzard's own
----handler: Blizzard_WorldMap.lua, build 70938). Seen in game 2026-11-16: a travel click changed
----the map and it closed after with no error.
+---The game is asked to open the map on it (C_Map.OpenWorldMap, which tells the map with an event,
+---WORLD_MAP_OPEN, so the change is made by Blizzard's own handler: Blizzard_WorldMap.lua, build
+---70938), never the map's own SetMapID: that runs in our call and leaves the map's mapID and the
+---quest log beside it tainted (Taint Watcher, a click on a boat, 2026-11-26), and with the
+---controller interface on the controller's code then refuses to close the map ("action blocked",
+---seen in game 2026-11-16). Seen in game 2026-11-16, on a controller: a travel click changed the
+---map and it closed after with no error.
 ---@param mapID number
 ---@return boolean shown
 function WorldMap.Show(mapID)
-    local map = WorldMap.Get()
-    if not (map and map.SetMapID and mapID) or InCombatLockdown() then
+    if not (WorldMap.Get() and mapID and C_Map and C_Map.OpenWorldMap) or InCombatLockdown() then
         return false
     end
-    if ns.Gamepad.On() then
-        if not (C_Map and C_Map.OpenWorldMap) then
-            return false
-        end
-        C_Map.OpenWorldMap(mapID)
-        return true
-    end
-    map:SetMapID(mapID)
+    C_Map.OpenWorldMap(mapID)
     return true
 end
 
