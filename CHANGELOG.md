@@ -2,6 +2,12 @@
 
 What changed in each release of Forever++. The same notes show in game under Settings > AddOns > Forever++ > Changelog, from [`ForeverPlusPlus/Changelog.lua`](ForeverPlusPlus/Changelog.lua); change both together.
 
+## Unreleased
+
+### Added
+
+- **Bag Slot Counter**: Bag Button on Screen (on by default) shows a backpack button with your free bag slots while the controller interface is on, since it hides the bag buttons. Move it in Edit Mode, and point at it for each bag's free slots.
+
 ## 1.9.1 (2026-11-25)
 
 ### Changed

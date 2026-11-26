@@ -292,6 +292,15 @@ L.BAGSLOTCOUNTER_POSITION_TOPLEFT = "Top Left"
 L.BAGSLOTCOUNTER_POSITION_BOTTOM = "Bottom"
 L.BAGSLOTCOUNTER_POSITION_TOP = "Top"
 L.BAGSLOTCOUNTER_POSITION_CENTER = "Center"
+L.BAGSLOTCOUNTER_SECTION_CONTROLLER = "Controller Interface"
+L.BAGSLOTCOUNTER_CONTROLLER = "Bag Button on Screen"
+L.BAGSLOTCOUNTER_CONTROLLER_DESC = "The controller interface hides the bag buttons, so while it's "
+    .. "on, show a backpack button with the free slots of every bag that counts. Move it in Edit "
+    .. "Mode, and point at it for each bag's free slots. It only shows the count: open your bags "
+    .. "with the controller as before."
+L.BAGSLOTCOUNTER_HUD_TITLE = "Bags" -- the controller button's tooltip title
+L.BAGSLOTCOUNTER_HUD_BAG = "Bag %d" -- a bag the game gives no name
+L.BAGSLOTCOUNTER_HUD_FREE = "%d of %d free"
 
 -- ProfessionTooltips
 L.PROFTOOLTIPS_TITLE = "Gathering Skill Tooltips" -- Profession Tooltips up to 1.4.0

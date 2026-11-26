@@ -3,10 +3,16 @@
 -- button. Special bags (quivers, ammo pouches, soul bags, herb bags), whose slots only take some
 -- items, can be left out. The reagent bag has its own setting: its own count, added to the
 -- backpack's count, or nothing. The text's size and corner are options.
+--
+-- The controller interface hides the bag bar (Blizzard_ActionBar's MainActionBar_UnInitializeMKB
+-- hides BagsBar and MicroMenu), and its own bag buttons are only in the bag window. So while it's
+-- on, a button of our own shows the backpack's icon and the total, placed in Edit Mode. It only
+-- shows: a click of ours opening Blizzard's bags would run in our call, and the controller's focus
+-- manager answers a window opening (docs/forever-api.md).
 local _, ns = ...
 
-local _G, ipairs, pairs, tostring = _G, ipairs, pairs, tostring
-local CreateFrame, C_Container, Enum = CreateFrame, C_Container, Enum
+local _G, ipairs, pairs, tostring, format = _G, ipairs, pairs, tostring, string.format
+local CreateFrame, C_Container, Enum, UIParent = CreateFrame, C_Container, Enum, UIParent
 
 local L = ns.L
 
@@ -19,11 +25,13 @@ local module = ns.NewModule("BagSlotCounter", L.BAGSLOTCOUNTER_DESC, {
     position = "bottomright", -- a key of POSITIONS
     color = true, -- red at 0 free, and orange at `lowSlots` or fewer
     lowSlots = 4, -- 0 for no orange
+    controller = true, -- our own bag button while the controller interface is on
+    x = 330, -- that button's offset from the center of the screen: right of the controller's bar
+    y = -330,
+    scale = 100, -- percent
 })
 module.title = L.BAGSLOTCOUNTER_TITLE
 module.category = "items"
--- Its own bag buttons, in the bag window, show each bag's free slots themselves.
-module.notice = ns.Gamepad.HidesNotice()
 
 module.options = {
     {
@@ -81,6 +89,11 @@ module.options = {
             return value == 0 and L.BAGSLOTCOUNTER_LOW_SLOTS_OFF or tostring(value)
         end,
     },
+    {
+        key = "controller", name = L.BAGSLOTCOUNTER_CONTROLLER,
+        description = L.BAGSLOTCOUNTER_CONTROLLER_DESC,
+        section = L.BAGSLOTCOUNTER_SECTION_CONTROLLER, added = "1.9.2",
+    },
 }
 
 -- Blizzard's number fonts, the ones stack counts use, smallest to largest.
@@ -132,16 +145,34 @@ local function blizzardCount()
     return _G.MainMenuBarBackpackButtonCount or (backpack and backpack.Count)
 end
 
+-- Our bag button for the controller interface, made the first time it shows.
+local hud
+local hudRegistered = false -- in Edit Mode
+-- The backpack's own icon and art, as Blizzard's backpack button draws them (BagsBar's
+-- MainMenuBarBackpackButton and BaseBagSlotButtonMixin:GetSlotAtlases, Camelot
+-- MainMenuBarBagButtons, Gethe `forever` branch, read 2026-11-26).
+local HUD_ICON = "Interface\\Icons\\ui-hud-actionbar-bag"
+local HUD_BORDER = "ui-hud-actionbar-iconframe-bags"
+local HUD_MASK = "UI-HUD-ActionBar-IconFrame-Mask"
+local HUD_SIZE = 45 -- the backpack button's size
+
+local function styleText(text, font, position)
+    if font then
+        text:SetFontObject(font)
+    end
+    text:ClearAllPoints()
+    text:SetPoint(position[1], position[2], position[3])
+    text:SetJustifyH(position[4])
+end
+
 local function style()
     local font = _G[SIZES[module.db.size] or SIZES.normal] or _G.NumberFontNormal
     local position = POSITIONS[module.db.position] or POSITIONS.bottomright
     for _, text in pairs(counts) do
-        if font then
-            text:SetFontObject(font)
-        end
-        text:ClearAllPoints()
-        text:SetPoint(position[1], position[2], position[3])
-        text:SetJustifyH(position[4])
+        styleText(text, font, position)
+    end
+    if hud then
+        styleText(hud.count, font, position)
     end
 end
 
@@ -197,8 +228,12 @@ local function update()
     local each = module.db.show == "each"
     local shown = {} -- bag id -> the count on its button
     local total, any = 0, false
+    local all, anyBag = 0, false -- every bag that counts, for our controller button
     for _, bag in ipairs(BAGS) do
         local free = freeSlots(bag)
+        if free then
+            all, anyBag = all + free, true
+        end
         local own = each
         if bag.id == REAGENT then
             own = module.db.reagent == "own"
@@ -215,6 +250,91 @@ local function update()
     end
     for _, bag in ipairs(BAGS) do
         setCount(counts[bag.id], shown[bag.id])
+    end
+    if hud then
+        setCount(hud.count, anyBag and all or nil)
+    end
+end
+
+-- The controller button ---------------------------------------------------------------------------
+
+-- Each bag that counts, with its free and total slots, the way the module counts them.
+local function showTooltip(self)
+    local tooltip = _G.GameTooltip
+    tooltip:SetOwner(self, "ANCHOR_LEFT")
+    tooltip:SetText(L.BAGSLOTCOUNTER_HUD_TITLE)
+    local getName = C_Container.GetBagName
+    for index, bag in ipairs(BAGS) do
+        local free = freeSlots(bag)
+        if free then
+            local name = getName and getName(bag.id)
+            if not (ns.IsText(name) and name ~= "") then
+                name = format(L.BAGSLOTCOUNTER_HUD_BAG, index)
+            end
+            tooltip:AddDoubleLine(name, format(L.BAGSLOTCOUNTER_HUD_FREE, free,
+                C_Container.GetContainerNumSlots(bag.id)), 1, 1, 1, 1, 1, 1)
+        end
+    end
+    tooltip:Show()
+end
+
+local function newHud()
+    local f = CreateFrame("Frame", nil, UIParent)
+    f:SetSize(HUD_SIZE, HUD_SIZE)
+    f:SetFrameStrata("MEDIUM")
+    f:EnableMouse(true) -- a tooltip only: clicks go through to the world
+    if f.SetMouseClickEnabled then
+        f:SetMouseClickEnabled(false)
+    end
+    local icon = f:CreateTexture(nil, "ARTWORK")
+    icon:SetAllPoints()
+    icon:SetTexture(HUD_ICON)
+    if ns.Frames.HasAtlas(HUD_MASK) then
+        -- Blizzard's square bag slot mask, at its offsets (SquareBagSlotButtonTemplate).
+        local mask = f:CreateMaskTexture()
+        mask:SetAtlas(HUD_MASK)
+        mask:SetPoint("TOPLEFT", -8, 8)
+        mask:SetPoint("BOTTOMRIGHT", 8, -8)
+        icon:AddMaskTexture(mask)
+    end
+    if ns.Frames.HasAtlas(HUD_BORDER) then
+        local border = f:CreateTexture(nil, "OVERLAY")
+        border:SetAllPoints()
+        border:SetAtlas(HUD_BORDER)
+    end
+    f.count = f:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
+    f.count:SetDrawLayer("OVERLAY", 7)
+    f:SetScript("OnEnter", showTooltip)
+    f:SetScript("OnLeave", _G.GameTooltip_Hide)
+    f:Hide()
+    return f
+end
+
+local function placeHud()
+    hud:SetScale(module.db.scale / 100)
+    ns.EditMode.Place(hud, module.db.x, module.db.y)
+end
+
+-- Shows our button while the module and its option are on and the controller interface is in use,
+-- and takes it away otherwise.
+local function refreshHud()
+    if module.enabled and module.db.controller and ns.Gamepad.On() then
+        if not hud then
+            hud = newHud()
+            style()
+        end
+        placeHud()
+        if not hudRegistered then
+            hudRegistered = true
+            ns.EditMode.RegisterModule(module, hud, L.BAGSLOTCOUNTER_TITLE, placeHud)
+        end
+        hud:Show()
+    elseif hud then
+        if hudRegistered then
+            hudRegistered = false
+            ns.EditMode.Unregister(hud)
+        end
+        hud:Hide()
     end
 end
 
@@ -236,12 +356,17 @@ function module:OnEnable()
     showAll(true)
     self:On("BAG_UPDATE_DELAYED", update)
     self:On("BAG_CONTAINER_UPDATE", update) -- a bag put on or taken off
-    self:On("PLAYER_ENTERING_WORLD", update)
+    self:On("PLAYER_ENTERING_WORLD", function()
+        refreshHud()
+        update()
+    end)
+    refreshHud()
     update()
 end
 
 function module:OnDisable()
     showAll(false)
+    refreshHud() -- the module is off now, so this takes the controller button away
 end
 
 function module:OnOptionChanged(key)
@@ -250,6 +375,9 @@ function module:OnOptionChanged(key)
     end
     if key == "size" or key == "position" then
         style()
+    elseif key == "controller" then
+        refreshHud()
+        update()
     else
         update()
     end

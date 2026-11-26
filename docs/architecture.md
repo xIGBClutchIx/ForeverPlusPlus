@@ -362,7 +362,7 @@ What each module is, in the code's terms (what it does for players is in `README
 - **Gathering Tracking**
 - **Gathering Skill Tooltips**: `ProfessionTooltips`.
 - **Auto Stow**
-- **Bag Slot Counter**
+- **Bag Slot Counter**: font strings on frames of ours over Blizzard's bag bar buttons. With the controller interface on (which hides `BagsBar`), Bag Button on Screen shows a frame of its own instead: the backpack's icon, mask, and border art with the total, in Edit Mode through `ns.EditMode.RegisterModule`, and a tooltip of each bag. It takes no clicks.
 - **Auto Gossip**
 - **Auto Quest**
 - **Tooltips**

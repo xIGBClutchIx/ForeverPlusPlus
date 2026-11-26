@@ -10,6 +10,17 @@ local L = ns.L
 
 ns.changelog = {
     {
+        version = L.CHANGELOG_UNRELEASED,
+        sections = {
+            { L.CHANGELOG_ADDED, {
+                { L.BAGSLOTCOUNTER_TITLE, "Bag Button on Screen (on by default) shows a backpack "
+                    .. "button with your free bag slots while the controller interface is on, "
+                    .. "since it hides the bag buttons. Move it in Edit Mode, and point at it for "
+                    .. "each bag's free slots." },
+            } },
+        },
+    },
+    {
         version = "1.9.1", date = "2026-11-25",
         sections = {
             { L.CHANGELOG_CHANGED, {
