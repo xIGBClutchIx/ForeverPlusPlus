@@ -760,6 +760,77 @@ local function onPet(tooltip, data)
     end
 end
 
+-- When the tooltip shows: the icon again, for the kinds whose own post call leaves the name as it
+-- was. A macro's did (only writing it after the game had finished with the tooltip worked), and a
+-- mount's and a pet's did too (dumped in game 2026-11-26: types 10 and 9, and still no icon). The
+-- game shows the tooltip as the last thing it does to it, so this is after everything. Each
+-- tooltip's data gets it once; writing the name shows the tooltip again, which ends here.
+local iconDone = setmetatable({}, { __mode = "k" }) -- tooltip -> the data it was last done for
+
+local function onShowIcon(tooltip)
+    if not (module.db.nameIcon and tooltip.GetPrimaryTooltipData) then
+        return
+    end
+    local data = tooltip:GetPrimaryTooltipData()
+    if type(data) ~= "table" or iconDone[tooltip] == data then
+        return
+    end
+    local kind, id = data.type, data.id
+    if not readable(kind) then
+        return
+    end
+    local types = Enum.TooltipDataType
+    local icon, name
+    if kind == (types.Macro or 25) then
+        local owner = tooltip.GetOwner and tooltip:GetOwner()
+        local slot, shown, subType
+        if type(owner) == "table" then
+            slot, shown, subType = ns.ActionButtons.Content(owner)
+        end
+        if slot == "macro" and shown then
+            if readable(subType) and subType == "item" then
+                icon = C_Item.GetItemIconByID and C_Item.GetItemIconByID(shown)
+                name = C_Item.GetItemNameByID and C_Item.GetItemNameByID(shown)
+            elseif C_Spell and C_Spell.GetSpellTexture then
+                icon = C_Spell.GetSpellTexture(shown)
+                name = C_Spell.GetSpellName and C_Spell.GetSpellName(shown)
+            end
+        end
+    elseif kind == types.Toy then
+        if readable(id) and id and C_Item.GetItemIconByID then
+            icon = C_Item.GetItemIconByID(id)
+            name = C_Item.GetItemNameByID and C_Item.GetItemNameByID(id)
+        end
+    elseif kind == types.Mount then
+        -- The ID may be the mount's or its spell's: the journal is asked both ways.
+        if readable(id) and id then
+            if C_MountJournal and C_MountJournal.GetMountInfoByID then
+                local mountName, _, mountIcon = C_MountJournal.GetMountInfoByID(id)
+                icon, name = mountIcon, mountName
+            end
+            if not icon then
+                icon, name = mountBySpell(id)
+            end
+        end
+    elseif kind == types.CompanionPet then
+        if readable(id) and id and C_PetJournal and C_PetJournal.GetPetInfoBySpeciesID then
+            name, icon = C_PetJournal.GetPetInfoBySpeciesID(id)
+        end
+    else
+        return
+    end
+    iconDone[tooltip] = data
+    -- The name the tooltip shows, when its data has it: the game's own wording, a named pet's
+    -- name. Then whatever shows it also finds its icon, when nothing above did.
+    local lines = readable(data.lines) and type(data.lines) == "table" and data.lines
+    local shownName = lines and lines[1] and lines[1].leftText
+    if ns.IsText(shownName, true) then
+        name = shownName
+        icon = icon or iconByName(shownName)
+    end
+    writeName(tooltip, icon, name)
+end
+
 -- A buff or debuff: a spell with a tooltip kind of its own. Its ID can be secret in combat, and
 -- then it gets no icon.
 local function onAura(tooltip, data)
@@ -1162,6 +1233,7 @@ function module:OnEnable()
     self:Hook(GameTooltip, "SetMountBySpellID", onSetMount)
     self:TooltipPostCall(Enum.TooltipDataType.CompanionPet, onPet)
     self:Hook(GameTooltip, "SetCompanionPet", onSetPet)
+    self:Hook(GameTooltip, "Show", onShowIcon)
     self:TooltipPostCall(Enum.TooltipDataType.UnitAura, onAura)
     -- Probe: every line of every tooltip, for a player's class line.
     if TooltipDataProcessor and TooltipDataProcessor.AllTypes then
