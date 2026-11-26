@@ -310,9 +310,13 @@ dialog.sheet { overflow-y: auto; overscroll-behavior: contain; }
    script), with every surface a pane of dark glass over it. Where text is read at length (diffs,
    an open sheet) the glass is nearly solid. */
 :root {
-    --surface: rgba(13, 18, 32, 0.56); --surface-2: rgba(26, 34, 54, 0.6); --line: rgba(140, 165, 230, 0.16);
-    --glass: rgba(4, 6, 11, 0.72); --glass-solid: rgba(4, 6, 11, 0.9);
-    --blur: blur(12px) saturate(1.25);
+    /* Neutral near-black and clear gray glass, as T3 Code's own space theme: no blue cast, one
+       hairline of white for every edge. */
+    --bg: #050506; --ink-2: #b3b7c1; --ink-3: #888c97;
+    --surface: rgba(24, 24, 28, 0.42); --surface-2: rgba(44, 44, 50, 0.42); --line: rgba(255, 255, 255, 0.09);
+    --tint-gray: rgba(255, 255, 255, 0.07);
+    --glass: rgba(8, 8, 10, 0.62); --glass-solid: rgba(8, 8, 10, 0.9);
+    --blur: blur(18px) saturate(1.1);
 }
 /* The page's color sits on the root and the body is clear, so the sky (under everything, by its
    z-index) is never painted over by the body's own background. */
@@ -322,15 +326,15 @@ body { background: transparent; }
 .panel, .card, .callout, .thread, .items, .commits, .frows, .rel-list, .pick, .field, .btn, .chip {
     -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
 }
-.card, .panel, .callout, .thread { box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 8px 24px rgba(0, 0, 0, 0.25); }
-.card:hover { box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 8px 28px rgba(40, 80, 180, 0.22); }
+.card, .panel, .callout, .thread { box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 8px 24px rgba(0, 0, 0, 0.3); }
+.card:hover { border-color: rgba(255, 255, 255, 0.28); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset, 0 8px 28px rgba(0, 0, 0, 0.4); }
 .bar { background: var(--glass); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); }
 .commit-body, .fhist { background: var(--glass-solid); }
-dialog.sheet { background: rgba(5, 8, 15, 0.84); -webkit-backdrop-filter: blur(18px) saturate(1.2); backdrop-filter: blur(18px) saturate(1.2); }
+dialog.sheet { background: rgba(8, 8, 10, 0.8); -webkit-backdrop-filter: blur(24px) saturate(1.1); backdrop-filter: blur(24px) saturate(1.1); }
 dialog.sheet::backdrop { background: rgba(0, 0, 0, 0.45); }
 .sheet-bar { background: var(--glass-solid); }
 .chip[aria-pressed="true"] { -webkit-backdrop-filter: none; backdrop-filter: none; }
-.top h1 { text-shadow: 0 0 24px rgba(120, 164, 255, 0.25); }
+.top h1 { text-shadow: 0 0 24px rgba(255, 255, 255, 0.12); }
 </style>
 
 <canvas id="sky" aria-hidden="true"></canvas>
@@ -1463,12 +1467,11 @@ function draw() {
     const rand = random(1600160);
     const unit = Math.min(w, h);
 
-    ctx.fillStyle = '#04060b';
+    ctx.fillStyle = '#050506';
     ctx.fillRect(0, 0, w, h);
     // Nebula: wide, faint clouds of blue and violet.
-    glow(w * 0.78, h * 0.18, unit * 0.9, [[0, 'rgba(46, 78, 170, 0.20)'], [1, 'rgba(46, 78, 170, 0)']]);
-    glow(w * 0.18, h * 0.62, unit * 0.8, [[0, 'rgba(96, 60, 160, 0.13)'], [1, 'rgba(96, 60, 160, 0)']]);
-    glow(w * 0.55, h * 0.95, unit * 0.7, [[0, 'rgba(30, 110, 140, 0.10)'], [1, 'rgba(30, 110, 140, 0)']]);
+    glow(w * 0.78, h * 0.18, unit * 0.9, [[0, 'rgba(70, 80, 110, 0.10)'], [1, 'rgba(70, 80, 110, 0)']]);
+    glow(w * 0.18, h * 0.62, unit * 0.8, [[0, 'rgba(80, 76, 100, 0.06)'], [1, 'rgba(80, 76, 100, 0)']]);
 
     // Stars: mostly faint and small, a few bright ones with a soft halo.
     const tints = ['255, 255, 255', '190, 210, 255', '255, 236, 200'];
@@ -1491,7 +1494,7 @@ function draw() {
     ctx.translate(gx, gy);
     ctx.rotate(-0.42);
     ctx.scale(1, 0.46);
-    glow(0, 0, gr * 1.25, [[0, 'rgba(120, 150, 255, 0.16)'], [0.55, 'rgba(90, 110, 220, 0.06)'], [1, 'rgba(90, 110, 220, 0)']]);
+    glow(0, 0, gr * 1.25, [[0, 'rgba(170, 175, 200, 0.12)'], [0.55, 'rgba(140, 145, 175, 0.04)'], [1, 'rgba(140, 145, 175, 0)']]);
     for (let i = 0; i < 1500; i++) {
         const t = Math.pow(rand(), 0.75);
         const arm = i % 2 ? Math.PI : 0;
@@ -1508,16 +1511,16 @@ function draw() {
 
     // A planet below the left corner: its dark body, and the light along its rim.
     const pr = unit * 0.95, px = w * 0.04, py = h + pr * 0.78;
-    ctx.fillStyle = '#05080f';
+    ctx.fillStyle = '#060607';
     ctx.beginPath();
     ctx.arc(px, py, pr, 0, Math.PI * 2);
     ctx.fill();
     const rim = ctx.createRadialGradient(px, py, pr * 0.955, px, py, pr * 1.07);
-    rim.addColorStop(0, 'rgba(5, 8, 15, 0)');
-    rim.addColorStop(0.38, 'rgba(120, 170, 255, 0.10)');
-    rim.addColorStop(0.42, 'rgba(170, 205, 255, 0.60)');
-    rim.addColorStop(0.5, 'rgba(110, 160, 255, 0.22)');
-    rim.addColorStop(1, 'rgba(80, 130, 255, 0)');
+    rim.addColorStop(0, 'rgba(6, 6, 7, 0)');
+    rim.addColorStop(0.38, 'rgba(150, 170, 200, 0.06)');
+    rim.addColorStop(0.42, 'rgba(190, 205, 225, 0.38)');
+    rim.addColorStop(0.5, 'rgba(120, 140, 170, 0.12)');
+    rim.addColorStop(1, 'rgba(100, 120, 150, 0)');
     ctx.fillStyle = rim;
     ctx.beginPath();
     ctx.arc(px, py, pr * 1.07, 0, Math.PI * 2);
