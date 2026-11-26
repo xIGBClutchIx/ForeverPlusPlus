@@ -143,7 +143,7 @@ One line here says what each file is for. [docs/architecture.md](docs/architectu
 
 | File | `ns` | For |
 | --- | --- | --- |
-| `ItemTooltip.lua` | `ItemTooltip` | Our lines on item tooltips, kept together at the sell price (`OnInfo`, `OnPrices`, `AddInfo`, `AddPrice`). |
+| `ItemTooltip.lua` | `ItemTooltip` | Our lines on item tooltips, kept together at the sell price (`OnInfo`, `OnPrices`, `AddInfo`, `AddPrice`), and a color a module gives an item's tooltip border in place of its quality's (`OnBorderColor`, `BorderColor`). |
 | `Bags.lua` | `Bags` | Walking every slot of the player's bags (`Each`), the free slots, and which bag is the reagent bag. |
 | `ItemButtons.lua` | `ItemButtons` | The item buttons in bags (a bag addon's too), bank, merchant, auction house, loot, and rolls, our marks on them, one walk over all of those for a module that marks items (`Walk`), and the options every mark shares. |
 | `BagClicks.lua` | `BagClicks` | Secure overlays on bag items whose right-click uses an item or casts on it, in Blizzard's bags and a bag addon's. |

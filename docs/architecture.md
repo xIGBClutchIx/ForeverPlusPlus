@@ -175,7 +175,7 @@ Generated files, in `Lib/Generated/` (never edited by hand; see Generated data):
 
 ### `ItemTooltip.lua`
 
-- `ns.ItemTooltip`: price lines together at the sell price (`OnPrices`, `AddPrice`), notes about them after every price line (`OnPriceNotes`), other item lines just above them (`OnInfo`, `AddInfo`), stack counts, Shift redraws, drawing one of Blizzard's lines again with something beside it, and `ColorText` in the quantity colors.
+- `ns.ItemTooltip`: price lines together at the sell price (`OnPrices`, `AddPrice`), notes about them after every price line (`OnPriceNotes`), other item lines just above them (`OnInfo`, `AddInfo`), stack counts, Shift redraws, drawing one of Blizzard's lines again with something beside it, `ColorText` in the quantity colors, and a border color a module offers for an item's tooltip in place of its quality's (`OnBorderColor`, asked by Tooltips through `BorderColor`).
 
 ### `ItemButtons.lua`
 

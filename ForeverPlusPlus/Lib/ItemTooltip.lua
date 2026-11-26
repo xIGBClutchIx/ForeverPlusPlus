@@ -435,3 +435,33 @@ function ItemTooltip.AddInfo(tooltip, name, text, align, color)
     local label = format(L.PRICE_INFO_LINE, name) .. padding(tooltip, name)
     emit(tooltip, align, label, ItemTooltip.ColorText(text, color))
 end
+
+-- Border colors -----------------------------------------------------------------------------------
+--
+-- A module that draws an item's border in a color of its own (Disenchant Icons) says so here, and
+-- the module that colors item tooltips' borders (Tooltips) asks, so the tooltip matches the icon
+-- without either knowing the other.
+
+local borderColors = {} -- fn(item) -> r, g, b, in the order added
+
+---Offers a color for an item tooltip's border in place of its quality's: `fn(item)` returns
+---r, g, b for an item it colors, or nil. `item` is an item ID or a link. Hooks can't be removed,
+---so `fn` checks whether its module is on. Add it once, as the file loads.
+---@param fn fun(item: number|string): number?, number?, number?
+function ItemTooltip.OnBorderColor(fn)
+    borderColors[#borderColors + 1] = fn
+end
+
+---The color a module gives an item's border in place of its quality's, or nil.
+---@param item number|string an item ID or a link
+---@return number? r
+---@return number? g
+---@return number? b
+function ItemTooltip.BorderColor(item)
+    for i = 1, #borderColors do
+        local r, g, b = borderColors[i](item)
+        if r then
+            return r, g, b
+        end
+    end
+end

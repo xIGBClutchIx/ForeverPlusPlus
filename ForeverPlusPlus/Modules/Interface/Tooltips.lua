@@ -593,6 +593,14 @@ local function onItem(tooltip, data)
     if not item and readable(data.hyperlink) then
         item = data.hyperlink
     end
+    -- A module that draws this item's border in a color of its own has the tooltip's too.
+    if item then
+        local r, g, b = ns.ItemTooltip.BorderColor(item)
+        if r then
+            setBorder(tooltip, r, g, b)
+            return
+        end
+    end
     local quality = item and C_Item.GetItemQualityByID(item)
     if readable(quality) and quality and C_Item.GetItemQualityColor then
         local r, g, b = C_Item.GetItemQualityColor(quality)

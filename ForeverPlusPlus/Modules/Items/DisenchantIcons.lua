@@ -15,7 +15,7 @@
 -- Nothing is written onto Blizzard's frames: our own texture sits on the icon.
 local _, ns = ...
 
-local _G, pairs, ipairs, wipe, strfind, setmetatable = _G, pairs, ipairs, wipe, strfind, setmetatable
+local _G, pairs, ipairs, wipe, strfind, setmetatable, type = _G, pairs, ipairs, wipe, strfind, setmetatable, type
 local C_Item, C_Spell, GetFileIDFromPath = C_Item, C_Spell, GetFileIDFromPath
 
 local L = ns.L
@@ -29,7 +29,8 @@ local module = ns.NewModule("DisenchantIcons", L.DISENCHANTICONS_DESC, {
     skipSold = false, -- leave out an item a vendor pays more for than its materials are worth
     icon = "roll", -- a key of ICONS, or "none"; set below to one this client has
     opacity = 100, -- percent, of the icon
-    border = "none", -- a key of COLORS: a color for the item's border, or "none"
+    border = "off", -- a key of COLORS: a color for the item's border, or "off"
+    tooltip = true, -- with a border color: the item's tooltip border in it too
     corner = "BOTTOMRIGHT", -- free of Upgrade Arrows (top left), Appearance Icons (top right), Already Known (bottom left)
     size = 18, -- in the bags; other places scale from it
     padding = 1, -- how far the icon sits in from its corner, in pixels
@@ -112,7 +113,7 @@ module.options = {
         key = "border", name = L.DISENCHANTICONS_BORDER, description = L.DISENCHANTICONS_BORDER_DESC,
         section = SECTION_ICON,
         choices = {
-            { "none", L.DISENCHANTICONS_BORDER_NONE },
+            { "off", L.DISENCHANTICONS_BORDER_NONE },
             { "purple", L.DISENCHANTICONS_COLOR_PURPLE },
             { "blue", L.DISENCHANTICONS_COLOR_BLUE },
             { "green", L.DISENCHANTICONS_COLOR_GREEN },
@@ -123,6 +124,10 @@ module.options = {
             return hasBorder
         end,
         needs = L.SETTINGS_NEEDS_CLIENT,
+    },
+    {
+        key = "tooltip", name = L.DISENCHANTICONS_TOOLTIP, description = L.DISENCHANTICONS_TOOLTIP_DESC,
+        section = SECTION_ICON, requires = "border",
     },
     ItemButtons.CornerOption(L.DISENCHANTICONS_CORNER_DESC, SECTION_ICON, {
         -- Other modules' marks on gear in the same corner. Settings reads their settings and shows
@@ -315,6 +320,25 @@ end, {
         return db[place] and (knowsEnchanting or not db.enchanter)
     end,
 })
+
+-- The tooltip's border in the border's color: Tooltips draws item tooltips' borders (its Item
+-- Quality Border) and asks Lib/ItemTooltip for a color first. Added once; nothing while off.
+ns.ItemTooltip.OnBorderColor(function(item)
+    local db = module.db
+    if not (module.enabled and db.tooltip and (knowsEnchanting or not db.enchanter)) then
+        return nil
+    end
+    local color = hasBorder and COLORS[db.border]
+    if not color then
+        return nil
+    end
+    -- Whether it disenchants is the item's, whatever its random suffix.
+    local link = type(item) == "number" and "item:" .. item or item
+    if type(link) == "string" and disenchantable(link) then
+        return color[1], color[2], color[3]
+    end
+    return nil
+end)
 
 -- Module ----------------------------------------------------------------------------------------
 
