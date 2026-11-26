@@ -15,8 +15,8 @@
 -- Nothing is written onto Blizzard's frames: our own texture sits on the icon.
 local _, ns = ...
 
-local _G, pairs, wipe, strfind = _G, pairs, wipe, strfind
-local C_Item, C_Spell = C_Item, C_Spell
+local _G, pairs, ipairs, wipe, strfind, setmetatable = _G, pairs, ipairs, wipe, strfind, setmetatable
+local C_Item, C_Spell, GetFileIDFromPath = C_Item, C_Spell, GetFileIDFromPath
 
 local L = ns.L
 local ItemButtons = ns.ItemButtons
@@ -27,6 +27,9 @@ local module = ns.NewModule("DisenchantIcons", L.DISENCHANTICONS_DESC, {
     enabled = false,
     enchanter = true, -- only on a character who knows Enchanting
     skipSold = false, -- leave out an item a vendor pays more for than its materials are worth
+    icon = "roll", -- a key of ICONS; set below to one this client has
+    color = "art", -- a key of COLORS: the art's own colors, or a tint
+    opacity = 100, -- percent
     corner = "BOTTOMRIGHT", -- free of Upgrade Arrows (top left), Appearance Icons (top right), Already Known (bottom left)
     size = 18, -- in the bags; other places scale from it
     padding = 1, -- how far the icon sits in from its corner, in pixels
@@ -41,6 +44,46 @@ module.added = "1.10.0"
 
 local SECTION_ITEMS, SECTION_ICON = L.DISENCHANTICONS_SECTION_ITEMS, L.DISENCHANTICONS_SECTION_ICON
 
+local DISENCHANT = ns.Data.Spell("DISENCHANT")
+
+-- The icons, in the order the dropdown lists them: an atlas, or an icon file with its border cut
+-- off (`crop`, as Blizzard's buff icons). `spell` is the Disenchant spell's own icon, read from the
+-- game. Atlases from build 1.60.1.71139's UiTextureAtlasMember (wago.tools, 2026-11-26): the loot
+-- roll's Disenchant button (32 by 32) and the world map's Enchanting quest icon (16 by 16, plain
+-- art that takes a tint well).
+local CROP = { 0.08, 0.92, 0.08, 0.92 }
+local ICONS = {
+    { "roll", L.DISENCHANTICONS_ICON_ROLL, atlas = "lootroll-toast-icon-disenchant-up" },
+    { "rune", L.DISENCHANTICONS_ICON_RUNE, atlas = "worldquest-icon-enchanting" },
+    { "spell", L.DISENCHANTICONS_ICON_SPELL, spell = DISENCHANT, file = "Interface\\Icons\\INV_Enchant_Disenchant", crop = CROP },
+    { "dust", L.DISENCHANTICONS_ICON_DUST, file = "Interface\\Icons\\INV_Enchant_DustArcane", crop = CROP },
+    { "shard", L.DISENCHANTICONS_ICON_SHARD, file = "Interface\\Icons\\INV_Enchant_ShardBrilliantLarge", crop = CROP },
+}
+local ICON_BY_KEY, ICON_CHOICES = {}, {}
+for _, icon in ipairs(ICONS) do
+    -- Probe: only the art this client has, when it can say.
+    local has
+    if icon.atlas then
+        has = ns.Frames.HasAtlas(icon.atlas)
+    else
+        has = not GetFileIDFromPath or GetFileIDFromPath(icon.file) ~= nil
+    end
+    if has then
+        ICON_BY_KEY[icon[1]] = icon
+        ICON_CHOICES[#ICON_CHOICES + 1] = { icon[1], icon[2] }
+    end
+end
+module.defaults.icon = ICON_CHOICES[1] and ICON_CHOICES[1][1] or "spell"
+
+-- A tint: the icon in gray, colored. Blizzard's own text and quality colors.
+local COLORS = {
+    purple = { 0.64, 0.21, 0.93 }, -- epic quality
+    blue = { 0, 0.44, 0.87 }, -- rare quality
+    green = { 0.12, 1, 0 }, -- uncommon quality
+    gold = { 1, 0.82, 0 }, -- NORMAL_FONT_COLOR
+    white = { 1, 1, 1 },
+}
+
 module.options = {
     {
         key = "enchanter", name = L.DISENCHANTICONS_ENCHANTER, description = L.DISENCHANTICONS_ENCHANTER_DESC,
@@ -53,6 +96,26 @@ module.options = {
             return Prices.Available()
         end,
         needs = L.DISENCHANTICONS_NEEDS_PRICES,
+    },
+    {
+        key = "icon", name = L.DISENCHANTICONS_ICON, description = L.DISENCHANTICONS_ICON_DESC,
+        section = SECTION_ICON, choices = ICON_CHOICES,
+    },
+    {
+        key = "color", name = L.DISENCHANTICONS_COLOR, description = L.DISENCHANTICONS_COLOR_DESC,
+        section = SECTION_ICON,
+        choices = {
+            { "art", L.DISENCHANTICONS_COLOR_ART },
+            { "purple", L.DISENCHANTICONS_COLOR_PURPLE },
+            { "blue", L.DISENCHANTICONS_COLOR_BLUE },
+            { "green", L.DISENCHANTICONS_COLOR_GREEN },
+            { "gold", L.DISENCHANTICONS_COLOR_GOLD },
+            { "white", L.DISENCHANTICONS_COLOR_WHITE },
+        },
+    },
+    {
+        key = "opacity", name = L.DISENCHANTICONS_OPACITY, description = L.DISENCHANTICONS_OPACITY_DESC,
+        section = SECTION_ICON, min = 10, max = 100, step = 5, format = "%d%%",
     },
     ItemButtons.CornerOption(L.DISENCHANTICONS_CORNER_DESC, SECTION_ICON, {
         -- Other modules' marks on gear in the same corner. Settings reads their settings and shows
@@ -85,9 +148,6 @@ module.options = {
     ItemButtons.PlaceOption("auction", L.DISENCHANTICONS_AUCTION_DESC),
     ItemButtons.PlaceOption("loot", L.DISENCHANTICONS_LOOT_DESC),
 }
-
-local DISENCHANT = ns.Data.Spell("DISENCHANT")
-local ICON = "Interface\\Icons\\INV_Enchant_Disenchant" -- the spell's icon, should the client not say
 
 -- Does the tooltip allow it ----------------------------------------------------------------------
 
@@ -183,17 +243,38 @@ end
 
 -- Marks -----------------------------------------------------------------------------------------
 
-local function iconTexture()
-    local texture = C_Spell and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(DISENCHANT)
-    return texture or ICON
-end
-
 local marks = ItemButtons.Overlays(function(icon)
-    local mark = icon:GetParent():CreateTexture(nil, "OVERLAY", nil, 7)
-    mark:SetTexture(iconTexture())
-    mark:SetTexCoord(0.08, 0.92, 0.08, 0.92) -- the icon without its border, as Blizzard's buff icons
-    return mark
+    return icon:GetParent():CreateTexture(nil, "OVERLAY", nil, 7)
 end)
+
+-- The chosen art, tint, and opacity on a mark. Kept per mark so a change shows at the next pass.
+local styled = setmetatable({}, { __mode = "k" }) -- mark -> the settings it was drawn with
+
+local function style(mark)
+    local db = module.db
+    local key = db.icon .. "|" .. db.color .. "|" .. db.opacity
+    if styled[mark] == key then
+        return
+    end
+    styled[mark] = key
+    local icon = ICON_BY_KEY[db.icon] or ICON_BY_KEY[module.defaults.icon] or ICONS[3]
+    if icon.atlas then
+        mark:SetAtlas(icon.atlas)
+        mark:SetTexCoord(0, 1, 0, 1)
+    else
+        local texture = icon.spell and C_Spell and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(icon.spell)
+        mark:SetTexture(texture or icon.file)
+        mark:SetTexCoord(icon.crop[1], icon.crop[2], icon.crop[3], icon.crop[4])
+    end
+    local color = COLORS[db.color]
+    mark:SetDesaturated(color ~= nil)
+    if color then
+        mark:SetVertexColor(color[1], color[2], color[3])
+    else
+        mark:SetVertexColor(1, 1, 1)
+    end
+    mark:SetAlpha(db.opacity / 100)
+end
 
 -- Bags, bank, the auction house, loot, and loot rolls ---------------------------------------------
 
@@ -204,6 +285,7 @@ local walk = ItemButtons.Walk(module, function(icon, link, place, a)
     end
     local mark = marks:Set(icon, link and disenchantable(link))
     if mark then
+        style(mark)
         ItemButtons.PlaceMark(mark, icon, module.db)
     end
 end, {
