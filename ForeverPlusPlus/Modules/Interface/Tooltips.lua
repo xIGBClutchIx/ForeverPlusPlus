@@ -826,6 +826,15 @@ local function onShowIcon(tooltip)
     local shownName = lines and lines[1] and lines[1].leftText
     if ns.IsText(shownName, true) then
         name = shownName
+        -- A pet's tooltip has no ID on this client (dumped in game 2026-11-26: nil, with the
+        -- pet's name on its first line): the journal finds the pet by that name.
+        if not icon and kind == types.CompanionPet and C_PetJournal and C_PetJournal.FindPetIDByName
+            and C_PetJournal.GetPetInfoBySpeciesID then
+            local speciesID = C_PetJournal.FindPetIDByName(ns.Text.Plain(shownName))
+            if speciesID then
+                icon = select(2, C_PetJournal.GetPetInfoBySpeciesID(speciesID))
+            end
+        end
         icon = icon or iconByName(shownName)
     end
     writeName(tooltip, icon, name)
