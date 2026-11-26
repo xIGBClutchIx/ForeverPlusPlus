@@ -631,6 +631,27 @@ local function onSpell(tooltip, data)
     end
 end
 
+-- A macro on an action bar that shows a spell's or item's tooltip (#showtooltip): its tooltip is a
+-- macro's, not a spell's or item's, and what it shows is named on its first line. Probe: the
+-- first line's tooltipType and tooltipID are how Mainline's own TooltipUtil tells which spell or
+-- item a macro's tooltip displays; unseen on this client, so each is checked before it's used.
+local function onMacro(tooltip, data)
+    if not (module.db.nameIcon and data) then
+        return
+    end
+    local lines = readable(data.lines) and type(data.lines) == "table" and data.lines
+    local first = lines and lines[1]
+    local kind, id = first and first.tooltipType, first and first.tooltipID
+    if not (readable(kind) and readable(id) and kind and id) then
+        return
+    end
+    if kind == Enum.TooltipDataType.Spell and C_Spell and C_Spell.GetSpellTexture then
+        nameIcon(tooltip, data, C_Spell.GetSpellTexture(id))
+    elseif kind == Enum.TooltipDataType.Item and C_Item.GetItemIconByID then
+        nameIcon(tooltip, data, C_Item.GetItemIconByID(id))
+    end
+end
+
 -- Class and Side on One Row: a player's class line and the side line right after it go on one
 -- row, class at the left and side at the right. Told from the tooltip's data as the game adds each
 -- line, by the client's own class and side names, so it needs no unit; in combat, when the lines
@@ -937,6 +958,9 @@ function module:OnEnable()
     self:TooltipPostCall(Enum.TooltipDataType.Item, onItem)
     self:TooltipPostCall(Enum.TooltipDataType.Object, onObject)
     self:TooltipPostCall(Enum.TooltipDataType.Spell, onSpell)
+    if Enum.TooltipDataType.Macro then
+        self:TooltipPostCall(Enum.TooltipDataType.Macro, onMacro)
+    end
     -- Probe: every line of every tooltip, for a player's class line.
     if TooltipDataProcessor and TooltipDataProcessor.AllTypes then
         self:TooltipLinePreCall(TooltipDataProcessor.AllTypes, onAnyLine)
