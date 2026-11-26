@@ -655,6 +655,48 @@ local function onSpell(tooltip, data)
     end
 end
 
+-- A toy: an item with a tooltip kind of its own (seen in game 2026-11-26: a toy got no icon from
+-- the item call). Its ID is the item's; failing that, the item is found by the tooltip's name.
+local function onToy(tooltip, data)
+    if not (module.db.nameIcon and data) then
+        return
+    end
+    local id = data.id
+    local icon = readable(id) and id and C_Item.GetItemIconByID and C_Item.GetItemIconByID(id)
+    if not icon then
+        local lines = readable(data.lines) and type(data.lines) == "table" and data.lines
+        icon = iconByName(lines and lines[1] and lines[1].leftText)
+    end
+    nameIcon(tooltip, data, icon)
+end
+
+-- After the game fills a tooltip with a toy, by its item: the same again from the item itself,
+-- as onSetAction does for a macro, in case the toy tooltip's own post call changes nothing either.
+local function onSetToy(tooltip, itemID)
+    if not (module.db.nameIcon and readable(itemID) and itemID and C_Item.GetItemIconByID) then
+        return
+    end
+    local icon = C_Item.GetItemIconByID(itemID)
+    local name = C_Item.GetItemNameByID and C_Item.GetItemNameByID(itemID)
+    local line = leftLine(tooltip, 1)
+    if line and icon and readable(icon) and ns.IsText(name, true) then
+        line:SetText("|T" .. icon .. ":0|t " .. name)
+        tooltip:Show()
+    end
+end
+
+-- A buff or debuff: a spell with a tooltip kind of its own. Its ID can be secret in combat, and
+-- then it gets no icon.
+local function onAura(tooltip, data)
+    if not (module.db.nameIcon and data and C_Spell and C_Spell.GetSpellTexture) then
+        return
+    end
+    local id = data.id
+    if readable(id) and id then
+        nameIcon(tooltip, data, C_Spell.GetSpellTexture(id))
+    end
+end
+
 -- A macro on an action bar that shows a spell's or item's tooltip (#showtooltip): its tooltip is a
 -- macro's, not a spell's or item's, and what it shows is named on its first line. Probe: the
 -- first line's tooltipType and tooltipID are how Mainline's own TooltipUtil tells which spell or
@@ -1039,6 +1081,9 @@ function module:OnEnable()
     -- its Enum names it.
     self:TooltipPostCall(Enum.TooltipDataType.Macro or 25, onMacro)
     self:Hook(GameTooltip, "SetAction", onSetAction)
+    self:TooltipPostCall(Enum.TooltipDataType.Toy, onToy)
+    self:Hook(GameTooltip, "SetToyByItemID", onSetToy)
+    self:TooltipPostCall(Enum.TooltipDataType.UnitAura, onAura)
     -- Probe: every line of every tooltip, for a player's class line.
     if TooltipDataProcessor and TooltipDataProcessor.AllTypes then
         self:TooltipLinePreCall(TooltipDataProcessor.AllTypes, onAnyLine)
