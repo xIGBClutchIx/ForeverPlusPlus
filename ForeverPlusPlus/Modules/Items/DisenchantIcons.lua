@@ -29,7 +29,7 @@ local module = ns.NewModule("DisenchantIcons", L.DISENCHANTICONS_DESC, {
     skipSold = false, -- leave out an item a vendor pays more for than its materials are worth
     icon = "roll", -- a key of ICONS, or "none"; set below to one this client has
     opacity = 100, -- percent, of the icon
-    border = "none", -- a key of COLORS: a colored border inside the item's own, or "none"
+    border = "none", -- a key of COLORS: a color for the item's border, or "none"
     corner = "BOTTOMRIGHT", -- free of Upgrade Arrows (top left), Appearance Icons (top right), Already Known (bottom left)
     size = 18, -- in the bags; other places scale from it
     padding = 1, -- how far the icon sits in from its corner, in pixels
@@ -72,10 +72,9 @@ module.defaults.icon = ICON_CHOICES[1][1]
 ICON_CHOICES[#ICON_CHOICES + 1] = { "none", L.DISENCHANTICONS_ICON_NONE } -- the border alone
 
 -- The border's colors: Blizzard's own quality and text colors. The border is the art Blizzard
--- draws an item's quality with (WhiteIconFrame), a little inside the item's own so its quality
--- color still shows around ours.
+-- draws an item's quality with (WhiteIconFrame), drawn over the item's own so it reads as the
+-- item's border in another color. Blizzard's border itself is left alone: ours covers it.
 local BORDER_FILE = "Interface\\Common\\WhiteIconFrame"
-local BORDER_INSET = 2 -- pixels on a bag icon
 local COLORS = {
     purple = { 0.64, 0.21, 0.93 }, -- epic quality
     blue = { 0, 0.44, 0.87 }, -- rare quality
@@ -284,12 +283,9 @@ local function style(mark)
     mark:SetAlpha(db.opacity / 100)
 end
 
--- The border in its color, inside the item's icon by an inset that keeps in proportion to it.
+-- The border in its color, over the item's own quality border (which fills the icon, as ours).
 local function placeBorder(border, icon, color)
-    local inset = ItemButtons.MarkSize(icon, BORDER_INSET)
-    border:ClearAllPoints()
-    border:SetPoint("TOPLEFT", icon, "TOPLEFT", inset, -inset)
-    border:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", -inset, inset)
+    border:SetAllPoints(icon)
     border:SetVertexColor(color[1], color[2], color[3])
 end
 
