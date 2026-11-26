@@ -400,13 +400,15 @@ end
 ---@param mode string "stack" (Shift for one) or "one" (Shift for the stack): how many it counts
 ---@param align string "right" (coins at the tooltip's edge) or "inline" (after the label)
 ---@param color string the quantity's color: "gray", "white", or "gold"
-function ItemTooltip.AddPrice(tooltip, data, name, unitPrice, mode, align, color)
+---@param note? string text about the price to put before the coins ("2h ago"), with its own color
+function ItemTooltip.AddPrice(tooltip, data, name, unitPrice, mode, align, color, note)
     local count = priceCount(tooltip, data, mode)
     local amount = unitPrice * count
     local quantity = (COLORS[color] or GRAY_FONT_COLOR):WrapTextInColorCode(format(L.PRICE_QUANTITY, count))
     -- The padding goes before the quantity, so the "x20"s line up.
     local label = format(L.PRICE_LINE, name .. padding(tooltip, name), quantity)
-    emit(tooltip, align, label, money(amount))
+    local value = money(amount)
+    emit(tooltip, align, label, note and (note .. "  " .. value) or value)
 end
 
 ---Text in a quantity color by its name ("gray", "white", or "gold"; gray for another) or in

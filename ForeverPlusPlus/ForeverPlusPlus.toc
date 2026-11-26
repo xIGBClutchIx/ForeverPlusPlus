@@ -120,6 +120,7 @@ Modules\Items\ItemTooltips\SellPrice.lua
 Modules\Items\ItemTooltips\RepairCost.lua
 Modules\Items\ItemTooltips\ItemCount.lua
 Modules\Items\ItemTooltips\Disenchant.lua
+Modules\Items\ItemTooltips\PairLines.lua
 Modules\Items\ItemTooltips\StatColors.lua
 Modules\Items\ItemTooltips\NewItem.lua
 Modules\Items\ItemTooltips\CraftedCompare.lua

@@ -21,7 +21,9 @@ local module = itemTooltips:NewPart({
     auction = true,
     auctionColor = "gold",
     hideJunk = false, -- no price on gray items (they do sell at auction on Forever)
-    scanAge = "right", -- "right", "inline" (like the price line's alignment), or "off"
+    -- "price" (beside the auction price), "right" or "inline" (a line of its own, placed as the
+    -- price line's alignment places a value), or "off"
+    scanAge = "price",
     scanAgeColor = "age", -- "age" (green when fresh to red when old), "gray", "white", or "gold"
     scanAgeRedHours = 12, -- hours old at which "age" is fully red
     scanOnOpen = true,
@@ -61,7 +63,9 @@ module:AddOptions({
     { key = "hideJunk", name = L.AUCTIONPRICES_JUNK, description = L.AUCTIONPRICES_JUNK_DESC, added = "1.0.1" },
     {
         key = "scanAge", name = L.AUCTIONPRICES_SCAN_AGE, description = L.AUCTIONPRICES_SCAN_AGE_DESC,
+        changed = "1.9.2",
         choices = {
+            { "price", L.AUCTIONPRICES_SCAN_AGE_PRICE },
             { "right", L.PRICE_ALIGN_RIGHT },
             { "inline", L.PRICE_ALIGN_INLINE },
             { "off", L.AUCTIONPRICES_SCAN_AGE_OFF },
@@ -255,12 +259,18 @@ local function addAuctionPrice(tooltip, data)
     if not itemID then
         return
     end
-    local price = auctionPrice(itemID)
+    local price, seenAt = auctionPrice(itemID)
     if not price then
         return
     end
     local db = module.db
-    ItemTooltip.AddPrice(tooltip, data, L.AUCTIONPRICES_LINE, price, db.mode, db.align, db.auctionColor)
+    -- Beside the Price: the scan's age goes in front of the coins, not on a line of its own.
+    local note
+    if db.scanAge == "price" and seenAt then
+        local age = time() - seenAt
+        note = ItemTooltip.ColorText(ns.Text.Ago(age), ageColor(age))
+    end
+    ItemTooltip.AddPrice(tooltip, data, L.AUCTIONPRICES_LINE, price, db.mode, db.align, db.auctionColor, note)
 end
 
 -- When this item's price was last seen, by a scan or the player's own search: an item missing
@@ -273,7 +283,7 @@ local function addScanAge(tooltip, data)
     end
     local price, seenAt = auctionPrice(itemID)
     local db = module.db
-    if price and db.scanAge ~= "off" and seenAt then
+    if price and (db.scanAge == "right" or db.scanAge == "inline") and seenAt then
         local age = time() - seenAt
         ItemTooltip.AddInfo(tooltip, L.AUCTIONPRICES_SCAN_AGE_LINE, ns.Text.Ago(age), db.scanAge, ageColor(age))
     end

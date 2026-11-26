@@ -531,6 +531,16 @@
     "GameFontDisable",
     "GameFontHighlight",
     "GameTooltip_SetTitle",
-    "GameTooltip_AddNormalLine"
+    "GameTooltip_AddNormalLine",
+    "ARMOR_TEMPLATE",
+    "SHIELD_BLOCK_TEMPLATE",
+    "ITEM_UNIQUE",
+    "ITEM_UNIQUE_MULTIPLE",
+    "ITEM_UNIQUE_EQUIPPABLE",
+    "ITEM_BIND_QUEST",
+    "ITEM_SOULBOUND",
+    "ITEM_BIND_ON_PICKUP",
+    "ITEM_BIND_ON_EQUIP",
+    "ITEM_BIND_ON_USE"
   ]
 }

@@ -10,8 +10,8 @@
 local _, ns = ...
 
 local _G, type, setmetatable, ipairs, pairs = _G, type, setmetatable, ipairs, pairs
-local find, sub, byte, format = string.find, string.sub, string.byte, string.format
-local Enum, C_Item = Enum, C_Item
+local find, sub, byte, format, match = string.find, string.sub, string.byte, string.format, string.match
+local Enum, C_Item, TooltipDataProcessor = Enum, C_Item, TooltipDataProcessor
 local UnitExists, UnitClass, UnitLevel, UnitName = UnitExists, UnitClass, UnitLevel, UnitName
 local UnitPVPName, UnitIsUnit, UnitReaction, UnitSelectionColor = UnitPVPName, UnitIsUnit, UnitReaction, UnitSelectionColor
 local GetGuildInfo, GetCreatureDifficultyColor = GetGuildInfo, GetCreatureDifficultyColor
@@ -48,6 +48,9 @@ local module = ns.NewModule("Tooltips", L.TOOLTIPS_DESC, {
     hideHealthBar = false, -- hide the health bar under unit tooltips
     questLines = "show", -- "show", "units" (hidden on unit tooltips), "all" (and on objects)
     dropChance = true, -- a quest item's drop chance after its objective line; needs QuestieDB
+    nameIcon = true, -- an item's or spell's icon before its name
+    classSide = true, -- a player's class and side on one row
+    questCounts = true, -- a quest objective's count at the right edge
     scale = 100, -- percent
 })
 module.title = L.TOOLTIPS_TITLE
@@ -93,6 +96,12 @@ module.options = {
         section = L.TOOLTIPS_SECTION_LINES, added = "1.9.0",
         available = function() return QuestieDB.IsReady() end,
         needs = format(L.SETTINGS_NEEDS_ADDON, "QuestieDB") },
+    { key = "nameIcon", name = L.TOOLTIPS_NAME_ICON, description = L.TOOLTIPS_NAME_ICON_DESC,
+        section = L.TOOLTIPS_SECTION_TIDY, added = "1.9.2" },
+    { key = "classSide", name = L.TOOLTIPS_CLASS_SIDE, description = L.TOOLTIPS_CLASS_SIDE_DESC,
+        section = L.TOOLTIPS_SECTION_TIDY, added = "1.9.2" },
+    { key = "questCounts", name = L.TOOLTIPS_QUEST_COUNTS, description = L.TOOLTIPS_QUEST_COUNTS_DESC,
+        section = L.TOOLTIPS_SECTION_TIDY, added = "1.9.2" },
     { key = "scale", name = L.TOOLTIPS_SCALE, description = L.TOOLTIPS_SCALE_DESC,
         section = L.TOOLTIPS_SECTION_BEHAVIOR, added = "1.8.0",
         min = 50, max = 200, step = 10, format = "%d%%" },
@@ -585,7 +594,126 @@ end
 
 -- Item tooltips ------------------------------------------------------------------------------
 
+-- Icon by Name: an item's or spell's icon before its name, at the height of the text. The name
+-- is Blizzard's line (or a module's, with an upgrade arrow at its right), written again with the
+-- icon in front. Its text comes from the tooltip's data, never the tooltip, and only when it can
+-- be read.
+local function nameIcon(tooltip, data, icon)
+    local lines = readable(data.lines) and type(data.lines) == "table" and data.lines
+    local first = lines and lines[1]
+    local name = first and first.leftText
+    if not (icon and readable(icon) and ns.IsText(name, true)) then
+        return
+    end
+    -- Blizzard numbers each line it adds. A name a module drew in its place has no number: it's
+    -- the first line, except on a tooltip that opens with a line of its own ("Currently
+    -- Equipped" on the ones that compare gear), which is left alone.
+    local index = first.lineIndex
+    if not ns.IsNumber(index) then
+        if tooltip ~= GameTooltip and tooltip ~= _G.ItemRefTooltip then
+            return
+        end
+        index = 1
+    end
+    local line = leftLine(tooltip, index)
+    if line then
+        line:SetText("|T" .. icon .. ":0|t " .. name)
+    end
+end
+
+local function onSpell(tooltip, data)
+    if not (module.db.nameIcon and data and C_Spell and C_Spell.GetSpellTexture) then
+        return
+    end
+    local id = data.id
+    if readable(id) and id then
+        nameIcon(tooltip, data, C_Spell.GetSpellTexture(id))
+    end
+end
+
+-- Class and Side on One Row: a player's class line and the side line right after it go on one
+-- row, class at the left and side at the right. Told from the tooltip's data as the game adds each
+-- line, by the client's own class and side names, so it needs no unit; in combat, when the lines
+-- can't be read, they stay as two.
+local CLASS_TOKENS -- a class's name as the client writes it -> its token, made when first asked
+
+local function classToken(text)
+    if not CLASS_TOKENS then
+        CLASS_TOKENS = {}
+        for _, names in ipairs({ _G.LOCALIZED_CLASS_NAMES_MALE or {}, _G.LOCALIZED_CLASS_NAMES_FEMALE or {} }) do
+            for token, name in pairs(names) do
+                CLASS_TOKENS[name] = token
+            end
+        end
+    end
+    return CLASS_TOKENS[text]
+end
+
+local classPairs = setmetatable({}, { __mode = "k" }) -- unit tooltip data -> { class line, side line, token, side }
+local NO_PAIR = {}
+local sideDrawn = setmetatable({}, { __mode = "k" }) -- tooltip -> the side line just drawn at the right
+
+local function classPair(data)
+    local found = classPairs[data]
+    if found then
+        return found ~= NO_PAIR and found or nil
+    end
+    found = NO_PAIR
+    local lines = readable(data.lines) and type(data.lines) == "table" and data.lines or {}
+    for i = 2, #lines - 1 do
+        local text, nextText = lineText(data, i), lineText(data, i + 1)
+        local token = text and classToken(text)
+        local side = nextText and (nextText == FACTION_ALLIANCE and "A" or nextText == FACTION_HORDE and "H")
+        if token and side then
+            found = { lines[i], lines[i + 1], token, side }
+            break
+        end
+    end
+    classPairs[data] = found
+    return found ~= NO_PAIR and found or nil
+end
+
+local function onAnyLine(tooltip, line)
+    if sideDrawn[tooltip] == line then
+        sideDrawn[tooltip] = nil
+        return true -- it's at the right of the class line
+    end
+    if not (module.db.classSide and tooltip.GetProcessingTooltipInfo) then
+        return
+    end
+    local info = tooltip:GetProcessingTooltipInfo()
+    local data = info and info.tooltipData
+    local kind = data and data.type
+    if not (readable(kind) and kind == Enum.TooltipDataType.Unit) then
+        return
+    end
+    local pair = classPair(data)
+    if not (pair and pair[1] == line) then
+        return
+    end
+    local db = module.db
+    local r, g, b = 1, 1, 1
+    local class = db.classColor and ns.Colors.ClassToken(pair[3])
+    if class then
+        r, g, b = class:GetRGB()
+    end
+    local r2, g2, b2 = 1, 1, 1
+    if db.factionColor then
+        local side = ns.Colors.Faction(pair[4])
+        r2, g2, b2 = side.r, side.g, side.b
+    end
+    tooltip:AddDoubleLine(pair[1].leftText, pair[2].leftText, r, g, b, r2, g2, b2)
+    sideDrawn[tooltip] = pair[2]
+    return true
+end
+
 local function onItem(tooltip, data)
+    if data and module.db.nameIcon and C_Item.GetItemIconByID then
+        local id = ns.ItemTooltip.ItemID(data)
+        if id then
+            nameIcon(tooltip, data, C_Item.GetItemIconByID(id))
+        end
+    end
     if not (module.db.itemBorder and data and C_Item.GetItemQualityByID) then
         return
     end
@@ -740,27 +868,60 @@ local function dropChance(npcID, text)
 end
 
 -- An objective line: left out by Quest Lines, or added by us with its drop chance, or Blizzard's.
+-- Blizzard's transparent texture, as a gap of a given width inside text.
+local INDENT = "|TInterface\\Common\\spacer:1:%d|t"
+
+-- A quest objective as its words and its count ("Tough Wolf Meat", "6 / 8"), from Blizzard's
+-- "6/8 Tough Wolf Meat" or "Tough Wolf Meat: 6/8". Nothing for an objective written another way
+-- (a percent, a single step): that one stays as Blizzard writes it.
+local function objectiveParts(text)
+    local plain = ns.Text.Plain(text)
+    local have, need, words = match(plain, "^[%s%-]*(%d+)/(%d+)%s+(.+)$")
+    if not have then
+        words, have, need = match(plain, "^[%s%-]*(.-):%s*(%d+)/(%d+)%s*$")
+    end
+    if have and words and words ~= "" then
+        return words, have .. " / " .. need
+    end
+end
+
 local function questObjectiveLine(tooltip, line)
     if skipQuestLine(tooltip) then
         return true
     end
-    if not module.db.dropChance or not tooltip.GetProcessingTooltipInfo or not QuestieDB.IsReady()
-        or (tooltip.IsForbidden and tooltip:IsForbidden()) then
-        return false
-    end
-    local info = tooltip:GetProcessingTooltipInfo()
-    local data = info and info.tooltipData
     local text = line and line.leftText
-    if not data or data.type ~= Enum.TooltipDataType.Unit or not ns.IsText(text, true) then
+    if not ns.IsText(text, true) or (tooltip.IsForbidden and tooltip:IsForbidden()) then
         return false
     end
-    local npcID = Units.NpcID(data.guid)
-    local chance = npcID and dropChance(npcID, text)
-    if not chance then
+    local db = module.db
+    -- The drop chance, on a creature's tooltip.
+    local chance
+    if db.dropChance and tooltip.GetProcessingTooltipInfo and QuestieDB.IsReady() then
+        local info = tooltip:GetProcessingTooltipInfo()
+        local data = info and info.tooltipData
+        local npcID = data and data.type == Enum.TooltipDataType.Unit and Units.NpcID(data.guid)
+        chance = npcID and dropChance(npcID, text) or nil
+    end
+    -- Counts at the Right: the objective's words at the left and its count at the right edge.
+    local words, count
+    if db.questCounts then
+        words, count = objectiveParts(text)
+    end
+    if not (chance or words) then
         return false
+    end
+    local color = line.leftColor
+    color = readable(color) and type(color) == "table" and color.r and color or NORMAL_FONT_COLOR
+    if words then
+        -- Blizzard indents an objective by its offset; a line with two sides takes none, so the
+        -- same indent goes in as a gap in front of the words.
+        local offset = line.leftOffset
+        local indent = ns.IsNumber(offset) and offset > 0 and format(INDENT, offset) or "  "
+        tooltip:AddDoubleLine(indent .. words .. (chance and (" " .. chance) or ""), count,
+            color.r, color.g, color.b, color.r, color.g, color.b)
+        return true
     end
     -- As Blizzard adds the line (TooltipDataHandlerMixin:AddLineDataText), with the chance after it.
-    local color = line.leftColor or NORMAL_FONT_COLOR
     tooltip:AddLine(text .. " " .. chance, color.r, color.g, color.b, line.wrapText or false, line.leftOffset)
     return true
 end
@@ -775,6 +936,11 @@ function module:OnEnable()
     self:TooltipPostCall(Enum.TooltipDataType.Unit, onUnit)
     self:TooltipPostCall(Enum.TooltipDataType.Item, onItem)
     self:TooltipPostCall(Enum.TooltipDataType.Object, onObject)
+    self:TooltipPostCall(Enum.TooltipDataType.Spell, onSpell)
+    -- Probe: every line of every tooltip, for a player's class line.
+    if TooltipDataProcessor and TooltipDataProcessor.AllTypes then
+        self:TooltipLinePreCall(TooltipDataProcessor.AllTypes, onAnyLine)
+    end
     -- The friends list's tooltip has no tooltip data for a post call, so after it shows.
     self:Hook(GameTooltip, "Show", onFriendTooltip)
     -- GameTooltip_SetDefaultAnchor is Blizzard's for every default-placed tooltip.

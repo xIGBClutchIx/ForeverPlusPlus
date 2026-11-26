@@ -17,6 +17,16 @@ ns.changelog = {
                     .. "button with your free bag slots while the controller interface is on, "
                     .. "since it hides the bag buttons. Move it in Edit Mode, and point at it for "
                     .. "each bag's free slots." },
+                { L.TOOLTIPS_TITLE, "Three small tidy options, each on by default. Icon by Name shows "
+                    .. "an item's or spell's icon before its name, Class and Side on One Row puts a "
+                    .. "player's class and Alliance or Horde on one row, and Objective Counts at the "
+                    .. "Right writes \"Tough Wolf Meat\" and \"6 / 8\" in place of \"6/8 Tough Wolf "
+                    .. "Meat\"." },
+                { L.ITEMTOOLTIPS_TITLE, "Pair Short Lines (on by default) puts two short lines that "
+                    .. "follow each other on one row: how an item binds with \"Unique\", and a "
+                    .. "shield's armor with its block. Scan Age has a new choice and default, Beside "
+                    .. "the Price, which shows \"2h ago\" on the Auction line instead of a line of its "
+                    .. "own." },
                 { L.DISENCHANTICONS_TITLE, "A new module, off by default, that marks the items you can "
                     .. "disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By "
                     .. "default only on a character with Enchanting, and Skip Items Worth More Sold "
