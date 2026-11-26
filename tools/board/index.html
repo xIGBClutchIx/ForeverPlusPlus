@@ -1,5 +1,6 @@
 <title>Forever++ Board</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<link rel="icon" type="image/png" href="icon.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@500;600;700&display=swap">
 <style>
 /* Layout: one working surface, dark by choice (the project's own navy and gold). A sticky bar of
@@ -39,9 +40,11 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .small { font-size: 13px; }
 
 /* Top: name, where the project stands, the views */
-.top { padding-block: 20px 12px; display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: baseline; }
+.top { padding-block: 20px 12px; display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; }
 .top h1 { font: 700 26px/1.1 var(--font-display); margin: 0; letter-spacing: -0.01em; }
-.top h1 span { color: var(--gold); }
+.top h1 .name > span { color: var(--gold); }
+.top h1 { display: flex; align-items: center; gap: 10px; }
+.top h1 .logo { width: 36px; height: 36px; border-radius: 6px; flex: none; }
 .standing { display: flex; flex-wrap: wrap; gap: 4px 16px; color: var(--ink-2); font-size: 13.5px; }
 .standing b { color: var(--ink); font-weight: 600; }
 .places { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13.5px; margin-left: auto; }
@@ -306,7 +309,7 @@ dialog.sheet { overflow-y: auto; overscroll-behavior: contain; }
 
 <div class="fb" id="app">
     <header class="top wrap">
-        <h1>Forever<span>++</span> Board</h1>
+        <h1><img class="logo" src="icon.png" alt=""><span class="name">Forever<span>++</span> Board</span></h1>
         <div class="standing" id="standing"><span>Reading the project's issues, commits and releases</span></div>
         <nav class="places" id="places" aria-label="The project elsewhere"></nav>
     </header>
