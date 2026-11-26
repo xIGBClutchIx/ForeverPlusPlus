@@ -598,17 +598,22 @@ end
 -- is Blizzard's line (or a module's, with an upgrade arrow at its right), written again with the
 -- icon in front. Its text comes from the tooltip's data, never the tooltip, and only when it can
 -- be read.
-local function nameIcon(tooltip, data, icon)
+local function nameIcon(tooltip, data, icon, known)
     local lines = readable(data.lines) and type(data.lines) == "table" and data.lines
     local first = lines and lines[1]
+    -- The name from the tooltip's data, or the one the caller already has for a tooltip whose
+    -- data doesn't hold it (a macro's).
     local name = first and first.leftText
+    if not ns.IsText(name, true) then
+        name = known
+    end
     if not (icon and readable(icon) and ns.IsText(name, true)) then
         return
     end
     -- Blizzard numbers each line it adds. A name a module drew in its place has no number: it's
     -- the first line, except on a tooltip that opens with a line of its own ("Currently
     -- Equipped" on the ones that compare gear), which is left alone.
-    local index = first.lineIndex
+    local index = first and first.lineIndex
     if not ns.IsNumber(index) then
         if tooltip ~= GameTooltip and tooltip ~= _G.ItemRefTooltip then
             return
@@ -657,6 +662,28 @@ local function onMacro(tooltip, data)
     if not (module.db.nameIcon and data) then
         return
     end
+    -- The action button the tooltip belongs to says what its macro shows: the slot's ID is that
+    -- spell or item, not the macro (ActionButtons.Content). This client's macro tooltip data
+    -- doesn't say (seen in game 2026-11-26: type 25, and Smart Buff's macro got no icon from it).
+    local owner = tooltip.GetOwner and tooltip:GetOwner()
+    if type(owner) == "table" then
+        local kind, id, subType = ns.ActionButtons.Content(owner)
+        if kind == "macro" and id then
+            if readable(subType) and subType == "item" then
+                if C_Item.GetItemIconByID then
+                    nameIcon(tooltip, data, C_Item.GetItemIconByID(id),
+                        C_Item.GetItemNameByID and C_Item.GetItemNameByID(id))
+                end
+                return
+            elseif C_Spell and C_Spell.GetSpellTexture then
+                local icon = C_Spell.GetSpellTexture(id)
+                if icon then
+                    nameIcon(tooltip, data, icon, C_Spell.GetSpellName and C_Spell.GetSpellName(id))
+                    return
+                end
+            end
+        end
+    end
     local lines = readable(data.lines) and type(data.lines) == "table" and data.lines
     local first = lines and lines[1]
     local kind, id = first and first.tooltipType, first and first.tooltipID
@@ -669,8 +696,7 @@ local function onMacro(tooltip, data)
             return
         end
     end
-    -- This client's macro tooltips don't say (seen in game 2026-11-26: Smart Buff's macro got no
-    -- icon): the tooltip's first line is the spell's or item's name, which finds its icon.
+    -- Not on an action bar: the tooltip's first line is the spell's or item's name.
     nameIcon(tooltip, data, iconByName(first and first.leftText))
 end
 
@@ -980,9 +1006,9 @@ function module:OnEnable()
     self:TooltipPostCall(Enum.TooltipDataType.Item, onItem)
     self:TooltipPostCall(Enum.TooltipDataType.Object, onObject)
     self:TooltipPostCall(Enum.TooltipDataType.Spell, onSpell)
-    if Enum.TooltipDataType.Macro then
-        self:TooltipPostCall(Enum.TooltipDataType.Macro, onMacro)
-    end
+    -- A macro's tooltip is type 25 on this client (dumped in game 2026-11-26), whether or not
+    -- its Enum names it.
+    self:TooltipPostCall(Enum.TooltipDataType.Macro or 25, onMacro)
     -- Probe: every line of every tooltip, for a player's class line.
     if TooltipDataProcessor and TooltipDataProcessor.AllTypes then
         self:TooltipLinePreCall(TooltipDataProcessor.AllTypes, onAnyLine)
