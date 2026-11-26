@@ -308,7 +308,7 @@ local walk = ItemButtons.Walk(module, function(icon, link, place, a)
         style(mark)
         ItemButtons.PlaceMark(mark, icon, db)
     end
-    local color = hasBorder and COLORS[db.border]
+    local color = hasBorder and COLORS[db.border] or nil
     local border = borders:Set(icon, can and color and true or false)
     if border then
         placeBorder(border, icon, color)
@@ -326,18 +326,18 @@ end, {
 ns.ItemTooltip.OnBorderColor(function(item)
     local db = module.db
     if not (module.enabled and db.tooltip and (knowsEnchanting or not db.enchanter)) then
-        return nil
+        return nil, nil, nil
     end
     local color = hasBorder and COLORS[db.border]
     if not color then
-        return nil
+        return nil, nil, nil
     end
     -- Whether it disenchants is the item's, whatever its random suffix.
     local link = type(item) == "number" and "item:" .. item or item
     if type(link) == "string" and disenchantable(link) then
         return color[1], color[2], color[3]
     end
-    return nil
+    return nil, nil, nil
 end)
 
 -- Module ----------------------------------------------------------------------------------------

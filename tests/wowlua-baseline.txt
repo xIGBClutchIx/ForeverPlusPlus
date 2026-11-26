@@ -82,9 +82,6 @@
 1	ForeverPlusPlus/Lib/Instances.lua: warning[return-mismatch] expected return type `string`, got `string?`
 1	ForeverPlusPlus/Modules/Character/CharacterWindow/Skills.lua: warning[type-mismatch] expected `number` for parameter 'invSlotId', got `number | string`
 1	ForeverPlusPlus/Modules/Interface/LocalTime.lua: warning[type-mismatch] expected `string | number` for parameter 's', got `string | false`
-1	ForeverPlusPlus/Modules/Items/BagSlotCounter.lua: warning[type-mismatch] expected `"LEFT" | "RIGHT" | "CENTER"` for parameter 'justifyH', got `string | number`
-1	ForeverPlusPlus/Modules/Items/BagSlotCounter.lua: warning[type-mismatch] expected `"TOPLEFT" | "TOPRIGHT" | "BOTTOMLEFT" | (6 more)` for parameter 'point', got `string | number`
-1	ForeverPlusPlus/Modules/Items/BagSlotCounter.lua: warning[type-mismatch] expected `"TOPLEFT" | "TOPRIGHT" | "BOTTOMLEFT" | nil | (6 more)` for parameter 'relativePoint', got `string | number`
 1	ForeverPlusPlus/Modules/Map/WorldMap/WorldMap.lua: warning[type-mismatch] expected `table` for parameter 'keys', got `string | string[]`
 
 # Our own fields on frames we made, which the checker types as Blizzard's plain Frame or Button.
