@@ -454,14 +454,22 @@ function htmlText(html) {
         .replace(/&quot;/g, '"').replace(/&#39;|&#x27;|&apos;/g, "'")
         .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
         .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16))).replace(/&amp;/g, '&');
-    return decode(String(html || '')
+    // Takes tags out until none is left: one pass over "<<b>i>" would leave "<i>" behind.
+    const strip = (s) => {
+        let before;
+        do {
+            before = s;
+            s = s.replace(/<[^>]+>/g, '');
+        } while (s !== before);
+        return s;
+    };
+    return decode(strip(String(html || '')
         .replace(/<a\b[^>]*?href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, (_, href, t) => {
-            const text = t.replace(/<[^>]+>/g, '');
+            const text = strip(t);
             const url = decode(href);
             return /^https:\/\//.test(url) && decode(text) !== url ? '[' + text + '](' + url + ')' : text;
         })
-        .replace(/<br\s*\/?>/gi, '\n').replace(/<li[^>]*>/gi, '- ').replace(/<\/(p|div|li|h\d|blockquote|pre)>/gi, '\n')
-        .replace(/<[^>]+>/g, ''))
+        .replace(/<br\s*\/?>/gi, '\n').replace(/<li[^>]*>/gi, '- ').replace(/<\/(p|div|li|h\d|blockquote|pre)>/gi, '\n')))
         .replace(/ /g, ' ').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
 }
 
@@ -533,10 +541,11 @@ function sortShas(shas) {
 // A release note that names an issue, like "(#23)".
 function notesFor(number) {
     const found = [];
+    const names = new RegExp('#' + Number(number) + '\\b'); // a number, whatever was passed
     for (const [version, release] of notes) {
         for (const section of release.sections) {
             for (const e of section.entries) {
-                if (new RegExp('#' + number + '\\b').test(e.text)) {
+                if (names.test(e.text)) {
                     found.push({ version, heading: section.heading, name: e.name, text: e.text });
                 }
             }
