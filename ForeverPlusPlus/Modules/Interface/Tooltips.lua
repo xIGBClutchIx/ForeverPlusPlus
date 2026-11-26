@@ -20,6 +20,7 @@ local NORMAL_FONT_COLOR, TOOLTIP_DEFAULT_COLOR = NORMAL_FONT_COLOR, TOOLTIP_DEFA
 local FACTION_HORDE, FACTION_ALLIANCE = FACTION_HORDE, FACTION_ALLIANCE
 local GameTooltip, InCombatLockdown = GameTooltip, InCombatLockdown
 local UnitChannelInfo, C_Spell, select = UnitChannelInfo, C_Spell, select
+local GetActionInfo = GetActionInfo
 
 local L = ns.L
 local readable = ns.IsReadable
@@ -700,6 +701,34 @@ local function onMacro(tooltip, data)
     nameIcon(tooltip, data, iconByName(first and first.leftText))
 end
 
+-- After the game fills a tooltip from an action bar slot: a macro's again, from the slot itself.
+-- The slot says "macro", the spell or item it shows, and which of the two (dumped in game
+-- 2026-11-26: "macro", 11550, "spell" for Smart Buff's macro showing Battle Shout), and yet the
+-- macro tooltip's own post call put no icon on it, so this doesn't lean on that call at all. The
+-- name is written whole, so an icon already there isn't doubled.
+local function onSetAction(tooltip, slot)
+    if not (module.db.nameIcon and readable(slot) and slot and GetActionInfo) then
+        return
+    end
+    local kind, id, subType = GetActionInfo(slot)
+    if not (readable(kind) and readable(id) and kind == "macro" and id) then
+        return
+    end
+    local icon, name
+    if readable(subType) and subType == "item" then
+        icon = C_Item.GetItemIconByID and C_Item.GetItemIconByID(id)
+        name = C_Item.GetItemNameByID and C_Item.GetItemNameByID(id)
+    elseif C_Spell and C_Spell.GetSpellTexture then
+        icon = C_Spell.GetSpellTexture(id)
+        name = C_Spell.GetSpellName and C_Spell.GetSpellName(id)
+    end
+    local line = leftLine(tooltip, 1)
+    if line and icon and readable(icon) and ns.IsText(name, true) then
+        line:SetText("|T" .. icon .. ":0|t " .. name)
+        tooltip:Show() -- the name is wider by its icon: the tooltip sizes itself again
+    end
+end
+
 -- Class and Side on One Row: a player's class line and the side line right after it go on one
 -- row, class at the left and side at the right. Told from the tooltip's data as the game adds each
 -- line, by the client's own class and side names, so it needs no unit; in combat, when the lines
@@ -1009,6 +1038,7 @@ function module:OnEnable()
     -- A macro's tooltip is type 25 on this client (dumped in game 2026-11-26), whether or not
     -- its Enum names it.
     self:TooltipPostCall(Enum.TooltipDataType.Macro or 25, onMacro)
+    self:Hook(GameTooltip, "SetAction", onSetAction)
     -- Probe: every line of every tooltip, for a player's class line.
     if TooltipDataProcessor and TooltipDataProcessor.AllTypes then
         self:TooltipLinePreCall(TooltipDataProcessor.AllTypes, onAnyLine)
