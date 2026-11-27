@@ -112,6 +112,9 @@ L.SOCIALBUTTON_MENU = "소셜"
 L.CHAT_BUTTON_FOLDED = "대화창이 너무 낮아 버튼이 들어가지 않으므로 대화 메뉴에 있습니다."
 L.CHAT_BUTTON_FOLDED_DESC = "버튼이 대화창 옆 말풍선 버튼 위에 들어가지 않아, 대신 그 버튼 메뉴의 맨 아래에 "
     .. "있습니다. 대화창을 더 높이면 돌아옵니다."
+L.CHAT_BUTTON_EVERY_TAB = "모든 탭에 버튼 표시"
+L.CHAT_BUTTON_EVERY_TAB_DESC = "어떤 대화 탭이 앞에 있든 버튼을 대화창 옆에 둡니다. 게임 자체의 대화 버튼은 첫 번째 "
+    .. "탭에만 있습니다."
 
 -- ChatFont
 L.CHATFONT_TITLE = "대화 글꼴"

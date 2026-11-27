@@ -104,6 +104,8 @@ L.SOCIALBUTTON_MENU = "社交"
 L.CHAT_BUTTON_FOLDED = "聊天窗口太矮，放不下它的按钮，因此它被放进了聊天菜单。"
 L.CHAT_BUTTON_FOLDED_DESC = "该按钮在聊天窗口旁的对话气泡按钮上方放不下，因此改为列在那个按钮菜单的底部。把聊天"
     .. "窗口调高即可恢复。"
+L.CHAT_BUTTON_EVERY_TAB = "每个标签都显示按钮"
+L.CHAT_BUTTON_EVERY_TAB_DESC = "无论当前是哪个聊天标签，都让按钮留在聊天窗口旁。游戏自带的聊天按钮只在第一个标签显示。"
 
 -- ChatFont
 L.CHATFONT_TITLE = "聊天字体"

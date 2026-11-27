@@ -21,6 +21,7 @@ local module = ns.NewModule("WhisperWindow", L.WHISPERWINDOW_DESC, {
     openOnWhisper = true,
     hideInChat = false,
     chatButton = true,
+    everyTab = true,
     alpha = 100,
     movingAlpha = 60,
     combatAlpha = 40,
@@ -64,6 +65,7 @@ module.options = {
     -- Changed: above Chat Copy's, and in the speech bubble's menu on a short chat window.
     { key = "chatButton", name = L.WHISPERWINDOW_BUTTON, description = L.WHISPERWINDOW_BUTTON_DESC,
         section = WINDOW, changed = "1.4.0" },
+    ns.Chat.EveryTabOption({ requires = "chatButton", section = WINDOW }),
     percent({ key = "alpha", name = L.WHISPERWINDOW_ALPHA, description = L.WHISPERWINDOW_ALPHA_DESC }),
     percent({ key = "movingAlpha", name = L.WHISPERWINDOW_MOVING,
         description = L.WHISPERWINDOW_MOVING_DESC }),

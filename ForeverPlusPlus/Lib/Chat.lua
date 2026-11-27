@@ -5,7 +5,7 @@ local _, ns = ...
 
 local _G, ipairs, type, tonumber, gsub, format = _G, ipairs, type, tonumber, string.gsub, string.format
 local select, pairs = select, pairs
-local setmetatable, CreateFrame, UIParent = setmetatable, CreateFrame, UIParent
+local setmetatable, CreateFrame, UIParent, hooksecurefunc = setmetatable, CreateFrame, UIParent, hooksecurefunc
 local byte, find, match, sub = string.byte, string.find, string.match, string.sub
 local min, max, concat = math.min, math.max, table.concat
 
@@ -555,6 +555,49 @@ local function host()
     return frame and (frame.buttonFrame or frame.ButtonFrame) or UIParent
 end
 
+-- The docked chat window in front, when it isn't the main one. Blizzard's chat buttons are in the
+-- main window's button frame (ChatFrame1ButtonFrame, FloatingChatFrame.xml), which hides with the
+-- main window while another tab is in front, so they, and ours with them, are only there on the
+-- first tab. Every docked window is laid over the main one (FCFDock_AddChatFrame's SetAllPoints)
+-- and has a button frame of its own at full alpha, in the same place.
+local function frontTab()
+    -- The dock is made as the chat loads (FloatingChatFrame.lua), so by name, not as a field.
+    local dock, main = _G["GENERAL_CHAT_DOCK"], _G.ChatFrame1
+    local front = dock and dock.selected
+    if front and main and front ~= main and front.isDocked and front.buttonFrame then
+        return front
+    end
+    return nil
+end
+
+-- The frame a button of the column belongs in: Blizzard's buttons' own, or for one that stays on
+-- every tab, the button frame of the tab in front. Only while Blizzard's buttons are where it put
+-- them; an addon that moved them has its own idea of when they show.
+local function hostFor(entry, parent)
+    if entry.everyTab then
+        local front, main = frontTab(), _G.ChatFrame1
+        if front and main and parent == main.buttonFrame then
+            return front.buttonFrame
+        end
+    end
+    return parent
+end
+
+---The option for a module's button in the column, on by default: whether it stays beside the chat
+---window whichever tab is in front. Pass what it reads to Chat.AddButton as `everyTab`.
+---@param extra? table more fields for the option (`requires`, `section`)
+---@return table option with the key "everyTab"
+function Chat.EveryTabOption(extra)
+    local option = {
+        key = "everyTab", name = ns.L.CHAT_BUTTON_EVERY_TAB, description = ns.L.CHAT_BUTTON_EVERY_TAB_DESC,
+        added = "1.10.0",
+    }
+    for field, value in pairs(extra or {}) do
+        option[field] = value
+    end
+    return option
+end
+
 ---A small button in the art of Blizzard's chat menu and channel buttons, with an icon on it, for
 ---the column (Chat.AddButton). It sits in the frame that holds them, so it fades with them.
 ---@param texture string the icon's texture path
@@ -604,7 +647,20 @@ end
 ---@return boolean
 function Chat.ButtonsHidden()
     local anchor = Chat.Anchor()
+    if anchor and anchor:IsShown() and frontTab() then
+        return false -- only behind another tab, which is Blizzard's own doing
+    end
     return not (anchor and anchor:IsVisible())
+end
+
+---The buttons in the column now, ours and Social Button's, wherever each is.
+---@return table[] buttons
+function Chat.ColumnButtons()
+    local list = {}
+    for i, entry in ipairs(column) do
+        list[i] = entry.button
+    end
+    return list
 end
 
 ---Whether the button `key` added is in the chat menu button's menu, since the chat window is too
@@ -709,6 +765,7 @@ local function onResize()
         C_Timer.After(0, layoutAgain)
     end
 end
+local dockHooked
 local watched = setmetatable({}, { __mode = "k" })
 local function watch(frame, ...)
     if frame and not watched[frame] and frame.HookScript then
@@ -819,13 +876,19 @@ function Chat.Layout()
     local parent = host()
     watch(parent, "OnSizeChanged")
     watch(_G.ChatFrameMenuButton, "OnShow", "OnHide")
+    -- Another tab coming to the front moves the buttons that stay on every tab to it.
+    if not dockHooked and hooksecurefunc and _G.FCFDock_SelectWindow then
+        dockHooked = true
+        hooksecurefunc("FCFDock_SelectWindow", onResize)
+    end
     local bottom = lowest(previous)
     local y = bottom and previous:GetBottom() * previous:GetEffectiveScale()
     for _, entry in ipairs(column) do
         local button = entry.button
         -- Ours follow Blizzard's buttons if an addon moved them; Social Button moves its own.
-        if ours[button] and button:GetParent() ~= parent then
-            button:SetParent(parent)
+        local to = hostFor(entry, parent)
+        if ours[button] and button:GetParent() ~= to then
+            button:SetParent(to)
         end
         button:ClearAllPoints()
         button:SetPoint("TOP", previous, "BOTTOM", 0, -2)
@@ -862,9 +925,13 @@ end
 ---@param button table
 ---@param order number
 ---@param label? string its line in the chat menu while it doesn't fit (Chat.NewButton's has one)
-function Chat.AddButton(key, button, order, label)
+---@param everyTab? boolean stays whichever tab is in front (a button from Chat.NewButton only)
+function Chat.AddButton(key, button, order, label, everyTab)
     Chat.RemoveButton(key, true)
-    column[#column + 1] = { key = key, button = button, order = order, label = label or ours[button] }
+    column[#column + 1] = {
+        key = key, button = button, order = order, label = label or ours[button],
+        everyTab = everyTab and ours[button] ~= nil,
+    }
     table.sort(column, function(a, b)
         return a.order < b.order
     end)

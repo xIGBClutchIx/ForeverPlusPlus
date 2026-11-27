@@ -106,6 +106,8 @@ L.SOCIALBUTTON_MENU = "社交"
 L.CHAT_BUTTON_FOLDED = "聊天視窗太矮，放不下它的按鈕，因此它在聊天選單中。"
 L.CHAT_BUTTON_FOLDED_DESC = "按鈕放不進聊天視窗旁的對話泡泡按鈕上方，因此改列在該按鈕選單的最下方。"
     .. "將聊天視窗拉高即可讓它回來。"
+L.CHAT_BUTTON_EVERY_TAB = "每個分頁都顯示按鈕"
+L.CHAT_BUTTON_EVERY_TAB_DESC = "無論目前是哪個聊天分頁，都讓按鈕留在聊天視窗旁。遊戲內建的聊天按鈕只在第一個分頁顯示。"
 
 -- ChatFont
 L.CHATFONT_TITLE = "聊天字型"

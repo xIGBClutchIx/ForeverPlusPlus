@@ -43,6 +43,10 @@ ns.changelog = {
                     .. "leaves out what a vendor pays more for." },
             } },
             { L.CHANGELOG_CHANGED, {
+                "Chat Copy and Whisper Window: Button on Every Tab (on by default) keeps the "
+                    .. "module's chat button beside the chat window whichever tab is in front. "
+                    .. "Before, it was only there on the first tab, like the game's own chat "
+                    .. "buttons.",
                 { L.EDITBOXONTOP_TITLE, "The main chat window can sit at the bottom edge of the "
                     .. "screen in Edit Mode, now the edit box no longer needs the room under it." },
             } },

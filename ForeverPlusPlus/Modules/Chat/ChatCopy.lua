@@ -21,6 +21,7 @@ local Chat = ns.Chat
 
 local module = ns.NewModule("ChatCopy", L.CHATCOPY_DESC, {
     stamps = false,
+    everyTab = true,
     layout = {}, -- data: where the window was left
 })
 module.title = L.CHATCOPY_TITLE
@@ -35,6 +36,8 @@ module.options = {
         description = L.CHATCOPY_STAMPS_DESC,
         added = "0.8.0",
     },
+    -- The button copies the tab in front, so it's no use only on the first.
+    Chat.EveryTabOption(),
 }
 
 -- The window's text box is limited in length; a long chat drops its oldest lines to fit, with
@@ -330,6 +333,8 @@ end
 function module:OnOptionChanged(key)
     if key == "stamps" then
         updateStamps()
+    elseif key == "everyTab" and self.enabled and button then
+        Chat.AddButton(self.name, button, 20, nil, self.db.everyTab)
     end
 end
 
@@ -340,7 +345,7 @@ end
 function module:OnEnable()
     button = button or newButton()
     button:Show()
-    Chat.AddButton(self.name, button, 20)
+    Chat.AddButton(self.name, button, 20, nil, self.db.everyTab)
     updateStamps()
     self:On("UPDATE_CHAT_WINDOWS", onWindows)
     self:On("UPDATE_FLOATING_CHAT_WINDOWS", onWindows)
