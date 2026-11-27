@@ -23,6 +23,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 ### Fixed
 
 - **Buff Timers**: Sort Buffs and Hide Tracking Buffs no longer raise a "Cannot anchor to itself" error with an interface addon that lays the buffs out itself, such as ShestakUI, and now sort and close up the buffs in that addon's own layout.
+- **Movable Windows**: An NPC's greeting window and the quest window it opens now share one place and size, so a quest giver's window no longer jumps when you click a quest. One you moved before keeps its place: the greeting's, or the quest window's if only that one was moved.
 ## 1.9.1 (2026-11-25)
 
 ### Changed

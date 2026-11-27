@@ -405,3 +405,27 @@ do
     same(now, current(), "once: a current file is untouched")
     same(char, { version = Store.VERSION, data = { UpgradeArrows = { trees = {} } } }, "once: and a current character")
 end
+
+-- 1.9.1 -----------------------------------------------------------------------------------------
+-- Movable Windows kept the quest window's place apart from the NPC greeting's; from layout 8 they
+-- share the greeting's, in every profile.
+do
+    local db = { version = 7,
+        data = { MovableWindows = {
+            positions = { QuestFrame = { "TOPLEFT", "TOPLEFT", 40, -90 }, BankFrame = { "CENTER", "CENTER", 0, 0 } },
+            scales = { QuestFrame = 120 },
+        } },
+        profiles = { raid = { name = "Raid", data = { MovableWindows = {
+            positions = { GossipFrame = { "TOPLEFT", "TOPLEFT", 10, -20 }, QuestFrame = { "TOPLEFT", "TOPLEFT", 500, -20 } },
+        } } } },
+    }
+    login(db, { version = 7 })
+    local windows = read(db, "MovableWindows")
+    same(windows.positions.GossipFrame, { "TOPLEFT", "TOPLEFT", 40, -90 }, "1.9.1: only the quest window was moved: the greeting takes its place")
+    eq(windows.positions.QuestFrame, nil, "1.9.1: and the quest window's own is gone")
+    eq(windows.scales.GossipFrame, 120, "1.9.1: and its size")
+    same(windows.positions.BankFrame, { "CENTER", "CENTER", 0, 0 }, "1.9.1: other windows keep theirs")
+    local raid = db.profiles.raid.data.MovableWindows.positions
+    same(raid.GossipFrame, { "TOPLEFT", "TOPLEFT", 10, -20 }, "1.9.1: both moved: the greeting's place wins, in a profile too")
+    eq(raid.QuestFrame, nil, "1.9.1: and the quest window's is gone")
+end
