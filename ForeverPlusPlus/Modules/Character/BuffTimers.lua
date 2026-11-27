@@ -170,12 +170,27 @@ end
 -- them: SetPoint only, on plain buttons that aren't protected, so right-click still cancels.
 local slots = {} -- i -> the anchor points Blizzard gave auraFrames[i]
 local placed = setmetatable({}, weak) -- button -> the slot it's in now, while not its own
+-- Whether the buttons are anchored to each other instead of to their container, as an interface
+-- addon that lays the buffs out itself does (ShestakUI anchors each to the one before it). A slot is
+-- then "next to that button", not a place: moving a button into it can anchor it to itself, which
+-- the game refuses with an error. So the buttons stay where that addon put them.
+local chained = false
 
 -- Read right after Blizzard laid the buttons out, when each is in its own place.
 local function readSlots()
     slots = {}
+    chained = false
+    local buttons = {}
+    for _, button in ipairs(BuffFrame and BuffFrame.auraFrames or {}) do
+        buttons[button] = true
+    end
     for i, button in ipairs(BuffFrame and BuffFrame.auraFrames or {}) do
         slots[i] = Frames.GetPoints(button)
+        for _, point in ipairs(slots[i]) do
+            if buttons[point[2]] then
+                chained = true
+            end
+        end
     end
     for button in pairs(placed) do
         placed[button] = nil
@@ -184,6 +199,11 @@ end
 
 local function place(button, i, own)
     local points = slots[i]
+    for _, point in ipairs(points or {}) do
+        if point[2] == button then
+            return -- a slot beside this very button: it can't be anchored to itself
+        end
+    end
     if (placed[button] or own) ~= i and points and points[1] then
         Frames.SetPoints(button, points)
         placed[button] = i ~= own and i or nil
@@ -310,7 +330,7 @@ local function layout()
     -- Not with the controller interface on: its cursor still lands on a buff at no alpha, and its
     -- cancel button would take the unseen buff off (Blizzard_BuffFrame's gamepad branch).
     local sorting, hiding = side ~= "off", module.db.hideTracking and not ns.Gamepad.On()
-    if not (frames and container) or not (sorting or hiding) then
+    if not (frames and container) or not (sorting or hiding) or chained then
         unsort()
         return
     end
