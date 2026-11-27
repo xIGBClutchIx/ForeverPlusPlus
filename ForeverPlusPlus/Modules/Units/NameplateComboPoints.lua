@@ -45,7 +45,7 @@ end
 local module = ns.NewModule("NameplateComboPoints", L.NAMEPLATECOMBO_DESC, {
     enabled = true, -- only Rogues and Druids have the module at all (IsAvailable)
     icon = "red",
-    position = "above",
+    position = "below", -- above the name is where the plate's debuffs go
     size = 100, -- percent
     preview = false, -- Debug: made-up points counting up, on any class
 })
