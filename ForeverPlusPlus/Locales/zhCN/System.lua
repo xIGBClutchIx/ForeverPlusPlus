@@ -182,13 +182,24 @@ L.MINIMAPBUTTON_CLEAR_ALL_KEY_DESC = "“错误捕获”开启时，点击按钮
 
 -- Commands
 L.COMMANDS_TITLE = "斜杠命令"
-L.COMMANDS_DESC = "添加简短的斜杠命令：/rl重新加载界面，/clear清空聊天窗口。/way在“路径点”中。"
+L.COMMANDS_DESC = "添加简短的斜杠命令：/rl重新加载界面，/clear清空聊天窗口，/kb设置按键，/pull开始"
+    .. "开怪倒计时。/way在“路径点”中。"
 L.COMMANDS_RELOAD = "/rl"
 L.COMMANDS_RELOAD_DESC = "/rl重新加载界面，与/reload相同。如果另一个插件已经有/rl，则留给它。"
 L.COMMANDS_RELOAD_HELP = "重新加载界面" -- a line of /fpp help, like the SLASH_ ones
 L.COMMANDS_CLEAR_HELP = "清空输入命令的聊天窗口"
 L.COMMANDS_CLEAR = "/clear"
 L.COMMANDS_CLEAR_DESC = "/clear清空你输入它的聊天窗口。如果另一个插件已经有/clear，则留给它。"
+L.COMMANDS_KEYBIND = "/kb"
+L.COMMANDS_KEYBIND_DESC = "/kb打开“快速快捷键模式”，与“按键设置”中的按钮相同：将鼠标指向一个动作按钮，"
+    .. "然后按下按键。仅限非战斗状态。如果另一个插件已经有/kb，则留给它。"
+L.COMMANDS_KEYBIND_HELP = "打开“快速快捷键模式”"
+L.COMMANDS_KEYBIND_BLOCKED = "战斗中或编辑模式打开时无法打开“快速快捷键模式”。"
+L.COMMANDS_PULL = "/pull"
+L.COMMANDS_PULL_DESC = "/pull 10开始游戏的开怪计时，也就是/countdown开始的倒计时，持续10秒；不写数字时"
+    .. "也是10秒。/pull 0停止它。如果首领插件或另一个插件已经有/pull，则留给它。"
+L.COMMANDS_PULL_HELP = "开始游戏的开怪倒计时，不写数字时为10秒"
+L.COMMANDS_PULL_USAGE = "输入/pull和倒计时的秒数，例如/pull 10；输入/pull 0停止倒计时。"
 
 -- HideBetaFeedback
 L.HIDEBETAFEEDBACK_TITLE = "隐藏测试版反馈"

@@ -107,7 +107,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | AddOns List | Shows the AddOns list without category headers, enabled addons first. Can search notes and save addon sets. |
 | Error Catcher | Catches Lua errors, blocked actions, and warnings quietly instead of in Blizzard's popup. `/fpp errors` lists them, with a Copy Bug Report button. Leaves Lua errors to BugGrabber when it's installed. |
 | Minimap Button | A Forever++ button on the minimap or in the addon compartment. Click it for a menu of quick toggles you can customize, or right-click for settings. It shows how many errors Error Catcher caught. |
-| Slash Commands | Adds `/rl` to reload the UI and `/clear` to empty the chat window, each with its own checkbox. |
+| Slash Commands | Adds `/rl` to reload the UI, `/clear` to empty the chat window, `/kb` to open Quick Keybind Mode, and `/pull 10` to start the game's pull countdown, each with its own checkbox. |
 | Console Variables | A Settings page to browse and change the game's console variables, with a Popular group, favorites, and a padlock that keeps one at its value. Off by default. |
 | Debug | Every module's debug options and the testing tools, on a Debug page in Settings. Off by default. |
 | Controller Mode | A Settings page that keeps a setup for the controller interface and one for keyboard and mouse: a Forever++ profile, an Edit Mode layout, and a set of addons each. Logging in on the other interface switches to its profile and layout, and asks to reload only when the addons loaded aren't its set. Off by default. |
