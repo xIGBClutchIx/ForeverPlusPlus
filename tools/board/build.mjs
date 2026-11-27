@@ -24,7 +24,8 @@
 // them all again). Same inputs give the same bytes, apart from board.json's time stamp.
 //
 // An item's commits are found by itself: those whose message names its issue, those a reply of
-// ours links, a pull request's merge, and for an inbox entry the branch it was handed: a branch
+// ours links, the merge of a branch named for it ("issue/44-..."), a pull request's merge, and for
+// an inbox entry the branch it was handed: a branch
 // merged into main brings the commits of its merge ("Merge branch 'x'"), and those of a branch it
 // was built on; one not merged yet brings what it has over main. The entry's commit and commits
 // count too. Needs Node 20 or newer, git, and gh signed in; with GitHub or CurseForge unreachable
@@ -598,6 +599,13 @@ for (const issue of issues) {
                 const sha = findCommit(m[0]);
                 if (sha) { shas.push(sha); }
             }
+        }
+    }
+    // A branch named for the issue, "issue/44-bags-vendor", is its work whatever the messages say.
+    for (const [name, list] of mergesOf) {
+        const named = /^issue\/(\d+)(?:\D|$)/.exec(name);
+        if (named && Number(named[1]) === issue.number) {
+            for (const m of list) { shas.push(...mergeRange(m).filter((s) => commits.has(s))); }
         }
     }
     const handed = handedIssue.get(issue.number);
