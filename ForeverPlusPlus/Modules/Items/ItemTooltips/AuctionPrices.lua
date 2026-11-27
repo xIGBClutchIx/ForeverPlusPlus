@@ -23,7 +23,7 @@ local module = itemTooltips:NewPart({
     hideJunk = false, -- no price on gray items (they do sell at auction on Forever)
     -- "price" (beside the auction price), "right" or "inline" (a line of its own, placed as the
     -- price line's alignment places a value), or "off"
-    scanAge = "price",
+    scanAge = "right",
     scanAgeColor = "age", -- "age" (green when fresh to red when old), "gray", "white", or "gold"
     scanAgeRedHours = 12, -- hours old at which "age" is fully red
     scanOnOpen = true,
@@ -65,9 +65,9 @@ module:AddOptions({
         key = "scanAge", name = L.AUCTIONPRICES_SCAN_AGE, description = L.AUCTIONPRICES_SCAN_AGE_DESC,
         changed = "1.9.2",
         choices = {
-            { "price", L.AUCTIONPRICES_SCAN_AGE_PRICE },
             { "right", L.PRICE_ALIGN_RIGHT },
             { "inline", L.PRICE_ALIGN_INLINE },
+            { "price", L.AUCTIONPRICES_SCAN_AGE_PRICE },
             { "off", L.AUCTIONPRICES_SCAN_AGE_OFF },
         },
     },

@@ -24,9 +24,8 @@ ns.changelog = {
                     .. "Meat\"." },
                 { L.ITEMTOOLTIPS_TITLE, "Pair Short Lines (on by default) puts two short lines that "
                     .. "follow each other on one row: how an item binds with \"Unique\", and a "
-                    .. "shield's armor with its block. Scan Age has a new choice and default, Beside "
-                    .. "the Price, which shows \"2h ago\" on the Auction line instead of a line of its "
-                    .. "own." },
+                    .. "shield's armor with its block. Scan Age has a new choice, Beside the Price, "
+                    .. "which shows \"2h ago\" on the Auction line instead of a line of its own." },
                 { L.DISENCHANTICONS_TITLE, "A new module, off by default, that marks the items you can "
                     .. "disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By "
                     .. "default only on a character with Enchanting, and Skip Items Worth More Sold "
