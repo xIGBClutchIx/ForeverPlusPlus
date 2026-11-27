@@ -393,7 +393,7 @@ What each module is, in the code's terms (what it does for players is in `README
 - **Gathering Map**: a folder: the module, which remembers each herb, vein, chest, and fishing pool gathered for the account, its world map and minimap icons, its kinds in the world map's filter menu (`Filter.lua`), and its page of nodes to show or hide for each character.
 - **Combat Alert**
 - **Macro Icon Search**: a search box in the macro icon picker, over the icons of the player's spells and items.
-- **Movable Windows**: drag Blizzard's windows with a key held, and resize one with a key and the mouse wheel (a frame of our own takes the wheel while the key is held, so no Blizzard frame gets a wheel handler), remembered always, for the session, or until closed.
+- **Movable Windows**: drag Blizzard's windows with a key held, and resize one with a key and the mouse wheel (a frame of our own takes the wheel while the key is held, so no Blizzard frame gets a wheel handler), remembered always, for the session, or until closed. Windows that take turns in one place keep one place and size between them (`SHARED`: the quest window is kept under the NPC greeting's, GossipFrame).
 - **Hide Stance Bar**: the stance bar faded out, its buttons not taking the mouse.
 - **Hide Bag and Menu Bars**: `HideMenuBars`: the bag bar and micro menu faded out until the mouse is over them, their buttons not taking the mouse while Show on Mouseover is off.
 - **Hide Zone Text**: `HideZoneText`: the zone, area, and territory font strings of Blizzard's zone text faded out, its two fading frames left to run.

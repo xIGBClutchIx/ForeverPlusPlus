@@ -150,6 +150,38 @@ local NAMES = {
 local FULL_SCREEN = {
     WorldMapFrame = function(frame) return frame.IsMaximized and frame:IsMaximized() end,
 }
+-- Windows that take turns in one place keep one place and size between them: window name -> the
+-- name it's kept under. Talking to an NPC, its greeting (GossipFrame) gives way to a quest's text
+-- (QuestFrame) and back as the player clicks through, in the panel manager's left slot, and both
+-- are the same size (338x496, GossipFrame.xml and QuestFrame.xml in Blizzard_UIPanels_Game), so
+-- a move of one is a move of the conversation. Saved positions from before 1.10.0 are merged in
+-- the migration below.
+local SHARED = { QuestFrame = "GossipFrame" }
+local SHARING = {} -- the names more than one window is kept under
+for _, into in pairs(SHARED) do
+    SHARING[into] = true
+end
+
+-- Each profile's QuestFrame place and size go to GossipFrame, unless that has its own already.
+ns.Migrate(8, function(db)
+    for _, root in ipairs(ns.Store.Roots(db)) do
+        local data = type(root.data) == "table" and root.data.MovableWindows
+        if type(data) == "table" then
+            for _, key in ipairs({ "positions", "scales" }) do
+                local saved = data[key]
+                if type(saved) == "table" then
+                    for name, into in pairs(SHARED) do
+                        if saved[into] == nil then
+                            saved[into] = saved[name]
+                        end
+                        saved[name] = nil
+                    end
+                end
+            end
+        end
+    end
+end)
+
 local MAX_BAGS = 13 -- ContainerFrame1 to 13: the backpack, bags, and bank bags
 for i = 1, MAX_BAGS do
     NAMES[#NAMES + 1] = "ContainerFrame" .. i
@@ -162,8 +194,8 @@ local wasMovable = setmetatable({}, weak) -- window -> whether it was movable be
 local wasClamped = setmetatable({}, weak) -- window -> whether it was kept on screen before we did
 local wasUserPlaced = setmetatable({}, weak) -- window -> IsUserPlaced before a drag
 local baseScale = setmetatable({}, weak) -- window -> Blizzard's own scale, once we've resized it
-local session = {} -- name -> position, for "session" and "never"
-local sessionScales = {} -- name -> size percent, for "session" and "never"
+local session = {} -- key -> position, for "session" and "never"
+local sessionScales = {} -- key -> size percent, for "session" and "never"
 local dragging -- the window being dragged, if any
 local placing = false -- while we set a window's anchors or scale ourselves, so our hooks keep out
 
@@ -171,6 +203,12 @@ local placing = false -- while we set a window's anchors or scale ourselves, so 
 -- and the zone map's tab is only the handle of a map that wouldn't follow it.
 local NO_SCALE = { WorldMapFrame = true, BattlefieldMapTab = true }
 local SCALE_MIN, SCALE_MAX, SCALE_STEP = 50, 200, 5 -- percents of Blizzard's size; a step a notch
+
+-- The name a window's place and size are kept under: its own, or the one it shares (SHARED).
+local function keyOf(frame)
+    local name = nameOf[frame]
+    return SHARED[name] or name
+end
 
 -- Where the player left a window, or nil to leave it to Blizzard.
 local function positionOf(name)
@@ -201,7 +239,7 @@ local function place(frame)
     if placing or frame == dragging or not module.enabled then
         return
     end
-    local name = nameOf[frame]
+    local name = keyOf(frame)
     local p, percent = positionOf(name), scaleOf(name)
     if not ((p or percent) and canMove(frame)) then
         return
@@ -253,18 +291,28 @@ local function putAllBack()
     end
 end
 
+-- Every window kept under `key` back where Blizzard places it: the one in hand, and one sharing
+-- its place that's hidden now and would otherwise keep our size.
+local function putBackSharing(key)
+    for frame in pairs(nameOf) do
+        if keyOf(frame) == key then
+            putBack(frame)
+        end
+    end
+end
+
 local function held(key)
     return key == "none" or Keys.IsDown(key)
 end
 
 -- Puts one window back where Blizzard places it and forgets where the player left it.
 local function resetWindow(frame)
-    local name = nameOf[frame]
+    local name = keyOf(frame)
     session[name] = nil
     module.db.positions[name] = nil
     sessionScales[name] = nil
     module.db.scales[name] = nil
-    putBack(frame)
+    putBackSharing(name)
 end
 
 -- Whether the mouse is on a window's title bar: within TITLE_HEIGHT of its top edge, since not
@@ -329,18 +377,46 @@ local function stopDrag(frame)
         return
     end
     local p = { point, relativePoint, x, y }
-    session[nameOf[frame]] = p
+    local name = keyOf(frame)
+    session[name] = p
     if module.db.remember == "always" then
-        module.db.positions[nameOf[frame]] = p
+        module.db.positions[name] = p
     end
+end
+
+-- Whether a window kept under `key` is open.
+local function sharingShown(key)
+    for frame in pairs(nameOf) do
+        if keyOf(frame) == key and ns.IsTrue(frame:IsShown()) then
+            return true
+        end
+    end
+    return false
+end
+
+-- With "never", a window goes back once it closes. One that shares its place closes as the other
+-- opens (the panel manager hides the old left panel before it shows the new one, SetUIPanel in
+-- UIParentPanelManager.lua, and the greeting may close on its own event first), so it's asked a
+-- moment later: only once none of them shows is the conversation over.
+local NEVER_DELAY = 0.5
+
+local function forgetClosed(name)
+    if not module.enabled or module.db.remember ~= "never" or sharingShown(name) then
+        return
+    end
+    session[name], sessionScales[name] = nil, nil -- back to Blizzard's place and size for next time
+    putBackSharing(name)
 end
 
 local function onHide(frame)
     stopDrag(frame)
-    local name = nameOf[frame]
+    local name = keyOf(frame)
     if module.db.remember == "never" and (session[name] or sessionScales[name]) then
-        session[name], sessionScales[name] = nil, nil -- back to Blizzard's place and size for next time
-        putBack(frame)
+        if SHARING[name] then
+            C_Timer.After(NEVER_DELAY, function() forgetClosed(name) end)
+        else
+            forgetClosed(name)
+        end
     end
 end
 
@@ -484,7 +560,7 @@ local function onWheel(_, delta)
     if dragging or not (frame and canMove(frame)) then
         return
     end
-    local name = nameOf[frame]
+    local name = keyOf(frame)
     local old = scaleOf(name) or 100
     local new = old + (delta > 0 and SCALE_STEP or -SCALE_STEP)
     new = new < SCALE_MIN and SCALE_MIN or new > SCALE_MAX and SCALE_MAX or new
