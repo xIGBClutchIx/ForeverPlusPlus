@@ -17,6 +17,21 @@
 -- above the key. Plain Lua 5.1, no addon code.
 local Notes = {}
 
+-- GlobalStrings tags the running client doesn't have as a Lua global, so the game can't hand us
+-- their text at run time and each language keeps its own copy. From Self Test's "game text"
+-- section (Forever 1.60.1.71139, 2026-11-26: the other 94 tags enUS names were all globals).
+Notes.NOT_GLOBAL = {
+    MENU_EDIT_SELECT_ALL = true,
+}
+
+---Whether the running game has a tag's text as a global string: a GlobalStrings tag, and not one
+---found missing in game. A "Table.ID" tag is a row of another table, never a global.
+---@param tag string
+---@return boolean
+function Notes.IsGlobal(tag)
+    return not tag:find(".", 1, true) and not Notes.NOT_GLOBAL[tag]
+end
+
 local function tags(comment, kind, into)
     for list in comment:gmatch("%[" .. kind .. ":%s*([^%]]-)%s*%]") do
         for tag in list:gmatch("[^,%s]+") do

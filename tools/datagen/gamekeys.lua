@@ -1,7 +1,8 @@
 -- Locales/Game.lua: each key the enUS locale files mark [game: TAG] (localenotes.lua) with its tag,
 -- for ns.GameText in Core.lua, which reads those strings from the running game in the player's
--- language. Only GlobalStrings tags: a "Table.ID" one (CreatureType.1) isn't a global of the
--- client's, so a language keeps its own copy of those. It reads no table, only our own files, but
+-- language. Only the tags the game has as globals (Notes.IsGlobal): a "Table.ID" one
+-- (CreatureType.1) and the few found missing in game aren't, so a language keeps its own copy of
+-- those. It reads no table, only our own files, but
 -- it's written here with tests/data/GameText.lua so the two can't disagree.
 local Lua = require("luaout")
 local Notes = require("localenotes")
@@ -37,7 +38,7 @@ function M.Build(_, _, script, root)
                 error(path .. ": " .. problem)
             end
             for _, entry in ipairs(entries) do
-                if entry.game and not entry.game:find(".", 1, true) then
+                if entry.game and Notes.IsGlobal(entry.game) then
                     list[#list + 1] = entry
                 end
             end

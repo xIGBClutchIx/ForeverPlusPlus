@@ -86,8 +86,6 @@ L.TALENTPLANNER_CLICK_MAXED = "<Щелкните правой кнопкой м�
 -- Each %s is a button as the player's controller shows it (Gamepad.Label): A, then Y
 L.TALENTPLANNER_CLICK_PAD = "<%s – добавить очко>\n<%s – убрать очко>"
 L.TALENTPLANNER_CLICK_PAD_MAXED = "<%s – убрать очко>" -- at its highest rank
-L.TALENTPLANNER_RANK = "Уровень %d/%d" -- planned ranks, most ranks
-L.TALENTPLANNER_NEXT_RANK = "Следующий уровень:"
 L.TALENTPLANNER_PLANNED = "По плану на уровне:"
 L.TALENTPLANNER_POINTS = "Запланировано очков: %d/%d" -- planned, points at the plan's level
 L.TALENTPLANNER_MORE = "(еще %d после этого уровня)"
@@ -142,7 +140,6 @@ L.TALENTPLANNER_DELETE = "Удалить план"
 L.TALENTPLANNER_DELETE_CONFIRM = "Удалить этот план талантов?"
 
 -- Macros
-L.MACROS_TITLE = "Макросы"
 L.MACROS_DESC = "Макросы, которые Forever++ создает среди ваших общих макросов и поддерживает в "
     .. "актуальном виде, у каждого свой флажок; при выключении макрос удаляется. Перетащите его из "
     .. "окна макросов (/macro) или воспользуйтесь кнопкой «Взять»."
@@ -187,7 +184,6 @@ L.MACROS_SMARTBUFF_PICKUP_DESC = "Взять макрос «Умное усил�
     .. "команд."
 
 -- Professions
-L.PROFESSIONS_TITLE = "Профессии"
 L.PROFESSIONS_DESC = "Добавить в окно профессии: цвет рецептов по шансу повысить навык, сколько "
     .. "повышений осталось у каждого, полосу уровней, на которых рецепт меняет цвет, стоимость "
     .. "изготовления по сравнению с ценой результата и еще не изученные рецепты. У каждого пункта "
@@ -249,12 +245,8 @@ L.PROFESSIONS_UNLEARNED_DESC = "Пункт «Показать неизученн
     .. "навыком, нужным для изучения (зеленый – уже, желтый – скоро, красный – позже), а на странице "
     .. "рецепта – предмет, который ему учит. Подменю «Неизученные» фильтрует их."
 -- Shown where the client lacks Blizzard's own strings for these.
-L.PROFESSIONS_UNLEARNED_SHOW = "Показать неизученное"
 L.PROFESSIONS_UNLEARNED_MENU = "Неизученные"
 L.PROFESSIONS_UNLEARNED_SOURCES = "Источники"
-L.PROFESSIONS_UNLEARNED_CHECK_ALL = "Выделить все"
-L.PROFESSIONS_UNLEARNED_UNCHECK_ALL = "Снять выделение"
-L.PROFESSIONS_UNLEARNED_LEARNED = "Показать изученные"
 L.PROFESSIONS_UNLEARNED_LEARNED_DESC = "Показывать в списке изученные рецепты. Выключите вместе с "
     .. "включенным «Показать неизученные», чтобы видеть только неизученные. Такой же флажок есть в "
     .. "меню фильтра списка."

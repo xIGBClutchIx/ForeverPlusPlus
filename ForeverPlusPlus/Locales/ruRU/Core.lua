@@ -60,11 +60,9 @@ L.SOUND_BUZZ = "Сигнал ошибки"
 L.SOUND_DENIED = "Отказ"
 L.SOUND_HORN = "Боевой рог"
 L.SOUND_BOSS = "Предупреждение о боссе"
-L.SOUND_RAIDWARNING = "Объявление рейду"
 L.SOUND_GM = "Оповещение ГМ"
 L.SOUND_ALARM = "Будильник"
 L.SOUND_WHISPER = "Шепот"
-L.SOUND_READYCHECK = "Проверка готовности"
 
 -- Core: /fpp and chat
 L.ON = "вкл"
@@ -165,11 +163,9 @@ L.ICONMARK_CONFLICT_DOWN = "Модуль «Стрелки улучшений» �
     .. "и они перекрываются. Выберите другой угол для одной из них."
 L.ICONMARK_SECTION_SHOW = "Где показывать" -- the header over the places a module marks items in
 L.ICONMARK_PLACE_BAGS = "Сумки"
-L.ICONMARK_PLACE_BANK = "Банк"
 L.ICONMARK_PLACE_MERCHANT = "Торговцы"
 L.ICONMARK_PLACE_AUCTION = "Аукцион"
 L.ICONMARK_PLACE_LOOT = "Добыча"
-L.ICONMARK_PLACE_MAIL = "Почта"
 L.ICONMARK_PLACE_QUESTS = "Награды за задания"
 L.SETTINGS_PAGE_NOTE = "Пока модуль включен, его страница «%s» есть на боковой панели в разделе "
     .. "Forever++. Страница появляется или пропадает, когда вы выберете другую страницу."
@@ -309,8 +305,6 @@ L.HOME_COMMANDS_HINT = "<Щелкните, чтобы ввести команд�
 
 -- Edit Mode dialog for our own frames (Lib/EditMode.lua)
 L.EDITMODE_SCALE = "Масштаб"
-L.EDITMODE_CLICK_TO_EDIT = "Щелкните, чтобы изменить"
-L.EDITMODE_RESET_POSITION = "Вернуть позицию по умолчанию"
 L.SETTINGS_EDIT_MODE_NOTE = "Расположение и вид настраиваются в режиме редактирования: нажмите Esc, "
     .. "выберите «Режим редактирования» и щелкните по рамке." -- a gray row on a module with Edit Mode settings
 L.SETTINGS_EDIT_MODE_NOTE_DESC = "Положение, масштаб и вид настраиваются в окне режима "

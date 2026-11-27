@@ -153,7 +153,8 @@ function Locales.WriteBaseline(code, known)
 end
 
 ---What is wrong with a language, each as a sorted list of texts (empty when nothing is):
----  missing   keys enUS has that it doesn't, outside the [english] blocks
+---  missing   keys enUS has that it doesn't, outside the [english] blocks and the [game] keys the
+---            running game supplies
 ---  english   keys it sets that enUS marks [english]
 ---  stale     keys whose English changed since the translation was recorded
 ---  untracked keys it sets with no record of the English they came from
@@ -180,7 +181,11 @@ function Locales.Problems(code, english, game)
                 found.english[#found.english + 1] = key
             end
         elseif theirs == nil then
-            found.missing[#found.missing + 1] = key
+            -- The game hands over its own strings at run time (ns.GameText), so a language
+            -- needn't carry one the client has as a global.
+            if not (note.game and Notes.IsGlobal(note.game)) then
+                found.missing[#found.missing + 1] = key
+            end
         elseif known[key] == nil then
             found.untracked[#found.untracked + 1] = key
         elseif known[key] ~= Locales.Hash(ours) then

@@ -39,9 +39,7 @@ L.ERRORCATCHER_ALL = "Все сеансы"
 L.ERRORCATCHER_FILTER = "%s (%d)" -- a filter above, how many errors it shows
 L.ERRORCATCHER_SUMMARY = "В этом сеансе: %d, сохранено: %d" -- errors this session, errors saved
 L.ERRORCATCHER_NONE = "Ошибок не перехвачено."
-L.ERRORCATCHER_KIND_ERROR = "Ошибка LUA"
 L.ERRORCATCHER_KIND_BLOCKED = "Заблокированное действие"
-L.ERRORCATCHER_KIND_WARNING = "Предупреждение LUA"
 L.ERRORCATCHER_KIND_TAINT = "Порча (taint)"
 L.ERRORCATCHER_POSITION = "%d из %d" -- this one, how many
 L.ERRORCATCHER_ROW_INFO = "%dx, %s" -- times seen, how long ago ("12m ago")
@@ -168,7 +166,6 @@ L.MINIMAPBUTTON_HINT_CLEAR = "Очистить ошибки сеанса"
 L.MINIMAPBUTTON_HINT_CLEAR_ALL = "Очистить все ошибки"
 L.MINIMAPBUTTON_HINT_MOVE = "Переместить кнопку"
 L.MINIMAPBUTTON_PLACE_NAME = "Положение кнопки"
-L.MINIMAPBUTTON_PLACE_RESET = "Сброс позиции"
 L.MINIMAPBUTTON_PLACE_RESET_DESC = "Вернуть кнопку на край мини-карты, где она была изначально. "
     .. "Перетащите ее, чтобы поставить в любое место на мини-карте или рядом с ней."
 -- The tooltip's legend: what each click does, the click at the right in green.

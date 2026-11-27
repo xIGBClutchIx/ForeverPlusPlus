@@ -11,7 +11,6 @@ L.INSTANCES_RANGE = "%d-%d" -- lowest, highest
 
 -- WorldMap: one module, a part each for Points of Interest, Zone Info, Unexplored Areas, and
 -- Coordinates. Each part's title heads its section in Settings, over its Enabled checkbox.
-L.WORLDMAP_TITLE = "Карта мира"
 L.WORLDMAP_DESC = "Добавить на карту мира достопримечательности, панель сведений о зоне, "
     .. "неисследованные места и координаты. У каждой части свой флажок «Включено» ниже."
 
@@ -34,9 +33,7 @@ L.POI_SECTION_TRAVEL = "Города и путешествия"
 L.POI_SECTION_OTHER = "Прочее"
 L.POI_DESC = "Показывать на карте мира подземелья, рейды, столицы, распорядителей полетов, корабли, "
     .. "дирижабли, целителей душ и силовые линии небеснорожденных."
-L.POI_DUNGEONS = "Подземелья"
 L.POI_DUNGEONS_DESC = "Входы в подземелья с диапазоном уровней, окрашенным относительно вашего."
-L.POI_RAIDS = "Рейды"
 L.POI_RAIDS_DESC = "Входы в рейды."
 L.POI_DUNGEON_MAPS = "Карты подземелий"
 L.POI_DUNGEON_MAPS_DESC = "Щелкните по значку подземелья или рейда, чтобы увидеть его карту, "
@@ -74,7 +71,6 @@ L.POI_SHIPS = "Корабли"
 L.POI_SHIPS_DESC = "Пристани кораблей с пунктом назначения."
 L.POI_ZEPPELINS = "Дирижабли"
 L.POI_ZEPPELINS_DESC = "Башни дирижаблей с пунктом назначения."
-L.POI_TRAMS = "Подземный поезд"
 L.POI_TRAMS_DESC = "Станции подземного поезда в Штормграде и Стальгорне, размером со значки кораблей."
 L.POI_TRAVEL_CLICKS = "Щелчок – следующая остановка"
 L.POI_TRAVEL_CLICKS_DESC = "Щелкните по кораблю, дирижаблю или поезду, чтобы увидеть карту его "
@@ -116,7 +112,6 @@ L.POI_SERVICE_GATE = "Служебные ворота"
 L.POI_NORTH = "Север"
 L.POI_EAST = "Восток"
 L.POI_WEST = "Запад"
-L.POI_FLIGHT_MASTER = "Распорядитель полетов"
 L.POI_FLIGHT_UNLEARNED = "Еще не изучено"
 L.POI_SHIP_TO = "Корабль: %s" -- a place
 L.POI_ZEPPELIN_TO = "Дирижабль: %s" -- a place
@@ -165,7 +160,6 @@ L.ZONEINFO_HIDE_LABEL_DESC = "На карте континента скрыва�
     .. "остаются."
 L.ZONEINFO_LEVELS = "Диапазон уровней"
 L.ZONEINFO_LEVELS_DESC = "Диапазон уровней зоны, окрашенный относительно вашего уровня, как задания."
-L.ZONEINFO_FISHING = "Рыбная ловля"
 L.ZONEINFO_FISHING_DESC = "Навык рыбной ловли, нужный для вод зоны: красным, пока ваш ниже, и "
     .. "зеленым, когда его хватает."
 L.ZONEINFO_HERBS = "Травы"
@@ -173,7 +167,6 @@ L.ZONEINFO_HERBS_DESC = "Травы в зоне. С травничеством �
     .. "в модуле «Подсказки навыков сбора»."
 L.ZONEINFO_ORE = "Руда"
 L.ZONEINFO_ORE_DESC = "Руда в зоне. С горным делом она окрашена относительно вашего навыка."
-L.ZONEINFO_SKINNING = "Снятие шкур"
 L.ZONEINFO_SKINNING_DESC = "Навык снятия шкур, нужный для животных зоны, по ее диапазону уровней."
 L.ZONEINFO_SHOW_OFF = "Откл."
 L.ZONEINFO_SHOW_KNOWN = "Если есть профессия"
@@ -191,7 +184,6 @@ L.ZONEINFO_FACTION_LINE = "Отдельная строка"
 L.ZONEINFO_TERRITORY_ALLIANCE = "Территория Альянса"
 L.ZONEINFO_TERRITORY_HORDE = "Территория Орды"
 L.ZONEINFO_CONTESTED = "Оспариваемая территория"
-L.ZONEINFO_DUNGEONS = "Подземелья"
 L.ZONEINFO_DUNGEONS_DESC = "Подземелья и рейды, вход в которые находится в зоне, с диапазоном "
     .. "уровней, окрашенным относительно вашего."
 L.ZONEINFO_SIZE = "Размер"
@@ -201,8 +193,6 @@ L.ZONEINFO_UNFOLD = "Развернуть"
 L.ZONEINFO_TITLE_LEVELS = "%s  %s" -- zone, its levels ("10-20")
 L.ZONEINFO_RANGE = "%s-%s" -- lowest, highest
 L.ZONEINFO_SKILL = "%s %s" -- profession, skill needed ("Fishing 55")
-L.ZONEINFO_FISHING_NAME = "Рыбная ловля" -- until the client gives its own name
-L.ZONEINFO_SKINNING_NAME = "Снятие шкур"
 L.ZONEINFO_LIST_SEPARATOR = ", "
 
 -- UnexploredAreas
@@ -273,7 +263,6 @@ L.SQUAREMINIMAP_SUN_OFF = "Откл."
 L.SQUAREMINIMAP_SUN_HINT = "<Перетащите, чтобы переместить>\n<Щелкните правой кнопкой мыши, чтобы "
     .. "вернуть на место>"
 L.SQUAREMINIMAP_SUN_RESET_NAME = "Индикатор дня и ночи"
-L.SQUAREMINIMAP_SUN_RESET = "Сброс позиции"
 L.SQUAREMINIMAP_SUN_RESET_DESC = "Вернуть индикатор дня и ночи к правому верхнему углу мини-карты."
 L.SQUAREMINIMAP_MAIL = "Значок почты"
 L.SQUAREMINIMAP_MAIL_DESC = "Где стоит значок почты: в углу квадратной карты или там, где его ставит "
@@ -481,7 +470,6 @@ L.GATHERINGMAP_EMPTY_TIPS = "Подсказки без желтой точки"
 L.GATHERINGMAP_EMPTY_TIPS_DESC = "Показывать подсказку и на значках трав и жил, а не только сундуков и "
     .. "косяков рыбы. Выключите, чтобы оставить травы и жилы собственной подсказке игры."
 -- A node's tooltip: the lines, each a label and its value as Blizzard's Sell Price line
-L.GATHERINGMAP_REQUIRES = "Требуется: %s (%d)" -- profession, skill; Blizzard's ITEM_MIN_SKILL when it has one
 L.GATHERINGMAP_TIP_GATHERED = "Собрано:"
 L.GATHERINGMAP_TIP_ONCE = "Один раз"
 L.GATHERINGMAP_TIP_TIMES = { "%d раз", "%d раза", "%d раз" } -- count, more than one
@@ -519,7 +507,6 @@ L.GATHERINGMAP_SKILL_SHOW = "Как обычно"
 L.GATHERINGMAP_SKILL_GRAY = "Серым"
 L.GATHERINGMAP_SKILL_HIDE = "Скрывать"
 L.GATHERINGMAP_SECTION_MINIMAP = "Мини-карта"
-L.GATHERINGMAP_SECTION_WORLDMAP = "Карта мира"
 L.GATHERINGMAP_SECTION_TOOLTIPS = "Подсказки"
 L.GATHERINGMAP_SECTION_NODES = "Запомненные точки" -- sharing and forgetting them, and Chat Messages
 -- Its own page in Settings: every node, with a checkbox to show or hide it
@@ -543,10 +530,6 @@ L.GATHERINGMAP_PAGE_FORGET_CONFIRM = "Забыть все запомненные
 L.GATHERINGMAP_PAGE_COUNT = "×%d" -- spots remembered, in a list row: "x12" with a times sign
 L.GATHERINGMAP_PAGE_LEGEND = "Число перед точкой – нужный для нее навык в цветах наставника. Число "
     .. "с × после нее – сколько ее мест запомнено."
-L.GATHERINGMAP_PAGE_APPRENTICE = "Ученик"
-L.GATHERINGMAP_PAGE_JOURNEYMAN = "Подмастерье"
-L.GATHERINGMAP_PAGE_EXPERT = "Умелец"
-L.GATHERINGMAP_PAGE_ARTISAN = "Искусник"
 L.GATHERINGMAP_PAGE_PROGRESS = "%d / %d" -- skill, its rank's most: "131 / 150"
 L.GATHERINGMAP_PAGE_NONE = "Пока нет"
 L.GATHERINGMAP_PAGE_SPOTS = { "%d место", "%d места", "%d мест" } -- count
@@ -632,7 +615,6 @@ L.COMPASSBAR_QUESTS_DESC = "Задание, выбранное на карте, 
     .. "рядом с вами."
 L.COMPASSBAR_QUESTS_SELECTED = "Только выбранное"
 L.COMPASSBAR_QUESTS_ALL = "Все на карте"
-L.COMPASSBAR_PIN = "Точка на карте"
 L.COMPASSBAR_PIN_DESC = "Ваша точка на карте (от /way или щелчка по карте)."
 L.COMPASSBAR_CORPSE = "Тело"
 L.COMPASSBAR_CORPSE_DESC = "Ваше тело, пока вы призрак."
@@ -689,14 +671,11 @@ L.COMPASSBAR_NW = "СЗ"
 L.COMPASSBAR_KIND_SELECTED = "Выбранное задание"
 L.COMPASSBAR_KIND_QUEST = "Задание"
 L.COMPASSBAR_KIND_TURNIN = "Можно сдать"
-L.COMPASSBAR_KIND_PIN = "Точка на карте"
 L.COMPASSBAR_KIND_CORPSE = "Тело"
 L.COMPASSBAR_KIND_GROUP = "Группа"
-L.COMPASSBAR_KIND_FLIGHT = "Распорядитель полетов"
 L.COMPASSBAR_KIND_NODE = "Точка сбора"
 L.COMPASSBAR_KIND_RARE = "Редкое существо"
 L.COMPASSBAR_DISTANCE = "Расстояние:"
 L.COMPASSBAR_READY = "Можно сдать"
-L.COMPASSBAR_PIN_TITLE = "Точка на карте" -- the map pin's marker's name
 L.COMPASSBAR_CORPSE_TITLE = "Ваше тело"
 L.COMPASSBAR_SAMPLE_QUEST = "Название задания" -- the example quest marker's name in Edit Mode

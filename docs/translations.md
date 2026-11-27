@@ -43,8 +43,9 @@ The string is the game's own text, word for word: a stat, a profession, a Blizza
 
 - At run time the string comes from the game itself. `Locales/Game.lua` (generated from these notes) lists each key with its tag, and `ns.GameText` in `Core.lua` reads the client's global string of that name, in the player's language, after the locale files have loaded. So the order is the game's text, then the language file's, then enUS. A language we have no translation for still gets these.
 - An English client keeps enUS's text: the test holds it to the client's English, so a patch can't change it under us unnoticed.
-- A `Table.ID` tag isn't a global of the client's, so a language keeps its own copy of those.
-- A language file may still carry a `[game]` key: it's what shows if the client lacks the global. Then the test holds it to the client's text. Self Test's "game text" section says whether the running client has every global; once it passes on a client, a language can drop its copies.
+- So a language file leaves these keys out: `ruRU` has none of the 94 the game supplies. The test doesn't count them as missing.
+- A language keeps its own copy where the game can't supply one, and the test holds that copy to the client's text: a `Table.ID` tag (never a global), and a tag in `NOT_GLOBAL` in `tools/datagen/localenotes.lua` (found missing in game: `MENU_EDIT_SELECT_ALL`).
+- Self Test's "game text" section says whether the running client has every global (2026-11-26, build 1.60.1.71139: 94 of 95). Run it after adding a `[game]` note: a tag that fails goes in `NOT_GLOBAL`, and each language then carries the string.
 - enUS has to equal the client's English too, so a note can't be put on the wrong string.
 - Add the note when a string of ours is the game's name for something. Don't add it to a general word that happens to match one ("None", "Always", "Blue"): the same English is often several things in the game, with different genders and forms in other languages.
 - To find a tag, search the table: `https://wago.tools/db2/GlobalStrings?build=<build>` (or the CSV in `tools/datagen/cache/<build>/GlobalStrings.enUS.csv` after a run).

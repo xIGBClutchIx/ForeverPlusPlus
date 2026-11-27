@@ -238,7 +238,7 @@ do
     local want, got = {}, {}
     for _, key in ipairs(english.order) do
         local tag = english.notes[key].game
-        if tag and not tag:find(".", 1, true) then
+        if tag and Notes.IsGlobal(tag) then
             want[#want + 1] = key .. "=" .. tag
         end
     end

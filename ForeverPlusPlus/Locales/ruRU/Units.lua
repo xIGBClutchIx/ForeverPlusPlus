@@ -15,9 +15,6 @@ L.DUNGEONNAMEPLATES_NOTICE_DESC = "Выпадающий список «Упро�
     .. "вашим, а при выходе возвращается ваш собственный выбор. Изменение этого списка, сделанное "
     .. "внутри, при выходе теряется."
 -- Shown where the client lacks Blizzard's own names for these.
-L.DUNGEONNAMEPLATES_FRIENDLY_PLAYERS = "Союзники"
-L.DUNGEONNAMEPLATES_FRIENDLY_NPCS = "Союзные NPC"
-L.DUNGEONNAMEPLATES_MINIONS = "Прислужники"
 L.DUNGEONNAMEPLATES_MINOR_ENEMIES = "Слабые противники"
 L.DUNGEONNAMEPLATES_FRIENDLY_PLAYERS_DESC = "Упрощать внутри индикаторы дружественных игроков."
 L.DUNGEONNAMEPLATES_FRIENDLY_NPCS_DESC = "Упрощать внутри индикаторы дружественных NPC."
@@ -46,7 +43,6 @@ L.DRUIDMANABAR_FORM_COLOR_DESC = "Заливать полосу маны бол�
     .. "спутать с темно-синей полосой маны самой рамки игрока, которая при включенном параметре "
     .. "«Во всех обликах» находится прямо над ней в обычном облике."
 -- ClassColors
-L.CLASSCOLORS_TITLE = "Цвета классов"
 L.CLASSCOLORS_DESC = "Окрашивать полосы здоровья и имена игроков в цвет их класса на рамках игрока, "
     .. "цели, запомненной цели, группы и цели цели, полосы NPC – по их отношению к вам, а имена – в списках "
     .. "друзей и «Кто»."
@@ -92,7 +88,6 @@ L.CLASSCOLORS_FOCUS_DESC = "Рамка вашей запомненной цел�
 L.CLASSCOLORS_PARTY = "Группа"
 L.CLASSCOLORS_PARTY_DESC = "Рамки участников группы. У рамок группы в стиле рейда есть своя "
     .. "настройка цвета класса в параметрах Blizzard."
-L.CLASSCOLORS_TOT = "Цель выбранной цели"
 L.CLASSCOLORS_TOT_DESC = "Маленькие рамки цели вашей цели и цели вашей запомненной цели."
 
 -- Friendly nameplates (Lib/PlateLabel.lua and both plate modules)
@@ -217,7 +212,6 @@ L.PLAYERNAMEPLATES_CLASS_ICON_ORDER_DESC = "Если уровень с той ж
     .. "вплотную к имени, а уровень за ним, или за уровнем."
 L.PLAYERNAMEPLATES_CLASS_ICON_INSIDE = "Значок у имени"
 L.PLAYERNAMEPLATES_CLASS_ICON_OUTSIDE = "Значок за уровнем"
-L.PLAYERNAMEPLATES_RECENT_ALLIES = "Недавние союзники"
 L.PLAYERNAMEPLATES_RECENT_ALLIES_DESC = "Как отмечать игроков из списка недавних союзников: значком "
     .. "недавних союзников рядом с именем или именем в светло-голубом цвете игры вместо цвета имени."
 L.PLAYERNAMEPLATES_RECENT_ALLIES_OFF = "Откл."
@@ -319,7 +313,6 @@ L.TARGETMARKERS_BINDING = "Кольцо меток" -- in Blizzard's Key Binding
 L.TARGETMARKERS_NO_KEY = "Клавиша еще не назначена" -- a gray row atop the module, with a button
 L.TARGETMARKERS_NO_KEY_DESC = "Кольцо открывается клавишей, которую вы выберете в меню «Назначение "
     .. "клавиш», в разделе Forever++."
-L.TARGETMARKERS_BIND = "Назначение клавиш"
 L.TARGETMARKERS_MOUSEOVER = "Отмечать цель под курсором"
 L.TARGETMARKERS_MOUSEOVER_DESC = "Если при нажатии клавиши курсор наведен на юнит, выбрать его целью, "
     .. "чтобы пометить именно его. Если выключено, кольцо всегда метит текущую цель."
