@@ -201,6 +201,6 @@ L.HIDEBETAFEEDBACK_QUEST = "隐藏任务反馈"
 L.HIDEBETAFEEDBACK_QUEST_DESC = "隐藏任务窗口上的反馈按钮。"
 
 -- MovableFramerate
-L.MOVABLEFRAMERATE_TITLE = "可移动帧数"
+L.MOVABLEFRAMERATE_TITLE = "可移动帧率显示"
 L.MOVABLEFRAMERATE_DESC = "像暴雪自己的框体一样，在编辑模式中移动帧数文字（Ctrl+R）并调整其大小。在你移动它之前，"
     .. "它保持在暴雪默认的位置。"

@@ -103,7 +103,7 @@ L.AUTOSTOW_OUTSIDE_ONLY_DESC = "在地下城、团队副本和战场中不收起
 
 -- AutoDismount
 L.AUTODISMOUNT_TITLE = "自动解散坐骑"
-L.AUTODISMOUNT_DESC = "因为骑乘或坐下而导致操作失败时（例如施放法术、乘坐飞行坐骑或拾取），自动下坐骑或站起来。"
+L.AUTODISMOUNT_DESC = "骑乘或坐着时，如果施法、搭乘飞行路线或拾取等操作失败，会自动解散坐骑或起身。"
 L.AUTODISMOUNT_DISMOUNT = "解散坐骑"
 L.AUTODISMOUNT_DISMOUNT_DESC = "骑乘时施放法术、与飞行管理员交谈或攻击时，自动下坐骑。"
 L.AUTODISMOUNT_STAND = "站起来"
@@ -198,15 +198,15 @@ L.SKIPCINEMATICS_RESET_CONFIRM = "忘记你看过哪些过场动画和影片？"
 L.SKIPCINEMATICS_RESET_DONE = "已清除看过的过场动画。"
 
 -- FishingCast
-L.FISHINGCAST_TITLE = "钓鱼施放"
+L.FISHINGCAST_TITLE = "双击右键抛竿"
 L.FISHINGCAST_DESC = "装备鱼竿时，在游戏世界中双击右键即可施放钓鱼。"
-L.FISHINGCAST_SPEED = "双击速度"
-L.FISHINGCAST_SPEED_DESC = "第二次右键点击必须多快跟上第一次。"
+L.FISHINGCAST_SPEED = "双击间隔"
+L.FISHINGCAST_SPEED_DESC = "两次右键点击之间允许的最长时间。"
 L.FISHINGCAST_MS = "%d毫秒" -- milliseconds
 L.FISHINGCAST_COMBAT = "战斗警告"
 L.FISHINGCAST_COMBAT_DESC = "装备鱼竿时进入战斗，提醒一次。"
 L.FISHINGCAST_COMBAT_TEXT = "你装备着鱼竿。"
-L.FISHINGCAST_LOUDER = "鱼漂更响"
+L.FISHINGCAST_LOUDER = "突出鱼漂水声"
 L.FISHINGCAST_LOUDER_DESC = "钓鱼时调高音效、调低音乐，让水花声更容易听到。停止钓鱼后恢复你自己的音量。"
 
 -- AutoWeaponBuff

@@ -203,7 +203,7 @@ L.COORDS_TENTHS_DESC = "坐标精确到十分位，例如45.3, 62.8。这是暴�
     .. "更改。"
 
 -- HideFilterReset
-L.HIDEFILTERRESET_TITLE = "隐藏过滤器重置"
+L.HIDEFILTERRESET_TITLE = "隐藏筛选重置按钮"
 L.HIDEFILTERRESET_DESC = "隐藏世界地图过滤器下拉菜单上的重置按钮，它在任何过滤项关闭时都会出现。"
 
 -- SquareMinimap
