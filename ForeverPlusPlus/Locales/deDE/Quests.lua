@@ -226,6 +226,33 @@ L.QUESTITEMSPARKLES_NOTICE = "Das Ausschalten erfordert einen Neustart des Spiel
 L.QUESTITEMSPARKLES_NOTICE_DESC = "Das Spiel zeichnet das Funkeln bis zu einem Neustart weiter, selbst "
     .. "wenn Eure eigene Einstellung zurück ist. Ein /reload reicht nicht."
 
+-- Quest Item Button
+L.QUESTITEMBUTTON_TITLE = "Questgegenstand-Schaltfläche"
+-- [quotes: KEY_BINDINGS]
+L.QUESTITEMBUTTON_DESC = "Eine Taste, die den Gegenstand der Quest benutzt, der Ihr am nächsten seid, "
+    .. "und eine Schaltfläche, die zeigt, welcher Gegenstand das ist. Wählt die Taste in der "
+    .. "„Tastaturbelegung“ unter Forever++ und verschiebt die Schaltfläche im Bearbeitungsmodus."
+L.QUESTITEMBUTTON_BINDING = "Gegenstand der nächsten Quest benutzen" -- in Blizzard's Key Bindings
+L.QUESTITEMBUTTON_NO_KEY = "Noch keine Taste belegt" -- a gray row atop the module, with a button
+-- [quotes: KEY_BINDINGS]
+L.QUESTITEMBUTTON_NO_KEY_DESC = "Der Gegenstand wird mit einer Taste benutzt, die Ihr in der "
+    .. "„Tastaturbelegung“ unter Forever++ wählt."
+L.QUESTITEMBUTTON_COMBAT = "Ein anderer Gegenstand wird nur außerhalb des Kampfes gewählt."
+L.QUESTITEMBUTTON_COMBAT_DESC = "Das Spiel lässt nur außerhalb des Kampfes ändern, was eine Taste tut. "
+    .. "Im Kampf behalten Taste und Schaltfläche also ihren Gegenstand und wählen neu, sobald der "
+    .. "Kampf endet."
+L.QUESTITEMBUTTON_BUTTON = "Schaltfläche anzeigen"
+L.QUESTITEMBUTTON_BUTTON_DESC = "Zeigt den Gegenstand, den die Taste benutzt, auf einer Schaltfläche, "
+    .. "die Ihr auch anklicken könnt. Aus benutzt ihn nur die Taste."
+L.QUESTITEMBUTTON_SELECTED = "Ausgewählte Quest zuerst"
+L.QUESTITEMBUTTON_SELECTED_DESC = "Hat die Quest, die Ihr in der Questverfolgung oder auf der Karte "
+    .. "ausgewählt habt, einen Gegenstand, wird dieser benutzt, egal wie weit die Quest entfernt ist."
+L.QUESTITEMBUTTON_BAGS = "Questgegenstände in Euren Taschen"
+L.QUESTITEMBUTTON_BAGS_DESC = "Benutzt auch Questgegenstände in Euren Taschen, die das Questlog nicht "
+    .. "bei einer Quest aufführt, wie bei vielen älteren Quests. Mit QuestieDB wird jeder seiner Quest "
+    .. "zugeordnet; einer ohne gefundene Quest wird nur benutzt, wenn es nichts anderes gibt."
+L.QUESTITEMBUTTON_FOR = "Quest:" -- on the button's tooltip, before the quest's name
+
 -- QuestPins
 L.QUESTPINS_TITLE = "Questnadeln"
 L.QUESTPINS_DESC = "Setzt ein ! auf die Weltkarte, wo jede Quest beginnt, die Ihr noch annehmen könnt, "

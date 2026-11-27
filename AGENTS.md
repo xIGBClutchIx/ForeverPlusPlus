@@ -301,7 +301,7 @@ When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or f
 | `ForeverPlusPlusDB`, `ForeverPlusPlusPlayersDB`, `ForeverPlusPlusCharDB` | Saved variables. |
 | `ForeverPlusPlusAPI` | The public API, set only by `API.lua`. |
 | `SLASH_FOREVERPLUSPLUS*`, `SlashCmdList.FOREVERPLUSPLUS*` | `/fpp`, and commands a module adds only while its option is on (`/way`, `/rl`). |
-| `ForeverPlusPlusScreenshotButton`, `ForeverPlusPlusSmartBuffButton`, `ForeverPlusPlusMarkerButton` | Buttons a key binding or `/click` needs by name. |
+| `ForeverPlusPlusScreenshotButton`, `ForeverPlusPlusSmartBuffButton`, `ForeverPlusPlusMarkerButton`, `ForeverPlusPlusQuestItemButton` | Buttons a key binding or `/click` needs by name. |
 | `BINDING_HEADER_FOREVERPLUSPLUS`, `BINDING_NAME_CLICK ...` | Blizzard's Key Bindings reads them. |
 | `ForeverPlusPlusErrorCatcher`, `ForeverPlusPlusChatCopy`, `ForeverPlusPlusWhisperWindow` | Windows Escape closes; `UISpecialFrames` holds names (`ns.Frames.CloseOnEscape`). |
 | `GetMinimapShape` | Set by Square Minimap only while it squares the minimap and no other addon defines it. |

@@ -204,6 +204,28 @@ L.QUESTITEMSPARKLES_NOTICE = "끄려면 게임을 다시 시작해야 합니다.
 L.QUESTITEMSPARKLES_NOTICE_DESC = "게임은 원래 설정으로 돌아간 뒤에도 다시 시작할 때까지 반짝임을 계속 그립니다. "
     .. "/reload로는 충분하지 않습니다."
 
+-- Quest Item Button
+L.QUESTITEMBUTTON_TITLE = "퀘스트 아이템 버튼"
+L.QUESTITEMBUTTON_DESC = "가장 가까운 퀘스트의 아이템을 사용하는 키와, 그 아이템이 무엇인지 보여 주는 "
+    .. "버튼입니다. 키는 단축키 설정의 Forever++ 항목에서 고르고, 버튼은 편집 모드에서 옮깁니다."
+L.QUESTITEMBUTTON_BINDING = "가장 가까운 퀘스트 아이템 사용" -- in Blizzard's Key Bindings
+L.QUESTITEMBUTTON_NO_KEY = "아직 지정된 키가 없습니다" -- a gray row atop the module, with a button
+L.QUESTITEMBUTTON_NO_KEY_DESC = "아이템은 단축키 설정의 Forever++ 항목에서 고른 키로 사용합니다."
+L.QUESTITEMBUTTON_COMBAT = "다른 아이템은 전투 중이 아닐 때만 고릅니다."
+L.QUESTITEMBUTTON_COMBAT_DESC = "게임은 전투 중이 아닐 때만 키의 동작을 바꿀 수 있게 하므로, 전투 중에는 "
+    .. "키와 버튼이 원래 아이템을 유지합니다. 전투가 끝나면 다시 고릅니다."
+L.QUESTITEMBUTTON_BUTTON = "버튼 표시"
+L.QUESTITEMBUTTON_BUTTON_DESC = "키가 사용하는 아이템을 버튼에 보여 주며, 버튼을 클릭해도 됩니다. "
+    .. "끄면 키로만 사용합니다."
+L.QUESTITEMBUTTON_SELECTED = "선택한 퀘스트 우선"
+L.QUESTITEMBUTTON_SELECTED_DESC = "퀘스트 추적기나 지도에서 고른 퀘스트에 아이템이 있으면, 퀘스트가 "
+    .. "아무리 멀어도 그 아이템을 사용합니다."
+L.QUESTITEMBUTTON_BAGS = "가방의 퀘스트 아이템"
+L.QUESTITEMBUTTON_BAGS_DESC = "퀘스트 목록이 퀘스트와 함께 보여 주지 않는 가방 속 퀘스트 아이템도 "
+    .. "사용합니다. 오래된 퀘스트의 아이템이 대개 그렇습니다. QuestieDB가 있으면 각 아이템을 해당 "
+    .. "퀘스트와 연결하며, 퀘스트를 찾지 못한 아이템은 다른 것이 없을 때만 사용합니다."
+L.QUESTITEMBUTTON_FOR = "퀘스트:" -- on the button's tooltip, before the quest's name
+
 -- QuestPins
 L.QUESTPINS_TITLE = "퀘스트 핀"
 L.QUESTPINS_DESC = "아직 받을 수 있는 퀘스트가 시작되는 곳마다 세계 지도에 종류별 색의 !를 놓고, NPC가 제안하거나 "

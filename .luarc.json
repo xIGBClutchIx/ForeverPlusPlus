@@ -232,6 +232,7 @@
     "PaperDollLevelInfo",
     "CharacterFrame",
     "GetBindingText",
+    "GetQuestLogSpecialItemInfo",
     "SkillsFrame",
     "ContainerFrame1",
     "ActionStatus",

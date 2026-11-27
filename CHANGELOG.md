@@ -28,6 +28,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Junk Delete Button**: A new module, off by default, that shows a button below the loot window while your bags are full. A click destroys your gray stack worth least to a vendor, named on the button with its value, so there's room for the loot. It asks first unless you turn Confirm Before Deleting off. Out of combat only.
 - **Bulk Buy**: A new module, off by default. Shift+click an item at a merchant for a bigger buying popup in place of the game's: type how many, or press Stack for one stack or Max for the most your money, bag space, and the merchant's stock allow, and buy more than one stack at a time.
 - **Professions**: Crafting Costs' Sort Recipe List (off by default) sorts the recipes in each category of the professions window by Estimated Profit or Total Cost, and shows that number on each row. Pick it in Settings or at the bottom of the window's Filter menu.
+- **Quest Item Button**: A new module, off by default, with a key that uses the item of the quest you're closest to, set in Key Bindings under Forever++, and a button showing which item that is, which you can move in Edit Mode. The quest you selected comes first, and with QuestieDB, quest items in your bags are matched to their quests.
 
 ### Changed
 

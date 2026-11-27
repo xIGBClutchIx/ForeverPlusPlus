@@ -101,6 +101,11 @@ ns.changelog = {
                     .. "recipes in each category of the professions window by Estimated Profit or "
                     .. "Total Cost, and shows that number on each row. Pick it in Settings or at the "
                     .. "bottom of the window's Filter menu." },
+                { L.QUESTITEMBUTTON_TITLE, "A new module, off by default, with a key that uses the "
+                    .. "item of the quest you're closest to, set in Key Bindings under Forever++, "
+                    .. "and a button showing which item that is, which you can move in Edit Mode. "
+                    .. "The quest you selected comes first, and with QuestieDB, quest items in your "
+                    .. "bags are matched to their quests." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "

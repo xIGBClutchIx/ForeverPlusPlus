@@ -2,4 +2,7 @@
     <!-- Target Markers' key (Modules/Units/TargetMarkers.lua), listed in Blizzard's Key Bindings
          under Forever++. It clicks a secure button the module makes while it's on. -->
     <Binding name="CLICK ForeverPlusPlusMarkerButton:LeftButton" header="FOREVERPLUSPLUS" category="ADDONS"/>
+    <!-- Quest Item Button's key (Modules/Quests/QuestItemButton.lua): it clicks a secure button
+         that uses the closest quest's item. -->
+    <Binding name="CLICK ForeverPlusPlusQuestItemButton:LeftButton" category="ADDONS"/>
 </Bindings>
