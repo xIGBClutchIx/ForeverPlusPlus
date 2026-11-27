@@ -98,6 +98,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 - **Hide Zone Text**: Hides the zone and area names that appear at the top of the screen when you enter one. Off by default.
 - **Hide Error Messages**: Keeps the red errors that repeat while you fight (Out of range, Not enough energy) off the screen, along with their sounds. Off by default.
 - **Hide Stance Bar**: Hides the stance bar. Its keys still work, and Show on Mouseover brings it back under the mouse. Off by default.
+- **Short Keybinds**: Writes the keys on your action buttons in short, so they fit: SC for Shift-C, MMB for the middle mouse button, N1 for number pad 1. Off by default.
 - **Loot Rolls**: Place the Need, Greed, and Pass rolls in Edit Mode, with their direction and spacing. Each roll shows the seconds left and what your group picked. Off by default.
 - **Local Time**: While the clock's Use Local Time is on, the calendar and a few other realm times show in your own time.
 - **Movable Windows**: Hold a key (Shift by default) and drag Blizzard's windows where you want them, by the whole window or only its title bar, and hold Ctrl and scroll to resize one. Positions and sizes are kept always, for the session, or until the window closes. Off by default.

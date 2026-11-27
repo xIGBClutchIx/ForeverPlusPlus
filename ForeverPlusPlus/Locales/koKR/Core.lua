@@ -38,6 +38,34 @@ L.KEY_NONE = "없음"
 -- as the player's controller shows it
 L.KEY_PAD_NOTE = "게임패드 인터페이스를 켠 상태에서는 대신 %s 또는 %s 버튼을 누르고 있으십시오."
 L.SKIP_KEY = "건너뛰기 키" -- the option of every module that a held key skips
+-- A key binding in short, as a label in the corner of an action button: the modifiers, then the
+-- key, run together ("SC" for Shift-C, "CM4" for Ctrl and mouse button 4). Keep each to a few
+-- letters: the button is about four characters wide.
+L.KEY_SHORT_SHIFT = "S"
+L.KEY_SHORT_CTRL = "C"
+L.KEY_SHORT_ALT = "A"
+L.KEY_SHORT_META = "M" -- the Command key, on a Mac
+L.KEY_SHORT_MOUSE = "M%s" -- a mouse button, by its number: M4, M5
+L.KEY_SHORT_MOUSE_MIDDLE = "M3" -- the middle mouse button
+L.KEY_SHORT_WHEEL_UP = "WU" -- the mouse wheel rolled up
+L.KEY_SHORT_WHEEL_DOWN = "WD"
+L.KEY_SHORT_NUMPAD = "N%s" -- a number pad key, by its digit or sign: N1, N+
+L.KEY_SHORT_SPACE = "Spc"
+L.KEY_SHORT_PAGEUP = "PU"
+L.KEY_SHORT_PAGEDOWN = "PD"
+L.KEY_SHORT_INSERT = "Ins"
+L.KEY_SHORT_DELETE = "Del"
+L.KEY_SHORT_HOME = "Hm"
+L.KEY_SHORT_END = "End"
+L.KEY_SHORT_BACKSPACE = "BS"
+L.KEY_SHORT_ESCAPE = "Esc"
+L.KEY_SHORT_ENTER = "Ent"
+L.KEY_SHORT_TAB = "Tab"
+L.KEY_SHORT_CAPSLOCK = "Caps"
+L.KEY_SHORT_UP = "Up" -- the arrow keys
+L.KEY_SHORT_DOWN = "Dn"
+L.KEY_SHORT_LEFT = "Lt"
+L.KEY_SHORT_RIGHT = "Rt"
 
 -- Lib/MapPins.lua: icons on the world map.
 L.MAPPINS_HINT_WAYPOINT = "<지도 핀을 설정하려면 Ctrl 클릭>"

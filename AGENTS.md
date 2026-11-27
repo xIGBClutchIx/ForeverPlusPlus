@@ -118,7 +118,7 @@ One line here says what each file is for. [docs/architecture.md](docs/architectu
 | `Text.lua` | `Text` | Numbers, durations ("3 Seconds", "12m ago"), yards, version compare, and stripping escape codes. |
 | `Money.lua` | `Money`, `MoneyShort` | Copper as coin text. |
 | `Fonts.lua` | `Fonts` | The game's fonts a font dropdown offers. |
-| `Keys.lua` | `Keys` | The Skip Key dropdown and whether its key is held. |
+| `Keys.lua` | `Keys` | The Skip Key dropdown and whether its key is held, and a key binding in short for a button's label (`Short`). |
 | `Gamepad.lua` | `Gamepad` | The controller interface: whether it's on (`On`), the notices of a module it hides or limits, its buttons by where they sit (`BUTTON`), reading one and a press of one (`Down`, `Press`), how the player's controller labels one, and click hints written for it. |
 | `Sounds.lua` | `Sounds` | The alert sounds every Sound dropdown offers, the dropdown itself (`Option`), and playing one. |
 | `RealmTime.lua` | `RealmTime` | Realm time moved to the player's clock. |

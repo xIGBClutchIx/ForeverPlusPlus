@@ -108,6 +108,11 @@ L.HIDEZONETEXT_SUBZONE_DESC = "隱藏區域內地點的名稱，例如閃金鎮�
 L.HIDEZONETEXT_PVP = "領地資訊"
 L.HIDEZONETEXT_PVP_DESC = "隱藏名稱下方說明該地屬於誰的那一行，例如爭奪中的領土或聖域。"
 
+-- ShortKeybinds
+L.SHORTKEYBINDS_TITLE = "簡短按鍵文字"
+L.SHORTKEYBINDS_DESC = "將快捷按鈕上的按鍵寫得更短，以便放得下：Shift-C寫作SC，滑鼠中鍵寫作M3，"
+    .. "數字鍵盤1寫作N1。適用於快捷列、寵物列和額外快捷鍵。"
+
 -- HideMenuBars
 L.HIDEMENUBARS_TITLE = "隱藏背包列和選單列"
 -- [quotes: KEY_BINDINGS]

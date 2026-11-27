@@ -246,6 +246,7 @@ Modules\Interface\HideMenuBars.lua
 Modules\Interface\HideZoneText.lua
 Modules\Interface\HideErrors.lua
 Modules\Interface\EditModeGlow.lua
+Modules\Interface\ShortKeybinds.lua
 Modules\Character\CharacterWindow\CharacterWindow.lua
 Modules\Character\CharacterWindow\Durability.lua
 Modules\Character\CharacterWindow\Skills.lua

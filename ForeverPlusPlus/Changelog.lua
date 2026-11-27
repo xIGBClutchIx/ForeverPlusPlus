@@ -67,6 +67,10 @@ ns.changelog = {
                     .. "button red while your target is out of its range, and blue while you can't pay "
                     .. "its cost, where the game only reddens the key and tints the icon a faint blue. "
                     .. "Out of range comes first, and the pet bar gets the red too." },
+                { L.SHORTKEYBINDS_TITLE, "A new module, off by default, that writes the keys on "
+                    .. "your action buttons in short, so they fit: SC for Shift-C, MMB for the middle "
+                    .. "mouse button, N1 for number pad 1. On the action bars, the pet bar, and the "
+                    .. "extra action button." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "

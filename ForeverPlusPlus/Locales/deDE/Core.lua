@@ -38,6 +38,34 @@ L.KEY_NONE = "Keine"
 -- as the player's controller shows it
 L.KEY_PAD_NOTE = "Mit der Controller-Oberfläche haltet Ihr stattdessen %s oder %s gedrückt."
 L.SKIP_KEY = "Taste zum Überspringen" -- the option of every module that a held key skips
+-- A key binding in short, as a label in the corner of an action button: the modifiers, then the
+-- key, run together ("SC" for Shift-C, "CM4" for Ctrl and mouse button 4). Keep each to a few
+-- letters: the button is about four characters wide.
+L.KEY_SHORT_SHIFT = "S"
+L.KEY_SHORT_CTRL = "C"
+L.KEY_SHORT_ALT = "A"
+L.KEY_SHORT_META = "M" -- the Command key, on a Mac
+L.KEY_SHORT_MOUSE = "M%s" -- a mouse button, by its number: M4, M5
+L.KEY_SHORT_MOUSE_MIDDLE = "MMT" -- the middle mouse button
+L.KEY_SHORT_WHEEL_UP = "RO" -- the mouse wheel rolled up
+L.KEY_SHORT_WHEEL_DOWN = "RU"
+L.KEY_SHORT_NUMPAD = "Z%s" -- a number pad key, by its digit or sign: N1, N+
+L.KEY_SHORT_SPACE = "Leer"
+L.KEY_SHORT_PAGEUP = "BAuf"
+L.KEY_SHORT_PAGEDOWN = "BAb"
+L.KEY_SHORT_INSERT = "Einfg"
+L.KEY_SHORT_DELETE = "Entf"
+L.KEY_SHORT_HOME = "Pos1"
+L.KEY_SHORT_END = "Ende"
+L.KEY_SHORT_BACKSPACE = "Rück"
+L.KEY_SHORT_ESCAPE = "Esc"
+L.KEY_SHORT_ENTER = "Eing"
+L.KEY_SHORT_TAB = "Tab"
+L.KEY_SHORT_CAPSLOCK = "Fest"
+L.KEY_SHORT_UP = "Ob" -- the arrow keys
+L.KEY_SHORT_DOWN = "Un"
+L.KEY_SHORT_LEFT = "Li"
+L.KEY_SHORT_RIGHT = "Re"
 
 -- Lib/MapPins.lua: icons on the world map.
 -- Click hints are written as Blizzard's instruction lines are: in angle brackets, the keys and the

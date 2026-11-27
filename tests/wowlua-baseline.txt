@@ -69,6 +69,7 @@
 1	ForeverPlusPlus/Lib/WorldMap.lua: warning[type-mismatch] expected `UiMapPoint` for parameter 'point', got `UiMapPoint | {position: Vector2DMixin, uiMapID: number}`
 1	ForeverPlusPlus/Modules/Character/Professions/UnlearnedRecipes.lua: warning[missing-parameter] missing argument for parameter 'callback'
 1	ForeverPlusPlus/Modules/Interface/CurrencyBar.lua: warning[type-mismatch] expected `string?` for parameter 'textR', got `string | number`
+1	ForeverPlusPlus/Modules/Interface/ShortKeybinds.lua: warning[type-mismatch] expected `string?` for parameter 'prefix', got `number`
 2	ForeverPlusPlus/Modules/Interface/LocalTime.lua: warning[missing-parameter] missing argument for parameter 'year'
 1	ForeverPlusPlus/Modules/Items/ItemTooltips/CraftedCompare.lua: warning[missing-fields] missing required field 'overrideItemLevel' in class 'TooltipComparisonItem'
 1	ForeverPlusPlus/Modules/System/MinimapButton.lua: warning[type-mismatch] expected `RootMenuDescriptionProxy` for parameter 'description', got `RootMenuDescriptionProxy | MenuStyle1Mixin`

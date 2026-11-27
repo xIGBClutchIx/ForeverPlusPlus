@@ -118,6 +118,12 @@ L.HIDEZONETEXT_SUBZONE_DESC = "골드샤이어 같은 지역 안 장소의 이�
 L.HIDEZONETEXT_PVP = "영토 줄"
 L.HIDEZONETEXT_PVP_DESC = "이름 아래에 분쟁 지역이나 성역처럼 누구의 영토인지 알려 주는 줄을 숨깁니다."
 
+-- ShortKeybinds
+L.SHORTKEYBINDS_TITLE = "짧은 단축키 표시"
+L.SHORTKEYBINDS_DESC = "행동 단축 버튼의 단축키를 짧게 써서 버튼에 맞게 합니다. Shift-C는 SC, 마우스 "
+    .. "가운데 버튼은 M3, 숫자패드 1은 N1이 됩니다. 행동 단축바, 소환수 단축바, 기타 행동 단축키에 "
+    .. "적용됩니다."
+
 -- HideMenuBars
 L.HIDEMENUBARS_TITLE = "가방 및 메뉴 막대 숨기기"
 L.HIDEMENUBARS_DESC = "마우스를 올리기 전까지 가방 막대와 메뉴를 숨깁니다. 단축키 설정의 키는 그대로 작동하며, "
