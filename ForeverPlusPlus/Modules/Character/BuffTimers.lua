@@ -171,23 +171,30 @@ end
 local slots = {} -- i -> the anchor points Blizzard gave auraFrames[i]
 local placed = setmetatable({}, weak) -- button -> the slot it's in now, while not its own
 -- Whether the buttons are anchored to each other instead of to their container, as an interface
--- addon that lays the buffs out itself does (ShestakUI anchors each to the one before it). A slot is
--- then "next to that button", not a place: moving a button into it can anchor it to itself, which
--- the game refuses with an error. So the buttons stay where that addon put them.
+-- addon that lays the buffs out itself does: ShestakUI's hook on UpdateGridLayout anchors each to
+-- the one before it, and the first of a row to the first of the row above (its
+-- Modules/Auras/BuffFrame.lua, read 2026-11-27). A slot is then "beside the button in that slot",
+-- not a fixed place, and copying it as it stands can anchor a button to itself, which the game
+-- refuses with an error. `arrange` lays such a chain out again in the new order instead.
 local chained = false
+local slotIndex = setmetatable({}, weak) -- button -> the slot that was its own when last read
 
--- Read right after Blizzard laid the buttons out, when each is in its own place.
+-- Read right after Blizzard (and any addon hooked there before us) laid the buttons out, when each
+-- is in its own place.
 local function readSlots()
     slots = {}
     chained = false
-    local buttons = {}
-    for _, button in ipairs(BuffFrame and BuffFrame.auraFrames or {}) do
-        buttons[button] = true
+    for button in pairs(slotIndex) do
+        slotIndex[button] = nil
     end
-    for i, button in ipairs(BuffFrame and BuffFrame.auraFrames or {}) do
+    local frames = BuffFrame and BuffFrame.auraFrames or {}
+    for i, button in ipairs(frames) do
+        slotIndex[button] = i
+    end
+    for i, button in ipairs(frames) do
         slots[i] = Frames.GetPoints(button)
         for _, point in ipairs(slots[i]) do
-            if buttons[point[2]] then
+            if slotIndex[point[2]] then
                 chained = true
             end
         end
@@ -199,14 +206,48 @@ end
 
 local function place(button, i, own)
     local points = slots[i]
-    for _, point in ipairs(points or {}) do
-        if point[2] == button then
-            return -- a slot beside this very button: it can't be anchored to itself
-        end
-    end
     if (placed[button] or own) ~= i and points and points[1] then
         Frames.SetPoints(button, points)
         placed[button] = i ~= own and i or nil
+    end
+end
+
+-- Puts each of `frames` in the slot `target` gives it (its own without one). Blizzard's slots are
+-- places on the container, so each button moves by itself. A chain's slots name the button beside
+-- them, so every button is taken off and put back, each anchored to whichever button is now in the
+-- slot its own slot leaned on: the same rows and gaps, in the new order.
+local function arrange(frames, target)
+    if not chained then
+        for i, button in ipairs(frames) do
+            place(button, target[button] or i, i)
+        end
+        return
+    end
+    local occupant, changed = {}, false
+    for i, button in ipairs(frames) do
+        local slot = target[button] or i
+        occupant[slot] = button
+        changed = changed or (placed[button] or i) ~= slot
+    end
+    if not changed then
+        return
+    end
+    for _, button in ipairs(frames) do
+        button:ClearAllPoints()
+    end
+    for i, button in ipairs(frames) do
+        local slot = target[button] or i
+        for _, point in ipairs(slots[slot] or {}) do
+            local to = point[2]
+            local leansOn = slotIndex[to]
+            if leansOn then
+                to = occupant[leansOn]
+            end
+            if to ~= button then -- never to itself: a slot that leans on its own would be a loop
+                button:SetPoint(point[1], to, point[3], point[4], point[5])
+            end
+        end
+        placed[button] = slot ~= i and slot or nil
     end
 end
 
@@ -302,10 +343,11 @@ end
 
 -- Every button back in Blizzard's place, and shown.
 local function unsort()
-    for i, button in ipairs(BuffFrame and BuffFrame.auraFrames or {}) do
+    local frames = BuffFrame and BuffFrame.auraFrames or {}
+    for _, button in ipairs(frames) do
         unhide(button)
-        place(button, i, i)
     end
+    arrange(frames, {})
     showArrow(true)
 end
 
@@ -330,7 +372,7 @@ local function layout()
     -- Not with the controller interface on: its cursor still lands on a buff at no alpha, and its
     -- cancel button would take the unseen buff off (Blizzard_BuffFrame's gamepad branch).
     local sorting, hiding = side ~= "off", module.db.hideTracking and not ns.Gamepad.On()
-    if not (frames and container) or not (sorting or hiding) or chained then
+    if not (frames and container) or not (sorting or hiding) then
         unsort()
         return
     end
@@ -384,16 +426,17 @@ local function layout()
     end
     local n = #list
     local reverse = sorting and (side == "left") ~= leftFirst
+    local target = {} -- button -> its slot; the buttons past Blizzard's shown ones keep their own
     for k, button in ipairs(list) do
-        place(button, reverse and n + 1 - k or k, order[button])
+        target[button] = reverse and n + 1 - k or k
     end
     for k, button in ipairs(rest) do
-        place(button, n + k, order[button])
+        target[button] = n + k
     end
     for i = #all + 1, #frames do
         unhide(frames[i])
-        place(frames[i], i, i)
     end
+    arrange(frames, target)
     showArrow(not (hiding and onlyTrackingFolds()))
 end
 

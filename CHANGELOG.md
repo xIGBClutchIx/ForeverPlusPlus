@@ -20,7 +20,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Fixed
 
-- **Buff Timers**: Sort Buffs and Hide Tracking Buffs no longer raise a "Cannot anchor to itself" error with an interface addon that lays the buffs out itself, such as ShestakUI. The buffs stay where that addon puts them.
+- **Buff Timers**: Sort Buffs and Hide Tracking Buffs no longer raise a "Cannot anchor to itself" error with an interface addon that lays the buffs out itself, such as ShestakUI, and now sort and close up the buffs in that addon's own layout.
 - **Waypoints**: Show Time to Arrive shows the whole time ("6:40"), not only its minutes. It also counts down every second and is steadier: it eases to a new estimate instead of jumping, and stays through a quick turn.
 
 ## 1.9.0 (2026-11-24)
