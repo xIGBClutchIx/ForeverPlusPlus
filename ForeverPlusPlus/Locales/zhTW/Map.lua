@@ -347,6 +347,33 @@ L.WAYPOINTS_NO_MAP = "這裡沒有地圖。請指定區域：/way 艾爾文森�
 L.WAYPOINTS_NOT_HERE = "無法在%s地圖上設定導航點。" -- zone
 L.WAYPOINTS_UNAVAILABLE = "這個用戶端沒有地圖導航點功能。"
 
+-- Townsfolk. Each kind is named as the minimap's tracking menu names it.
+L.TOWNSFOLK_DESC = "在世界地圖上為旅店老闆、郵箱、銀行職員、拍賣師、你的職業訓練師、你的專業技能訓練師等顯示圖示，"
+    .. "資料來自QuestieDB插件。"
+L.TOWNSFOLK_NOTICE = "只顯示QuestieDB知道的。"
+L.TOWNSFOLK_NOTICE_DESC = "他們所在的位置來自QuestieDB的資料，其中可能沒有每一個郵箱。訓練師的職業或專業是從其名字下方的頭銜讀出的。"
+L.TOWNSFOLK_PINS = "在世界地圖上顯示"
+L.TOWNSFOLK_PINS_DESC = "在區域和城市地圖上顯示圖示。世界地圖的過濾選單中也有相同的開關。"
+-- Smaller headers over its options in Settings
+L.TOWNSFOLK_SECTION_SERVICES = "服務"
+L.TOWNSFOLK_SECTION_TRAINERS = "訓練師"
+L.TOWNSFOLK_SECTION_VENDORS = "商人"
+L.TOWNSFOLK_INNKEEPER_DESC = "設定爐石的地方。"
+L.TOWNSFOLK_MAILBOX_DESC = "收發郵件的地方。"
+L.TOWNSFOLK_BANKER_DESC = "打開銀行的地方。"
+L.TOWNSFOLK_AUCTIONEER_DESC = "打開拍賣場的地方。"
+L.TOWNSFOLK_STABLE_DESC = "獵人寄放寵物的地方。"
+L.TOWNSFOLK_BATTLEMASTER_DESC = "加入戰場的地方。"
+L.TOWNSFOLK_CLASS_DESC = "你自己職業的訓練師，以及獵人的寵物訓練師。"
+L.TOWNSFOLK_PROFESSION_DESC = "你所擁有的專業技能的訓練師。"
+L.TOWNSFOLK_ALL_PROFESSIONS = "所有專業"
+L.TOWNSFOLK_ALL_PROFESSIONS_DESC = "顯示所有專業的訓練師，以便找到一個來學習。"
+L.TOWNSFOLK_REPAIR_DESC = "能修理裝備的商人。"
+L.TOWNSFOLK_FOOD_DESC = "販賣食物和飲料的商人。"
+L.TOWNSFOLK_REAGENT_DESC = "販賣法術所需材料的商人。"
+L.TOWNSFOLK_POISON_DESC = "販賣盜賊毒藥的商人。"
+L.TOWNSFOLK_AMMO_DESC = "販賣箭和子彈的商人。"
+
 -- MinimapNodeIcons, removed after 1.4.0: its title stays for its notes in the changelog.
 L.MINIMAPNODEICONS_TITLE = "小地圖採集點圖示"
 

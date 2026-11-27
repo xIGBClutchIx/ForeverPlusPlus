@@ -376,6 +376,35 @@ L.WAYPOINTS_NO_MAP = "이곳에는 지도가 없습니다. 지역을 지정하�
 L.WAYPOINTS_NOT_HERE = "%s 지도에는 웨이포인트를 놓을 수 없습니다." -- zone
 L.WAYPOINTS_UNAVAILABLE = "이 클라이언트에는 지도 웨이포인트가 없습니다."
 
+-- Townsfolk. Each kind is named as the minimap's tracking menu names it.
+L.TOWNSFOLK_DESC = "세계 지도에 여관주인, 우체통, 은행원, 경매인, 내 직업의 상급자, 내 전문 기술의 전문가 "
+    .. "등을 아이콘으로 표시합니다. 데이터는 QuestieDB 애드온에서 가져옵니다."
+L.TOWNSFOLK_NOTICE = "QuestieDB가 아는 것만 표시됩니다."
+L.TOWNSFOLK_NOTICE_DESC = "위치는 QuestieDB의 데이터에서 가져오며, 모든 우체통이 있지는 않을 수 있습니다. "
+    .. "상급자의 직업이나 전문 기술은 이름 아래의 칭호로 알아냅니다."
+L.TOWNSFOLK_PINS = "세계 지도에 표시"
+L.TOWNSFOLK_PINS_DESC = "지역과 도시 지도에 아이콘을 표시합니다. 세계 지도의 필터 메뉴에도 같은 스위치가 "
+    .. "있습니다."
+-- Smaller headers over its options in Settings
+L.TOWNSFOLK_SECTION_SERVICES = "편의 시설"
+L.TOWNSFOLK_SECTION_TRAINERS = "상급자"
+L.TOWNSFOLK_SECTION_VENDORS = "상인"
+L.TOWNSFOLK_INNKEEPER_DESC = "귀환석을 귀속하는 곳입니다."
+L.TOWNSFOLK_MAILBOX_DESC = "우편을 보내고 받는 곳입니다."
+L.TOWNSFOLK_BANKER_DESC = "은행을 여는 곳입니다."
+L.TOWNSFOLK_AUCTIONEER_DESC = "경매장을 여는 곳입니다."
+L.TOWNSFOLK_STABLE_DESC = "사냥꾼이 소환수를 맡기는 곳입니다."
+L.TOWNSFOLK_BATTLEMASTER_DESC = "전장에 참여하는 곳입니다."
+L.TOWNSFOLK_CLASS_DESC = "내 직업의 상급자와 사냥꾼의 소환수 조련사입니다."
+L.TOWNSFOLK_PROFESSION_DESC = "내가 가진 전문 기술의 전문가입니다."
+L.TOWNSFOLK_ALL_PROFESSIONS = "모든 전문 기술"
+L.TOWNSFOLK_ALL_PROFESSIONS_DESC = "배울 전문 기술을 찾을 수 있게 모든 전문 기술의 전문가를 표시합니다."
+L.TOWNSFOLK_REPAIR_DESC = "장비를 수리해 주는 상인입니다."
+L.TOWNSFOLK_FOOD_DESC = "음식과 음료를 파는 상인입니다."
+L.TOWNSFOLK_REAGENT_DESC = "주문에 쓰는 마법 재료를 파는 상인입니다."
+L.TOWNSFOLK_POISON_DESC = "도적의 독을 파는 상인입니다."
+L.TOWNSFOLK_AMMO_DESC = "화살과 탄환을 파는 상인입니다."
+
 -- MinimapNodeIcons, removed after 1.4.0: its title stays for its notes in the changelog.
 L.MINIMAPNODEICONS_TITLE = "미니맵 채집물 아이콘"
 

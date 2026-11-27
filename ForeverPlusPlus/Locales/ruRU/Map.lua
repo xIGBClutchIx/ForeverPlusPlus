@@ -395,6 +395,35 @@ L.WAYPOINTS_NO_MAP = "Здесь нет карты. Укажите зону: /wa
 L.WAYPOINTS_NOT_HERE = "Нельзя поставить путевую точку на карте «%s»." -- zone
 L.WAYPOINTS_UNAVAILABLE = "В этом клиенте нет путевых точек на карте."
 
+-- Townsfolk. Each kind is named as the minimap's tracking menu names it.
+L.TOWNSFOLK_DESC = "Значки на карте мира для хозяев таверн, почтовых ящиков, банкиров, аукционеров, "
+    .. "учителей вашего класса, учителей ваших профессий и не только, по данным модификации QuestieDB."
+L.TOWNSFOLK_NOTICE = "Показываются только те, о ком знает QuestieDB."
+L.TOWNSFOLK_NOTICE_DESC = "Где они стоят, берется из данных QuestieDB, где может быть не каждый "
+    .. "почтовый ящик. Класс или профессия учителя определяются по надписи под его именем."
+L.TOWNSFOLK_PINS = "Показывать на карте мира"
+L.TOWNSFOLK_PINS_DESC = "Показывать значки на картах зон и городов. В меню фильтров карты мира есть "
+    .. "такой же переключатель."
+-- Smaller headers over its options in Settings
+L.TOWNSFOLK_SECTION_SERVICES = "Услуги"
+L.TOWNSFOLK_SECTION_TRAINERS = "Учителя"
+L.TOWNSFOLK_SECTION_VENDORS = "Торговцы"
+L.TOWNSFOLK_INNKEEPER_DESC = "Где привязать камень возвращения."
+L.TOWNSFOLK_MAILBOX_DESC = "Где отправлять и забирать почту."
+L.TOWNSFOLK_BANKER_DESC = "Где открыть банк."
+L.TOWNSFOLK_AUCTIONEER_DESC = "Где открыть аукцион."
+L.TOWNSFOLK_STABLE_DESC = "Где охотник держит питомцев."
+L.TOWNSFOLK_BATTLEMASTER_DESC = "Где встать в очередь на поле боя."
+L.TOWNSFOLK_CLASS_DESC = "Учителя вашего класса и учителя питомцев для охотников."
+L.TOWNSFOLK_PROFESSION_DESC = "Учителя ваших профессий."
+L.TOWNSFOLK_ALL_PROFESSIONS = "Все профессии"
+L.TOWNSFOLK_ALL_PROFESSIONS_DESC = "Показывать учителей всех профессий, чтобы найти, какую изучить."
+L.TOWNSFOLK_REPAIR_DESC = "Торговцы, которые чинят снаряжение."
+L.TOWNSFOLK_FOOD_DESC = "Торговцы едой и напитками."
+L.TOWNSFOLK_REAGENT_DESC = "Торговцы реагентами для заклинаний."
+L.TOWNSFOLK_POISON_DESC = "Торговцы ядами для разбойников."
+L.TOWNSFOLK_AMMO_DESC = "Торговцы стрелами и пулями."
+
 -- MinimapNodeIcons, removed after 1.4.0: its title stays for its notes in the changelog.
 L.MINIMAPNODEICONS_TITLE = "Значки точек на мини-карте"
 

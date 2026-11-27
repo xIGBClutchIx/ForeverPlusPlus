@@ -682,6 +682,59 @@ function QuestieDB.IdsByName(kind, name)
     return ids(try(found[kind].IdsByName, name))
 end
 
+---The bit of one of QuestieDB's NPC flags, by its name in `LibQuestieDB.Enum.npcFlags`
+---(`"INNKEEPER"`, `"TRAINER"`, `"VENDOR"`, ...), or nil when the installed version doesn't have
+---it: the table came with contract 4, and a flag the game's version lacks is left out of it.
+---@param name string
+---@return number|nil bit
+function QuestieDB.NpcFlag(name)
+    local found = api()
+    local enum = found and type(found.Enum) == "table" and found.Enum.npcFlags
+    local value = type(enum) == "table" and enum[name]
+    if type(value) == "number" and value > 0 then
+        return value
+    end
+    return nil
+end
+
+---An NPC's flag mask alone, a far cheaper read than `QuestieDB.Npc` for going over every NPC: 0
+---for none, an unknown ID, or while QuestieDB isn't ready.
+---@param npcID number
+---@return number mask
+function QuestieDB.NpcFlags(npcID)
+    local found = api()
+    if not found or type(npcID) ~= "number" then
+        return 0
+    end
+    local mask = try(found.Npc.Get, npcID, "npcFlags")
+    return type(mask) == "number" and mask or 0
+end
+
+---Whether a flag mask has a flag's bit set (`QuestieDB.NpcFlag`'s). Lua 5.1 has no bit operators,
+---and the masks can be wider than the client's 32-bit `bit` library.
+---@param mask number
+---@param flag number
+---@return boolean
+function QuestieDB.HasFlag(mask, flag)
+    return type(mask) == "number" and type(flag) == "number" and flag > 0 and hasFlag(mask, flag)
+end
+
+---A text field (a `name`, an NPC's `subName`) as QuestieDB's own data has it, before its
+---translations and Corrections (its `GetRaw`): English whatever the game's language, for telling
+---kinds apart by their words. Nil when it has none, isn't text, or QuestieDB isn't ready. Each read
+---is uncached on its side.
+---@param kind string `"Npc"`, `"Object"`, `"Item"`, or `"Quest"`
+---@param entityID number
+---@param field string
+---@return string|nil
+function QuestieDB.English(kind, entityID, field)
+    local found = api()
+    if not found or not KINDS[kind] or type(entityID) ~= "number" or type(field) ~= "string" then
+        return nil
+    end
+    return str(try(found[kind].GetRaw, entityID, field))
+end
+
 -- Drop chances --------------------------------------------------------------------------------
 
 -- Item ID -> { NPC ID -> percent }, from QuestieDB's drop support data: Wowhead's numbers, then

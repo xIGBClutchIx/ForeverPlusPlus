@@ -102,6 +102,7 @@ local DATA = {
             spawns = { [10] = { { 50, 25 }, { 10, 90, 7 } }, [20] = { { -1, -1 } }, [30] = { { 1, 1 } } },
             zoneID = 10, questStarts = { 900001 }, questEnds = { 900001 }, friendlyToFaction = "AH",
             npcFlags = 2,
+            raw = { subName = "Errand Trainer" }, -- its English, under the translated subName
         },
     },
     Item = {
@@ -142,6 +143,15 @@ local function entity(kind, data)
         end
         return out
     end
+    e.Get = function(id, field)
+        assert(keys[field], "no field " .. field)
+        return data[id] and data[id][field]
+    end
+    -- Base data, before translations: a row's `raw` field, else the field itself.
+    e.GetRaw = function(id, field)
+        local row = data[id]
+        return row and (row.raw and row.raw[field] or row[field])
+    end
     e.GetAllIds = function()
         local list = {}
         for id in pairs(data) do
@@ -165,7 +175,8 @@ local function entity(kind, data)
 end
 
 local function newLib(changes)
-    local lib = { Meta = {}, contractVersion = 4, minSupportedContract = 1, readMode = "baked" }
+    local lib = { Meta = {}, contractVersion = 4, minSupportedContract = 1, readMode = "baked",
+        Enum = { npcFlags = { NONE = 0, QUEST_GIVER = 2, TRAINER = 16 } } }
     for kind in pairs(SCHEMA) do
         local e, keys = entity(kind, DATA[kind])
         lib[kind] = e
@@ -370,6 +381,19 @@ same(Q.Ids("Quest"), { 900001, 900002, 900003 }, "questiedb: every quest ID")
 same(Q.Ids("Spell"), {}, "questiedb: an unknown kind")
 same(Q.IdsByName("Object", "Test Crate"), { 600001 }, "questiedb: IDs by name")
 same(Q.IdsByName("Object", "Nothing"), {}, "questiedb: no IDs by name")
+
+eq(Q.NpcFlag("QUEST_GIVER"), 2, "questiedb: an NPC flag's bit")
+eq(Q.NpcFlag("NONE"), nil, "questiedb: no bit for NONE")
+eq(Q.NpcFlag("INNKEEPER"), nil, "questiedb: a flag it doesn't have")
+eq(Q.NpcFlags(800001), 2, "questiedb: an NPC's flags alone")
+eq(Q.NpcFlags(1), 0, "questiedb: no flags for an unknown NPC")
+eq(Q.HasFlag(2 + 16, 16) and Q.HasFlag(2 + 16, 2) and not Q.HasFlag(2, 16), true, "questiedb: a flag in a mask")
+eq(Q.HasFlag(2 ^ 33 + 16, 2 ^ 33), true, "questiedb: a flag past 32 bits")
+eq(Q.HasFlag(16, nil), false, "questiedb: no flag is never set")
+eq(Q.English("Npc", 800001, "subName"), "Errand Trainer", "questiedb: a field's English")
+eq(Q.English("Npc", 800001, "minLevel"), nil, "questiedb: English is text only")
+eq(Q.English("Npc", 1, "name"), nil, "questiedb: no English for an unknown NPC")
+eq(Q.English("Spell", 1, "name"), nil, "questiedb: no English for an unknown kind")
 
 same(Q.DropRates(700001), { [800002] = 25.5, [800003] = 3 }, "questiedb: Wowhead's drop rates first")
 same(Q.DropRates(700009), { [800001] = 1 }, "questiedb: CMaNGOS's for an item Wowhead's lack")

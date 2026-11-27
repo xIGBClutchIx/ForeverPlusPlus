@@ -404,6 +404,36 @@ L.WAYPOINTS_NO_MAP = "Hier gibt es keine Karte. Nennt eine Zone: /way Wald von E
 L.WAYPOINTS_NOT_HERE = "Auf dieser Karte ist kein Wegpunkt möglich: %s" -- zone
 L.WAYPOINTS_UNAVAILABLE = "Dieser Client hat keine Kartenwegpunkte."
 
+-- Townsfolk. Each kind is named as the minimap's tracking menu names it.
+L.TOWNSFOLK_DESC = "Symbole auf der Weltkarte für Gastwirte, Briefkästen, Bankiers, Auktionatoren, "
+    .. "die Lehrer Eurer Klasse, die Lehrer Eurer Berufe und mehr, aus den Daten des Addons QuestieDB."
+L.TOWNSFOLK_NOTICE = "Es erscheinen nur die, die QuestieDB kennt."
+L.TOWNSFOLK_NOTICE_DESC = "Wo sie stehen, kommt aus den Daten von QuestieDB, die nicht jeden "
+    .. "Briefkasten haben müssen. Klasse oder Beruf eines Lehrers werden aus dem Titel unter seinem "
+    .. "Namen gelesen."
+L.TOWNSFOLK_PINS = "Auf der Weltkarte anzeigen"
+L.TOWNSFOLK_PINS_DESC = "Zeigt die Symbole auf Zonen- und Stadtkarten. Das Filtermenü der Weltkarte "
+    .. "hat denselben Schalter."
+-- Smaller headers over its options in Settings
+L.TOWNSFOLK_SECTION_SERVICES = "Dienste"
+L.TOWNSFOLK_SECTION_TRAINERS = "Lehrer"
+L.TOWNSFOLK_SECTION_VENDORS = "Händler"
+L.TOWNSFOLK_INNKEEPER_DESC = "Wo Ihr Euren Ruhestein bindet."
+L.TOWNSFOLK_MAILBOX_DESC = "Wo Ihr Post verschickt und abholt."
+L.TOWNSFOLK_BANKER_DESC = "Wo Ihr Eure Bank öffnet."
+L.TOWNSFOLK_AUCTIONEER_DESC = "Wo Ihr das Auktionshaus öffnet."
+L.TOWNSFOLK_STABLE_DESC = "Wo ein Jäger seine Tiere unterbringt."
+L.TOWNSFOLK_BATTLEMASTER_DESC = "Wo Ihr Euch für ein Schlachtfeld anmeldet."
+L.TOWNSFOLK_CLASS_DESC = "Die Lehrer Eurer eigenen Klasse und die Tierausbilder eines Jägers."
+L.TOWNSFOLK_PROFESSION_DESC = "Die Lehrer der Berufe, die Ihr habt."
+L.TOWNSFOLK_ALL_PROFESSIONS = "Jeder Beruf"
+L.TOWNSFOLK_ALL_PROFESSIONS_DESC = "Zeigt die Lehrer jedes Berufs, um einen zum Erlernen zu finden."
+L.TOWNSFOLK_REPAIR_DESC = "Händler, die Eure Ausrüstung reparieren."
+L.TOWNSFOLK_FOOD_DESC = "Händler für Speis und Trank."
+L.TOWNSFOLK_REAGENT_DESC = "Händler für die Reagenzien, die Zauber brauchen."
+L.TOWNSFOLK_POISON_DESC = "Händler für die Gifte eines Schurken."
+L.TOWNSFOLK_AMMO_DESC = "Händler für Pfeile und Kugeln."
+
 -- MinimapNodeIcons, removed after 1.4.0: its title stays for its notes in the changelog.
 L.MINIMAPNODEICONS_TITLE = "Vorkommenssymbole auf der Minikarte"
 

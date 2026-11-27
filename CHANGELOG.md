@@ -30,6 +30,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Professions**: Crafting Costs' Sort Recipe List (off by default) sorts the recipes in each category of the professions window by Estimated Profit or Total Cost, and shows that number on each row. Pick it in Settings or at the bottom of the window's Filter menu.
 - **Quest Item Button**: A new module, off by default, with a key that uses the item of the quest you're closest to, set in Key Bindings under Forever++, and a button showing which item that is, which you can move in Edit Mode. The quest you selected comes first, and with QuestieDB, quest items in your bags are matched to their quests.
 - **Mount Speed Gear**: A new module, off by default, that puts on Carrot on a Stick, gloves enchanted with Riding Skill, and boots with Mithril Spurs from your bags when you mount up, and your own gear back on when you get off, once combat ends. Your own gear is remembered through a reload or logout.
+- **Townsfolk**: A new module, off by default, that needs the QuestieDB addon. It puts innkeepers, mailboxes, bankers, auctioneers, your class trainers, the trainers of your professions, repairers, and more on the world map, each kind with its own checkbox, and the same ones in the map's filter menu.
 
 ### Changed
 

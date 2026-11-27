@@ -110,6 +110,10 @@ ns.changelog = {
                     .. "gloves enchanted with Riding Skill, and boots with Mithril Spurs from your "
                     .. "bags when you mount up, and your own gear back on when you get off, once "
                     .. "combat ends. Your own gear is remembered through a reload or logout." },
+                { L.TOWNSFOLK_TITLE, "A new module, off by default, that needs the QuestieDB addon. "
+                    .. "It puts innkeepers, mailboxes, bankers, auctioneers, your class trainers, the "
+                    .. "trainers of your professions, repairers, and more on the world map, each kind "
+                    .. "with its own checkbox, and the same ones in the map's filter menu." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "
