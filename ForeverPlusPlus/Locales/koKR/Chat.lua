@@ -177,6 +177,13 @@ L.MOVABLECOMBATLOGTAB_TITLE = "전투 기록 탭 이동"
 L.MOVABLECOMBATLOGTAB_DESC = "전투 기록 탭이 일반 탭 바로 뒤에 고정되지 않고, 직접 만든 탭 뒤까지 대화 탭 사이 "
     .. "어디로든 끌어 옮길 수 있게 합니다."
 
+-- ChatTabResize
+L.CHATTABRESIZE_TITLE = "대화 탭으로 크기 조절"
+L.CHATTABRESIZE_DESC = "일반 대화 탭을 위아래로 끌어 기본 대화창을 높이거나 낮춥니다."
+L.CHATTABRESIZE_NOTICE = "새 높이는 다시 불러올 때까지만 유지됩니다"
+L.CHATTABRESIZE_NOTICE_DESC = "편집 모드가 대화창의 높이를 저장하고 있어서, /reload나 레이아웃을 바꾸면 그 "
+    .. "높이로 돌아갑니다. 계속 쓰려면 편집 모드에서 정하세요."
+
 -- HideChatButtons
 L.HIDECHATBUTTONS_TITLE = "대화 버튼 숨기기"
 L.HIDECHATBUTTONS_DESC = "마우스가 대화창 위에 오기 전까지 대화창 옆의 버튼을 숨기고, 탭과 함께 나타나고 "

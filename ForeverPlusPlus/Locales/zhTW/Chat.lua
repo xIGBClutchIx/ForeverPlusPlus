@@ -166,6 +166,13 @@ L.MOVABLECOMBATLOGTAB_TITLE = "可移動戰鬥記錄分頁"
 L.MOVABLECOMBATLOGTAB_DESC = "讓戰鬥記錄的分頁可以拖曳到聊天分頁中的任何位置，甚至是你建立的分頁之後，"
     .. "而不是固定在「綜合」之後。"
 
+-- ChatTabResize
+L.CHATTABRESIZE_TITLE = "拖曳分頁調整聊天大小"
+L.CHATTABRESIZE_DESC = "上下拖曳「綜合」聊天分頁，讓主聊天視窗變高或變矮。"
+L.CHATTABRESIZE_NOTICE = "新的高度只維持到重新載入"
+L.CHATTABRESIZE_NOTICE_DESC = "編輯模式保存著聊天視窗的高度，在/reload或更換版面配置後會恢復它。要保留高度，"
+    .. "請在編輯模式中設定。"
+
 -- HideChatButtons
 L.HIDECHATBUTTONS_TITLE = "隱藏聊天按鈕"
 L.HIDECHATBUTTONS_DESC = "隱藏聊天視窗旁的按鈕，直到滑鼠指向聊天，並隨著分頁淡入淡出。"

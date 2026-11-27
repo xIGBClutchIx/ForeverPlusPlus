@@ -193,6 +193,15 @@ L.MOVABLECOMBATLOGTAB_TITLE = "Beweglicher Kampflog-Reiter"
 L.MOVABLECOMBATLOGTAB_DESC = "Lässt den Reiter des Kampflogs an jede Stelle zwischen Euren Chatreitern "
     .. "ziehen, auch hinter die selbst erstellten, statt direkt nach Allgemein zu bleiben."
 
+-- ChatTabResize
+L.CHATTABRESIZE_TITLE = "Chatgröße per Reiter"
+L.CHATTABRESIZE_DESC = "Zieht den Chatreiter Allgemein nach oben oder unten, um das Hauptchatfenster "
+    .. "höher oder niedriger zu machen."
+L.CHATTABRESIZE_NOTICE = "Die neue Höhe gilt bis zum nächsten Neuladen"
+L.CHATTABRESIZE_NOTICE_DESC = "Der Bearbeitungsmodus behält die Höhe des Chatfensters und stellt sie "
+    .. "nach einem /reload oder einem Wechsel des Layouts wieder her. Stellt sie im "
+    .. "Bearbeitungsmodus ein, um sie zu behalten."
+
 -- HideChatButtons
 L.HIDECHATBUTTONS_TITLE = "Chatknöpfe ausblenden"
 L.HIDECHATBUTTONS_DESC = "Blendet die Knöpfe neben dem Chatfenster aus, bis die Maus über dem Chat ist, "

@@ -52,6 +52,9 @@ ns.changelog = {
                 { L.QUESTPINS_TITLE, "Quest Details with Shift (on by default): hold Shift over a "
                     .. "pin to see what each of its quests asks, who it's turned in to, and the "
                     .. "quest it leads to, from QuestieDB." },
+                { L.CHATTABRESIZE_TITLE, "A new module, off by default, that makes the main chat "
+                    .. "window taller or shorter as you drag its General tab up or down. The height "
+                    .. "lasts until you reload; Edit Mode keeps the one it comes back at." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "

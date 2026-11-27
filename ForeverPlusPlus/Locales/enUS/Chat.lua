@@ -186,6 +186,14 @@ L.MOVABLECOMBATLOGTAB_TITLE = "Movable Combat Log Tab"
 L.MOVABLECOMBATLOGTAB_DESC = "Let the Combat Log's tab be dragged anywhere among your chat tabs, "
     .. "even after the ones you made, instead of staying right after General."
 
+-- ChatTabResize
+L.CHATTABRESIZE_TITLE = "Chat Tab Resizing"
+L.CHATTABRESIZE_DESC = "Drag the General chat tab up or down to make the main chat window taller "
+    .. "or shorter."
+L.CHATTABRESIZE_NOTICE = "The new height lasts until you reload"
+L.CHATTABRESIZE_NOTICE_DESC = "Edit Mode keeps the chat window's height, and puts it back after a "
+    .. "/reload or a change of layout. Set it in Edit Mode to keep it."
+
 -- HideChatButtons
 L.HIDECHATBUTTONS_TITLE = "Hide Chat Buttons"
 L.HIDECHATBUTTONS_DESC = "Hide the buttons beside the chat window until the mouse is over the "
