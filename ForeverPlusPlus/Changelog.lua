@@ -119,6 +119,9 @@ ns.changelog = {
                     .. "headphones, so the game follows it instead of playing on the old one. It works "
                     .. "while the game's Output Device is the system default, and waits out a "
                     .. "cinematic or loading screen." },
+                { L.WIDEVENDOR_TITLE, "A new module, off by default, that shows 20 items on each "
+                    .. "page of a vendor's window instead of 10, in a window about twice as wide. "
+                    .. "It stays its usual size with the controller interface." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "

@@ -104,6 +104,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 - **Local Time**: While the clock's Use Local Time is on, the calendar and a few other realm times show in your own time.
 - **Movable Windows**: Hold a key (Shift by default) and drag Blizzard's windows where you want them, by the whole window or only its title bar, and hold Ctrl and scroll to resize one. Positions and sizes are kept always, for the session, or until the window closes. Off by default.
 - **Tooltips**: Colors unit and item tooltips by class, reaction, or quality, and adds player titles, who a unit is targeting, and, with the QuestieDB addon, the chance a creature drops a quest's item. Tidies tooltips without changing their look: an item's or spell's icon before its name, a player's class and side on one row, and a quest objective's count at the right. Off by default, adds a player's item level and specialization, and health text on the health bar. Can hide the health bar, quest lines, the unit frames' and chat tabs' right-click hints, and the fishing bobber's tooltip.
+- **Wide Vendor Window**: Shows 20 items on each page of a vendor's window instead of 10, in a window about twice as wide. Not with the controller interface. Off by default.
 - **Movable Framerate**: Lets you move and resize the framerate text (Ctrl+R) in Edit Mode. Off by default.
 
 ### Items

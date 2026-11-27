@@ -142,6 +142,17 @@ L.HIDESTANCEBAR_MOUSEOVER = "Bei Mausberührung zeigen"
 L.HIDESTANCEBAR_MOUSEOVER_DESC = "Zeigt die Haltungsleiste, solange die Maus darüber ist, sodass Ihr "
     .. "sie wie gewohnt anklicken könnt."
 
+-- WideVendor
+L.WIDEVENDOR_TITLE = "Breites Händlerfenster"
+L.WIDEVENDOR_DESC = "Zeigt auf jeder Seite des Händlerfensters 20 statt 10 Gegenstände, in einem "
+    .. "etwa doppelt so breiten Fenster."
+L.WIDEVENDOR_NOTICE = "Wirkt beim nächsten Öffnen eines Händlerfensters"
+L.WIDEVENDOR_NOTICE_DESC = "Wird es bei offenem Händlerfenster ein- oder ausgeschaltet, ändert sich "
+    .. "das Fenster erst, wenn es sich schließt."
+L.WIDEVENDOR_CONTROLLER = "Aus mit der Controller-Oberfläche"
+L.WIDEVENDOR_CONTROLLER_DESC = "Der Cursor des Controllers bewegt sich selbst durch die Gegenstände "
+    .. "eines Händlers, daher behält das Fenster mit der Controller-Oberfläche seine übliche Größe."
+
 -- HideZoneText
 L.HIDEZONETEXT_TITLE = "Zonentext ausblenden"
 L.HIDEZONETEXT_DESC = "Blendet die Namen aus, die oben im Bild erscheinen, wenn Ihr eine Zone oder "

@@ -502,6 +502,7 @@
     "ContainerFrameCombinedBags",
     "ContainerFrameItemButton_CalculateItemTooltipAnchors",
     "MerchantFrame",
+    "MERCHANT_ITEMS_PER_PAGE",
     "BankFrame",
     "SendMailFrame",
     "TradeFrame",

@@ -124,6 +124,16 @@ L.HIDESTANCEBAR_MOUSEOVER = "마우스를 올리면 표시"
 L.HIDESTANCEBAR_MOUSEOVER_DESC = "마우스가 태세 막대 위에 있는 동안 막대를 표시해 평소처럼 클릭할 수 있게 "
     .. "합니다."
 
+-- WideVendor
+L.WIDEVENDOR_TITLE = "넓은 상인 창"
+L.WIDEVENDOR_DESC = "상인 창의 각 페이지에 물품을 10개 대신 20개 표시하며, 창 너비가 약 두 배가 "
+    .. "됩니다."
+L.WIDEVENDOR_NOTICE = "다음에 상인 창을 열 때 적용"
+L.WIDEVENDOR_NOTICE_DESC = "상인 창이 열려 있는 동안 켜거나 끄면, 창이 닫힌 뒤에 바뀝니다."
+L.WIDEVENDOR_CONTROLLER = "게임패드 인터페이스에서는 꺼짐"
+L.WIDEVENDOR_CONTROLLER_DESC = "게임패드 커서가 상인의 물품 사이를 스스로 이동하므로, 게임패드 "
+    .. "인터페이스에서는 창이 원래 크기를 유지합니다."
+
 -- HideZoneText
 L.HIDEZONETEXT_TITLE = "지역 이름 숨기기"
 L.HIDEZONETEXT_DESC = "지역이나 그 안의 장소에 들어갈 때 화면 위쪽에 나타나는 이름을 숨깁니다. 지역 이름은 "

@@ -111,6 +111,14 @@ L.HIDESTANCEBAR_DESC = "隐藏姿态条：你的姿态、形态、光环或潜�
 L.HIDESTANCEBAR_MOUSEOVER = "鼠标指向时显示"
 L.HIDESTANCEBAR_MOUSEOVER_DESC = "鼠标指向姿态条时显示它，可以像平常一样点击。"
 
+-- WideVendor
+L.WIDEVENDOR_TITLE = "加宽商人窗口"
+L.WIDEVENDOR_DESC = "商人窗口每页显示20件物品而不是10件，窗口宽度约为原来的两倍。"
+L.WIDEVENDOR_NOTICE = "下次打开商人窗口时生效"
+L.WIDEVENDOR_NOTICE_DESC = "在商人窗口打开时开启或关闭，窗口会在关闭后才改变。"
+L.WIDEVENDOR_CONTROLLER = "在手柄界面下关闭"
+L.WIDEVENDOR_CONTROLLER_DESC = "手柄的光标会自行在商人的物品间移动，因此在手柄界面下窗口保持原来的大小。"
+
 -- HideZoneText
 L.HIDEZONETEXT_TITLE = "隐藏区域文字"
 L.HIDEZONETEXT_DESC = "隐藏进入某个区域或其中某个地点时屏幕上方出现的名字。小地图上仍显示区域名称。"

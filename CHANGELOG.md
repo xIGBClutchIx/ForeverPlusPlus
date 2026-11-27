@@ -32,6 +32,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Mount Speed Gear**: A new module, off by default, that puts on Carrot on a Stick, gloves enchanted with Riding Skill, and boots with Mithril Spurs from your bags when you mount up, and your own gear back on when you get off, once combat ends. Your own gear is remembered through a reload or logout.
 - **Townsfolk**: A new module, off by default, that needs the QuestieDB addon. It puts innkeepers, mailboxes, bankers, auctioneers, your class trainers, the trainers of your professions, repairers, and more on the world map, each kind with its own checkbox, and the same ones in the map's filter menu.
 - **Keep Audio Synced**: A new module, off by default, that restarts the game's sound when your computer's default sound device changes, as when you plug in headphones, so the game follows it instead of playing on the old one. It works while the game's Output Device is the system default, and waits out a cinematic or loading screen.
+- **Wide Vendor Window**: A new module, off by default, that shows 20 items on each page of a vendor's window instead of 10, in a window about twice as wide. It stays its usual size with the controller interface.
 
 ### Changed
 

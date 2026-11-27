@@ -256,6 +256,7 @@ Modules\Interface\HideZoneText.lua
 Modules\Interface\HideErrors.lua
 Modules\Interface\EditModeGlow.lua
 Modules\Interface\ShortKeybinds.lua
+Modules\Interface\WideVendor.lua
 Modules\Character\CharacterWindow\CharacterWindow.lua
 Modules\Character\CharacterWindow\Durability.lua
 Modules\Character\CharacterWindow\Details.lua

@@ -305,6 +305,7 @@ When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or f
 | `BINDING_HEADER_FOREVERPLUSPLUS`, `BINDING_NAME_CLICK ...` | Blizzard's Key Bindings reads them. |
 | `ForeverPlusPlusErrorCatcher`, `ForeverPlusPlusChatCopy`, `ForeverPlusPlusWhisperWindow` | Windows Escape closes; `UISpecialFrames` holds names (`ns.Frames.CloseOnEscape`). |
 | `GetMinimapShape` | Set by Square Minimap only while it squares the minimap and no other addon defines it. |
+| `MERCHANT_ITEMS_PER_PAGE` | Blizzard's; set by Wide Vendor Window only while the vendor window is closed, the one way to a bigger page. It taints Blizzard's merchant code, which has nothing protected. |
 
 **Events and lifecycle**
 

@@ -14,6 +14,7 @@ local WRITES = {
     { name = "ForeverPlusPlusPlayersDB" },
     { name = "ForeverPlusPlusAPI", file = "ForeverPlusPlus/API.lua" },
     { name = "GetMinimapShape", file = "ForeverPlusPlus/Modules/Map/SquareMinimap.lua" },
+    { name = "MERCHANT_ITEMS_PER_PAGE", file = "ForeverPlusPlus/Modules/Interface/WideVendor.lua" },
     { name = "BINDING_HEADER_FOREVERPLUSPLUS" },
     { pattern = "^SLASH_FOREVERPLUSPLUS[%w_]*$" },
 }
