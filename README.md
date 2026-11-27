@@ -63,6 +63,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Chat Tab Resizing | Drag the General chat tab up or down to make the main chat window taller or shorter, until you reload. Off by default. |
 | Whisper Window | Keeps whispers in a window like a messenger: conversations with unread counts on the left, the one you pick on the right, and a box to reply in. Opens from a chat button or `/fpp whispers`, and can hide whispers from chat. Off by default. |
 | **Interface** | |
+| Action Bar Colors | Tints a whole action button red while your target is out of its range, and blue while you can't pay its cost, where the game only reddens the key. Out of range comes first, and the pet bar gets the red too. Off by default. |
 | Combat Alert | Floats "Entering Combat" and "Leaving Combat" up the screen, with an optional sound. Placed in Edit Mode. Off by default. |
 | Currency Bar | Shows your gold, and optionally currencies, in a small box, with this session's gains and gold per hour in its tooltip. Placed in Edit Mode. Off by default. |
 | Edit Mode Glow | Dims the blue and gold boxes Edit Mode draws over each frame, so their edges are easier to see and line up. A Show Glow checkbox and slider under the Edit Mode window hide or dim them while you edit. Off by default. |

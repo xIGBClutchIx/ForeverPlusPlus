@@ -82,6 +82,15 @@ L.TOOLTIPS_QUEST_LINES_ALL = "在玩家、NPC和物件上隱藏"
 -- RecipeColors, a part of Professions since 1.5.0: its title stays for its notes in the changelog.
 L.RECIPECOLORS_TITLE = "配方顏色"
 
+-- ActionBarColors
+L.ACTIONBARCOLORS_TITLE = "快捷列顏色"
+L.ACTIONBARCOLORS_DESC = "目標超出技能範圍時將整個快捷列按鈕染成紅色，無法支付技能消耗時染成藍色，"
+    .. "而不只是遊戲的紅色按鍵文字和淡藍色。超出範圍優先。寵物快捷列也會變紅。"
+L.ACTIONBARCOLORS_RANGE = "超出範圍"
+L.ACTIONBARCOLORS_RANGE_DESC = "目標超出按鈕技能的範圍時將按鈕染成紅色。"
+L.ACTIONBARCOLORS_RESOURCE = "資源不足"
+L.ACTIONBARCOLORS_RESOURCE_DESC = "無法支付按鈕技能的消耗時將按鈕染成藍色，比遊戲本身的淡藍色更深。"
+
 -- HideStanceBar
 L.HIDESTANCEBAR_TITLE = "隱藏形態列"
 -- [quotes: KEY_BINDINGS]

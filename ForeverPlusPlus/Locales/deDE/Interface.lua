@@ -99,6 +99,17 @@ L.TOOLTIPS_QUEST_LINES_ALL = "Bei Spielern, NSCs und Objekten ausblenden"
 -- RecipeColors, a part of Professions since 1.5.0: its title stays for its notes in the changelog.
 L.RECIPECOLORS_TITLE = "Rezeptfarben"
 
+-- ActionBarColors
+L.ACTIONBARCOLORS_TITLE = "Aktionsleistenfarben"
+L.ACTIONBARCOLORS_DESC = "Färbt eine ganze Aktionstaste rot, solange Euer Ziel außer ihrer Reichweite "
+    .. "ist, und blau, solange Ihr ihre Kosten nicht zahlen könnt, statt nur der roten Taste und des "
+    .. "schwachen Blaus des Spiels. Außer Reichweite geht vor. Die Leiste Eures Begleiters wird auch rot."
+L.ACTIONBARCOLORS_RANGE = "Außer Reichweite"
+L.ACTIONBARCOLORS_RANGE_DESC = "Färbt eine Taste rot, solange Euer Ziel außer ihrer Reichweite ist."
+L.ACTIONBARCOLORS_RESOURCE = "Nicht genug Ressourcen"
+L.ACTIONBARCOLORS_RESOURCE_DESC = "Färbt eine Taste blau, solange Ihr ihre Kosten nicht zahlen könnt, "
+    .. "kräftiger als das schwache Blau des Spiels."
+
 -- HideStanceBar
 L.HIDESTANCEBAR_TITLE = "Haltungsleiste ausblenden"
 -- [quotes: KEY_BINDINGS]

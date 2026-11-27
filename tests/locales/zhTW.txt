@@ -2,6 +2,12 @@
 # tests/spec/locales.lua fails when the English has changed since: read the new English, fix
 # the translation if it needs it, then run: lua tests/locales.lua --update zhTW KEY ...
 0cceddc0	ABOUT
+924d360f	ACTIONBARCOLORS_DESC
+385ad17f	ACTIONBARCOLORS_RANGE
+a4f2245f	ACTIONBARCOLORS_RANGE_DESC
+b6973497	ACTIONBARCOLORS_RESOURCE
+7cea723c	ACTIONBARCOLORS_RESOURCE_DESC
+8806afaa	ACTIONBARCOLORS_TITLE
 3fd3798f	ADDONSLIST_CHAT_DESC
 8ba0476c	ADDONSLIST_DESC
 aa62f4d8	ADDONSLIST_ENABLEDFIRST

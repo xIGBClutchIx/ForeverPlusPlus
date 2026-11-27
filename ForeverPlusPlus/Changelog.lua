@@ -63,6 +63,10 @@ ns.changelog = {
                     .. "addons put around the minimap until the mouse is over it, and fades them in "
                     .. "and out. Blizzard's Buttons does the same for the calendar, tracking, and "
                     .. "addon compartment buttons." },
+                { L.ACTIONBARCOLORS_TITLE, "A new module, off by default, that tints a whole action "
+                    .. "button red while your target is out of its range, and blue while you can't pay "
+                    .. "its cost, where the game only reddens the key and tints the icon a faint blue. "
+                    .. "Out of range comes first, and the pet bar gets the red too." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "
