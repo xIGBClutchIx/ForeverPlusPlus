@@ -96,6 +96,11 @@ L.HIDEZONETEXT_SUBZONE_DESC = "隐藏区域中地点的名称，例如闪金镇�
 L.HIDEZONETEXT_PVP = "领土信息"
 L.HIDEZONETEXT_PVP_DESC = "隐藏名字下方说明这是谁的领土的一行，例如争夺中的领土或安全区域。"
 
+-- ShortKeybinds
+L.SHORTKEYBINDS_TITLE = "简短按键文字"
+L.SHORTKEYBINDS_DESC = "将动作按钮上的按键写得更短，以便放得下：Shift-C写作SC，鼠标中键写作M3，"
+    .. "数字键盘1写作N1。适用于动作条、宠物条和额外快捷键。"
+
 -- HideMenuBars
 L.HIDEMENUBARS_TITLE = "隐藏背包栏和菜单栏"
 -- [quotes: KEY_BINDINGS]

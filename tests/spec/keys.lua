@@ -56,6 +56,30 @@ for _, choice in ipairs(Keys.CHOICES) do
 end
 eq(table.concat(values, ","), "shift,ctrl,alt,none", "keys: the choices, in order")
 
+-- A key binding in short, from its raw key names. A key with a long name of its own the game
+-- names in the player's language, which stands in here for anything not shortened.
+GetBindingText = function(key) return key == "PRINTSCREEN" and "Print Screen" or "" end
+local short = Keys.Short
+eq(short("SHIFT-C"), "SC", "keys: Shift and a letter")
+eq(short("C"), "C", "keys: a letter alone")
+eq(short("CTRL-SHIFT-1"), "CS1", "keys: two modifiers, in the binding's order")
+eq(short("ALT-F12"), "AF12", "keys: a function key")
+eq(short("BUTTON3"), "MMB", "keys: the middle mouse button")
+eq(short("SHIFT-BUTTON4"), "SM4", "keys: another mouse button, by number")
+eq(short("MOUSEWHEELUP"), "WU", "keys: the mouse wheel")
+eq(short("CTRL-NUMPAD7"), "CN7", "keys: a number pad digit")
+eq(short("NUMPADPLUS"), "N+", "keys: a number pad sign")
+eq(short("SHIFT--"), "S-", "keys: the minus key after a modifier")
+eq(short("-"), "-", "keys: the minus key alone")
+eq(short("LSHIFT-SPACE"), "SSpc", "keys: a left or right modifier, and a long key name")
+eq(short("ALT-\195\150"), "A\195\150", "keys: a letter of another keyboard's layout, whole")
+eq(short("PRINTSCREEN"), "Print Screen", "keys: a key with no short form, as the game names it")
+eq(short("NUMPADENTER"), "NUMPADENTER", "keys: one the game has no text for, as it is")
+eq(short("PAD1"), nil, "keys: a controller button is left to the game")
+eq(short("SHIFT-PADLTRIGGER"), nil, "keys: also after a modifier")
+eq(short(nil), nil, "keys: nothing bound")
+eq(short(""), nil, "keys: nothing bound, as an empty string")
+
 -- Hold Shift to Skip checkboxes become key dropdowns.
 local shiftSaved = { AutoGossip = { shiftSkips = false }, AutoRepair = { shiftSkips = true },
     AutoQuest = { shiftSkips = "odd" } }

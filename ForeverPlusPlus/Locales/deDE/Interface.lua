@@ -120,6 +120,12 @@ L.HIDEZONETEXT_PVP = "Territoriumszeile"
 L.HIDEZONETEXT_PVP_DESC = "Blendet die Zeile unter dem Namen aus, die sagt, wessen Territorium es "
     .. "ist, etwa Umkämpftes Territorium oder Sicheres Gebiet."
 
+-- ShortKeybinds
+L.SHORTKEYBINDS_TITLE = "Kurze Tastenbelegung"
+L.SHORTKEYBINDS_DESC = "Schreibt die Tasten auf Euren Aktionsbuttons kurz, damit sie passen: SC für "
+    .. "Umschalt-C, MMT für die mittlere Maustaste, Z1 für Ziffernblock 1. Auf den Aktionsleisten, "
+    .. "dem Haustierbalken und dem zusätzlichen Aktionsbutton."
+
 -- HideMenuBars
 L.HIDEMENUBARS_TITLE = "Taschen- und Menüleiste ausblenden"
 -- [quotes: KEY_BINDINGS]

@@ -118,6 +118,12 @@ L.HIDEZONETEXT_PVP = "Territory Line"
 L.HIDEZONETEXT_PVP_DESC = "Hide the line under the name that says whose territory it is, such as "
     .. "Contested Territory or Sanctuary."
 
+-- ShortKeybinds
+L.SHORTKEYBINDS_TITLE = "Short Keybinds"
+L.SHORTKEYBINDS_DESC = "Write the keys on your action buttons in short, so they fit: SC for Shift-C, "
+    .. "MMB for the middle mouse button, N1 for number pad 1. On the action bars, the pet bar, and "
+    .. "the extra action button."
+
 -- HideMenuBars
 L.HIDEMENUBARS_TITLE ="Hide Bag and Menu Bars"
 -- [quotes: KEY_BINDINGS]

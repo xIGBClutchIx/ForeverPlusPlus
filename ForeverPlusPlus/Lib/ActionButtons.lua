@@ -49,6 +49,20 @@ local function eachPadButton(fn)
     end
 end
 
+---Calls `fn(button, bar, index)` for every button of Blizzard's usual action bars, whether in use
+---or not (the controller interface hides them while it's on).
+---@param fn fun(button: table, bar: number, index: number)
+function ActionButtons.EachBar(fn)
+    for bar, prefix in ipairs(BARS) do
+        for index = 1, BUTTONS do
+            local button = _G[prefix .. index]
+            if button then
+                fn(button, bar, index)
+            end
+        end
+    end
+end
+
 ---Calls `fn(button, bar, index)` for every Blizzard action button in use: the controller
 ---interface's while it's on, the usual bars' otherwise. With `all`, both sets, for hooking every
 ---button once (bar numbers then repeat between the two).
@@ -57,14 +71,7 @@ end
 function ActionButtons.Each(fn, all)
     local pad = ns.Gamepad.On()
     if all or not pad then
-        for bar, prefix in ipairs(BARS) do
-            for index = 1, BUTTONS do
-                local button = _G[prefix .. index]
-                if button then
-                    fn(button, bar, index)
-                end
-            end
-        end
+        ActionButtons.EachBar(fn)
     end
     if all or pad then
         eachPadButton(fn)

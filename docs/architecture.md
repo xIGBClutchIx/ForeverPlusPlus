@@ -87,6 +87,7 @@ Generated files, in `Lib/Generated/` (never edited by hand; see Generated data):
 ### `Keys.lua`
 
 - `ns.Keys`: the Skip Key dropdown and whether its key is held (`IsDown`). With the controller interface on, a held trigger stands in for the key (`Gamepad.TriggerHeld`), and `Detail()` says whether what shows only with Shift shows now: Shift, or always with the controller interface on.
+- `Short(binding)` is a key binding as the game stores it ("SHIFT-C", "CTRL-BUTTON4") in short for a label on a small button ("SC", "CM4"), built from the binding's own key names and each language's letters, never from the game's localized text; nil for a controller button.
 
 ### `Gamepad.lua`
 
@@ -287,7 +288,7 @@ Generated files, in `Lib/Generated/` (never edited by hand; see Generated data):
 
 ### `ActionButtons.lua`
 
-- `ns.ActionButtons`: Blizzard's action buttons, what each slot holds, and our own marks over them. `Each` walks the bars in use: the controller interface's own while it's on, the usual ones otherwise (`all` for both). `Watch(module, fn)` tells a module when a button's slot changes without an action bar event, as the controller bars' pages do.
+- `ns.ActionButtons`: Blizzard's action buttons, what each slot holds, and our own marks over them. `EachBar` walks the usual bars' buttons whether in use or not, and `Each` walks the bars in use: the controller interface's own while it's on, the usual ones otherwise (`all` for both). `Watch(module, fn)` tells a module when a button's slot changes without an action bar event, as the controller bars' pages do.
 
 ### `Spellbook.lua`
 
@@ -397,6 +398,7 @@ What each module is, in the code's terms (what it does for players is in `README
 - **Hide Stance Bar**: the stance bar faded out, its buttons not taking the mouse.
 - **Hide Bag and Menu Bars**: `HideMenuBars`: the bag bar and micro menu faded out until the mouse is over them, their buttons not taking the mouse while Show on Mouseover is off.
 - **Hide Zone Text**: `HideZoneText`: the zone, area, and territory font strings of Blizzard's zone text faded out, its two fading frames left to run.
+- **Short Keybinds**: each action, pet, and extra action button's `UpdateHotkeys` (`SetHotkeys` on the pet bar) hooked, and its HotKey font string given `Keys.Short` of the bound key after Blizzard writes it; Blizzard's text put back when it turns off.
 - **Hide Error Messages**: `HideErrors`: the error frame's UI_ERROR_MESSAGE heard in its place, and only the errors not hidden handed to it.
 - **Loot Rolls**: the group loot rolls placed in Edit Mode, with their grow direction, spacing, and preview as Edit Mode settings, and the seconds left and roll counts on each.
 - **Movable Framerate**
