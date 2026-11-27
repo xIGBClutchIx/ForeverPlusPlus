@@ -18,7 +18,7 @@ local pairs, ipairs, next, type, min, max = pairs, ipairs, next, type, math.min,
 local setmetatable, sort, select, huge = setmetatable, table.sort, select, math.huge
 local InCombatLockdown, C_Timer, C_QuestLog, C_Map = InCombatLockdown, C_Timer, C_QuestLog, C_Map
 local C_CVar, GameTooltip, GetQuestLink, EventRegistry = C_CVar, GameTooltip, GetQuestLink, EventRegistry
-local GetRealZoneText = GetRealZoneText
+local GetRealZoneText, GetTime = GetRealZoneText, GetTime
 local GetQuestUiMapID, Enum = GetQuestUiMapID, Enum
 
 local L = ns.L
@@ -756,6 +756,67 @@ local function setFaded(on)
     tracker():SetAlpha(on and module.db.fadeOpacity / 100 or 1)
 end
 
+-- The followed quest ------------------------------------------------------------------------------
+-- Untracking a quest drops it as the quest the map and arrow follow (the super-tracked one):
+-- Blizzard's SuperTrackEventMixin clears it on QUEST_WATCH_LIST_CHANGED with tracked false
+-- (Blizzard_FrameXMLUtil/Mainline/Blizzard_QuestSuperTracking.lua, forever branch). That event can
+-- arrive after RemoveQuestWatch returns, so a check right after the call can miss it. A quest the
+-- game had just followed by itself on accepting it (QuestUtil.CheckAutoSuperTrackQuest, which
+-- does so only while nothing is followed) then lost the arrow as soon as Sort Quests moved it.
+-- So the quest is held for a moment: put back at once if it's gone, and again the frame after the
+-- game clears it, while nothing else is followed and the quest is still in the log. Turning it in
+-- lets it go, as Blizzard means it to.
+
+local HOLD = 1 -- seconds after our untracking that a clear of the followed quest is undone
+local held, heldUntil -- the quest followed when our untracking began, and until when it's held
+
+-- Whether the game follows nothing at all: no quest, map pin, or anything else.
+local function followingNothing()
+    if C_SuperTrack.IsSuperTrackingAnything then
+        return not ns.IsTrueOrSecret(C_SuperTrack.IsSuperTrackingAnything())
+    end
+    return Quests.Selected() == nil
+end
+
+local function restoreHeld()
+    if not held then
+        return
+    end
+    if GetTime() > heldUntil or not C_QuestLog.GetLogIndexForQuestID(held) then
+        held = nil
+        return
+    end
+    if followingNothing() then
+        C_SuperTrack.SetSuperTrackedQuestID(held)
+    end
+end
+
+local restoreHeldSoon = ns.Frames.Coalesce(restoreHeld, nil, module)
+
+---Call after untracking quests that began while `questID` was followed (Quests.Selected): puts
+---it back now if it was dropped, and keeps it for a moment against the game dropping it later.
+---@param questID number?
+local function keepFollowed(questID)
+    if not (questID and C_SuperTrack and C_SuperTrack.SetSuperTrackedQuestID) then
+        return
+    end
+    held, heldUntil = questID, GetTime() + HOLD
+    restoreHeld()
+end
+internal.keepFollowed = keepFollowed
+
+local function onSuperTrackingChanged()
+    if held and followingNothing() then
+        restoreHeldSoon() -- the next frame, after QUEST_TURNED_IN has had its say
+    end
+end
+
+local function onQuestTurnedIn(_, questID)
+    if questID == held then
+        held = nil
+    end
+end
+
 -- Sorting -----------------------------------------------------------------------------------------
 -- The tracker lists quests in watch list order (after callings and quests that set their own
 -- place) and has no sort of its own, and the comparison is a local in its code. So Sort Quests
@@ -868,7 +929,7 @@ local function sortWatches()
     for i, quest in ipairs(sorted) do
         ids[i] = quest.id
     end
-    -- Untracking a quest can drop it as the quest the map and arrow follow, so put that back.
+    -- Untracking a quest can drop it as the quest the map and arrow follow, so keep that one.
     local super = ns.Quests.Selected()
     for i = from, to, step do
         C_QuestLog.RemoveQuestWatch(ids[i])
@@ -876,9 +937,7 @@ local function sortWatches()
     for i = from, to, step do
         C_QuestLog.AddQuestWatch(ids[i])
     end
-    if super and C_SuperTrack.SetSuperTrackedQuestID and ns.Quests.Selected() ~= super then
-        C_SuperTrack.SetSuperTrackedQuestID(super)
-    end
+    keepFollowed(super)
     -- Check the order once the client has it. Wrong the first time means quests go to the other
     -- end, so sort again that way; wrong after that, and this client keeps its own order.
     C_Timer.After(0, function()
@@ -1215,9 +1274,8 @@ local function hideCompleted()
             removed = true
         end
     end
-    if removed and super and C_SuperTrack and C_SuperTrack.SetSuperTrackedQuestID
-        and ns.Quests.Selected() ~= super then
-        C_SuperTrack.SetSuperTrackedQuestID(super)
+    if removed then
+        keepFollowed(super)
     end
     if refilter then
         refilterZone()
@@ -1368,6 +1426,8 @@ function module:OnEnable()
     self:HookScript(frame, "OnShow", requestFit)
     self:On("PLAYER_REGEN_DISABLED", function() setFaded(true) end)
     self:On("PLAYER_REGEN_ENABLED", function() setFaded(false) end)
+    self:On("SUPER_TRACKING_CHANGED", onSuperTrackingChanged)
+    self:On("QUEST_TURNED_IN", onQuestTurnedIn)
     setFaded(InCombatLockdown())
     setSorting(self.db.sort ~= "off")
     setZoneFilter(self.db.zone)

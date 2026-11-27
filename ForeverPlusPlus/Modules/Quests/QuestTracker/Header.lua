@@ -6,7 +6,7 @@
 local _, ns = ...
 
 local type, ipairs = type, ipairs
-local C_QuestLog, C_SuperTrack, Constants = C_QuestLog, C_SuperTrack, Constants
+local C_QuestLog, Constants = C_QuestLog, Constants
 local CreateFrame, GameTooltip = CreateFrame, GameTooltip
 
 local L = ns.L
@@ -157,16 +157,14 @@ local function setTracked(quests, track)
             end
             return
         end
-        -- Untracking a quest can drop it as the quest the map and arrow follow, so put that back.
+        -- Untracking a quest can drop it as the quest the map and arrow follow, so keep that one.
         local super = ns.Quests.Selected()
         for _, questID in ipairs(quests) do
             if watched[questID] then
                 C_QuestLog.RemoveQuestWatch(questID)
             end
         end
-        if super and C_SuperTrack and C_SuperTrack.SetSuperTrackedQuestID and ns.Quests.Selected() ~= super then
-            C_SuperTrack.SetSuperTrackedQuestID(super)
-        end
+        internal.keepFollowed(super)
     end)
 end
 
