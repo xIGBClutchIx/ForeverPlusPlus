@@ -119,6 +119,17 @@ L.HIDEERRORS_HIDE_DESC = "“技能错误”隐藏使用技能和攻击时的错
 L.HIDEERRORS_HIDE_ABILITY = "技能错误"
 L.HIDEERRORS_HIDE_ALL = "所有错误"
 
+-- EditModeGlow
+L.EDITMODEGLOW_TITLE = "编辑模式高亮"
+L.EDITMODEGLOW_DESC = "调暗编辑模式在每个框体上绘制的蓝色和金色方框，让框体的边缘更容易看清和对齐。"
+    .. "Forever++ 自己框体的方框也会一起调暗。"
+L.EDITMODEGLOW_OPACITY = "高亮不透明度"
+L.EDITMODEGLOW_OPACITY_DESC = "方框显示的强度。为 0% 时方框消失，但每个框体仍可点击和拖动。"
+L.EDITMODEGLOW_PANEL = "编辑模式中的控件"
+L.EDITMODEGLOW_PANEL_DESC = "在编辑模式窗口下方显示“显示高亮”复选框和这个滑块。取消勾选“显示高亮”"
+    .. "会隐藏方框，直到编辑模式关闭。"
+L.EDITMODEGLOW_SHOW = "显示高亮"
+
 -- CombatAlert
 L.COMBATALERT_TITLE = "战斗提示"
 L.COMBATALERT_DESC = "进入或脱离战斗时显示一行向上飘起并淡出的文字。可在编辑模式中移动和调整大小。"

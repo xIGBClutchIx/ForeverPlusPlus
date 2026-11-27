@@ -223,6 +223,26 @@ local LAYOUT = {
     Center = { layer = "BORDER", atlas = "%s-NineSlice-Center", x = -8, y = 8, x1 = 8, y1 = -8 },
 }
 local KIT_PARTS = { "Corner", "Center" }
+local glow = 1 -- how strongly our boxes show, 0 to 1 (EditMode.SetGlow)
+
+---Sets how strongly an Edit Mode box shows: the alpha of the nine pieces Blizzard's selection
+---layout makes on `container`, which is one of ours or one of Blizzard's own (a system frame's
+---`Selection`, or its `MouseOverHighlight`). Its label is left as it is, and so is the mouse: a box
+---at 0 still picks and drags its frame. Pieces a box hasn't made yet (it makes them the first time
+---it shows) are skipped. Only alpha is set, which none of Edit Mode's own code reads.
+---@param container table?
+---@param alpha number 0 to 1
+function EditMode.DimBox(container, alpha)
+    if type(container) ~= "table" then
+        return
+    end
+    for piece in pairs(LAYOUT) do
+        local texture = container[piece]
+        if type(texture) == "table" and texture.SetAlpha then
+            texture:SetAlpha(alpha)
+        end
+    end
+end
 
 -- Whether a look's atlases are there (the corners and the fill; the edges follow them).
 local function hasKit(kit)
@@ -257,6 +277,20 @@ local function look(selection, isSelected)
             selection.tint:SetColorTexture(0.2, 0.5, 1, 0.3)
         end
         selection.tint:Show()
+    end
+    -- A box's first layout makes its pieces, at full alpha.
+    EditMode.DimBox(selection, glow)
+    selection.tint:SetAlpha(glow)
+end
+
+---Sets how strongly the boxes of our own frames show while Edit Mode is open, 0 to 1 (1 is
+---Blizzard's look). Their labels stay as they are.
+---@param alpha number
+function EditMode.SetGlow(alpha)
+    glow = alpha
+    for _, info in pairs(registered) do
+        EditMode.DimBox(info.selection, alpha)
+        info.selection.tint:SetAlpha(alpha)
     end
 end
 

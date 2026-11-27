@@ -122,6 +122,17 @@ L.HIDEERRORS_HIDE_DESC = "「技能錯誤」會隱藏使用技能和攻擊時的
 L.HIDEERRORS_HIDE_ABILITY = "技能錯誤"
 L.HIDEERRORS_HIDE_ALL = "所有錯誤"
 
+-- EditModeGlow
+L.EDITMODEGLOW_TITLE = "編輯模式高亮"
+L.EDITMODEGLOW_DESC = "調暗編輯模式在每個框架上繪製的藍色和金色方框，讓框架的邊緣更容易看清和對齊。"
+    .. "Forever++ 自己框架的方框也會一起調暗。"
+L.EDITMODEGLOW_OPACITY = "高亮不透明度"
+L.EDITMODEGLOW_OPACITY_DESC = "方框顯示的強度。為 0% 時方框會消失，但每個框架仍可點擊和拖曳。"
+L.EDITMODEGLOW_PANEL = "編輯模式中的控制項"
+L.EDITMODEGLOW_PANEL_DESC = "在編輯模式視窗下方顯示「顯示高亮」核取方塊和這個滑桿。取消勾選「顯示高亮」"
+    .. "會隱藏方框，直到編輯模式關閉。"
+L.EDITMODEGLOW_SHOW = "顯示高亮"
+
 -- CombatAlert
 L.COMBATALERT_TITLE = "戰鬥提示"
 L.COMBATALERT_DESC = "進入或離開戰鬥時，顯示一行向上飄動並淡出的文字。可在編輯模式中移動和調整大小。"

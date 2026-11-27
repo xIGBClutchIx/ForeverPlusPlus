@@ -143,6 +143,18 @@ L.HIDEERRORS_HIDE_DESC = "Ability Errors hides the ones from using abilities and
 L.HIDEERRORS_HIDE_ABILITY = "Ability Errors"
 L.HIDEERRORS_HIDE_ALL = "All Errors"
 
+-- EditModeGlow
+L.EDITMODEGLOW_TITLE = "Edit Mode Glow"
+L.EDITMODEGLOW_DESC = "Dim the blue and gold boxes Edit Mode draws over each frame, so their edges "
+    .. "are easier to see and line up. The boxes of Forever++'s own frames dim too."
+L.EDITMODEGLOW_OPACITY = "Glow Opacity"
+L.EDITMODEGLOW_OPACITY_DESC = "How strongly the boxes show. At 0% they're gone, but each frame can "
+    .. "still be clicked and dragged."
+L.EDITMODEGLOW_PANEL = "Controls in Edit Mode"
+L.EDITMODEGLOW_PANEL_DESC = "A Show Glow checkbox and this slider under the Edit Mode window. "
+    .. "Unchecking Show Glow hides the boxes until Edit Mode closes."
+L.EDITMODEGLOW_SHOW = "Show Glow" -- the checkbox under the Edit Mode window
+
 -- CombatAlert
 L.COMBATALERT_TITLE = "Combat Alert"
 L.COMBATALERT_DESC = "Show a line of text that floats up and fades when you enter or leave "

@@ -55,6 +55,10 @@ ns.changelog = {
                 { L.CHATTABRESIZE_TITLE, "A new module, off by default, that makes the main chat "
                     .. "window taller or shorter as you drag its General tab up or down. The height "
                     .. "lasts until you reload; Edit Mode keeps the one it comes back at." },
+                { L.EDITMODEGLOW_TITLE, "A new module, off by default, that dims the blue and gold "
+                    .. "boxes Edit Mode draws over each frame, so their edges are easier to see and line "
+                    .. "up. A Show Glow checkbox and a slider under the Edit Mode window hide or dim "
+                    .. "them while you edit." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "
