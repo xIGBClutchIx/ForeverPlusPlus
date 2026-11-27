@@ -9,16 +9,18 @@
 --
 -- Two of Blizzard's colors mean more than ours and are left alone: a tapped mob's gray, and its
 -- threat colors (GAINING_THREAT_COLOR and HIGH_THREAT_COLOR, shown in a group with Health Bar Color
--- on under Options > Nameplates > Threat Display). Which is which is told from the color Blizzard
--- just set, so nothing about threat is read here.
+-- on under Options > Nameplates > Aggro Display). Whether a bar shows one is asked the way Blizzard
+-- asks it (showsThreat), never told from the color: a mob fighting the player is plain red, which
+-- matched a threat color and left every mob in combat unpainted.
 --
 -- What a mob is comes from UnitClassification, UnitIsBossMob and UnitHasPowerType, none of which
 -- the client's API notes mark as secret; each is still read through ns.IsReadable, and a plate
 -- whose answer can't be read keeps Blizzard's color. Not yet checked in a dungeon, in combat.
 local _, ns = ...
 
-local ipairs, type, tostring, setmetatable, _G = ipairs, type, tostring, setmetatable, _G
+local type, tostring, setmetatable = type, tostring, setmetatable
 local UnitIsPlayer, UnitCanAttack, UnitIsTapDenied, UnitExists = UnitIsPlayer, UnitCanAttack, UnitIsTapDenied, UnitExists
+local UnitInParty, UnitThreatSituation, UnitThreatLeadSituation = UnitInParty, UnitThreatSituation, UnitThreatLeadSituation
 local C_NamePlate = C_NamePlate
 local UnitClassification, UnitIsBossMob, UnitHasPowerType = UnitClassification, UnitIsBossMob, UnitHasPowerType
 
@@ -82,6 +84,7 @@ module.notice = { text = L.NAMEPLATECOLORS_THREAT, description = L.NAMEPLATECOLO
 
 local weak = { __mode = "k" }
 local unitOf = setmetatable({}, weak) -- bar -> the unit its plate shows
+local frameOf = setmetatable({}, weak) -- bar -> its plate's UnitFrame
 local blizzardColor = setmetatable({}, weak) -- bar -> { r, g, b } as Blizzard last set it
 local painted = setmetatable({}, weak) -- bar -> true while it shows our color
 local painting = false -- our own SetStatusBarColor, so the hook lets it by
@@ -126,21 +129,28 @@ local function kindOf(unit)
     return nil
 end
 
--- Whether a color is one of Blizzard's that we leave: a threat color, or one we can't read.
-local function isTheirs(r, g, b)
-    if not (readable(r) and readable(g) and readable(b)) then
+-- Whether a threat reading means a threat color: any threat above none, or one we can't read.
+local function isThreat(situation)
+    if not readable(situation) then
         return true
     end
-    for _, name in ipairs({ "GAINING_THREAT_COLOR", "HIGH_THREAT_COLOR" }) do
-        local color = _G[name]
-        if type(color) == "table" and color.GetRGB then
-            local tr, tg, tb = color:GetRGB()
-            if r == tr and g == tg and b == tb then
-                return true
-            end
-        end
+    return type(situation) == "number" and situation > 0
+end
+
+-- Whether Blizzard is showing its threat color on a bar, which we leave. It does (CompactUnitFrame's
+-- ShouldUseThreatHealthBarColor) only with Health Bar Color on, which the plate keeps as
+-- displayThreatHealthBarColor, in a party, and with threat on the mob: the player's own, or for a
+-- tank how close the next player is. We don't ask which the player is, so either counts.
+local function showsThreat(bar, unit)
+    local frame = frameOf[bar]
+    if not (frame and frame.displayThreatHealthBarColor) then
+        return false
     end
-    return false
+    if read(UnitInParty("player")) == false then
+        return false
+    end
+    return isThreat(UnitThreatSituation("player", unit))
+        or (UnitThreatLeadSituation ~= nil and isThreat(UnitThreatLeadSituation("player", unit)))
 end
 
 local function restore(bar)
@@ -163,7 +173,6 @@ local function paint(bar)
         local r, g, b = bar:GetStatusBarColor()
         blizzardColor[bar] = { r, g, b }
     end
-    local theirs = blizzardColor[bar]
     -- Debug's Show All Mobs As: every enemy NPC as the one kind picked, whatever it is.
     local kind
     local forced = module.db.preview
@@ -173,7 +182,7 @@ local function paint(bar)
         kind = kindOf(unit)
     end
     local tapped = read(UnitIsTapDenied(unit))
-    if not kind or tapped ~= false or isTheirs(theirs[1], theirs[2], theirs[3]) then
+    if not kind or tapped ~= false or showsThreat(bar, unit) then
         if painted[bar] then
             restore(bar)
         end
@@ -207,7 +216,7 @@ local handlers = {
     OnAdded = function(unit, frame)
         local bar = barOf(frame)
         if bar then
-            unitOf[bar] = unit
+            unitOf[bar], frameOf[bar] = unit, frame
             module:Hook(bar, "SetStatusBarColor", onColored)
             paint(bar)
         end
@@ -219,7 +228,7 @@ local handlers = {
             if painted[bar] then
                 restore(bar)
             end
-            unitOf[bar], blizzardColor[bar] = nil, nil
+            unitOf[bar], frameOf[bar], blizzardColor[bar] = nil, nil, nil
         end
     end,
 }
@@ -243,7 +252,6 @@ local function printTarget()
     local frame = ns.Nameplates.FrameFor(unit)
     local plate = C_NamePlate and C_NamePlate.GetNamePlateForUnit and C_NamePlate.GetNamePlateForUnit(unit)
     local bar = (frame and barOf(frame)) or (plate and plate.UnitFrame and barOf(plate.UnitFrame))
-    local theirs = bar and blizzardColor[bar]
     ns.Print(L.NAMEPLATECOLORS_PRINT_LINE:format(
         shown(UnitClassification(unit)),
         UnitIsBossMob and shown(UnitIsBossMob(unit)) or "-",
@@ -251,7 +259,7 @@ local function printTarget()
         shown(UnitIsTapDenied(unit)),
         shown(UnitCanAttack("player", unit)),
         shown(UnitIsPlayer(unit)),
-        theirs and tostring(isTheirs(theirs[1], theirs[2], theirs[3])) or "-",
+        bar and frameOf[bar] and tostring(showsThreat(bar, unit)) or "-",
         tostring(kindOf(unit))))
 end
 
@@ -283,6 +291,8 @@ end
 function module:OnEnable()
     ns.Nameplates.Register(self, handlers)
     self:On("UNIT_FACTION", onUnitChanged)
+    -- Joining or leaving a party is when Blizzard's threat colors start and stop.
+    self:On("GROUP_ROSTER_UPDATE", repaint)
     if ns.HasEvent("UNIT_CLASSIFICATION_CHANGED") then
         self:On("UNIT_CLASSIFICATION_CHANGED", onUnitChanged)
     end

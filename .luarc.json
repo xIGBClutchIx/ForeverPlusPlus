@@ -81,6 +81,8 @@
     "AbbreviateLargeNumbers",
     "UnitGUID",
     "UnitInParty",
+    "UnitThreatSituation",
+    "UnitThreatLeadSituation",
     "UnitInRaid",
     "UnitIsInMyGuild",
     "C_FriendList",
