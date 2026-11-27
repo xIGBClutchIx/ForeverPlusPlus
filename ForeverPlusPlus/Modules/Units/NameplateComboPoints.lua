@@ -11,8 +11,9 @@
 -- is then full or empty by the bar's own drawing, and no points draws nothing.
 local _, ns = ...
 
-local select, ipairs, type = select, ipairs, type
+local select, ipairs, type, tostring, floor = select, ipairs, type, tostring, math.floor
 local CreateFrame, UnitClass, UnitPowerMax, GetComboPoints = CreateFrame, UnitClass, UnitPowerMax, GetComboPoints
+local GetTime = GetTime
 local C_NamePlate = C_NamePlate
 
 local L = ns.L
@@ -21,6 +22,7 @@ local module = ns.NewModule("NameplateComboPoints", L.NAMEPLATECOMBO_DESC, {
     enabled = false,
     position = "above",
     size = 100, -- percent
+    preview = false, -- Debug: made-up points counting up, on any class
 })
 module.title = L.NAMEPLATECOMBO_TITLE
 module.category = "units"
@@ -39,12 +41,19 @@ module.options = {
         key = "size", name = L.NAMEPLATECOMBO_SIZE, description = L.NAMEPLATECOMBO_SIZE_DESC,
         min = 50, max = 200, step = 10, format = "%d%%",
     },
+    { key = "preview", name = L.NAMEPLATECOMBO_PREVIEW, description = L.NAMEPLATECOMBO_PREVIEW_DESC,
+        debug = true, section = L.DEBUG_SECTION_PREVIEWS },
 }
 
--- Only the classes that have combo points here.
+-- Only the classes that have combo points here. With Debug on at login it's there for any class,
+-- for its preview (Debug's file loads before this one, so its settings are read by then).
 function module:IsAvailable()
+    if not (GetComboPoints and C_NamePlate) then
+        return false
+    end
     local class = select(2, UnitClass("player"))
-    return (class == "ROGUE" or class == "DRUID") and GetComboPoints ~= nil and C_NamePlate ~= nil
+    local debug = ns.modules.Debug
+    return class == "ROGUE" or class == "DRUID" or (debug and debug.db and debug.db.enabled) or false
 end
 
 local TEXTURE = "Interface\\ComboFrame\\ComboPoint" -- the target frame's dots (ComboFrame.xml)
@@ -92,9 +101,25 @@ local function update()
     if not holder or not holder:IsShown() then
         return
     end
-    local points = GetComboPoints("player", "target")
+    local points
+    if module.db.preview then
+        -- Debug's preview: none, then one more each second up to them all, and round again.
+        points = floor(GetTime()) % (#dots + 1)
+    else
+        points = GetComboPoints("player", "target")
+    end
     for _, dot in ipairs(dots) do
         dot:SetValue(points)
+    end
+end
+
+-- The preview's points change with the clock, not with an event.
+local sinceTick = 0
+local function onUpdate(_, elapsed)
+    sinceTick = sinceTick + elapsed
+    if sinceTick >= 0.25 then
+        sinceTick = 0
+        update()
     end
 end
 
@@ -121,9 +146,26 @@ local function attach()
     end
     holder:SetScale(module.db.size / 100)
     holder:SetFrameLevel(frame:GetFrameLevel() + 5)
+    holder:SetScript("OnUpdate", module.db.preview and onUpdate or nil)
     holder:Show()
     update()
 end
+
+-- Debug's button: what the client gives for the target's combo points, and whether it can be read.
+local function printPoints()
+    local points = GetComboPoints("player", "target")
+    local plate = C_NamePlate.GetNamePlateForUnit("target")
+    ns.Print(L.NAMEPLATECOMBO_PRINT_LINE:format(
+        ns.IsReadable(points) and tostring(points) or "secret", maxPoints(),
+        tostring(plate ~= nil and plate.UnitFrame ~= nil)))
+end
+
+module.debugActions = {
+    {
+        name = L.NAMEPLATECOMBO_PRINT, button = L.NAMEPLATECOMBO_PRINT_BUTTON,
+        description = L.NAMEPLATECOMBO_PRINT_DESC, section = L.DEBUG_SECTION_DIAGNOSTICS, fn = printPoints,
+    },
+}
 
 local handlers = {
     -- The target's plate may come up after it was targeted, or go while it still is.

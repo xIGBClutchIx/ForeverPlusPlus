@@ -327,6 +327,20 @@ L.NAMEPLATECOLORS_THREAT = "The game's own colors come first."
 L.NAMEPLATECOLORS_THREAT_DESC = "A mob another player tapped stays gray, and a mob you have threat on "
     .. "keeps the game's threat color while you're in a group, when Health Bar Color is on under "
     .. "Aggro Display in the game's Nameplates options."
+-- [english]
+L.NAMEPLATECOLORS_PREVIEW = "Preview Mob Type Colors"
+L.NAMEPLATECOLORS_PREVIEW_DESC = "Color every enemy NPC's nameplate as a made-up kind, a boss, a rare, an "
+    .. "elite, and a caster in turn, to see the colors without finding one of each."
+L.NAMEPLATECOLORS_PRINT = "Mob Type of Target"
+L.NAMEPLATECOLORS_PRINT_BUTTON = "Print"
+L.NAMEPLATECOLORS_PRINT_DESC = "Print what the game says about your target, with \"secret\" for what it "
+    .. "won't let an addon read, and the kind Mob Type Nameplate Colors makes of it. For checking in a "
+    .. "dungeon and in combat."
+-- classification, boss, has mana, tapped, attackable, a player, Blizzard's bar color is a threat color, our kind
+L.NAMEPLATECOLORS_PRINT_LINE = "Target: classification %s, boss %s, mana %s, tapped %s, attackable %s, "
+    .. "player %s, threat color %s, kind %s"
+L.NAMEPLATECOLORS_PRINT_NONE = "No target."
+-- [/english]
 
 -- NameplateComboPoints
 L.NAMEPLATECOMBO_TITLE = "Nameplate Combo Points"
@@ -338,6 +352,17 @@ L.NAMEPLATECOMBO_POSITION_ABOVE = "Above the Health Bar"
 L.NAMEPLATECOMBO_POSITION_BELOW = "Below the Health Bar"
 L.NAMEPLATECOMBO_SIZE = "Size"
 L.NAMEPLATECOMBO_SIZE_DESC = "How big the dots are."
+-- [english]
+L.NAMEPLATECOMBO_PREVIEW = "Preview Combo Points"
+L.NAMEPLATECOMBO_PREVIEW_DESC = "Count made-up combo points up on your target's nameplate, one more each "
+    .. "second, to see where the dots sit. Works on any class: with Debug on at login the module is "
+    .. "there for all of them."
+L.NAMEPLATECOMBO_PRINT = "Combo Points Read"
+L.NAMEPLATECOMBO_PRINT_BUTTON = "Print"
+L.NAMEPLATECOMBO_PRINT_DESC = "Print what the game gives for your combo points on your target, with "
+    .. "\"secret\" when an addon can't read the number, and whether the target has a nameplate."
+L.NAMEPLATECOMBO_PRINT_LINE = "Combo points %s, most %d, target has a nameplate: %s" -- count, most, true or false
+-- [/english]
 
 -- TargetMarkers
 L.TARGETMARKERS_TITLE = "Target Markers"

@@ -17,8 +17,9 @@
 -- whose answer can't be read keeps Blizzard's color. Not yet checked in a dungeon, in combat.
 local _, ns = ...
 
-local ipairs, type, setmetatable, _G = ipairs, type, setmetatable, _G
-local UnitIsPlayer, UnitCanAttack, UnitIsTapDenied = UnitIsPlayer, UnitCanAttack, UnitIsTapDenied
+local ipairs, type, tostring, setmetatable, _G = ipairs, type, tostring, setmetatable, _G
+local UnitIsPlayer, UnitCanAttack, UnitIsTapDenied, UnitExists = UnitIsPlayer, UnitCanAttack, UnitIsTapDenied, UnitExists
+local C_NamePlate = C_NamePlate
 local UnitClassification, UnitIsBossMob, UnitHasPowerType = UnitClassification, UnitIsBossMob, UnitHasPowerType
 
 local L = ns.L
@@ -30,6 +31,7 @@ local module = ns.NewModule("NameplateColors", L.NAMEPLATECOLORS_DESC, {
     rare = true,
     elite = true,
     caster = true,
+    preview = false, -- Debug: every enemy NPC's plate as a made-up kind
 })
 module.title = L.NAMEPLATECOLORS_TITLE
 module.category = "units"
@@ -41,6 +43,8 @@ module.options = {
     { key = "rare", name = L.NAMEPLATECOLORS_RARE, description = L.NAMEPLATECOLORS_RARE_DESC },
     { key = "elite", name = L.NAMEPLATECOLORS_ELITE, description = L.NAMEPLATECOLORS_ELITE_DESC },
     { key = "caster", name = L.NAMEPLATECOLORS_CASTER, description = L.NAMEPLATECOLORS_CASTER_DESC },
+    { key = "preview", name = L.NAMEPLATECOLORS_PREVIEW, description = L.NAMEPLATECOLORS_PREVIEW_DESC,
+        debug = true, section = L.DEBUG_SECTION_PREVIEWS },
 }
 module.notice = { text = L.NAMEPLATECOLORS_THREAT, description = L.NAMEPLATECOLORS_THREAT_DESC }
 
@@ -58,6 +62,10 @@ local unitOf = setmetatable({}, weak) -- bar -> the unit its plate shows
 local blizzardColor = setmetatable({}, weak) -- bar -> { r, g, b } as Blizzard last set it
 local painted = setmetatable({}, weak) -- bar -> true while it shows our color
 local painting = false -- our own SetStatusBarColor, so the hook lets it by
+-- Debug's Preview Mob Type Colors: the kind each bar is made out to be, dealt in turn as plates come.
+local PREVIEW_KINDS = { "boss", "rare", "elite", "caster" }
+local previewKind = setmetatable({}, weak)
+local dealt = 0
 
 -- A value read, or nil when it's secret.
 local function read(value)
@@ -67,11 +75,16 @@ local function read(value)
     return nil
 end
 
+-- Whether a unit is one we'd color at all: an NPC the player can attack, as far as the client says.
+local function isEnemyNpc(unit)
+    return read(UnitIsPlayer(unit)) == false and read(UnitCanAttack("player", unit)) == true
+end
+
 -- The kind of mob a unit is, as an option's key, or nil for one we don't color: a player, a unit
 -- that can't be attacked, or anything the client won't say.
 local function kindOf(unit)
     local db = module.db
-    if read(UnitIsPlayer(unit)) ~= false or read(UnitCanAttack("player", unit)) ~= true then
+    if not isEnemyNpc(unit) then
         return nil
     end
     local classification = read(UnitClassification(unit))
@@ -130,7 +143,18 @@ local function paint(bar)
         blizzardColor[bar] = { r, g, b }
     end
     local theirs = blizzardColor[bar]
-    local kind = kindOf(unit)
+    local kind
+    if module.db.preview then
+        if isEnemyNpc(unit) then
+            if not previewKind[bar] then
+                dealt = dealt % #PREVIEW_KINDS + 1
+                previewKind[bar] = PREVIEW_KINDS[dealt]
+            end
+            kind = previewKind[bar]
+        end
+    else
+        kind = kindOf(unit)
+    end
     local tapped = read(UnitIsTapDenied(unit))
     if not kind or tapped ~= false or isTheirs(theirs[1], theirs[2], theirs[3]) then
         if painted[bar] then
@@ -177,9 +201,47 @@ local handlers = {
             if painted[bar] then
                 restore(bar)
             end
-            unitOf[bar], blizzardColor[bar] = nil, nil
+            unitOf[bar], blizzardColor[bar], previewKind[bar] = nil, nil, nil
         end
     end,
+}
+
+-- Debug's button: what the client says about the target, whether each answer can be read, and
+-- what we make of it. For checking in a dungeon and in combat, where an answer may be secret.
+local function shown(value)
+    if not readable(value) then
+        return "secret"
+    end
+    return tostring(value)
+end
+
+local function printTarget()
+    local unit = "target"
+    if not UnitExists(unit) then
+        ns.Print(L.NAMEPLATECOLORS_PRINT_NONE)
+        return
+    end
+    local mana = Enum and Enum.PowerType and Enum.PowerType.Mana
+    local frame = ns.Nameplates.FrameFor(unit)
+    local plate = C_NamePlate and C_NamePlate.GetNamePlateForUnit and C_NamePlate.GetNamePlateForUnit(unit)
+    local bar = (frame and barOf(frame)) or (plate and plate.UnitFrame and barOf(plate.UnitFrame))
+    local theirs = bar and blizzardColor[bar]
+    ns.Print(L.NAMEPLATECOLORS_PRINT_LINE:format(
+        shown(UnitClassification(unit)),
+        UnitIsBossMob and shown(UnitIsBossMob(unit)) or "-",
+        UnitHasPowerType and mana and shown(UnitHasPowerType(unit, mana)) or "-",
+        shown(UnitIsTapDenied(unit)),
+        shown(UnitCanAttack("player", unit)),
+        shown(UnitIsPlayer(unit)),
+        theirs and tostring(isTheirs(theirs[1], theirs[2], theirs[3])) or "-",
+        tostring(kindOf(unit))))
+end
+
+module.debugActions = {
+    {
+        name = L.NAMEPLATECOLORS_PRINT, button = L.NAMEPLATECOLORS_PRINT_BUTTON,
+        description = L.NAMEPLATECOLORS_PRINT_DESC, section = L.DEBUG_SECTION_DIAGNOSTICS, fn = printTarget,
+    },
 }
 
 local function repaint()
