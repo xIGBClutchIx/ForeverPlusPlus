@@ -270,6 +270,13 @@ L.DEFAULTS_DEVELOPER = "開發者的預設值"
 L.DEFAULTS_RECOMMENDED = "建議的預設值"
 L.HOME_MODULES_ON = "已開啟%d個模組，共%d個" -- on, total
 L.HOME_GAME_BUILD = "遊戲 %s（%s）" -- version, build
+-- The Language dropdown on the About page. A language's own name is never translated (Core.lua).
+L.LANGUAGE = "語言"
+L.LANGUAGE_CLIENT = "遊戲用戶端：%s" -- the client's language, as the dropdown names it
+L.LANGUAGE_DESC = "Forever++文字使用的語言。「遊戲用戶端」表示跟隨遊戲本身的語言。變更後會重新載入介面。"
+L.LANGUAGE_WARNING = "選擇遊戲用戶端以外的語言時，部分文字可能無法正常顯示（會變成方塊），"
+    .. "而且Forever++中的遊戲內建名稱仍為英文。"
+L.LANGUAGE_RELOAD = "以%s顯示Forever++？這會重新載入介面。" -- the language's name
 L.HOME_LINKS = "連結"
 L.HOME_LINK_CURSEFORGE = "CurseForge"
 L.HOME_LINK_WAGO = "Wago"

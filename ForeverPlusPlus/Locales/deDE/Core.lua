@@ -295,6 +295,15 @@ L.DEFAULTS_DEVELOPER = "Standard des Entwicklers"
 L.DEFAULTS_RECOMMENDED = "Empfohlener Standard"
 L.HOME_MODULES_ON = "%d von %d Modulen an" -- on, total
 L.HOME_GAME_BUILD = "Spiel %s (%s)" -- version, build
+-- The Language dropdown on the About page. A language's own name is never translated (Core.lua).
+L.LANGUAGE = "Sprache"
+L.LANGUAGE_CLIENT = "Spielclient: %s" -- the client's language, as the dropdown names it
+L.LANGUAGE_DESC = "Die Sprache der Texte von Forever++. „Spielclient“ folgt der Sprache des Spiels. Eine "
+    .. "Änderung lädt das Interface neu."
+L.LANGUAGE_WARNING = "Eine Sprache, in der das Spiel nicht läuft, wird womöglich nicht überall "
+    .. "dargestellt: Zeichen können als Kästchen erscheinen, und die spieleigenen Begriffe in Forever++ "
+    .. "bleiben englisch."
+L.LANGUAGE_RELOAD = "Forever++ auf %s anzeigen? Das Interface wird dabei neu geladen." -- the language's name
 L.HOME_LINKS = "Links"
 L.HOME_LINK_CURSEFORGE = "CurseForge"
 L.HOME_LINK_WAGO = "Wago"

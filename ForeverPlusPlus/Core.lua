@@ -54,15 +54,84 @@ local L = setmetatable({}, {
 })
 ns.L = L
 
----Returns the table a locale file fills with its strings, or nil when the client uses another
+-- The language the text is in: the one the player chose on the About page (ForeverPlusPlusDB's
+-- `language`, for the whole account), or else the client's. The TOC's LoadSavedVariablesFirst puts
+-- the saved choice here before the locale files run; on a client without it the saved table isn't
+-- there yet, and the client's language is used. Decided once, since every file reads its text as
+-- it loads: a new choice takes a reload.
+local language
+local shipped, isShipped = {}, {} -- the codes with locale files, in the TOC's order
+
+local function decide()
+    if not language then
+        local db = _G.ForeverPlusPlusDB
+        local chosen = type(db) == "table" and db.language
+        ns.savedFirst = type(db) == "table" -- for Self Test: whether the saved table came first
+        language = type(chosen) == "string" and chosen or GetLocale()
+    end
+    return language
+end
+
+---Returns the table a locale file fills with its strings, or nil when the text is in another
 ---language (the file then stops). enUS is always filled, since it's the fallback.
 ---@param locale string a GetLocale() code, such as "enUS" or "deDE"
 ---@return table|nil
 function ns.NewLocale(locale)
+    if not isShipped[locale] then
+        isShipped[locale] = true
+        shipped[#shipped + 1] = locale
+    end
     if locale == "enUS" then
         return enUS
-    elseif locale == GetLocale() then
+    elseif locale == decide() then
         return L
+    end
+end
+
+-- Each language's name in itself, for the Language dropdown: the same whatever language the text
+-- is in, so a player who picked one by mistake can find their own. UTF-8 bytes, since this file is
+-- ASCII: Russkiy, Jianti Zhongwen, Fanti Zhongwen, Hangugeo.
+local LANGUAGE_NAMES = {
+    enUS = "English",
+    deDE = "Deutsch",
+    ruRU = "\208\160\209\131\209\129\209\129\208\186\208\184\208\185",
+    zhCN = "\231\174\128\228\189\147\228\184\173\230\150\135",
+    zhTW = "\231\185\129\233\171\148\228\184\173\230\150\135",
+    koKR = "\237\149\156\234\181\173\236\150\180",
+}
+
+---The language the text is in, as a locale code: the player's choice, or the client's.
+---@return string
+function ns.Language()
+    return decide()
+end
+
+---The languages the addon has text in, in the order they load, each as { code, name }: the name
+---is the language's own for itself with its code, "Deutsch (deDE)", so it can be told apart even
+---where the client's font can't draw it.
+---@return table[]
+function ns.Languages()
+    local list = {}
+    for i, code in ipairs(shipped) do
+        list[i] = { code, format("%s (%s)", LANGUAGE_NAMES[code] or code, code) }
+    end
+    return list
+end
+
+---The language the player chose, or nil while it follows the client.
+---@return string?
+function ns.ChosenLanguage()
+    local db = _G.ForeverPlusPlusDB
+    local chosen = type(db) == "table" and db.language
+    return type(chosen) == "string" and chosen or nil
+end
+
+---Chooses the language the text is in from the next load on: a code from ns.Languages, or nil to
+---follow the client again. The caller reloads the interface.
+---@param code? string
+function ns.SetLanguage(code)
+    if type(_G.ForeverPlusPlusDB) == "table" then
+        _G.ForeverPlusPlusDB.language = isShipped[code] and code or nil
     end
 end
 
@@ -73,10 +142,12 @@ end
 ---after the locale files: the game's text first, then the language's own, then enUS.
 ---An English client keeps enUS's text, which the tests hold to the client's English, so nothing
 ---there changes under us with a patch. A string the client doesn't have is left as it was.
+---With a language chosen that isn't the client's, the game's strings would be the wrong language
+---(the client only has its own), so they stay as the locale files have them: English.
 ---@param keys table our key -> the client's global string name
 function ns.GameText(keys)
     ns.gameText = keys
-    if GetLocale() == "enUS" then
+    if decide() == "enUS" or decide() ~= GetLocale() then
         return
     end
     for key, tag in pairs(keys) do

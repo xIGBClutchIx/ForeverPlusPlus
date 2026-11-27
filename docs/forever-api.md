@@ -608,6 +608,10 @@ The QuestieDB addon's quest, NPC, item, and object data, read at run time throug
 
 - It's a global, `LibQuestieDB`, set at the end of its own load (not LibStub, not load on demand, no ready event); addon name `QuestieDB`, with `QuestieDB_Forever.toc` and `QuestieDB_Camelot.toc` in its releases. Coordinates are 0-100 percents keyed by AreaTable ID; its own ZoneDB support table maps those to uiMapIDs. **[web]** (its source at `d57637f`, 2026-11-11) **Unverified** in game: not installed on the client yet; Self Test's `questiedb` lines check it.
 
+## Saved variables before the files
+
+`## LoadSavedVariablesFirst: 1` in a TOC makes the client load the addon's saved variables before its files, where they normally come after. Mainline's client has it (six addons in this machine's retail install use it, read 2026-11-27). **Not yet confirmed on Forever:** our TOC has it for the Language dropdown, and Self Test's `language.savedFirst` line says whether the saved table was there as the locale files loaded. Without it the dropdown's choice is saved but never applies.
+
 ## The client's text in another language
 
 The install holds one language (enUS here), so the client folder can't answer what the game calls something in Russian. wago.tools serves the same build's tables in any language: `https://wago.tools/db2/<Table>/csv?build=<build>&locale=ruRU` (read 2026-11-26, build 1.60.1.71139).

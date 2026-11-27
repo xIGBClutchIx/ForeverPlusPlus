@@ -276,6 +276,14 @@ L.DEFAULTS_DEVELOPER = "개발자 기본 설정"
 L.DEFAULTS_RECOMMENDED = "권장 기본 설정"
 L.HOME_MODULES_ON = "모듈 %d/%d개 켜짐" -- on, total
 L.HOME_GAME_BUILD = "게임 %s (%s)" -- version, build
+-- The Language dropdown on the About page. A language's own name is never translated (Core.lua).
+L.LANGUAGE = "언어"
+L.LANGUAGE_CLIENT = "게임 클라이언트: %s" -- the client's language, as the dropdown names it
+L.LANGUAGE_DESC = "Forever++의 문구에 사용할 언어입니다. '게임 클라이언트'는 게임의 언어를 따릅니다. 변경하면 UI를 "
+    .. "재시작합니다."
+L.LANGUAGE_WARNING = "게임 클라이언트와 다른 언어는 일부 화면에서 제대로 표시되지 않을 수 있습니다. 글자가 네모로 "
+    .. "보일 수 있으며, Forever++에 표시되는 게임 고유 용어는 영어로 남습니다."
+L.LANGUAGE_RELOAD = "Forever++를 다음 언어로 표시하시겠습니까? %s\n변경하면 UI를 재시작합니다." -- the language's name
 L.HOME_LINKS = "링크"
 L.HOME_LINK_CURSEFORGE = "CurseForge"
 L.HOME_LINK_WAGO = "Wago"

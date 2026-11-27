@@ -725,6 +725,15 @@ local function checkGameText()
         end
     end
     info("gametext.locale", text(GetLocale()))
+    -- The Language dropdown (About page) needs the saved table before the locale files run, which
+    -- the TOC's LoadSavedVariablesFirst asks for. On a first login there's nothing saved either way.
+    info("language.inUse", text(ns.Language()) .. ", chosen: " .. text(ns.ChosenLanguage()))
+    if ns.savedFirst then
+        pass("language.savedFirst", "the saved table was there as the locale files loaded")
+    else
+        fail("language.savedFirst", "no saved table as the locale files loaded: a chosen language "
+            .. "can't apply (or this is the first login)")
+    end
     if #names == 0 then
         fail("gametext.keys", "Locales/Game.lua gave no keys")
     elseif #missing == 0 then

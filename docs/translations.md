@@ -6,9 +6,11 @@ Forever++ ships English (`enUS`), Russian (`ruRU`), Simplified Chinese (`zhCN`),
 
 ## How the game picks a language
 
-- The language follows the game client: `ns.NewLocale(code)` in `Core.lua` gives a locale file the table to fill only when `code` is `GetLocale()` (or `enUS`, the fallback). There is no setting.
+- The language follows the game client unless the player picks one: `ns.NewLocale(code)` in `Core.lua` gives a locale file the table to fill only when `code` is the language in use (or `enUS`, the fallback). `ns.Language()` is that language.
 - A key a language doesn't set shows in English. A missing key never errors.
-- A setting for "English on a non-English client" isn't there, and isn't simple: module titles and option names are read from the locale as the files load, before saved settings exist. It would need a reload after changing it.
+- **The Language dropdown** on the About page lists "Game Client" and every language with files, each named in itself with its code ("Deutsch (deDE)"), so a player who picked one by mistake can find their own. The choice is saved for the whole account as `ForeverPlusPlusDB.language` and takes a reload, which the dropdown asks for: every file read its text as it loaded.
+- It works because the TOC says `## LoadSavedVariablesFirst: 1`, which puts the saved table there before the locale files run. On a client without that line's support the saved table is nil at that point and the client's language is used; Self Test's `language.savedFirst` says which.
+- A language that isn't the client's is the player's own risk, and the dropdown's tooltip says so: the client's fonts may not have its letters, and the `[game]` strings stay English, since the client only has them in its own language (`ns.GameText` lays them over the text only when the language in use is the client's).
 
 ## The files
 

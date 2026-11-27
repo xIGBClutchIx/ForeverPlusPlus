@@ -7,7 +7,8 @@
 local _, ns = ...
 
 local ipairs, format, floor, concat = ipairs, string.format, math.floor, table.concat
-local CreateFrame, GetBuildInfo = CreateFrame, GetBuildInfo
+local max = math.max
+local CreateFrame, GetBuildInfo, GetLocale, ReloadUI = CreateFrame, GetBuildInfo, GetLocale, ReloadUI
 local L = ns.L
 local S = ns.SettingsUI
 
@@ -20,6 +21,8 @@ local COLUMNS_TOP = -152
 local HEADING = 30 -- a heading, the line under it, and the space before what it heads
 local SECTION = 14 -- the space after a section, before the next heading
 local LINK_WIDTH, LINK_GAP = 108, 6 -- two link buttons fill the left column
+local LANGUAGE_WIDTH = 170 -- the Language dropdown, under the game's build
+local LANGUAGE_LABEL = 80 -- and the room its label takes, left of it
 
 local WEBSITE = "https://github.com/xIGBClutchIx/ForeverPlusPlus"
 
@@ -116,12 +119,13 @@ local function buildHeader(frame, pageWidth)
     game:SetPoint("TOPRIGHT", version, "BOTTOMRIGHT", 0, -5)
     game:SetText(format(L.HOME_GAME_BUILD, gameVersion, build))
 
-    -- Wraps before it would run into the game's version.
+    -- Wraps before it would run into the game's version, or the Language dropdown under it.
     local tagline = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     tagline:SetPoint("TOPLEFT", name, "BOTTOMLEFT", 0, -6)
     tagline:SetJustifyH("LEFT")
     tagline:SetText(metadata("Notes") ~= "" and metadata("Notes") or L.HOME_TAGLINE)
-    local room = pageWidth - (LEFT + 64 + 14) - EDGE - game:GetStringWidth() - 16
+    local right = max(game:GetStringWidth(), LANGUAGE_WIDTH + LANGUAGE_LABEL)
+    local room = pageWidth - (LEFT + 64 + 14) - EDGE - right - 16
     if tagline:GetStringWidth() > room then
         tagline:SetWidth(room)
     end
@@ -133,6 +137,42 @@ local function buildHeader(frame, pageWidth)
     end
     update()
     frame:HookScript("OnShow", update) -- after /fpp or the Modules page changed some
+
+    -- The language the text is in, under the game's build: the client's, or one the player picks.
+    -- Every file read its text as it loaded, so a choice is saved and the interface reloaded.
+    local chosen = ns.ChosenLanguage()
+    local names = {}
+    local function choices()
+        local list = { { "client", format(L.LANGUAGE_CLIENT, names[GetLocale()] or GetLocale()) } }
+        for _, entry in ipairs(ns.Languages()) do
+            list[#list + 1] = entry
+        end
+        return list
+    end
+    for _, entry in ipairs(ns.Languages()) do
+        names[entry[1]] = entry[2]
+    end
+    local dropdown
+    dropdown = ns.SettingsKit.NewDropdown(frame, LANGUAGE_WIDTH, choices, function()
+        return chosen or "client"
+    end, function(value)
+        local code = value ~= "client" and value or nil
+        if code == ns.ChosenLanguage() then
+            return
+        end
+        local name = code and names[code] or format(L.LANGUAGE_CLIENT, names[GetLocale()] or GetLocale())
+        ns.Confirm("ABOUT_LANGUAGE", L.LANGUAGE_RELOAD, function()
+            ns.SetLanguage(code)
+            ReloadUI()
+        end, name)
+    end)
+    if dropdown then
+        dropdown:SetPoint("TOPRIGHT", game, "BOTTOMRIGHT", 0, -8)
+        local label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        label:SetPoint("RIGHT", dropdown, "LEFT", -8, 0)
+        label:SetText(L.LANGUAGE)
+        ns.SettingsKit.AddTooltip(dropdown, L.LANGUAGE, L.LANGUAGE_DESC .. "\n\n" .. L.LANGUAGE_WARNING)
+    end
 end
 
 -- The left column: links, credits, and the addons we work with.

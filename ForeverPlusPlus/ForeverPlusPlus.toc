@@ -5,6 +5,7 @@
 ## Version: 1.9.1
 ## SavedVariables: ForeverPlusPlusDB, ForeverPlusPlusPlayersDB
 ## SavedVariablesPerCharacter: ForeverPlusPlusCharDB
+## LoadSavedVariablesFirst: 1
 ## OptionalDeps: Auctionator, QuestieDB
 ## IconTexture: Interface\AddOns\ForeverPlusPlus\Media\Icon
 
