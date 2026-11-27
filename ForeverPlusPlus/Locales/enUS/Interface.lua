@@ -52,6 +52,20 @@ L.TOOLTIPS_DROP_CHANCE_DESC = "Show the chance a creature drops a quest's item a
 L.TOOLTIPS_DROP_CHANCE_FORMAT = "(%s%%)"
 L.TOOLTIPS_TARGET_LINE = "Target:"
 L.TOOLTIPS_TARGET_YOU = "You"
+L.TOOLTIPS_ITEM_LEVEL = "Item Level" -- [game: STAT_AVERAGE_ITEM_LEVEL]
+L.TOOLTIPS_ITEM_LEVEL_DESC = "Add a line with a player's average item level. For another player "
+    .. "the game is asked when you point at them, out of combat and close by, and the answer is "
+    .. "kept for a few minutes, so the line shows a moment after the tooltip."
+L.TOOLTIPS_SPEC = "Specialization" -- [game: SPECIALIZATION]
+L.TOOLTIPS_SPEC_DESC = "Add a line with a player's specialization: the talent tree they've spent "
+    .. "the most points in. Another player's talents are asked for as their item level is."
+L.TOOLTIPS_TALENT_POINTS = "Talent Points"
+L.TOOLTIPS_TALENT_POINTS_DESC = "Show the points in each tree, in the trees' order, after the "
+    .. "specialization: \"(5/31/15)\"."
+-- [quotes: STAT_AVERAGE_ITEM_LEVEL]
+L.TOOLTIPS_ITEM_LEVEL_LINE = "Item Level:"
+-- [quotes: SPECIALIZATION]
+L.TOOLTIPS_SPEC_LINE = "Specialization:"
 L.TOOLTIPS_SECTION_TIDY = "Tidy"
 L.TOOLTIPS_NAME_ICON = "Icon by Name"
 L.TOOLTIPS_NAME_ICON_DESC = "Show an icon before the name in the tooltip of an item, toy, spell, "
@@ -84,6 +98,14 @@ L.TOOLTIPS_HIDE_CLICK_HINT_DESC = "Leave the \"Right click for Frame Settings\" 
 L.TOOLTIPS_HIDE_TAB_TOOLTIP = "Hide Chat Tab Tooltips"
 L.TOOLTIPS_HIDE_TAB_TOOLTIP_DESC = "Show no tooltip over a chat window's tab, which only repeats "
     .. "its name."
+L.TOOLTIPS_HEALTH_TEXT = "Health Text"
+L.TOOLTIPS_HEALTH_TEXT_DESC = "Write a unit's health on the health bar under its tooltip, as a "
+    .. "percentage, as a number, or both."
+L.TOOLTIPS_HEALTH_TEXT_OFF = "None" -- [game: NONE]
+L.TOOLTIPS_HEALTH_TEXT_PERCENT = "Percentage" -- [game: STATUS_TEXT_PERCENT]
+L.TOOLTIPS_HEALTH_TEXT_VALUE = "Numeric Value" -- [game: STATUS_TEXT_VALUE]
+L.TOOLTIPS_HEALTH_TEXT_BOTH = "Both" -- [game: STATUS_TEXT_BOTH]
+L.TOOLTIPS_HEALTH_TEXT_CONFLICT = "Hide Health Bar hides the health text with the bar."
 L.TOOLTIPS_HIDE_HEALTH_BAR = "Hide Health Bar"
 L.TOOLTIPS_HIDE_HEALTH_BAR_DESC = "Hide the green health bar under player and NPC tooltips."
 L.TOOLTIPS_QUEST_LINES = "Quest Lines"

@@ -33,6 +33,12 @@ ns.changelog = {
                     .. "and Alliance or Horde on one row; both are on by default. Objective Counts at "
                     .. "the Right, off by default, writes \"Tough Wolf Meat\" and \"6 / 8\" in place "
                     .. "of \"6/8 Tough Wolf Meat\"." },
+                { L.TOOLTIPS_TITLE, "Three new options, off by default. Item Level and "
+                    .. "Specialization add a player's average item level and the talent tree they've "
+                    .. "spent the most points in, with the points in each tree; another player's are "
+                    .. "asked for when you point at them, out of combat and close by. Health Text "
+                    .. "writes a unit's health on the tooltip's health bar, as a percentage, a "
+                    .. "number, or both." },
                 { L.ITEMTOOLTIPS_TITLE, "Pair Short Lines (on by default) puts two short lines that "
                     .. "follow each other on one row: how an item binds with \"Unique\", and a "
                     .. "shield's armor with its block. Scan Age has a new choice, Beside the Price, "

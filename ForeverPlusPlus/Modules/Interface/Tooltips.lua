@@ -1,7 +1,9 @@
 -- Tooltips: colors unit and item tooltips so they say more at a glance. The border and name
 -- follow the unit's class or how it feels about you, item borders follow quality, the guild,
 -- level and class on a unit's lines get colors, a player's title shows in their name, and a line
--- says who the unit is targeting. Ideas from ManiaTip; none of its code.
+-- says who the unit is targeting. Ideas from ManiaTip; none of its code. Off by default, a
+-- player's item level and specialization (another player's by inspect, through ns.Inspect) and
+-- health text on the health bar.
 --
 -- Every change is made after Blizzard builds the tooltip (TooltipDataProcessor post calls), on
 -- Blizzard's own lines, except Quest Lines, which leaves the quest lines out as it's built (line
@@ -21,6 +23,10 @@ local FACTION_HORDE, FACTION_ALLIANCE = FACTION_HORDE, FACTION_ALLIANCE
 local GameTooltip, InCombatLockdown = GameTooltip, InCombatLockdown
 local UnitChannelInfo, C_Spell, select = UnitChannelInfo, C_Spell, select
 local GetActionInfo, C_MountJournal, C_PetJournal = GetActionInfo, C_MountJournal, C_PetJournal
+local tostring, unpack, pcall, concat, floor = tostring, unpack, pcall, table.concat, math.floor
+local UnitGUID, UnitIsPlayer, GetAverageItemLevel = UnitGUID, UnitIsPlayer, GetAverageItemLevel
+local UnitHealth, UnitHealthMax, UnitHealthPercent = UnitHealth, UnitHealthMax, UnitHealthPercent
+local CurveConstants, AbbreviateLargeNumbers = CurveConstants, AbbreviateLargeNumbers
 
 local L = ns.L
 local readable = ns.IsReadable
@@ -41,6 +47,10 @@ local module = ns.NewModule("Tooltips", L.TOOLTIPS_DESC, {
     friends = true,
     title = true,
     target = true,
+    itemLevel = false, -- a player's average item level; another player's needs an inspect
+    spec = false, -- a player's talent tree with the most points
+    talentPoints = true, -- with the specialization, the points in each tree
+    healthText = "off", -- on the health bar: "off", "percent", "value", "both"
     hideInCombat = false, -- hide unit tooltips while in combat
     anchorCursor = false, -- tooltips at the mouse instead of the bottom right
     hideFishing = false, -- hide the bobber's tooltip while fishing
@@ -93,6 +103,12 @@ module.options = {
         section = L.TOOLTIPS_SECTION_LINES },
     { key = "target", name = L.TOOLTIPS_TARGET, description = L.TOOLTIPS_TARGET_DESC,
         section = L.TOOLTIPS_SECTION_LINES },
+    { key = "itemLevel", name = L.TOOLTIPS_ITEM_LEVEL, description = L.TOOLTIPS_ITEM_LEVEL_DESC,
+        section = L.TOOLTIPS_SECTION_LINES, added = "1.10.0" },
+    { key = "spec", name = L.TOOLTIPS_SPEC, description = L.TOOLTIPS_SPEC_DESC,
+        section = L.TOOLTIPS_SECTION_LINES, added = "1.10.0" },
+    { key = "talentPoints", name = L.TOOLTIPS_TALENT_POINTS, description = L.TOOLTIPS_TALENT_POINTS_DESC,
+        section = L.TOOLTIPS_SECTION_LINES, requires = "spec", added = "1.10.0" },
     { key = "dropChance", name = L.TOOLTIPS_DROP_CHANCE, description = L.TOOLTIPS_DROP_CHANCE_DESC,
         section = L.TOOLTIPS_SECTION_LINES, added = "1.9.0",
         available = function() return QuestieDB.IsReady() end,
@@ -116,6 +132,20 @@ module.options = {
         section = L.TOOLTIPS_SECTION_BEHAVIOR, added = "1.6.0" },
     { key = "hideTabTooltip", name = L.TOOLTIPS_HIDE_TAB_TOOLTIP,
         description = L.TOOLTIPS_HIDE_TAB_TOOLTIP_DESC, section = L.TOOLTIPS_SECTION_BEHAVIOR, added = "1.8.0" },
+    {
+        key = "healthText", name = L.TOOLTIPS_HEALTH_TEXT, description = L.TOOLTIPS_HEALTH_TEXT_DESC,
+        section = L.TOOLTIPS_SECTION_BEHAVIOR, added = "1.10.0",
+        choices = {
+            { "off", L.TOOLTIPS_HEALTH_TEXT_OFF },
+            { "percent", L.TOOLTIPS_HEALTH_TEXT_PERCENT },
+            { "value", L.TOOLTIPS_HEALTH_TEXT_VALUE },
+            { "both", L.TOOLTIPS_HEALTH_TEXT_BOTH },
+        },
+        conflicts = {
+            { key = "hideHealthBar", text = L.TOOLTIPS_HEALTH_TEXT_CONFLICT,
+                when = function(db) return db.healthText ~= "off" and db.hideHealthBar end },
+        },
+    },
     { key = "hideHealthBar", name = L.TOOLTIPS_HIDE_HEALTH_BAR,
         description = L.TOOLTIPS_HIDE_HEALTH_BAR_DESC, section = L.TOOLTIPS_SECTION_BEHAVIOR, added = "0.9.0" },
     {
@@ -398,6 +428,161 @@ local function addTarget(tooltip, unit)
     tooltip:AddDoubleLine(L.TOOLTIPS_TARGET_LINE, UnitName(target), lr, lg, lb, r, g, b)
 end
 
+-- Item Level and Specialization: lines from what a player wears and where their talent points
+-- are. The player's own come from the game straight away; another player's need the server's
+-- answer to an inspect (ns.Inspect), so they're added when it comes, if the tooltip still shows
+-- that player, and from the kept answer on every tooltip after. Each tab's name is the game's.
+local function addInspectLines(tooltip, entry)
+    local db = module.db
+    if db.itemLevel and ns.IsNumber(entry.itemLevel) then
+        tooltip:AddDoubleLine(L.TOOLTIPS_ITEM_LEVEL_LINE, tostring(entry.itemLevel), 1, 1, 1, 1, 1, 1)
+    end
+    local best, total = nil, 0
+    if db.spec and entry.tabs then
+        best, total = ns.Talents.Dominant(nil, entry.tabs)
+    end
+    if best and total > 0 and best.name ~= "" then
+        local text = best.name
+        if db.talentPoints then
+            local points = {}
+            for i, tab in ipairs(entry.tabs) do
+                points[i] = tab.spent
+            end
+            local gray = ns.Colors.GRAY
+            text = text .. " " .. colorCode(gray[1], gray[2], gray[3]) .. "(" .. concat(points, "/") .. ")|r"
+        end
+        tooltip:AddDoubleLine(L.TOOLTIPS_SPEC_LINE, text, 1, 1, 1, 1, 1, 1)
+    end
+end
+
+-- The player's own item level and talents, read now.
+local function ownEntry()
+    local level
+    if GetAverageItemLevel then
+        local overall, equipped = GetAverageItemLevel()
+        level = ns.IsNumber(equipped) and equipped or overall
+    end
+    return {
+        itemLevel = ns.IsNumber(level) and level > 0 and floor(level) or nil,
+        tabs = ns.Talents.Tabs(),
+    }
+end
+
+-- The server's answer for a player pointed at: drawn on GameTooltip while it still shows them.
+local function onInspected(entry, guid)
+    if not (module.enabled and entry and GameTooltip:IsShown()) then
+        return
+    end
+    local unit = tooltipUnit(GameTooltip)
+    local shown = unit and UnitGUID(unit)
+    if readable(shown) and shown == guid then
+        addInspectLines(GameTooltip, entry)
+        GameTooltip:Show() -- sizes itself again for the new lines
+    end
+end
+
+local function inspectLines(tooltip, unit)
+    local isPlayer = UnitIsPlayer(unit)
+    if not (readable(isPlayer) and isPlayer) then
+        return
+    end
+    local isSelf = UnitIsUnit(unit, "player")
+    if not readable(isSelf) then
+        return
+    end
+    if isSelf then
+        addInspectLines(tooltip, ownEntry())
+        return
+    end
+    local guid = UnitGUID(unit)
+    local entry = readable(guid) and guid and ns.Inspect.Get(guid)
+    if not entry and tooltip == GameTooltip then
+        entry = ns.Inspect.Request(unit, onInspected)
+    end
+    if entry then
+        addInspectLines(tooltip, entry)
+    end
+end
+
+-- Health Text: a font string of ours on GameTooltip's health bar, with the health of the unit the
+-- tooltip shows. Blizzard fills the bar from the unit's GUID every frame (GameTooltipUnitHealthBarMixin,
+-- Blizzard_GameTooltip/Mainline/GameTooltip.lua), so the text is written again whenever its value
+-- changes. Health is secret in combat and instances: it only ever goes to SetFormattedText, which
+-- takes a secret, and to the game's own percent and number helpers, under pcall in case this
+-- client's don't take one (as Druid Mana Bar does). Nothing here is compared or added up.
+local healthString -- made the first time the option is on
+local healthUnit -- the unit GameTooltip shows, while it shows one
+
+local function setHealth(format, ...)
+    local args = { ... }
+    local short = AbbreviateLargeNumbers
+    local done = short and pcall(function()
+        local shown = {}
+        for i, value in ipairs(args) do
+            shown[i] = i <= 2 and short(value) or value
+        end
+        healthString:SetFormattedText(format, unpack(shown, 1, #args))
+    end)
+    if not done then
+        healthString:SetFormattedText(format, unpack(args, 1, #args))
+    end
+end
+
+local function updateHealthText()
+    if not healthString then
+        return
+    end
+    local mode = module.enabled and module.db.healthText or "off"
+    local unit = healthUnit
+    if mode == "off" or not unit then
+        healthString:SetText("")
+        return
+    end
+    local exists = UnitExists(unit)
+    if not (readable(exists) and exists) then
+        return -- the mouse has left the unit: the bar and its text are on their way out
+    end
+    local percentOk, percent = false, nil
+    if mode ~= "value" then
+        local scale = CurveConstants and CurveConstants.ScaleTo100
+        if UnitHealthPercent and scale then
+            percentOk, percent = pcall(UnitHealthPercent, unit, true, scale)
+        end
+    end
+    if mode == "percent" then
+        if percentOk then
+            healthString:SetFormattedText("%.0f%%", percent)
+        else
+            healthString:SetText("")
+        end
+    elseif mode == "both" and percentOk then
+        setHealth("%s / %s (%.0f%%)", UnitHealth(unit), UnitHealthMax(unit), percent)
+    else
+        setHealth("%s / %s", UnitHealth(unit), UnitHealthMax(unit))
+    end
+end
+
+local function healthTextFor(unit)
+    healthUnit = unit
+    if not healthString and module.db.healthText ~= "off" then
+        local bar = GameTooltip.StatusBar
+        if not bar then
+            return
+        end
+        healthString = bar:CreateFontString(nil, "OVERLAY", "TextStatusBarText")
+        healthString:SetPoint("CENTER", bar, "CENTER", 0, 0)
+        module:HookScript(bar, "OnValueChanged", updateHealthText)
+    end
+    updateHealthText()
+end
+
+local function clearHealthText()
+    healthUnit = nil
+    if healthString then
+        healthString:SetText("")
+    end
+end
+
 -- Hide in Combat fades GameTooltip rather than hiding it: Hide would run Blizzard's OnHide from
 -- our code, mid-processing and in combat, and taint the next tooltip. The next tooltip or its
 -- hiding brings it back.
@@ -516,8 +701,14 @@ local function onUnit(tooltip, data)
             colorFaction(tooltip, data)
         end
     end
+    if db.itemLevel or db.spec then
+        inspectLines(tooltip, unit)
+    end
     if db.target then
         addTarget(tooltip, unit)
+    end
+    if tooltip == GameTooltip and (healthString or db.healthText ~= "off") then
+        healthTextFor(unit)
     end
 end
 
@@ -1256,6 +1447,7 @@ function module:OnEnable()
     ns.Chat.EachWindow(self, hookTab)
     self:HookScript(GameTooltip, "OnTooltipCleared", unfade)
     self:HookScript(GameTooltip, "OnHide", unfade)
+    self:HookScript(GameTooltip, "OnTooltipCleared", clearHealthText)
     fadeHealthBar(self.db.hideHealthBar)
     applyScale()
 end
@@ -1264,6 +1456,8 @@ function module:OnDisable()
     fadeHealthBar(false)
     unfade()
     applyScale()
+    clearHealthText()
+    ns.Inspect.Prune()
 end
 
 function module:OnOptionChanged(key)
@@ -1271,5 +1465,7 @@ function module:OnOptionChanged(key)
         fadeHealthBar(self.db.hideHealthBar)
     elseif key == "scale" then
         applyScale()
+    elseif key == "healthText" then
+        updateHealthText()
     end
 end

@@ -287,7 +287,11 @@ Generated files, in `Lib/Generated/` (never edited by hand; see Generated data):
 
 ### `Talents.lua`
 
-- `ns.Talents`: the talent tabs with the points in each, and the dominant one.
+- `ns.Talents`: the talent tabs with the points in each, and the dominant one. `Tabs(Talents.INSPECT)` reads the inspect trait config instead: the player last inspected.
+
+### `Inspect.lua`
+
+- `ns.Inspect`: another player's average item level and talent tabs, from the server's answer to `NotifyInspect`. `Request(unit, fn)` asks (one at a time, 1.5 seconds apart, never in combat, out of range, or while Blizzard's inspect window has one going) and calls `fn(entry, guid)` on `INSPECT_READY`; `Get(guid)` returns an answer kept for five minutes. The item level is `C_PaperDollInfo.GetInspectItemLevel`, or else `Average` of the worn items' levels. It never calls `ClearInspectPlayer`. Used by Tooltips.
 
 ### `ActionButtons.lua`
 
@@ -375,7 +379,7 @@ What each module is, in the code's terms (what it does for players is in `README
 - **Bag Slot Counter**: font strings on frames of ours over Blizzard's bag bar buttons. With the controller interface on (which hides `BagsBar`), Bag Button on Screen shows a frame of its own instead: the backpack's icon, mask, and border art with the total, in Edit Mode through `ns.EditMode.RegisterModule`, and a tooltip of each bag. It takes no clicks.
 - **Auto Gossip**
 - **Auto Quest**
-- **Tooltips**
+- **Tooltips**: Item Level and Specialization through `ns.Inspect` for another player, and Health Text as a font string of ours on `GameTooltip.StatusBar`, written from the game's health with `SetFormattedText` so a secret value only goes to the setter.
 - **Auto Decline**
 - **Auto Confirm**: the enchant popups answered with the C_Item call their own Yes makes, then closed.
 - **Auto Release**
