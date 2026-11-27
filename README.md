@@ -62,7 +62,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Hide Chat Tabs | Hides the chat windows' tabs until the mouse is over the chat. A tab with a new message still flashes. Off by default. |
 | Hide Combat Log Tab | Takes the Combat Log's tab off the chat window. Off by default. |
 | Movable Combat Log Tab | Lets you drag the Combat Log's tab anywhere among your chat tabs, not only right after General. Off by default. |
-| Chat Tab Resizing | Drag the General chat tab up or down to make the main chat window taller or shorter, until you reload. Off by default. |
+| Chat Tab Resizing | Drag the General chat tab up or down to make the main chat window taller or shorter, saved in your Edit Mode layout. Off by default. |
 | Whisper Window | Keeps whispers in a window like a messenger: conversations with unread counts on the left, the one you pick on the right, and a box to reply in. Opens from a chat button or `/fpp whispers`, and can hide whispers from chat. Off by default. |
 | **Interface** | |
 | Action Bar Colors | Tints a whole action button red while your target is out of its range, and blue while you can't pay its cost, where the game only reddens the key. Out of range comes first, and the pet bar gets the red too. Off by default. |
@@ -100,7 +100,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Flight Timer | Times your flights and shows a countdown bar (placed in Edit Mode) and the time on the flight map. A route you haven't flown shows an estimate, marked as one. |
 | Gathering Map | Remembers every herb, vein, chest, and fishing pool you gather, for all your characters, and shows them on the world map and minimap. Near you on the minimap a node becomes an empty ring, so the game's tracking dot shows inside it when the node is up. Pick which nodes show on its own Settings page, forget one with Shift+right-click, and share them as text with Export and Import. |
 | Hide Filter Reset | Hides the reset button on the world map's filter dropdown. |
-| Hide Minimap Buttons | Hides the buttons addons put around the minimap until the mouse is over it, and fades them in and out; optionally Blizzard's calendar, tracking, and addon compartment buttons too. Off by default. |
+| Hide Minimap Buttons | Hides the buttons addons put around the minimap until the mouse is over it, and fades them in and out; optionally Blizzard's calendar, tracking, and addon compartment buttons, and Forever++'s own button, too. Off by default. |
 | Square Minimap | Makes the minimap square, with a border in Blizzard's art (a dozen styles, or none). Minimap buttons and icons follow the square edge. Off by default. |
 | Waypoints | `/way [zone] x y [note]` puts the game's map pin on a spot (`/way 45.2 67.8`, `/way clear`, `/way share`), with an arrow on screen that points to it, your selected quest, or your corpse. TomTom's `/way` wins if it's installed. |
 | Compass Bar | A compass across the top of the screen with your selected quest, map pin, corpse, and group on it, and optionally every quest, flight masters, gathering nodes, and rares. Sized in Edit Mode. Off by default. |

@@ -45,7 +45,8 @@ ns.changelog = {
                     .. "which shows \"2h ago\" on the Auction line instead of a line of its own. "
                     .. "Quests (on by default, with the QuestieDB addon) names the quests an item is "
                     .. "for, those in your quest log first and those you've done in gray, so old "
-                    .. "quest items you can throw away stand out." },
+                    .. "quest items you can throw away stand out. Lines sets how many are named, and "
+                    .. "each kind of quest (in your log, not done yet, done) has its own checkbox." },
                 { L.UNDIMMEDEDITBOX_TITLE, "A new module, off by default, that keeps the box you "
                     .. "type chat in at full strength while you aren't typing. It needs the game's "
                     .. "Chat Style set to IM Style, which is what keeps the box on screen." },
@@ -65,8 +66,10 @@ ns.changelog = {
                     .. "pin to see what each of its quests asks, who it's turned in to, and the "
                     .. "quest it leads to, from QuestieDB." },
                 { L.CHATTABRESIZE_TITLE, "A new module, off by default, that makes the main chat "
-                    .. "window taller or shorter as you drag its General tab up or down. The height "
-                    .. "lasts until you reload; Edit Mode keeps the one it comes back at." },
+                    .. "window taller or shorter as you drag its General tab up or down. Save to Edit "
+                    .. "Mode (on by default) saves the new height in your Edit Mode layout, so it "
+                    .. "lasts; one of the game's own layouts can't be changed, so there it lasts "
+                    .. "until you reload." },
                 { L.EDITMODEGLOW_TITLE, "A new module, off by default, that dims the blue and gold "
                     .. "boxes Edit Mode draws over each frame, so their edges are easier to see and line "
                     .. "up. A Show Glow checkbox and a slider under the Edit Mode window hide or dim "
@@ -74,7 +77,8 @@ ns.changelog = {
                 { L.HIDEMINIMAPBUTTONS_TITLE, "A new module, off by default, that hides the buttons "
                     .. "addons put around the minimap until the mouse is over it, and fades them in "
                     .. "and out. Blizzard's Buttons does the same for the calendar, tracking, and "
-                    .. "addon compartment buttons." },
+                    .. "addon compartment buttons, and Forever++'s Button for Forever++'s own, which "
+                    .. "otherwise stays and shows the others when you point at it." },
                 { L.ACTIONBARCOLORS_TITLE, "A new module, off by default, that tints a whole action "
                     .. "button red while your target is out of its range, and blue while you can't pay "
                     .. "its cost, where the game only reddens the key and tints the icon a faint blue. "
@@ -102,8 +106,9 @@ ns.changelog = {
                     .. "allow, and buy more than one stack at a time." },
                 { L.PROFESSIONS_TITLE, "Crafting Costs' Sort Recipe List (off by default) sorts the "
                     .. "recipes in each category of the professions window by Estimated Profit or "
-                    .. "Total Cost, and shows that number on each row. Pick it in Settings or at the "
-                    .. "bottom of the window's Filter menu." },
+                    .. "Total Cost, and shows that number on each row. Without Categories sorts "
+                    .. "every recipe in one list instead. Pick both in Settings or at the bottom of "
+                    .. "the window's Filter menu." },
                 { L.QUESTITEMBUTTON_TITLE, "A new module, off by default, with a key that uses the "
                     .. "item of the quest you're closest to, set in Key Bindings under Forever++, "
                     .. "and a button showing which item that is, which you can move in Edit Mode. "

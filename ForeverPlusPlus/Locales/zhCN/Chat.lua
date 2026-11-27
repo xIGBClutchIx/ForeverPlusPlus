@@ -170,6 +170,12 @@ L.CHATTABRESIZE_DESC = "上下拖动“综合”聊天标签，让主聊天窗�
 L.CHATTABRESIZE_NOTICE = "新的高度只保持到重新载入"
 L.CHATTABRESIZE_NOTICE_DESC = "编辑模式保存着聊天窗口的高度，在/reload或更换布局后会恢复它。要保留高度，"
     .. "请在编辑模式中设置。"
+L.CHATTABRESIZE_SAVE = "保存到编辑模式"
+L.CHATTABRESIZE_SAVE_DESC = "松开标签时，把新的高度保存到你的编辑模式布局中，这样它会像在编辑模式中设置的高度一样"
+    .. "保留下来。战斗中会在战斗结束后保存。"
+L.CHATTABRESIZE_PRESET = "高度无法保存到游戏自带的布局中"
+L.CHATTABRESIZE_PRESET_DESC = "你的编辑模式布局是游戏自带的，无法更改，所以新的高度只保持到重新载入。在编辑模式中"
+    .. "创建自己的布局，高度就会保存在其中。"
 
 -- HideChatButtons
 L.HIDECHATBUTTONS_TITLE = "隐藏聊天按钮"

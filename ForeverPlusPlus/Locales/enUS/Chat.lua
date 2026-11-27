@@ -193,6 +193,13 @@ L.CHATTABRESIZE_DESC = "Drag the General chat tab up or down to make the main ch
 L.CHATTABRESIZE_NOTICE = "The new height lasts until you reload"
 L.CHATTABRESIZE_NOTICE_DESC = "Edit Mode keeps the chat window's height, and puts it back after a "
     .. "/reload or a change of layout. Set it in Edit Mode to keep it."
+L.CHATTABRESIZE_SAVE = "Save to Edit Mode"
+L.CHATTABRESIZE_SAVE_DESC = "Save the new height in your Edit Mode layout when you let go of the tab, "
+    .. "so it lasts as a height set in Edit Mode does. In combat it's saved once combat ends."
+L.CHATTABRESIZE_PRESET = "The height can't be saved in one of the game's own layouts"
+L.CHATTABRESIZE_PRESET_DESC = "Your Edit Mode layout is one that comes with the game, which can't be "
+    .. "changed, so the new height lasts until you reload. Make a layout of your own in Edit Mode "
+    .. "and the height is saved in it."
 
 -- HideChatButtons
 L.HIDECHATBUTTONS_TITLE = "Hide Chat Buttons"

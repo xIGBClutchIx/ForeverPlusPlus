@@ -7,29 +7,65 @@
 -- StartSizing("TOP"), as Blizzard's own resize grips size a chat window (StartSizing, then
 -- StopMovingOrSizing). The tab sits on the window's top edge, so it follows the cursor.
 --
--- The new height isn't written into Edit Mode's layout: that is Blizzard's saved data, and
--- changing it outside Edit Mode (EditModeManagerFrame:OnSystemSettingChange) would be our code
--- running Edit Mode's, which taints it. So the height lasts until Edit Mode lays the window out
--- again (a /reload, or another layout), and Edit Mode keeps the height it comes back at.
+-- Edit Mode owns the window's height: it lays the window out again from its layout at a /reload
+-- or a change of layout. So with Save to Edit Mode the new height is written into the layout in
+-- use once the drag ends (ns.EditMode.SaveSettings, the game's own save calls), as resizing the
+-- window in Edit Mode and pressing Save would. Never through EditModeManagerFrame
+-- (OnSystemSettingChange), which would be our code running Edit Mode's and taint it. Blizzard's
+-- preset layouts can't be changed, so with one in use, or the option off, the height lasts until
+-- Edit Mode lays the window out again.
 local _, ns = ...
 
-local _G, CreateFrame, IsMouseButtonDown = _G, CreateFrame, IsMouseButtonDown
+local _G, CreateFrame, IsMouseButtonDown, floor = _G, CreateFrame, IsMouseButtonDown, math.floor
 
 local L = ns.L
 
 local module = ns.NewModule("ChatTabResize", L.CHATTABRESIZE_DESC, {
     enabled = false,
+    save = true, -- write the new height into the Edit Mode layout in use
 })
 module.title = L.CHATTABRESIZE_TITLE
 module.category = "chat"
 module.added = "1.10.0"
+module.options = {
+    { key = "save", name = L.CHATTABRESIZE_SAVE, description = L.CHATTABRESIZE_SAVE_DESC },
+}
 module.notice = {
-    { text = L.CHATTABRESIZE_NOTICE, description = L.CHATTABRESIZE_NOTICE_DESC },
+    {
+        text = L.CHATTABRESIZE_NOTICE, description = L.CHATTABRESIZE_NOTICE_DESC,
+        shown = function()
+            return not module.db.save
+        end,
+    },
+    {
+        text = L.CHATTABRESIZE_PRESET, description = L.CHATTABRESIZE_PRESET_DESC,
+        shown = function()
+            return module.db.save and ns.EditMode.OwnLayout() == false
+        end,
+    },
     ns.Gamepad.LimitedNotice(), -- dragging a tab needs a mouse
 }
 
 local sizing -- the mouse button the drag started with, while the window is being sized
 local driver -- our frame that sees the button let go; hidden between drags
+local before -- the window's height when the drag began
+
+-- The window's height into the Edit Mode layout in use, kept as Edit Mode keeps it: hundreds and
+-- the rest apart (EditModeChatFrameSystemMixin:UpdateSystemSettingHeight).
+local function save()
+    local frame = _G.ChatFrame1
+    local systems = Enum and Enum.EditModeSystem
+    local settings = Enum and Enum.EditModeChatFrameSetting
+    if not (module.enabled and module.db.save and frame and systems and systems.ChatFrame and settings
+        and settings.HeightHundreds and settings.HeightTensAndOnes) then
+        return
+    end
+    local height = floor(frame:GetHeight() + 0.5)
+    ns.EditMode.SaveSettings(systems.ChatFrame, {
+        [settings.HeightHundreds] = floor(height / 100),
+        [settings.HeightTensAndOnes] = height % 100,
+    })
+end
 
 local function stop()
     if not sizing then
@@ -40,7 +76,11 @@ local function stop()
     local frame, tab = _G.ChatFrame1, _G.ChatFrame1Tab
     if frame then
         frame:StopMovingOrSizing()
+        if before and floor(frame:GetHeight() + 0.5) ~= before then
+            ns.AfterCombat(save) -- the game's layouts can't be saved in combat
+        end
     end
+    before = nil
     if tab then
         tab:UnlockHighlight()
     end
@@ -68,6 +108,7 @@ local function onDragStart(tab, button)
         driver:SetScript("OnUpdate", onUpdate)
     end
     sizing = button
+    before = floor(frame:GetHeight() + 0.5)
     frame:StartSizing("TOP")
     tab:LockHighlight()
     driver:Show()
@@ -84,6 +125,14 @@ end
 function module:OnEnable()
     self:HookScript(_G.ChatFrame1Tab, "OnDragStart", onDragStart)
     self:HookScript(_G.ChatFrame1Tab, "OnDragStop", stop)
+    -- Another layout came into use: the notice about Blizzard's own layouts follows it.
+    if ns.HasEvent("EDIT_MODE_LAYOUTS_UPDATED") then
+        self:On("EDIT_MODE_LAYOUTS_UPDATED", function()
+            if ns.RefreshSetting then
+                ns.RefreshSetting(module.name)
+            end
+        end)
+    end
 end
 
 function module:OnDisable()

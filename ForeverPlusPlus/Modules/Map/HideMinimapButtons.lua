@@ -1,8 +1,9 @@
--- Hide Minimap Buttons: the buttons other addons put around the minimap (LibDBIcon's, Forever++'s,
--- and the rest) can't be seen until the mouse is over the minimap or one of them, and fade in and
--- out. With an option, Blizzard's own buttons by the minimap fade too: the calendar, tracking, the
--- addon compartment, and the expansion button. The mail and crafting order icons never do, since
--- they say something arrived.
+-- Hide Minimap Buttons: the buttons other addons put around the minimap (LibDBIcon's and the rest)
+-- can't be seen until the mouse is over the minimap or one of them, and fade in and out. With an
+-- option, Blizzard's own buttons by the minimap fade too: the calendar, tracking, the addon
+-- compartment, and the expansion button. The mail and crafting order icons never do, since they
+-- say something arrived. Forever++'s own button (Minimap Button offers it through ns.Providers)
+-- stays, and the mouse over it brings the rest back, unless its option fades it with them.
 --
 -- An addon's button is a Button the addon gave the minimap, or the frame behind it
 -- (MinimapBackdrop), whose middle sits on the minimap's edge or past it: where LibDBIcon and the
@@ -25,6 +26,7 @@ local L = ns.L
 local module = ns.NewModule("HideMinimapButtons", L.HIDEMINIMAPBUTTONS_DESC, {
     enabled = false,
     blizzard = false, -- Blizzard's calendar, tracking, addon compartment, and expansion buttons too
+    own = false, -- Forever++'s own minimap button too
 })
 module.title = L.HIDEMINIMAPBUTTONS_TITLE
 module.category = "map"
@@ -35,6 +37,11 @@ module.options = {
         key = "blizzard",
         name = L.HIDEMINIMAPBUTTONS_BLIZZARD,
         description = L.HIDEMINIMAPBUTTONS_BLIZZARD_DESC,
+    },
+    {
+        key = "own",
+        name = L.HIDEMINIMAPBUTTONS_OWN,
+        description = L.HIDEMINIMAPBUTTONS_OWN_DESC,
     },
 }
 
@@ -88,6 +95,12 @@ local function libraryPins()
     return pins and type(pins.minimapPins) == "table" and pins.minimapPins or nil
 end
 
+-- Forever++'s own minimap button, or nil while it isn't on the minimap.
+local function ownButton()
+    local offered = ns.Providers.Get("minimapButton")
+    return offered and offered.frame
+end
+
 -- Whether a frame's middle is on the minimap's edge or past it.
 local function onEdge(frame)
     local minimap = _G.Minimap
@@ -132,6 +145,15 @@ end
 local function scan()
     local found = {}
     local skip, pins = blizzardChildren(), libraryPins()
+    -- Ours is known by itself, not by where it is: the player can drag it onto the map. It
+    -- fades with the rest only with the option, and otherwise stays to bring them back.
+    local mine = ownButton()
+    if mine then
+        skip[mine] = true
+        if module.db.own and mine:IsShown() then
+            found[mine] = true
+        end
+    end
     for _, parent in ipairs({ _G.Minimap, _G.MinimapBackdrop }) do
         for _, child in ipairs({ parent:GetChildren() }) do
             if isAddonButton(child, skip, pins) then
@@ -185,6 +207,10 @@ end
 local function mouseOver()
     local cluster = _G.MinimapCluster
     if (cluster and cluster:IsMouseOver()) or _G.Minimap:IsMouseOver() then
+        return true
+    end
+    local mine = ownButton()
+    if mine and mine:IsVisible() and mine:IsMouseOver() then
         return true
     end
     for button in pairs(tracked) do
@@ -243,7 +269,7 @@ function module:OnDisable()
 end
 
 function module:OnOptionChanged(key)
-    if key == "blizzard" and self.enabled then
+    if (key == "blizzard" or key == "own") and self.enabled then
         scan()
     end
 end

@@ -172,6 +172,12 @@ L.CHATTABRESIZE_DESC = "上下拖曳「綜合」聊天分頁，讓主聊天視�
 L.CHATTABRESIZE_NOTICE = "新的高度只維持到重新載入"
 L.CHATTABRESIZE_NOTICE_DESC = "編輯模式保存著聊天視窗的高度，在/reload或更換版面配置後會恢復它。要保留高度，"
     .. "請在編輯模式中設定。"
+L.CHATTABRESIZE_SAVE = "儲存到編輯模式"
+L.CHATTABRESIZE_SAVE_DESC = "放開分頁時，把新的高度儲存到你的編輯模式版面配置中，這樣它會像在編輯模式中設定的高度"
+    .. "一樣保留下來。戰鬥中會在戰鬥結束後儲存。"
+L.CHATTABRESIZE_PRESET = "高度無法儲存到遊戲內建的版面配置中"
+L.CHATTABRESIZE_PRESET_DESC = "你的編輯模式版面配置是遊戲內建的，無法更改，所以新的高度只維持到重新載入。在編輯模式中"
+    .. "建立自己的版面配置，高度就會儲存在其中。"
 
 -- HideChatButtons
 L.HIDECHATBUTTONS_TITLE = "隱藏聊天按鈕"

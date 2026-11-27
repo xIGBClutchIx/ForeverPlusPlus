@@ -183,6 +183,12 @@ L.CHATTABRESIZE_DESC = "일반 대화 탭을 위아래로 끌어 기본 대화�
 L.CHATTABRESIZE_NOTICE = "새 높이는 다시 불러올 때까지만 유지됩니다"
 L.CHATTABRESIZE_NOTICE_DESC = "편집 모드가 대화창의 높이를 저장하고 있어서, /reload나 레이아웃을 바꾸면 그 "
     .. "높이로 돌아갑니다. 계속 쓰려면 편집 모드에서 정하세요."
+L.CHATTABRESIZE_SAVE = "편집 모드에 저장"
+L.CHATTABRESIZE_SAVE_DESC = "탭을 놓을 때 새 높이를 편집 모드 레이아웃에 저장해서, 편집 모드에서 정한 높이처럼 "
+    .. "유지되게 합니다. 전투 중에는 전투가 끝난 뒤 저장됩니다."
+L.CHATTABRESIZE_PRESET = "게임의 기본 레이아웃에는 높이를 저장할 수 없습니다"
+L.CHATTABRESIZE_PRESET_DESC = "지금 쓰는 편집 모드 레이아웃은 게임에 들어 있는 것이라 바꿀 수 없어서, 새 높이는 다시 "
+    .. "불러올 때까지만 유지됩니다. 편집 모드에서 레이아웃을 직접 만들면 높이가 거기에 저장됩니다."
 
 -- HideChatButtons
 L.HIDECHATBUTTONS_TITLE = "대화 버튼 숨기기"

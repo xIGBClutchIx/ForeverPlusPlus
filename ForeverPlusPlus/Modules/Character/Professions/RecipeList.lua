@@ -1,7 +1,8 @@
 -- Professions' recipe list: the one place that gives Blizzard's recipe list a tree of our own, for
 -- the parts that change what it holds or its order. Unlearned Recipes adds the recipes not known yet
 -- (`List.adder`); Crafting Costs' Sort Recipe List orders each category's recipes by profit or cost
--- (`List.order`). Either works alone, and both at once build one tree.
+-- (`List.order`), or every recipe in one list with no categories (`List.flat`). Either works
+-- alone, and both at once build one tree.
 --
 -- How: Blizzard's list code already draws, sorts, collapses, and selects whatever its tree holds
 -- (Professions.GenerateCraftingDataProvider, Blizzard_ProfessionsTemplates). After Blizzard sets the
@@ -29,6 +30,8 @@ local List = {
     -- Set by Crafting Costs: fn() -> a comparator of recipe infos (Professions.RecipeOrder), or nil
     -- for Blizzard's order.
     order = nil,
+    -- Set by Crafting Costs: fn() -> true for one list in `order` with no categories under it.
+    flat = nil,
 }
 internal.RecipeList = List
 
@@ -170,6 +173,28 @@ local function read(provider)
     return { favorites = favorites, learned = learned, ids = ids, names = names }
 end
 
+-- Every recipe info under `node`, into `into`, once each (`seen` by recipe ID): the game's data
+-- has some recipes twice.
+local function gather(node, into, seen)
+    local info = recipeOf(node)
+    if info and not seen[info.recipeID] then
+        seen[info.recipeID] = true
+        into[#into + 1] = info
+    end
+    for _, child in ipairs(node:GetNodes()) do
+        gather(child, into, seen)
+    end
+end
+
+-- One list with no categories: every recipe a row at the top of the tree, in `order`. Blizzard's
+-- rows are drawn from their own data alone, so a recipe needs no category over it.
+local function attachFlat(root, recipes, order)
+    table.sort(recipes, order)
+    for _, recipe in ipairs(recipes) do
+        root:Insert({ recipeInfo = recipe, order = 0 })
+    end
+end
+
 -- Blizzard's "no results" text follows its own tree, which ours may differ from either way: it
 -- goes by whichever tree the list has now (theirs again after ours was empty, too).
 local function noResults()
@@ -213,7 +238,20 @@ local function build(box, retain)
     end
     local provider = CreateTreeDataProvider()
     local root = provider:GetRootNode()
-    if spec then
+    if order and List.flat and List.flat() then
+        -- Favorites too: sorted with the rest, each recipe once.
+        local recipes, seen = {}, {}
+        if not spec or spec.learned then
+            gather(theirs:GetRootNode(), recipes, seen)
+        end
+        for _, info in ipairs(spec and spec.recipes or {}) do
+            if not seen[info.recipeID] then
+                seen[info.recipeID] = true
+                recipes[#recipes + 1] = info
+            end
+        end
+        attachFlat(root, recipes, order)
+    elseif spec then
         local recipes = {}
         if spec.learned then
             for i, info in ipairs(has.learned) do

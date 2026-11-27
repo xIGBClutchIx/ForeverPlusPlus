@@ -5,8 +5,8 @@
 -- already done, so an old quest item that can go stands out. Quests the player's race or class
 -- can't take aren't named, which leaves out the other side's.
 --
--- The quests in the log come first, then the ones not done, then the done ones, at most three
--- lines and a gray count of the rest. An item more than five of the player's quests ask for is a
+-- The quests in the log come first, then the ones not done, then the done ones, each kind with
+-- its own checkbox, at most Lines of them (three by default) and a gray count of the rest. An item more than five of the player's quests ask for is a
 -- common one (cloth, bars, the war effort's goods): only the quests in the log are named for it.
 --
 -- QuestieDB names an item's quests from the quests' side, so the index of items to quests is
@@ -27,9 +27,22 @@ local module = ns.modules.ItemTooltips:NewPart({
     available = QuestieDB.IsAvailable, needs = format(L.SETTINGS_NEEDS_ADDON, "QuestieDB"),
 }, {
     itemQuests = true,
+    questLines = 3, -- quests named on one tooltip; a count of the rest after them
+    questsInLog = true, -- name the quests in the quest log
+    questsOpen = true, -- name the quests neither in the log nor done
+    questsDone = true, -- name the quests already done
 })
 
-local LINES = 3 -- quests named on one tooltip; a count of the rest after them
+module:AddOptions({
+    {
+        key = "questLines", name = L.ITEMQUESTS_LINES, description = L.ITEMQUESTS_LINES_DESC,
+        min = 1, max = 10, step = 1, format = "%d",
+    },
+    { key = "questsInLog", name = L.ITEMQUESTS_SHOW_IN_LOG, description = L.ITEMQUESTS_SHOW_IN_LOG_DESC },
+    { key = "questsOpen", name = L.ITEMQUESTS_SHOW_OPEN, description = L.ITEMQUESTS_SHOW_OPEN_DESC },
+    { key = "questsDone", name = L.ITEMQUESTS_SHOW_DONE, description = L.ITEMQUESTS_SHOW_DONE_DESC },
+})
+
 local COMMON = 5 -- more of the player's quests than this, and only the ones in the log are named
 local STEP = 250 -- quests read into the index a frame
 
@@ -135,16 +148,19 @@ local function addQuests(tooltip, data)
     if not list then
         return
     end
-    local align = module.db.align
+    local db = module.db
+    local align = db.align
+    local lines = db.questLines
+    local wanted = { [IN_LOG] = db.questsInLog, [OPEN] = db.questsOpen, [DONE] = db.questsDone }
     local common = #list > COMMON
     local shown, more = 0, 0
     for _, entry in ipairs(list) do
         if common and entry.state ~= IN_LOG then
             break -- the log's come first
         end
-        local text = questText(entry)
+        local text = wanted[entry.state] and questText(entry)
         if text then
-            if shown < LINES then
+            if shown < lines then
                 shown = shown + 1
                 ItemTooltip.AddInfo(tooltip, L.ITEMQUESTS_LINE, text, align, "white")
             else

@@ -31,6 +31,7 @@ local module = professions:NewPart({
     -- The recipe list's order in each category: "off" (Blizzard's), "profit" (highest first), or
     -- "cost" (lowest first).
     craftingSort = "off",
+    craftingFlat = false, -- sorted as one list, without Blizzard's categories
     craftingTooltip = true, -- a recipe item's tooltip says what crafting it costs
     craftingWrits = true, -- a Craftsman's Writ's tooltip says what filling it costs
     -- Where the crafted item is sold: "auction" (a merchant only when it has no auction price),
@@ -56,6 +57,10 @@ module:AddOptions({
     {
         key = "craftingSort", name = L.PROFESSIONS_CRAFTING_SORT, description = L.PROFESSIONS_CRAFTING_SORT_DESC,
         added = "1.10.0", choices = SORT_CHOICES,
+    },
+    {
+        key = "craftingFlat", name = L.PROFESSIONS_CRAFTING_FLAT, description = L.PROFESSIONS_CRAFTING_FLAT_DESC,
+        added = "1.10.0", requires = "craftingSort",
     },
     {
         key = "craftingTooltip", name = L.PROFESSIONS_CRAFTING_TOOLTIP,
@@ -644,6 +649,11 @@ List.order = function()
     end, by == "profit")
 end
 
+-- Without Categories: one list of every recipe, Favorites among them, so the best is at the top.
+List.flat = function()
+    return sorting() ~= nil and module.db.craftingFlat
+end
+
 local ROW_HOOKS = { Init = profitRow }
 
 local function redrawRows()
@@ -726,6 +736,15 @@ local function addSort(owner, root)
             ns.SetOption(module.name, "craftingSort", value)
         end)
     end
+    menu:CreateDivider()
+    local flat = menu:CreateCheckbox(L.PROFESSIONS_CRAFTING_FLAT, function()
+        return module.db.craftingFlat
+    end, function()
+        ns.SetOption(module.name, "craftingFlat", not module.db.craftingFlat)
+    end)
+    flat:SetEnabled(function()
+        return sorting() ~= nil
+    end)
 end
 
 -- Added once at load: Blizzard's menus can't take an addition back, so the entries check whether
@@ -777,7 +796,7 @@ function module:OnOptionChanged(key)
         wipe(waiting)
         hookRows()
         redrawRows() -- hides every row's profit when they're off
-    elseif key == "craftingSort" then
+    elseif key == "craftingSort" or key == "craftingFlat" then
         hookRows()
         List.Refresh() -- sorted, or in Blizzard's order again
         redrawRows() -- the rows show what the list is sorted by

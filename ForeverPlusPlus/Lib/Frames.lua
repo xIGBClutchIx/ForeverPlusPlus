@@ -51,6 +51,9 @@ function Frames.TemplateBox(parent, template)
         box:SetBackdrop(BACKDROP_TOOLTIP_16_16_5555)
         box:SetBackdropColor(0, 0, 0, 0.8)
     end
+    -- A border template comes pinned to every edge of its parent (NineSlicePanelTemplate's
+    -- setAllPoints), which would stretch the box to the parent's far edges under the caller's points.
+    box:ClearAllPoints()
     return box
 end
 

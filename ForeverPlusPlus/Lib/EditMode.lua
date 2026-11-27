@@ -942,6 +942,88 @@ function EditMode.Layouts()
     return list, active and active.key
 end
 
+-- The game's saved layouts and its presets, as the game numbers them (presets first), or nil on a
+-- client without them: the saved table, the presets' copy, and the saved layout in use, which is
+-- nil while a preset is.
+local function savedLayouts()
+    local C, presets = _G.C_EditMode, _G.EditModePresetLayoutManager
+    if not (C and C.GetLayouts and presets and presets.GetCopyOfPresetLayouts) then
+        return nil
+    end
+    local saved, preset = C.GetLayouts(), presets:GetCopyOfPresetLayouts()
+    if not (type(saved) == "table" and type(saved.layouts) == "table" and type(preset) == "table"
+        and type(saved.activeLayout) == "number") then
+        return nil
+    end
+    return saved, preset, saved.layouts[saved.activeLayout - #preset]
+end
+
+---Whether the Edit Mode layout in use is one the player made, which `SaveSettings` can change:
+---false for one of Blizzard's presets, nil on a client without layouts.
+---@return boolean?
+function EditMode.OwnLayout()
+    local saved, _, layout = savedLayouts()
+    if not saved then
+        return nil
+    end
+    return layout ~= nil
+end
+
+---Writes settings of one of Blizzard's Edit Mode systems into the layout in use and saves it, as
+---changing them in Edit Mode and pressing Save does. Through the game's own calls only
+---(C_EditMode.SaveLayouts, then SetActiveLayout so Edit Mode reads the layout again from its own
+---event), never through EditModeManagerFrame, whose code ours would taint. Out of combat and
+---with Edit Mode closed. True when saved; false when it can't be now (combat, Edit Mode open) or
+---the layout in use is one of Blizzard's presets; nil when the client or the layout hasn't the
+---system or its settings.
+---@param system number an Enum.EditModeSystem
+---@param values table<number, number> setting -> raw value
+---@return boolean?
+function EditMode.SaveSettings(system, values)
+    local C = _G.C_EditMode
+    local saved, preset, layout = savedLayouts()
+    if not (saved and C.SaveLayouts and C.SetActiveLayout) then
+        return nil
+    end
+    if InCombatLockdown() or EditMode.IsActive() or not layout then
+        return false
+    end
+    local entry
+    for _, candidate in ipairs(type(layout.systems) == "table" and layout.systems or {}) do
+        if candidate.system == system then
+            entry = candidate
+            break
+        end
+    end
+    if not (entry and type(entry.settings) == "table") then
+        return nil
+    end
+    local wanted, written = 0, 0
+    for _ in pairs(values) do
+        wanted = wanted + 1
+    end
+    for _, setting in ipairs(entry.settings) do
+        local value = values[setting.setting]
+        if value ~= nil then
+            setting.value = value
+            written = written + 1
+        end
+    end
+    if written < wanted then
+        return nil
+    end
+    -- The list as Blizzard saves it, its presets before the saved ones
+    -- (EditModeManagerFrameMixin:UpdateLayoutInfo and SaveLayouts).
+    local all = preset
+    for _, own in ipairs(saved.layouts) do
+        all[#all + 1] = own
+    end
+    saved.layouts = all
+    C.SaveLayouts(saved)
+    C.SetActiveLayout(saved.activeLayout)
+    return true
+end
+
 ---Makes one of Blizzard's Edit Mode layouts the one in use, as picking it in Edit Mode does, out
 ---of combat. True when it's in use already or is now, false when it waits for combat to end, nil
 ---when there's no such layout.

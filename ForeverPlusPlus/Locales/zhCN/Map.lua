@@ -208,8 +208,9 @@ L.HIDEFILTERRESET_DESC = "隐藏世界地图过滤器下拉菜单上的重置按
 
 -- HideMinimapButtons
 L.HIDEMINIMAPBUTTONS_TITLE = "隐藏小地图按钮"
-L.HIDEMINIMAPBUTTONS_DESC = "隐藏插件放在小地图周围的按钮（包括Forever++的），直到鼠标指向小地图或其中一个按钮，"
-    .. "并让它们淡入淡出。"
+L.HIDEMINIMAPBUTTONS_DESC = "隐藏插件放在小地图周围的按钮，直到鼠标指向小地图或其中一个按钮，并让它们淡入淡出。"
+L.HIDEMINIMAPBUTTONS_OWN = "Forever++的按钮"
+L.HIDEMINIMAPBUTTONS_OWN_DESC = "以同样方式隐藏Forever++自己的小地图按钮。它保持显示时，鼠标指向它也会显示其他按钮。"
 L.HIDEMINIMAPBUTTONS_BLIZZARD = "暴雪的按钮"
 L.HIDEMINIMAPBUTTONS_BLIZZARD_DESC = "以同样方式隐藏日历、追踪和插件收纳栏按钮。邮件图标始终显示。"
 

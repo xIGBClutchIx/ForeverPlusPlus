@@ -235,9 +235,11 @@ L.HIDEFILTERRESET_DESC = "Blendet den Zurücksetzen-Knopf am Filtermenü der Wel
 
 -- HideMinimapButtons
 L.HIDEMINIMAPBUTTONS_TITLE = "Minikartenknöpfe ausblenden"
-L.HIDEMINIMAPBUTTONS_DESC = "Blendet die Knöpfe, die Addons um die Minikarte setzen, auch den von "
-    .. "Forever++, aus, bis die Maus über der Minikarte oder einem von ihnen ist, und blendet sie "
-    .. "weich ein und aus."
+L.HIDEMINIMAPBUTTONS_DESC = "Blendet die Knöpfe, die Addons um die Minikarte setzen, aus, bis die "
+    .. "Maus über der Minikarte oder einem von ihnen ist, und blendet sie weich ein und aus."
+L.HIDEMINIMAPBUTTONS_OWN = "Knopf von Forever++"
+L.HIDEMINIMAPBUTTONS_OWN_DESC = "Blendet den eigenen Minikartenknopf von Forever++ ebenso aus. Solange "
+    .. "er bleibt, zeigt die Maus über ihm auch die anderen Knöpfe."
 L.HIDEMINIMAPBUTTONS_BLIZZARD = "Knöpfe von Blizzard"
 L.HIDEMINIMAPBUTTONS_BLIZZARD_DESC = "Blendet die Knöpfe für Kalender, Aufspüren und das Addon-Fach "
     .. "ebenso aus. Das Postsymbol bleibt immer sichtbar."

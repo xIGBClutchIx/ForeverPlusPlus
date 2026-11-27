@@ -218,23 +218,25 @@ local function makePopup()
     art:SetTexCoord(0, 0.671875, 0, 0.75)
     art:SetAllPoints()
 
+    -- The stretched art's inset box is about 46 tall, from 23 to 69 below the top: the amount in
+    -- its upper half and the cost in its lower, both centered.
     popup.left = arrow("Left")
-    popup.left:SetPoint("RIGHT", popup, "TOPLEFT", 27, -41)
+    popup.left:SetPoint("RIGHT", popup, "TOPLEFT", 27, -38)
     popup.left:SetScript("OnClick", function()
         step(-1)
     end)
     popup.right = arrow("Right")
-    popup.right:SetPoint("LEFT", popup, "TOPLEFT", 150, -41)
+    popup.right:SetPoint("LEFT", popup, "TOPLEFT", 150, -38)
     popup.right:SetScript("OnClick", function()
         step(1)
     end)
 
     local box = CreateFrame("EditBox", nil, popup)
     box:SetPoint("LEFT", popup.left, "RIGHT", 4, 0)
-    box:SetPoint("RIGHT", popup.right, "LEFT", -6, 0)
+    box:SetPoint("RIGHT", popup.right, "LEFT", -4, 0)
     box:SetHeight(20)
     box:SetFontObject("GameFontHighlight")
-    box:SetJustifyH("RIGHT")
+    box:SetJustifyH("CENTER")
     box:SetNumeric(true)
     box:SetMaxLetters(5)
     box:SetAutoFocus(false)
@@ -258,7 +260,7 @@ local function makePopup()
     popup.box = box
 
     popup.cost = popup:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    popup.cost:SetPoint("TOP", popup, "TOP", 0, -61)
+    popup.cost:SetPoint("CENTER", popup, "TOP", 0, -57)
 
     local stackButton = button(L.BULKBUY_STACK, function()
         if offer then

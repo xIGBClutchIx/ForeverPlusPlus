@@ -678,9 +678,12 @@ local function update()
         button = button or newMinimapButton()
         place()
         button:Show()
+        -- For Hide Minimap Buttons, which can't tell ours by where it is: it may sit anywhere.
+        ns.Providers.Set("minimapButton", { frame = button })
     elseif button then
         button:SetScript("OnUpdate", nil)
         button:Hide()
+        ns.Providers.Set("minimapButton", nil)
     end
     if where == "compartment" or where == "both" then
         addCompartment()

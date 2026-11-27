@@ -287,6 +287,15 @@ L.ITEMQUESTS_STATE = "%s %s" -- the quest, where it stands (ITEMQUESTS_IN_LOG or
 L.ITEMQUESTS_IN_LOG = "(в журнале)" -- in the quest log
 L.ITEMQUESTS_DONE = "(выполнено)" -- the quest is done
 L.ITEMQUESTS_MORE = { "ещё %d задание", "ещё %d задания", "ещё %d заданий" } -- after the lines, the quests not named
+L.ITEMQUESTS_LINES = "Строк"
+L.ITEMQUESTS_LINES_DESC = "Сколько заданий самое большее называется в одной подсказке. Остальные "
+    .. "подсчитаны в последней строке."
+L.ITEMQUESTS_SHOW_IN_LOG = "Задания из журнала"
+L.ITEMQUESTS_SHOW_IN_LOG_DESC = "Называть задания, которые есть в вашем журнале заданий."
+L.ITEMQUESTS_SHOW_OPEN = "Еще не выполненные задания"
+L.ITEMQUESTS_SHOW_OPEN_DESC = "Называть задания, которые вы еще не взяли и не выполнили."
+L.ITEMQUESTS_SHOW_DONE = "Выполненные задания"
+L.ITEMQUESTS_SHOW_DONE_DESC = "Называть уже выполненные вами задания, серым цветом."
 L.ITEMTOOLTIPS_SHORTSTATS = "Краткие характеристики"
 L.SHORTSTATS_TITLE = "Краткие характеристики"
 L.SHORTSTATS_DESC = "Записывать бонус «Если на персонаже:» как обычную характеристику: «+29 Сила "

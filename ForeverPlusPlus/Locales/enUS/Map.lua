@@ -238,8 +238,11 @@ L.HIDEFILTERRESET_DESC = "Hide the reset button on the world map's filter dropdo
 
 -- HideMinimapButtons
 L.HIDEMINIMAPBUTTONS_TITLE = "Hide Minimap Buttons"
-L.HIDEMINIMAPBUTTONS_DESC = "Hide the buttons addons put around the minimap, Forever++'s too, until "
-    .. "the mouse is over the minimap or one of them, and fade them in and out."
+L.HIDEMINIMAPBUTTONS_DESC = "Hide the buttons addons put around the minimap until the mouse is over "
+    .. "the minimap or one of them, and fade them in and out."
+L.HIDEMINIMAPBUTTONS_OWN = "Forever++'s Button"
+L.HIDEMINIMAPBUTTONS_OWN_DESC = "Hide Forever++'s own minimap button the same way. While it stays, "
+    .. "the mouse over it shows the other buttons too."
 L.HIDEMINIMAPBUTTONS_BLIZZARD = "Blizzard's Buttons"
 L.HIDEMINIMAPBUTTONS_BLIZZARD_DESC = "Hide the calendar, tracking, and addon compartment buttons "
     .. "the same way. The mail icon always shows."
