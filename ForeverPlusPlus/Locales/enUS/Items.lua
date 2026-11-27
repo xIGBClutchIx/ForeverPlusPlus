@@ -201,6 +201,21 @@ L.EASYDELETE_TITLE = "Easy Delete"
 -- [quotes: DELETE_ITEM_CONFIRM_STRING]
 L.EASYDELETE_DESC = "Type DELETE for you when destroying a good item, so Yes is a single click."
 
+-- JunkDelete
+L.JUNKDELETE_TITLE = "Junk Delete Button"
+L.JUNKDELETE_DESC = "While your bags are full, show a button below the loot window that destroys your "
+    .. "gray stack worth least to a vendor, to make room for the loot. The button names the stack and "
+    .. "its value."
+L.JUNKDELETE_NOTICE = "Works only out of combat." -- a gray row atop the module
+L.JUNKDELETE_NOTICE_DESC = "The button hides in combat, so a stray click in a fight never destroys "
+    .. "anything."
+-- the button: the stack (its icon and name), then what a vendor pays for it
+L.JUNKDELETE_BUTTON = "Delete: %s (%s)"
+L.JUNKDELETE_HINT = "<Click to destroy this stack>"
+-- the stack's item link, then what a vendor pays for it
+L.JUNKDELETE_DELETED = "Deleted to make room: %s (%s)."
+L.JUNKDELETE_CHAT_DESC = "Say in chat which stack was deleted and what it was worth."
+
 -- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE,
 -- DISENCHANT_TITLE, STATCOLORS_TITLE, SHORTSTATS_TITLE, NEWITEM_TITLE, CRAFTEDCOMPARE_TITLE, and
 -- AUCTIONPRICES_TITLE: a section holds one part, since its checkbox reads "Enabled" under it)

@@ -174,6 +174,19 @@ L.EASYDELETE_TITLE = "轻松摧毁"
 -- [quotes: DELETE_ITEM_CONFIRM_STRING]
 L.EASYDELETE_DESC = "摧毁优秀物品时自动替你输入DELETE，只需点击一次“是”。"
 
+-- JunkDelete
+L.JUNKDELETE_TITLE = "垃圾删除按钮"
+L.JUNKDELETE_DESC = "背包已满时，在拾取窗口下方显示一个按钮，摧毁卖给商人最不值钱的一组灰色物品，"
+    .. "为拾取腾出空间。按钮上会显示这组物品及其价值。"
+L.JUNKDELETE_NOTICE = "仅在非战斗状态下有效。" -- a gray row atop the module
+L.JUNKDELETE_NOTICE_DESC = "战斗中按钮会隐藏，因此战斗中的误点不会摧毁任何东西。"
+-- the button: the stack (its icon and name), then what a vendor pays for it
+L.JUNKDELETE_BUTTON = "删除：%s（%s）"
+L.JUNKDELETE_HINT = "<点击摧毁这组物品>"
+-- the stack's item link, then what a vendor pays for it
+L.JUNKDELETE_DELETED = "为腾出空间已删除：%s（%s）。"
+L.JUNKDELETE_CHAT_DESC = "在聊天中说明删除了哪组物品以及它值多少钱。"
+
 -- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE,
 -- DISENCHANT_TITLE, STATCOLORS_TITLE, SHORTSTATS_TITLE, NEWITEM_TITLE, CRAFTEDCOMPARE_TITLE, and
 -- AUCTIONPRICES_TITLE: a section holds one part, since its checkbox reads "Enabled" under it)

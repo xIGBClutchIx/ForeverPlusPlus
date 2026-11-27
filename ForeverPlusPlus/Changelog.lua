@@ -45,6 +45,10 @@ ns.changelog = {
                     .. "disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By "
                     .. "default only on a character with Enchanting, and Skip Items Worth More Sold "
                     .. "leaves out what a vendor pays more for." },
+                { L.JUNKDELETE_TITLE, "A new module, off by default, that shows a button below the "
+                    .. "loot window while your bags are full. A click destroys your gray stack worth "
+                    .. "least to a vendor, named on the button with its value, so there's room for "
+                    .. "the loot. Out of combat only." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "

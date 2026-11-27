@@ -116,6 +116,7 @@ Everything is on by default except where noted. Each module can be turned off, a
   - **Short Stat Text**: "+29 Spell Power" for an Equip: bonus that is a plain stat.
   - **Compare Crafted Gear**: a recipe that makes gear compares it with what you wear.
   - **Repair Cost**, **Item Count** across bags and bank, **Disenchant** results and value, and **New in Forever** on items Classic never had: off by default.
+- **Junk Delete Button**: While your bags are full, shows a button below the loot window that destroys your gray stack worth least to a vendor, named on the button with its value, to make room for the loot. Out of combat only. Off by default.
 - **Gathering Skill Tooltips**: Shows the skill a herb, ore, skinnable beast, or locked box needs in its tooltip, colored against your skill.
 - **Waylaid Crates**: Helps fill Waylaid Crates: what each bundle costs at auction, and an auction house category listing every item your crates still need.
 - **Unusable Items Tint**: Tints red the icons of items you can't use, in bags, the bank, and merchants, and optionally the auction house and loot.

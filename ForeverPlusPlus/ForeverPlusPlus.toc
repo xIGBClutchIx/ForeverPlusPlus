@@ -201,6 +201,7 @@ Modules\Items\UpgradeArrows\Weights.lua
 Modules\Items\UpgradeArrows\Page.lua
 Modules\Quests\BestQuestReward.lua
 Modules\Items\EasyDelete.lua
+Modules\Items\JunkDelete.lua
 Modules\Items\AuctionTotals.lua
 Modules\System\HideBetaFeedback.lua
 Modules\Interface\Tooltips.lua

@@ -205,6 +205,21 @@ L.EASYDELETE_TITLE = "Быстрое удаление"
 L.EASYDELETE_DESC = "Вводить за вас слово УДАЛИТЬ при уничтожении ценного предмета, чтобы "
     .. "хватало одного нажатия «Да»."
 
+-- JunkDelete
+L.JUNKDELETE_TITLE = "Кнопка удаления хлама"
+L.JUNKDELETE_DESC = "Когда сумки заполнены, показывать под окном добычи кнопку, которая уничтожает "
+    .. "самую дешевую у торговца стопку серых предметов, чтобы освободить место для добычи. На кнопке "
+    .. "видны стопка и ее цена."
+L.JUNKDELETE_NOTICE = "Работает только вне боя." -- a gray row atop the module
+L.JUNKDELETE_NOTICE_DESC = "В бою кнопка скрыта, чтобы случайный щелчок во время боя ничего не "
+    .. "уничтожил."
+-- the button: the stack (its icon and name), then what a vendor pays for it
+L.JUNKDELETE_BUTTON = "Удалить: %s (%s)"
+L.JUNKDELETE_HINT = "<Щелкните, чтобы уничтожить эту стопку>"
+-- the stack's item link, then what a vendor pays for it
+L.JUNKDELETE_DELETED = "Удалено, чтобы освободить место: %s (%s)."
+L.JUNKDELETE_CHAT_DESC = "Сообщать в чате, какая стопка удалена и сколько она стоила."
+
 -- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE,
 -- DISENCHANT_TITLE, STATCOLORS_TITLE, SHORTSTATS_TITLE, NEWITEM_TITLE, CRAFTEDCOMPARE_TITLE, and
 -- AUCTIONPRICES_TITLE: a section holds one part, since its checkbox reads "Enabled" under it)

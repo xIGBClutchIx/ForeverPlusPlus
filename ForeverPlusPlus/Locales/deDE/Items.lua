@@ -214,6 +214,21 @@ L.EASYDELETE_TITLE = "Einfaches Löschen"
 L.EASYDELETE_DESC = "Tippt beim Zerstören eines guten Gegenstands „LÖSCHEN“ für Euch ein, sodass "
     .. "„Ja“ nur ein Klick ist."
 
+-- JunkDelete
+L.JUNKDELETE_TITLE = "Plunder-Löschknopf"
+L.JUNKDELETE_DESC = "Zeigt bei vollen Taschen unter dem Beutefenster einen Knopf, der Euren grauen "
+    .. "Stapel mit dem geringsten Händlerwert zerstört, um Platz für die Beute zu schaffen. Der Knopf "
+    .. "nennt den Stapel und seinen Wert."
+L.JUNKDELETE_NOTICE = "Funktioniert nur außerhalb des Kampfes." -- a gray row atop the module
+L.JUNKDELETE_NOTICE_DESC = "Im Kampf ist der Knopf ausgeblendet, damit ein versehentlicher Klick im "
+    .. "Gefecht nie etwas zerstört."
+-- the button: the stack (its icon and name), then what a vendor pays for it
+L.JUNKDELETE_BUTTON = "Löschen: %s (%s)"
+L.JUNKDELETE_HINT = "<Klicken, um diesen Stapel zu zerstören>"
+-- the stack's item link, then what a vendor pays for it
+L.JUNKDELETE_DELETED = "Gelöscht, um Platz zu schaffen: %s (%s)."
+L.JUNKDELETE_CHAT_DESC = "Nennt im Chat, welcher Stapel gelöscht wurde und was er wert war."
+
 -- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE,
 -- DISENCHANT_TITLE, STATCOLORS_TITLE, SHORTSTATS_TITLE, NEWITEM_TITLE, CRAFTEDCOMPARE_TITLE, and
 -- AUCTIONPRICES_TITLE: a section holds one part, since its checkbox reads "Enabled" under it)

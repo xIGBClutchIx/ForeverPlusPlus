@@ -193,6 +193,20 @@ L.ITEMCOUNT_IN_BANK = "은행 %d" -- count
 L.EASYDELETE_TITLE = "간편 삭제"
 L.EASYDELETE_DESC = "좋은 아이템을 파괴할 때 '지금파괴'를 대신 입력해, 한 번만 클릭하면 '예'가 되게 합니다."
 
+-- JunkDelete
+L.JUNKDELETE_TITLE = "잡동사니 삭제 버튼"
+L.JUNKDELETE_DESC = "가방이 가득 차면 전리품 창 아래에 버튼을 표시해, 상인 판매가가 가장 낮은 회색 아이템 "
+    .. "묶음을 파괴하여 전리품을 넣을 자리를 만듭니다. 버튼에 그 묶음과 가치가 표시됩니다."
+L.JUNKDELETE_NOTICE = "전투 중이 아닐 때만 작동합니다." -- a gray row atop the module
+L.JUNKDELETE_NOTICE_DESC = "전투 중에는 버튼이 숨겨지므로, 전투 중 실수로 클릭해도 아무것도 파괴되지 "
+    .. "않습니다."
+-- the button: the stack (its icon and name), then what a vendor pays for it
+L.JUNKDELETE_BUTTON = "삭제: %s (%s)"
+L.JUNKDELETE_HINT = "<클릭하면 이 묶음을 파괴합니다>"
+-- the stack's item link, then what a vendor pays for it
+L.JUNKDELETE_DELETED = "자리를 만들기 위해 삭제함: %s (%s)."
+L.JUNKDELETE_CHAT_DESC = "어떤 묶음을 삭제했는지와 그 가치를 대화창에 알립니다."
+
 -- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE,
 -- DISENCHANT_TITLE, STATCOLORS_TITLE, SHORTSTATS_TITLE, NEWITEM_TITLE, CRAFTEDCOMPARE_TITLE, and
 -- AUCTIONPRICES_TITLE: a section holds one part, since its checkbox reads "Enabled" under it)

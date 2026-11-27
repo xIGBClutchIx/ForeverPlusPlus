@@ -166,6 +166,7 @@ Generated files, in `Lib/Generated/` (never edited by hand; see Generated data):
 - `ns.Bags`: what's in the player's bags.
 - `Each(fn, reagent)` calls `fn(bag, slot, info)` for every slot of the backpack and the four bags (the reagent bag too with `reagent`), `info` nil for an empty slot. It stops at the first `fn` that returns something and returns that.
 - `FreeSlots()` counts the free slots of the bags that take anything (not a quiver's or the reagent bag's).
+- `CheapestJunk(price)` returns the bag, slot, info, and whole-stack value of the gray stack worth least to a vendor, in the bags that take anything: Poor quality, a vendor buys it, not locked, and `price(link)` knows its price. The first of equal ones wins. Junk Delete Button's pick.
 - `LAST` and `REAGENT` are the bag indices, the one place they're written down.
 - The buttons Blizzard draws for bags are `ItemButtons`'.
 
@@ -360,6 +361,7 @@ What each module is, in the code's terms (what it does for players is in `README
 - **Upgrade Arrows**: a folder: the module and its stat weight templates.
 - **Best Quest Reward**
 - **Easy Delete**
+- **Junk Delete Button**: `JunkDelete`: off by default. A `UIPanelButtonTemplate` button of ours, a child of `LootFrame` below it, shown while the loot window holds an item, `Bags.FreeSlots()` is 0, out of combat, and with the controller interface off. It names `Bags.CheapestJunk(ns.Prices.Vendor)`'s stack; its click reads the slot again, picks it up, checks the cursor holds that item, and only then calls `DeleteCursorItem` (which needs the click).
 - **Auction Totals**: sums `C_AuctionHouse.GetOwnedAuctionInfo` into one line of text on a child of the Auctions page's Cancel Auction button.
 - **Hide Beta Feedback**: beta/PTR only.
 - **Gathering Tracking**
