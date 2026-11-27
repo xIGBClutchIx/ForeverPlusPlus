@@ -2,7 +2,8 @@
 -- can take start, on the zone map shown and, on a continent map, the zones below it. Spawns of one
 -- giver that lie close together share a pin (up to clusterLimit a giver), and pins on the same
 -- spot stack into one that lists every quest. Ctrl+click puts Blizzard's map pin on the pin's
--- nearest spawn, Shift+right-click hides its quests for this character.
+-- nearest spawn, Shift+right-click hides its quests for this character. Holding Shift over a pin
+-- adds each quest's details from QuestieDB: its objectives, who takes it back, and what it leads to.
 local _, ns = ...
 
 local type, pairs, ipairs, format, tostring = type, pairs, ipairs, string.format, tostring
@@ -177,22 +178,84 @@ local function giverName(info)
     return record and record.name
 end
 
+-- The name of who or what a quest is turned in to, from QuestieDB: its first NPC, else its first object.
+local function finisherName(quest)
+    local npc = quest.finishers.npcs[1]
+    local record = npc and QuestieDB.Npc(npc)
+    if not record then
+        local object = quest.finishers.objects[1]
+        record = object and QuestieDB.Object(object)
+    end
+    return record and record.name
+end
+
+-- Quest Details: what one quest asks, in QuestieDB's words (its objectives text, in the player's
+-- language), who takes it back, and the quest it leads to.
+local function addDetails(lines, id, info)
+    local required = info.upcoming[id] == "upcoming" and internal.RequiredLevel(id)
+    if required then
+        lines[#lines + 1] = MapTooltip.Note(format(L.QUESTPINS_REQUIRES_LEVEL, required))
+    end
+    local quest = QuestieDB.Quest(id)
+    if not quest then
+        return
+    end
+    for _, text in ipairs(quest.objectivesText) do
+        if type(text) == "string" and text ~= "" then
+            lines[#lines + 1] = MapTooltip.Detail(ns.Quests.Text(text))
+        end
+    end
+    local finisher = finisherName(quest)
+    if finisher then
+        lines[#lines + 1] = MapTooltip.Pair(L.QUESTPINS_DETAIL_TURN_IN, finisher)
+    end
+    if quest.next then
+        lines[#lines + 1] = MapTooltip.Pair(L.QUESTPINS_DETAIL_NEXT, internal.Title(quest.next))
+    end
+end
+
+local DETAILED = 3 -- the most quests of one pin that get their details; the rest are a title each
+
 local function tooltipLines(info)
     local db = module.db
     local lines = {}
     local most = db.tooltipMax
-    for i = 2, #info.quests do
-        if i > most then
-            lines[#lines + 1] = MapTooltip.Note(format(L.QUESTPINS_MORE, #info.quests - most))
-            break
+    -- Shift (or the controller interface, as every map tooltip's extra lines) gives each quest its
+    -- details under its title, the pin's own title being the first quest's.
+    if db.tooltipDetails and ns.Keys.Detail() then
+        for i, id in ipairs(info.quests) do
+            if i > most then
+                lines[#lines + 1] = MapTooltip.Note(format(L.QUESTPINS_MORE, #info.quests - most))
+                break
+            end
+            if i > 1 then
+                -- A gap after each quest's details, and so before the first plain title too.
+                if i <= DETAILED + 1 then
+                    lines[#lines + 1] = " "
+                end
+                lines[#lines + 1] = questLine(id)
+            end
+            if i <= DETAILED then
+                addDetails(lines, id, info)
+            end
         end
-        lines[#lines + 1] = questLine(info.quests[i])
-    end
-    -- An upcoming quest says the level it waits for.
-    for i, id in ipairs(info.quests) do
-        local required = i <= most and info.upcoming[id] == "upcoming" and internal.RequiredLevel(id)
-        if required then
-            lines[#lines + 1] = MapTooltip.Note(format(L.QUESTPINS_REQUIRES_LEVEL, required))
+        if #info.quests > 1 then
+            lines[#lines + 1] = " "
+        end
+    else
+        for i = 2, #info.quests do
+            if i > most then
+                lines[#lines + 1] = MapTooltip.Note(format(L.QUESTPINS_MORE, #info.quests - most))
+                break
+            end
+            lines[#lines + 1] = questLine(info.quests[i])
+        end
+        -- An upcoming quest says the level it waits for.
+        for i, id in ipairs(info.quests) do
+            local required = i <= most and info.upcoming[id] == "upcoming" and internal.RequiredLevel(id)
+            if required then
+                lines[#lines + 1] = MapTooltip.Note(format(L.QUESTPINS_REQUIRES_LEVEL, required))
+            end
         end
     end
     local name = db.tooltipGiver and giverName(info)

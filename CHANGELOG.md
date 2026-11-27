@@ -15,6 +15,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Chat Buttons on Every Tab**: A new module, on by default, that keeps the buttons beside the chat window whichever chat tab is in front: the game's chat menu and channels buttons, and the ones Forever++ adds. The game only shows them on the first tab.
 - **Disenchant Icons**: A new module, off by default, that marks the items you can disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By default only on a character with Enchanting, and Skip Items Worth More Sold leaves out what a vendor pays more for.
 - **Slash Commands**: `/kb` opens Quick Keybind Mode, out of combat, and `/pull 10` starts the game's pull countdown, the one `/countdown` starts (10 seconds with no number, `/pull 0` stops it). Both are on by default and left to another addon that already has them, such as a boss mod's `/pull`.
+- **Quest Pins**: Quest Details with Shift (on by default): hold Shift over a pin to see what each of its quests asks, who it's turned in to, and the quest it leads to, from QuestieDB.
 
 ### Changed
 

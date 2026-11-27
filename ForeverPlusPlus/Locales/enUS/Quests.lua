@@ -338,7 +338,12 @@ L.QUESTPINS_FADE_ALPHA = "Faded Opacity"
 L.QUESTPINS_FADE_ALPHA_DESC = "How solid a pin of only upcoming or faded low-level quests is."
 L.QUESTPINS_TOOLTIP_GIVER = "Quest Giver on Pins"
 L.QUESTPINS_TOOLTIP_GIVER_DESC = "Name who or what starts the quests in a pin's tooltip."
+L.QUESTPINS_TOOLTIP_DETAILS = "Quest Details with Shift"
+L.QUESTPINS_TOOLTIP_DETAILS_DESC = "Hold Shift over a pin to see what each of its quests asks, who "
+    .. "it's turned in to, and the quest it leads to."
 L.QUESTPINS_TOOLTIP_MAX = "Most Quests Listed"
 L.QUESTPINS_TOOLTIP_MAX_DESC = "The most quests one pin's tooltip lists."
 L.QUESTPINS_MORE = "and %d more"
 L.QUESTPINS_REQUIRES_LEVEL = "Requires level %d"
+L.QUESTPINS_DETAIL_TURN_IN = "Turn in to:" -- a label; the NPC or object's name is at the right
+L.QUESTPINS_DETAIL_NEXT = "Leads to:" -- a label; the next quest's title is at the right

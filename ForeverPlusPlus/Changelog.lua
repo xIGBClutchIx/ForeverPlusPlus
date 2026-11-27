@@ -49,6 +49,9 @@ ns.changelog = {
                     .. "starts the game's pull countdown, the one /countdown starts (10 seconds with "
                     .. "no number, /pull 0 stops it). Both are on by default and left to another addon "
                     .. "that already has them, such as a boss mod's /pull." },
+                { L.QUESTPINS_TITLE, "Quest Details with Shift (on by default): hold Shift over a "
+                    .. "pin to see what each of its quests asks, who it's turned in to, and the "
+                    .. "quest it leads to, from QuestieDB." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "

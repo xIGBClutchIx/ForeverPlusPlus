@@ -295,7 +295,7 @@ Generated files, in `Lib/Generated/` (never edited by hand; see Generated data):
 
 ### `Quests.lua`
 
-- `ns.Quests`: the quest the map and arrow follow (`Selected`), which quest Blizzard's quest windows show (`DetailsID`, `GiverID`, and `GreetingButton` with its level) and a quest's level from the quest log.
+- `ns.Quests`: the quest the map and arrow follow (`Selected`), which quest Blizzard's quest windows show (`DetailsID`, `GiverID`, and `GreetingButton` with its level), a quest's level from the quest log, and quest text with the game's `$N`, `$C`, `$R`, `$B`, and `$G` tokens filled in for this character (`Text`).
 - What every module writes for a quest: `DifficultyLevel(questID, fallback)` (the game's, then the log's, then the fallback, such as QuestieDB's), `Title(questID, fallback)`, `IsElite`, and `LevelTag(questID, level)`, "[12]" or "[12+]" for a group quest, and `Tag(questID)`, the client's quest tag (dungeon, raid, PvP), kept once it answers. One source, so two modules can't tag the same quest differently.
 
 ### `QuestieDB.lua`
@@ -414,7 +414,7 @@ What each module is, in the code's terms (what it does for players is in `README
 - **Quest Levels**
 - **Quest Reputation**: the selected quest's `GetQuestLogRewardFactionInfo` rewards, after `QuestInfo_Display`: buttons of Blizzard's small reputation template in a frame of ours under the map's `MapQuestInfoRewardsFrame` (standing alone, with the panel resized after `QuestMapFrame_ShowQuestDetails`, when the quest has no other rewards), or lines on the end of `QuestInfoDescriptionText`.
 - **Quest Item Sparkles**: keeps the CVar for the sparkle on quest items in the world on.
-- **Quest Pins**: a folder: the module, its index of quest starts by map read from QuestieDB a few milliseconds a frame, the rules for which quests the player can take, its world map pins, and its NPC tooltip lines; needs QuestieDB, off by default.
+- **Quest Pins**: a folder: the module, its index of quest starts by map read from QuestieDB a few milliseconds a frame, the rules for which quests the player can take, its world map pins (whose tooltip, while `ns.Keys.Detail()`, adds each quest's QuestieDB objectives text, finisher, and next quest), and its NPC tooltip lines; needs QuestieDB, off by default.
 - **Talent Planner**: a folder: the module, reading the tree, drawing on it, the plan bar, and the level-up reminder.
 - **Slash Commands**: `Commands`: `/rl`, `/clear`, `/kb` (shows `QuickKeybindFrame`, out of combat and Edit Mode), and `/pull` (`C_PartyInfo.DoCountdown`).
 - **Chat Copy**

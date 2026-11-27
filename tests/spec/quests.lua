@@ -85,3 +85,21 @@ do
     eq(Quests.Selected(), nil, "selected: nil with no answer")
     T.game.secret = nil
 end
+
+do
+    -- Quest text with the game's tokens filled in for this character.
+    local Quests = ns.Quests
+    local sex = 2
+    UnitSex = function() return sex end
+    UnitName = function() return "Ayla", "Brightwood" end
+    UnitClass = function() return "Mage", "MAGE" end
+    UnitRace = function() return "Gnome", "Gnome" end
+    eq(Quests.Text("Kill 10 Kobold Vermin."), "Kill 10 Kobold Vermin.", "quest text: plain text as it is")
+    eq(Quests.Text("Well met, $N the $r $C."), "Well met, Ayla the Gnome Mage.",
+        "quest text: the name, race, and class, either case")
+    eq(Quests.Text("Go now.$B$BReturn soon."), "Go now.\n\nReturn soon.", "quest text: $B is a new line")
+    eq(Quests.Text("Thank you, $Gsir:madam;."), "Thank you, sir.", "quest text: the male word")
+    sex = 3
+    eq(Quests.Text("Thank you, $gsir:madam;."), "Thank you, madam.", "quest text: the female word")
+    eq(Quests.Text("100% done"), "100% done", "quest text: a percent sign stays")
+end
