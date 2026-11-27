@@ -45,6 +45,10 @@ ns.changelog = {
                     .. "disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By "
                     .. "default only on a character with Enchanting, and Skip Items Worth More Sold "
                     .. "leaves out what a vendor pays more for." },
+                { L.ACTIONBARCOLORS_TITLE, "A new module, off by default, that tints a whole action "
+                    .. "button red while your target is out of its range, and blue while you can't pay "
+                    .. "its cost, where the game only reddens the key and tints the icon a faint blue. "
+                    .. "Out of range comes first, and the pet bar gets the red too." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "

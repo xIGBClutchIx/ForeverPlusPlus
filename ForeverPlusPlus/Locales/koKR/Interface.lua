@@ -88,6 +88,17 @@ L.TOOLTIPS_QUEST_LINES_ALL = "플레이어, NPC, 물체에서 숨기기"
 -- RecipeColors, a part of Professions since 1.5.0: its title stays for its notes in the changelog.
 L.RECIPECOLORS_TITLE = "제조법 색상"
 
+-- ActionBarColors
+L.ACTIONBARCOLORS_TITLE = "행동 단축바 색상"
+L.ACTIONBARCOLORS_DESC = "대상이 사거리 밖에 있으면 행동 단축 버튼 전체를 빨간색으로, 비용을 치를 수 "
+    .. "없으면 파란색으로 물들입니다. 게임처럼 단축키만 빨갛게 하거나 옅은 파란색만 쓰지 않습니다. "
+    .. "사거리 밖이 먼저입니다. 소환수 단축바도 빨갛게 됩니다."
+L.ACTIONBARCOLORS_RANGE = "사거리 밖"
+L.ACTIONBARCOLORS_RANGE_DESC = "대상이 버튼의 사거리 밖에 있는 동안 버튼을 빨간색으로 물들입니다."
+L.ACTIONBARCOLORS_RESOURCE = "자원 부족"
+L.ACTIONBARCOLORS_RESOURCE_DESC = "비용을 치를 수 없는 동안 버튼을 게임의 옅은 파란색보다 진한 "
+    .. "파란색으로 물들입니다."
+
 -- HideStanceBar
 L.HIDESTANCEBAR_TITLE = "태세 막대 숨기기"
 L.HIDESTANCEBAR_DESC = "태세, 변신, 오라, 은신이 있는 태세 막대를 숨깁니다. 단축키 설정의 키는 그대로 "

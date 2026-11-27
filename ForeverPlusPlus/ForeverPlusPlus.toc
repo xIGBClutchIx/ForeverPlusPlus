@@ -240,6 +240,7 @@ Modules\System\AddOnsList.lua
 Modules\Interface\CurrencyBar.lua
 Modules\Interface\LocalTime.lua
 Modules\Interface\LootRolls.lua
+Modules\Interface\ActionBarColors.lua
 Modules\Interface\HideStanceBar.lua
 Modules\Interface\HideMenuBars.lua
 Modules\Interface\HideZoneText.lua

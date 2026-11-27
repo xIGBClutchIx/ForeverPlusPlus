@@ -394,6 +394,7 @@ What each module is, in the code's terms (what it does for players is in `README
 - **Combat Alert**
 - **Macro Icon Search**: a search box in the macro icon picker, over the icons of the player's spells and items.
 - **Movable Windows**: drag Blizzard's windows with a key held, and resize one with a key and the mouse wheel (a frame of our own takes the wheel while the key is held, so no Blizzard frame gets a wheel handler), remembered always, for the session, or until closed.
+- **Action Bar Colors**: `ActionBarColors`: the action, controller, and pet buttons' icon colors set again after each of Blizzard's own (`UpdateUsable`, `ActionButton_UpdateRangeIndicator`, `RefreshRange`, `UpdateButtonState`), red out of range before blue short of the cost, and Blizzard's color put back by its own rule when a tint comes off.
 - **Hide Stance Bar**: the stance bar faded out, its buttons not taking the mouse.
 - **Hide Bag and Menu Bars**: `HideMenuBars`: the bag bar and micro menu faded out until the mouse is over them, their buttons not taking the mouse while Show on Mouseover is off.
 - **Hide Zone Text**: `HideZoneText`: the zone, area, and territory font strings of Blizzard's zone text faded out, its two fading frames left to run.

@@ -89,6 +89,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 
 ### Interface
 
+- **Action Bar Colors**: Tints a whole action button red while your target is out of its range, and blue while you can't pay its cost, where the game only reddens the key. Out of range comes first, and the pet bar gets the red too. Off by default.
 - **Combat Alert**: Floats "Entering Combat" and "Leaving Combat" up the screen, with an optional sound. Placed in Edit Mode. Off by default.
 - **Currency Bar**: Shows your gold, and optionally currencies, in a small box, with this session's gains and gold per hour in its tooltip. Placed in Edit Mode. Off by default.
 - **Hide Bag and Menu Bars**: Hides the bag bar and the micro menu until the mouse is over them, or always. Their keys still work. Off by default.

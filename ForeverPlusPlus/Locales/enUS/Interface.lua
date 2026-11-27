@@ -97,6 +97,17 @@ L.TOOLTIPS_QUEST_LINES_ALL = "Hide on Players, NPCs, and Objects"
 -- RecipeColors, a part of Professions since 1.5.0: its title stays for its notes in the changelog.
 L.RECIPECOLORS_TITLE = "Recipe Colors"
 
+-- ActionBarColors
+L.ACTIONBARCOLORS_TITLE = "Action Bar Colors"
+L.ACTIONBARCOLORS_DESC = "Tint a whole action button red while your target is out of its range, and "
+    .. "blue while you can't pay its cost, in place of only the red key and the faint blue the game "
+    .. "shows. Out of range comes first. The pet bar gets the red too."
+L.ACTIONBARCOLORS_RANGE = "Out of Range"
+L.ACTIONBARCOLORS_RANGE_DESC = "Tint a button red while your target is out of its range."
+L.ACTIONBARCOLORS_RESOURCE = "Not Enough Resources"
+L.ACTIONBARCOLORS_RESOURCE_DESC = "Tint a button blue while you can't pay its cost, deeper than the "
+    .. "game's own faint blue."
+
 -- HideStanceBar
 L.HIDESTANCEBAR_TITLE = "Hide Stance Bar"
 -- [quotes: KEY_BINDINGS]

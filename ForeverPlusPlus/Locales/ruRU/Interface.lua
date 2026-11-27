@@ -93,6 +93,17 @@ L.TOOLTIPS_QUEST_LINES_ALL = "Скрывать у игроков, NPC и объ�
 -- RecipeColors, a part of Professions since 1.5.0: its title stays for its notes in the changelog.
 L.RECIPECOLORS_TITLE = "Цвета рецептов"
 
+-- ActionBarColors
+L.ACTIONBARCOLORS_TITLE = "Цвета панелей команд"
+L.ACTIONBARCOLORS_DESC = "Окрашивать всю кнопку действия в красный, пока цель вне ее радиуса, и в "
+    .. "синий, пока вам не хватает ресурса на нее, а не только красную клавишу и слабый синий, как в "
+    .. "игре. Вне радиуса важнее. Панель питомца тоже краснеет."
+L.ACTIONBARCOLORS_RANGE = "Вне радиуса"
+L.ACTIONBARCOLORS_RANGE_DESC = "Окрашивать кнопку в красный, пока цель вне ее радиуса."
+L.ACTIONBARCOLORS_RESOURCE = "Не хватает ресурса"
+L.ACTIONBARCOLORS_RESOURCE_DESC = "Окрашивать кнопку в синий, пока вам не хватает ресурса на нее, "
+    .. "ярче слабого синего оттенка игры."
+
 -- HideStanceBar
 L.HIDESTANCEBAR_TITLE = "Скрыть панель стоек"
 L.HIDESTANCEBAR_DESC = "Скрывать панель стоек: ваши стойки, облики, ауры или незаметность. Их "
