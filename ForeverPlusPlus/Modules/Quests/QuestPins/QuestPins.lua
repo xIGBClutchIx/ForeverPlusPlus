@@ -31,6 +31,7 @@ local module = ns.NewModule("QuestPins", L.QUESTPINS_DESC, {
     upcoming = true, -- quests the player is upcomingLevels or fewer levels short of
     upcomingLevels = 3,
     tooltipGiver = true,
+    tooltipDetails = true, -- each quest's objectives, who takes it back, and its next quest, with Shift
     tooltipMax = 8, -- the most quests a pin's tooltip lists
     normal = true,
     repeatable = false,
@@ -134,6 +135,8 @@ module.options = {
         section = TOOLTIPS },
     { key = "tooltipGiver", name = L.QUESTPINS_TOOLTIP_GIVER, description = L.QUESTPINS_TOOLTIP_GIVER_DESC,
         section = TOOLTIPS },
+    { key = "tooltipDetails", name = L.QUESTPINS_TOOLTIP_DETAILS, description = L.QUESTPINS_TOOLTIP_DETAILS_DESC,
+        section = TOOLTIPS, added = "1.10.0" },
     { key = "tooltipMax", name = L.QUESTPINS_TOOLTIP_MAX, description = L.QUESTPINS_TOOLTIP_MAX_DESC,
         section = TOOLTIPS, min = 3, max = 20, step = 1, format = "%d" },
     ns.ChatOption(L.QUESTPINS_CHAT_DESC),

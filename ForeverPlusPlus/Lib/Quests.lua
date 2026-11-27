@@ -1,9 +1,9 @@
 -- Which quest Blizzard's quest windows show, and its level from the quest log, for the quest
--- modules that tag or mark quest titles. The window functions are read when called, since some
+-- modules that tag or mark quest titles, and quest text with the game's tokens filled in. The window functions are read when called, since some
 -- (the greeting's level functions) are Classic's and may be gone on a patch. Probe each.
 local _, ns = ...
 
-local select, type = select, type
+local select, type, gsub = select, type, string.gsub
 
 local Quests = {}
 ns.Quests = Quests
@@ -114,6 +114,29 @@ end
 ---@return string
 function Quests.LevelTag(questID, level)
     return "[" .. level .. (Quests.IsElite(questID) and "+" or "") .. "]"
+end
+
+---Quest text as the game shows it to this character, from text with the game's own tokens in it
+---(QuestieDB's objectives text has them as written): $N the player's name, $C the class, $R the
+---race, $B a new line, and $Gmale:female; the word for the character's sex. Each read when called.
+---@param text string
+---@return string
+function Quests.Text(text)
+    text = gsub(text, "%$[Gg]%s*([^:;]*):([^;]*);", function(male, female)
+        return UnitSex and UnitSex("player") == 3 and female or male
+    end)
+    text = gsub(text, "%$([BbNnCcRr])", function(token)
+        token = token:upper()
+        if token == "B" then
+            return "\n"
+        elseif token == "N" then
+            return UnitName and UnitName("player") or ""
+        elseif token == "C" then
+            return UnitClass and UnitClass("player") or ""
+        end
+        return UnitRace and UnitRace("player") or ""
+    end)
+    return text
 end
 
 ---The quest in the details pane. QuestInfo_Display fills it for a quest giver's offer and reward,

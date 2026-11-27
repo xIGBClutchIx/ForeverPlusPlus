@@ -186,7 +186,7 @@ One line here says what each file is for. [docs/architecture.md](docs/architectu
 | `Gathering.lua` | `Gathering` | What the player gathers as they gather it, a map's remembered nodes, and nodes as shareable text. |
 | `Taxi.lua` | `Taxi` | The open flight master's flight points, and a flight's estimated time. |
 | `Arrival.lua` | `Arrival` | The time left until the player reaches something, from how fast the distance to it is closing (`New`, `Countdown`). |
-| `Quests.lua` | `Quests` | Which quest Blizzard's quest windows show, a quest's level and tag, and whether it's a group quest. |
+| `Quests.lua` | `Quests` | Which quest Blizzard's quest windows show, a quest's level and tag, whether it's a group quest, and quest text with its tokens filled in (`Text`). |
 | `QuestieDB.lua` | `QuestieDB` | The one place we read the separate QuestieDB addon, at run time (`Require` for a module that needs it). |
 
 **Generated**, in `Lib/Generated/` (never edit by hand): `InstanceLevels.lua`, `DisenchantBrackets.lua`, `LockboxSkills.lua`, `ComprehendScrolls.lua`, `WeaponBuffs.lua`, `TaxiRoutes.lua`, `NewItems.lua`, `ExplorableMaps.lua`.

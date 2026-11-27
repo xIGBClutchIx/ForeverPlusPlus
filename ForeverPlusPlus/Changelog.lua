@@ -45,6 +45,9 @@ ns.changelog = {
                     .. "disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By "
                     .. "default only on a character with Enchanting, and Skip Items Worth More Sold "
                     .. "leaves out what a vendor pays more for." },
+                { L.QUESTPINS_TITLE, "Quest Details with Shift (on by default): hold Shift over a "
+                    .. "pin to see what each of its quests asks, who it's turned in to, and the "
+                    .. "quest it leads to, from QuestieDB." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "
