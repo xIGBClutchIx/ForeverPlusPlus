@@ -18,6 +18,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Quest Pins**: Quest Details with Shift (on by default): hold Shift over a pin to see what each of its quests asks, who it's turned in to, and the quest it leads to, from QuestieDB.
 - **Chat Tab Resizing**: A new module, off by default, that makes the main chat window taller or shorter as you drag its General tab up or down. The height lasts until you reload; Edit Mode keeps the one it comes back at.
 - **Edit Mode Glow**: A new module, off by default, that dims the blue and gold boxes Edit Mode draws over each frame, so their edges are easier to see and line up. A Show Glow checkbox and a slider under the Edit Mode window hide or dim them while you edit.
+- **Hide Minimap Buttons**: A new module, off by default, that hides the buttons addons put around the minimap until the mouse is over it, and fades them in and out. Blizzard's Buttons does the same for the calendar, tracking, and addon compartment buttons.
 
 ### Changed
 

@@ -59,6 +59,10 @@ ns.changelog = {
                     .. "boxes Edit Mode draws over each frame, so their edges are easier to see and line "
                     .. "up. A Show Glow checkbox and a slider under the Edit Mode window hide or dim "
                     .. "them while you edit." },
+                { L.HIDEMINIMAPBUTTONS_TITLE, "A new module, off by default, that hides the buttons "
+                    .. "addons put around the minimap until the mouse is over it, and fades them in "
+                    .. "and out. Blizzard's Buttons does the same for the calendar, tracking, and "
+                    .. "addon compartment buttons." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "

@@ -388,6 +388,7 @@ What each module is, in the code's terms (what it does for players is in `README
 - **World Map**: a folder: the module, its quick checkboxes in the world map's filter menu (`Filter.lua`), and a part each for Points of Interest (with its flight points, ley lines, and Blizzard icons in files of their own), Zone Info, Unexplored Areas, and Coordinates, with their map, zone, and map art data.
 - **Flight Timer**
 - **Hide Filter Reset**
+- **Hide Minimap Buttons**: an alpha on each Button of the minimap (or its backdrop) whose middle is on its edge or past it, HereBeDragons' pins left out, and Blizzard's header buttons with an option; a poll of where the mouse is, since the buttons take it from the minimap.
 - **Square Minimap**: a square mask and border in place of the round frame, saying so through `GetMinimapShape`.
 - **Waypoints**: `/way` and a waypoint arrow, with the time to arrive from `ns.Arrival`.
 - **Compass Bar**: a compass across the top of the screen, sized in Edit Mode, with the selected quest, the map pin, the corpse, the group, and, as the player picks, quests on the map, flight masters, Gathering Map's nodes through its provider, and rares on it.
