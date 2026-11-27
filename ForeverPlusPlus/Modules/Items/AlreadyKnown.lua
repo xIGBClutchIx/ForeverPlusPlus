@@ -54,13 +54,13 @@ module.options = {
         -- only while it's on.
         conflicts = {
             {
-                module = "UpgradeArrows", key = "corner", text = L.ALREADYKNOWN_CONFLICT_ARROW,
+                module = "UpgradeArrows", key = "corner", text = L.ICONMARK_CONFLICT_ARROW,
                 when = function(db, other)
                     return db.style ~= "tint" and db.corner == other.corner
                 end,
             },
             {
-                module = "UpgradeArrows", key = "downCorner", text = L.ALREADYKNOWN_CONFLICT_DOWN,
+                module = "UpgradeArrows", key = "downCorner", text = L.ICONMARK_CONFLICT_DOWN,
                 when = function(db, other)
                     return db.style ~= "tint" and other.downgrades and db.corner == other.downCorner
                         and other.downCorner ~= other.corner

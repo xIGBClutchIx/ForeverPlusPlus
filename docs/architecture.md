@@ -105,7 +105,7 @@ Generated files, in `Lib/Generated/` (never edited by hand; see Generated data):
 
 ### `Text.lua`
 
-- `ns.Text`: numbers with thousands separators (`Number`), font string width, tooltip lines, "3 Seconds" and "12m ago", "120 yds" (`Yards`), which of two versions is newer, text without its escape codes, the client's format strings as patterns, and a bar's text as the game's Status Text setting writes it (`StatusText`).
+- `ns.Text`: numbers with thousands separators (`Number`), font string width, tooltip lines, "3 Seconds" and "12m ago", the form of a counted string that goes with a number in any language (`Plural`), "120 yds" (`Yards`), which of two versions is newer, text without its escape codes, the client's format strings as patterns, and a bar's text as the game's Status Text setting writes it (`StatusText`).
 
 ### `GameData.lua`
 

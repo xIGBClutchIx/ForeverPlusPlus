@@ -134,13 +134,13 @@ module.options = {
         -- these only while that module is on. Already Known marks no gear, so it never overlaps.
         conflicts = {
             {
-                module = "UpgradeArrows", key = "corner", text = L.DISENCHANTICONS_CONFLICT_ARROW,
+                module = "UpgradeArrows", key = "corner", text = L.ICONMARK_CONFLICT_ARROW,
                 when = function(db, other)
                     return db.corner == other.corner
                 end,
             },
             {
-                module = "UpgradeArrows", key = "downCorner", text = L.DISENCHANTICONS_CONFLICT_DOWN,
+                module = "UpgradeArrows", key = "downCorner", text = L.ICONMARK_CONFLICT_DOWN,
                 when = function(db, other)
                     return other.downgrades and db.corner == other.downCorner and other.downCorner ~= other.corner
                 end,

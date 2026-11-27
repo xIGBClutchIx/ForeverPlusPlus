@@ -388,7 +388,8 @@ local function territory(zone)
         return TERRITORY.contested, L.ZONEINFO_CONTESTED
     end
     local color = side == ns.WorldMap.PlayerSide() and TERRITORY.friendly or TERRITORY.hostile
-    return color, format(L.ZONEINFO_TERRITORY, ns.WorldMap.SideName(side) or side)
+    -- A line per faction, not the faction's name put into one: a language may decline the name.
+    return color, side == "A" and L.ZONEINFO_TERRITORY_ALLIANCE or L.ZONEINFO_TERRITORY_HORDE
 end
 
 -- A dungeon or raid as one row: Points of Interest's, or in a right corner the same mirrored

@@ -22,7 +22,7 @@ L.QUESTTRACKER_SECTION_OBJECTIVES = "Objectives"
 L.QUESTTRACKER_DESC = "Restyle Blizzard's quest tracker: its font, a box behind it that fits "
     .. "what it shows, and fading in combat. It can also sort tracked quests, show only the "
     .. "current zone's, hide completed ones, color objectives by progress, and track quests by "
-    .. "zone from its Quests header. Move and size it in Edit Mode as before."
+    .. "zone from its Quests header. Move and resize it in Edit Mode as before."
 L.QUESTTRACKER_SORT = "Sort Quests"
 L.QUESTTRACKER_SORT_DESC = "List tracked quests by level, lowest or highest first, or with the "
     .. "quests of the zone you're in first and the rest grouped by zone, instead of in the order "
@@ -229,8 +229,8 @@ L.QUESTITEMSPARKLES_NOTICE_DESC = "The game keeps drawing the sparkle until it r
 
 -- QuestPins
 L.QUESTPINS_TITLE = "Quest Pins"
-L.QUESTPINS_DESC = "Puts a ! on the world map where each quest you can still take starts, colored "
-    .. "by kind, and lists the quests an NPC offers or waits to hear back on in its tooltip. "
+L.QUESTPINS_DESC = "Put a ! on the world map where each quest you can still take starts, colored "
+    .. "by kind, and list the quests an NPC offers or waits to hear back on in its tooltip. "
     .. "Ctrl+click a pin to set a map pin there, Shift+right-click to hide it. Reads the QuestieDB addon."
 L.QUESTPINS_SECTION_PINS = "Pins"
 L.QUESTPINS_SECTION_KINDS = "Show Quests"
@@ -297,15 +297,21 @@ L.QUESTPINS_SPAWNS = "%d possible spawn locations"
 L.QUESTPINS_HINT_HIDE = "<Shift right click to hide this pin>"
 L.QUESTPINS_NO_PIN_HERE = "The game doesn't allow a map pin on this map."
 L.QUESTPINS_NO_PINS = "This client can't set a map pin."
-L.QUESTPINS_HID = "Hid %d quest pin(s). Show Hidden Pins in Settings brings them back."
-L.QUESTPINS_RESTORED = "Showing %d hidden quest pin(s) again."
+L.QUESTPINS_HID = { -- count
+    "Hid %d quest pin. Show Hidden Pins in Settings brings it back.",
+    "Hid %d quest pins. Show Hidden Pins in Settings brings them back.",
+}
+L.QUESTPINS_RESTORED = { -- count
+    "Showing %d hidden quest pin again.",
+    "Showing %d hidden quest pins again.",
+}
 L.QUESTPINS_RESTORED_ONE = "Showing quest %d again."
 L.QUESTPINS_NOT_HIDDEN = "Quest %d isn't hidden."
 L.QUESTPINS_UNHIDE_USAGE = "Usage: /fpp questpins unhide <id|all>"
 L.QUESTPINS_NONE_HIDDEN = "No hidden quest pins on this character."
 L.QUESTPINS_HIDDEN = "Hidden quest pins on this character (%d):"
 L.QUESTPINS_USAGE = "Usage: /fpp questpins [hidden | unhide <id|all> | why <id>]"
-L.QUESTPINS_COMMAND = "Lists, restores, or explains quest pins."
+L.QUESTPINS_COMMAND = "list, restore, or explain quest pins"
 L.QUESTPINS_NOT_READY = "Quest Pins is still reading QuestieDB."
 L.QUESTPINS_WHY = "Quest %d: %s" -- quest ID, QUESTPINS_WHY_SHOWN or why it has no pin
 L.QUESTPINS_WHY_SHOWN = "pinned"

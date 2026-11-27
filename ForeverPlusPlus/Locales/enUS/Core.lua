@@ -2,15 +2,27 @@
 -- under Locales/enUS/. Another language gets a folder of its own (Locales/deDE/, ...) whose files
 -- start the same way with its own code, set only the keys they translate, and go in the TOC after
 -- these. Splitting by category, as the modules are, is a choice: one file per language works too.
+-- A language's files are UTF-8; the ASCII rule is for every other file.
 --
 -- For a translation:
---   * Keep every %s and %d a string has. To change their order, number them: "%2$s of %1$s".
+--   * Keep every %s and %d a string has. To change their order, number every one of them:
+--     "%2$s of %1$s". The game's format takes that; plain Lua's doesn't.
+--   * A string that counts something is a list of forms, { "%d spot", "%d spots" }, and the number
+--     picks one (ns.Text.Plural). Give as many forms as the language has: one, two as English
+--     (1, then the rest), or three as Russian (1 and 21, then 2 to 4, then 5 to 20).
 --   * The same English under two keys is two places (an option's name and the tooltip line it
 --     adds, two dropdowns' "Off"), which another language may word differently. Each key says
 --     where it shows in its name or the comment beside it.
---   * What only someone debugging the addon reads can stay English: everything in Tools.lua, and
---     keys with DEBUG, DUMP, TRACE, DIAG, or PRINT in their name.
---   * tests/spec/locales.lua checks a language's keys and placeholders against these.
+--   * A key whose comment says it's matched against the game's own text has to be the client's
+--     wording in that language, letter for letter.
+--   * What only someone debugging the addon reads can stay English: in Tools.lua everything but
+--     the modules players see on the Modules page (Controller Mode, Console Variables, Debug's own
+--     title, description and notice), keys with DEBUG, DUMP, TRACE, DIAG, PRINT, or LOG in their
+--     name, and the Error Catcher's report (ERRORCATCHER_REPORT_...), which is pasted into bug
+--     reports.
+--   * A place name on the map (Data/PointsOfInterest.lua) is translated under the English name
+--     itself: L["Booty Bay"] = "...".
+--   * tests/spec/locales.lua checks a language's keys, placeholders, and forms against these.
 -- This file has the core's own text: the Lib helpers, /fpp, and the Settings pages.
 local _, ns = ...
 
@@ -20,12 +32,9 @@ if not L then
 end
 
 -- Lib/Text.lua: lengths of time, for slider labels and price lines
-L.TEXT_ONE_SECOND = "1 Second"
-L.TEXT_SECONDS = "%d Seconds" -- number of seconds, more than one
-L.TEXT_ONE_MINUTE = "1 Minute"
-L.TEXT_MINUTES = "%d Minutes" -- minutes
-L.TEXT_ONE_HOUR = "1 Hour"
-L.TEXT_HOURS = "%d Hours" -- hours, more than one
+L.TEXT_SECONDS = { "%d Second", "%d Seconds" }
+L.TEXT_MINUTES = { "%d Minute", "%d Minutes" }
+L.TEXT_HOURS = { "%d Hour", "%d Hours" }
 L.TEXT_AGO_NOW = "just now"
 L.TEXT_AGO_MINUTES = "%dm ago" -- minutes
 L.TEXT_AGO_HOURS = "%dh ago" -- hours
@@ -106,7 +115,7 @@ L.SLASH_TAKEN = "%s already belongs to another addon, so Forever++ leaves it to 
 L.OPTIONS_HEADER = "%s is %s. Options (/fpp set %s <option> <value>):" -- module, on/off, module
 L.OPTIONS_NONE = "none"
 L.OPTIONS_DEBUG = ", debug"
-L.SET_USAGE = "usage: /fpp set <module> <option> <value>"
+L.SET_USAGE = "Usage: /fpp set <module> <option> [value]"
 L.MODULE_STATE_ALLOWED = "%s is %s (on, off)." -- module name, on/off
 L.NO_OPTION = "%s has no option %s. /fpp options %s lists them." -- module, option, module
 L.OPTION_STATE = "%s %s is %s." -- module, option, value
@@ -120,8 +129,7 @@ L.PROFILES_NAME_TAKEN = "There is already a profile called %s." -- name
 L.PROFILES_DEFAULT_ALWAYS = "Default is always there, so it can't be renamed or deleted."
 L.SLASH_PROFILE = "list the profiles, or switch this character to one"
 L.PROFILES_HEADER = "profiles (/fpp profiles <name> to switch):"
-L.PROFILES_CHARACTERS = "%d characters" -- how many characters use a profile, more than one
-L.PROFILES_ONE_CHARACTER = "1 character"
+L.PROFILES_CHARACTERS = { "%d character", "%d characters" } -- how many use a profile
 L.PROFILES_SWITCHED = "Now using the %s profile." -- profile name
 L.PROFILES_AFTER_COMBAT = "Switching to the %s profile once combat ends." -- profile name
 L.PROFILES_NO_SUCH = "No profile called %s. /fpp profiles lists them." -- what was typed
@@ -176,7 +184,12 @@ L.ICONMARK_PIXELS = "%d px" -- a size or padding slider's value
 L.ICONMARK_PADDING = "Padding"
 L.ICONMARK_PADDING_DESC = "How far in from its corner the mark sits: at 2, a mark in the top left "
     .. "moves 2 pixels right and 2 down."
-L.ICONMARK_SECTION_SHOW = "Show On" -- the header over the places a module marks items in
+-- Under a mark's Corner option while Upgrade Arrows has an arrow in the same corner
+L.ICONMARK_CONFLICT_ARROW = "Upgrade Arrows puts its arrow in this corner too, so the two "
+    .. "overlap. Pick another corner for one of them."
+L.ICONMARK_CONFLICT_DOWN = "Upgrade Arrows puts its downgrade arrow in this corner too, so the "
+    .. "two overlap. Pick another corner for one of them."
+L.ICONMARK_SECTION_SHOW ="Show On" -- the header over the places a module marks items in
 L.ICONMARK_PLACE_BAGS = "Bags"
 L.ICONMARK_PLACE_BANK = "Bank"
 L.ICONMARK_PLACE_MERCHANT = "Merchants"
@@ -317,8 +330,7 @@ L.CHANGELOG_SEARCH = "Search changes" -- gray text in the Changelog page's empty
 L.CHANGELOG_BY_MODULE = "By Module" -- checkbox that groups a release's notes under their modules
 L.CHANGELOG_GENERAL = "General" -- heading, with By Module on, for notes about no one module
 L.CHANGELOG_NO_MATCH ="No changes match \"%s\"." -- the search text
-L.CHANGELOG_ONE_CHANGE = "1 change"
-L.CHANGELOG_CHANGES = "%d changes" -- how many entries a release has
+L.CHANGELOG_CHANGES = { "%d change", "%d changes" } -- how many entries a release has
 L.CHANGELOG_ADDED = "Added"
 L.CHANGELOG_CHANGED = "Changed"
 L.CHANGELOG_FIXED = "Fixed"

@@ -47,7 +47,7 @@ L.AUTOOPEN_SPECIAL_DESC = "Also open the few containers usually left for you to 
     .. "and world boss sacks of gems, holiday gifts, and trunks and crates that hold a quest item, "
     .. "a recipe, or a piece of gear."
 L.AUTOOPEN_PICK_LOCKS = "Pick Locks on Right Click"
-L.AUTOOPEN_PICK_LOCKS_DESC = "Right click a locked lockbox in your bags to cast Pick Lock on it, "
+L.AUTOOPEN_PICK_LOCKS_DESC = "Right-click a locked lockbox in your bags to cast Pick Lock on it, "
     .. "then it's opened."
 L.AUTOOPEN_CHAT_DESC ="Say in chat what was opened."
 L.AUTOOPEN_OPENED = "Opened %s." -- one or more item links, each maybe with a count
@@ -62,10 +62,17 @@ L.AUTOSELLJUNK_BUYBACK_DESC = "Sell only as much junk as the merchant's buyback 
 L.AUTOSELLJUNK_KEY_DESC = "Hold this key as you talk to the merchant to leave your junk unsold."
 L.AUTOSELLJUNK_CHAT_DESC = "Say in chat how many items were sold and what they sold for, and how "
     .. "many were left unsold because the buyback list was full."
-L.AUTOSELLJUNK_SOLD = "Sold %d junk items for %s." -- count, money
--- count, money, how many were left
-L.AUTOSELLJUNK_SOLD_FULL = "Sold %d junk items for %s. Buyback is full: %d left unsold."
-L.AUTOSELLJUNK_FULL = "Buyback is full: %d junk items left unsold." -- count
+-- count, money; the forms go by the count
+L.AUTOSELLJUNK_SOLD = { "Sold %d junk item for %s.", "Sold %d junk items for %s." }
+-- count, money, how many were left; the forms go by the first count
+L.AUTOSELLJUNK_SOLD_FULL = {
+    "Sold %d junk item for %s. Buyback is full: %d left unsold.",
+    "Sold %d junk items for %s. Buyback is full: %d left unsold.",
+}
+L.AUTOSELLJUNK_FULL = { -- count
+    "Buyback is full: %d junk item left unsold.",
+    "Buyback is full: %d junk items left unsold.",
+}
 
 -- GatheringTracking
 L.GATHERINGTRACKING_TITLE = "Gathering Tracking"
@@ -197,7 +204,7 @@ L.AUTODECLINE_SOMEONE = "someone"
 -- AutoConfirm
 L.AUTOCONFIRM_TITLE = "Auto Confirm"
 L.AUTOCONFIRM_DESC = "Answer Yes to the popup that asks before an enchant replaces the one an "
-    .. "item has, so leveling Enchanting takes one click an enchant."
+    .. "item has, so leveling Enchanting takes one click per enchant."
 L.AUTOCONFIRM_REPLACE = "Replacing an Enchant"
 L.AUTOCONFIRM_REPLACE_DESC = "Confirm an enchant that replaces the one the item already has."
 L.AUTOCONFIRM_BIND = "Binding the Item"
@@ -295,7 +302,7 @@ L.AUTOSCREENSHOT_DESC = "Take a screenshot when you level up, earn an achievemen
 L.AUTOSCREENSHOT_SECTION_GENERAL = "General"
 L.AUTOSCREENSHOT_SECTION_EVENTS = "Take a Screenshot When"
 L.AUTOSCREENSHOT_HIDE_UI = "Hide Interface"
-L.AUTOSCREENSHOT_HIDE_UI_DESC = "Hide the interface for the screenshot, the way Alt-Z does. Not in "
+L.AUTOSCREENSHOT_HIDE_UI_DESC = "Hide the interface for the screenshot, the way Alt+Z does. Not in "
     .. "combat, where the game doesn't allow it."
 L.AUTOSCREENSHOT_HIDE_OWN = "Your Own Screenshots"
 L.AUTOSCREENSHOT_HIDE_OWN_DESC = "Also hide the interface for the screenshots you take with the "

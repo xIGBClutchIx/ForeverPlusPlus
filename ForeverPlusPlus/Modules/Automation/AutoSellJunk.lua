@@ -8,6 +8,7 @@ local GetNumBuybackItems, GetBuybackItemLink = GetNumBuybackItems, GetBuybackIte
 
 local L = ns.L
 local money = ns.Money
+local Plural = ns.Text.Plural
 
 local BUYBACK_SLOTS = 12 -- the merchant's buyback list holds this many; older sales fall off it
 
@@ -73,11 +74,11 @@ local function onMerchantShow()
         end
     end, true)
     if sold > 0 and left > 0 then
-        module:Print(format(L.AUTOSELLJUNK_SOLD_FULL, sold, money(total), left))
+        module:Print(format(Plural(L.AUTOSELLJUNK_SOLD_FULL, sold), sold, money(total), left))
     elseif sold > 0 then
-        module:Print(format(L.AUTOSELLJUNK_SOLD, sold, money(total)))
+        module:Print(format(Plural(L.AUTOSELLJUNK_SOLD, sold), sold, money(total)))
     elseif left > 0 then
-        module:Print(format(L.AUTOSELLJUNK_FULL, left))
+        module:Print(format(Plural(L.AUTOSELLJUNK_FULL, left), left))
     end
 end
 

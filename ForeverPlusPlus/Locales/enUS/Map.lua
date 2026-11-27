@@ -181,7 +181,8 @@ L.ZONEINFO_FACTION_DESC = "Who holds the zone, in the colors the game uses when 
     .. "line of its own."
 L.ZONEINFO_FACTION_NAME = "Name Color"
 L.ZONEINFO_FACTION_LINE = "Own Line"
-L.ZONEINFO_TERRITORY = "%s Territory" -- a faction
+L.ZONEINFO_TERRITORY_ALLIANCE = "Alliance Territory"
+L.ZONEINFO_TERRITORY_HORDE = "Horde Territory"
 L.ZONEINFO_CONTESTED = "Contested Territory"
 L.ZONEINFO_DUNGEONS = "Dungeons"
 L.ZONEINFO_DUNGEONS_DESC = "The dungeons and raids whose entrance is in the zone, with their level "
@@ -434,7 +435,7 @@ L.GATHERINGMAP_CLEAR_LEARNED_DESC = "Forget the items and skills of the herbs an
     .. "learned again as you gather them."
 L.GATHERINGMAP_CLEAR_LEARNED_CONFIRM = "Forget every herb and vein Forever++ has learned?"
 L.GATHERINGMAP_CLEAR_LEARNED_DONE = "Learned herbs and veins cleared."
-L.GATHERINGMAP_FORGOT = "Forgot %d nodes." -- count
+L.GATHERINGMAP_FORGOT = { "Forgot %d node.", "Forgot %d nodes." } -- count
 L.GATHERINGMAP_FORGOT_ONE = "Forgot %s." -- node name
 L.GATHERINGMAP_FORGET_HINT = "<Shift right click to forget this node>"
 L.GATHERINGMAP_JUST = "Just Gathered"
@@ -469,7 +470,7 @@ L.GATHERINGMAP_EMPTY_TIPS_DESC = "Show the tooltip on herb and vein icons too, n
 L.GATHERINGMAP_REQUIRES = "Requires %s (%d)" -- profession, skill; Blizzard's ITEM_MIN_SKILL when it has one
 L.GATHERINGMAP_TIP_GATHERED = "Gathered:"
 L.GATHERINGMAP_TIP_ONCE = "Once"
-L.GATHERINGMAP_TIP_TIMES = "%d times" -- count, more than one
+L.GATHERINGMAP_TIP_TIMES = { "%d time", "%d times" } -- count, more than one
 L.GATHERINGMAP_TIP_LAST = "Last:"
 L.GATHERINGMAP_TIP_ALSO = "Also:"
 L.GATHERINGMAP_TIP_ALSO_VALUE = "%s (%d)" -- another vein spawning there, its gathers
@@ -534,8 +535,7 @@ L.GATHERINGMAP_PAGE_EXPERT = "Expert"
 L.GATHERINGMAP_PAGE_ARTISAN = "Artisan"
 L.GATHERINGMAP_PAGE_PROGRESS = "%d / %d" -- skill, its rank's most: "131 / 150"
 L.GATHERINGMAP_PAGE_NONE = "None yet"
-L.GATHERINGMAP_PAGE_ONE_SPOT = "1 spot"
-L.GATHERINGMAP_PAGE_SPOTS = "%d spots" -- count, more than one
+L.GATHERINGMAP_PAGE_SPOTS = { "%d spot", "%d spots" } -- count
 L.GATHERINGMAP_PAGE_SHOW_ALL = "Show All"
 L.GATHERINGMAP_PAGE_HIDE_ALL = "Hide All"
 L.GATHERINGMAP_PAGE_EMPTY = "No nodes match the search."
@@ -578,7 +578,7 @@ L.GATHERINGMAP_TRACE_REFUSED = "Gathering Map: refused, \"%s\", node %s" -- the 
 L.GATHERINGMAP_LOG_REQUIRES = "skill too low (needs %d), remembered as not gathered" -- rank
 L.GATHERINGMAP_LOG_NEW = "a new node"
 L.GATHERINGMAP_LOG_ONCE = "gathered once"
-L.GATHERINGMAP_LOG_AGAIN = "gathered %d times" -- count, more than one
+L.GATHERINGMAP_LOG_AGAIN = { "gathered %d time", "gathered %d times" } -- count, more than one
 L.GATHERINGMAP_LOG_KIND = "not saved: not a kind it remembers"
 L.GATHERINGMAP_LOG_UNNAMED = "not saved: nothing named it"
 L.GATHERINGMAP_LOG_NOT_CHEST = "not saved: not a chest it knows"
@@ -591,7 +591,7 @@ L.GATHERINGMAP_SEEN = "Not gathered yet"
 L.COMPASSBAR_TITLE = "Compass Bar"
 L.COMPASSBAR_DESC = "A compass across the top of the screen that turns as you turn, with your "
     .. "selected quest, your map pin, and more on it in the direction they are, and how far away. "
-    .. "Move and size it in Edit Mode."
+    .. "Move and resize it in Edit Mode."
 L.COMPASSBAR_NOTICE = "It hides in dungeons and raids."
 L.COMPASSBAR_NOTICE_DESC = "The game doesn't tell addons which way you face in dungeons and "
     .. "raids, or where anything is there."

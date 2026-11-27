@@ -286,7 +286,7 @@ When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or f
 
 ## Lua rules
 
-- Lua 5.1. ASCII only in `.lua` and `.toc` files. Four-space indents, LF endings (`.editorconfig`).
+- Lua 5.1. ASCII only in `.lua` and `.toc` files, except another language's locale files (`Locales/ruRU/`, ...), which are UTF-8. Four-space indents, LF endings (`.editorconfig`).
 - Start every file with `local addonName, ns = ...` (or `local _, ns = ...`). Modules share state through `ns`, never `_G`.
 - Cache hot globals as file-level locals: `local pairs, CreateFrame = pairs, CreateFrame`.
 - Annotate public functions with LuaLS `---@param` / `---@return`. Match the comment style of `Core.lua`: short, plain, and saying why.
@@ -325,6 +325,8 @@ When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or f
 
 - Every player-facing string is `ns.L.KEY`, with the English in `Locales/enUS/` (the file for the module's category). Prefix a module's keys with its name (`FRIENDLYPLATES_...`).
 - Use `%s` placeholders instead of joining pieces, since word order differs between languages.
+- A string that counts something is a list of forms, `L.KEY = { "%d spot", "%d spots" }`, read with `format(ns.Text.Plural(L.KEY, n), n)`. Never pick a form with `n == 1` or write "(s)": a language can have three forms.
+- Don't put a name into a sentence where it would need another case ("%s Territory"): give each name its own string, or write a label and a value ("Source: %s").
 - Player-facing text goes through `ns.Print` and stays short.
 - Anything a module says in chat by itself (not in reply to a command) goes through `module:Print`, with `chat = true` in its defaults and `ns.ChatOption(description)` in `module.options`, so the player gets a Chat Messages checkbox.
 

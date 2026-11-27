@@ -24,6 +24,19 @@ eq(ns.Text.Minutes(1), "1 Minute", "one minute")
 eq(ns.Text.Minutes(10), "10 Minutes", "minutes")
 eq(ns.Text.Hours(1), "1 Hour", "one hour")
 eq(ns.Text.Hours(12), "12 Hours", "hours")
+do
+    local one, two, three = { "a" }, { "one", "many" }, { "one", "few", "many" }
+    local Plural = ns.Text.Plural
+    eq(Plural(one, 1) .. Plural(one, 7), "aa", "Plural: one form is used for every number")
+    eq(Plural(two, 1), "one", "Plural: two forms, 1")
+    eq(Plural(two, 0) .. Plural(two, 2) .. Plural(two, 21), "manymanymany", "Plural: two forms, the rest")
+    local got = {}
+    for _, n in ipairs({ 1, 21, 101, 2, 4, 23, 5, 11, 12, 14, 20, 111, 0 }) do
+        got[#got + 1] = Plural(three, n)
+    end
+    eq(table.concat(got, " "), "one one one few few few many many many many many many many",
+        "Plural: three forms follow the Slavic rule")
+end
 eq(ns.Text.Yards(119.6), "120 yds", "Yards rounds")
 eq(ns.Text.Yards(1500), "1500 yds", "Yards without the client's short numbers")
 AbbreviateNumbers = function(n) return (n / 1000) .. "K" end

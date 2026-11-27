@@ -239,11 +239,11 @@ local function refresh()
         module.replace = false
     end
     if replaced > 0 then
-        module:Print(format(L.SPELLRANKS_REPLACED, replaced))
+        module:Print(format(ns.Text.Plural(L.SPELLRANKS_REPLACED, replaced), replaced))
     end
     -- Say it once when a level or a new spell adds marks, not on every bar change.
     if #lowSlots > lastCount and module.announce then
-        module:Print(format(L.SPELLRANKS_FOUND, #lowSlots))
+        module:Print(format(ns.Text.Plural(L.SPELLRANKS_FOUND, #lowSlots), #lowSlots))
     end
     lastCount = #lowSlots
     module.announce = false

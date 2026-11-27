@@ -116,7 +116,7 @@ end
 
 -- "N changes" for a release's notes.
 local function countText(count)
-    return count == 1 and L.CHANGELOG_ONE_CHANGE or format(L.CHANGELOG_CHANGES, count)
+    return format(ns.Text.Plural(L.CHANGELOG_CHANGES, count), count)
 end
 
 -- Gold fading out to the right. Probe: SetGradient with colors is Mainline's; without it, a faint

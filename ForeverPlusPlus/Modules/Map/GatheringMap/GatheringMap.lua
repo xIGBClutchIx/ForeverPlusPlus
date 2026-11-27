@@ -298,7 +298,7 @@ local function forgetAll(mapID)
             nodes[id] = nil
         end
     end
-    ns.Print(format(L.GATHERINGMAP_FORGOT, forgot))
+    ns.Print(format(ns.Text.Plural(L.GATHERINGMAP_FORGOT, forgot), forgot))
     internal.NodesChanged(nil)
 end
 
@@ -765,7 +765,7 @@ function internal.TooltipLines(node, yards)
         lines[#lines + 1] = Tip.Detail(L.GATHERINGMAP_SEEN)
     elseif wants("tipGathered") then
         lines[#lines + 1] = Tip.Pair(L.GATHERINGMAP_TIP_GATHERED, node.count == 1 and L.GATHERINGMAP_TIP_ONCE
-            or format(L.GATHERINGMAP_TIP_TIMES, node.count))
+            or format(ns.Text.Plural(L.GATHERINGMAP_TIP_TIMES, node.count), node.count))
     end
     if node.time and wants("tipLast") then
         lines[#lines + 1] = Tip.Pair(L.GATHERINGMAP_TIP_LAST, ns.Text.Ago(time() - node.time))
@@ -937,7 +937,7 @@ local function onGather(gather)
     end
     log(gather, new and L.GATHERINGMAP_LOG_NEW
         or node.count == 1 and L.GATHERINGMAP_LOG_ONCE
-        or format(L.GATHERINGMAP_LOG_AGAIN, node.count))
+        or format(ns.Text.Plural(L.GATHERINGMAP_LOG_AGAIN, node.count), node.count))
     internal.NodesChanged(mapID)
 end
 

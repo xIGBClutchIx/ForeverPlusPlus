@@ -90,25 +90,47 @@ function Text.StatusText(value, maxValue, mode)
     return short(value) .. " / " .. short(maxValue), "", ""
 end
 
+---The form of a counted string that goes with `n`. A locale gives such a string as a list of its
+---forms, and how many there are says which rule picks one, so the list is all a language sets:
+---one form is used for every number, two are English's (1, then everything else), and three are
+---the Slavic languages' (1 and 21, then 2 to 4 and 22 to 24, then the rest, 11 to 14 with them).
+---A string a language hasn't translated is still enUS's two forms, picked the English way.
+---@param forms string[] one of ns.L's lists of forms
+---@param n number
+---@return string
+function Text.Plural(forms, n)
+    local count = #forms
+    if count < 3 then
+        return forms[(count == 2 and n ~= 1) and 2 or 1]
+    end
+    local ones, tens = n % 10, n % 100
+    if ones == 1 and tens ~= 11 then
+        return forms[1]
+    elseif ones >= 2 and ones <= 4 and (tens < 12 or tens > 14) then
+        return forms[2]
+    end
+    return forms[3]
+end
+
 ---A number of seconds for a slider label: "1 Second", "5 Seconds".
 ---@param seconds number
 ---@return string
 function Text.Seconds(seconds)
-    return seconds == 1 and L.TEXT_ONE_SECOND or format(L.TEXT_SECONDS, seconds)
+    return format(Text.Plural(L.TEXT_SECONDS, seconds), seconds)
 end
 
 ---A number of minutes for a slider label: "1 Minute", "10 Minutes".
 ---@param minutes number
 ---@return string
 function Text.Minutes(minutes)
-    return minutes == 1 and L.TEXT_ONE_MINUTE or format(L.TEXT_MINUTES, minutes)
+    return format(Text.Plural(L.TEXT_MINUTES, minutes), minutes)
 end
 
 ---A number of hours for a slider label: "1 Hour", "12 Hours".
 ---@param hours number
 ---@return string
 function Text.Hours(hours)
-    return hours == 1 and L.TEXT_ONE_HOUR or format(L.TEXT_HOURS, hours)
+    return format(Text.Plural(L.TEXT_HOURS, hours), hours)
 end
 
 ---A distance in yards as Blizzard's own waypoint marker writes it ("120 yds",

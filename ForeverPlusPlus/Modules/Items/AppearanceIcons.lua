@@ -45,13 +45,13 @@ module.options = {
         -- only while that module is on.
         conflicts = {
             {
-                module = "UpgradeArrows", key = "corner", text = L.APPEARANCEICONS_CONFLICT_ARROW,
+                module = "UpgradeArrows", key = "corner", text = L.ICONMARK_CONFLICT_ARROW,
                 when = function(db, other)
                     return db.corner == other.corner
                 end,
             },
             {
-                module = "UpgradeArrows", key = "downCorner", text = L.APPEARANCEICONS_CONFLICT_DOWN,
+                module = "UpgradeArrows", key = "downCorner", text = L.ICONMARK_CONFLICT_DOWN,
                 when = function(db, other)
                     return other.downgrades and db.corner == other.downCorner and other.downCorner ~= other.corner
                 end,

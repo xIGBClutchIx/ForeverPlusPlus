@@ -28,9 +28,12 @@ jobs:
       - name: Offline tests
         run: lua5.1 tests/run.lua
 
+      # Another language's locale files (Locales/ruRU/, ...) are UTF-8, so only enUS is held to it.
       - name: ASCII only in .lua and .toc
         run: |
-          if grep -rnP '[^\x00-\x7F]' --include='*.lua' --include='*.toc' ForeverPlusPlus; then
+          if find ForeverPlusPlus \( -name '*.lua' -o -name '*.toc' \) \
+              \( -path 'ForeverPlusPlus/Locales/enUS/*' -o ! -path 'ForeverPlusPlus/Locales/*' \) -print0 \
+              | xargs -0 grep -nP '[^\x00-\x7F]'; then
             echo "Non-ASCII characters found (see above)."
             exit 1
           fi

@@ -721,7 +721,7 @@ end
 ---@param n integer
 ---@return string
 function Profiles.UsersText(n)
-    return n == 1 and L.PROFILES_ONE_CHARACTER or format(L.PROFILES_CHARACTERS, n)
+    return format(ns.Text.Plural(L.PROFILES_CHARACTERS, n), n)
 end
 
 ---Switches with a line in chat saying so, or that it waits for combat to end.

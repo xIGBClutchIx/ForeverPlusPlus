@@ -180,7 +180,7 @@ local function addResetButton(row, stat)
         return nil
     end
     button:SetScript("OnEnter", function(self)
-        Kit.ShowTooltip(self, L.SETTINGS_RESET, format(L.UPGRADEARROWS_PAGE_DEFAULT, weightText(defaultWeight(stat))))
+        Kit.ShowTooltip(self, L.SETTINGS_RESET, format(L.SETTINGS_RESET_TO, weightText(defaultWeight(stat))))
     end)
     button:SetScript("OnLeave", Kit.HideTooltip)
     return button

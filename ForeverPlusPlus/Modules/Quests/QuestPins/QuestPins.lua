@@ -162,7 +162,7 @@ function internal.Hide(ids)
         end
     end
     if count > 0 then
-        module:Print(format(L.QUESTPINS_HID, count))
+        module:Print(format(ns.Text.Plural(L.QUESTPINS_HID, count), count))
         internal.Changed()
     end
 end
@@ -172,7 +172,7 @@ local function unhide(arg)
     if arg == "all" then
         local count = hiddenCount()
         module.db.hidden = {}
-        ns.Print(format(L.QUESTPINS_RESTORED, count))
+        ns.Print(format(ns.Text.Plural(L.QUESTPINS_RESTORED, count), count))
         internal.Changed()
         return
     end

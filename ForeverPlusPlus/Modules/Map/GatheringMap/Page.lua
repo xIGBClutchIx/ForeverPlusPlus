@@ -177,8 +177,7 @@ end
 
 local function spotsText(spots)
     return spots == 0 and L.GATHERINGMAP_PAGE_NONE
-        or spots == 1 and L.GATHERINGMAP_PAGE_ONE_SPOT
-        or format(L.GATHERINGMAP_PAGE_SPOTS, spots)
+        or format(ns.Text.Plural(L.GATHERINGMAP_PAGE_SPOTS, spots), spots)
 end
 
 -- Forgets every remembered spot of the node `name`, in every zone.
@@ -196,7 +195,7 @@ local function forgetName(name)
             nodes[mapID] = nil
         end
     end
-    ns.Print(format(L.GATHERINGMAP_FORGOT, forgot))
+    ns.Print(format(ns.Text.Plural(L.GATHERINGMAP_FORGOT, forgot), forgot))
     internal.NodesChanged(nil)
 end
 
@@ -491,7 +490,7 @@ local function fillNodeView(view, entry)
     Kit.AddEntry(stack, view.minimap, nil, 0)
     if entry.gathers > 0 then
         view.gathered.value:SetText(entry.gathers == 1 and L.GATHERINGMAP_TIP_ONCE
-            or format(L.GATHERINGMAP_TIP_TIMES, entry.gathers))
+            or format(ns.Text.Plural(L.GATHERINGMAP_TIP_TIMES, entry.gathers), entry.gathers))
         Kit.AddEntry(stack, view.gathered, nil, 8)
     else
         view.gathered:Hide()

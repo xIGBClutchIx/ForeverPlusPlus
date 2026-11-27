@@ -171,8 +171,8 @@ L.MACROS_SMARTBUFF_HAS_ALL_SELF = "%s has all the buffs you can give, buffing yo
 L.MACROS_SMARTBUFF_CANT = "%s can't be buffed"
 L.MACROS_SMARTBUFF_CANT_SELF = "%s can't be buffed, buffing you instead"
 L.MACROS_SMARTBUFF_NOTHING = "You have all the buffs you can have"
-L.MACROS_SMARTBUFF_COMMAND = "Shows how Smart Buff judges your friendly target (or you): each of "
-    .. "your buffs, which they have, and what it casts."
+L.MACROS_SMARTBUFF_COMMAND = "show how Smart Buff judges your friendly target (or you): each of "
+    .. "your buffs, which they have, and what it casts"
 L.MACROS_SMARTBUFF_DIAG_OFF = "Smart Buff is off."
 L.MACROS_SMARTBUFF_DIAG_UNIT = "Smart Buff for %s: class %s, gets %s buffs, %s." -- name, class, kind, mana
 L.MACROS_SMARTBUFF_DIAG_MANA = "uses mana"
@@ -206,7 +206,7 @@ L.PROFESSIONS_DESC = "Add to the professions window: recipes colored by your cha
     .. "how many skill-ups each has left, a bar of the levels a recipe changes color at, what "
     .. "a recipe costs to craft against what it makes, and the recipes you don't know yet. "
     .. "Each has its own checkbox."
-L.PROFESSIONS_NO_PRICES = "Crafting Costs has no auction prices: Item Tooltips' Auction Prices is off."
+L.PROFESSIONS_NO_PRICES = "Crafting Costs has no auction prices: Item Tooltips' Show Auction Prices is off."
 L.PROFESSIONS_NO_PRICES_DESC = "Without auction prices, Crafting Costs counts only what merchants "
     .. "charge and pay, so most totals say No price and most recipes show no profit."
 -- Recipe Colors
@@ -227,7 +227,8 @@ L.PROFESSIONS_POINTS_LEFT = "Number Left"
 L.PROFESSIONS_POINTS_GRAY = "Gray At"
 L.PROFESSIONS_POINTS_OFF = "Off"
 L.PROFESSIONS_DETAIL = "Skill-Ups on Selected Recipe"
-L.PROFESSIONS_DETAIL_DESC = "Under the selected recipe's name, the skill it gives skill-ups until, and how many are left. Skill Bar's bar takes its place while that shows."
+L.PROFESSIONS_DETAIL_DESC = "Under the selected recipe's name, the skill at which it stops "
+    .. "giving skill-ups, and how many are left. Skill Bar's bar takes its place while that shows."
 L.PROFESSIONS_DETAIL_UNTIL = "Skill-ups until %d" -- the skill a recipe turns gray at
 L.PROFESSIONS_DETAIL_MORE = "Skill-ups until %d %s" -- the skill, then PROFESSIONS_DETAIL_LEFT in gray
 L.PROFESSIONS_DETAIL_LEFT = "(%d more)"
@@ -366,13 +367,19 @@ L.SPELLRANKS_REPLACE = "Use Highest Rank"
 L.SPELLRANKS_REPLACE_DESC = "When you learn a spell, and when you turn this on, put the highest "
     .. "rank you know on your action bars in place of every lower one. Out of combat, and not for "
     .. "macros. Leave it off if you keep lower ranks on your bars on purpose."
-L.SPELLRANKS_REPLACED = "Put the highest rank of %d spells on your action bars." -- count
+L.SPELLRANKS_REPLACED = { -- count
+    "Put the highest rank of %d spell on your action bars.",
+    "Put the highest rank of %d spells on your action bars.",
+}
 L.SPELLRANKS_CHAT_DESC = "Say in chat how many action bar spells have a higher rank after you "
     .. "learn new spells or level up, and how many Use Highest Rank replaced."
 L.SPELLRANKS_BEST = "Higher Rank Known:"
 L.SPELLRANKS_BEST_RANK = "Rank %d" -- the best rank known
-L.SPELLRANKS_FOUND = "%d action bar spells have a higher rank. /fpp ranks lists them."
-L.SPELLRANKS_COMMAND = "List the action bar spells that have a higher rank"
+L.SPELLRANKS_FOUND = { -- count
+    "%d action bar spell has a higher rank. /fpp ranks lists it.",
+    "%d action bar spells have a higher rank. /fpp ranks lists them.",
+}
+L.SPELLRANKS_COMMAND = "list the action bar spells that have a higher rank"
 L.SPELLRANKS_OFF = "Spell Ranks is off."
 L.SPELLRANKS_NONE = "Every spell on your action bars is its highest rank."
 L.SPELLRANKS_LINE = "Bar %d, slot %d: %s is Rank %d, and Rank %d is known." -- bar, slot, spell link, ranks
@@ -382,7 +389,7 @@ L.TRAINALL_TITLE = "Train All"
 L.TRAINALL_DESC = "Add a Train All button to the trainer window that learns everything you can "
     .. "learn and afford. A new profession is left for you to choose."
 L.TRAINALL_BUTTON = "Train All"
-L.TRAINALL_TOOLTIP = "Learn %d skills for %s." -- count, money
+L.TRAINALL_TOOLTIP = { "Learn %d skill for %s.", "Learn %d skills for %s." } -- count, money
 L.TRAINALL_NOTHING = "Nothing here that you can learn and afford."
 
 -- BuffTimers
@@ -443,8 +450,8 @@ L.XPBARTEXT_RATE = "Show XP per Hour"
 L.XPBARTEXT_RATE_DESC = "Show your XP per hour since you logged in and the time to level at that "
     .. "pace, once you've played a minute and gained some XP."
 L.XPBARTEXT_QUEST_BAR ="Fill Bar with Ready Quests"
-L.XPBARTEXT_QUEST_BAR_DESC = "Fill the bar on from your XP in green with the XP of the quests "
-    .. "ready to turn in, like rested XP."
+L.XPBARTEXT_QUEST_BAR_DESC = "Carry the bar on past your XP in green by the XP of the quests "
+    .. "ready to turn in, the way rested XP is shown."
 L.XPBARTEXT_SECTION_TEXT = "Text"
 L.XPBARTEXT_SECTION_BAR = "Bar and Tooltip"
 L.XPBARTEXT_TOOLTIP ="Detailed Tooltip"

@@ -100,7 +100,8 @@ local function onEnter(self)
     GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
     GameTooltip:SetText(L.TRAINALL_BUTTON, 1, 1, 1)
     if count > 0 then
-        GameTooltip:AddLine(format(L.TRAINALL_TOOLTIP, count, ns.Money(total)), nil, nil, nil, true)
+        local text = ns.Text.Plural(L.TRAINALL_TOOLTIP, count)
+        GameTooltip:AddLine(format(text, count, ns.Money(total)), nil, nil, nil, true)
     else
         GameTooltip:AddLine(L.TRAINALL_NOTHING, nil, nil, nil, true)
     end

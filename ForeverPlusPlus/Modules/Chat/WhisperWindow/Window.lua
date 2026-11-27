@@ -186,7 +186,7 @@ end
 
 local function summary()
     local unread = internal.UnreadTotal()
-    local count = #list == 1 and L.WHISPERWINDOW_SUMMARY_ONE or format(L.WHISPERWINDOW_SUMMARY, #list)
+    local count = format(ns.Text.Plural(L.WHISPERWINDOW_SUMMARY, #list), #list)
     if unread > 0 then
         count = format(L.WHISPERWINDOW_SUMMARY_UNREAD, count, unread)
     end

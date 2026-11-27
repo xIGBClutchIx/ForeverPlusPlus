@@ -567,7 +567,8 @@ end
 
 -- How often and when an entry happened, in one line.
 local function seenText(entry)
-    return format(L.ERRORCATCHER_META, entry.count or 1, entry.session or 0,
+    local count = entry.count or 1
+    return format(ns.Text.Plural(L.ERRORCATCHER_META, count), count, entry.session or 0,
         when(entry.first or entry.time), when(entry.time), age(entry))
 end
 

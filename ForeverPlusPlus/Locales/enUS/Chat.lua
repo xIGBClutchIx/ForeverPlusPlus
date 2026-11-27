@@ -208,7 +208,7 @@ L.WHISPERWINDOW_OPEN_DESC = "Open the window when a whisper comes in, or when yo
     .. "chat. In combat, it waits until combat ends."
 L.WHISPERWINDOW_HIDE = "Hide Whispers in Chat"
 L.WHISPERWINDOW_HIDE_DESC = "Leave whispers, and away and busy replies, out of the chat windows "
-    .. "once the Whisper Window has them. A whisper the game hides the text of still shows in chat."
+    .. "once the Whisper Window has them. A whisper whose text the game hides still shows in chat."
 L.WHISPERWINDOW_BUTTON = "Chat Button"
 L.WHISPERWINDOW_BUTTON_DESC = "Add a button beside the chat window that opens the Whisper Window "
     .. "and counts unread whispers. On a chat window too short for it, it's in the speech bubble "
@@ -235,8 +235,7 @@ L.WHISPERWINDOW_COMMAND = "open the Whisper Window, on a conversation with a nam
 L.WHISPERWINDOW_COMMAND_USAGE = "[name]"
 L.WHISPERWINDOW_TOOLTIP = "Whispers"
 L.WHISPERWINDOW_TOOLTIP_DESC = "Open your conversations."
-L.WHISPERWINDOW_SUMMARY_ONE = "1 conversation"
-L.WHISPERWINDOW_SUMMARY = "%d conversations" -- how many
+L.WHISPERWINDOW_SUMMARY = { "%d conversation", "%d conversations" } -- how many
 L.WHISPERWINDOW_SUMMARY_UNREAD = "%s, %d unread" -- "3 conversations", unread whispers
 L.WHISPERWINDOW_PREVIEW_YOU = "You: %s" -- your last whisper, in the list
 L.WHISPERWINDOW_REPLY_HINT = "Whisper %s" -- name

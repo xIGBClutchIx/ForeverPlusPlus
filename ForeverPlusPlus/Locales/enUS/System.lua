@@ -46,7 +46,11 @@ L.ERRORCATCHER_KIND_TAINT = "Taint"
 L.ERRORCATCHER_POSITION = "%d of %d" -- this one, how many
 L.ERRORCATCHER_ROW_INFO = "%dx, %s" -- times seen, how long ago ("12m ago")
 -- times, session, first and last time it happened, how long ago ("12m ago")
-L.ERRORCATCHER_META = "Seen %d times in session %d, first at %s, last at %s (%s)."
+-- The forms go by the times.
+L.ERRORCATCHER_META = {
+    "Seen %d time in session %d, first at %s, last at %s (%s).",
+    "Seen %d times in session %d, first at %s, last at %s (%s).",
+}
 L.ERRORCATCHER_STACK = "Stack:"
 L.ERRORCATCHER_LOCALS = "Locals:"
 L.ERRORCATCHER_NO_STACK = "No stack: blocked actions and warnings don't come with one."
@@ -118,8 +122,8 @@ L.ADDONSLIST_CHAT_DESC = "Say in chat when a set is saved, and how many of a set
 -- MinimapButton
 L.MINIMAPBUTTON_TITLE = "Minimap Button"
 L.MINIMAPBUTTON_DESC = "A Forever++ button on the minimap, in the addon compartment, or both: click it for quick "
-    .. "toggles (Customize, below, picks which modules they offer), right-click it for "
-    .. "settings, and Shift-click it for caught errors."
+    .. "toggles (Quick Toggles, below, picks which modules they offer), right-click it for "
+    .. "settings, and Shift+click it for caught errors."
 L.MINIMAPBUTTON_SECTION_BUTTON = "Button"
 L.MINIMAPBUTTON_SECTION_TOGGLES = "Quick Toggles"
 L.MINIMAPBUTTON_SECTION_ERRORS = "Errors"
@@ -190,7 +194,8 @@ L.MINIMAPBUTTON_MENU_SIDE_LEFT = "Left"
 L.MINIMAPBUTTON_MENU_SIDE_RIGHT = "Right"
 L.MINIMAPBUTTON_MENU_ORDER = "Menu Order"
 L.MINIMAPBUTTON_MENU_ORDER_DESC = "How the quick toggles are laid out: in groups by what you're doing "
-    .. "(Loot, NPCs, World, and so on), under the Modules page's categories, or in one list from A to Z."
+    .. "(Vendors and Loot, NPCs and Quests, and so on), under the Modules page's categories, or "
+    .. "in one list from A to Z."
 L.MINIMAPBUTTON_MENU_ORDER_GROUPS = "Activity"
 L.MINIMAPBUTTON_MENU_ORDER_CATEGORY = "Category"
 L.MINIMAPBUTTON_MENU_ORDER_TITLE = "A to Z"
