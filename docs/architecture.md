@@ -374,6 +374,7 @@ What each module is, in the code's terms (what it does for players is in `README
 - **Auto Release**
 - **Skip Cinematics**
 - **Auto Dismount**
+- **Mount Speed Gear** (`MountGear`): swaps a bag slot with an inventory slot (pick up one, then the other, as Blizzard's equipment manager does), so full bags don't matter, and keeps what it replaced per character (`worn`) by item, enchant, gems, and suffix, so a reload while mounted still puts it back. Its trinkets and enchants are `ns.GameData` sets seeded from `Data/Items.lua`.
 - **Fishing Cast**
 - **Auto Weapon Buff**
 - **Comprehend Scrolls**

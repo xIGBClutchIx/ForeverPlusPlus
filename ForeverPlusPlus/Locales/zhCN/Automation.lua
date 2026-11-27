@@ -111,6 +111,29 @@ L.AUTODISMOUNT_STAND_DESC = "坐着时施放法术、拾取或攻击时，自动
 L.AUTODISMOUNT_UNSHIFT = "取消变形"
 L.AUTODISMOUNT_UNSHIFT_DESC = "施放在变形形态（例如德鲁伊的熊形态或猎豹形态）下无法施放的法术时，自动取消变形。"
 
+-- MountGear
+L.MOUNTGEAR_TITLE = "坐骑速度装备"
+L.MOUNTGEAR_DESC = "上坐骑时，从背包中换上提高坐骑速度的装备，下坐骑时换回你原来的装备。"
+    .. "原来的装备在重载界面或登出后仍会记住。"
+L.MOUNTGEAR_NOTICE = "等待战斗结束"
+L.MOUNTGEAR_NOTICE_DESC = "战斗中无法更换装备，所以如果你在战斗中下坐骑，原来的装备会在战斗结束后换回。"
+    .. "重新装备的饰品在30秒内无法使用，和装备任何饰品时一样。只会换上已与你绑定的装备。"
+L.MOUNTGEAR_TRINKET = "饰品"
+L.MOUNTGEAR_TRINKET_DESC = "换上“棍子上的胡萝卜”。"
+L.MOUNTGEAR_TRINKET_SLOT = "饰品栏位"
+L.MOUNTGEAR_TRINKET_SLOT_DESC = "“棍子上的胡萝卜”替换你两个饰品中的哪一个。"
+L.MOUNTGEAR_TRINKET_UPPER = "上方"
+L.MOUNTGEAR_TRINKET_LOWER = "下方"
+L.MOUNTGEAR_GLOVES = "手套"
+L.MOUNTGEAR_GLOVES_DESC = "换上带有“附魔手套 - 骑乘”的手套。"
+L.MOUNTGEAR_BOOTS = "靴子"
+L.MOUNTGEAR_BOOTS_DESC = "换上装有“秘银马刺”的靴子。"
+L.MOUNTGEAR_INSTANCES = "在地下城和战场中"
+L.MOUNTGEAR_INSTANCES_DESC = "在地下城、团队副本和战场中也更换装备。关闭时，你原来的装备会留在身上。"
+L.MOUNTGEAR_CHAT_DESC = "无法换回你原来的装备时在聊天中说明。"
+L.MOUNTGEAR_MISSING = "无法重新装备%s：它不在你的背包里。" -- an item link
+L.MOUNTGEAR_BAGS_FULL = "背包已满，%s仍然穿在身上。" -- an item link
+
 -- AutoGossip
 L.AUTOGOSSIP_TITLE = "自动对话"
 L.AUTOGOSSIP_DESC = "当NPC只有一个对话选项，或者除了闲聊之外只有一项服务、且没有任务时，自动替你选择，"

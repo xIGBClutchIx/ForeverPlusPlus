@@ -38,3 +38,15 @@ ns.Data.autoOpenKept = {
     [22158] = true, -- Pledge of Adoration: Thunder Bluff
     [22157] = true, -- Pledge of Adoration: Undercity
 }
+
+-- Mount Speed Gear: what makes a mount faster, and goes on when the player mounts up. Trinkets by
+-- item ID. Enchants by SpellItemEnchantment ID, to the inventory type that carries them: the ID is
+-- the EffectMiscValue of the enchanting spell's Enchant Item effect (SpellEffect, build
+-- 1.60.1.71139). Carrot on a Stick is in that build's Item table (a trinket) but not ItemSparse.
+ns.Data.mountSpeedTrinkets = {
+    [11122] = true, -- Carrot on a Stick (Equip: mount speed +3%)
+}
+ns.Data.mountSpeedEnchants = {
+    [930] = "INVTYPE_HAND", -- Enchant Gloves - Riding Skill (spell 13947)
+    [464] = "INVTYPE_FEET", -- Mithril Spurs (item 7969, spell 9783)
+}

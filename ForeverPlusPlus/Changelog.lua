@@ -45,6 +45,10 @@ ns.changelog = {
                     .. "disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By "
                     .. "default only on a character with Enchanting, and Skip Items Worth More Sold "
                     .. "leaves out what a vendor pays more for." },
+                { L.MOUNTGEAR_TITLE, "A new module, off by default, that puts on Carrot on a Stick, "
+                    .. "gloves enchanted with Riding Skill, and boots with Mithril Spurs from your "
+                    .. "bags when you mount up, and your own gear back on when you get off, once "
+                    .. "combat ends. Your own gear is remembered through a reload or logout." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "

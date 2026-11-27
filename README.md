@@ -28,6 +28,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Fishing Cast | Double right-click with a fishing pole equipped to cast Fishing. Louder Bobber turns sound effects up while you fish. Never in combat. Off by default. |
 | Fast Loot | With auto loot on, takes everything at once instead of waiting for the loot window. |
 | Gathering Tracking | Keeps Find Minerals or Find Herbs on after logging in, zoning, or dying, and can swap between the two every few seconds, silently if you like. A Dwarf can add Find Treasure. |
+| Mount Speed Gear | Puts on Carrot on a Stick, Riding Skill gloves, and Mithril Spurs boots from your bags when you mount up, and your own gear back when you get off, once out of combat. Off by default. |
 | Skip Cinematics | Skips cinematics and movies you've already seen, or every one. Hold the Watch Key to watch. Off by default. |
 | Auto Quest | Accepts quests and turns in finished ones as you talk to quest givers. Never picks a reward for you, and pauses while you hold Shift. Off by default. |
 | **Character** | |
