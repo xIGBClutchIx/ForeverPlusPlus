@@ -197,7 +197,7 @@ L.MOVABLEWINDOWS_RESET_CLICK_DESC = "Щелкните по окну этой к�
 L.MOVABLEWINDOWS_CLICK_RIGHT = "Правая кнопка мыши"
 L.MOVABLEWINDOWS_CLICK_MIDDLE = "Средняя кнопка мыши"
 L.MOVABLEWINDOWS_CLICK_LEFT = "Левая кнопка мыши"
-L.MOVABLEWINDOWS_CLICK_OFF = "Выкл."
+L.MOVABLEWINDOWS_CLICK_OFF = "Откл."
 L.MOVABLEWINDOWS_RESET_KEY = "Клавиша сброса"
 L.MOVABLEWINDOWS_RESET_KEY_DESC = "Клавиша, которую нужно удерживать при щелчке, чтобы сбросить окно. "
     .. "При «Нет» окно сбрасывается одним щелчком."
@@ -255,7 +255,7 @@ L.LOCALTIME_PREVIOUS_DAY = "%s -1" -- a time that falls on the day before
 L.LOCALTIME_YOUR_TIME = "Ваше время: %s" -- under the create event window's date
 
 -- LootRolls
-L.LOOTROLLS_TITLE = "Розыгрыш добычи"
+L.LOOTROLLS_TITLE = "Розыгрыши добычи"
 L.LOOTROLLS_DESC = "Размещать окна розыгрыша («Мне это нужно», «Не откажусь», «Отказаться») в режиме "
     .. "редактирования и складывать их вверх, вниз, влево или вправо. Показывает оставшиеся секунды "
     .. "и сколько игроков выбрали каждый вариант."

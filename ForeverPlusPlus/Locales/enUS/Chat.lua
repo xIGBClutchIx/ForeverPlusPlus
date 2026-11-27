@@ -21,7 +21,7 @@ L.CHATCOPY_BUTTON_HIDDEN_DESC = "Blizzard's buttons beside the chat window are h
     .. "by another chat addon, and Chat Copy's button sits with them. Click Timestamps still works."
 L.CHATCOPY_HIDDEN ="(hidden by the game)"
 L.CHATCOPY_EMPTY = "(no chat yet)"
-L.CHATCOPY_SELECT_ALL = "Select All"
+L.CHATCOPY_SELECT_ALL = "Select All" -- [game: MENU_EDIT_SELECT_ALL]
 L.CHATCOPY_SELECT_HINT = "Press Ctrl+C to copy."
 
 -- ChatSounds

@@ -20,7 +20,7 @@ L.CHATCOPY_BUTTON_HIDDEN_DESC = "Кнопки Blizzard рядом с окном 
     .. "по-прежнему работает."
 L.CHATCOPY_HIDDEN = "(скрыто игрой)"
 L.CHATCOPY_EMPTY = "(в чате пока пусто)"
-L.CHATCOPY_SELECT_ALL = "Выделить все"
+L.CHATCOPY_SELECT_ALL = "Выбрать все"
 L.CHATCOPY_SELECT_HINT = "Нажмите Ctrl+C, чтобы скопировать."
 
 -- ChatSounds

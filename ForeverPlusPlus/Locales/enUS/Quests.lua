@@ -23,7 +23,7 @@ L.QUESTTRACKER_DESC = "Restyle Blizzard's quest tracker: its font, a box behind 
     .. "what it shows, and fading in combat. It can also sort tracked quests, show only the "
     .. "current zone's, hide completed ones, color objectives by progress, and track quests by "
     .. "zone from its Quests header. Move and resize it in Edit Mode as before."
-L.QUESTTRACKER_SORT = "Sort Quests"
+L.QUESTTRACKER_SORT = "Sort Quests" -- [game: TRACKER_SORT_LABEL]
 L.QUESTTRACKER_SORT_DESC = "List tracked quests by level, lowest or highest first, or with the "
     .. "quests of the zone you're in first and the rest grouped by zone, instead of in the order "
     .. "you tracked them. Waits for combat to end."
@@ -68,8 +68,8 @@ L.QUESTTRACKER_ZONES_TITLE = "Track by Zone"
 L.QUESTTRACKER_ZONES_HINT = "<Click to track quests by zone>"
 L.QUESTTRACKER_ZONES_ENTRY = "%s (%d)" -- zone, how many quests
 L.QUESTTRACKER_ZONES_NONE = "No quests"
-L.QUESTTRACKER_ZONES_ALL = "Track All"
-L.QUESTTRACKER_ZONES_CLEAR = "Untrack All"
+L.QUESTTRACKER_ZONES_ALL = "Track All" -- [game: QUEST_LOG_TRACK_ALL]
+L.QUESTTRACKER_ZONES_CLEAR = "Untrack All" -- [game: QUEST_LOG_UNTRACK_ALL]
 L.QUESTTRACKER_ZONES_FULL = "The tracker is full: it takes %d quests."
 L.QUESTTRACKER_DEFAULT = "Default"
 L.QUESTTRACKER_FONT = "Font"
@@ -123,13 +123,13 @@ L.FOREVERQUESTICONS_TITLE = "Forever Quest Icons"
 L.FOREVERQUESTICONS_DESC = "Mark quests that are new to Forever, the ones that weren't in original "
     .. "Classic, with an icon after their name in the quest log, the objective tracker, quest "
     .. "givers' lists, and the quest's details and turn-in windows."
-L.FOREVERQUESTICONS_LOG = "Quest Log"
+L.FOREVERQUESTICONS_LOG = "Quest Log" -- [game: QUEST_LOG]
 L.FOREVERQUESTICONS_LOG_DESC = "Show the icon in the quest log beside the world map."
-L.FOREVERQUESTICONS_TRACKER = "Objective Tracker"
+L.FOREVERQUESTICONS_TRACKER = "Objective Tracker" -- [game: HUD_EDIT_MODE_OBJECTIVE_TRACKER_LABEL]
 L.FOREVERQUESTICONS_TRACKER_DESC = "Show the icon on quests in the objective tracker."
 L.FOREVERQUESTICONS_GIVERS = "Quest Givers"
 L.FOREVERQUESTICONS_GIVERS_DESC = "Show the icon in the list of quests a quest giver offers."
-L.FOREVERQUESTICONS_DETAILS = "Quest Details"
+L.FOREVERQUESTICONS_DETAILS = "Quest Details" -- [game: QUEST_DETAILS]
 L.FOREVERQUESTICONS_DETAILS_DESC = "Show the icon after the quest's name at the top of its "
     .. "details, in the quest window and on the map."
 L.FOREVERQUESTICONS_SIZE ="Icon Size"
@@ -157,7 +157,7 @@ L.AUTOQUEST_ACCEPT = "Accept Quests"
 L.AUTOQUEST_ACCEPT_DESC = "Accept new quests, and take them one by one from a quest giver's list."
 L.AUTOQUEST_REPEATABLE = "Repeatable Quests"
 L.AUTOQUEST_REPEATABLE_DESC = "Also take repeatable and daily quests from a quest giver's list."
-L.AUTOQUEST_TRIVIAL = "Low-Level Quests"
+L.AUTOQUEST_TRIVIAL = "Low-Level Quests" -- [game: MINIMAP_TRACKING_TRIVIAL_QUESTS]
 L.AUTOQUEST_TRIVIAL_DESC = "Also take quests far below your level (gray) from a quest giver's list. The game "
     .. "lists them only while Low-Level Quests is checked in the minimap's tracking menu."
 L.AUTOQUEST_SHARED = "Shared Quests"
@@ -263,7 +263,7 @@ L.QUESTPINS_WAR_EFFORT_DESC = "Show pins for the war effort's quests in the capi
     .. "had one of its quests in your quest log."
 L.QUESTPINS_WAR_EFFORT_ALWAYS = "Always Show War Effort"
 L.QUESTPINS_WAR_EFFORT_ALWAYS_DESC = "Show the war effort's pins without waiting for one of its quests in your log."
-L.QUESTPINS_LOW = "Low-Level Quests"
+L.QUESTPINS_LOW = "Low-Level Quests" -- [game: MINIMAP_TRACKING_TRIVIAL_QUESTS]
 L.QUESTPINS_LOW_DESC = "What to do with quests far below your level: hide their pins, show them "
     .. "faded and gray, or show them like the rest."
 L.QUESTPINS_LOW_HIDE = "Hide"
@@ -281,8 +281,10 @@ L.QUESTPINS_HIGH_GAP_DESC = "How many levels above you a quest is when its pin i
 L.QUESTPINS_NPC_TOOLTIPS = "NPC Tooltips"
 L.QUESTPINS_NPC_TOOLTIPS_DESC = "Add the quests an NPC offers that you can take (!) and the ones you can turn in to it (?) to its tooltip."
 L.QUESTPINS_CHAT_DESC = "Say in chat when pins are hidden."
+-- [english]
 L.QUESTPINS_DEBUG = "Quest Pin Details"
 L.QUESTPINS_DEBUG_DESC = "Show quest IDs, kinds, and where each pin's giver stands in the pins' tooltips."
+-- [/english]
 L.QUESTPINS_RESET = "Hidden Pins"
 L.QUESTPINS_RESET_BUTTON = "Show Hidden Pins"
 L.QUESTPINS_RESET_DESC = "Bring back the pins you hid on this character."

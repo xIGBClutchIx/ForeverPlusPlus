@@ -120,6 +120,7 @@ L.AUTOSTOW_DELAY_DESC = "How long your weapons stay out, after combat or after y
 L.AUTOSTOW_OUTSIDE_ONLY = "Only Out of Instances"
 L.AUTOSTOW_OUTSIDE_ONLY_DESC = "Leave your weapons out in dungeons, raids and battlegrounds, where "
     .. "the next pull is never far off."
+-- [english]
 L.AUTOSTOW_LOG = "Log Sheath State"
 L.AUTOSTOW_LOG_DESC = "Print in chat, with timestamps, every change of the sheath state (1 away, "
     .. "2 melee, 3 ranged) out of combat, and every toggle Auto Stow or you make."
@@ -133,6 +134,7 @@ L.AUTOSTOW_LOG_AGAIN = "toggle changed nothing, state %s, trying once more"
 L.AUTOSTOW_LOG_NO_CHANGE ="toggle changed nothing, leaving state %s until it changes"
 L.AUTOSTOW_LOG_GAVE_UP = "still not away after %d toggles, leaving state %s until it changes"
 L.AUTOSTOW_LOG_PLAYER = "you pressed Sheath, state %s, delay starts again"
+-- [/english]
 
 -- AutoDismount
 L.AUTODISMOUNT_TITLE = "Auto Dismount"
@@ -168,6 +170,7 @@ L.AUTOGOSSIP_OTHER = "Other NPCs"
 L.AUTOGOSSIP_OTHER_DESC = "Pick the only option of any other NPC, unless the game asks you to "
     .. "read its text first."
 L.AUTOGOSSIP_KEY_DESC = "Hold this key as you talk to an NPC to pick its options yourself."
+-- [english]
 L.AUTOGOSSIP_PRINT = "Print Gossip Options"
 L.AUTOGOSSIP_PRINT_DESC = "Print every gossip option in chat with its icon and status, to check "
     .. "which kind of NPC it counts as."
@@ -175,8 +178,14 @@ L.AUTOGOSSIP_PRINT_HEADER = "Gossip options (title: %s):" -- NPC's title under t
 L.AUTOGOSSIP_PRINT_LINE = "  %s  icon=%s status=%s flags=%s  %s" -- id, icon, status, flags, name
 L.AUTOGOSSIP_PRINT_RESULT = "  -> %s" -- the kind picked, or why not (debug codes)
 L.AUTOGOSSIP_PRINT_LEARNED = "Gossip icon %s learned as %s." -- icon file ID, kind (false: ambiguous)
--- The title under a stable master's name, exactly as the game shows it.
+-- [/english]
+-- The title under a stable master's name, exactly as the game shows it: it's matched against the
+-- game's text, and no table of the client's has it (it comes from the server). English until
+-- someone reads it off a client in the language (/dump GameTooltipTextLeft2:GetText() over one);
+-- until then Auto Gossip doesn't know a stable master there.
+-- [english]
 L.AUTOGOSSIP_TITLE_STABLE = "Stable Master"
+-- [/english]
 
 -- AutoDecline
 L.AUTODECLINE_TITLE = "Auto Decline"
@@ -247,10 +256,12 @@ L.SKIPCINEMATICS_RESET_DESC = "Forget which cinematics and movies you've seen, s
     .. "more."
 L.SKIPCINEMATICS_RESET_CONFIRM = "Forget which cinematics and movies you've seen?"
 L.SKIPCINEMATICS_RESET_DONE = "Seen cinematics cleared."
+-- [english]
 L.SKIPCINEMATICS_PRINT = "Print Cinematic Keys"
 L.SKIPCINEMATICS_PRINT_DESC = "Print each cinematic's or movie's key in chat as it starts, with "
     .. "whether it was seen and skipped."
 L.SKIPCINEMATICS_PRINT_LINE = "Cinematic %s: seen=%s skip=%s" -- key (movie ID or map:subzone), seen, skip
+-- [/english]
 
 
 -- FishingCast
@@ -279,12 +290,14 @@ L.AUTOWEAPONBUFF_WARN_DESC = "When no equipped weapon can take the item, like a 
     .. "only blades, say so in red at the top of the screen instead of bringing up a cursor."
 L.AUTOWEAPONBUFF_WARN_TEXT = "No equipped weapon can take %s." -- item name
 L.AUTOWEAPONBUFF_WARN_TEXT_ANY = "No equipped weapon can take that."
+-- [english]
 L.AUTOWEAPONBUFF_PRINT = "Print Weapon Checks"
 L.AUTOWEAPONBUFF_PRINT_DESC = "Print in chat, each time you use a weapon buff from your bags or a bar, "
     .. "which kind of item it is and which weapon slot was picked, and each time it learns a weapon "
     .. "an item goes on."
 -- debug codes: item link, item kind (sharp, blunt, melee, pole, learned), slot picked (16, 17, or nil)
 L.AUTOWEAPONBUFF_PRINT_LINE = "Weapon buff: %s kind=%s -> slot %s" -- item link or name, kind, slot
+-- [/english]
 L.AUTOWEAPONBUFF_LEARNED_LINE = "Weapon buff learned: %s goes on %s." -- item name, weapon type
 
 -- ComprehendScrolls
@@ -325,12 +338,12 @@ L.AUTOSCREENSHOT_LOOT = "Loot"
 L.AUTOSCREENSHOT_LOOT_DESC = "When you receive an item of the quality below or better."
 L.AUTOSCREENSHOT_LOOT_QUALITY = "Loot Quality"
 L.AUTOSCREENSHOT_LOOT_QUALITY_DESC = "The lowest item quality that takes a screenshot."
-L.AUTOSCREENSHOT_QUALITY_RARE = "Rare"
-L.AUTOSCREENSHOT_QUALITY_EPIC = "Epic"
-L.AUTOSCREENSHOT_QUALITY_LEGENDARY = "Legendary"
+L.AUTOSCREENSHOT_QUALITY_RARE = "Rare" -- [game: ITEM_QUALITY3_DESC]
+L.AUTOSCREENSHOT_QUALITY_EPIC = "Epic" -- [game: ITEM_QUALITY4_DESC]
+L.AUTOSCREENSHOT_QUALITY_LEGENDARY = "Legendary" -- [game: ITEM_QUALITY5_DESC]
 L.AUTOSCREENSHOT_BOSS_KILL = "Boss Kill"
 L.AUTOSCREENSHOT_BOSS_KILL_DESC = "When your group defeats a dungeon or raid boss."
-L.AUTOSCREENSHOT_REPUTATION = "Reputation"
+L.AUTOSCREENSHOT_REPUTATION = "Reputation" -- [game: CHARACTER_FRAME_TAB_REPUTATION]
 L.AUTOSCREENSHOT_REPUTATION_DESC = "When you reach Friendly, Honored, Revered, or Exalted with a "
     .. "faction."
 L.AUTOSCREENSHOT_PVP_RANK = "PvP Rank"

@@ -55,7 +55,7 @@ L.MAPPINS_CONTINENTS_DESC = "Показывать значки также на �
     .. "картах зон."
 -- Lib/Sounds.lua: the alert sounds, in every Sound dropdown
 L.SOUND_NAME = "Звук"
-L.SOUND_OFF = "Выкл."
+L.SOUND_OFF = "Откл."
 L.SOUND_BUZZ = "Сигнал ошибки"
 L.SOUND_DENIED = "Отказ"
 L.SOUND_HORN = "Боевой рог"
@@ -309,8 +309,8 @@ L.HOME_COMMANDS_HINT = "<Щелкните, чтобы ввести команд�
 
 -- Edit Mode dialog for our own frames (Lib/EditMode.lua)
 L.EDITMODE_SCALE = "Масштаб"
-L.EDITMODE_CLICK_TO_EDIT = "Щелкните для изменения"
-L.EDITMODE_RESET_POSITION = "Восстановить положение по умолчанию"
+L.EDITMODE_CLICK_TO_EDIT = "Щелкните, чтобы изменить"
+L.EDITMODE_RESET_POSITION = "Вернуть позицию по умолчанию"
 L.SETTINGS_EDIT_MODE_NOTE = "Расположение и вид настраиваются в режиме редактирования: нажмите Esc, "
     .. "выберите «Режим редактирования» и щелкните по рамке." -- a gray row on a module with Edit Mode settings
 L.SETTINGS_EDIT_MODE_NOTE_DESC = "Положение, масштаб и вид настраиваются в окне режима "

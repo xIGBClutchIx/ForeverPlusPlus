@@ -18,9 +18,9 @@ L.DUNGEONNAMEPLATES_NOTICE_DESC = "The game's Simplified dropdown (Options > Nam
     .. "own choice comes back when you leave. A change you make to that dropdown while inside is "
     .. "lost when you leave."
 -- Shown where the client lacks Blizzard's own names for these.
-L.DUNGEONNAMEPLATES_FRIENDLY_PLAYERS = "Friendly Players"
-L.DUNGEONNAMEPLATES_FRIENDLY_NPCS = "Friendly NPCs"
-L.DUNGEONNAMEPLATES_MINIONS = "Minions"
+L.DUNGEONNAMEPLATES_FRIENDLY_PLAYERS = "Friendly Players" -- [game: UNIT_NAMEPLATES_SIMPLIFIED_FRIENDLY_PLAYERS]
+L.DUNGEONNAMEPLATES_FRIENDLY_NPCS = "Friendly NPCs" -- [game: UNIT_NAMEPLATES_SIMPLIFIED_FRIENDLY_NPCS]
+L.DUNGEONNAMEPLATES_MINIONS = "Minions" -- [game: UNIT_NAMEPLATES_SIMPLIFIED_MINIONS]
 L.DUNGEONNAMEPLATES_MINOR_ENEMIES = "Minor Enemies"
 L.DUNGEONNAMEPLATES_FRIENDLY_PLAYERS_DESC = "Simplify friendly players' nameplates inside."
 L.DUNGEONNAMEPLATES_FRIENDLY_NPCS_DESC = "Simplify friendly NPCs' nameplates inside."
@@ -33,21 +33,23 @@ L.DUNGEONNAMEPLATES_BATTLEGROUNDS_DESC = "Also simplify them in battlegrounds an
 
 -- DruidManaBar
 L.DRUIDMANABAR_TITLE = "Druid Mana Bar"
-L.DRUIDMANABAR_DESC = "Show your mana under the energy or rage bar on the player frame while in "
+-- [quotes: STATUS_TEXT]
+L.DRUIDMANABAR_DESC ="Show your mana under the energy or rage bar on the player frame while in "
     .. "Cat or Bear Form, in the frame's own slot for a third bar. Its text follows the game's "
     .. "Status Text setting, like the other bars."
 L.DRUIDMANABAR_EVERY_FORM = "Show in Every Form"
 L.DRUIDMANABAR_EVERY_FORM_DESC = "Show the mana bar in caster, Travel, and Aquatic Form too, where "
     .. "the player frame's own bar is already mana, so your mana is always in the same place."
 L.DRUIDMANABAR_TEXT = "Show Text"
-L.DRUIDMANABAR_TEXT_DESC = "Show your mana on the bar as the game's Status Text setting does on "
+-- [quotes: STATUS_TEXT]
+L.DRUIDMANABAR_TEXT_DESC ="Show your mana on the bar as the game's Status Text setting does on "
     .. "the other bars, and under the mouse. Off, the bar never shows text."
 L.DRUIDMANABAR_FORM_COLOR = "Lighter Blue"
 L.DRUIDMANABAR_FORM_COLOR_DESC = "Fill the mana bar a lighter blue, so it never looks like the "
     .. "player frame's own dark blue mana bar, which sits right above it in caster form with Show "
     .. "in Every Form on."
 -- ClassColors
-L.CLASSCOLORS_TITLE = "Class Colors"
+L.CLASSCOLORS_TITLE = "Class Colors" -- [game: CLASS_COLORS]
 L.CLASSCOLORS_DESC = "Show players' health bars and names in their class color on the player, "
     .. "target, focus, party, and target-of-target frames, NPCs' bars by reaction, and names in "
     .. "the friends and who lists."
@@ -92,7 +94,7 @@ L.CLASSCOLORS_FOCUS_DESC = "Your focus's frame."
 L.CLASSCOLORS_PARTY = "Party"
 L.CLASSCOLORS_PARTY_DESC = "Your party members' frames. Raid-style party frames have their own "
     .. "class color setting in Blizzard's options."
-L.CLASSCOLORS_TOT = "Target of Target"
+L.CLASSCOLORS_TOT = "Target of Target" -- [game: SHOW_TARGET_OF_TARGET_TEXT]
 L.CLASSCOLORS_TOT_DESC = "The small frames for your target's target and your focus's target."
 
 -- Friendly nameplates (Lib/PlateLabel.lua and both plate modules)
@@ -214,7 +216,7 @@ L.PLAYERNAMEPLATES_CLASS_ICON_ORDER_DESC = "With the level on the same side, whe
     .. "sits next to the name, with the level past it, or past the level."
 L.PLAYERNAMEPLATES_CLASS_ICON_INSIDE = "Icon Next to Name"
 L.PLAYERNAMEPLATES_CLASS_ICON_OUTSIDE = "Icon Past Level"
-L.PLAYERNAMEPLATES_RECENT_ALLIES = "Recent Allies"
+L.PLAYERNAMEPLATES_RECENT_ALLIES = "Recent Allies" -- [game: SOCIAL_UI_RECENT_ALLIES_TAB_NAME]
 L.PLAYERNAMEPLATES_RECENT_ALLIES_DESC = "How to mark players on your Recent Allies list: the "
     .. "Recent Allies icon beside their name, or their name in the game's light blue instead of "
     .. "the Name Color."
@@ -313,8 +315,9 @@ L.TARGETMARKERS_DESC = "Hold a key and a ring of the raid icons opens at your mo
     .. "go to place a world marker instead. Works in combat."
 L.TARGETMARKERS_BINDING = "Marker Ring" -- in Blizzard's Key Bindings
 L.TARGETMARKERS_NO_KEY = "No key is bound yet" -- a gray row atop the module, with a button
+-- [quotes: KEY_BINDINGS]
 L.TARGETMARKERS_NO_KEY_DESC = "The ring opens with a key you choose in Key Bindings, under Forever++."
-L.TARGETMARKERS_BIND = "Key Bindings"
+L.TARGETMARKERS_BIND = "Key Bindings" -- [game: KEY_BINDINGS]
 L.TARGETMARKERS_MOUSEOVER = "Mark What's Under the Mouse"
 L.TARGETMARKERS_MOUSEOVER_DESC = "When your mouse is over a unit as you press the key, target it, so "
     .. "it's the one marked. Off, the ring always marks your current target."

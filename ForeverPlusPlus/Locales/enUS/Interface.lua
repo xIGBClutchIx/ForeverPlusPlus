@@ -36,10 +36,10 @@ L.TOOLTIPS_CLASS_COLOR = "Class Name Color"
 L.TOOLTIPS_CLASS_COLOR_DESC = "Color a player's class name in its class color."
 L.TOOLTIPS_FACTION_COLOR = "Faction Color"
 L.TOOLTIPS_FACTION_COLOR_DESC = "Color the Horde or Alliance line on a unit red or blue, as on the world map."
-L.TOOLTIPS_FRIENDS = "Friends List"
+L.TOOLTIPS_FRIENDS = "Friends List" -- [game: FRIENDS_LIST]
 L.TOOLTIPS_FRIENDS_DESC = "Color a friend's tooltip in the friends list the same way: their "
     .. "character's name, level, class, and side, as the options above are set."
-L.TOOLTIPS_PLAYER_TITLE = "Player Titles"
+L.TOOLTIPS_PLAYER_TITLE = "Player Titles" -- [game: SHOW_PLAYER_TITLES]
 L.TOOLTIPS_PLAYER_TITLE_DESC = "Show a player's title with their name."
 L.TOOLTIPS_TARGET = "Target"
 L.TOOLTIPS_TARGET_DESC = "Add a line with who the unit is targeting, colored by class or "
@@ -99,7 +99,8 @@ L.RECIPECOLORS_TITLE = "Recipe Colors"
 
 -- HideStanceBar
 L.HIDESTANCEBAR_TITLE = "Hide Stance Bar"
-L.HIDESTANCEBAR_DESC = "Hide the stance bar: your stances, forms, auras, or stealth. Their keys in "
+-- [quotes: KEY_BINDINGS]
+L.HIDESTANCEBAR_DESC ="Hide the stance bar: your stances, forms, auras, or stealth. Their keys in "
     .. "Key Bindings still work."
 L.HIDESTANCEBAR_MOUSEOVER = "Show on Mouseover"
 L.HIDESTANCEBAR_MOUSEOVER_DESC = "Show the stance bar while the mouse is over it, where you can "
@@ -119,7 +120,8 @@ L.HIDEZONETEXT_PVP_DESC = "Hide the line under the name that says whose territor
 
 -- HideMenuBars
 L.HIDEMENUBARS_TITLE ="Hide Bag and Menu Bars"
-L.HIDEMENUBARS_DESC = "Hide the bag bar and the micro menu until the mouse is over them. Their keys "
+-- [quotes: KEY_BINDINGS]
+L.HIDEMENUBARS_DESC ="Hide the bag bar and the micro menu until the mouse is over them. Their keys "
     .. "in Key Bindings still work, and both show in Edit Mode."
 L.HIDEMENUBARS_BAGS = "Bag Bar"
 L.HIDEMENUBARS_BAGS_DESC = "Hide the bag bar."
@@ -145,8 +147,8 @@ L.HIDEERRORS_HIDE_ALL = "All Errors"
 L.COMBATALERT_TITLE = "Combat Alert"
 L.COMBATALERT_DESC = "Show a line of text that floats up and fades when you enter or leave "
     .. "combat. Move and resize it in Edit Mode."
-L.COMBATALERT_ENTER_TEXT = "Entering Combat"
-L.COMBATALERT_LEAVE_TEXT = "Leaving Combat"
+L.COMBATALERT_ENTER_TEXT = "Entering Combat" -- [game: ENTERING_COMBAT]
+L.COMBATALERT_LEAVE_TEXT = "Leaving Combat" -- [game: LEAVING_COMBAT]
 L.COMBATALERT_TEST = "Test Alerts"
 L.COMBATALERT_TEST_BUTTON = "Play"
 L.COMBATALERT_TEST_DESC = "Show the entering combat alert, then the leaving one, without a fight."
@@ -216,6 +218,7 @@ L.MOVABLEWINDOWS_RESET_DONE = "Every window is back in its usual place, at its u
 L.CURRENCYBAR_TITLE = "Currency Bar"
 L.CURRENCYBAR_DESC = "Show your gold and the currencies you track in a small box, so they are "
     .. "always in view. Move and resize it in Edit Mode."
+-- [quotes: SHOW_ON_BACKPACK, CURRENCY]
 L.CURRENCYBAR_HINT = "Track currencies by ticking Show on Backpack in the Currency tab."
 L.CURRENCYBAR_MONEY = "Gold"
 L.CURRENCYBAR_MONEY_DESC = "Show how much gold, silver, and copper you carry."
@@ -229,7 +232,8 @@ L.CURRENCYBAR_TOOLTIP = "Tooltip"
 L.CURRENCYBAR_TOOLTIP_DESC = "Show your gold and tracked currencies when you hover the box."
 L.CURRENCYBAR_SESSION = "Session"
 L.CURRENCYBAR_SESSION_DESC = "Show what you gained or spent this session in the tooltip."
-L.CURRENCYBAR_CURRENCIES_DESC = "Show the currencies you have ticked Show on Backpack in the "
+-- [quotes: SHOW_ON_BACKPACK]
+L.CURRENCYBAR_CURRENCIES_DESC ="Show the currencies you have ticked Show on Backpack in the "
     .. "Currency tab."
 L.CURRENCYBAR_VERTICAL = "Vertical"
 L.CURRENCYBAR_VERTICAL_DESC = "Stack the gold and currencies in a column instead of a row."
@@ -242,8 +246,9 @@ L.LOCALTIME_TITLE = "Local Time"
 L.LOCALTIME_DESC = "Show the calendar's times in your own time instead of the realm's, while the "
     .. "clock uses local time. Guild events in the Communities window and Guild News, and when "
     .. "auction money arrives in the mail, follow too."
-L.LOCALTIME_CLOCK = "Use Local Time"
-L.LOCALTIME_CLOCK_DESC = "The clock's own Use Local Time setting: your computer's time instead of "
+L.LOCALTIME_CLOCK = "Use Local Time" -- [game: TIMEMANAGER_LOCALTIME]
+-- [quotes: TIMEMANAGER_LOCALTIME]
+L.LOCALTIME_CLOCK_DESC ="The clock's own Use Local Time setting: your computer's time instead of "
     .. "the realm's. The calendar follows it, so the clock and the calendar always agree."
 L.LOCALTIME_NOTICE = "Events stay on the realm's day in the calendar."
 L.LOCALTIME_NOTICE_DESC = "A time with +1 after it is the next day in your time, and -1 the day "
@@ -253,7 +258,7 @@ L.LOCALTIME_PREVIOUS_DAY = "%s -1" -- a time that falls on the day before
 L.LOCALTIME_YOUR_TIME = "Your time: %s" -- under the create event window's date
 
 -- LootRolls
-L.LOOTROLLS_TITLE = "Loot Rolls"
+L.LOOTROLLS_TITLE = "Loot Rolls" -- [game: LOOT_ROLLS]
 L.LOOTROLLS_DESC = "Place the Need, Greed, and Pass rolls in Edit Mode, and have them stack up, down, "
     .. "left, or right. Shows the seconds left and how many have picked each."
 L.LOOTROLLS_GROW = "Grow" -- Edit Mode: which way more rolls stack

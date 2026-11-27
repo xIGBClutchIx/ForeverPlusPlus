@@ -39,9 +39,9 @@ L.ERRORCATCHER_ALL = "All Sessions"
 L.ERRORCATCHER_FILTER = "%s (%d)" -- a filter above, how many errors it shows
 L.ERRORCATCHER_SUMMARY = "%d this session, %d saved" -- errors this session, errors saved
 L.ERRORCATCHER_NONE = "No errors caught."
-L.ERRORCATCHER_KIND_ERROR = "Lua Error"
+L.ERRORCATCHER_KIND_ERROR = "Lua Error" -- [game: LUA_ERROR]
 L.ERRORCATCHER_KIND_BLOCKED = "Blocked Action"
-L.ERRORCATCHER_KIND_WARNING = "Lua Warning"
+L.ERRORCATCHER_KIND_WARNING = "Lua Warning" -- [game: LUA_WARNING]
 L.ERRORCATCHER_KIND_TAINT = "Taint"
 L.ERRORCATCHER_POSITION = "%d of %d" -- this one, how many
 L.ERRORCATCHER_ROW_INFO = "%dx, %s" -- times seen, how long ago ("12m ago")
@@ -81,12 +81,14 @@ L.ERRORCATCHER_TAINT_LOG_DESC = "One of the game's own settings: it writes which
     .. "one down and off after, since the file grows quickly."
 L.ERRORCATCHER_COPY = "Copy Bug Report"
 L.ERRORCATCHER_COPY_HINT = "Selected. Press Ctrl+C to copy."
+-- [english]
 L.ERRORCATCHER_REPORT_HEADER = "Forever++ %s bug report" -- the addon's version
 L.ERRORCATCHER_REPORT_CLIENT = "Client: %s, build %s, interface %s, %s" -- version, build, interface, locale
 L.ERRORCATCHER_REPORT_DATE = "Date: %s"
 L.ERRORCATCHER_REPORT_MODULES = "Modules on (%d): %s"
 L.ERRORCATCHER_REPORT_ADDONS = "Other addons (%d): %s"
 L.ERRORCATCHER_REPORT_NONE = "none"
+-- [/english]
 L.ERRORCATCHER_TEST = "Test Error"
 L.ERRORCATCHER_TEST_BUTTON = "Throw"
 L.ERRORCATCHER_TEST_DESC = "Raise a Lua error on purpose, to check that Error Catcher (or, "
@@ -171,7 +173,7 @@ L.MINIMAPBUTTON_HINT_CLEAR = "Clear Session Errors"
 L.MINIMAPBUTTON_HINT_CLEAR_ALL = "Clear All Errors"
 L.MINIMAPBUTTON_HINT_MOVE = "Move Button"
 L.MINIMAPBUTTON_PLACE_NAME = "Button Position"
-L.MINIMAPBUTTON_PLACE_RESET = "Reset Position"
+L.MINIMAPBUTTON_PLACE_RESET = "Reset Position" -- [game: RESET_POSITION]
 L.MINIMAPBUTTON_PLACE_RESET_DESC = "Put the minimap button back on the minimap's edge, where it starts. "
     .. "Drag it to put it anywhere on or around the minimap."
 -- The tooltip's legend: what each click does, the click at the right in green. Named as Blizzard's

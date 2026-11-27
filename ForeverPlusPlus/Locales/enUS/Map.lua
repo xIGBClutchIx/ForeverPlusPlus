@@ -14,7 +14,7 @@ L.INSTANCES_RANGE = "%d-%d" -- lowest, highest
 
 -- WorldMap: one module, a part each for Points of Interest, Zone Info, Unexplored Areas, and
 -- Coordinates. Each part's title heads its section in Settings, over its Enabled checkbox.
-L.WORLDMAP_TITLE = "World Map"
+L.WORLDMAP_TITLE = "World Map" -- [game: WORLDMAP_BUTTON]
 L.WORLDMAP_DESC = "Add to the world map: points of interest, a zone info panel, unexplored areas, "
     .. "and coordinates. Each has its own Enabled checkbox below."
 
@@ -37,9 +37,9 @@ L.POI_SECTION_TRAVEL = "Cities and Travel"
 L.POI_SECTION_OTHER = "Other"
 L.POI_DESC = "Show dungeons, raids, capital cities, flight masters, boats, zeppelins, spirit "
     .. "healers, and Skyborne ley lines on the world map."
-L.POI_DUNGEONS = "Dungeons"
+L.POI_DUNGEONS = "Dungeons" -- [game: DUNGEONS]
 L.POI_DUNGEONS_DESC = "Dungeon entrances, with their level range colored against yours."
-L.POI_RAIDS = "Raids"
+L.POI_RAIDS = "Raids" -- [game: RAIDS]
 L.POI_RAIDS_DESC = "Raid entrances."
 L.POI_DUNGEON_MAPS = "Dungeon Maps"
 L.POI_DUNGEON_MAPS_DESC = "Click a dungeon or raid icon to see its map, drawn from the game's own "
@@ -76,7 +76,7 @@ L.POI_SHIPS = "Boats"
 L.POI_SHIPS_DESC = "Boat docks, with where the boat goes."
 L.POI_ZEPPELINS = "Zeppelins"
 L.POI_ZEPPELINS_DESC = "Zeppelin towers, with where the zeppelin goes."
-L.POI_TRAMS = "Deeprun Tram"
+L.POI_TRAMS = "Deeprun Tram" -- [game: DUNGEON_FLOOR_DEEPRUNTRAM1]
 L.POI_TRAMS_DESC = "The Deeprun Tram's stations in Stormwind and Ironforge, at the boats' size."
 L.POI_TRAVEL_CLICKS = "Click for Next Stop"
 L.POI_TRAVEL_CLICKS_DESC = "Click a boat, zeppelin, or the tram to see the map of its next stop."
@@ -114,7 +114,7 @@ L.POI_SERVICE_GATE = "Service Gate"
 L.POI_NORTH = "North"
 L.POI_EAST = "East"
 L.POI_WEST = "West"
-L.POI_FLIGHT_MASTER = "Flight Master"
+L.POI_FLIGHT_MASTER = "Flight Master" -- [game: MINIMAP_TRACKING_FLIGHTMASTER]
 L.POI_FLIGHT_UNLEARNED = "Not learned yet"
 L.POI_SHIP_TO = "Boat to %s" -- a place
 L.POI_ZEPPELIN_TO = "Zeppelin to %s" -- a place
@@ -159,7 +159,7 @@ L.ZONEINFO_HIDE_LABEL_DESC = "On a continent map, hide the zone name the game sh
     .. "the map while this panel shows the same zone. Names of dungeons and other icons still show."
 L.ZONEINFO_LEVELS = "Level Range"
 L.ZONEINFO_LEVELS_DESC = "The zone's level range, colored against your level like quests."
-L.ZONEINFO_FISHING = "Fishing"
+L.ZONEINFO_FISHING = "Fishing" -- [game: FISHING]
 L.ZONEINFO_FISHING_DESC = "The Fishing skill the zone's waters need: red while yours is lower, green once "
     .. "it's enough."
 L.ZONEINFO_HERBS = "Herbs"
@@ -167,7 +167,7 @@ L.ZONEINFO_HERBS_DESC = "The herbs in the zone. With Herbalism they're colored a
     .. "like Gathering Skill Tooltips."
 L.ZONEINFO_ORE = "Ore"
 L.ZONEINFO_ORE_DESC = "The ore in the zone. With Mining it's colored against your skill."
-L.ZONEINFO_SKINNING = "Skinning"
+L.ZONEINFO_SKINNING = "Skinning" -- [game: SKINNING]
 L.ZONEINFO_SKINNING_DESC = "The Skinning the zone's beasts need, from its level range."
 L.ZONEINFO_SHOW_OFF = "Off"
 L.ZONEINFO_SHOW_KNOWN = "With the Profession"
@@ -184,7 +184,7 @@ L.ZONEINFO_FACTION_LINE = "Own Line"
 L.ZONEINFO_TERRITORY_ALLIANCE = "Alliance Territory"
 L.ZONEINFO_TERRITORY_HORDE = "Horde Territory"
 L.ZONEINFO_CONTESTED = "Contested Territory"
-L.ZONEINFO_DUNGEONS = "Dungeons"
+L.ZONEINFO_DUNGEONS = "Dungeons" -- [game: DUNGEONS]
 L.ZONEINFO_DUNGEONS_DESC = "The dungeons and raids whose entrance is in the zone, with their level "
     .. "range colored against yours."
 L.ZONEINFO_SIZE = "Size"
@@ -194,8 +194,8 @@ L.ZONEINFO_UNFOLD = "Show More"
 L.ZONEINFO_TITLE_LEVELS = "%s  %s" -- zone, its levels ("10-20")
 L.ZONEINFO_RANGE = "%s-%s" -- lowest, highest
 L.ZONEINFO_SKILL = "%s %s" -- profession, skill needed ("Fishing 55")
-L.ZONEINFO_FISHING_NAME = "Fishing" -- until the client gives its own name
-L.ZONEINFO_SKINNING_NAME = "Skinning"
+L.ZONEINFO_FISHING_NAME = "Fishing" -- until the client gives its own name [game: FISHING]
+L.ZONEINFO_SKINNING_NAME = "Skinning" -- [game: SKINNING]
 L.ZONEINFO_LIST_SEPARATOR = ", "
 
 -- UnexploredAreas
@@ -257,7 +257,8 @@ L.SQUAREMINIMAP_BORDER_NONE = "None"
 L.SQUAREMINIMAP_BORDER_SCALE = "Border Size"
 L.SQUAREMINIMAP_BORDER_SCALE_DESC = "How big the border's art is."
 L.SQUAREMINIMAP_GAP = "Space Above"
-L.SQUAREMINIMAP_GAP_DESC = "How far the map sits from the zone name, tracking, and calendar above it "
+-- [quotes: HUD_EDIT_MODE_SETTING_MINIMAP_HEADER_UNDERNEATH]
+L.SQUAREMINIMAP_GAP_DESC ="How far the map sits from the zone name, tracking, and calendar above it "
     .. "(below it, with Edit Mode's Header Underneath)."
 L.SQUAREMINIMAP_SUN = "Day and Night" -- the sun and moon indicator on the minimap
 L.SQUAREMINIMAP_SUN_KEY = "Move the Sun"
@@ -266,7 +267,7 @@ L.SQUAREMINIMAP_SUN_KEY_DESC = "Hold this key and drag the day and night indicat
 L.SQUAREMINIMAP_SUN_OFF = "Off"
 L.SQUAREMINIMAP_SUN_HINT = "<Drag to move it>\n<Right click to put it back>"
 L.SQUAREMINIMAP_SUN_RESET_NAME = "Day and Night Indicator"
-L.SQUAREMINIMAP_SUN_RESET = "Reset Position"
+L.SQUAREMINIMAP_SUN_RESET = "Reset Position" -- [game: RESET_POSITION]
 L.SQUAREMINIMAP_SUN_RESET_DESC = "Put the day and night indicator back by the minimap's top right "
     .. "corner."
 L.SQUAREMINIMAP_MAIL = "Mail Icon"
@@ -328,7 +329,8 @@ L.FLIGHTTIMER_COLOR_PURPLE = "Purple"
 L.FLIGHTTIMER_COLOR_GRAY = "Gray"
 L.FLIGHTTIMER_LANDING_SOUND = "Sound on Landing"
 L.FLIGHTTIMER_LANDING_SOUND_KIND_DESC = "The sound Sound on Landing plays. Picking one plays it."
-L.FLIGHTTIMER_LANDING_SOUND_DESC = "Play a sound (the ready check's, unless you pick another) a few seconds before you land, so you "
+-- [quotes: ENABLE_BGSOUND]
+L.FLIGHTTIMER_LANDING_SOUND_DESC ="Play a sound (the ready check's, unless you pick another) a few seconds before you land, so you "
     .. "can tab out on long flights. Only on a flight you have taken before or, with Estimated "
     .. "Times, one without stops. To hear it while "
     .. "tabbed out, turn on Sound in Background in the game's Audio settings."
@@ -467,7 +469,7 @@ L.GATHERINGMAP_EMPTY_TIPS = "Tooltips Without a Dot"
 L.GATHERINGMAP_EMPTY_TIPS_DESC = "Show the tooltip on herb and vein icons too, not only chests and "
     .. "fishing pools. Turn it off to leave a herb or vein to the game's own tooltip."
 -- A node's tooltip: the lines, each a label and its value as Blizzard's Sell Price line
-L.GATHERINGMAP_REQUIRES = "Requires %s (%d)" -- profession, skill; Blizzard's ITEM_MIN_SKILL when it has one
+L.GATHERINGMAP_REQUIRES = "Requires %s (%d)" -- profession, skill; Blizzard's ITEM_MIN_SKILL when it has one [game: ITEM_MIN_SKILL]
 L.GATHERINGMAP_TIP_GATHERED = "Gathered:"
 L.GATHERINGMAP_TIP_ONCE = "Once"
 L.GATHERINGMAP_TIP_TIMES = { "%d time", "%d times" } -- count, more than one
@@ -505,7 +507,7 @@ L.GATHERINGMAP_SKILL_SHOW = "As Usual"
 L.GATHERINGMAP_SKILL_GRAY = "Gray"
 L.GATHERINGMAP_SKILL_HIDE = "Hidden"
 L.GATHERINGMAP_SECTION_MINIMAP = "Minimap"
-L.GATHERINGMAP_SECTION_WORLDMAP = "World Map"
+L.GATHERINGMAP_SECTION_WORLDMAP = "World Map" -- [game: WORLDMAP_BUTTON]
 L.GATHERINGMAP_SECTION_TOOLTIPS = "Tooltips"
 L.GATHERINGMAP_SECTION_NODES = "Remembered Nodes" -- sharing and forgetting them, and Chat Messages
 -- Its own page in Settings: every node, with a checkbox to show or hide it
@@ -529,10 +531,10 @@ L.GATHERINGMAP_PAGE_FORGET_CONFIRM = "Forget every remembered spot of %s, for al
 L.GATHERINGMAP_PAGE_COUNT = "\195\151%d" -- spots remembered, in a list row: "x12" with a times sign
 L.GATHERINGMAP_PAGE_LEGEND = "The number in front of a node is the skill it takes, in your "
     .. "trainer's colors. The \195\151 number after it is how many of its spots are remembered."
-L.GATHERINGMAP_PAGE_APPRENTICE = "Apprentice"
-L.GATHERINGMAP_PAGE_JOURNEYMAN = "Journeyman"
-L.GATHERINGMAP_PAGE_EXPERT = "Expert"
-L.GATHERINGMAP_PAGE_ARTISAN = "Artisan"
+L.GATHERINGMAP_PAGE_APPRENTICE = "Apprentice" -- [game: APPRENTICE]
+L.GATHERINGMAP_PAGE_JOURNEYMAN = "Journeyman" -- [game: JOURNEYMAN]
+L.GATHERINGMAP_PAGE_EXPERT = "Expert" -- [game: EXPERT]
+L.GATHERINGMAP_PAGE_ARTISAN = "Artisan" -- [game: ARTISAN]
 L.GATHERINGMAP_PAGE_PROGRESS = "%d / %d" -- skill, its rank's most: "131 / 150"
 L.GATHERINGMAP_PAGE_NONE = "None yet"
 L.GATHERINGMAP_PAGE_SPOTS = { "%d spot", "%d spots" } -- count
@@ -563,6 +565,7 @@ L.GATHERINGMAP_MAP_SIZE_DESC = "How big each icon is on the world map, at any zo
 L.GATHERINGMAP_ALPHA = "Opacity"
 L.GATHERINGMAP_ALPHA_DESC = "How solid the icons are. Lower lets the map show through."
 L.GATHERINGMAP_CONTINENTS_DESC = "Also show every zone's nodes on its continent's map, smaller."
+-- [english]
 L.GATHERINGMAP_LOG = "Log Gathers"
 L.GATHERINGMAP_LOG_DESC = "Print in chat each gather Gathering Map hears of: the node, what named "
     .. "it, the world object's ID, where you stood, and whether it was saved."
@@ -582,8 +585,11 @@ L.GATHERINGMAP_LOG_AGAIN = { "gathered %d time", "gathered %d times" } -- count,
 L.GATHERINGMAP_LOG_KIND = "not saved: not a kind it remembers"
 L.GATHERINGMAP_LOG_UNNAMED = "not saved: nothing named it"
 L.GATHERINGMAP_LOG_NOT_CHEST = "not saved: not a chest it knows"
+-- [/english]
 L.GATHERINGMAP_LOCKPICKING = "Lockpicking"
+-- [english]
 L.GATHERINGMAP_LOG_NOWHERE = "not saved: no spot on a map"
+-- [/english]
 -- A node's tooltip, for one seen but never gathered
 L.GATHERINGMAP_SEEN = "Not gathered yet"
 
@@ -634,7 +640,7 @@ L.COMPASSBAR_QUESTS = "Quests"
 L.COMPASSBAR_QUESTS_DESC = "The quest selected on the map, or every quest the map shows near you."
 L.COMPASSBAR_QUESTS_SELECTED = "Selected Only"
 L.COMPASSBAR_QUESTS_ALL = "All on Map"
-L.COMPASSBAR_PIN = "Map Pin"
+L.COMPASSBAR_PIN = "Map Pin" -- [game: MAP_PIN]
 L.COMPASSBAR_PIN_DESC = "Your map pin, from /way or a click on the map."
 L.COMPASSBAR_CORPSE = "Corpse"
 L.COMPASSBAR_CORPSE_DESC = "Your corpse, while you're a ghost."
@@ -692,14 +698,14 @@ L.COMPASSBAR_NW = "NW"
 L.COMPASSBAR_KIND_SELECTED = "Selected Quest"
 L.COMPASSBAR_KIND_QUEST = "Quest"
 L.COMPASSBAR_KIND_TURNIN = "Ready to Turn In"
-L.COMPASSBAR_KIND_PIN = "Map Pin"
+L.COMPASSBAR_KIND_PIN = "Map Pin" -- [game: MAP_PIN]
 L.COMPASSBAR_KIND_CORPSE = "Corpse"
 L.COMPASSBAR_KIND_GROUP = "Group"
-L.COMPASSBAR_KIND_FLIGHT = "Flight Master"
+L.COMPASSBAR_KIND_FLIGHT = "Flight Master" -- [game: MINIMAP_TRACKING_FLIGHTMASTER]
 L.COMPASSBAR_KIND_NODE = "Gathering"
 L.COMPASSBAR_KIND_RARE = "Rare"
 L.COMPASSBAR_DISTANCE = "Distance:"
 L.COMPASSBAR_READY = "Ready to turn in"
-L.COMPASSBAR_PIN_TITLE = "Map Pin" -- the map pin's marker's name
+L.COMPASSBAR_PIN_TITLE = "Map Pin" -- the map pin's marker's name [game: MAP_PIN]
 L.COMPASSBAR_CORPSE_TITLE = "Your Corpse"
 L.COMPASSBAR_SAMPLE_QUEST = "Quest Name" -- the example quest marker's name in Edit Mode

@@ -20,6 +20,10 @@ On Windows: `"C:\Program Files (x86)\Lua\5.1\lua.exe" tests/run.lua`. CI runs `l
 | `lib/harness.lua` | The checks: `eq`, `same`, `near`, `ok`, `raises`. |
 | `lib/bytecode.lua` | The globals a file reads and writes, with their lines, and the strings in its code, from its Lua 5.1 bytecode (what `luac -l` lists as GETGLOBAL and SETGLOBAL), for the `globals` and `rules` specs. |
 | `lib/core.lua` | A fresh loaded Core for a spec, as `T.Core()`: the real `Core.lua` on stub frames and a stub clock (see The real Core). |
+| `lib/locales.lua` | What holds another language to enUS and to the game: the locale files and their notes, the client's text, and each language's record. For the `locales` spec and `locales.lua`. |
+| `locales.lua` | `lua tests/locales.lua` prints what each language is missing or has to re-read; `--update <code> [KEY ...]` records the English a translation was made from. See [docs/translations.md](../docs/translations.md). |
+| `locales/<code>.txt` | A language's record: each translated key with a fingerprint of its English. The `locales` spec fails when the English has changed since. |
+| `data/GameText.lua` | The client's own text in each language we ship, for the tags enUS names, and its names for our places. Written by `tools/datagen/generate.lua`; never edited by hand. |
 | `spec/*.lua` | One spec per area: a Lib file (`text`, `store`, `prices`, `cvars`, `units`, ...), Core by area (the `core_*` specs), the public API (`api`), what a plugin's module is handed (`plugins`), and checks across the addon (`docs`, `globals`, `locales`, `modules`, `release`, `rules`). |
 
 ## A spec

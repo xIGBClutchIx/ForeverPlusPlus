@@ -189,3 +189,62 @@ eq(table.concat(twiceTheirs, ", "), "", "locales: no language sets a string twic
 for code, theirs in pairs(languages) do
     eq(problems(theirs, strings.L), "", "locales: " .. code .. " matches enUS")
 end
+
+-- The notes enUS writes about its own keys (tools/datagen/localenotes.lua).
+local Locales = dofile("tests/lib/locales.lua")
+local Notes = dofile("tools/datagen/localenotes.lua")
+do
+    local entries, problem = Notes.Read(table.concat({
+        'L.A = "Sell Price" -- [game: SELL_PRICE]',
+        "-- [quotes: STATUS_TEXT, KEY_BINDINGS]",
+        'L.B = "as the Status Text setting, in Key Bindings, "',
+        '    .. "does" -- more of it',
+        "",
+        "-- [english]",
+        'L.C = "debug -- not a comment" -- count',
+        "-- [/english]",
+        'L.D = { "%d a", "%d as" }',
+    }, "\n"))
+    eq(problem, nil, "notes: a well formed file has no problem")
+    eq(#entries, 4, "notes: every key is read")
+    eq(entries[1].game, "SELL_PRICE", "notes: [game] after the string")
+    eq(table.concat(entries[2].quotes, " "), "STATUS_TEXT KEY_BINDINGS", "notes: [quotes] above the key")
+    eq(entries[2].english or entries[4].english, false, "notes: keys outside the block are translated")
+    eq(entries[3].english, true, "notes: keys inside [english] stay English")
+    eq(entries[3].game, nil, "notes: a key's notes don't reach the next key")
+    eq(select(2, Notes.Read("-- [english]\nL.A = \"x\"")) ~= nil, true, "notes: an open [english] is a problem")
+    eq(select(2, Notes.Read("-- [/english]")) ~= nil, true, "notes: a stray [/english] is a problem")
+    eq(Locales.Hash("abc") == Locales.Hash("abc") and Locales.Hash("abc") ~= Locales.Hash("abd"), true,
+        "notes: a fingerprint follows the text")
+end
+
+-- Each language is whole and current: everything outside enUS's [english] blocks is translated,
+-- from the English as it is now, and what enUS says is the game's wording is the client's own
+-- text in that language (tests/data/GameText.lua). `lua tests/locales.lua` prints the same, and
+-- docs/translations.md says what to do about each.
+local english, game = Locales.English(), Locales.GameText()
+eq(table.concat(english.problems, ", "), "", "locales: enUS's [english] markers pair up")
+local marked, bound = 0, 0
+for _, key in ipairs(english.order) do
+    marked = marked + (english.notes[key].english and 1 or 0)
+    bound = bound + (english.notes[key].game and 1 or 0)
+end
+eq(marked > 50 and bound > 50, true, ("locales: the notes are found (%d english, %d game)"):format(marked, bound))
+local CHECKS = {
+    { "notes", "enUS's notes are right" },
+    { "missing", "has every string" },
+    { "english", "leaves the [english] strings alone" },
+    { "stale", "was translated from the English as it is now" },
+    { "untracked", "has a record of the English behind every string" },
+    { "game", "uses the client's text where enUS says [game]" },
+    { "quotes", "has the client's text where enUS says [quotes]" },
+    { "places", "names the places as the client does" },
+}
+for _, code in ipairs(Locales.Languages()) do
+    local found = Locales.Problems(code, english, game)
+    for _, check in ipairs(CHECKS) do
+        local list = found[check[1]]
+        local shown = table.concat(list, ", ", 1, math.min(#list, 12)) .. (#list > 12 and ", ..." or "")
+        eq(#list == 0 and "" or ("%d: %s"):format(#list, shown), "", "locales: " .. code .. " " .. check[2])
+    end
+end

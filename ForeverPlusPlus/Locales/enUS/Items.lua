@@ -104,7 +104,7 @@ L.APPEARANCEICONS_BANK_DESC = "Mark gear in the bank."
 L.APPEARANCEICONS_MERCHANT_DESC = "Mark gear a merchant sells."
 L.APPEARANCEICONS_AUCTION_DESC = "Mark gear in the auction house's lists."
 L.APPEARANCEICONS_LOOT_DESC = "Mark gear in the loot window and on loot rolls."
-L.APPEARANCEICONS_PROFESSIONS = "Professions"
+L.APPEARANCEICONS_PROFESSIONS = "Professions" -- [game: TRADE_SKILLS]
 L.APPEARANCEICONS_PROFESSIONS_DESC = "Mark a recipe in the professions window when the gear it makes "
     .. "has an appearance you haven't collected."
 L.APPEARANCEICONS_RECIPE_SPOT = "Recipe Icon"
@@ -198,6 +198,7 @@ L.ITEMCOUNT_IN_BANK = "%d in bank" -- count
 
 -- EasyDelete
 L.EASYDELETE_TITLE = "Easy Delete"
+-- [quotes: DELETE_ITEM_CONFIRM_STRING]
 L.EASYDELETE_DESC = "Type DELETE for you when destroying a good item, so Yes is a single click."
 
 -- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE,
@@ -263,7 +264,7 @@ L.DISENCHANT_CHANCE = "%s%%" -- a number such as 75 or 99.5
 L.DISENCHANT_AMOUNT = "%s %s" -- amount (such as 1-2), material
 L.DISENCHANT_RANGE = "%d-%d" -- fewest, most
 L.DISENCHANT_UNKNOWN_ITEM = "Item %d" -- item ID, while its name isn't loaded
-L.SELLPRICE_TITLE = "Sell Price"
+L.SELLPRICE_TITLE = "Sell Price" -- [game: SELL_PRICE]
 L.SELLPRICE_DESC = "Show the vendor price of the whole stack. Hold Shift to see one item."
 L.REPAIRCOST_TITLE = "Repair Cost"
 L.REPAIRCOST_DESC = "Show what repairing damaged gear costs, on gear you wear or carry, without "
@@ -317,7 +318,7 @@ L.BAGSLOTCOUNTER_SHOW_EACH = "Per Bag"
 L.BAGSLOTCOUNTER_SPECIAL = "Count Special Bags"
 L.BAGSLOTCOUNTER_SPECIAL_DESC = "Also count bags that only hold some items, such as quivers, ammo "
     .. "pouches, soul bags, and herb bags."
-L.BAGSLOTCOUNTER_REAGENT = "Reagent Bag"
+L.BAGSLOTCOUNTER_REAGENT = "Reagent Bag" -- [game: BAG_NAME_BAG_REAGENT]
 L.BAGSLOTCOUNTER_REAGENT_DESC = "Where the reagent bag's free slots show: on its own button, added to "
     .. "the backpack's count, or not at all."
 L.BAGSLOTCOUNTER_REAGENT_OWN = "On Its Own Button"
@@ -379,16 +380,16 @@ L.PROFTOOLTIPS_KEY = "Opens locks up to %s (%d)" -- profession, skill
 L.PROFTOOLTIPS_ITEMS = "Items"
 L.PROFTOOLTIPS_ITEMS_DESC = "Show in herb, ore, stone, and lockbox tooltips the skill needed to "
     .. "gather or open them."
-L.PROFTOOLTIPS_REQUIRES = "Requires %s (%d)" -- profession, skill
+L.PROFTOOLTIPS_REQUIRES = "Requires %s (%d)" -- profession, skill [game: ITEM_MIN_SKILL]
 L.PROFTOOLTIPS_YOURS = "Your %s skill: %d" -- profession, the player's skill
 L.PROFTOOLTIPS_GATHERED = "Gathered with %s (%d)" -- profession, skill
-L.PROFTOOLTIPS_HERBALISM_NAME = "Herbalism" -- until the client gives its own name
-L.PROFTOOLTIPS_MINING_NAME = "Mining"
-L.PROFTOOLTIPS_SKINNING_NAME = "Skinning"
+L.PROFTOOLTIPS_HERBALISM_NAME = "Herbalism" -- until the client gives its own name [game: HERBALISM]
+L.PROFTOOLTIPS_MINING_NAME = "Mining" -- [game: MINING]
+L.PROFTOOLTIPS_SKINNING_NAME = "Skinning" -- [game: SKINNING]
 L.PROFTOOLTIPS_LOCKPICKING_NAME = "Lockpicking"
 -- Creature types that can be skinned, exactly as the game names them.
-L.PROFTOOLTIPS_BEAST = "Beast"
-L.PROFTOOLTIPS_DRAGONKIN = "Dragonkin"
+L.PROFTOOLTIPS_BEAST = "Beast" -- [game: CreatureType.1]
+L.PROFTOOLTIPS_DRAGONKIN = "Dragonkin" -- [game: CreatureType.2]
 
 
 -- WaylaidCrates
@@ -588,40 +589,40 @@ L.UPGRADEARROWS_GROUP_SPELL = "Spells"
 L.UPGRADEARROWS_GROUP_DEFENSE = "Defense"
 L.UPGRADEARROWS_GROUP_WEAPONS = "Weapons"
 L.UPGRADEARROWS_GROUP_RESISTANCES = "Resistances"
-L.UPGRADEARROWS_STAT_STR = "Strength"
-L.UPGRADEARROWS_STAT_AGI = "Agility"
-L.UPGRADEARROWS_STAT_STA = "Stamina"
-L.UPGRADEARROWS_STAT_INT = "Intellect"
-L.UPGRADEARROWS_STAT_SPI = "Spirit"
-L.UPGRADEARROWS_STAT_HEALTH = "Health"
-L.UPGRADEARROWS_STAT_MANA = "Mana"
-L.UPGRADEARROWS_STAT_AP = "Attack Power"
+L.UPGRADEARROWS_STAT_STR = "Strength" -- [game: PRIMARY_STAT1_TOOLTIP_NAME]
+L.UPGRADEARROWS_STAT_AGI = "Agility" -- [game: PRIMARY_STAT2_TOOLTIP_NAME]
+L.UPGRADEARROWS_STAT_STA = "Stamina" -- [game: PRIMARY_STAT3_TOOLTIP_NAME]
+L.UPGRADEARROWS_STAT_INT = "Intellect" -- [game: PRIMARY_STAT4_TOOLTIP_NAME]
+L.UPGRADEARROWS_STAT_SPI = "Spirit" -- [game: SPELL_STAT5_NAME]
+L.UPGRADEARROWS_STAT_HEALTH = "Health" -- [game: HEALTH]
+L.UPGRADEARROWS_STAT_MANA = "Mana" -- [game: MANA]
+L.UPGRADEARROWS_STAT_AP = "Attack Power" -- [game: STAT_ATTACK_POWER]
 L.UPGRADEARROWS_STAT_RAP = "Ranged Attack Power"
 L.UPGRADEARROWS_STAT_HIT = "Hit"
-L.UPGRADEARROWS_STAT_CRIT = "Critical Strike"
+L.UPGRADEARROWS_STAT_CRIT = "Critical Strike" -- [game: STAT_CRITICAL_STRIKE]
 L.UPGRADEARROWS_STAT_HASTE = "Haste"
 L.UPGRADEARROWS_STAT_EXPERTISE = "Expertise"
 L.UPGRADEARROWS_STAT_ARMORPEN = "Armor Penetration"
-L.UPGRADEARROWS_STAT_SP = "Spell Damage"
+L.UPGRADEARROWS_STAT_SP = "Spell Damage" -- [game: STAT_SPELLDAMAGE]
 L.UPGRADEARROWS_STAT_HEAL = "Healing"
 L.UPGRADEARROWS_STAT_SPELLHIT = "Spell Hit"
 L.UPGRADEARROWS_STAT_SPELLCRIT = "Spell Critical Strike"
 L.UPGRADEARROWS_STAT_MP5 = "Mana per 5 Seconds"
 L.UPGRADEARROWS_STAT_HP5 = "Health per 5 Seconds"
-L.UPGRADEARROWS_STAT_ARMOR = "Armor"
+L.UPGRADEARROWS_STAT_ARMOR = "Armor" -- [game: ARMOR]
 L.UPGRADEARROWS_STAT_DEF = "Defense"
-L.UPGRADEARROWS_STAT_DODGE = "Dodge"
-L.UPGRADEARROWS_STAT_PARRY = "Parry"
-L.UPGRADEARROWS_STAT_BLOCK = "Block"
+L.UPGRADEARROWS_STAT_DODGE = "Dodge" -- [game: STAT_DODGE]
+L.UPGRADEARROWS_STAT_PARRY = "Parry" -- [game: STAT_PARRY]
+L.UPGRADEARROWS_STAT_BLOCK = "Block" -- [game: STAT_BLOCK]
 L.UPGRADEARROWS_STAT_BLOCKVALUE = "Block Value"
 L.UPGRADEARROWS_STAT_DPS = "Weapon Damage per Second"
 L.UPGRADEARROWS_STAT_DPS_OFF = "Off-Hand Damage per Second"
 L.UPGRADEARROWS_STAT_DPS_RANGED = "Ranged Damage per Second"
-L.UPGRADEARROWS_STAT_RES_FIRE = "Fire Resistance"
-L.UPGRADEARROWS_STAT_RES_NATURE = "Nature Resistance"
-L.UPGRADEARROWS_STAT_RES_FROST = "Frost Resistance"
-L.UPGRADEARROWS_STAT_RES_SHADOW = "Shadow Resistance"
-L.UPGRADEARROWS_STAT_RES_ARCANE = "Arcane Resistance"
+L.UPGRADEARROWS_STAT_RES_FIRE = "Fire Resistance" -- [game: RESISTANCE2_NAME]
+L.UPGRADEARROWS_STAT_RES_NATURE = "Nature Resistance" -- [game: RESISTANCE3_NAME]
+L.UPGRADEARROWS_STAT_RES_FROST = "Frost Resistance" -- [game: RESISTANCE4_NAME]
+L.UPGRADEARROWS_STAT_RES_SHADOW = "Shadow Resistance" -- [game: RESISTANCE5_NAME]
+L.UPGRADEARROWS_STAT_RES_ARCANE = "Arcane Resistance" -- [game: RESISTANCE6_NAME]
 L.UPGRADEARROWS_UNKNOWN = "Unweighed Stats"
 L.UPGRADEARROWS_UNKNOWN_BUTTON = "Print"
 L.UPGRADEARROWS_UNKNOWN_DESC = "Print the stats met on items that Upgrade Arrows has no weight for, so "

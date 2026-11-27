@@ -614,7 +614,9 @@ The install holds one language (enUS here), so the client folder can't answer wh
 
 - `GlobalStrings` has the interface's own strings by tag (`BaseTag`, `TagText_lang`): `ADDONS` is "Модификации", `UNIT_NAME_NPC` "Имена NPC", `MAP_PIN` "Точка на карте", `SET_FOCUS` "Запомнить цель", `DEFAULT` "По умолчанию", `MINIMAP_LABEL` "Мини-карта", `ITEM_MIN_SKILL` "Требуется: %s (%d)".
 - `CreatureType`, `TaxiNodes`, `AreaTable`, `SkillLine`, and `Faction` have the names the game shows. Join a language's rows to enUS's by `ID`.
-- `Locales/ruRU/` was checked against these for its terms and every place name in `Places.lua`. An NPC's title under its name (a stable master's) isn't in any of them.
+- `SpellName` and `ItemSparse` have spell and item names by ID: spell 1296017 (Comprehend Scroll) is "Перевести свиток", item 210771 (Waylaid Supplies) "Перехват припасов: ...". `ChrRaces` has the Skyborne as "небеснорожденный".
+- The Russian client's words differ from the usual guesses: item quality 4 (Epic) is "Превосходное", a talent's rank is "Уровень %d/%d", "Off" is "Откл.", an NPC is "NPC".
+- `Locales/ruRU/` is held to these by the `locales` spec, through `tests/data/GameText.lua` ([translations.md](translations.md)). An NPC's title under its name (a stable master's) isn't in any of them: it comes from the server.
 
 ## Open questions
 

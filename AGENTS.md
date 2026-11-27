@@ -10,6 +10,7 @@ Keep this file short. It says what exists and what the rules are. The detail is 
 | Every Settings rule in full, with reasons, edge cases, and examples | [docs/settings.md](docs/settings.md) |
 | What we know about the Forever client, with sources | [docs/forever-api.md](docs/forever-api.md) |
 | What each module does for players, and "Add a module" step by step | [README.md](README.md) |
+| Languages: whose words a string is, the notes in the locale files, the checks, and how to change a string | [docs/translations.md](docs/translations.md) |
 
 ## What Forever++ is
 
@@ -46,6 +47,7 @@ There is no build step or library folder. Plain Lua, loaded straight from the TO
 | `docs/stat-weights.md` | Upgrade Arrows' default stat weights, how each was worked out, and the sources. |
 | `docs/description.md` | The project description on CurseForge and Wago. Nothing syncs it; paste it into both by hand after it changes. |
 | `docs/table-survey.md` | What the client's tables hold for data kept by hand, for one build (`tools/datagen/survey.lua`). |
+| `docs/translations.md` | How the languages work: the notes in the locale files, the checks, changing a string, and adding a language. |
 | `tests/` | Offline tests (see Verification and `tests/README.md`). |
 | `tools/datagen/` | Generates data files from the client's database tables (see Generated data). Not shipped. |
 | `tools/board/` | The Forever++ Board, a private Claude artifact: `index.html` is its page, and `build.mjs` (Node) writes its data from git, the release notes and TOC, GitHub, CurseForge, and the inbox task's state into `out/`, which git ignores. Its header says how to run and publish it. Not shipped. |
@@ -66,7 +68,7 @@ Load order is the TOC's: `Core.lua`, `Commands.lua`, `Locales/`, `Data/`, `Lib/`
 | `Bindings.xml` | Keys in Blizzard's Key Bindings, under Forever++ (Target Markers' ring). The game loads it by itself; it isn't in the TOC. |
 | `Core.lua` | The shared `ns`: events, modules and parts, saved settings, hooks, timers, migrations, printing, and the locale table `ns.L`. |
 | `Commands.lua` | `/fpp` and its subcommands, `/fpp set` and `toggle`, and the Defaults popup's resets (`ns.ApplyPreset`, `ns.UsePreset`). |
-| `Locales/<language>/*.lua` | Player-facing text, a file per category. `enUS/` has every key and is the fallback; another language sets only what it translates. |
+| `Locales/<language>/*.lua` | Player-facing text, a file per category. `enUS/` has every key and is the fallback, and its comments say whose words each string is. Another language (`ruRU/` today) has every key outside enUS's `[english]` blocks, and `Places.lua` for place names. |
 | `Data/*.lua` | Game data kept by hand, in one place so a patch's change is one edit: plain tables on `ns.Data`, with where each came from. `Instances.lua` (the dungeons and raids, and their map art), `Professions.lua` (herbs, veins, chests, pools, tools, skeleton keys), `Spells.lua` (spell IDs more than one file uses, through `ns.Data.Spell`), `Items.lua` (the containers Auto Open Containers leaves), `Buffs.lua` (Smart Buff's), `PointsOfInterest.lua` (where dungeon entrances, flight masters, boats, and spirit healers are on each zone's map), `ZoneInfo.lua` (each zone's levels, fishing skill, herbs, and ores). No logic. |
 | `Lib/*.lua` | Shared services any module can use. They cost nothing until a module uses them. |
 | `Modules/<Category>/` | One change each. |
@@ -215,7 +217,7 @@ One line here says what each file is for. [docs/architecture.md](docs/architectu
 
 ### Generated data
 
-`lua5.1 tools/datagen/generate.lua [build]` downloads the tables a `wowf` build needs from wago.tools and writes every generated file: Unexplored Areas' and Professions' `Data.lua`, the eight files in `Lib/Generated/`, and `Reference.txt` (what the tables say about data kept by hand, so a new build's diff shows what to check). [docs/architecture.md](docs/architecture.md#generated-data-toolsdatagen) has what each comes from, `summary.lua` and `survey.lua`, and the `table-data.yml` workflow that regenerates for a new build and opens a pull request.
+`lua5.1 tools/datagen/generate.lua [build]` downloads the tables a `wowf` build needs from wago.tools and writes every generated file: Unexplored Areas' and Professions' `Data.lua`, the eight files in `Lib/Generated/`, `tests/data/GameText.lua` (the client's own text in each language we ship, for the locales spec), and `Reference.txt` (what the tables say about data kept by hand, so a new build's diff shows what to check). [docs/architecture.md](docs/architecture.md#generated-data-toolsdatagen) has what each comes from, `summary.lua` and `survey.lua`, and the `table-data.yml` workflow that regenerates for a new build and opens a pull request.
 
 - **Never edit a generated file by hand.** Change the generator (one module per file, listed in `generators.lua`) and run it again.
 - `BUILD` is the build they came from. Output is sorted, so the same build gives the same bytes.
@@ -327,6 +329,17 @@ When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or f
 - Use `%s` placeholders instead of joining pieces, since word order differs between languages.
 - A string that counts something is a list of forms, `L.KEY = { "%d spot", "%d spots" }`, read with `format(ns.Text.Plural(L.KEY, n), n)`. Never pick a form with `n == 1` or write "(s)": a language can have three forms.
 - Don't put a name into a sentence where it would need another case ("%s Territory"): give each name its own string, or write a label and a value ("Source: %s").
+
+**Languages.** The addon ships more than one, and every one is kept whole: a change to `Locales/enUS/` changes every other language in the same commit. The tests fail otherwise. [docs/translations.md](docs/translations.md) has the steps.
+
+- A new key gets its translation in each language, at the same place in the same file. Reworded English means reading each translation of that key again. Then record it: `lua tests/locales.lua --update <code> KEY`. Never run `--update` to quiet the test without reading the string.
+- Say whose words a string is, in its comment in enUS:
+  - No note: ours. A translator words it.
+  - `[game: TAG]`: the game's own text, word for word (a stat, a profession, a Blizzard setting we mirror). Every language uses the client's text for the tag. Not for a general word that happens to match one.
+  - `[quotes: TAG]`: a sentence of ours that names something of the game's. Every language writes the client's text for the tag in it.
+  - Between `-- [english]` and `-- [/english]`: stays English everywhere. Only what someone debugging reads, or a name that mustn't change.
+- Take the game's terms from `tests/data/GameText.lua` or the client's tables (wago.tools, `&locale=<code>`), never from memory. A new tag means running `tools/datagen/generate.lua` so `GameText.lua` has it.
+- `lua tests/locales.lua` prints what each language still has to do.
 - Player-facing text goes through `ns.Print` and stays short.
 - Anything a module says in chat by itself (not in reply to a command) goes through `module:Print`, with `chat = true` in its defaults and `ns.ChatOption(description)` in `module.options`, so the player gets a Chat Messages checkbox.
 
@@ -455,7 +468,7 @@ lua5.1 tests/run.lua store    # the specs with that in their name
 - A spec in `tests/spec/` covers each area of pure-logic `Lib/` code, Core's module lifecycle on stub frames and a stub clock, and the public API.
 - Checks across the addon:
   - `globals`: no file writes a global the Lua rules don't allow, and every global it reads is Lua's or in `.luarc.json`.
-  - `locales`: every `L.KEY` the code uses is defined in `Locales/enUS/`.
+  - `locales`: every `L.KEY` the code uses is defined in `Locales/enUS/`, and every other language is whole, translated from the English as it is now, and uses the client's own text where enUS says `[game]` or `[quotes]` (`tests/data/GameText.lua`).
   - `docs`: every Lib file has a row in the Lib tables here and a place in `docs/architecture.md`, and every click hint is written as Blizzard's are.
   - `modules`: every file loads offline, makes no frame, hook, timer, or event listener as it loads, and every module's settings are well formed.
   - `release`: the TOC's version, `Changelog.lua`, and `CHANGELOG.md` agree.

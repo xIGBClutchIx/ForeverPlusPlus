@@ -152,7 +152,7 @@ L.AUTOGOSSIP_BANKER = "Банкиры"
 L.AUTOGOSSIP_BANKER_DESC = "Открывать банк."
 L.AUTOGOSSIP_VENDOR = "Торговцы и ремонт"
 L.AUTOGOSSIP_VENDOR_DESC = "Открывать лавку."
-L.AUTOGOSSIP_TRAINER = "Наставники"
+L.AUTOGOSSIP_TRAINER = "Учителя"
 L.AUTOGOSSIP_TRAINER_DESC = "Открывать список навыков наставника."
 L.AUTOGOSSIP_TAXI = "Распорядители полетов"
 L.AUTOGOSSIP_TAXI_DESC = "Открывать карту полетов."
@@ -266,9 +266,9 @@ L.AUTOWEAPONBUFF_WARN_TEXT_ANY = "Ни одно надетое оружие дл
 L.AUTOWEAPONBUFF_LEARNED_LINE = "Усиление оружия: %s, тип оружия – %s." -- item name, weapon type
 
 -- ComprehendScrolls
-L.COMPREHENDSCROLLS_TITLE = "Понимание свитков"
+L.COMPREHENDSCROLLS_TITLE = "Перевод свитков"
 L.COMPREHENDSCROLLS_DESC = "Щелкните правой кнопкой мыши по свитку мага в сумке, чтобы применить к "
-    .. "нему «Понимание свитка», не открывая книгу заклинаний."
+    .. "нему «Перевести свиток», не открывая книгу заклинаний."
 L.COMPREHENDSCROLLS_NOTICE = "Работает только вне боя." -- a gray row atop the module
 L.COMPREHENDSCROLLS_NOTICE_DESC = "Игра не дает модификациям менять действие щелчка по сумке в бою, "
     .. "поэтому до конца боя правый щелчок работает как у Blizzard."
@@ -303,7 +303,7 @@ L.AUTOSCREENSHOT_LOOT_DESC = "Когда вы получаете предмет 
 L.AUTOSCREENSHOT_LOOT_QUALITY = "Качество добычи"
 L.AUTOSCREENSHOT_LOOT_QUALITY_DESC = "Самое низкое качество предмета, при котором делается снимок."
 L.AUTOSCREENSHOT_QUALITY_RARE = "Редкое"
-L.AUTOSCREENSHOT_QUALITY_EPIC = "Эпическое"
+L.AUTOSCREENSHOT_QUALITY_EPIC = "Превосходное"
 L.AUTOSCREENSHOT_QUALITY_LEGENDARY = "Легендарное"
 L.AUTOSCREENSHOT_BOSS_KILL = "Победа над боссом"
 L.AUTOSCREENSHOT_BOSS_KILL_DESC = "Когда ваша группа побеждает босса подземелья или рейда."

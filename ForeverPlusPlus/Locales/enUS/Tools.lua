@@ -33,7 +33,9 @@ L.CONSOLEVARIABLES_CHANGED = "Changed" -- the group of CVars not at their defaul
 L.CONSOLEVARIABLES_ALL = "All"
 -- The client's own CVar categories (Enum.ConsoleCategory). Default, Gm, Reveal, and None read badly
 -- to players, so they get plainer names.
+-- [english]
 L.CONSOLEVARIABLES_CATEGORY_DEBUG = "Debug"
+-- [/english]
 L.CONSOLEVARIABLES_CATEGORY_GRAPHICS = "Graphics"
 L.CONSOLEVARIABLES_CATEGORY_CONSOLE = "Console"
 L.CONSOLEVARIABLES_CATEGORY_COMBAT = "Combat"
@@ -82,7 +84,7 @@ L.CONSOLEVARIABLES_POP_INTERFACE = "Interface"
 L.CONSOLEVARIABLES_POP_GRAPHICS = "Graphics"
 L.CONSOLEVARIABLES_POP_SCREENSHOTS = "Screenshots"
 L.CONSOLEVARIABLES_POP_MOUSE = "Mouse"
-L.CONSOLEVARIABLES_POP_ZOOM = "Max Camera Distance"
+L.CONSOLEVARIABLES_POP_ZOOM = "Max Camera Distance" -- [game: MAX_FOLLOW_DIST]
 L.CONSOLEVARIABLES_POP_ZOOM_DESC = "How far you can zoom out. Options stops at 2.0; this can go further."
 L.CONSOLEVARIABLES_POP_ZOOM_SPEED = "Zoom Speed"
 L.CONSOLEVARIABLES_POP_ZOOM_SPEED_DESC = "How fast the mouse wheel zooms the camera. Default 20, up to 50."
@@ -91,7 +93,7 @@ L.CONSOLEVARIABLES_POP_COLLISION_DESC = "1 lets trees and walls get between you 
     .. "jumps closer; 0 jumps at once."
 L.CONSOLEVARIABLES_POP_GLOW = "Screen Glow"
 L.CONSOLEVARIABLES_POP_GLOW_DESC = "The soft glow over the whole screen. 0 turns it off for a sharper picture."
-L.CONSOLEVARIABLES_POP_DEATH = "Death Effect"
+L.CONSOLEVARIABLES_POP_DEATH = "Death Effect" -- [game: DEATH_EFFECT]
 L.CONSOLEVARIABLES_POP_DEATH_DESC = "The gray blur while you're dead. 0 turns it off."
 L.CONSOLEVARIABLES_POP_PLATE_RANGE = "Nameplate Range"
 L.CONSOLEVARIABLES_POP_PLATE_RANGE_DESC = "How far away nameplates show, in yards. Default 45. Saved for "
@@ -118,7 +120,8 @@ L.CONSOLEVARIABLES_POP_PLATE_PETS_DESC = "1 shows nameplates on enemy players' p
 L.CONSOLEVARIABLES_POP_COMBO = "Combo Point Position"
 L.CONSOLEVARIABLES_POP_COMBO_DESC = "Where combo points show: 1 on your target's frame, 2 on yours."
 L.CONSOLEVARIABLES_POP_FOG_END = "Fog Distance"
-L.CONSOLEVARIABLES_POP_FOG_END_DESC = "How far away the distance fog is thickest. Default 1600; raise "
+-- [quotes: FARCLIP]
+L.CONSOLEVARIABLES_POP_FOG_END_DESC ="How far away the distance fog is thickest. Default 1600; raise "
     .. "it with View Distance."
 L.CONSOLEVARIABLES_POP_FOG_START = "Fog Start"
 L.CONSOLEVARIABLES_POP_FOG_START_DESC = "How far away the distance fog begins. Default 800."
@@ -127,7 +130,7 @@ L.CONSOLEVARIABLES_POP_GRASS_DESC = "How thick grass and ground clutter are. Def
     .. "frames."
 L.CONSOLEVARIABLES_POP_GRASS_DIST = "Grass Distance"
 L.CONSOLEVARIABLES_POP_GRASS_DIST_DESC = "How far away grass is drawn. Default 70."
-L.CONSOLEVARIABLES_POP_ROTATE = "Rotate Minimap"
+L.CONSOLEVARIABLES_POP_ROTATE = "Rotate Minimap" -- [game: ROTATE_MINIMAP]
 L.CONSOLEVARIABLES_POP_ROTATE_DESC = "1 turns the minimap with you, so up is the way you face."
 L.CONSOLEVARIABLES_POP_MAP_FADE = "World Map Fade"
 L.CONSOLEVARIABLES_POP_MAP_FADE_DESC = "1 fades the world map while you move. 0 keeps it solid."
@@ -152,7 +155,7 @@ L.CONSOLEVARIABLES_POP_PUSH_SPELLS_DESC = "1 puts spells you learn on your actio
 L.CONSOLEVARIABLES_POP_LOOT_RATE = "Auto Loot Speed"
 L.CONSOLEVARIABLES_POP_LOOT_RATE_DESC = "Milliseconds between items as auto loot takes them. Lower is "
     .. "faster. Default 150."
-L.CONSOLEVARIABLES_POP_FARCLIP = "View Distance"
+L.CONSOLEVARIABLES_POP_FARCLIP = "View Distance" -- [game: FARCLIP]
 L.CONSOLEVARIABLES_POP_FARCLIP_DESC = "How far away the world is drawn. Default 1000; higher costs frames."
 L.CONSOLEVARIABLES_POP_WEATHER = "Weather"
 L.CONSOLEVARIABLES_POP_WEATHER_DESC = "How much rain and snow you see, 0 (none) to 3. Default 2."
@@ -167,6 +170,7 @@ L.CONSOLEVARIABLES_POP_RAW_MOUSE_DESC = "1 reads the mouse directly, which can s
 -- SelfTest
 L.SELFTEST_TITLE = "Self Test"
 L.SELFTEST_DESC = "Probe the client APIs Forever++ depends on and save what they do, for debugging."
+-- [english]
 L.SELFTEST_COMMAND = "run the self test, then /reload to save its log"
 L.SELFTEST_BUTTON = "Run"
 L.SELFTEST_BUTTON_DESC = "Probe the client APIs Forever++ relies on, then record flights, deaths and "
@@ -178,11 +182,13 @@ L.SELFTEST_GAMEDATA_DESC = "Forget the item, spell, and map facts Forever++ lear
     .. "to what it ships with. They're learned again as you play."
 L.SELFTEST_GAMEDATA_CONFIRM = "Forget all game data Forever++ learned in play?"
 L.SELFTEST_GAMEDATA_DONE = "Learned game data forgotten."
+-- [/english]
 
 -- Screenshots
 L.SCREENSHOTS_TITLE = "Screenshots"
 L.SCREENSHOTS_DESC = "Take screenshots of Forever++ in the game's own windows, one after another, "
     .. "for its pages and posts."
+-- [english]
 L.SCREENSHOTS_COMMAND = "take a screenshot of each scene, or of one (tooltip, minimap, map, bags, "
     .. "character, skills, talents, whispers, settings), or of the screen as it is after a wait"
 L.SCREENSHOTS_BUTTON = "Take"
@@ -226,6 +232,7 @@ L.SCREENSHOTS_SCENE_SETTINGS = "Settings"
 L.SCREENSHOTS_SCENE_WHISPERS = "Whisper Window"
 L.SCREENSHOTS_SCENE_MINIMAP = "Minimap Button"
 L.SCREENSHOTS_SCENE_SCREEN = "Screen"
+-- [/english]
 
 -- Controller Mode
 L.CONTROLLERMODE_TITLE = "Controller Mode"
@@ -245,7 +252,7 @@ L.CONTROLLERMODE_PROFILE_DESC = "The profile this character switches to on this 
 L.CONTROLLERMODE_LAYOUT = "Edit Mode Layout"
 L.CONTROLLERMODE_LAYOUT_DESC = "The Edit Mode layout to use on this interface. The game offers a layout "
     .. "only on the interface it was made for."
-L.CONTROLLERMODE_ADDONS = "AddOns"
+L.CONTROLLERMODE_ADDONS = "AddOns" -- [game: ADDONS]
 L.CONTROLLERMODE_ADDONS_NONE = "Don't Change"
 L.CONTROLLERMODE_ADDONS_SAVED = "%d addons on" -- number of addons
 L.CONTROLLERMODE_ADDONS_SAVE = "Use Current"
@@ -268,6 +275,7 @@ L.TAINTWATCHER_DESC = "Watch the quest tracker, quest log, world map, and the ga
     .. "for values an addon wrote into them, which is what later makes the game say \"Interface "
     .. "action failed because of an AddOn\". Each one found is listed in Error Catcher and by "
     .. "/fpp taint, with the time. For finding what broke something."
+-- [english]
 L.TAINTWATCHER_NOTICE = "It says when a value was first seen, not what wrote it."
 L.TAINTWATCHER_NOTICE_DESC = "Values are checked twice a second, so the cause is what happened just "
     .. "before one is found."
@@ -287,9 +295,11 @@ L.TAINTWATCHER_ALREADY = "%d values were already tainted when watching began. Ty
 L.TAINTWATCHER_REPORT = "Tainted: %s." -- Error Catcher's entry; a TAINTWATCHER_LINE
 L.TAINTWATCHER_NONE = "No tainted values found."
 L.TAINTWATCHER_LIST_LINE = "%s  %s" -- the time found, a TAINTWATCHER_LINE
+-- [/english]
 -- Profiler
 L.PROFILER_TITLE = "CPU Profiler"
 L.PROFILER_DESC = "See how much CPU each module takes, on a page in Settings, to find what's slow."
+-- [english]
 L.PROFILER_COMMAND = "open the Profiler page"
 L.PROFILER_NO_PAGE = "This client's Settings can't open the Profiler page."
 L.PROFILER_RECORD = "Record"
@@ -329,11 +339,13 @@ L.PROFILER_COUNTED = "Counted, not timed: a stopwatch around each of thousands a
     .. "more than the call." -- a part's tooltip on the Profiler page
 L.PROFILER_NOTE = "Only Forever++'s own code is timed, and timing it adds a little cost of its own "
     .. "while recording. Memory can only be read for the whole addon, not for each module."
+-- [/english]
 
 -- Gear Probe
 L.GEARPROBE_TITLE = "Gear Probe"
 L.GEARPROBE_DESC = "Read what this client says about your gear, talent tabs, and stats, for "
     .. "working on Upgrade Arrows."
+-- [english]
 L.GEARPROBE_COMMAND = "probe your gear, bags, talents, and stats, then /reload to save the log"
 L.GEARPROBE_BUTTON = "Run"
 L.GEARPROBE_BUTTON_DESC = "Read the stats of what you wear and of the gear in your bags, the "
@@ -343,3 +355,4 @@ L.GEARPROBE_BUTTON_DESC = "Read the stats of what you wear and of the gear in yo
 L.GEARPROBE_DONE = "Gear probe wrote %d lines, with %d pieces of gear from your bags. Type /reload "
     .. "to save them." -- number of lines, number of bag items
 L.GEARPROBE_NO_GEAR = "No weapons or armor were found in your bags, so the comparison wasn't tried."
+-- [/english]

@@ -80,8 +80,8 @@ L.TALENTPLANNER_CLICK_MAXED = "<Right click to remove one>\n<Hold Shift for ever
 -- Each %s is a button as the player's controller shows it (Gamepad.Label): A, then Y
 L.TALENTPLANNER_CLICK_PAD = "<%s to add a point>\n<%s to remove one>"
 L.TALENTPLANNER_CLICK_PAD_MAXED = "<%s to remove one>" -- at its highest rank
-L.TALENTPLANNER_RANK ="Rank %d/%d" -- planned ranks, most ranks
-L.TALENTPLANNER_NEXT_RANK = "Next Rank:"
+L.TALENTPLANNER_RANK ="Rank %d/%d" -- planned ranks, most ranks [game: TOOLTIP_TALENT_RANK]
+L.TALENTPLANNER_NEXT_RANK = "Next Rank:" -- [game: NEXT_RANK_COLON]
 L.TALENTPLANNER_PLANNED = "Planned at Level:"
 L.TALENTPLANNER_POINTS = "Points Planned: %d/%d" -- planned, points at the plan's level
 L.TALENTPLANNER_MORE = "(%d more after this level)"
@@ -135,7 +135,7 @@ L.TALENTPLANNER_DELETE = "Delete Plan"
 L.TALENTPLANNER_DELETE_CONFIRM = "Delete this talent plan?"
 
 -- Macros
-L.MACROS_TITLE = "Macros"
+L.MACROS_TITLE = "Macros" -- [game: MACROS]
 L.MACROS_DESC = "Macros Forever++ makes in your general macros and keeps up to date, each with its own "
     .. "checkbox, deleted when you turn it off. Drag one from the Macros window (/macro) or use its "
     .. "Pick Up button."
@@ -149,7 +149,11 @@ L.MACROS_MISSING = "The %s macro isn't made yet"
 L.MACROS_IN_COMBAT = "Macros can't be picked up in combat."
 L.MACROS_PICKUP_BUTTON = "Pick Up"
 L.MACROS_SMARTBUFF = "Smart Buff"
-L.MACROS_SMARTBUFF_MACRO = "Buff - F++" -- the macro's name: at most 16 letters
+-- The macro's name, at most 16 letters. The same in every language: the module finds its macro
+-- by this name, so another name would make a second one.
+-- [english]
+L.MACROS_SMARTBUFF_MACRO = "Buff - F++"
+-- [/english]
 L.MACROS_SMARTBUFF_DESC = "A macro that casts the buff your friendly target (or you, with none) "
     .. "should get from you, at the best rank you know that they can take: Blessing of Might or "
     .. "Wisdom by class, Fortitude, Arcane Intellect, Mark of the Wild, and the like, and when none "
@@ -173,6 +177,7 @@ L.MACROS_SMARTBUFF_CANT_SELF = "%s can't be buffed, buffing you instead"
 L.MACROS_SMARTBUFF_NOTHING = "You have all the buffs you can have"
 L.MACROS_SMARTBUFF_COMMAND = "show how Smart Buff judges your friendly target (or you): each of "
     .. "your buffs, which they have, and what it casts"
+-- [english]
 L.MACROS_SMARTBUFF_DIAG_OFF = "Smart Buff is off."
 L.MACROS_SMARTBUFF_DIAG_UNIT = "Smart Buff for %s: class %s, gets %s buffs, %s." -- name, class, kind, mana
 L.MACROS_SMARTBUFF_DIAG_MANA = "uses mana"
@@ -196,12 +201,13 @@ L.MACROS_SMARTBUFF_DIAG_CASTS = "Casts: %s"
 L.MACROS_SMARTBUFF_DIAG_NOTHING = "nothing"
 L.MACROS_SMARTBUFF_DIAG_AURAS = "Their buffs: %s"
 L.MACROS_SMARTBUFF_DIAG_NO_AURAS = "Their buffs can't be read now (in combat, mostly)."
+-- [/english]
 L.MACROS_SMARTBUFF_STALE ="Smart Buff can't change in combat"
 L.MACROS_SMARTBUFF_PICKUP = "Smart Buff Macro"
 L.MACROS_SMARTBUFF_PICKUP_DESC = "Put the Smart Buff macro on your cursor, to drop on an action bar."
 
 -- Professions
-L.PROFESSIONS_TITLE = "Professions"
+L.PROFESSIONS_TITLE = "Professions" -- [game: TRADE_SKILLS]
 L.PROFESSIONS_DESC = "Add to the professions window: recipes colored by your chance of a skill-up, "
     .. "how many skill-ups each has left, a bar of the levels a recipe changes color at, what "
     .. "a recipe costs to craft against what it makes, and the recipes you don't know yet. "
@@ -233,6 +239,7 @@ L.PROFESSIONS_DETAIL_UNTIL = "Skill-ups until %d" -- the skill a recipe turns gr
 L.PROFESSIONS_DETAIL_MORE = "Skill-ups until %d %s" -- the skill, then PROFESSIONS_DETAIL_LEFT in gray
 L.PROFESSIONS_DETAIL_LEFT = "(%d more)"
 L.PROFESSIONS_DETAIL_DONE = "No more skill-ups (gray at %d)"
+-- [english]
 L.PROFESSIONS_DUMP_LINE = "Skill line %s, parent %s; skill counted from: %s"
 L.PROFESSIONS_DUMP = "Recipe Skill-Up Levels"
 L.PROFESSIONS_DUMP_BUTTON = "Print"
@@ -242,6 +249,7 @@ L.PROFESSIONS_DUMP_SKILL = "%s: %s (%s), skill %s of %s" -- function, profession
 L.PROFESSIONS_DUMP_ROW = "%s (%d): maxTrivialLevel %s, relativeDifficulty %s, numSkillUps %s" -- recipe, its ID, then its fields
 L.PROFESSIONS_DUMP_FIELDS = "%s: %s" -- recipe, every field as key=value
 L.PROFESSIONS_DUMP_COUNT = "maxTrivialLevel is given for %d of the %d recipes you know."
+-- [/english]
 -- Skill Bar
 L.PROFESSIONS_BAR = "Skill Bar"
 L.PROFESSIONS_BAR_DESC = "Under the selected recipe's name, a bar of the skill levels it turns "
@@ -257,11 +265,13 @@ L.PROFESSIONS_BAR_GREEN = "Green"
 L.PROFESSIONS_BAR_GRAY = "Gray"
 L.PROFESSIONS_BAR_SKILL = "Your Skill"
 L.PROFESSIONS_BAR_NOTE = "Yellow and gray are from the game's data; green is halfway between."
+-- [english]
 L.PROFESSIONS_BAR_DUMP = "Skill Bar Levels"
 L.PROFESSIONS_BAR_DUMP_DESC = "With a profession window open, check the game's tables against the color each recipe you know shows, and print the selected recipe's levels."
 L.PROFESSIONS_BAR_DUMP_WRONG = "%s (%d): the tables give another color than the game's (%s)" -- recipe, its ID, relativeDifficulty
 L.PROFESSIONS_BAR_DUMP_SELECTED = "%s: ability %s, tables yellow %s gray %s; game gray %s, difficulty %s, skill %s"
 L.PROFESSIONS_BAR_DUMP_COUNT = "Levels fit %d recipes; %d have no matching table entry; %d show another color."
+-- [/english]
 -- Unlearned Recipes
 L.PROFESSIONS_UNLEARNED = "Unlearned Recipes"
 L.PROFESSIONS_UNLEARNED_DESC = "Show Unlearned in the recipe list's Filter menu lists the "
@@ -269,12 +279,12 @@ L.PROFESSIONS_UNLEARNED_DESC = "Show Unlearned in the recipe list's Filter menu 
     .. "the skill each takes to learn (green now, yellow soon, red later) and, on its page, the "
     .. "recipe item that teaches it. The Unlearned submenu filters them."
 -- Shown where the client lacks Blizzard's own strings for these.
-L.PROFESSIONS_UNLEARNED_SHOW = "Show Unlearned"
+L.PROFESSIONS_UNLEARNED_SHOW = "Show Unlearned" -- [game: PROFESSION_RECIPES_SHOW_UNLEARNED]
 L.PROFESSIONS_UNLEARNED_MENU = "Unlearned"
 L.PROFESSIONS_UNLEARNED_SOURCES = "Sources"
-L.PROFESSIONS_UNLEARNED_CHECK_ALL = "Check All"
-L.PROFESSIONS_UNLEARNED_UNCHECK_ALL = "Uncheck All"
-L.PROFESSIONS_UNLEARNED_LEARNED = "Show Learned"
+L.PROFESSIONS_UNLEARNED_CHECK_ALL = "Check All" -- [game: CHECK_ALL]
+L.PROFESSIONS_UNLEARNED_UNCHECK_ALL = "Uncheck All" -- [game: UNCHECK_ALL]
+L.PROFESSIONS_UNLEARNED_LEARNED = "Show Learned" -- [game: PROFESSION_RECIPES_SHOW_LEARNED]
 L.PROFESSIONS_UNLEARNED_LEARNED_DESC = "List the recipes you know in the recipe list. Turn it off with "
     .. "Show Unlearned on to see only the ones you don't. The same checkbox is in the list's Filter menu."
 L.PROFESSIONS_UNLEARNED_SHOW_DESC = "List the recipes you don't know yet in the recipe list, each in its "
@@ -304,12 +314,14 @@ L.PROFESSIONS_UNLEARNED_LIMITS_DESC = "The game's data tables give the skill a r
 L.PROFESSIONS_UNLEARNED_TAUGHT = "Learned From: %s" -- the item, with what follows it
 L.PROFESSIONS_UNLEARNED_OWNED = "%s |cff20ff20(in your bags)|r" -- the item's name
 L.PROFESSIONS_UNLEARNED_PRICED = "%s  %s" -- the item, its auction price
+-- [english]
 L.PROFESSIONS_UNLEARNED_DUMP = "Unlearned Recipe Sources"
 L.PROFESSIONS_UNLEARNED_DUMP_DESC = "With a profession window open, print what the game says about "
     .. "where the selected unlearned recipe (or else the first) comes from, and how many unlearned recipes it says that for."
 L.PROFESSIONS_UNLEARNED_DUMP_RECIPE = "%s (%d): sourceType %s, source text: %s"
 L.PROFESSIONS_UNLEARNED_DUMP_TYPES = "Source types any recipe is from: %s; source type filter %s"
 L.PROFESSIONS_UNLEARNED_DUMP_COUNT = "%d have a sourceType and %d a source text, of %d unlearned."
+-- [/english]
 -- Crafting Costs
 L.PROFESSIONS_CRAFTING = "Crafting Costs"
 L.PROFESSIONS_CRAFTING_DESC = "Show Total Cost, Value, and Estimated Profit (after the auction "

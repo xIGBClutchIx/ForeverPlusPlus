@@ -89,19 +89,34 @@ local function latestBuild()
     return version
 end
 
--- A table's CSV for a build, from the cache or else downloaded into it.
-local function getTable(name, build)
-    if not name:match("^%w+$") then
+-- The languages the addon has text in: enUS, then each other folder the TOC loads from Locales/.
+local function languages()
+    local list, seen = { "enUS" }, { enUS = true }
+    for line in (readFile(ROOT .. "/ForeverPlusPlus/ForeverPlusPlus.toc") or ""):gmatch("[^\r\n]+") do
+        local code = line:match("^Locales[/\\](%a%a%u%u)[/\\]")
+        if code and not seen[code] then
+            seen[code] = true
+            list[#list + 1] = code
+        end
+    end
+    return list
+end
+
+-- A table's CSV for a build, from the cache or else downloaded into it. With `locale` it's the
+-- table in that language (a generator's `localized` tables); without, the site's default, enUS.
+local function getTable(name, build, locale)
+    if not name:match("^%w+$") or (locale and not locale:match("^%a%a%u%u$")) then
         fail("bad table name " .. name)
     end
     local folder = CACHE .. "/" .. build
-    local path = folder .. "/" .. name .. ".csv"
+    local path = folder .. "/" .. name .. (locale and "." .. locale or "") .. ".csv"
     local text = readFile(path)
     if text then
         return text
     end
     makeDir(folder)
     local url = ("https://wago.tools/db2/%s/csv?build=%s"):format(name, build)
+        .. (locale and "&locale=" .. locale or "")
     io.stderr:write("datagen: downloading ", name, " for ", build, "\n")
     local part = path .. ".part"
     if not curl(url, part) then
@@ -147,10 +162,16 @@ elseif not isBuild(build) then
     fail("a build looks like 1.60.1.70888, not " .. tostring(build))
 end
 
-local tables = {}
+local tables = { languages = languages() }
 for _, generator in ipairs(GENERATORS) do
     for _, name in ipairs(generator.tables) do
         tables[name] = tables[name] or getTable(name, build)
+    end
+    for _, name in ipairs(generator.localized or {}) do
+        for _, code in ipairs(tables.languages) do
+            local key = code .. "." .. name
+            tables[key] = tables[key] or getTable(name, build, code)
+        end
     end
     for _, name in ipairs(generator.classic or {}) do
         local key = "Classic." .. name

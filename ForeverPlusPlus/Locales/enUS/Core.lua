@@ -13,16 +13,23 @@
 --   * The same English under two keys is two places (an option's name and the tooltip line it
 --     adds, two dropdowns' "Off"), which another language may word differently. Each key says
 --     where it shows in its name or the comment beside it.
---   * A key whose comment says it's matched against the game's own text has to be the client's
---     wording in that language, letter for letter.
---   * What only someone debugging the addon reads can stay English: in Tools.lua everything but
---     the modules players see on the Modules page (Controller Mode, Console Variables, Debug's own
---     title, description and notice), keys with DEBUG, DUMP, TRACE, DIAG, PRINT, or LOG in their
---     name, and the Error Catcher's report (ERRORCATCHER_REPORT_...), which is pasted into bug
---     reports.
 --   * A place name on the map (Data/PointsOfInterest.lua) is translated under the English name
---     itself: L["Booty Bay"] = "...".
---   * tests/spec/locales.lua checks a language's keys, placeholders, and forms against these.
+--     itself: L["Booty Bay"] = "...", with the name the client gives it.
+--
+-- Three notes in these files' comments say whose words a string is, and the tests hold every
+-- language to them (docs/translations.md has the whole of it):
+--   [game: TAG]     The text is the game's own, word for word (TAG is its name in the client's
+--                   GlobalStrings table, or Table.ID): a language uses the client's text for it,
+--                   never its own wording. Without this note a string is ours to word.
+--   [quotes: TAG]   A sentence of ours names something of the game's (a setting, a button): a
+--                   language writes the client's text for TAG in it, as the client writes it.
+--   [english] ... [/english]
+--                   The keys between the two lines stay English everywhere, and a language leaves
+--                   them out: what only someone debugging the addon reads (the Debug page, test
+--                   buttons, printed logs, the bug report people paste to us), and names another
+--                   language mustn't change. Everything outside a block has to be translated.
+-- tests/spec/locales.lua checks all of it, with a language's placeholders and forms, and
+-- `lua tests/locales.lua` prints what a language still has to do.
 -- This file has the core's own text: the Lib helpers, /fpp, and the Settings pages.
 local _, ns = ...
 
@@ -87,11 +94,11 @@ L.SOUND_BUZZ = "Error Buzz"
 L.SOUND_DENIED = "Denied"
 L.SOUND_HORN = "War Horn"
 L.SOUND_BOSS = "Boss Warning"
-L.SOUND_RAIDWARNING = "Raid Warning"
+L.SOUND_RAIDWARNING = "Raid Warning" -- [game: RAID_WARNING]
 L.SOUND_GM = "GM Alert"
 L.SOUND_ALARM = "Alarm Clock"
 L.SOUND_WHISPER = "Whisper"
-L.SOUND_READYCHECK = "Ready Check"
+L.SOUND_READYCHECK = "Ready Check" -- [game: RADIAL_LABEL_READY_CHECK]
 
 -- Core: /fpp and chat
 L.ON = "on"
@@ -191,11 +198,11 @@ L.ICONMARK_CONFLICT_DOWN = "Upgrade Arrows puts its downgrade arrow in this corn
     .. "two overlap. Pick another corner for one of them."
 L.ICONMARK_SECTION_SHOW ="Show On" -- the header over the places a module marks items in
 L.ICONMARK_PLACE_BAGS = "Bags"
-L.ICONMARK_PLACE_BANK = "Bank"
+L.ICONMARK_PLACE_BANK = "Bank" -- [game: BANK]
 L.ICONMARK_PLACE_MERCHANT = "Merchants"
 L.ICONMARK_PLACE_AUCTION = "Auction House"
 L.ICONMARK_PLACE_LOOT = "Loot"
-L.ICONMARK_PLACE_MAIL = "Mail"
+L.ICONMARK_PLACE_MAIL = "Mail" -- [game: BUTTON_LAG_MAIL]
 L.ICONMARK_PLACE_QUESTS = "Quest Rewards"
 L.SETTINGS_PAGE_NOTE = "While it's on, its %s page is in the sidebar under Forever++. The page "
     .. "shows or goes away once you pick another page."
@@ -211,6 +218,7 @@ L.SETTINGS_NEW_ONLY = "New" -- the checkbox beside the search box that lists onl
 L.SETTINGS_NOTHING_NEW = "Nothing new." -- the Modules list while that checkbox is on and nothing is new
 -- The section headers on the Debug module's page, in the order they show. Modules put
 -- their debug options and buttons in one with `section`.
+-- [english]
 L.DEBUG_SECTION_NEW = "What's New"
 L.DEBUG_SECTION_DIAGNOSTICS = "Diagnostics"
 L.DEBUG_SECTION_TOOLS = "Tools"
@@ -247,6 +255,7 @@ L.DEBUG_EVENTS_LEAKS = "%d modules are off but still listening to events (in red
 L.DEBUG_RELOAD = "Reload UI"
 L.DEBUG_RELOAD_BUTTON = "Reload"
 L.DEBUG_RELOAD_DESC = "Reload the interface, like /rl, to load changes to the addon's files."
+-- [/english]
 
 -- Settings: the Profiles page
 L.PROFILES = "Profiles"
@@ -372,8 +381,8 @@ L.HOME_COMMANDS_HINT = "<Click to type a command in chat>"
 
 -- Edit Mode dialog for our own frames (Lib/EditMode.lua)
 L.EDITMODE_SCALE = "Scale"
-L.EDITMODE_CLICK_TO_EDIT = "Click To Edit"
-L.EDITMODE_RESET_POSITION = "Reset To Default Position"
+L.EDITMODE_CLICK_TO_EDIT = "Click To Edit" -- [game: HUD_EDIT_MODE_INSTRUCTIONS_CLICK_TO_EDIT]
+L.EDITMODE_RESET_POSITION = "Reset To Default Position" -- [game: HUD_EDIT_MODE_RESET_POSITION]
 L.SETTINGS_EDIT_MODE_NOTE = "Where it sits and how it's laid out are in Edit Mode: press Escape, "
     .. "pick Edit Mode, then click it." -- a gray row on a module with Edit Mode settings
 L.SETTINGS_EDIT_MODE_NOTE_DESC = "Its place, scale, and layout settings are in its Edit Mode dialog and "
