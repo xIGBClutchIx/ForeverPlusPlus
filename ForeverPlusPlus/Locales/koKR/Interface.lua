@@ -130,6 +130,18 @@ L.HIDEERRORS_HIDE_DESC = "'능력 오류'는 능력 사용과 공격에서 나�
 L.HIDEERRORS_HIDE_ABILITY = "능력 오류"
 L.HIDEERRORS_HIDE_ALL = "모든 오류"
 
+-- EditModeGlow
+L.EDITMODEGLOW_TITLE = "편집 모드 강조"
+L.EDITMODEGLOW_DESC = "편집 모드가 각 프레임 위에 그리는 파란색과 금색 상자를 흐리게 하여 가장자리를 더 "
+    .. "쉽게 보고 맞출 수 있게 합니다. Forever++ 자체 프레임의 상자도 함께 흐려집니다."
+L.EDITMODEGLOW_OPACITY = "강조 불투명도"
+L.EDITMODEGLOW_OPACITY_DESC = "상자가 얼마나 진하게 보일지 정합니다. 0%에서는 사라지지만 각 프레임은 "
+    .. "여전히 클릭하고 끌 수 있습니다."
+L.EDITMODEGLOW_PANEL = "편집 모드의 조작 도구"
+L.EDITMODEGLOW_PANEL_DESC = "편집 모드 창 아래에 '강조 표시' 확인란과 이 슬라이더를 표시합니다. "
+    .. "'강조 표시'를 해제하면 편집 모드가 닫힐 때까지 상자가 숨겨집니다."
+L.EDITMODEGLOW_SHOW = "강조 표시"
+
 -- CombatAlert
 L.COMBATALERT_TITLE = "전투 알림"
 L.COMBATALERT_DESC = "전투를 시작하거나 끝낼 때 위로 떠오르며 사라지는 글자를 표시합니다. 편집 모드에서 위치와 "

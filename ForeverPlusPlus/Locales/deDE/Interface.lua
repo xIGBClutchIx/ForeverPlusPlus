@@ -146,6 +146,20 @@ L.HIDEERRORS_HIDE_DESC = "„Fähigkeitsfehler“ blendet die Fehler beim Einsat
 L.HIDEERRORS_HIDE_ABILITY = "Fähigkeitsfehler"
 L.HIDEERRORS_HIDE_ALL = "Alle Fehler"
 
+-- EditModeGlow
+L.EDITMODEGLOW_TITLE = "Leuchten im Bearbeitungsmodus"
+L.EDITMODEGLOW_DESC = "Dämpft die blauen und goldenen Rahmen, die der Bearbeitungsmodus über jedes "
+    .. "Fenster legt, damit ihre Kanten leichter zu sehen und auszurichten sind. Die Rahmen der "
+    .. "Fenster von Forever++ werden ebenfalls gedämpft."
+L.EDITMODEGLOW_OPACITY = "Deckkraft des Leuchtens"
+L.EDITMODEGLOW_OPACITY_DESC = "Wie stark die Rahmen zu sehen sind. Bei 0 % sind sie weg, aber jedes "
+    .. "Fenster lässt sich weiterhin anklicken und ziehen."
+L.EDITMODEGLOW_PANEL = "Steuerung im Bearbeitungsmodus"
+L.EDITMODEGLOW_PANEL_DESC = "Ein Kontrollkästchen „Leuchten zeigen“ und dieser Regler unter dem Fenster "
+    .. "des Bearbeitungsmodus. Ohne Haken bei „Leuchten zeigen“ bleiben die Rahmen ausgeblendet, bis "
+    .. "der Bearbeitungsmodus schließt."
+L.EDITMODEGLOW_SHOW = "Leuchten zeigen"
+
 -- CombatAlert
 L.COMBATALERT_TITLE = "Kampfhinweis"
 L.COMBATALERT_DESC = "Zeigt eine Textzeile, die aufsteigt und verblasst, wenn Ihr einen Kampf beginnt "

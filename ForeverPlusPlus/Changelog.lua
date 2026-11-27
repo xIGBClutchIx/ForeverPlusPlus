@@ -45,6 +45,10 @@ ns.changelog = {
                     .. "disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By "
                     .. "default only on a character with Enchanting, and Skip Items Worth More Sold "
                     .. "leaves out what a vendor pays more for." },
+                { L.EDITMODEGLOW_TITLE, "A new module, off by default, that dims the blue and gold "
+                    .. "boxes Edit Mode draws over each frame, so their edges are easier to see and line "
+                    .. "up. A Show Glow checkbox and a slider under the Edit Mode window hide or dim "
+                    .. "them while you edit." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "

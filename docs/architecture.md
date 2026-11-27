@@ -250,6 +250,7 @@ Generated files, in `Lib/Generated/` (never edited by hand; see Generated data):
 ### `EditMode.lua`
 
 - `ns.EditMode`: our own frames in Blizzard's Edit Mode, looking and working like Blizzard's: a selection box that turns gold when clicked, dragging with snapping, arrow-key nudging, and a settings dialog and right-click menu with scale, the frame's own settings (dropdowns, sliders, checkboxes), and reset position, and `RegisterModule` for a frame placed from its module's x, y, and scale settings, whose options marked `editMode = true` are those settings. Also Blizzard's own layouts: the list with the one in use (`Layouts`, each known by its kind and name and marked when it's made for the controller interface) and putting one in use out of combat (`SetLayout`).
+- `DimBox(container, alpha)` sets the alpha of the nine-slice pieces on any Edit Mode box, ours or one of Blizzard's (a system frame's `Selection` or its `MouseOverHighlight`), leaving its label and its mouse; `SetGlow(alpha)` does it for every box of ours, now and as each is drawn again. For Edit Mode Glow.
 
 ### `Chat.lua`
 
@@ -395,6 +396,7 @@ What each module is, in the code's terms (what it does for players is in `README
 - **Macro Icon Search**: a search box in the macro icon picker, over the icons of the player's spells and items.
 - **Movable Windows**: drag Blizzard's windows with a key held, and resize one with a key and the mouse wheel (a frame of our own takes the wheel while the key is held, so no Blizzard frame gets a wheel handler), remembered always, for the session, or until closed.
 - **Hide Stance Bar**: the stance bar faded out, its buttons not taking the mouse.
+- **Edit Mode Glow**: `EditModeGlow`: the alpha of the nine-slice pieces on each Edit Mode system's `Selection` and its `MouseOverHighlight` (`ns.EditMode.DimBox`, dimmed again as each shows), our own boxes through `ns.EditMode.SetGlow`, and a row of our own anchored under `EditModeManagerFrame` with a Show Glow checkbox and the slider.
 - **Hide Bag and Menu Bars**: `HideMenuBars`: the bag bar and micro menu faded out until the mouse is over them, their buttons not taking the mouse while Show on Mouseover is off.
 - **Hide Zone Text**: `HideZoneText`: the zone, area, and territory font strings of Blizzard's zone text faded out, its two fading frames left to run.
 - **Hide Error Messages**: `HideErrors`: the error frame's UI_ERROR_MESSAGE heard in its place, and only the errors not hidden handed to it.
