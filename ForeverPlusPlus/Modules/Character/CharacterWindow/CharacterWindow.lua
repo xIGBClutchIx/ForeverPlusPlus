@@ -24,6 +24,7 @@ local module = ns.NewModule("CharacterWindow", L.CHARACTERWINDOW_DESC, {
     inspect = true, -- the item levels and enchant marks in the Inspect window too
 })
 module.title = L.CHARACTERWINDOW_TITLE
+module.presets = { developer = { options = { enchants = true } } } -- Enchant Marks
 module.category = "character"
 module.internal = {}
 local internal = module.internal

@@ -48,9 +48,9 @@ local module = ns.NewModule("Tooltips", L.TOOLTIPS_DESC, {
     title = true,
     target = true,
     itemLevel = false, -- a player's average item level; another player's needs an inspect
-    spec = false, -- a player's talent tree with the most points
+    spec = true, -- a player's talent tree with the most points
     talentPoints = true, -- with the specialization, the points in each tree
-    healthText = "off", -- on the health bar: "off", "percent", "value", "both"
+    healthText = "both", -- on the health bar: "off", "percent", "value", "both"
     hideInCombat = false, -- hide unit tooltips while in combat
     anchorCursor = false, -- tooltips at the mouse instead of the bottom right
     hideFishing = false, -- hide the bobber's tooltip while fishing
@@ -67,7 +67,7 @@ local module = ns.NewModule("Tooltips", L.TOOLTIPS_DESC, {
 module.title = L.TOOLTIPS_TITLE
 module.category = "interface"
 -- Hide Right-Click Hints and Hide Chat Tab Tooltips
-module.presets = { developer = { options = { hideClickHint = true, hideTabTooltip = true } } }
+module.presets = { developer = { options = { hideClickHint = true, hideTabTooltip = true, hideFishing = true } } }
 
 local UNIT_COLORS = {
     { "class", L.TOOLTIPS_COLOR_CLASS },

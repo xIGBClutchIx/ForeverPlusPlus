@@ -29,7 +29,7 @@ local module = ns.modules.ItemTooltips:NewPart({
     itemQuests = true,
     questLines = 3, -- quests named on one tooltip; a count of the rest after them
     questsInLog = true, -- name the quests in the quest log
-    questsOpen = true, -- name the quests neither in the log nor done
+    questsOpen = false, -- name the quests neither in the log nor done
     questsDone = true, -- name the quests already done
 })
 

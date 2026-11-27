@@ -37,7 +37,7 @@ local SETTLE = 1
 local COOLDOWN, WARMUP = 5, 15
 
 local module = ns.NewModule("KeepAudioSynced", L.KEEPAUDIOSYNCED_DESC, {
-    enabled = false,
+    enabled = true,
 })
 module.title = L.KEEPAUDIOSYNCED_TITLE
 module.category = "system"

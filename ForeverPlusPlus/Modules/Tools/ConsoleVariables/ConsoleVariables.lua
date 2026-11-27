@@ -31,7 +31,6 @@ local module = ns.NewModule("ConsoleVariables", L.CONSOLEVARIABLES_DESC, {
 })
 module.title = L.CONSOLEVARIABLES_TITLE
 module.category = "system" -- off, its page and command are gone; it costs nothing until opened
-module.presets = { developer = { enabled = true } }
 module.internal = {}
 local internal = module.internal
 

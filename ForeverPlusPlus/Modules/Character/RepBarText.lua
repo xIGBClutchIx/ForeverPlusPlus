@@ -28,7 +28,7 @@ local module = ns.NewModule("RepBarText", L.REPBARTEXT_DESC, {
 })
 module.title = L.REPBARTEXT_TITLE
 module.category = "character"
-module.presets = { developer = { options = { rate = true } } } -- Show Reputation per Hour
+module.presets = { developer = { options = { solid = true } } } -- Solid Bar
 module.added = "1.8.0"
 
 module.options = {

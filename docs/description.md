@@ -34,7 +34,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 - **Auto Dismount**: Dismounts or stands you up when a spell, flight, loot, or attack fails because you're mounted or sitting. Can also leave shapeshift forms.
 - **Auto Gossip**: Picks an NPC's only option for you, so the bank, shop, trainer, or flight map opens straight away. Hold the Skip Key to choose yourself. Off by default.
 - **Auto Release**: Releases your spirit when you die in a battleground, unless you can be resurrected. Off by default.
-- **Auto Screenshot**: Takes a screenshot when you level up, earn an achievement, or defeat a boss, and optionally for loot, reputation, PvP ranks, and more. Can hide the interface for the shot. Off by default.
+- **Auto Screenshot**: Takes a screenshot when you level up, earn an achievement, or defeat a boss, and optionally for loot, reputation, PvP ranks, and more. Can hide the interface for the shot.
 - **Auto Open Containers**: Opens clams, sacks, and unlocked lockboxes in your bags by themselves when nothing is in the way, keeping the bag slots free that you pick. Off by default.
 - **Auto Repair**: Repairs your gear at any merchant who repairs and says what it cost. Hold the Skip Key to skip it.
 - **Auto Sell Junk**: Sells gray items when a merchant opens and says what they sold for. Can stop at what the buyback list holds. Off by default.
@@ -87,7 +87,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 - **Hide Chat Tabs**: Hides the chat windows' tabs until the mouse is over the chat. A tab with a new message still flashes. Off by default.
 - **Hide Combat Log Tab**: Takes the Combat Log's tab off the chat window. Off by default.
 - **Movable Combat Log Tab**: Lets you drag the Combat Log's tab anywhere among your chat tabs, not only right after General. Off by default.
-- **Chat Tab Resizing**: Drag the General chat tab up or down to make the main chat window taller or shorter, saved in your Edit Mode layout. Off by default.
+- **Chat Tab Resizing**: Drag the General chat tab up or down to make the main chat window taller or shorter, saved in your Edit Mode layout.
 - **Whisper Window**: Keeps whispers in a window like a messenger: conversations with unread counts on the left, the one you pick on the right, and a box to reply in. Opens from a chat button or `/fpp whispers`, and can hide whispers from chat. Off by default.
 
 ### Interface
@@ -104,7 +104,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 - **Loot Rolls**: Place the Need, Greed, and Pass rolls in Edit Mode, with their direction and spacing. Each roll shows the seconds left and what your group picked. Off by default.
 - **Local Time**: While the clock's Use Local Time is on, the calendar and a few other realm times show in your own time.
 - **Movable Windows**: Hold a key (Shift by default) and drag Blizzard's windows where you want them, by the whole window or only its title bar, and hold Ctrl and scroll to resize one. Positions and sizes are kept always, for the session, or until the window closes. Off by default.
-- **Tooltips**: Colors unit and item tooltips by class, reaction, or quality, and adds player titles, who a unit is targeting, and, with the QuestieDB addon, the chance a creature drops a quest's item. Tidies tooltips without changing their look: an item's or spell's icon before its name, a player's class and side on one row, and a quest objective's count at the right. Off by default, adds a player's item level and specialization, and health text on the health bar. Can hide the health bar, quest lines, the unit frames' and chat tabs' right-click hints, and the fishing bobber's tooltip.
+- **Tooltips**: Colors unit and item tooltips by class, reaction, or quality, and adds player titles, who a unit is targeting, and, with the QuestieDB addon, the chance a creature drops a quest's item. Tidies tooltips without changing their look: an item's or spell's icon before its name, a player's class and side on one row, and a quest objective's count at the right. Adds a player's specialization and health text on the health bar, and, off by default, their item level. Can hide the health bar, quest lines, the unit frames' and chat tabs' right-click hints, and the fishing bobber's tooltip.
 - **Wide Vendor Window**: Shows 20 items on each page of a vendor's window instead of 10, in a window about twice as wide. Not with the controller interface. Off by default.
 - **Movable Framerate**: Lets you move and resize the framerate text (Ctrl+R) in Edit Mode. Off by default.
 
@@ -114,7 +114,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 - **Appearance Icons**: Marks gear whose appearance you haven't collected with Blizzard's transmogrifier icon, in bags, the bank, merchants, the auction house, loot, and on recipes that make it.
 - **Auction Totals**: On the auction house's Auctions page, shows next to Cancel Auction what your auctions are listed for in all, and how much has sold.
 - **Bag Slot Counter**: Shows free bag slots on the backpack button, or each bag's own count, turning orange when few are left and red at 0. With the controller interface, which hides the bag buttons, a backpack button of its own shows the count, placed in Edit Mode.
-- **Bulk Buy**: Shift+click an item at a merchant for a bigger buying popup: type how many, or pick a stack or the most you can afford and carry, and buy more than one stack at a time. Off by default.
+- **Bulk Buy**: Shift+click an item at a merchant for a bigger buying popup: type how many, or pick a stack or the most you can afford and carry, and buy more than one stack at a time.
 - **Disenchant Icons**: Marks the items you can disenchant with the Disenchant icon, in bags, the bank, the auction house, and loot, by default only on a character with Enchanting. Off by default.
 - **Easy Delete**: Types DELETE for you when you destroy a good item, so Yes is a single click. Off by default.
 - **Item Levels**: Shows the level of weapons and armor on their icons, in their quality's color, in bags, the bank, merchants, and loot, and the auction house if you turn it on. Off by default.
@@ -163,7 +163,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 ### System
 
 - **Hide Beta Feedback**: Hides the beta's "Press F6 to submit an issue" tooltip line and feedback buttons. Off by default, and only on beta and PTR clients.
-- **Keep Audio Synced**: When your computer's default sound device changes, as when you plug in headphones, restarts the game's sound so it follows. Works while the game's Output Device is the system default. Off by default.
+- **Keep Audio Synced**: When your computer's default sound device changes, as when you plug in headphones, restarts the game's sound so it follows. Works while the game's Output Device is the system default.
 - **AddOns List**: Shows the AddOns list without category headers, enabled addons first. Can search notes and save addon sets.
 - **Error Catcher**: Catches Lua errors, blocked actions, and warnings quietly instead of in Blizzard's popup. `/fpp errors` lists them, with a Copy Bug Report button. Leaves Lua errors to BugGrabber when it's installed.
 - **Minimap Button**: A Forever++ button on the minimap or in the addon compartment. Click it for a menu of quick toggles you can customize, or right-click for settings. It shows how many errors Error Catcher caught.

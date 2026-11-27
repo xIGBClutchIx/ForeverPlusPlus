@@ -29,6 +29,7 @@ local module = ns.NewModule("HideMinimapButtons", L.HIDEMINIMAPBUTTONS_DESC, {
     own = false, -- Forever++'s own minimap button too
 })
 module.title = L.HIDEMINIMAPBUTTONS_TITLE
+module.presets = { developer = { enabled = true } }
 module.category = "map"
 module.added = "1.10.0"
 

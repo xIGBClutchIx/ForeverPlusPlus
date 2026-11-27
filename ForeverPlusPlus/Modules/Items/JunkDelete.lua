@@ -23,6 +23,7 @@ local module = ns.NewModule("JunkDelete", L.JUNKDELETE_DESC, {
     chat = true,
 })
 module.title = L.JUNKDELETE_TITLE
+module.presets = { developer = { enabled = true } }
 module.category = "items"
 module.added = "1.10.0"
 module.quickToggle = "loot"

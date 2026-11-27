@@ -49,6 +49,7 @@ local module = ns.NewModule("PlayerNameplates", L.PLAYERNAMEPLATES_DESC, ns.Frie
     testIcons = "off", -- debug: "off", "group", or "friend" on every friendly player
 }))
 module.title = L.PLAYERNAMEPLATES_TITLE
+module.presets = { developer = { options = { titles = true } } }
 module.category = "units"
 module.quickToggle = "nameplates"
 

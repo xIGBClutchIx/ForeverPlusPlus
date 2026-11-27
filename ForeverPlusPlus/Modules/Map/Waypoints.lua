@@ -33,6 +33,7 @@ local module = ns.NewModule("Waypoints", L.WAYPOINTS_DESC, {
     y = 296, -- near the top, under the Compass Bar's spot
 })
 module.title = L.WAYPOINTS_TITLE
+module.presets = { developer = { options = { eta = true } } } -- Show Time to Arrive
 module.category = "map"
 module.added = "0.8.0"
 

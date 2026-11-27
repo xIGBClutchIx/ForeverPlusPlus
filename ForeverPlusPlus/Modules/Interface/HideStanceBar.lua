@@ -21,6 +21,7 @@ local module = ns.NewModule("HideStanceBar", L.HIDESTANCEBAR_DESC, {
     mouseover = false,
 })
 module.title = L.HIDESTANCEBAR_TITLE
+module.presets = { developer = { options = { mouseover = true } } }
 module.category = "interface"
 module.added = "1.6.0"
 module.notice = ns.Gamepad.HidesNotice()

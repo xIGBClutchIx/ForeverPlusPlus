@@ -36,6 +36,7 @@ local module = ns.NewModule("Townsfolk", L.TOWNSFOLK_DESC, {
     ammo = false,
 })
 module.title = L.TOWNSFOLK_TITLE
+module.presets = { developer = { enabled = true, options = { mailbox = false, repair = false } } }
 module.category = "map"
 module.added = "1.10.0"
 module.internal = {}

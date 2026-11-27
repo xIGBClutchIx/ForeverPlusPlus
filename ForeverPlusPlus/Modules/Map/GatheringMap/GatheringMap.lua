@@ -80,7 +80,8 @@ local module = ns.NewModule("GatheringMap", L.GATHERINGMAP_DESC, {
 module.perCharacter = { hidden = true, hiddenKinds = true, hiddenWorld = true, hiddenMinimap = true }
 module.title = L.GATHERINGMAP_TITLE
 module.category = "map"
-module.presets = { developer = { options = { minimapEmptyTips = false } } } -- Tooltips Without a Dot off
+-- Tooltips Without a Dot off, and when a node was gathered only with Shift.
+module.presets = { developer = { options = { minimapEmptyTips = false, tipGathered = "shift" } } }
 module.quickToggle = "gathering"
 module.added = "1.2.0"
 module.internal = {}

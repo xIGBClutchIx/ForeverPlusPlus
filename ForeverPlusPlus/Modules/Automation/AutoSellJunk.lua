@@ -19,6 +19,7 @@ local module = ns.NewModule("AutoSellJunk", L.AUTOSELLJUNK_DESC, {
     chat = true,
 })
 module.title = L.AUTOSELLJUNK_TITLE
+module.presets = { developer = { enabled = true } }
 module.category = "automation"
 module.quickToggle = "loot"
 

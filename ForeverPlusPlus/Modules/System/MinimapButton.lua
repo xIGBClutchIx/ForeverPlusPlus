@@ -49,7 +49,7 @@ local module = ns.NewModule("MinimapButton", L.MINIMAPBUTTON_DESC, {
 })
 module.title = L.MINIMAPBUTTON_TITLE
 module.category = "system"
-module.presets = { developer = { options = { menuSide = "left" } } }
+module.presets = { developer = { options = { menuSide = "left", menuCustomize = false, menuProfiles = false } } }
 module.added = "0.8.0"
 -- The quick toggles the player picked are a choice like a setting, so each profile keeps its own.
 module.perProfile = { quickToggles = true }

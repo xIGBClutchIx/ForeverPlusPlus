@@ -29,6 +29,7 @@ local module = ns.NewModule("ChatBorder", L.CHATBORDER_DESC, {
     editBoxChannel = true,
 })
 module.title = L.CHATBORDER_TITLE
+module.presets = { developer = { options = { fade = false } } }
 module.category = "chat"
 module.added = "1.9.0"
 

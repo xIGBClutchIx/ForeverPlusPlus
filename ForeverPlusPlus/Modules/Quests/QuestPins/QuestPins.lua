@@ -55,7 +55,7 @@ local module = ns.NewModule("QuestPins", L.QUESTPINS_DESC, {
 module.perCharacter = { hidden = true }
 module.title = L.QUESTPINS_TITLE
 module.category = "quests"
-module.presets = { developer = { enabled = true, options = { pvp = false } } }
+module.presets = { developer = { enabled = true, options = { pvp = false, color = "difficulty" } } }
 module.added = "1.6.0"
 module.internal = {}
 local internal = module.internal

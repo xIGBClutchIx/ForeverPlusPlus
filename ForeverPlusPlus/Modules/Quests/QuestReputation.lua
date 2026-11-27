@@ -39,6 +39,7 @@ local module = ns.NewModule("QuestReputation", L.QUESTREPUTATION_DESC, {
     icon = "handshake",
 })
 module.title = L.QUESTREPUTATION_TITLE
+module.presets = { developer = { enabled = true } }
 module.category = "quests"
 module.added = "1.9.0"
 

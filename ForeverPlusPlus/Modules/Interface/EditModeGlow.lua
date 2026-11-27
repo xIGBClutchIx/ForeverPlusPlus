@@ -26,6 +26,7 @@ local module = ns.NewModule("EditModeGlow", L.EDITMODEGLOW_DESC, {
     panel = true,
 })
 module.title = L.EDITMODEGLOW_TITLE
+module.presets = { developer = { enabled = true, options = { opacity = 100 } } }
 module.category = "interface"
 module.added = "1.10.0"
 

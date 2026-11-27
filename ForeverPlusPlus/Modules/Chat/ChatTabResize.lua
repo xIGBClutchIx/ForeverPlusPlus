@@ -21,7 +21,7 @@ local _G, CreateFrame, IsMouseButtonDown, floor = _G, CreateFrame, IsMouseButton
 local L = ns.L
 
 local module = ns.NewModule("ChatTabResize", L.CHATTABRESIZE_DESC, {
-    enabled = false,
+    enabled = true,
     save = true, -- write the new height into the Edit Mode layout in use
 })
 module.title = L.CHATTABRESIZE_TITLE

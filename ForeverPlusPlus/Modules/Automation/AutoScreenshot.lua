@@ -18,7 +18,7 @@ local L = ns.L
 local readable = ns.IsReadable
 
 local module = ns.NewModule("AutoScreenshot", L.AUTOSCREENSHOT_DESC, {
-    enabled = false,
+    enabled = true,
     levelUp = true,
     achievement = true,
     loot = false,
@@ -40,7 +40,6 @@ ns.CVars.Track(module)
 module.title = L.AUTOSCREENSHOT_TITLE
 module.category = "automation"
 module.quickToggle = "other"
-module.presets = { developer = { enabled = true } }
 
 local GENERAL, EVENTS = L.AUTOSCREENSHOT_SECTION_GENERAL, L.AUTOSCREENSHOT_SECTION_EVENTS
 

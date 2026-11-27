@@ -20,7 +20,7 @@ local BuyMerchantItem = BuyMerchantItem
 local L = ns.L
 
 local module = ns.NewModule("BulkBuy", L.BULKBUY_DESC, {
-    enabled = false,
+    enabled = true,
 })
 module.title = L.BULKBUY_TITLE
 module.category = "items"
@@ -221,12 +221,12 @@ local function makePopup()
     -- The stretched art's inset box is about 46 tall, from 23 to 69 below the top: the amount in
     -- its upper half and the cost in its lower, both centered.
     popup.left = arrow("Left")
-    popup.left:SetPoint("RIGHT", popup, "TOPLEFT", 27, -38)
+    popup.left:SetPoint("RIGHT", popup, "TOPLEFT", 27, -37)
     popup.left:SetScript("OnClick", function()
         step(-1)
     end)
     popup.right = arrow("Right")
-    popup.right:SetPoint("LEFT", popup, "TOPLEFT", 150, -38)
+    popup.right:SetPoint("LEFT", popup, "TOPLEFT", 150, -37)
     popup.right:SetScript("OnClick", function()
         step(1)
     end)
@@ -260,7 +260,7 @@ local function makePopup()
     popup.box = box
 
     popup.cost = popup:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    popup.cost:SetPoint("CENTER", popup, "TOP", 0, -57)
+    popup.cost:SetPoint("CENTER", popup, "TOP", 0, -54)
 
     local stackButton = button(L.BULKBUY_STACK, function()
         if offer then

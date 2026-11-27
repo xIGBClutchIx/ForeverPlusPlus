@@ -33,7 +33,8 @@ ns.changelog = {
                     .. "and Alliance or Horde on one row; both are on by default. Objective Counts at "
                     .. "the Right, off by default, writes \"Tough Wolf Meat\" and \"6 / 8\" in place "
                     .. "of \"6/8 Tough Wolf Meat\"." },
-                { L.TOOLTIPS_TITLE, "Three new options, off by default. Item Level and "
+                { L.TOOLTIPS_TITLE, "Three new options: Specialization and Health Text on by "
+                    .. "default, Item Level off. Item Level and "
                     .. "Specialization add a player's average item level and the talent tree they've "
                     .. "spent the most points in, with the points in each tree; another player's are "
                     .. "asked for when you point at them, out of combat and close by. Health Text "
@@ -46,7 +47,8 @@ ns.changelog = {
                     .. "Quests (on by default, with the QuestieDB addon) names the quests an item is "
                     .. "for, those in your quest log first and those you've done in gray, so old "
                     .. "quest items you can throw away stand out. Lines sets how many are named, and "
-                    .. "each kind of quest (in your log, not done yet, done) has its own checkbox." },
+                    .. "each kind of quest (in your log, not done yet, done) has its own checkbox; "
+                    .. "not done yet is off by default." },
                 { L.UNDIMMEDEDITBOX_TITLE, "A new module, off by default, that keeps the box you "
                     .. "type chat in at full strength while you aren't typing. It needs the game's "
                     .. "Chat Style set to IM Style, which is what keeps the box on screen." },
@@ -65,7 +67,7 @@ ns.changelog = {
                 { L.QUESTPINS_TITLE, "Quest Details with Shift (on by default): hold Shift over a "
                     .. "pin to see what each of its quests asks, who it's turned in to, and the "
                     .. "quest it leads to, from QuestieDB." },
-                { L.CHATTABRESIZE_TITLE, "A new module, off by default, that makes the main chat "
+                { L.CHATTABRESIZE_TITLE, "A new module, on by default, that makes the main chat "
                     .. "window taller or shorter as you drag its General tab up or down. Save to Edit "
                     .. "Mode (on by default) saves the new height in your Edit Mode layout, so it "
                     .. "lasts; one of the game's own layouts can't be changed, so there it lasts "
@@ -100,7 +102,7 @@ ns.changelog = {
                     .. "least to a vendor, named on the button with its value, so there's room for "
                     .. "the loot. It asks first unless you turn Confirm Before Deleting off. Out of "
                     .. "combat only." },
-                { L.BULKBUY_TITLE, "A new module, off by default. Shift+click an item at a merchant for "
+                { L.BULKBUY_TITLE, "A new module, on by default. Shift+click an item at a merchant for "
                     .. "a bigger buying popup in place of the game's: type how many, or press Stack for "
                     .. "one stack or Max for the most your money, bag space, and the merchant's stock "
                     .. "allow, and buy more than one stack at a time." },
@@ -122,7 +124,7 @@ ns.changelog = {
                     .. "It puts innkeepers, mailboxes, bankers, auctioneers, your class trainers, the "
                     .. "trainers of your professions, repairers, and more on the world map, each kind "
                     .. "with its own checkbox, and the same ones in the map's filter menu." },
-                { L.KEEPAUDIOSYNCED_TITLE, "A new module, off by default, that restarts the game's "
+                { L.KEEPAUDIOSYNCED_TITLE, "A new module, on by default, that restarts the game's "
                     .. "sound when your computer's default sound device changes, as when you plug in "
                     .. "headphones, so the game follows it instead of playing on the old one. It works "
                     .. "while the game's Output Device is the system default, and waits out a "
@@ -132,6 +134,10 @@ ns.changelog = {
                     .. "It stays its usual size with the controller interface." },
             } },
             { L.CHANGELOG_CHANGED, {
+                { L.AUTOSCREENSHOT_TITLE, "On by default now. If you never turned it on or off, "
+                    .. "it's on after this update." },
+                { L.CHATHISTORY_TITLE, "The \"Earlier chat\" line between old and new chat is on "
+                    .. "by default now." },
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "
                     .. "screen in Edit Mode, without the strip kept for the buttons." },
                 { L.EDITBOXONTOP_TITLE, "The main chat window can sit at the bottom edge of the "

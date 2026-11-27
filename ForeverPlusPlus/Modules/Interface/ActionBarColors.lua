@@ -33,6 +33,7 @@ local module = ns.NewModule("ActionBarColors", L.ACTIONBARCOLORS_DESC, {
     resource = true,
 })
 module.title = L.ACTIONBARCOLORS_TITLE
+module.presets = { developer = { enabled = true } }
 module.category = "interface"
 module.added = "1.10.0"
 

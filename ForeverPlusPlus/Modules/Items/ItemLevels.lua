@@ -27,6 +27,7 @@ local module = ns.NewModule("ItemLevels", L.ITEMLEVELS_DESC, {
     loot = true,
 })
 module.title = L.ITEMLEVELS_TITLE
+module.presets = { developer = { options = { corner = "BOTTOMLEFT" } } }
 module.category = "items"
 module.added = "1.10.0"
 

@@ -26,6 +26,7 @@ local module = ns.NewModule("TargetMarkers", L.TARGETMARKERS_DESC, {
     scale = 90, -- the ring's size, in percent
 })
 module.title = L.TARGETMARKERS_TITLE
+module.presets = { developer = { enabled = true } }
 module.category = "units"
 module.added = "1.3.0"
 

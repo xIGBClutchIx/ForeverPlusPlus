@@ -25,6 +25,7 @@ local module = ns.NewModule("ShortKeybinds", L.SHORTKEYBINDS_DESC, {
     enabled = false,
 })
 module.title = L.SHORTKEYBINDS_TITLE
+module.presets = { developer = { enabled = true } }
 module.category = "interface"
 module.added = "1.10.0"
 

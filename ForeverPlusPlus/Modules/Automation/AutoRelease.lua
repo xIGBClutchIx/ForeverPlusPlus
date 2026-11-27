@@ -16,6 +16,7 @@ local module = ns.NewModule("AutoRelease", L.AUTORELEASE_DESC, {
     chat = true,
 })
 module.title = L.AUTORELEASE_TITLE
+module.presets = { developer = { enabled = true } }
 module.category = "automation"
 module.quickToggle = "world"
 

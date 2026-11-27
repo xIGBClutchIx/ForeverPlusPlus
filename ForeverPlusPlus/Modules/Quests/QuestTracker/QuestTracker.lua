@@ -52,7 +52,9 @@ local module = ns.NewModule("QuestTracker", L.QUESTTRACKER_DESC, {
 })
 module.title = L.QUESTTRACKER_TITLE
 module.category = "quests"
-module.presets = { developer = { options = { sort = "low" } } }
+module.presets = { developer = { options = {
+    sort = "low", completed = true, count = true, dimOpacity = 80, progress = true, tooltip = true, zones = true,
+} } }
 module.perCharacter = { hidden = true, done = true }
 module.internal = {} -- what this folder's files share
 local internal = module.internal

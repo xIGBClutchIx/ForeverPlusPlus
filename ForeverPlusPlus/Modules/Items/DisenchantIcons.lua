@@ -40,6 +40,7 @@ local module = ns.NewModule("DisenchantIcons", L.DISENCHANTICONS_DESC, {
     loot = true,
 })
 module.title = L.DISENCHANTICONS_TITLE
+module.presets = { developer = { options = { border = "purple" } } }
 module.category = "items"
 module.added = "1.10.0"
 
