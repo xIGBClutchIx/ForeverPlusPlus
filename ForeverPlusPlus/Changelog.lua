@@ -91,6 +91,10 @@ ns.changelog = {
                     .. "a bigger buying popup in place of the game's: type how many, or press Stack for "
                     .. "one stack or Max for the most your money, bag space, and the merchant's stock "
                     .. "allow, and buy more than one stack at a time." },
+                { L.PROFESSIONS_TITLE, "Crafting Costs' Sort Recipe List (off by default) sorts the "
+                    .. "recipes in each category of the professions window by Estimated Profit or "
+                    .. "Total Cost, and shows that number on each row. Pick it in Settings or at the "
+                    .. "bottom of the window's Filter menu." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "

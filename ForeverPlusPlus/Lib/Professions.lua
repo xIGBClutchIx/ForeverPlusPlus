@@ -1,7 +1,8 @@
 -- The player's profession skills by skill line, read once and again only after they change; the
 -- herbs and veins in the world with the skill they take, and the chests and fishing pools; a
--- recipe's color levels and their bar, and the pure logic of Unlearned Recipes; and the
--- professions window's recipe rows. Nothing is listened to until a module first asks.
+-- recipe's color levels and their bar, the pure logic of Unlearned Recipes, and a sort order for
+-- the recipe list; and the professions window's recipe rows. Nothing is listened to until a
+-- module first asks.
 local _, ns = ...
 
 local _G, type, ipairs, pairs, select, setmetatable = _G, type, ipairs, pairs, select, setmetatable
@@ -730,12 +731,14 @@ end
 ---each category under its parent. With `keepEmpty` false (not searching) a category with no recipes
 ---of its own is left out, and what was under it stands at the top, as Blizzard's does. A recipe
 ---whose category `categoryOf` doesn't know is left out. Returns the top categories, each
----`{ info, categories, recipes }`, categories by `uiOrder` then name and recipes in Blizzard's order.
+---`{ info, categories, recipes }`, categories by `uiOrder` then name and recipes in Blizzard's order,
+---or in `order` when it's given (a comparator from Professions.RecipeOrder).
 ---@param recipes table[] recipe infos: `{ recipeID, categoryID, name, difficulty?, maxTrivialLevel?, itemLevel? }`
 ---@param categoryOf fun(id: number): table|nil a category's info: `{ categoryID, parentCategoryID?, name, uiOrder? }`
 ---@param keepEmpty boolean
+---@param order? fun(a: table, b: table): boolean
 ---@return table[] top
-function Professions.RecipeTree(recipes, categoryOf, keepEmpty)
+function Professions.RecipeTree(recipes, categoryOf, keepEmpty, order)
     local nodes = {} -- category ID -> node, or false for one not known
     local function nodeOf(id)
         local node = nodes[id]
@@ -769,7 +772,7 @@ function Professions.RecipeTree(recipes, categoryOf, keepEmpty)
     end
     local function sortNode(node)
         table.sort(node.categories, byOrderThenName)
-        table.sort(node.recipes, byRecipe)
+        table.sort(node.recipes, order or byRecipe)
         for _, child in ipairs(node.categories) do
             sortNode(child)
         end
@@ -779,6 +782,71 @@ function Professions.RecipeTree(recipes, categoryOf, keepEmpty)
     end
     table.sort(top, byOrderThenName)
     return top
+end
+
+-- A sort the player picks -------------------------------------------------------------------------
+-- The recipe list sorted by something of ours (Crafting Costs' profit or cost) within each of
+-- Blizzard's categories, which stay as they are.
+
+---A comparator for recipe infos: those `valueOf` gives a number first, by it (highest first with
+---`highFirst`, else lowest), then those it gives none. Within a tie, and among those with none,
+---Blizzard's own order. Each recipe's value is asked once, so make a new comparator for each sort.
+---@param valueOf fun(info: table): number|nil
+---@param highFirst boolean
+---@return fun(a: table, b: table): boolean
+function Professions.RecipeOrder(valueOf, highFirst)
+    local values = {} -- info -> its value, or false for none
+    local function value(info)
+        local v = values[info]
+        if v == nil then
+            v = valueOf(info)
+            if type(v) ~= "number" or v ~= v then
+                v = false -- none, or not a number (NaN too)
+            end
+            values[info] = v
+        end
+        return v
+    end
+    return function(a, b)
+        local va, vb = value(a), value(b)
+        if va and vb then
+            if va ~= vb then
+                if highFirst then
+                    return va > vb
+                end
+                return va < vb
+            end
+        elseif va or vb then
+            return va and true or false -- the one with a value first
+        end
+        return byRecipe(a, b)
+    end
+end
+
+---`items` again, in a new list, with the recipes among them in `order`, each in a place a recipe
+---had, and the rest (subcategories, paddings) where they were. `recipeOf(item)` is an item's recipe
+---info, or nil for one that isn't a recipe. For a node's children in the recipe list's tree.
+---@param items table[]
+---@param recipeOf fun(item: table): table|nil
+---@param order fun(a: table, b: table): boolean a comparator of recipe infos
+---@return table[]
+function Professions.OrderAmong(items, recipeOf, order)
+    local out, slots, recipes = {}, {}, {}
+    for i, item in ipairs(items) do
+        out[i] = item
+        local info = recipeOf(item)
+        if info then
+            slots[#slots + 1] = i
+            recipes[#recipes + 1] = { item = item, info = info }
+        end
+    end
+    table.sort(recipes, function(a, b)
+        return order(a.info, b.info)
+    end)
+    for n, i in ipairs(slots) do
+        out[i] = recipes[n].item
+    end
+    return out
 end
 
 local known -- skill line -> { rank, name, icon }, or nil until read

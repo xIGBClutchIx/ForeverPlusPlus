@@ -25,6 +25,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Item Levels**: A new module, off by default, that shows the level of weapons and armor on their icons, in their quality's color, in your bags, the bank, at merchants, and in loot, and in the auction house if you turn it on.
 - **Junk Delete Button**: A new module, off by default, that shows a button below the loot window while your bags are full. A click destroys your gray stack worth least to a vendor, named on the button with its value, so there's room for the loot. It asks first unless you turn Confirm Before Deleting off. Out of combat only.
 - **Bulk Buy**: A new module, off by default. Shift+click an item at a merchant for a bigger buying popup in place of the game's: type how many, or press Stack for one stack or Max for the most your money, bag space, and the merchant's stock allow, and buy more than one stack at a time.
+- **Professions**: Crafting Costs' Sort Recipe List (off by default) sorts the recipes in each category of the professions window by Estimated Profit or Total Cost, and shows that number on each row. Pick it in Settings or at the bottom of the window's Filter menu.
 
 ### Changed
 
