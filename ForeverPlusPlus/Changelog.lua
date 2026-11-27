@@ -82,6 +82,11 @@ ns.changelog = {
                     .. "weapons and armor on their icons, in their quality's color, in your bags, "
                     .. "the bank, at merchants, and in loot, and in the auction house if you turn "
                     .. "it on." },
+                { L.JUNKDELETE_TITLE, "A new module, off by default, that shows a button below the "
+                    .. "loot window while your bags are full. A click destroys your gray stack worth "
+                    .. "least to a vendor, named on the button with its value, so there's room for "
+                    .. "the loot. It asks first unless you turn Confirm Before Deleting off. Out of "
+                    .. "combat only." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "

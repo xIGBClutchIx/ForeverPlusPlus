@@ -49,6 +49,36 @@ eq(Bags.Each(function() end), nil, "bags: a walk nothing stops returns nil")
 -- bag that gave no answer, or the reagent bag's 7.
 eq(Bags.FreeSlots(), 7, "bags: free slots in the bags that take anything")
 
+-- The cheapest gray stack: bag 0 has gray 100 (2 at 30c, 60c) and gray 101 (1 at 40c), a white
+-- 102 worth 1c, a gray 103 a vendor won't buy, a locked gray 104, and a gray 105 with no price
+-- known; the quiver (bag 2) has a gray 106 worth 1c, the reagent bag a gray 107 worth 1c.
+local function gray(id, count, extra)
+    local info = { itemID = id, quality = 0, stackCount = count, hyperlink = "item:" .. id }
+    for k, v in pairs(extra or {}) do
+        info[k] = v
+    end
+    return info
+end
+slots = {
+    [0] = {
+        gray(100, 2), gray(101, 1), gray(102, 1, { quality = 1 }), gray(103, 1, { hasNoValue = true }),
+        gray(104, 1, { isLocked = true }), gray(105, 1), false,
+    },
+    [2] = { gray(106, 1) },
+    [5] = { gray(107, 1) },
+}
+local prices = { ["item:100"] = 30, ["item:101"] = 40, ["item:102"] = 1, ["item:103"] = 1, ["item:104"] = 1,
+    ["item:106"] = 1, ["item:107"] = 1 }
+local function price(link) return prices[link] end
+local junkBag, junkSlot, junkInfo, junkValue = Bags.CheapestJunk(price)
+same({ junkBag, junkSlot, junkInfo and junkInfo.itemID, junkValue }, { 0, 2, 101, 40 },
+    "bags: the cheapest gray stack counts the whole stack, and skips white, no-value, locked, and unpriced")
+prices["item:100"] = 20
+junkBag, junkSlot, junkInfo, junkValue = Bags.CheapestJunk(price)
+same({ junkBag, junkSlot, junkValue }, { 0, 1, 40 }, "bags: the first of equal stacks wins")
+slots = { [0] = { gray(102, 1, { quality = 1 }) }, [2] = { gray(106, 1) }, [5] = { gray(107, 1) } }
+eq(Bags.CheapestJunk(price), nil, "bags: no junk in the ordinary bags, none outside them counted")
+
 eq(Bags.REAGENT, 5, "bags: the reagent bag without Enum.BagIndex")
 C_Container = nil
 T.load("Lib/Bags", ns)

@@ -192,6 +192,22 @@ L.EASYDELETE_TITLE = "輕鬆刪除"
 -- [quotes: DELETE_ITEM_CONFIRM_STRING]
 L.EASYDELETE_DESC = "摧毀好物品時自動替你輸入「DELETE」，只要點擊一次「是」即可。"
 
+-- JunkDelete
+L.JUNKDELETE_TITLE = "垃圾刪除按鈕"
+L.JUNKDELETE_DESC = "背包已滿時，在拾取視窗下方顯示一個按鈕，摧毀賣給商人最不值錢的一組灰色物品，"
+    .. "為拾取騰出空間。按鈕上會顯示這組物品及其價值。"
+L.JUNKDELETE_NOTICE = "僅限非戰鬥狀態。" -- a gray row atop the module
+L.JUNKDELETE_NOTICE_DESC = "戰鬥中按鈕會隱藏，因此戰鬥中的誤點不會摧毀任何東西。"
+-- the button: the stack (its icon and name), then what a vendor pays for it
+L.JUNKDELETE_BUTTON = "刪除：%s（%s）"
+L.JUNKDELETE_HINT = "<點擊摧毀這組物品>"
+-- the stack's item link, then what a vendor pays for it
+L.JUNKDELETE_DELETED = "為騰出空間已刪除：%s（%s）。"
+L.JUNKDELETE_CONFIRM = "刪除前確認"
+L.JUNKDELETE_CONFIRM_DESC = "摧毀這組物品前先詢問。關閉後點擊一次即摧毀。"
+L.JUNKDELETE_CONFIRM_TEXT = "摧毀%s以騰出空間？"
+L.JUNKDELETE_CHAT_DESC ="在聊天中顯示刪除了哪組物品以及它值多少錢。"
+
 -- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE,
 -- DISENCHANT_TITLE, STATCOLORS_TITLE, SHORTSTATS_TITLE, NEWITEM_TITLE, CRAFTEDCOMPARE_TITLE, and
 -- AUCTIONPRICES_TITLE: a section holds one part, since its checkbox reads "Enabled" under it)

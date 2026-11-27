@@ -1,6 +1,6 @@
--- What's in the player's bags: walking every slot, and counting the free ones. One place for
--- which bags there are, so a build that moves a bag index is fixed here. The buttons Blizzard
--- draws for them are Lib/ItemButtons.lua's.
+-- What's in the player's bags: walking every slot, counting the free ones, and finding the gray
+-- stack worth least. One place for which bags there are, so a build that moves a bag index is
+-- fixed here. The buttons Blizzard draws for them are Lib/ItemButtons.lua's.
 local _, ns = ...
 
 local type = type
@@ -49,4 +49,46 @@ function Bags.FreeSlots()
         end
     end
     return free
+end
+
+-- Whether a bag takes anything, so emptying a slot in it makes room for any loot.
+local function ordinary(bag)
+    local _, family = C_Container.GetContainerNumFreeSlots(bag)
+    return family == nil or family == 0
+end
+
+---The gray stack in the ordinary bags worth least to a vendor, the whole stack counted: its bag,
+---slot, item info, and value in copper. Only Poor quality items a vendor buys, not locked, and
+---with a price `price(link)` knows; never the reagent bag or a bag that takes only its own kind.
+---The first of equal ones wins. Nil when there's none.
+---@param price fun(link: string): number|nil a vendor's price for one, such as ns.Prices.Vendor
+---@return number|nil bag
+---@return number|nil slot
+---@return table|nil info
+---@return number|nil value
+function Bags.CheapestJunk(price)
+    local poor = Enum and Enum.ItemQuality and Enum.ItemQuality.Poor or 0
+    local best, bestBag, bestSlot, bestInfo
+    local skip = {} -- bag -> true for a bag that takes only its own kind
+    Bags.Each(function(bag, slot, info)
+        if skip[bag] == nil then
+            skip[bag] = not ordinary(bag)
+        end
+        if skip[bag] or not info or info.quality ~= poor or info.hasNoValue or info.isLocked
+            or not info.hyperlink then
+            return
+        end
+        local each = price(info.hyperlink)
+        if type(each) ~= "number" or each <= 0 then
+            return
+        end
+        local value = each * (info.stackCount or 1)
+        if not best or value < best then
+            best, bestBag, bestSlot, bestInfo = value, bag, slot, info
+        end
+    end)
+    if not best then
+        return nil
+    end
+    return bestBag, bestSlot, bestInfo, best
 end
