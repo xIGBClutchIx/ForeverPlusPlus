@@ -13,8 +13,9 @@ ns.changelog = {
         version = L.CHANGELOG_UNRELEASED,
         sections = {
             { L.CHANGELOG_ADDED, {
-                "A Russian translation, for the Russian game client. It hasn't been proofread by "
-                    .. "a native speaker yet, and anything it doesn't cover shows in English.",
+                "Russian, Simplified Chinese, and Traditional Chinese translations, each shown on a "
+                    .. "game client in that language. None has been proofread by a native speaker "
+                    .. "yet, and anything one doesn't cover shows in English.",
                 { L.BAGSLOTCOUNTER_TITLE, "Bag Button on Screen (on by default) shows a backpack "
                     .. "button with your free bag slots while the controller interface is on, "
                     .. "since it hides the bag buttons. Move it in Edit Mode, and point at it for "

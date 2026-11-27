@@ -2,7 +2,7 @@
 
 How Forever++'s text works in more than one language: what a language file is, whose words each string is, and the checks that keep a translation whole and current. `AGENTS.md` has the rules in short; this is the detail.
 
-Forever++ ships English (`enUS`) and Russian (`ruRU`). A language is a commitment: once one ships, every string added or reworded has to be done in it too, in the same change. The checks below make that a failing test instead of something to remember.
+Forever++ ships English (`enUS`), Russian (`ruRU`), Simplified Chinese (`zhCN`), and Traditional Chinese (`zhTW`). The Forever client also has its own text in `deDE`, `frFR`, `esES`, `esMX`, `ptBR`, and `koKR` (`itIT` is in its list but still English in build 1.60.1.71139); those get the `[game]` strings from the client and the rest in English. A language is a commitment: once one ships, every string added or reworded has to be done in it too, in the same change. The checks below make that a failing test instead of something to remember.
 
 ## How the game picks a language
 
@@ -137,6 +137,16 @@ Join a language's rows to enUS's by `ID`. An NPC's title under its name isn't in
 4. Translate everything outside the `[english]` blocks. A counted string is a list of the language's forms: one, two (1, then the rest), or three (the Slavic rule), as `ns.Text.Plural` reads them.
 5. `lua tests/locales.lua --update <code>`, then `lua5.1 tests/run.lua`.
 6. Check `Lib/Fonts.lua`'s `NON_ROMAN` if the language isn't written in Latin letters: the font options are off for those.
+
+## Chinese (zhCN, zhTW): what's known
+
+- Each written in 2026-11 by one model, working from a glossary of that client's own text for build 1.60.1.71139 (interface terms, classes, professions, factions, flight points, the spells and items we name). Not yet read by a native speaker, and not yet seen in game.
+- They are two translations, not one converted: the Taiwan client's terms differ (a profile is 配置 in zhCN and 設定檔 in zhTW, a module 模块 and 模組).
+- Chinese has one plural form, so a counted string is a list of one: `{ "%d个地点" }`.
+- A flight point's name comes with its zone after a full-width comma (血毒河，费伍德森林); `gametext.lua` cuts it off as it does the English ", Zone".
+- **Our own terms**, where the client has no word: 快捷开关 / 快速切換 for the quick toggles, 路径点 / 導航點 for a `/way` waypoint (the game's map pin is 地图标记 / 地圖標記), 图钉 / 圖釘 for a Quest Pins pin, 权重方案 / 權重方案 for a stat weight profile.
+- **Examples in descriptions** (an item or quest named to show what a line looks like) are the translator's own wording, not looked up.
+- The stable master and city icon limits under Russian apply here too.
 
 ## Russian (ruRU): what's known
 
