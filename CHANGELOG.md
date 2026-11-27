@@ -14,6 +14,13 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Item Tooltips**: Pair Short Lines (on by default) puts two short lines that follow each other on one row: how an item binds with "Unique", and a shield's armor with its block. Scan Age has a new choice, Beside the Price, which shows "2h ago" on the Auction line instead of a line of its own.
 - **Disenchant Icons**: A new module, off by default, that marks the items you can disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By default only on a character with Enchanting, and Skip Items Worth More Sold leaves out what a vendor pays more for.
 
+### Changed
+
+- **Edit Box on Top**: The main chat window can sit at the bottom edge of the screen in Edit Mode, now the edit box no longer needs the room under it.
+
+### Fixed
+
+- **Buff Timers**: Sort Buffs and Hide Tracking Buffs no longer raise a "Cannot anchor to itself" error with an interface addon that lays the buffs out itself, such as ShestakUI, and now sort and close up the buffs in that addon's own layout.
 ## 1.9.1 (2026-11-25)
 
 ### Changed
@@ -22,7 +29,6 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 ### Fixed
 
-- **Buff Timers**: Sort Buffs and Hide Tracking Buffs no longer raise a "Cannot anchor to itself" error with an interface addon that lays the buffs out itself, such as ShestakUI, and now sort and close up the buffs in that addon's own layout.
 - **Waypoints**: Show Time to Arrive shows the whole time ("6:40"), not only its minutes. It also counts down every second and is steadier: it eases to a new estimate instead of jumping, and stays through a quick turn.
 
 ## 1.9.0 (2026-11-24)

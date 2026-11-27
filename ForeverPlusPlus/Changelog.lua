@@ -42,6 +42,15 @@ ns.changelog = {
                     .. "default only on a character with Enchanting, and Skip Items Worth More Sold "
                     .. "leaves out what a vendor pays more for." },
             } },
+            { L.CHANGELOG_CHANGED, {
+                { L.EDITBOXONTOP_TITLE, "The main chat window can sit at the bottom edge of the "
+                    .. "screen in Edit Mode, now the edit box no longer needs the room under it." },
+            } },
+            { L.CHANGELOG_FIXED, {
+                { L.BUFFTIMERS_TITLE, "Sort Buffs and Hide Tracking Buffs no longer raise a \"Cannot "
+                    .. "anchor to itself\" error with an interface addon that lays the buffs out "
+                    .. "itself, such as ShestakUI, and now sort and close up the buffs in that "
+                    .. "addon's own layout." },            } },
         },
     },
     {
@@ -55,10 +64,6 @@ ns.changelog = {
                     .. "so Pick Lock no longer says \"Item is locked\".",
             } },
             { L.CHANGELOG_FIXED, {
-                { L.BUFFTIMERS_TITLE, "Sort Buffs and Hide Tracking Buffs no longer raise a \"Cannot "
-                    .. "anchor to itself\" error with an interface addon that lays the buffs out "
-                    .. "itself, such as ShestakUI, and now sort and close up the buffs in that "
-                    .. "addon's own layout." },
                 { L.WAYPOINTS_TITLE, "Show Time to Arrive shows the whole time (\"6:40\"), not "
                     .. "only its minutes. It also counts down every second and is steadier: it "
                     .. "eases to a new estimate instead of jumping, and stays through a quick "
