@@ -218,6 +218,14 @@ L.EDITBOXONTOP_TITLE = "Eingabefeld oben"
 L.EDITBOXONTOP_DESC = "Setzt das Feld, in das Ihr Chat tippt, über die Reiter des Chatfensters statt "
     .. "unter das Fenster. Beim Ausschalten kommt es zurück."
 
+-- UndimmedEditBox
+L.UNDIMMEDEDITBOX_TITLE = "Ungedimmtes Eingabefeld"
+L.UNDIMMEDEDITBOX_DESC = "Lässt das Feld, in das Ihr Chat tippt, in voller Stärke, während Ihr nicht "
+    .. "tippt, statt es abzudunkeln."
+L.UNDIMMEDEDITBOX_NOT_IM = "Benötigt \"Chatstil\" auf \"Sofortnachrichtenstil\""
+L.UNDIMMEDEDITBOX_NOT_IM_DESC = "Bei einem anderen Chatstil blendet das Spiel das Eingabefeld aus, "
+    .. "bis Ihr tippt, es gibt also nichts hell zu halten."
+
 -- WhisperWindow
 L.WHISPERWINDOW_TITLE = "Flüsterfenster"
 L.WHISPERWINDOW_DESC = "Hält Flüstern in einem eigenen Fenster, ein Gespräch pro Person, mit einem "

@@ -77,6 +77,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 - **Chat Font**: Draws chat in another of the game's fonts, keeping its size. Not on Korean, Chinese, and Russian clients.
 - **Chat Border**: Draws a border around each chat window and the box you type in, in the game's own frame art: Thin, Stone, or Gold, in a color you pick, fading with the chat's tabs. Off by default.
 - **Edit Box on Top**: Puts the box you type chat in above the chat window's tabs instead of under the window, and lets the main chat window sit at the bottom edge of the screen in Edit Mode. Off by default.
+- **Undimmed Edit Box**: Keeps the box you type chat in at full strength while you aren't typing, with the game's Chat Style on IM Style. Off by default.
 - **Keep Chat Visible**: Keeps chat text on screen instead of fading it out after a while.
 - **Chat History**: Shows each chat window's latest lines again after a login or reload, except whispers.
 - **Chat Arrow Keys**: Up and Down in the chat box bring back what you sent, and Left and Right move through the text, without holding Alt.

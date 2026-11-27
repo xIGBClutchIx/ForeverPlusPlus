@@ -199,6 +199,13 @@ L.EDITBOXONTOP_TITLE = "입력창 위로"
 L.EDITBOXONTOP_DESC = "대화를 입력하는 창을 대화창 아래 대신 대화창 탭 위에 놓습니다. 끄면 원래 자리로 "
     .. "돌아갑니다."
 
+-- UndimmedEditBox
+L.UNDIMMEDEDITBOX_TITLE = "입력창 흐려짐 없음"
+L.UNDIMMEDEDITBOX_DESC = "입력하지 않을 때에도 대화 입력창을 흐리게 하지 않고 또렷하게 유지합니다."
+L.UNDIMMEDEDITBOX_NOT_IM = "\"대화창 스타일\"이 \"메신저 스타일\"이어야 합니다"
+L.UNDIMMEDEDITBOX_NOT_IM_DESC = "다른 대화창 스타일에서는 입력할 때까지 게임이 입력창을 숨기므로 "
+    .. "밝게 유지할 것이 없습니다."
+
 -- WhisperWindow
 L.WHISPERWINDOW_TITLE = "귓속말 창"
 L.WHISPERWINDOW_DESC = "귓속말을 사람마다 대화 하나씩, 답장할 입력창과 함께 별도의 창에 모아 둡니다. 대화는 "

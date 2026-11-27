@@ -46,6 +46,9 @@ ns.changelog = {
                     .. "Quests (on by default, with the QuestieDB addon) names the quests an item is "
                     .. "for, those in your quest log first and those you've done in gray, so old "
                     .. "quest items you can throw away stand out." },
+                { L.UNDIMMEDEDITBOX_TITLE, "A new module, off by default, that keeps the box you "
+                    .. "type chat in at full strength while you aren't typing. It needs the game's "
+                    .. "Chat Style set to IM Style, which is what keeps the box on screen." },
                 { L.CHATBUTTONSEVERYTAB_TITLE, "A new module, on by default, that keeps the buttons "
                     .. "beside the chat window whichever chat tab is in front: the game's chat "
                     .. "menu and channels buttons, and the ones Forever++ adds. The game only "

@@ -210,6 +210,15 @@ L.EDITBOXONTOP_TITLE = "Edit Box on Top"
 L.EDITBOXONTOP_DESC = "Put the box you type chat in above the chat window's tabs instead of under "
     .. "the window. Turning this off puts it back."
 
+-- UndimmedEditBox
+L.UNDIMMEDEDITBOX_TITLE = "Undimmed Edit Box"
+L.UNDIMMEDEDITBOX_DESC = "Keep the box you type chat in at full strength while you aren't typing, "
+    .. "instead of dimmed."
+-- [quotes: CHAT_STYLE, IM_STYLE]
+L.UNDIMMEDEDITBOX_NOT_IM = "Needs \"Chat Style\" set to \"IM Style\""
+L.UNDIMMEDEDITBOX_NOT_IM_DESC = "With another chat style the game hides the edit box until you "
+    .. "type, so there is nothing to keep bright."
+
 -- WhisperWindow
 L.WHISPERWINDOW_TITLE = "Whisper Window"
 L.WHISPERWINDOW_DESC = "Keep whispers in a window of their own, a conversation per person, with a "

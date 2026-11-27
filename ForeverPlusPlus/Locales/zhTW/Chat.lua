@@ -186,6 +186,12 @@ L.HIDECHATTABS_DESC = "隱藏聊天視窗的分頁，直到滑鼠指向聊天，
 L.EDITBOXONTOP_TITLE = "輸入框置頂"
 L.EDITBOXONTOP_DESC = "將輸入聊天的輸入框放在聊天視窗分頁的上方，而不是視窗下方。關閉後會恢復原位。"
 
+-- UndimmedEditBox
+L.UNDIMMEDEDITBOX_TITLE = "輸入框不變暗"
+L.UNDIMMEDEDITBOX_DESC = "未輸入時，讓聊天輸入框保持完整顯示，而不是變暗。"
+L.UNDIMMEDEDITBOX_NOT_IM = "需要將「聊天方式」設為「以即時通訊方式」"
+L.UNDIMMEDEDITBOX_NOT_IM_DESC = "使用其他聊天方式時，遊戲會在你輸入前隱藏輸入框，因此無需保持明亮。"
+
 -- WhisperWindow
 L.WHISPERWINDOW_TITLE = "悄悄話視窗"
 L.WHISPERWINDOW_DESC = "將悄悄話放在專屬的視窗中，每個人一段對話，並附有回覆用的輸入框。對話會為每個角色儲存。"

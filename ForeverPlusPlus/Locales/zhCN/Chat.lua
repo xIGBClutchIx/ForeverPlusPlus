@@ -184,6 +184,12 @@ L.HIDECHATTABS_DESC = "隐藏聊天窗口的标签，直到鼠标指向聊天，
 L.EDITBOXONTOP_TITLE = "输入框置顶"
 L.EDITBOXONTOP_DESC = "把你输入聊天的框放在聊天窗口的标签上方，而不是窗口下方。关闭后恢复原位。"
 
+-- UndimmedEditBox
+L.UNDIMMEDEDITBOX_TITLE = "输入框不变暗"
+L.UNDIMMEDEDITBOX_DESC = "不输入时，让聊天输入框保持完全显示，而不是变暗。"
+L.UNDIMMEDEDITBOX_NOT_IM = "需要将“聊天风格”设为“即时通讯风格”"
+L.UNDIMMEDEDITBOX_NOT_IM_DESC = "使用其他聊天风格时，游戏会在你输入前隐藏输入框，因此无需保持明亮。"
+
 -- WhisperWindow
 L.WHISPERWINDOW_TITLE = "悄悄话窗口"
 L.WHISPERWINDOW_DESC = "把悄悄话放在单独的窗口中，每人一个对话，并带有回复框。对话会为每个角色保存。"
