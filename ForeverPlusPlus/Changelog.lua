@@ -87,6 +87,10 @@ ns.changelog = {
                     .. "least to a vendor, named on the button with its value, so there's room for "
                     .. "the loot. It asks first unless you turn Confirm Before Deleting off. Out of "
                     .. "combat only." },
+                { L.BULKBUY_TITLE, "A new module, off by default. Shift+click an item at a merchant for "
+                    .. "a bigger buying popup in place of the game's: type how many, or press Stack for "
+                    .. "one stack or Max for the most your money, bag space, and the merchant's stock "
+                    .. "allow, and buy more than one stack at a time." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "

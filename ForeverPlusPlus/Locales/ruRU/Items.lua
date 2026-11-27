@@ -237,6 +237,18 @@ L.JUNKDELETE_CONFIRM = "Спрашивать перед удалением"
 L.JUNKDELETE_CONFIRM_DESC = "Спрашивать, прежде чем уничтожить стопку. Если выключить, она уничтожается одним щелчком."
 L.JUNKDELETE_CONFIRM_TEXT = "Уничтожить %s, чтобы освободить место?"
 L.JUNKDELETE_CHAT_DESC ="Сообщать в чате, какая стопка удалена и сколько она стоила."
+-- BulkBuy
+L.BULKBUY_TITLE = "Оптовая покупка"
+L.BULKBUY_DESC = "Shift+щелчок по товару у торговца открывает окно покупки побольше: введите количество "
+    .. "или выберите стопку либо максимум, который вам по карману и поместится в сумки, и покупайте "
+    .. "больше одной стопки за раз."
+L.BULKBUY_STACK = "Стопка"
+L.BULKBUY_STACK_DESC = "Одна полная стопка."
+L.BULKBUY_MAX = "Макс."
+L.BULKBUY_MAX_DESC = "Столько, сколько позволяют ваши деньги, место в сумках и запас торговца."
+L.BULKBUY_NOTICE = "Только для товаров за золото."
+L.BULKBUY_NOTICE_DESC = "Для товаров, которые стоят жетоны или другие предметы, остается собственное "
+    .. "окно игры."
 
 -- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE,
 -- DISENCHANT_TITLE, STATCOLORS_TITLE, SHORTSTATS_TITLE, NEWITEM_TITLE, CRAFTEDCOMPARE_TITLE, and

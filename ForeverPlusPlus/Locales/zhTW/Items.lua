@@ -207,6 +207,16 @@ L.JUNKDELETE_CONFIRM = "刪除前確認"
 L.JUNKDELETE_CONFIRM_DESC = "摧毀這組物品前先詢問。關閉後點擊一次即摧毀。"
 L.JUNKDELETE_CONFIRM_TEXT = "摧毀%s以騰出空間？"
 L.JUNKDELETE_CHAT_DESC ="在聊天中顯示刪除了哪組物品以及它值多少錢。"
+-- BulkBuy
+L.BULKBUY_TITLE = "大量購買"
+L.BULKBUY_DESC = "在商人處按住Shift鍵點擊物品，開啟較大的購買視窗：輸入數量，或選擇一疊或你買得起、"
+    .. "背包放得下的最大數量，一次購買超過一疊。"
+L.BULKBUY_STACK = "一疊"
+L.BULKBUY_STACK_DESC = "完整的一疊。"
+L.BULKBUY_MAX = "最大"
+L.BULKBUY_MAX_DESC = "你的金錢、背包空間和商人存貨所允許的最大數量。"
+L.BULKBUY_NOTICE = "僅限用金幣購買的物品。"
+L.BULKBUY_NOTICE_DESC = "需要代幣或其他物品購買的物品仍使用遊戲本身的視窗。"
 
 -- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE,
 -- DISENCHANT_TITLE, STATCOLORS_TITLE, SHORTSTATS_TITLE, NEWITEM_TITLE, CRAFTEDCOMPARE_TITLE, and

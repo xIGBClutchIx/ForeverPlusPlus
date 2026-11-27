@@ -246,6 +246,18 @@ L.JUNKDELETE_CONFIRM = "Vor dem Löschen nachfragen"
 L.JUNKDELETE_CONFIRM_DESC = "Fragt nach, bevor der Stapel zerstört wird. Ausgeschaltet zerstört ihn ein Klick."
 L.JUNKDELETE_CONFIRM_TEXT = "%s zerstören, um Platz zu schaffen?"
 L.JUNKDELETE_CHAT_DESC ="Nennt im Chat, welcher Stapel gelöscht wurde und was er wert war."
+-- BulkBuy
+L.BULKBUY_TITLE = "Großeinkauf"
+L.BULKBUY_DESC = "Umschalt+Klick auf einen Gegenstand beim Händler öffnet ein größeres Kauffenster: Gebt "
+    .. "eine Menge ein oder wählt einen Stapel oder das Meiste, das Ihr Euch leisten und tragen könnt, "
+    .. "und kauft mehr als einen Stapel auf einmal."
+L.BULKBUY_STACK = "Stapel"
+L.BULKBUY_STACK_DESC = "Ein voller Stapel."
+L.BULKBUY_MAX = "Max."
+L.BULKBUY_MAX_DESC = "So viele, wie Euer Geld, Euer Taschenplatz und der Vorrat des Händlers erlauben."
+L.BULKBUY_NOTICE = "Nur für Gegenstände, die Gold kosten."
+L.BULKBUY_NOTICE_DESC = "Gegenstände, die Abzeichen oder andere Gegenstände kosten, behalten das "
+    .. "Fenster des Spiels."
 
 -- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE,
 -- DISENCHANT_TITLE, STATCOLORS_TITLE, SHORTSTATS_TITLE, NEWITEM_TITLE, CRAFTEDCOMPARE_TITLE, and

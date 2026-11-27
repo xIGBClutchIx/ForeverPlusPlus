@@ -224,6 +224,16 @@ L.JUNKDELETE_CONFIRM = "삭제 전 확인"
 L.JUNKDELETE_CONFIRM_DESC = "묶음을 파괴하기 전에 확인합니다. 끄면 클릭 한 번으로 파괴합니다."
 L.JUNKDELETE_CONFIRM_TEXT = "자리를 만들기 위해 다음 아이템을 파괴하시겠습니까? %s"
 L.JUNKDELETE_CHAT_DESC ="어떤 묶음을 삭제했는지와 그 가치를 대화창에 알립니다."
+-- BulkBuy
+L.BULKBUY_TITLE = "대량 구매"
+L.BULKBUY_DESC = "상인에게서 아이템을 Shift+클릭하면 더 큰 구매 창이 열립니다. 수량을 입력하거나, 한 "
+    .. "묶음 또는 살 수 있고 가방에 들어가는 최대 수량을 골라 한 번에 한 묶음보다 많이 삽니다."
+L.BULKBUY_STACK = "묶음"
+L.BULKBUY_STACK_DESC = "가득 찬 한 묶음입니다."
+L.BULKBUY_MAX = "최대"
+L.BULKBUY_MAX_DESC = "가진 돈, 가방 공간, 상인의 재고가 허락하는 만큼입니다."
+L.BULKBUY_NOTICE = "골드로 사는 아이템에만 쓰입니다."
+L.BULKBUY_NOTICE_DESC = "토큰이나 다른 아이템이 드는 아이템은 게임 자체 창을 그대로 씁니다."
 
 -- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE,
 -- DISENCHANT_TITLE, STATCOLORS_TITLE, SHORTSTATS_TITLE, NEWITEM_TITLE, CRAFTEDCOMPARE_TITLE, and

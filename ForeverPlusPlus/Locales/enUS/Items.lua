@@ -233,6 +233,16 @@ L.JUNKDELETE_CONFIRM = "Confirm Before Deleting"
 L.JUNKDELETE_CONFIRM_DESC = "Ask before the stack is destroyed. Turn it off to destroy it with one click."
 L.JUNKDELETE_CONFIRM_TEXT = "Destroy %s to make room?" -- %s: the item's link
 L.JUNKDELETE_CHAT_DESC = "Say in chat which stack was deleted and what it was worth."
+-- BulkBuy
+L.BULKBUY_TITLE = "Bulk Buy"
+L.BULKBUY_DESC = "Shift+click an item at a merchant for a bigger buying popup: type how many, or pick a "
+    .. "stack or the most you can afford and carry, and buy more than one stack at a time."
+L.BULKBUY_STACK = "Stack" -- a button in the popup: one full stack
+L.BULKBUY_STACK_DESC = "One full stack."
+L.BULKBUY_MAX = "Max" -- a button in the popup: as many as can be bought
+L.BULKBUY_MAX_DESC = "As many as your money, your bag space, and the merchant's stock allow."
+L.BULKBUY_NOTICE = "Only for items bought with gold." -- a gray row atop the module
+L.BULKBUY_NOTICE_DESC = "Items that cost tokens or other items keep the game's own popup."
 
 -- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE,
 -- DISENCHANT_TITLE, STATCOLORS_TITLE, SHORTSTATS_TITLE, NEWITEM_TITLE, CRAFTEDCOMPARE_TITLE, and
