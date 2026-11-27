@@ -620,7 +620,7 @@ From Blizzard's own source for build 1.60.1.70205 (read 2026-11-27) unless tagge
 
 ## Saved variables before the files
 
-`## LoadSavedVariablesFirst: 1` in a TOC makes the client load the addon's saved variables before its files, where they normally come after. Mainline's client has it (six addons in this machine's retail install use it, read 2026-11-27). **Not yet confirmed on Forever:** our TOC has it for the Language dropdown, and Self Test's `language.savedFirst` line says whether the saved table was there as the locale files loaded. Without it the dropdown's choice is saved but never applies.
+`## LoadSavedVariablesFirst: 1` in a TOC makes the client load the addon's saved variables before its files, where they normally come after. Mainline's client has it (six addons in this machine's retail install use it, read 2026-11-27). **It works on Forever** (1.60.1, seen in game 2026-11-27: the Language dropdown's choice was applied after the reload). Our TOC has it for the Language dropdown, and Self Test's `language.savedFirst` line says whether the saved table was there as the locale files loaded. Without it the dropdown's choice is saved but never applies.
 
 ## The client's text in another language
 
