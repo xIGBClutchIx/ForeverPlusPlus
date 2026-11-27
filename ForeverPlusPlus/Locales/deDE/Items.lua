@@ -238,6 +238,19 @@ L.NEWITEM_TITLE = "Neu in Forever"
 L.NEWITEM_DESC = "Zeigt „Neu in Forever“ bei einem Gegenstand, den Classic nie hatte. Ein Gegenstand, "
     .. "den Forever geändert hat, den es aber auch in Classic gab, wird nicht markiert."
 L.NEWITEM_LINE = "Neu in Forever" -- the tooltip line
+L.ITEMTOOLTIPS_ITEMQUESTS = "Quests anzeigen"
+L.ITEMQUESTS_TITLE = "Quests"
+L.ITEMQUESTS_DESC = "Nennt die Quests, für die ein Gegenstand ist, aus QuestieDB: eine, die er "
+    .. "startet, eine, die ihn verlangt, oder eine, die ihn Euch zum Benutzen gibt. Quests in Eurem "
+    .. "Questlog stehen zuerst, und eine erledigte Quest ist grau, sodass ein alter Questgegenstand, "
+    .. "den Ihr wegwerfen könnt, auffällt. Bei einem Gegenstand, den viele Quests verlangen, etwa "
+    .. "Stoff, werden nur die Quests in Eurem Questlog genannt."
+L.ITEMQUESTS_LINE = "Quest" -- the tooltip line's label
+L.ITEMQUESTS_LEVEL_NAME = "%s %s" -- the quest's level ("[12]"), its name
+L.ITEMQUESTS_STATE = "%s %s" -- the quest, where it stands (ITEMQUESTS_IN_LOG or ITEMQUESTS_DONE)
+L.ITEMQUESTS_IN_LOG = "(im Questlog)" -- in the quest log
+L.ITEMQUESTS_DONE = "(erledigt)" -- the quest is done
+L.ITEMQUESTS_MORE = { "%d weitere Quest", "%d weitere Quests" } -- after the lines, the quests not named
 L.ITEMTOOLTIPS_SHORTSTATS = "Kurze Werte"
 L.SHORTSTATS_TITLE = "Kurze Werte"
 L.SHORTSTATS_DESC = "Schreibt einen Bonus „Anlegen:“ als schlichten Wert: „+29 Zaubermacht“ statt "

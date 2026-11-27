@@ -30,6 +30,7 @@ C_QuestLog = {
     GetNumQuestLogEntries = function() return #logged end,
     GetInfo = function(i) return logged[i] end,
 }
+T.load("Lib/QuestieDB") -- the race and class masks
 T.load("Modules/Quests/QuestPins/Rules", ns)
 
 -- Starts each case from a plain quest at the player's level.

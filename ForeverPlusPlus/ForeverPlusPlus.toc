@@ -185,6 +185,7 @@ Modules\Items\ItemTooltips\Disenchant.lua
 Modules\Items\ItemTooltips\PairLines.lua
 Modules\Items\ItemTooltips\StatColors.lua
 Modules\Items\ItemTooltips\NewItem.lua
+Modules\Items\ItemTooltips\ItemQuests.lua
 Modules\Items\ItemTooltips\CraftedCompare.lua
 Modules\Items\ItemTooltips\AuctionPrices.lua
 Modules\Items\ItemTooltips\Scan.lua

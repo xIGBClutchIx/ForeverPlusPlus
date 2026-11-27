@@ -229,6 +229,19 @@ L.NEWITEM_TITLE = "Новое в Forever"
 L.NEWITEM_DESC = "Писать «Новое в Forever» на предметах, которых никогда не было в Classic. Предмет, "
     .. "который Forever изменил, но который был и в Classic, не отмечается."
 L.NEWITEM_LINE = "Новое в Forever" -- the tooltip line
+L.ITEMTOOLTIPS_ITEMQUESTS = "Задания"
+L.ITEMQUESTS_TITLE = "Задания"
+L.ITEMQUESTS_DESC = "Называть задания, для которых нужен предмет, по данным QuestieDB: задание, "
+    .. "которое он начинает, которое его требует или в котором его выдают для использования. "
+    .. "Задания из вашего журнала идут первыми, а выполненное задание серое, так что старый "
+    .. "предмет для задания, который можно выбросить, сразу заметен. Для предмета, который нужен "
+    .. "многим заданиям, например ткани, называются только задания из вашего журнала."
+L.ITEMQUESTS_LINE = "Задание" -- the tooltip line's label
+L.ITEMQUESTS_LEVEL_NAME = "%s %s" -- the quest's level ("[12]"), its name
+L.ITEMQUESTS_STATE = "%s %s" -- the quest, where it stands (ITEMQUESTS_IN_LOG or ITEMQUESTS_DONE)
+L.ITEMQUESTS_IN_LOG = "(в журнале)" -- in the quest log
+L.ITEMQUESTS_DONE = "(выполнено)" -- the quest is done
+L.ITEMQUESTS_MORE = { "ещё %d задание", "ещё %d задания", "ещё %d заданий" } -- after the lines, the quests not named
 L.ITEMTOOLTIPS_SHORTSTATS = "Краткие характеристики"
 L.SHORTSTATS_TITLE = "Краткие характеристики"
 L.SHORTSTATS_DESC = "Записывать бонус «Если на персонаже:» как обычную характеристику: «+29 Сила "

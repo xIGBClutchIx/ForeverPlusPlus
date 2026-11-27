@@ -89,6 +89,7 @@ local DATA = {
             name = "Sorted Errand", questLevel = 15, requiredLevel = 10, requiredMaxLevel = 20,
             startedBy = {}, finishedBy = {}, objectives = {}, zoneOrSort = -61,
             preQuestGroup = { 900001 }, preQuestSingle = { 900001, 0 }, parentQuest = 900001,
+            sourceItemId = 700004, requiredSourceItems = { 700003, 0 },
         },
         [900003] = { -- QuestieDB's -1: scales to the player's level
             name = "Scaling Errand", questLevel = -1, requiredLevel = 20,
@@ -109,6 +110,10 @@ local DATA = {
             vendors = { 800001 }, questRewards = nil, startQuest = 0, relatedQuests = { 900001 },
             itemLevel = 5, requiredLevel = 0, class = 12, subClass = 0, teachesSpell = 0,
         },
+        -- Quests only the item names: one it starts, and one of its related quests.
+        [700005] = { name = "Old Letter", startQuest = 900003, relatedQuests = { 900002 } },
+        -- The item a quest starts from names it too.
+        [700002] = { name = "Torn Note", startQuest = 900001, relatedQuests = { 900001 } },
     },
     Object = {
         [600001] = {
@@ -375,6 +380,33 @@ same(Q.QuestDrops(900001), {
 }, "questiedb: the creatures that drop a quest's items")
 same(Q.QuestDrops(900002), {}, "questiedb: a quest with no item to drop")
 eq(Q.QuestDrops(1), nil, "questiedb: no drops for an unknown quest")
+
+-- Items and their quests, from the quests' side, a few quests at a time.
+eq(Q.ItemQuests(700001), nil, "questiedb: no item quests before the index")
+eq(Q.IndexItemQuests(2), false, "questiedb: the index isn't whole after two of three quests")
+eq(Q.ItemQuests(700001), nil, "questiedb: no item quests while the index is built")
+eq(Q.IndexItemQuests(2), true, "questiedb: the index is whole")
+eq(Q.IndexItemQuests(2), true, "questiedb: a whole index stays whole")
+same(Q.ItemQuests(700001), { { id = 900001, kind = "objective" } },
+    "questiedb: an item a quest asks for, once though the item names it too")
+same(Q.ItemQuests(700002), { { id = 900001, kind = "starts" } }, "questiedb: an item that starts a quest")
+same(Q.ItemQuests(700004), { { id = 900002, kind = "given" } }, "questiedb: an item a quest's giver hands over")
+same(Q.ItemQuests(700003), { { id = 900002, kind = "used" } }, "questiedb: an item a quest needs but doesn't count")
+same(Q.ItemQuests(700005), { { id = 900002, kind = "related" }, { id = 900003, kind = "starts" } },
+    "questiedb: quests only the item names, ascending")
+same(Q.ItemQuests(1), {}, "questiedb: an item tied to no quest")
+eq(Q.ItemQuests("700001"), nil, "questiedb: an item ID that isn't a number")
+local tied = Q.ItemQuests(700001)
+tied[1].id = 1
+eq(Q.ItemQuests(700001)[1].id, 900001, "questiedb: item quests are our own copies")
+
+-- Race and class masks.
+eq(Q.HasRace(nil, 2) and Q.HasClass(nil, 1), true, "questiedb: no mask lets anyone")
+eq(Q.HasRace(2, 2) and not Q.HasRace(1, 2), true, "questiedb: a Classic race by its own bit")
+eq(Q.HasRace(2 ^ 33, 96) and not Q.HasRace(2 ^ 32, 96), true, "questiedb: a Horde Skyborne by bit 34")
+eq(Q.HasRace(2 + 16 + 32 + 128, 96), false, "questiedb: every Classic Horde race isn't a Skyborne")
+eq(Q.HasRace(1, 99), true, "questiedb: a race the masks have no bit for")
+eq(Q.HasClass(8, 4) and not Q.HasClass(8, 1), true, "questiedb: a class by its bit")
 
 -- A change on their side: errors become nil, and a support table that isn't Lua is no table.
 local erring = newLib()

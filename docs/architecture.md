@@ -300,7 +300,7 @@ Generated files, in `Lib/Generated/` (never edited by hand; see Generated data):
 
 ### `QuestieDB.lua`
 
-- `ns.QuestieDB`: the one place we read the separate QuestieDB addon's quest, NPC, item, and object data, at run time through its `LibQuestieDB` API and never copied into this repo (`docs/questiedb.md`): whether it's there and fits (`Status`, `IsReady`, `Problem`, `OnReady`), records as our own copies with spawns 0-1 on a uiMapID (`Quest`, `Npc`, `Item`, `Object`, `Ids`, `IdsByName`, `UiMapID`, `DropRates`, `QuestDrops` for the creatures that drop a quest's items, and `QuestsUnlockedBy` and `QuestsLeadingTo` for a quest's links the other way, indexed once), every call protected, and `Notices` for a module that needs it, with `Require` to lock one off while it's missing.
+- `ns.QuestieDB`: the one place we read the separate QuestieDB addon's quest, NPC, item, and object data, at run time through its `LibQuestieDB` API and never copied into this repo (`docs/questiedb.md`): whether it's there and fits (`Status`, `IsReady`, `Problem`, `OnReady`), records as our own copies with spawns 0-1 on a uiMapID (`Quest`, `Npc`, `Item`, `Object`, `Ids`, `IdsByName`, `UiMapID`, `DropRates`, `QuestDrops` for the creatures that drop a quest's items, and `QuestsUnlockedBy` and `QuestsLeadingTo` for a quest's links the other way, indexed once), the quests an item is for (`ItemQuests`, from an index of every quest's items that `IndexItemQuests` builds a step at a time), whether a quest's race or class mask lets the player take it (`HasRace`, `HasClass`, Skyborne bits included), every call protected, and `Notices` for a module that needs it, with `Require` to lock one off while it's missing.
 
 ### `Plugins.lua`
 
@@ -351,7 +351,7 @@ What each module is, in the code's terms (what it does for players is in `README
 - **Auto Repair**
 - **Auto Sell Junk**
 - **Auto Open Containers**: `AutoOpen`: opens the containers in the bags by themselves, when nothing is in the way, and for a Rogue, a right click on a locked lockbox casts Pick Lock on it (`ns.BagClicks`).
-- **Item Tooltips**: a folder: the module and its parts, Sell Price, Repair Cost, Item Count, Disenchant, Stat Colors (with Short Stat Text), Pair Short Lines (two short lines that follow each other, drawn as one row from the tooltip's data), New in Forever, Compare Crafted Gear, and Auction Prices, with its auction house scan in `Scan.lua`.
+- **Item Tooltips**: a folder: the module and its parts, Sell Price, Repair Cost, Item Count, Disenchant, Stat Colors (with Short Stat Text), Pair Short Lines (two short lines that follow each other, drawn as one row from the tooltip's data), New in Forever, Quests (the quests an item is for, from `ns.QuestieDB.ItemQuests`, whose index it builds a few hundred quests a frame once on), Compare Crafted Gear, and Auction Prices, with its auction house scan in `Scan.lua`.
 - **Waylaid Crates**: a folder: the module, Bundle Costs, and its auction house category.
 - **Already Known**
 - **Appearance Icons**: uncollected appearances.
