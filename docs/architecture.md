@@ -395,6 +395,7 @@ What each module is, in the code's terms (what it does for players is in `README
 - **Macro Icon Search**: a search box in the macro icon picker, over the icons of the player's spells and items.
 - **Movable Windows**: drag Blizzard's windows with a key held, and resize one with a key and the mouse wheel (a frame of our own takes the wheel while the key is held, so no Blizzard frame gets a wheel handler), remembered always, for the session, or until closed.
 - **Hide Stance Bar**: the stance bar faded out, its buttons not taking the mouse.
+- **Wide Vendor Window**: `WideVendor`: Blizzard's `MERCHANT_ITEMS_PER_PAGE` raised to 20 while the window is closed (the one Blizzard value the addon writes), `MerchantItem13` to `20` made from Blizzard's template, and the window widened, with 11 to 20 laid out beside Blizzard's ten from hooks on each tab's update. Off with the controller interface.
 - **Hide Bag and Menu Bars**: `HideMenuBars`: the bag bar and micro menu faded out until the mouse is over them, their buttons not taking the mouse while Show on Mouseover is off.
 - **Hide Zone Text**: `HideZoneText`: the zone, area, and territory font strings of Blizzard's zone text faded out, its two fading frames left to run.
 - **Hide Error Messages**: `HideErrors`: the error frame's UI_ERROR_MESSAGE heard in its place, and only the errors not hidden handed to it.

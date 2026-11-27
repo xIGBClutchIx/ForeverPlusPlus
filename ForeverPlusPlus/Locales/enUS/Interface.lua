@@ -106,6 +106,17 @@ L.HIDESTANCEBAR_MOUSEOVER = "Show on Mouseover"
 L.HIDESTANCEBAR_MOUSEOVER_DESC = "Show the stance bar while the mouse is over it, where you can "
     .. "click it as usual."
 
+-- WideVendor
+L.WIDEVENDOR_TITLE = "Wide Vendor Window"
+L.WIDEVENDOR_DESC = "Show 20 items on each page of a vendor's window instead of 10, in a window about "
+    .. "twice as wide."
+L.WIDEVENDOR_NOTICE = "Shows the next time a vendor window opens" -- a gray row atop the module
+L.WIDEVENDOR_NOTICE_DESC = "Turned on or off while a vendor's window is open, the window changes "
+    .. "once it closes."
+L.WIDEVENDOR_CONTROLLER = "Off with the controller interface"
+L.WIDEVENDOR_CONTROLLER_DESC = "The controller's cursor moves through a vendor's items by itself, so "
+    .. "the window keeps its usual size while the controller interface is on."
+
 -- HideZoneText
 L.HIDEZONETEXT_TITLE = "Hide Zone Text"
 L.HIDEZONETEXT_DESC = "Hide the names that appear at the top of the screen when you enter a zone or "

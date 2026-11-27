@@ -89,6 +89,14 @@ L.HIDESTANCEBAR_DESC = "隱藏形態列：你的姿態、形態、光環或潛�
 L.HIDESTANCEBAR_MOUSEOVER = "滑鼠指向時顯示"
 L.HIDESTANCEBAR_MOUSEOVER_DESC = "滑鼠指向形態列時顯示它，讓你可以照常點擊。"
 
+-- WideVendor
+L.WIDEVENDOR_TITLE = "加寬商人視窗"
+L.WIDEVENDOR_DESC = "商人視窗每頁顯示20件物品而非10件，視窗寬度約為原本的兩倍。"
+L.WIDEVENDOR_NOTICE = "下次開啟商人視窗時生效"
+L.WIDEVENDOR_NOTICE_DESC = "在商人視窗開啟時啟用或停用，視窗會在關閉後才改變。"
+L.WIDEVENDOR_CONTROLLER = "在控制器介面下關閉"
+L.WIDEVENDOR_CONTROLLER_DESC = "控制器的游標會自行在商人的物品間移動，因此在控制器介面下視窗維持原本的大小。"
+
 -- HideZoneText
 L.HIDEZONETEXT_TITLE = "隱藏區域文字"
 L.HIDEZONETEXT_DESC = "隱藏進入區域或區域內某地點時，出現在畫面上方的名稱。小地圖上仍會顯示區域名稱。"

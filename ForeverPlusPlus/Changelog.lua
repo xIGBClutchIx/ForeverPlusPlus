@@ -45,6 +45,9 @@ ns.changelog = {
                     .. "disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By "
                     .. "default only on a character with Enchanting, and Skip Items Worth More Sold "
                     .. "leaves out what a vendor pays more for." },
+                { L.WIDEVENDOR_TITLE, "A new module, off by default, that shows 20 items on each "
+                    .. "page of a vendor's window instead of 10, in a window about twice as wide. "
+                    .. "It stays its usual size with the controller interface." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "

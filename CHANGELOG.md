@@ -14,6 +14,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Item Tooltips**: Pair Short Lines (on by default) puts two short lines that follow each other on one row: how an item binds with "Unique", and a shield's armor with its block. Scan Age has a new choice, Beside the Price, which shows "2h ago" on the Auction line instead of a line of its own.
 - **Chat Buttons on Every Tab**: A new module, on by default, that keeps the buttons beside the chat window whichever chat tab is in front: the game's chat menu and channels buttons, and the ones Forever++ adds. The game only shows them on the first tab.
 - **Disenchant Icons**: A new module, off by default, that marks the items you can disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By default only on a character with Enchanting, and Skip Items Worth More Sold leaves out what a vendor pays more for.
+- **Wide Vendor Window**: A new module, off by default, that shows 20 items on each page of a vendor's window instead of 10, in a window about twice as wide. It stays its usual size with the controller interface.
 
 ### Changed
 
