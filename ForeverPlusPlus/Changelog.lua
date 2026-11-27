@@ -45,6 +45,10 @@ ns.changelog = {
                     .. "disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By "
                     .. "default only on a character with Enchanting, and Skip Items Worth More Sold "
                     .. "leaves out what a vendor pays more for." },
+                { L.BULKBUY_TITLE, "A new module, off by default. Shift+click an item at a merchant for "
+                    .. "a bigger buying popup in place of the game's: type how many, or press Stack for "
+                    .. "one stack or Max for the most your money, bag space, and the merchant's stock "
+                    .. "allow, and buy more than one stack at a time." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "

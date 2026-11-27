@@ -50,6 +50,31 @@ eq(Bags.Each(function() end), nil, "bags: a walk nothing stops returns nil")
 eq(Bags.FreeSlots(), 7, "bags: free slots in the bags that take anything")
 
 eq(Bags.REAGENT, 5, "bags: the reagent bag without Enum.BagIndex")
+
+-- Room for an item of 20 a stack: bag 0 holds 15 of item 10 and a locked 5 of it, bag 1 a full
+-- 20, bag 2 is a quiver with 3 free, and the reagent bag has 15 of it and 6 free.
+slots = {
+    [0] = { { itemID = 10, stackCount = 15 }, { itemID = 10, stackCount = 5, isLocked = true }, false },
+    [1] = { { itemID = 10, stackCount = 20 }, { itemID = 11, stackCount = 1 } },
+    [2] = { false, false, false },
+    [5] = { { itemID = 10, stackCount = 15 } },
+}
+free = { [0] = { 1, 0 }, [1] = { 0, 0 }, [2] = { 3, 1 }, [5] = { 6, 0 } }
+local families = { [10] = 0, [30] = 1 } -- item 30 is arrows, which a quiver (family 1) takes
+local hadItem = C_Item
+C_Item = { GetItemFamily = function(id) return families[id] end }
+local hadBit = bit
+bit = bit or { band = function(a, b) return (a == 1 and b == 1) and 1 or 0 end }
+T.load("Lib/Bags", ns)
+Bags = ns.Bags
+-- 5 more in the stack of 15 and 20 in the free slot; not the locked stack's, the quiver's, or the
+-- reagent bag's.
+eq(Bags.Room(10, 20), 25, "bags: room for an item, its stacks and the free slots of bags that take anything")
+eq(Bags.Room(30, 200), 800, "bags: and a quiver's free slots for arrows")
+eq(Bags.Room(99, 1), 1, "bags: an item of one a stack fits once a free slot")
+bit = hadBit
+C_Item = hadItem
+
 C_Container = nil
 T.load("Lib/Bags", ns)
 eq(ns.Bags.Each(function() return true end), nil, "bags: no walk on a client without C_Container")

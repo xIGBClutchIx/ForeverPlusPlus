@@ -178,6 +178,17 @@ L.EASYDELETE_TITLE = "輕鬆刪除"
 -- [quotes: DELETE_ITEM_CONFIRM_STRING]
 L.EASYDELETE_DESC = "摧毀好物品時自動替你輸入「DELETE」，只要點擊一次「是」即可。"
 
+-- BulkBuy
+L.BULKBUY_TITLE = "大量購買"
+L.BULKBUY_DESC = "在商人處按住Shift鍵點擊物品，開啟較大的購買視窗：輸入數量，或選擇一疊或你買得起、"
+    .. "背包放得下的最大數量，一次購買超過一疊。"
+L.BULKBUY_STACK = "一疊"
+L.BULKBUY_STACK_DESC = "完整的一疊。"
+L.BULKBUY_MAX = "最大"
+L.BULKBUY_MAX_DESC = "你的金錢、背包空間和商人存貨所允許的最大數量。"
+L.BULKBUY_NOTICE = "僅限用金幣購買的物品。"
+L.BULKBUY_NOTICE_DESC = "需要代幣或其他物品購買的物品仍使用遊戲本身的視窗。"
+
 -- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE,
 -- DISENCHANT_TITLE, STATCOLORS_TITLE, SHORTSTATS_TITLE, NEWITEM_TITLE, CRAFTEDCOMPARE_TITLE, and
 -- AUCTIONPRICES_TITLE: a section holds one part, since its checkbox reads "Enabled" under it)

@@ -201,6 +201,17 @@ L.EASYDELETE_TITLE = "Easy Delete"
 -- [quotes: DELETE_ITEM_CONFIRM_STRING]
 L.EASYDELETE_DESC = "Type DELETE for you when destroying a good item, so Yes is a single click."
 
+-- BulkBuy
+L.BULKBUY_TITLE = "Bulk Buy"
+L.BULKBUY_DESC = "Shift+click an item at a merchant for a bigger buying popup: type how many, or pick a "
+    .. "stack or the most you can afford and carry, and buy more than one stack at a time."
+L.BULKBUY_STACK = "Stack" -- a button in the popup: one full stack
+L.BULKBUY_STACK_DESC = "One full stack."
+L.BULKBUY_MAX = "Max" -- a button in the popup: as many as can be bought
+L.BULKBUY_MAX_DESC = "As many as your money, your bag space, and the merchant's stock allow."
+L.BULKBUY_NOTICE = "Only for items bought with gold." -- a gray row atop the module
+L.BULKBUY_NOTICE_DESC = "Items that cost tokens or other items keep the game's own popup."
+
 -- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE,
 -- DISENCHANT_TITLE, STATCOLORS_TITLE, SHORTSTATS_TITLE, NEWITEM_TITLE, CRAFTEDCOMPARE_TITLE, and
 -- AUCTIONPRICES_TITLE: a section holds one part, since its checkbox reads "Enabled" under it)

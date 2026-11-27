@@ -548,6 +548,12 @@
     "ITEM_BIND_ON_PICKUP",
     "ITEM_BIND_ON_EQUIP",
     "ITEM_BIND_ON_USE",
-    "C_MountJournal"
+    "C_MountJournal",
+    "C_MerchantFrame",
+    "GetMerchantItemLink",
+    "GetMerchantItemMaxStack",
+    "BuyMerchantItem",
+    "StackSplitFrame",
+    "OKAY"
   ]
 }

@@ -214,6 +214,19 @@ L.EASYDELETE_TITLE = "Einfaches Löschen"
 L.EASYDELETE_DESC = "Tippt beim Zerstören eines guten Gegenstands „LÖSCHEN“ für Euch ein, sodass "
     .. "„Ja“ nur ein Klick ist."
 
+-- BulkBuy
+L.BULKBUY_TITLE = "Großeinkauf"
+L.BULKBUY_DESC = "Umschalt+Klick auf einen Gegenstand beim Händler öffnet ein größeres Kauffenster: Gebt "
+    .. "eine Menge ein oder wählt einen Stapel oder das Meiste, das Ihr Euch leisten und tragen könnt, "
+    .. "und kauft mehr als einen Stapel auf einmal."
+L.BULKBUY_STACK = "Stapel"
+L.BULKBUY_STACK_DESC = "Ein voller Stapel."
+L.BULKBUY_MAX = "Max."
+L.BULKBUY_MAX_DESC = "So viele, wie Euer Geld, Euer Taschenplatz und der Vorrat des Händlers erlauben."
+L.BULKBUY_NOTICE = "Nur für Gegenstände, die Gold kosten."
+L.BULKBUY_NOTICE_DESC = "Gegenstände, die Abzeichen oder andere Gegenstände kosten, behalten das "
+    .. "Fenster des Spiels."
+
 -- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE,
 -- DISENCHANT_TITLE, STATCOLORS_TITLE, SHORTSTATS_TITLE, NEWITEM_TITLE, CRAFTEDCOMPARE_TITLE, and
 -- AUCTIONPRICES_TITLE: a section holds one part, since its checkbox reads "Enabled" under it)

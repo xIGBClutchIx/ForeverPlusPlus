@@ -1,10 +1,10 @@
--- What's in the player's bags: walking every slot, and counting the free ones. One place for
--- which bags there are, so a build that moves a bag index is fixed here. The buttons Blizzard
--- draws for them are Lib/ItemButtons.lua's.
+-- What's in the player's bags: walking every slot, counting the free ones, and how many more of
+-- an item fit. One place for which bags there are, so a build that moves a bag index is fixed
+-- here. The buttons Blizzard draws for them are Lib/ItemButtons.lua's.
 local _, ns = ...
 
-local type = type
-local C_Container = C_Container
+local type, bit = type, bit
+local C_Container, C_Item = C_Container, C_Item
 
 local Bags = {}
 ns.Bags = Bags
@@ -49,4 +49,34 @@ function Bags.FreeSlots()
         end
     end
     return free
+end
+
+---How many more of an item fit in the bags: what its own stacks there have room for, and a full
+---stack in each free slot of a bag that takes it, one that takes anything or one of its own kind
+---(arrows in a quiver). The reagent bag isn't counted, so it may say less than fits, never more.
+---@param itemID number
+---@param stackSize number how many make a full stack of it
+---@return number
+function Bags.Room(itemID, stackSize)
+    if not (C_Container and C_Container.GetContainerNumFreeSlots) then
+        return 0
+    end
+    local family = C_Item and C_Item.GetItemFamily and C_Item.GetItemFamily(itemID)
+    family = type(family) == "number" and family or 0
+    local room = 0
+    for bag = 0, Bags.LAST do
+        local slots, bagFamily = C_Container.GetContainerNumFreeSlots(bag)
+        local takes = bagFamily == nil or bagFamily == 0
+            or (family ~= 0 and bit and bit.band(family, bagFamily) ~= 0)
+        if takes then
+            room = room + (type(slots) == "number" and slots or 0) * stackSize
+            for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
+                local info = C_Container.GetContainerItemInfo(bag, slot)
+                if info and info.itemID == itemID and not info.isLocked and (info.stackCount or 0) < stackSize then
+                    room = room + stackSize - (info.stackCount or 0)
+                end
+            end
+        end
+    end
+    return room
 end

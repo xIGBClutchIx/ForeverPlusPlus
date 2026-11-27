@@ -166,6 +166,7 @@ Generated files, in `Lib/Generated/` (never edited by hand; see Generated data):
 - `ns.Bags`: what's in the player's bags.
 - `Each(fn, reagent)` calls `fn(bag, slot, info)` for every slot of the backpack and the four bags (the reagent bag too with `reagent`), `info` nil for an empty slot. It stops at the first `fn` that returns something and returns that.
 - `FreeSlots()` counts the free slots of the bags that take anything (not a quiver's or the reagent bag's).
+- `Room(itemID, stackSize)` says how many more of an item fit: the room left in its unlocked stacks, and a full stack per free slot of a bag that takes it (any bag that takes anything, and one of its kind, such as a quiver for arrows). Not the reagent bag, so it may say less than fits, never more.
 - `LAST` and `REAGENT` are the bag indices, the one place they're written down.
 - The buttons Blizzard draws for bags are `ItemButtons`'.
 
@@ -360,6 +361,7 @@ What each module is, in the code's terms (what it does for players is in `README
 - **Upgrade Arrows**: a folder: the module and its stat weight templates.
 - **Best Quest Reward**
 - **Easy Delete**
+- **Bulk Buy**: `BulkBuy`: off by default. After Blizzard's Shift+click on a merchant item (`MerchantItemButton_OnModifiedClick`) opens its `StackSplitFrame`, hides it and opens a frame of its own in the same art, since setting the amount on Blizzard's would taint what its Okay buys with. Stack and Max fill the amount (Max from money, the merchant's stock, and `Bags.Room`); Okay buys `GetMerchantItemMaxStack` at a time, each lot after the bags hold the last. Items with an extended cost, and the controller interface, keep Blizzard's popup.
 - **Auction Totals**: sums `C_AuctionHouse.GetOwnedAuctionInfo` into one line of text on a child of the Auctions page's Cancel Auction button.
 - **Hide Beta Feedback**: beta/PTR only.
 - **Gathering Tracking**
