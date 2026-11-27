@@ -149,6 +149,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 ### System
 
 - **Hide Beta Feedback**: Hides the beta's "Press F6 to submit an issue" tooltip line and feedback buttons. Off by default, and only on beta and PTR clients.
+- **Keep Audio Synced**: When your computer's default sound device changes, as when you plug in headphones, restarts the game's sound so it follows. Works while the game's Output Device is the system default. Off by default.
 - **AddOns List**: Shows the AddOns list without category headers, enabled addons first. Can search notes and save addon sets.
 - **Error Catcher**: Catches Lua errors, blocked actions, and warnings quietly instead of in Blizzard's popup. `/fpp errors` lists them, with a Copy Bug Report button. Leaves Lua errors to BugGrabber when it's installed.
 - **Minimap Button**: A Forever++ button on the minimap or in the addon compartment. Click it for a menu of quick toggles you can customize, or right-click for settings. It shows how many errors Error Catcher caught.

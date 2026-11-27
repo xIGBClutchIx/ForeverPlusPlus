@@ -45,6 +45,11 @@ ns.changelog = {
                     .. "disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By "
                     .. "default only on a character with Enchanting, and Skip Items Worth More Sold "
                     .. "leaves out what a vendor pays more for." },
+                { L.KEEPAUDIOSYNCED_TITLE, "A new module, off by default, that restarts the game's "
+                    .. "sound when your computer's default sound device changes, as when you plug in "
+                    .. "headphones, so the game follows it instead of playing on the old one. It works "
+                    .. "while the game's Output Device is the system default, and waits out a "
+                    .. "cinematic or loading screen." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "

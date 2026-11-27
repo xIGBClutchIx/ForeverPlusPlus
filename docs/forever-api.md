@@ -445,6 +445,14 @@ From the Gear Probe tool (the Debug module's settings, `/fpp gearprobe`), run on
 - Movies go through `PLAY_MOVIE(movieID)` and `MovieFrame` (`MovieFrameMixin`, always loaded). `MovieFrame:PlayMovie` sets `MovieFrame.movieID` only when the movie really started, and the skip dialog's confirm button calls `MovieFrame:FinishMovie()`. **[web]** (same repo, `Blizzard_FrameXML/MovieFrame.lua`) `CinematicStarted` / `CinematicFinished` take secret arguments only when untainted, which doesn't matter for plain numbers.
 - Unverified: whether `StopCinematic()` from a `C_Timer.After(0)` after `CINEMATIC_START` ends the cinematic, and whether `FinishMovie()` from a `hooksecurefunc` on `MovieFrame.PlayMovie` works without a taint error. Skip Cinematics depends on both; its Debug option prints each key as it starts.
 
+## Sound devices
+
+- The game's output device is the CVar `Sound_OutputDriverIndex`, a dropdown in Blizzard's Audio settings (`AUDIO_OUTPUT_DEVICE`, "Output Device") filled from `Sound_GameSystem_GetNumOutputDrivers()` and `Sound_GameSystem_GetOutputDriverNameByIndex(index)`, index 0 first. Index 0 is the system default in Mainline. **[web]** (Blizzard's UI source for build 1.60.1.70205, `Blizzard_SettingsDefinitions_Shared/Audio.lua`)
+- `Sound_GameSystem_RestartSoundSystem()` isn't called anywhere in that source, but it's in Mainline's global API list (Ketho/BlizzardInterfaceResources `GlobalAPI.lua`), and the Forever port of EnhanceQoL and the TurboFace addon call it for Forever. Not protected as far as anything shows. **[web]** Unverified on Forever ourselves.
+- `VOICE_CHAT_OUTPUT_DEVICES_UPDATED` (no payload) fires when voice chat's output device list changes; Blizzard's Audio settings refresh their voice output dropdown on it. `C_VoiceChat.GetAvailableOutputDevices()` returns the list (`deviceID`, `displayName`, `isActive`, `isSystemDefault`, `isCommsDefault`), or nil. **[web]** (same source, and `VoiceChatDocumentation.lua`) Whether voice chat runs on Forever, and so whether the event fires there when a device is plugged in, is Unverified; Keep Audio Synced depends on it.
+- `SOUND_DEVICE_UPDATE` is in `SoundDocumentation.lua` (synchronous, no payload), but nothing in Blizzard's source registers it, and what fires it is Unverified (it may be the game's own restart), so Keep Audio Synced doesn't use it. **[web]**
+- EnhanceQoL's Forever port and TurboFace both do this the same way: on `VOICE_CHAT_OUTPUT_DEVICES_UPDATED`, restart unless `CinematicFrame` or `MovieFrame` is showing. They also set `Sound_OutputDriverIndex` to 0 themselves; Forever++ leaves that to the player with a notice. **[web]** (their source on GitHub, read 2026-11-27)
+
 ## Screenshots and milestone events
 
 - `Screenshot()` and the `SCREENSHOT_SUCCEEDED` / `SCREENSHOT_FAILED` events are there, and hiding `UIParent` out of combat for a shot works. **[addon]** (Memento v2.30 `core/Capture.lua`, which lists 16001 in its TOC)

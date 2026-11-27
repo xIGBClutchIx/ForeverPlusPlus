@@ -219,6 +219,14 @@ L.HIDEBETAFEEDBACK_BUTTON_DESC = "떠 있는 버그 신고 버튼을 숨깁니�
 L.HIDEBETAFEEDBACK_QUEST = "퀘스트 피드백 숨기기"
 L.HIDEBETAFEEDBACK_QUEST_DESC = "퀘스트 창의 피드백 버튼을 숨깁니다."
 
+-- KeepAudioSynced
+L.KEEPAUDIOSYNCED_TITLE = "오디오 동기화 유지"
+L.KEEPAUDIOSYNCED_DESC = "컴퓨터의 기본 소리 장치가 바뀌면(예: 헤드폰을 꽂을 때) 게임 소리를 다시 시작해 "
+    .. "이전 장치 대신 새 장치에서 재생되게 합니다."
+L.KEEPAUDIOSYNCED_NOT_DEFAULT = "\"출력 장치\"가 시스템 기본값일 때만 작동합니다"
+L.KEEPAUDIOSYNCED_NOT_DEFAULT_DESC = "특정 장치를 선택하면 게임 소리가 그 장치에 머무르므로 따라갈 변화가 없습니다."
+L.KEEPAUDIOSYNCED_USE_DEFAULT = "시스템 기본값 사용"
+
 -- MovableFramerate
 L.MOVABLEFRAMERATE_TITLE = "프레임률 이동"
 L.MOVABLEFRAMERATE_DESC = "블리자드 기본 개체창처럼 편집 모드에서 프레임률 표시(Ctrl+R)의 위치와 크기를 바꿉니다. "

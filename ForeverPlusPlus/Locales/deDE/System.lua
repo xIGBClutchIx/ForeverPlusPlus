@@ -228,6 +228,15 @@ L.HIDEBETAFEEDBACK_BUTTON_DESC = "Blendet den schwebenden Knopf für Fehlerberic
 L.HIDEBETAFEEDBACK_QUEST = "Quest-Feedback ausblenden"
 L.HIDEBETAFEEDBACK_QUEST_DESC = "Blendet die Feedback-Knöpfe in Questfenstern aus."
 
+-- KeepAudioSynced
+L.KEEPAUDIOSYNCED_TITLE = "Audio synchron halten"
+L.KEEPAUDIOSYNCED_DESC = "Wenn sich das Standard-Audiogerät des Computers ändert, etwa beim Einstecken "
+    .. "von Kopfhörern, wird der Spielsound neu gestartet, damit er auf dem neuen Gerät statt dem alten läuft."
+L.KEEPAUDIOSYNCED_NOT_DEFAULT = "Funktioniert nur, solange \"Ausgabegerät\" auf dem Systemstandard steht"
+L.KEEPAUDIOSYNCED_NOT_DEFAULT_DESC = "Ist ein Gerät mit Namen gewählt, bleibt der Spielsound auf "
+    .. "diesem Gerät, und es gibt nichts zu folgen."
+L.KEEPAUDIOSYNCED_USE_DEFAULT = "Systemstandard verwenden"
+
 -- MovableFramerate
 L.MOVABLEFRAMERATE_TITLE = "Bewegliche Bildrate"
 L.MOVABLEFRAMERATE_DESC = "Verschiebt den Bildratentext (Strg+R) im Bearbeitungsmodus und ändert seine "

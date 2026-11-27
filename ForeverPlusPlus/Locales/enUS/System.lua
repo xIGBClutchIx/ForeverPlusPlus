@@ -236,6 +236,16 @@ L.HIDEBETAFEEDBACK_BUTTON_DESC = "Hide the floating bug report button."
 L.HIDEBETAFEEDBACK_QUEST = "Hide Quest Feedback"
 L.HIDEBETAFEEDBACK_QUEST_DESC = "Hide the feedback buttons on quest windows."
 
+-- KeepAudioSynced
+L.KEEPAUDIOSYNCED_TITLE = "Keep Audio Synced"
+L.KEEPAUDIOSYNCED_DESC = "When your computer's default sound device changes, as when you plug in "
+    .. "headphones, restart the game's sound so it plays on the new device instead of the old one."
+-- [quotes: AUDIO_OUTPUT_DEVICE]
+L.KEEPAUDIOSYNCED_NOT_DEFAULT = "Works only while \"Output Device\" is the system default"
+L.KEEPAUDIOSYNCED_NOT_DEFAULT_DESC = "Set to a device by name, the game's sound stays on that "
+    .. "device, so there is nothing to follow."
+L.KEEPAUDIOSYNCED_USE_DEFAULT = "Use System Default"
+
 -- MovableFramerate
 L.MOVABLEFRAMERATE_TITLE = "Movable Framerate"
 L.MOVABLEFRAMERATE_DESC = "Move and resize the framerate text (Ctrl+R) in Edit Mode, like "
