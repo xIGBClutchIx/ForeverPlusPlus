@@ -2,7 +2,7 @@
 
 How Forever++'s text works in more than one language: what a language file is, whose words each string is, and the checks that keep a translation whole and current. `AGENTS.md` has the rules in short; this is the detail.
 
-Forever++ ships English (`enUS`), Russian (`ruRU`), Simplified Chinese (`zhCN`), and Traditional Chinese (`zhTW`). The Forever client also has its own text in `deDE`, `frFR`, `esES`, `esMX`, `ptBR`, and `koKR` (`itIT` is in its list but still English in build 1.60.1.71139); those get the `[game]` strings from the client and the rest in English. A language is a commitment: once one ships, every string added or reworded has to be done in it too, in the same change. The checks below make that a failing test instead of something to remember.
+Forever++ ships English (`enUS`), Russian (`ruRU`), Simplified Chinese (`zhCN`), Traditional Chinese (`zhTW`), German (`deDE`), and Korean (`koKR`). The Forever client also has its own text in `frFR`, `esES`, `esMX`, and `ptBR` (`itIT` is in its list but still English in build 1.60.1.71139); those get the `[game]` strings from the client and the rest in English. A language is a commitment: once one ships, every string added or reworded has to be done in it too, in the same change. The checks below make that a failing test instead of something to remember.
 
 ## How the game picks a language
 
@@ -137,6 +137,21 @@ Join a language's rows to enUS's by `ID`. An NPC's title under its name isn't in
 4. Translate everything outside the `[english]` blocks. A counted string is a list of the language's forms: one, two (1, then the rest), or three (the Slavic rule), as `ns.Text.Plural` reads them.
 5. `lua tests/locales.lua --update <code>`, then `lua5.1 tests/run.lua`.
 6. Check `Lib/Fonts.lua`'s `NON_ROMAN` if the language isn't written in Latin letters: the font options are off for those.
+
+## German (deDE): what's known
+
+- Written in 2026-11 by one model from a glossary of the German client's own text for build 1.60.1.71139. Not yet read by a native speaker, and not yet seen in game: German runs long, and text too long for its place hasn't been looked for.
+- The player is addressed as "Ihr / Euch", as the client does, and descriptions are in the third person ("Zeigt ...").
+- **Opacity sliders say "Deckkraft"**, not the client's `OPACITY` ("Transparenz"), which means the opposite of what a higher value does.
+- **"Verlernte anzeigen"** is the client's own text for Show Unlearned, quoted where we name that menu entry, though it reads as "show what was unlearned again".
+- **Our own terms:** Modul, Schnellschalter (quick toggles), Vorlage (preset), Wegpunkt (a `/way` waypoint; the game's map pin is Kartenmarkierung), Nadel (a Quest Pins pin), Vorkommen (a gathering node), Verbesserung (gear better than what's worn).
+
+## Korean (koKR): what's known
+
+- Written in 2026-11 by one model from a glossary of the Korean client's own text for build 1.60.1.71139. Not yet read by a native speaker, and not yet seen in game.
+- **Particles:** a name put in with `%s` may end in a consonant or a vowel, so no particle follows a placeholder; strings are worded as a label and a value. The client's own escape picks the right one at draw time (`%s|1을;를;`, `%s|1이;가;`) and can be used where a particle can't be avoided.
+- One plural form, as Chinese. A flight point's zone is in parentheses after its name (피멍울 초소 (악령의 숲)), which `gametext.lua` cuts off.
+- **Our own terms:** 모듈, 빠른 전환 (quick toggles), 프리셋, 웨이포인트 (a `/way` waypoint; the game's map pin is 지도 핀), 채집물 (a gathering node), 게임패드 인터페이스 (the controller interface).
 
 ## Chinese (zhCN, zhTW): what's known
 

@@ -49,11 +49,12 @@ local function localeFiles(root)
     return list
 end
 
--- A flight point's name without its ", Zone" ending. Chinese writes the comma full width
--- (U+FF0C, three bytes in UTF-8).
+-- A flight point's name without its zone: ", Zone" in most languages, the comma full width in
+-- Chinese (U+FF0C, three bytes in UTF-8), and " (Zone)" in Korean.
 local function shortName(name)
     name = name:gsub(",.*$", "")
-    return (name:gsub("\239\188\140.*$", ""))
+    name = name:gsub("\239\188\140.*$", "")
+    return (name:gsub("%s+%b()$", ""))
 end
 
 function M.Build(t, build, script, root)
