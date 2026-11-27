@@ -109,7 +109,7 @@ L.TALENTPLANNER_RESET_DESC = "Начать план заново с изучен
 L.TALENTPLANNER_RESET_CONFIRM = "Начать план талантов заново с изученных талантов?"
 L.TALENTPLANNER_NO_POINTS = "На уровне %d не осталось очков талантов."
 L.TALENTPLANNER_MAXED = "Этот талант уже на высшем ранге."
-L.TALENTPLANNER_TIER = "Требуется очков в ветви «%2$s»: %1$d." -- points, tab name
+L.TALENTPLANNER_TIER = "Требуется очков в ветке «%2$s»: %1$d." -- points, tab name
 L.TALENTPLANNER_PREREQ = "Требуется высший ранг таланта: %s." -- talent names
 L.TALENTPLANNER_NEEDED = "Это очко нужно талантам, запланированным после этого."
 L.TALENTPLANNER_PLAN_NAME = "План %d"
@@ -469,7 +469,7 @@ L.REPBARTEXT_ALWAYS_DESC = "Показывать текст все время. �
     .. "курсор над полосой."
 L.REPBARTEXT_PERCENT = "Показывать процент"
 L.REPBARTEXT_PERCENT_DESC = "Показывать, какая часть уровня отношения пройдена."
-L.REPBARTEXT_STANDING = "Показывать уровень репутации"
+L.REPBARTEXT_STANDING = "Показывать отношение"
 L.REPBARTEXT_STANDING_DESC = "Показывать уровень отношения, например «Дружелюбие», после названия "
     .. "фракции."
 L.REPBARTEXT_RATE = "Показывать репутацию в час"
@@ -486,7 +486,7 @@ L.REPBARTEXT_REP = "%s: %s / %s" -- the faction (and standing), reputation into 
 L.REPBARTEXT_WITH_PERCENT = "%s (%d%%)" -- the reputation text, its percent
 L.REPBARTEXT_AMOUNT = "%s (%d%%)" -- an amount of reputation, as a percent of the standing
 L.REPBARTEXT_RATE_TEXT = "%s/ч (%s до «%s»)" -- reputation per hour, time as a clock, the next standing
-L.REPBARTEXT_TIP_STANDING = "Уровень репутации:"
+L.REPBARTEXT_TIP_STANDING = "Отношение:"
 L.REPBARTEXT_TIP_LEFT = "До «%s»:" -- the next standing
 L.REPBARTEXT_TIP_SESSION = "За этот сеанс:"
 L.REPBARTEXT_TIP_RATE = "Репутация в час:"

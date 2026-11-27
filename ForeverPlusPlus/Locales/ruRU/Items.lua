@@ -437,7 +437,7 @@ L.WAYLAIDCRATES_NONE_LISTED = "Нет лотов" -- no auctions up for the item
 -- Upgrade Arrows
 L.UPGRADEARROWS_TITLE = "Стрелки улучшений"
 L.UPGRADEARROWS_DESC = "Ставить зеленую стрелку Blizzard на снаряжение, которое лучше надетого, по "
-    .. "весам характеристик для вашего класса и ветви талантов – в сумках, у торговцев, в добыче, "
+    .. "весам характеристик для вашего класса и ветки талантов – в сумках, у торговцев, в добыче, "
     .. "в наградах за задания и на аукционе."
 L.UPGRADEARROWS_NOTICE = "Это быстрая подсказка, а не симуляция: настройте веса под свой стиль игры." -- a gray row atop the module
 L.UPGRADEARROWS_NOTICE_DESC = "Стандартные веса – отправная точка по значениям характеристик "
@@ -480,11 +480,11 @@ L.UPGRADEARROWS_PERCENT_ICON = "Процент"
 L.UPGRADEARROWS_PERCENT_ICON_DESC = "Писать величину улучшения рядом со стрелкой на значке, например "
     .. "+12%. У улучшения для пустой ячейки процента нет."
 L.UPGRADEARROWS_PROFILE = "Профиль"
-L.UPGRADEARROWS_PROFILE_DESC = "По чьим весам оценивать снаряжение: по ветви талантов, в которую "
+L.UPGRADEARROWS_PROFILE_DESC = "По чьим весам оценивать снаряжение: по ветке талантов, в которую "
     .. "вложено больше всего очков, или по выбранной. «Сила зверя: медведь» ценит броню и "
     .. "выносливость – для друида-танка. Ползунки ниже относятся к этому профилю."
 L.UPGRADEARROWS_PROFILE_AUTO = "Авто (по талантам)"
-L.UPGRADEARROWS_PROFILE_TREE = "Ветвь %d" -- a talent tab, before its name is known
+L.UPGRADEARROWS_PROFILE_TREE = "Ветка %d" -- a talent tab, before its name is known
 L.UPGRADEARROWS_PROFILE_BEAR = "Сила зверя: медведь (друид)"
 L.UPGRADEARROWS_THRESHOLD = "Порог"
 L.UPGRADEARROWS_THRESHOLD_DESC = "Насколько оценка предмета должна превышать оценку надетого, чтобы "
@@ -523,10 +523,10 @@ L.UPGRADEARROWS_OTHER_ADDON = "Модификация UpgradeArrow тоже вк
     .. "стрелки."
 L.UPGRADEARROWS_OTHER_ADDON_DESC = "Выключите одну из двух, чтобы на каждом улучшении была одна стрелка."
 L.UPGRADEARROWS_COMMAND = "открыть страницу «Веса характеристик» с ползунком веса для каждой "
-    .. "характеристики любого класса и ветви"
+    .. "характеристики любого класса и ветки"
 L.UPGRADEARROWS_PAGE_TITLE = "Веса характеристик" -- the module's own page in the Settings sidebar
 L.UPGRADEARROWS_PAGE_USED = "Сейчас снаряжение оценивается по профилю «%s»." -- a profile's name
-L.UPGRADEARROWS_PAGE_USED_AUTO = "Сейчас снаряжение оценивается по профилю «%s» – вашей ветви с "
+L.UPGRADEARROWS_PAGE_USED_AUTO = "Сейчас снаряжение оценивается по профилю «%s» – вашей ветке с "
     .. "наибольшим числом очков (%d)." -- name, points
 L.UPGRADEARROWS_PAGE_USED_GUESS = "Сейчас снаряжение оценивается по профилю «%s» – это предположение, "
     .. "пока вы не вложите очки талантов."
@@ -538,7 +538,7 @@ L.UPGRADEARROWS_PAGE_GUIDE = "Стрелки – быстрая подсказк
 L.UPGRADEARROWS_PAGE_CLASS = "Класс"
 L.UPGRADEARROWS_PAGE_CLASS_DESC = "Чьи веса показывать. Веса другого класса сохраняются до того "
     .. "времени, когда вы будете играть за него."
-L.UPGRADEARROWS_PAGE_TREE = "Ветвь"
+L.UPGRADEARROWS_PAGE_TREE = "Ветка"
 L.UPGRADEARROWS_PAGE_PROFILE_NAME = "%s (%s)" -- a talent tree's name, its class
 L.UPGRADEARROWS_PAGE_OTHER_CLASS = "Эти веса действуют, когда вы играете за класс «%s»." -- a class's name
 -- The talent trees of each class, for a class the client has no talent data for.

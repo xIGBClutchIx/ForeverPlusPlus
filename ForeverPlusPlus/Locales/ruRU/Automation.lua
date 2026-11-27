@@ -143,7 +143,7 @@ L.AUTODISMOUNT_UNSHIFT_DESC = "Выходить из облика, наприм�
 
 -- AutoGossip
 L.AUTOGOSSIP_TITLE = "Автоматический выбор ответа"
-L.AUTOGOSSIP_DESC = "Если у НИП только один вариант диалога или одна услуга помимо болтовни и нет "
+L.AUTOGOSSIP_DESC = "Если у NPC только один вариант диалога или одна услуга помимо болтовни и нет "
     .. "заданий, выбирать ее за вас, чтобы банк, лавка, список навыков у наставника или карта "
     .. "полетов открывались сразу."
 L.AUTOGOSSIP_SECTION_GENERAL = "Общие"
@@ -158,10 +158,10 @@ L.AUTOGOSSIP_TAXI = "Распорядители полетов"
 L.AUTOGOSSIP_TAXI_DESC = "Открывать карту полетов."
 L.AUTOGOSSIP_STABLE = "Смотрители стойл"
 L.AUTOGOSSIP_STABLE_DESC = "Открывать стойло."
-L.AUTOGOSSIP_OTHER = "Другие НИП"
-L.AUTOGOSSIP_OTHER_DESC = "Выбирать единственный вариант у любого другого НИП, если только игра не "
+L.AUTOGOSSIP_OTHER = "Другие NPC"
+L.AUTOGOSSIP_OTHER_DESC = "Выбирать единственный вариант у любого другого NPC, если только игра не "
     .. "просит сначала прочитать его текст."
-L.AUTOGOSSIP_KEY_DESC = "Удерживайте эту клавишу при разговоре с НИП, чтобы выбирать варианты самому."
+L.AUTOGOSSIP_KEY_DESC = "Удерживайте эту клавишу при разговоре с NPC, чтобы выбирать варианты самому."
 -- AUTOGOSSIP_TITLE_STABLE is left to enUS: it's matched against the client's own text.
 
 -- AutoDecline

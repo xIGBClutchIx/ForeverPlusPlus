@@ -608,6 +608,14 @@ The QuestieDB addon's quest, NPC, item, and object data, read at run time throug
 
 - It's a global, `LibQuestieDB`, set at the end of its own load (not LibStub, not load on demand, no ready event); addon name `QuestieDB`, with `QuestieDB_Forever.toc` and `QuestieDB_Camelot.toc` in its releases. Coordinates are 0-100 percents keyed by AreaTable ID; its own ZoneDB support table maps those to uiMapIDs. **[web]** (its source at `d57637f`, 2026-11-11) **Unverified** in game: not installed on the client yet; Self Test's `questiedb` lines check it.
 
+## The client's text in another language
+
+The install holds one language (enUS here), so the client folder can't answer what the game calls something in Russian. wago.tools serves the same build's tables in any language: `https://wago.tools/db2/<Table>/csv?build=<build>&locale=ruRU` (read 2026-11-26, build 1.60.1.71139).
+
+- `GlobalStrings` has the interface's own strings by tag (`BaseTag`, `TagText_lang`): `ADDONS` is "Модификации", `UNIT_NAME_NPC` "Имена NPC", `MAP_PIN` "Точка на карте", `SET_FOCUS` "Запомнить цель", `DEFAULT` "По умолчанию", `MINIMAP_LABEL` "Мини-карта", `ITEM_MIN_SKILL` "Требуется: %s (%d)".
+- `CreatureType`, `TaxiNodes`, `AreaTable`, `SkillLine`, and `Faction` have the names the game shows. Join a language's rows to enUS's by `ID`.
+- `Locales/ruRU/` was checked against these for its terms and every place name in `Places.lua`. An NPC's title under its name (a stable master's) isn't in any of them.
+
 ## Open questions
 
 Check these in the live client and move them up with a tag and date:

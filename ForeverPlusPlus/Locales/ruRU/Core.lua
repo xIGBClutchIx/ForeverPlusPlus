@@ -42,7 +42,7 @@ L.SKIP_KEY = "Клавиша пропуска" -- the option of every module tha
 -- Lib/MapPins.lua: icons on the world map.
 -- Click hints are written as Blizzard's instruction lines are: in angle brackets, the keys and the
 -- click as separate words with no hyphen or plus ("Ctrl click"), no full stop. One click to a line.
-L.MAPPINS_HINT_WAYPOINT = "<Щелкните, удерживая Ctrl, чтобы поставить метку на карте>"
+L.MAPPINS_HINT_WAYPOINT = "<Щелкните, удерживая Ctrl, чтобы поставить точку на карте>"
 -- The options of icons on the world map: their size, opacity, and whether continent maps show
 -- them, the same in every module that has them.
 L.MAPPINS_SIZE = "Размер значков"
