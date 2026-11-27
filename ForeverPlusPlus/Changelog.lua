@@ -21,7 +21,7 @@ ns.changelog = {
                     .. "nameplate health bar by what it is: a boss, a rare, an elite, or a caster, "
                     .. "each in a color you pick. The game's gray for a tapped mob and its threat "
                     .. "colors come first." },
-                { L.NAMEPLATECOMBO_TITLE, "A new module for Rogues and Druids, off by default, that "
+                { L.NAMEPLATECOMBO_TITLE, "A new module for Rogues and Druids, on by default, that "
                     .. "shows your combo points on your target's nameplate, above its name or below "
                     .. "its health bar: one dot a point and nothing with none." },
                 { L.BAGSLOTCOUNTER_TITLE, "Bag Button on Screen (on by default) shows a backpack "

@@ -43,7 +43,7 @@ if ns.Frames.HasAtlas(ICONS.rogueBlue) then
 end
 
 local module = ns.NewModule("NameplateComboPoints", L.NAMEPLATECOMBO_DESC, {
-    enabled = false,
+    enabled = true, -- only Rogues and Druids have the module at all (IsAvailable)
     icon = "red",
     position = "above",
     size = 100, -- percent
