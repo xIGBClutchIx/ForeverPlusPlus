@@ -608,6 +608,16 @@ The QuestieDB addon's quest, NPC, item, and object data, read at run time throug
 
 - It's a global, `LibQuestieDB`, set at the end of its own load (not LibStub, not load on demand, no ready event); addon name `QuestieDB`, with `QuestieDB_Forever.toc` and `QuestieDB_Camelot.toc` in its releases. Coordinates are 0-100 percents keyed by AreaTable ID; its own ZoneDB support table maps those to uiMapIDs. **[web]** (its source at `d57637f`, 2026-11-11) **Unverified** in game: not installed on the client yet; Self Test's `questiedb` lines check it.
 
+## Nameplate bar colors, threat, and combo points
+
+From Blizzard's own source for build 1.60.1.70205 (read 2026-11-27) unless tagged otherwise.
+
+- **A nameplate's bar color** is picked by `CompactUnitFrame_UpdateHealthColor` (`Blizzard_UnitFrame/Shared/CompactUnitFrame.lua`): its threat color, gray for dead or tapped, a class color, or the selection color (red while on your threat list). What kind of mob a unit is never comes into it. It calls `SetStatusBarColor` only when the color differs from what the bar shows, so a hook on that setter can repaint and stay.
+- **Threat colors are the game's own.** The CVar `nameplateThreatDisplay` is a bitfield of `Enum.NamePlateThreatDisplay` (Progressive 1, Flash 2, HealthBarColor 3; read a bit with `C_CVar.GetCVarBitfield`), set by three checkboxes under Options > Nameplates > "Aggro Display". With HealthBarColor on, an enemy plate's bar is `GAINING_THREAT_COLOR` for threat status 1 and 2 and `HIGH_THREAT_COLOR` for 3, from `UnitThreatSituation("player", unit)`, or `UnitThreatLeadSituation` for a tank. Only while in a party (`UnitInParty`), and there's no color for another tank.
+- **No combo points on nameplates.** `Blizzard_NamePlates.toc` leaves the Rogue and Druid `ClassNameplateBar` files out of this client. Combo points are the target frame's `ComboFrame`, which reads `GetComboPoints(PlayerFrame.unit, "target")` and draws `Interface\ComboFrame\ComboPoint` (the red dot is its texture coordinates 0.375 to 0.5625).
+- **What may be secret** (the client's API notes): `UnitThreatSituation` and `UnitThreatLeadSituation` when the unit's threat state is restricted, `GetComboPoints` when unit power is (`SecretWhenUnitPowerRestricted`), `UnitCreatureType` when identity is. `UnitClassification`, `UnitHasPowerType`, and `UnitIsBossMob` carry no such note. **Unverified in game**, in a dungeon and in combat: `/run local u="target" print(issecretvalue(UnitClassification(u)), UnitClassification(u), UnitHasPowerType(u,0), UnitIsBossMob(u))` and `/run local c=GetComboPoints("player","target") print(issecretvalue(c))`.
+- Mob Type Nameplate Colors and Nameplate Combo Points are built on these, and neither has run in the game yet.
+
 ## Saved variables before the files
 
 `## LoadSavedVariablesFirst: 1` in a TOC makes the client load the addon's saved variables before its files, where they normally come after. Mainline's client has it (six addons in this machine's retail install use it, read 2026-11-27). **Not yet confirmed on Forever:** our TOC has it for the Language dropdown, and Self Test's `language.savedFirst` line says whether the saved table was there as the locale files loaded. Without it the dropdown's choice is saved but never applies.

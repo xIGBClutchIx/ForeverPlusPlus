@@ -289,6 +289,36 @@ L.NPCNAMEPLATES_TITLE_COLOR = "칭호 색상"
 L.NPCNAMEPLATES_TITLE_COLOR_DESC = "NPC의 <칭호> 줄 색상입니다."
 L.NPCNAMEPLATES_TITLE_COLOR_NAME = "이름과 같게"
 
+-- NameplateColors
+L.NAMEPLATECOLORS_TITLE = "몬스터 유형별 이름표 색상"
+L.NAMEPLATECOLORS_DESC = "적대적인 NPC 이름표의 생명력 막대를 유형에 따라 색칠합니다. 우두머리는 보라색, 희귀는 하늘색, "
+    .. "정예는 주황색, 주문 시전자는 파란색으로 표시합니다."
+L.NAMEPLATECOLORS_BOSS = "우두머리"
+L.NAMEPLATECOLORS_BOSS_DESC = "야외 우두머리와 공격대 우두머리를 보라색으로 표시합니다."
+L.NAMEPLATECOLORS_RARE = "희귀"
+L.NAMEPLATECOLORS_RARE_DESC = "희귀 및 희귀 정예 몬스터를 하늘색으로 표시합니다."
+L.NAMEPLATECOLORS_ELITE = "정예"
+L.NAMEPLATECOLORS_ELITE_DESC = "정예 몬스터를 주황색으로 표시합니다. 던전 우두머리도 게임에서는 정예로 취급합니다."
+L.NAMEPLATECOLORS_CASTER = "주문 시전자"
+L.NAMEPLATECOLORS_CASTER_DESC = "위 유형에 속하지 않으면서 마나가 있는 몬스터를 파란색으로 표시합니다. 근접 공격만 하는 "
+    .. "몬스터 중에도 마나가 있는 경우가 있습니다."
+-- A gray row atop the module
+L.NAMEPLATECOLORS_THREAT = "게임 자체 색상이 우선합니다."
+-- [quotes: UNIT_NAMEPLATES_THREAT_DISPLAY_HEALTHBAR_COLOR, UNIT_NAMEPLATES_THREAT_DISPLAY, NAMEPLATES_LABEL]
+L.NAMEPLATECOLORS_THREAT_DESC = "다른 플레이어가 선점한 몬스터는 회색으로 남습니다. 파티에 속해 있고 게임 설정의 '이름표'에서 "
+    .. "'위협 표시'의 '생명력 막대 색상'이 켜져 있으면, 위협 수준이 있는 몬스터는 게임의 위협 색상을 유지합니다."
+
+-- NameplateComboPoints
+L.NAMEPLATECOMBO_TITLE = "이름표 연계 점수"
+L.NAMEPLATECOMBO_DESC = "대상의 이름표에 연계 점수를 표시합니다. 점수 하나당 점 하나를 표시하며, 점수가 없으면 표시하지 "
+    .. "않습니다. 도적과 표범 변신 중인 드루이드에게 적용됩니다."
+L.NAMEPLATECOMBO_POSITION = "위치"
+L.NAMEPLATECOMBO_POSITION_DESC = "이름표에서 점이 표시되는 위치입니다."
+L.NAMEPLATECOMBO_POSITION_ABOVE = "생명력 막대 위"
+L.NAMEPLATECOMBO_POSITION_BELOW = "생명력 막대 아래"
+L.NAMEPLATECOMBO_SIZE = "크기"
+L.NAMEPLATECOMBO_SIZE_DESC = "점의 크기입니다."
+
 -- TargetMarkers
 L.TARGETMARKERS_TITLE = "대상 표시기"
 L.TARGETMARKERS_DESC = "키를 누르고 있으면 마우스 위치에 공격대 아이콘 고리가 열립니다. 하나를 가리킨 뒤 "

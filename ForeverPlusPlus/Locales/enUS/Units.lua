@@ -308,6 +308,37 @@ L.NPCNAMEPLATES_TITLE_COLOR = "Title Color"
 L.NPCNAMEPLATES_TITLE_COLOR_DESC = "The color of an NPC's <Title> line."
 L.NPCNAMEPLATES_TITLE_COLOR_NAME = "Same as Name"
 
+-- NameplateColors
+L.NAMEPLATECOLORS_TITLE = "Mob Type Nameplate Colors"
+L.NAMEPLATECOLORS_DESC = "Color the health bar of an enemy NPC's nameplate by what it is: a boss purple, "
+    .. "a rare light blue, an elite orange, and a caster blue."
+L.NAMEPLATECOLORS_BOSS = "Bosses"
+L.NAMEPLATECOLORS_BOSS_DESC = "World and raid bosses, in purple."
+L.NAMEPLATECOLORS_RARE = "Rares"
+L.NAMEPLATECOLORS_RARE_DESC = "Rare and rare elite mobs, in light blue."
+L.NAMEPLATECOLORS_ELITE = "Elites"
+L.NAMEPLATECOLORS_ELITE_DESC = "Elite mobs, in orange. A dungeon's bosses are elites to the game."
+L.NAMEPLATECOLORS_CASTER = "Casters"
+L.NAMEPLATECOLORS_CASTER_DESC = "Mobs with mana that are none of the above, in blue. Some that only "
+    .. "fight in melee have mana too."
+-- A gray row atop the module
+L.NAMEPLATECOLORS_THREAT = "The game's own colors come first."
+-- [quotes: UNIT_NAMEPLATES_THREAT_DISPLAY_HEALTHBAR_COLOR, UNIT_NAMEPLATES_THREAT_DISPLAY, NAMEPLATES_LABEL]
+L.NAMEPLATECOLORS_THREAT_DESC = "A mob another player tapped stays gray, and a mob you have threat on "
+    .. "keeps the game's threat color while you're in a group, when Health Bar Color is on under "
+    .. "Aggro Display in the game's Nameplates options."
+
+-- NameplateComboPoints
+L.NAMEPLATECOMBO_TITLE = "Nameplate Combo Points"
+L.NAMEPLATECOMBO_DESC = "Show your combo points on your target's nameplate, one dot for each point "
+    .. "and nothing with none. For Rogues, and Druids in Cat Form."
+L.NAMEPLATECOMBO_POSITION = "Position"
+L.NAMEPLATECOMBO_POSITION_DESC = "Where the dots sit on the nameplate."
+L.NAMEPLATECOMBO_POSITION_ABOVE = "Above the Health Bar"
+L.NAMEPLATECOMBO_POSITION_BELOW = "Below the Health Bar"
+L.NAMEPLATECOMBO_SIZE = "Size"
+L.NAMEPLATECOMBO_SIZE_DESC = "How big the dots are."
+
 -- TargetMarkers
 L.TARGETMARKERS_TITLE = "Target Markers"
 L.TARGETMARKERS_DESC = "Hold a key and a ring of the raid icons opens at your mouse. Point toward one "

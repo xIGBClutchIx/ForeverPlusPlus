@@ -336,6 +336,8 @@ What each module is, in the code's terms (what it does for players is in `README
 - **Quest Nameplates**
 - **Druid Mana Bar**: druids only: mana in the player frame's third-bar slot while in a form without it.
 - **Target Markers**: a ring of raid icons at the cursor while a key from `Bindings.xml` is held, picking by direction like the ping wheel, a world marker with Shift; secure, so it works in combat.
+- **Mob Type Nameplate Colors**: `NameplateColors`: an enemy NPC plate's health bar painted by `UnitClassification`, `UnitIsBossMob` and `UnitHasPowerType`, over Blizzard's color through a hook on the bar's `SetStatusBarColor` (as Player Nameplates does for players), put back when the plate is reused; a tapped mob's gray and Blizzard's threat colors (told from the color it set) are left.
+- **Nameplate Combo Points**: `NameplateComboPoints`: one frame of dots moved onto the target's plate (`C_NamePlate.GetNamePlateForUnit`), each a status bar from one point to the next that the count from `GetComboPoints` is handed to, so a secret count is never compared. Rogues and Druids only (`IsAvailable`).
 - **Simplified Dungeon Nameplates**: `DungeonNameplates`: the game's Simplified nameplates CVar on for the kinds picked only inside dungeons and raids, the player's own value back outside.
 - **Console Variables**: a folder: the tool page, its Popular list of CVars, and its locks, which keep a CVar at the player's value at login and whenever it changes while the module is on, off by default.
 - **Debug**: every module's debug options and buttons on its own page in the sidebar while it's on, drawn by `Settings/Debug.lua`, off by default; off, its page and tools' commands are gone and debug options go back to their defaults.

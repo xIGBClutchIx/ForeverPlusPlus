@@ -17,6 +17,13 @@ ns.changelog = {
                     .. "each shown on a game client in that language. None has been proofread by a native speaker "
                     .. "yet, and anything one doesn't cover shows in English. A Language dropdown on "
                     .. "the About page picks another one, or English, whatever the client's language is.",
+                { L.NAMEPLATECOLORS_TITLE, "A new module, off by default, that colors an enemy NPC's "
+                    .. "nameplate health bar by what it is: a boss purple, a rare light blue, an elite "
+                    .. "orange, and a caster blue. The game's gray for a tapped mob and its threat "
+                    .. "colors come first." },
+                { L.NAMEPLATECOMBO_TITLE, "A new module for Rogues and Druids, off by default, that "
+                    .. "shows your combo points on your target's nameplate, above or below its health "
+                    .. "bar: one dot a point and nothing with none." },
                 { L.BAGSLOTCOUNTER_TITLE, "Bag Button on Screen (on by default) shows a backpack "
                     .. "button with your free bag slots while the controller interface is on, "
                     .. "since it hides the bag buttons. Move it in Edit Mode, and point at it for "

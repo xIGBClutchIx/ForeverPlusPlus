@@ -316,6 +316,37 @@ L.NPCNAMEPLATES_TITLE_COLOR = "Titelfarbe"
 L.NPCNAMEPLATES_TITLE_COLOR_DESC = "Die Farbe der Zeile <Titel> eines NSCs."
 L.NPCNAMEPLATES_TITLE_COLOR_NAME = "Wie der Name"
 
+-- NameplateColors
+L.NAMEPLATECOLORS_TITLE = "Namensplakettenfarben nach Gegnertyp"
+L.NAMEPLATECOLORS_DESC = "Färbt die Gesundheitsleiste auf der Namensplakette eines feindlichen NSCs nach "
+    .. "dessen Typ: Bosse violett, rare Gegner hellblau, Elitegegner orange und Zauberwirker blau."
+L.NAMEPLATECOLORS_BOSS = "Bosse"
+L.NAMEPLATECOLORS_BOSS_DESC = "Welt- und Schlachtzugsbosse, in Violett."
+L.NAMEPLATECOLORS_RARE = "Rare Gegner"
+L.NAMEPLATECOLORS_RARE_DESC = "Rare und rare Elitegegner, in Hellblau."
+L.NAMEPLATECOLORS_ELITE = "Elitegegner"
+L.NAMEPLATECOLORS_ELITE_DESC = "Elitegegner, in Orange. Dungeonbosse sind für das Spiel ebenfalls Elitegegner."
+L.NAMEPLATECOLORS_CASTER = "Zauberwirker"
+L.NAMEPLATECOLORS_CASTER_DESC = "Gegner mit Mana, die zu keiner der Gruppen oben gehören, in Blau. Auch "
+    .. "manche reinen Nahkämpfer haben Mana."
+-- A gray row atop the module
+L.NAMEPLATECOLORS_THREAT = "Die eigenen Farben des Spiels haben Vorrang."
+-- [quotes: UNIT_NAMEPLATES_THREAT_DISPLAY_HEALTHBAR_COLOR, UNIT_NAMEPLATES_THREAT_DISPLAY, NAMEPLATES_LABEL]
+L.NAMEPLATECOLORS_THREAT_DESC = "Ein von einem anderen Spieler markierter Gegner bleibt grau. Ein Gegner, "
+    .. "bei dem Ihr Bedrohung habt, behält in einer Gruppe die Bedrohungsfarbe des Spiels, wenn in den "
+    .. "Spieloptionen unter „Namensplaketten“ bei „Aggroanzeige“ die Option „Gesundheitsleistenfarbe“ aktiv ist."
+
+-- NameplateComboPoints
+L.NAMEPLATECOMBO_TITLE = "Combopunkte auf Namensplaketten"
+L.NAMEPLATECOMBO_DESC = "Zeigt Eure Combopunkte auf der Namensplakette Eures Ziels: ein Punkt je "
+    .. "Combopunkt und nichts ohne. Für Schurken und Druiden in Katzengestalt."
+L.NAMEPLATECOMBO_POSITION = "Position"
+L.NAMEPLATECOMBO_POSITION_DESC = "Wo die Punkte auf der Namensplakette sitzen."
+L.NAMEPLATECOMBO_POSITION_ABOVE = "Über der Gesundheitsleiste"
+L.NAMEPLATECOMBO_POSITION_BELOW = "Unter der Gesundheitsleiste"
+L.NAMEPLATECOMBO_SIZE = "Größe"
+L.NAMEPLATECOMBO_SIZE_DESC = "Wie groß die Punkte sind."
+
 -- TargetMarkers
 L.TARGETMARKERS_TITLE = "Zielmarkierungen"
 L.TARGETMARKERS_DESC = "Haltet eine Taste gedrückt, und an Eurer Maus öffnet sich ein Ring der "

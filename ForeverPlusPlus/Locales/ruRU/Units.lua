@@ -304,6 +304,37 @@ L.NPCNAMEPLATES_TITLE_COLOR = "Цвет звания"
 L.NPCNAMEPLATES_TITLE_COLOR_DESC = "Цвет строки <Звание> NPC."
 L.NPCNAMEPLATES_TITLE_COLOR_NAME = "Как у имени"
 
+-- NameplateColors
+L.NAMEPLATECOLORS_TITLE = "Цвета индикаторов по типу существ"
+L.NAMEPLATECOLORS_DESC = "Окрашивать полосу здоровья на индикаторе враждебного NPC по его типу: босс – "
+    .. "фиолетовым, редкое существо – голубым, элита – оранжевым, заклинатель – синим."
+L.NAMEPLATECOLORS_BOSS = "Боссы"
+L.NAMEPLATECOLORS_BOSS_DESC = "Мировые и рейдовые боссы – фиолетовым."
+L.NAMEPLATECOLORS_RARE = "Редкие существа"
+L.NAMEPLATECOLORS_RARE_DESC = "Редкие и редкие элитные существа – голубым."
+L.NAMEPLATECOLORS_ELITE = "Элита"
+L.NAMEPLATECOLORS_ELITE_DESC = "Элитные существа – оранжевым. Боссы подземелий для игры тоже элита."
+L.NAMEPLATECOLORS_CASTER = "Заклинатели"
+L.NAMEPLATECOLORS_CASTER_DESC = "Существа с маной, не попавшие ни в одну из групп выше, – синим. Мана "
+    .. "бывает и у тех, кто сражается только в ближнем бою."
+-- A gray row atop the module
+L.NAMEPLATECOLORS_THREAT = "Собственные цвета игры важнее."
+-- [quotes: UNIT_NAMEPLATES_THREAT_DISPLAY_HEALTHBAR_COLOR, UNIT_NAMEPLATES_THREAT_DISPLAY, NAMEPLATES_LABEL]
+L.NAMEPLATECOLORS_THREAT_DESC = "Существо, отмеченное другим игроком, остается серым, а существо, у "
+    .. "которого вы вызываете угрозу, сохраняет цвет угрозы, пока вы в группе и в настройках игры "
+    .. "«Индикаторы здоровья» в пункте «Отображение угрозы» включен «Цвет индикатора здоровья»."
+
+-- NameplateComboPoints
+L.NAMEPLATECOMBO_TITLE = "Приемы серии на индикаторе"
+L.NAMEPLATECOMBO_DESC = "Показывать приемы серии на индикаторе здоровья вашей цели: по точке за каждый "
+    .. "прием и ничего, если их нет. Для разбойников и друидов в облике кошки."
+L.NAMEPLATECOMBO_POSITION = "Положение"
+L.NAMEPLATECOMBO_POSITION_DESC = "Где на индикаторе находятся точки."
+L.NAMEPLATECOMBO_POSITION_ABOVE = "Над полосой здоровья"
+L.NAMEPLATECOMBO_POSITION_BELOW = "Под полосой здоровья"
+L.NAMEPLATECOMBO_SIZE = "Размер"
+L.NAMEPLATECOMBO_SIZE_DESC = "Размер точек."
+
 -- TargetMarkers
 L.TARGETMARKERS_TITLE = "Метки целей"
 L.TARGETMARKERS_DESC = "Удерживайте клавишу, и у курсора откроется кольцо рейдовых меток. Наведите "

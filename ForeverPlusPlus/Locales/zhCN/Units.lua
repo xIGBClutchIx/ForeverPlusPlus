@@ -258,6 +258,34 @@ L.NPCNAMEPLATES_TITLE_COLOR = "头衔颜色"
 L.NPCNAMEPLATES_TITLE_COLOR_DESC = "NPC<头衔>一行的颜色。"
 L.NPCNAMEPLATES_TITLE_COLOR_NAME = "与名字相同"
 
+-- NameplateColors
+L.NAMEPLATECOLORS_TITLE = "怪物类型姓名板颜色"
+L.NAMEPLATECOLORS_DESC = "按敌对NPC的类型为其姓名板生命条着色：首领为紫色，稀有为浅蓝色，精英为橙色，施法者为蓝色。"
+L.NAMEPLATECOLORS_BOSS = "首领"
+L.NAMEPLATECOLORS_BOSS_DESC = "世界首领和团队副本首领，显示为紫色。"
+L.NAMEPLATECOLORS_RARE = "稀有"
+L.NAMEPLATECOLORS_RARE_DESC = "稀有和稀有精英怪物，显示为浅蓝色。"
+L.NAMEPLATECOLORS_ELITE = "精英"
+L.NAMEPLATECOLORS_ELITE_DESC = "精英怪物，显示为橙色。地下城首领在游戏中也属于精英。"
+L.NAMEPLATECOLORS_CASTER = "施法者"
+L.NAMEPLATECOLORS_CASTER_DESC = "不属于以上类型且有法力值的怪物，显示为蓝色。有些只进行近战的怪物也有法力值。"
+-- A gray row atop the module
+L.NAMEPLATECOLORS_THREAT = "游戏自身的颜色优先。"
+-- [quotes: UNIT_NAMEPLATES_THREAT_DISPLAY_HEALTHBAR_COLOR, UNIT_NAMEPLATES_THREAT_DISPLAY, NAMEPLATES_LABEL]
+L.NAMEPLATECOLORS_THREAT_DESC = "被其他玩家标记的怪物保持灰色；当你在队伍中，且游戏“姓名板”选项的“仇恨显示”中"
+    .. "开启了“生命条颜色”时，你对其有仇恨的怪物会保留游戏的仇恨颜色。"
+
+-- NameplateComboPoints
+L.NAMEPLATECOMBO_TITLE = "姓名板连击点数"
+L.NAMEPLATECOMBO_DESC = "在目标的姓名板上显示你的连击点数：每一点显示一个圆点，没有连击点时不显示。"
+    .. "适用于潜行者和猎豹形态的德鲁伊。"
+L.NAMEPLATECOMBO_POSITION = "位置"
+L.NAMEPLATECOMBO_POSITION_DESC = "圆点在姓名板上的位置。"
+L.NAMEPLATECOMBO_POSITION_ABOVE = "生命条上方"
+L.NAMEPLATECOMBO_POSITION_BELOW = "生命条下方"
+L.NAMEPLATECOMBO_SIZE = "尺寸"
+L.NAMEPLATECOMBO_SIZE_DESC = "圆点的大小。"
+
 -- TargetMarkers
 L.TARGETMARKERS_TITLE = "队伍标记"
 L.TARGETMARKERS_DESC = "按住一个键，就会在鼠标处打开一圈团队标记图标。指向其中一个后松开即可标记你的目标，"
