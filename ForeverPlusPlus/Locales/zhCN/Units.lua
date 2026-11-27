@@ -260,15 +260,17 @@ L.NPCNAMEPLATES_TITLE_COLOR_NAME = "与名字相同"
 
 -- NameplateColors
 L.NAMEPLATECOLORS_TITLE = "怪物类型姓名板颜色"
-L.NAMEPLATECOLORS_DESC = "按敌对NPC的类型为其姓名板生命条着色：首领为紫色，稀有为浅蓝色，精英为橙色，施法者为蓝色。"
+L.NAMEPLATECOLORS_DESC = "按敌对NPC的类型为其姓名板生命条着色：首领、稀有、精英或施法者，各自使用你选择的颜色。"
 L.NAMEPLATECOLORS_BOSS = "首领"
-L.NAMEPLATECOLORS_BOSS_DESC = "世界首领和团队副本首领，显示为紫色。"
+L.NAMEPLATECOLORS_BOSS_DESC = "世界首领和团队副本首领的颜色。"
 L.NAMEPLATECOLORS_RARE = "稀有"
-L.NAMEPLATECOLORS_RARE_DESC = "稀有和稀有精英怪物，显示为浅蓝色。"
+L.NAMEPLATECOLORS_RARE_DESC = "稀有和稀有精英怪物的颜色。"
 L.NAMEPLATECOLORS_ELITE = "精英"
-L.NAMEPLATECOLORS_ELITE_DESC = "精英怪物，显示为橙色。地下城首领在游戏中也属于精英。"
+L.NAMEPLATECOLORS_ELITE_DESC = "精英怪物的颜色。地下城首领在游戏中也属于精英。"
 L.NAMEPLATECOLORS_CASTER = "施法者"
-L.NAMEPLATECOLORS_CASTER_DESC = "不属于以上类型且有法力值的怪物，显示为蓝色。有些只进行近战的怪物也有法力值。"
+L.NAMEPLATECOLORS_CASTER_DESC = "不属于以上类型且有法力值的怪物的颜色。有些只进行近战的怪物也有法力值。"
+L.NAMEPLATECOLORS_OFF = "关闭" -- a kind that isn't colored
+L.NAMEPLATECOLORS_LIGHT_BLUE = "浅蓝色"
 -- A gray row atop the module
 L.NAMEPLATECOLORS_THREAT = "游戏自身的颜色优先。"
 -- [quotes: UNIT_NAMEPLATES_THREAT_DISPLAY_HEALTHBAR_COLOR, UNIT_NAMEPLATES_THREAT_DISPLAY, NAMEPLATES_LABEL]

@@ -291,17 +291,19 @@ L.NPCNAMEPLATES_TITLE_COLOR_NAME = "이름과 같게"
 
 -- NameplateColors
 L.NAMEPLATECOLORS_TITLE = "몬스터 유형별 이름표 색상"
-L.NAMEPLATECOLORS_DESC = "적대적인 NPC 이름표의 생명력 막대를 유형에 따라 색칠합니다. 우두머리는 보라색, 희귀는 하늘색, "
-    .. "정예는 주황색, 주문 시전자는 파란색으로 표시합니다."
+L.NAMEPLATECOLORS_DESC = "적대적인 NPC 이름표의 생명력 막대를 유형에 따라 색칠합니다. 우두머리, 희귀, 정예, 주문 시전자를 "
+    .. "각각 선택한 색상으로 표시합니다."
 L.NAMEPLATECOLORS_BOSS = "우두머리"
-L.NAMEPLATECOLORS_BOSS_DESC = "야외 우두머리와 공격대 우두머리를 보라색으로 표시합니다."
+L.NAMEPLATECOLORS_BOSS_DESC = "야외 우두머리와 공격대 우두머리의 색상입니다."
 L.NAMEPLATECOLORS_RARE = "희귀"
-L.NAMEPLATECOLORS_RARE_DESC = "희귀 및 희귀 정예 몬스터를 하늘색으로 표시합니다."
+L.NAMEPLATECOLORS_RARE_DESC = "희귀 및 희귀 정예 몬스터의 색상입니다."
 L.NAMEPLATECOLORS_ELITE = "정예"
-L.NAMEPLATECOLORS_ELITE_DESC = "정예 몬스터를 주황색으로 표시합니다. 던전 우두머리도 게임에서는 정예로 취급합니다."
+L.NAMEPLATECOLORS_ELITE_DESC = "정예 몬스터의 색상입니다. 던전 우두머리도 게임에서는 정예로 취급합니다."
 L.NAMEPLATECOLORS_CASTER = "주문 시전자"
-L.NAMEPLATECOLORS_CASTER_DESC = "위 유형에 속하지 않으면서 마나가 있는 몬스터를 파란색으로 표시합니다. 근접 공격만 하는 "
-    .. "몬스터 중에도 마나가 있는 경우가 있습니다."
+L.NAMEPLATECOLORS_CASTER_DESC = "위 유형에 속하지 않으면서 마나가 있는 몬스터의 색상입니다. 근접 공격만 하는 몬스터 중에도 "
+    .. "마나가 있는 경우가 있습니다."
+L.NAMEPLATECOLORS_OFF = "끄기" -- a kind that isn't colored
+L.NAMEPLATECOLORS_LIGHT_BLUE = "하늘색"
 -- A gray row atop the module
 L.NAMEPLATECOLORS_THREAT = "게임 자체 색상이 우선합니다."
 -- [quotes: UNIT_NAMEPLATES_THREAT_DISPLAY_HEALTHBAR_COLOR, UNIT_NAMEPLATES_THREAT_DISPLAY, NAMEPLATES_LABEL]

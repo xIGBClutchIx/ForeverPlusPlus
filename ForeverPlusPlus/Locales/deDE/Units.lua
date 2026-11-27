@@ -319,16 +319,18 @@ L.NPCNAMEPLATES_TITLE_COLOR_NAME = "Wie der Name"
 -- NameplateColors
 L.NAMEPLATECOLORS_TITLE = "Namensplakettenfarben nach Gegnertyp"
 L.NAMEPLATECOLORS_DESC = "Färbt die Gesundheitsleiste auf der Namensplakette eines feindlichen NSCs nach "
-    .. "dessen Typ: Bosse violett, rare Gegner hellblau, Elitegegner orange und Zauberwirker blau."
+    .. "dessen Typ: Bosse, rare Gegner, Elitegegner oder Zauberwirker, jeweils in einer Farbe Eurer Wahl."
 L.NAMEPLATECOLORS_BOSS = "Bosse"
-L.NAMEPLATECOLORS_BOSS_DESC = "Welt- und Schlachtzugsbosse, in Violett."
+L.NAMEPLATECOLORS_BOSS_DESC = "Die Farbe für Welt- und Schlachtzugsbosse."
 L.NAMEPLATECOLORS_RARE = "Rare Gegner"
-L.NAMEPLATECOLORS_RARE_DESC = "Rare und rare Elitegegner, in Hellblau."
+L.NAMEPLATECOLORS_RARE_DESC = "Die Farbe für rare und rare Elitegegner."
 L.NAMEPLATECOLORS_ELITE = "Elitegegner"
-L.NAMEPLATECOLORS_ELITE_DESC = "Elitegegner, in Orange. Dungeonbosse sind für das Spiel ebenfalls Elitegegner."
+L.NAMEPLATECOLORS_ELITE_DESC = "Die Farbe für Elitegegner. Dungeonbosse sind für das Spiel ebenfalls Elitegegner."
 L.NAMEPLATECOLORS_CASTER = "Zauberwirker"
-L.NAMEPLATECOLORS_CASTER_DESC = "Gegner mit Mana, die zu keiner der Gruppen oben gehören, in Blau. Auch "
+L.NAMEPLATECOLORS_CASTER_DESC = "Die Farbe für Gegner mit Mana, die zu keiner der Gruppen oben gehören. Auch "
     .. "manche reinen Nahkämpfer haben Mana."
+L.NAMEPLATECOLORS_OFF = "Aus" -- a kind that isn't colored
+L.NAMEPLATECOLORS_LIGHT_BLUE = "Hellblau"
 -- A gray row atop the module
 L.NAMEPLATECOLORS_THREAT = "Die eigenen Farben des Spiels haben Vorrang."
 -- [quotes: UNIT_NAMEPLATES_THREAT_DISPLAY_HEALTHBAR_COLOR, UNIT_NAMEPLATES_THREAT_DISPLAY, NAMEPLATES_LABEL]

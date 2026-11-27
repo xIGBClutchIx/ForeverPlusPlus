@@ -27,10 +27,10 @@ local readable = ns.IsReadable
 
 local module = ns.NewModule("NameplateColors", L.NAMEPLATECOLORS_DESC, {
     enabled = false,
-    boss = true,
-    rare = true,
-    elite = true,
-    caster = true,
+    boss = "purple",
+    rare = "lightblue",
+    elite = "orange",
+    caster = "blue",
     preview = false, -- Debug: every enemy NPC's plate as a made-up kind
 })
 module.title = L.NAMEPLATECOLORS_TITLE
@@ -38,24 +38,40 @@ module.category = "units"
 module.added = "1.9.2"
 module.quickToggle = "nameplates"
 
+-- The colors a kind can have, each unlike the ones Blizzard's own bars mean something by: hostile
+-- red, tapped gray, and its threat colors. The names are the nameplate options' shared ones.
+local COLORS = {
+    purple = { 0.70, 0.30, 0.95 },
+    lightblue = { 0.45, 0.80, 1.00 },
+    blue = { 0.30, 0.50, 1.00 },
+    orange = { 1.00, 0.55, 0.10 },
+    yellow = { 1.00, 0.90, 0.20 },
+    green = { 0.30, 0.90, 0.35 },
+    pink = { 1.00, 0.50, 0.80 },
+    white = { 1.00, 1.00, 1.00 },
+}
+local CHOICES = {
+    { "off", L.NAMEPLATECOLORS_OFF },
+    { "purple", L.PLATES_COLOR_PURPLE },
+    { "lightblue", L.NAMEPLATECOLORS_LIGHT_BLUE },
+    { "blue", L.PLATES_COLOR_BLUE },
+    { "orange", L.PLATES_COLOR_ORANGE },
+    { "yellow", L.PLATES_COLOR_YELLOW },
+    { "green", L.PLATES_COLOR_GREEN },
+    { "pink", L.PLATES_COLOR_PINK },
+    { "white", L.PLATES_COLOR_WHITE },
+}
+
 module.options = {
-    { key = "boss", name = L.NAMEPLATECOLORS_BOSS, description = L.NAMEPLATECOLORS_BOSS_DESC },
-    { key = "rare", name = L.NAMEPLATECOLORS_RARE, description = L.NAMEPLATECOLORS_RARE_DESC },
-    { key = "elite", name = L.NAMEPLATECOLORS_ELITE, description = L.NAMEPLATECOLORS_ELITE_DESC },
-    { key = "caster", name = L.NAMEPLATECOLORS_CASTER, description = L.NAMEPLATECOLORS_CASTER_DESC },
+    { key = "boss", name = L.NAMEPLATECOLORS_BOSS, description = L.NAMEPLATECOLORS_BOSS_DESC, choices = CHOICES },
+    { key = "rare", name = L.NAMEPLATECOLORS_RARE, description = L.NAMEPLATECOLORS_RARE_DESC, choices = CHOICES },
+    { key = "elite", name = L.NAMEPLATECOLORS_ELITE, description = L.NAMEPLATECOLORS_ELITE_DESC, choices = CHOICES },
+    { key = "caster", name = L.NAMEPLATECOLORS_CASTER, description = L.NAMEPLATECOLORS_CASTER_DESC,
+        choices = CHOICES },
     { key = "preview", name = L.NAMEPLATECOLORS_PREVIEW, description = L.NAMEPLATECOLORS_PREVIEW_DESC,
         debug = true, section = L.DEBUG_SECTION_PREVIEWS },
 }
 module.notice = { text = L.NAMEPLATECOLORS_THREAT, description = L.NAMEPLATECOLORS_THREAT_DESC }
-
--- One color a kind, each unlike Blizzard's own bar colors (hostile red, neutral yellow, friendly
--- green, tapped gray, and the threat colors).
-local COLORS = {
-    boss = { 0.70, 0.30, 0.95 }, -- purple
-    rare = { 0.45, 0.80, 1.00 }, -- light blue
-    elite = { 1.00, 0.55, 0.10 }, -- orange
-    caster = { 0.30, 0.50, 1.00 }, -- blue
-}
 
 local weak = { __mode = "k" }
 local unitOf = setmetatable({}, weak) -- bar -> the unit its plate shows
@@ -91,15 +107,17 @@ local function kindOf(unit)
     if type(classification) ~= "string" then
         return nil
     end
-    if db.boss and (classification == "worldboss" or UnitIsBossMob and read(UnitIsBossMob(unit)) == true) then
+    -- A kind set to Off isn't colored, and the mob counts as the next kind it also is.
+    local boss, rare, elite, caster = COLORS[db.boss], COLORS[db.rare], COLORS[db.elite], COLORS[db.caster]
+    if boss and (classification == "worldboss" or UnitIsBossMob and read(UnitIsBossMob(unit)) == true) then
         return "boss"
-    elseif db.rare and (classification == "rare" or classification == "rareelite") then
+    elseif rare and (classification == "rare" or classification == "rareelite") then
         return "rare"
-    elseif db.elite and (classification == "elite" or classification == "rareelite") then
+    elseif elite and (classification == "elite" or classification == "rareelite") then
         return "elite"
     end
     local mana = Enum and Enum.PowerType and Enum.PowerType.Mana
-    if db.caster and UnitHasPowerType and mana and read(UnitHasPowerType(unit, mana)) == true then
+    if caster and UnitHasPowerType and mana and read(UnitHasPowerType(unit, mana)) == true then
         return "caster"
     end
     return nil
@@ -162,7 +180,8 @@ local function paint(bar)
         end
         return
     end
-    local color = COLORS[kind]
+    -- The preview shows a kind that's set to Off too, in the color it starts with.
+    local color = COLORS[module.db[kind]] or COLORS[module.defaults[kind]]
     painting = true
     bar:SetStatusBarColor(color[1], color[2], color[3])
     painting = false

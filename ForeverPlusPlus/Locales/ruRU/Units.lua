@@ -306,17 +306,19 @@ L.NPCNAMEPLATES_TITLE_COLOR_NAME = "Как у имени"
 
 -- NameplateColors
 L.NAMEPLATECOLORS_TITLE = "Цвета индикаторов по типу существ"
-L.NAMEPLATECOLORS_DESC = "Окрашивать полосу здоровья на индикаторе враждебного NPC по его типу: босс – "
-    .. "фиолетовым, редкое существо – голубым, элита – оранжевым, заклинатель – синим."
+L.NAMEPLATECOLORS_DESC = "Окрашивать полосу здоровья на индикаторе враждебного NPC по его типу: босс, "
+    .. "редкое существо, элита или заклинатель – каждый своим цветом на выбор."
 L.NAMEPLATECOLORS_BOSS = "Боссы"
-L.NAMEPLATECOLORS_BOSS_DESC = "Мировые и рейдовые боссы – фиолетовым."
+L.NAMEPLATECOLORS_BOSS_DESC = "Цвет для мировых и рейдовых боссов."
 L.NAMEPLATECOLORS_RARE = "Редкие существа"
-L.NAMEPLATECOLORS_RARE_DESC = "Редкие и редкие элитные существа – голубым."
+L.NAMEPLATECOLORS_RARE_DESC = "Цвет для редких и редких элитных существ."
 L.NAMEPLATECOLORS_ELITE = "Элита"
-L.NAMEPLATECOLORS_ELITE_DESC = "Элитные существа – оранжевым. Боссы подземелий для игры тоже элита."
+L.NAMEPLATECOLORS_ELITE_DESC = "Цвет для элитных существ. Боссы подземелий для игры тоже элита."
 L.NAMEPLATECOLORS_CASTER = "Заклинатели"
-L.NAMEPLATECOLORS_CASTER_DESC = "Существа с маной, не попавшие ни в одну из групп выше, – синим. Мана "
+L.NAMEPLATECOLORS_CASTER_DESC = "Цвет для существ с маной, не попавших ни в одну из групп выше. Мана "
     .. "бывает и у тех, кто сражается только в ближнем бою."
+L.NAMEPLATECOLORS_OFF = "Откл." -- a kind that isn't colored
+L.NAMEPLATECOLORS_LIGHT_BLUE = "Голубой"
 -- A gray row atop the module
 L.NAMEPLATECOLORS_THREAT = "Собственные цвета игры важнее."
 -- [quotes: UNIT_NAMEPLATES_THREAT_DISPLAY_HEALTHBAR_COLOR, UNIT_NAMEPLATES_THREAT_DISPLAY, NAMEPLATES_LABEL]

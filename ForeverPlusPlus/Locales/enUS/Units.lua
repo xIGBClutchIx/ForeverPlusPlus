@@ -310,17 +310,19 @@ L.NPCNAMEPLATES_TITLE_COLOR_NAME = "Same as Name"
 
 -- NameplateColors
 L.NAMEPLATECOLORS_TITLE = "Mob Type Nameplate Colors"
-L.NAMEPLATECOLORS_DESC = "Color the health bar of an enemy NPC's nameplate by what it is: a boss purple, "
-    .. "a rare light blue, an elite orange, and a caster blue."
+L.NAMEPLATECOLORS_DESC = "Color the health bar of an enemy NPC's nameplate by what it is: a boss, a rare, "
+    .. "an elite, or a caster, each in a color you pick."
 L.NAMEPLATECOLORS_BOSS = "Bosses"
-L.NAMEPLATECOLORS_BOSS_DESC = "World and raid bosses, in purple."
+L.NAMEPLATECOLORS_BOSS_DESC = "The color for world and raid bosses."
 L.NAMEPLATECOLORS_RARE = "Rares"
-L.NAMEPLATECOLORS_RARE_DESC = "Rare and rare elite mobs, in light blue."
+L.NAMEPLATECOLORS_RARE_DESC = "The color for rare and rare elite mobs."
 L.NAMEPLATECOLORS_ELITE = "Elites"
-L.NAMEPLATECOLORS_ELITE_DESC = "Elite mobs, in orange. A dungeon's bosses are elites to the game."
+L.NAMEPLATECOLORS_ELITE_DESC = "The color for elite mobs. A dungeon's bosses are elites to the game."
 L.NAMEPLATECOLORS_CASTER = "Casters"
-L.NAMEPLATECOLORS_CASTER_DESC = "Mobs with mana that are none of the above, in blue. Some that only "
+L.NAMEPLATECOLORS_CASTER_DESC = "The color for mobs with mana that are none of the above. Some that only "
     .. "fight in melee have mana too."
+L.NAMEPLATECOLORS_OFF = "Off" -- a kind that isn't colored
+L.NAMEPLATECOLORS_LIGHT_BLUE = "Light Blue"
 -- A gray row atop the module
 L.NAMEPLATECOLORS_THREAT = "The game's own colors come first."
 -- [quotes: UNIT_NAMEPLATES_THREAT_DISPLAY_HEALTHBAR_COLOR, UNIT_NAMEPLATES_THREAT_DISPLAY, NAMEPLATES_LABEL]

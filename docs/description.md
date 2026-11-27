@@ -162,7 +162,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 
 - **Class Colors**: Colors players' health bars, and optionally names, by class on the unit frames, NPCs' bars by reaction, and names in the friends and who lists by class.
 - **Druid Mana Bar**: Druids only: shows your mana under the energy or rage bar while in Cat or Bear Form.
-- **Mob Type Nameplate Colors**: Colors an enemy NPC's nameplate health bar by what it is: a boss purple, a rare light blue, an elite orange, and a caster blue. The game's gray for a tapped mob and its threat colors come first. Off by default.
+- **Mob Type Nameplate Colors**: Colors an enemy NPC's nameplate health bar by what it is: a boss, a rare, an elite, or a caster, each in a color you pick. The game's gray for a tapped mob and its threat colors come first. Off by default.
 - **Nameplate Combo Points**: Rogues and Druids only: shows your combo points on your target's nameplate, above or below its health bar, one dot a point and nothing with none. Off by default.
 - **NPC Nameplates**: Always shows friendly NPCs' names and titles, with the health bar only when they're hurt or in combat. Options for sizes, a level badge, and where buffs sit.
 - **Player Nameplates**: Always shows friendly players' names and guilds, with the health bar only when they're hurt or in combat. Options for sizes, a level badge, class icons, dimming players outside your group, guild, and friends, and a name and health bar color for group members, friends, and enemy players. In dungeons and raids the game keeps Blizzard's own friendly plates.
