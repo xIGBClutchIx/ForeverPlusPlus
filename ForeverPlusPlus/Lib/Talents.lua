@@ -22,16 +22,22 @@ local function spentIn(configID, groupID)
     return ns.IsNumber(spent) and spent or 0
 end
 
+---The config another player's talents are in after the server answers an inspect
+---(Constants.TraitConsts.INSPECT_TRAIT_CONFIG_ID, -1 in the client's API docs), for Tabs.
+Talents.INSPECT = -1
+
 ---The player's talent tabs in order: `{ index, groupID, name, order, spent }` each, or nil
 ---while the client has no talent data yet (early at login, or a client without trait trees).
+---With `configID` (Talents.INSPECT), the tabs of that config instead: the player last inspected.
+---@param configID number?
 ---@return table[]?
-function Talents.Tabs()
+function Talents.Tabs(configID)
     if not (C_ClassTalents and C_ClassTalents.GetActiveConfigID and C_Traits
         and C_Traits.GetConfigInfo and C_Traits.GetGroupDisplayInfoByTreeID
         and C_Traits.GetGroupCurrencyInfo) then
         return nil
     end
-    local configID = C_ClassTalents.GetActiveConfigID()
+    configID = configID or C_ClassTalents.GetActiveConfigID()
     local info = configID and C_Traits.GetConfigInfo(configID)
     local trees = info and readable(info.treeIDs) and info.treeIDs
     local treeID = type(trees) == "table" and trees[1]
@@ -62,11 +68,13 @@ function Talents.Tabs()
 end
 
 ---The tab with the most points, and the points spent in all. The first tab in order wins a tie.
----Nil while there's no talent data.
+---Nil while there's no talent data. `configID` as for Tabs; or pass the `tabs` Tabs gave.
+---@param configID number?
+---@param tabs table[]?
 ---@return table? tab
 ---@return number total
-function Talents.Dominant()
-    local tabs = Talents.Tabs()
+function Talents.Dominant(configID, tabs)
+    tabs = tabs or Talents.Tabs(configID)
     if not tabs then
         return nil, 0
     end

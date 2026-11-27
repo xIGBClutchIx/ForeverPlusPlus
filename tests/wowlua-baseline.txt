@@ -75,6 +75,7 @@
 1	ForeverPlusPlus/Modules/System/MinimapButton.lua: warning[type-mismatch] expected `RootMenuDescriptionProxy` for parameter 'menuDescriptionProxy', got `RootMenuDescriptionProxy | MenuStyle1Mixin`
 1	ForeverPlusPlus/Modules/Tools/SelfTest.lua: warning[type-mismatch] expected `CurveObjectBase?` for parameter '...', got `string`
 1	ForeverPlusPlus/Modules/Tools/SelfTest.lua: warning[type-mismatch] expected `number` for parameter '...', got `secret<number> | colorRGBA | string`
+1	ForeverPlusPlus/Modules/Interface/Tooltips.lua: warning[type-mismatch] expected `string | number` for parameter '...', got `secret<number> | colorRGBA | string`
 
 # The checker loses track of our own tables: a value already checked for nil or false a line
 # above, or a table holding both text and numbers that it types as either for every entry.
@@ -83,6 +84,7 @@
 1	ForeverPlusPlus/Modules/Character/CharacterWindow/Skills.lua: warning[type-mismatch] expected `number` for parameter 'invSlotId', got `number | string`
 1	ForeverPlusPlus/Modules/Interface/LocalTime.lua: warning[type-mismatch] expected `string | number` for parameter 's', got `string | false`
 1	ForeverPlusPlus/Modules/Map/WorldMap/WorldMap.lua: warning[type-mismatch] expected `table` for parameter 'keys', got `string | string[]`
+2	ForeverPlusPlus/Lib/Inspect.lua: warning[secret-comparison] value from `guid` may be secret; comparing it errors in addon code; guard with `canaccessvalue`
 
 # Our own fields on frames we made, which the checker types as Blizzard's plain Frame or Button.
 1	ForeverPlusPlus/Modules/Map/GatheringMap/Page.lua: warning[undefined-field] undefined field 'entry' on class 'Frame'

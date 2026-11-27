@@ -162,7 +162,8 @@ One line here says what each file is for. [docs/architecture.md](docs/architectu
 | --- | --- | --- |
 | `Professions.lua` | `Professions` | Profession skills, gathering nodes by name, recipe levels and their bar, and the professions window's recipe rows. |
 | `Spellbook.lua` | `Spellbook` | The spells the player knows, with every rank. |
-| `Talents.lua` | `Talents` | The talent tabs and the points in each. |
+| `Talents.lua` | `Talents` | The talent tabs and the points in each, the player's or the player last inspected (`INSPECT`). |
+| `Inspect.lua` | `Inspect` | Another player's item level and talents from an inspect: throttled, one at a time, kept by GUID (`Request`, `Get`, `Average`). |
 | `TalentPlan.lua` | `TalentPlan` | An ordered talent plan checked against the tree's rules, share strings, and build links. |
 | `Units.lua` | `Units` | Who a unit is: in my group, a friend, a recent ally, a guildmate. And whether the player is busy (`PlayerBusy`, `PlayerCasting`), for a module that acts by itself. |
 
