@@ -19,11 +19,11 @@ ns.changelog = {
                     .. "button with your free bag slots while the controller interface is on, "
                     .. "since it hides the bag buttons. Move it in Edit Mode, and point at it for "
                     .. "each bag's free slots." },
-                { L.TOOLTIPS_TITLE, "Three small tidy options, each on by default. Icon by Name shows "
-                    .. "an item's or spell's icon before its name, Class and Side on One Row puts a "
-                    .. "player's class and Alliance or Horde on one row, and Objective Counts at the "
-                    .. "Right writes \"Tough Wolf Meat\" and \"6 / 8\" in place of \"6/8 Tough Wolf "
-                    .. "Meat\"." },
+                { L.TOOLTIPS_TITLE, "Three small tidy options. Icon by Name shows an item's or spell's "
+                    .. "icon before its name, and Class and Side on One Row puts a player's class "
+                    .. "and Alliance or Horde on one row; both are on by default. Objective Counts at "
+                    .. "the Right, off by default, writes \"Tough Wolf Meat\" and \"6 / 8\" in place "
+                    .. "of \"6/8 Tough Wolf Meat\"." },
                 { L.ITEMTOOLTIPS_TITLE, "Pair Short Lines (on by default) puts two short lines that "
                     .. "follow each other on one row: how an item binds with \"Unique\", and a "
                     .. "shield's armor with its block. Scan Age has a new choice, Beside the Price, "

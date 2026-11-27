@@ -51,7 +51,7 @@ local module = ns.NewModule("Tooltips", L.TOOLTIPS_DESC, {
     dropChance = true, -- a quest item's drop chance after its objective line; needs QuestieDB
     nameIcon = true, -- an item's or spell's icon before its name
     classSide = true, -- a player's class and side on one row
-    questCounts = true, -- a quest objective's count at the right edge
+    questCounts = false, -- a quest objective's count at the right edge
     scale = 100, -- percent
 })
 module.title = L.TOOLTIPS_TITLE
