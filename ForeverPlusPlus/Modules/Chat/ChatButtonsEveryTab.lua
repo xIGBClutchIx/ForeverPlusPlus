@@ -18,7 +18,7 @@ local L = ns.L
 local Chat = ns.Chat
 
 local module = ns.NewModule("ChatButtonsEveryTab", L.CHATBUTTONSEVERYTAB_DESC, {
-    enabled = false,
+    enabled = true,
 })
 module.title = L.CHATBUTTONSEVERYTAB_TITLE
 module.category = "chat"
