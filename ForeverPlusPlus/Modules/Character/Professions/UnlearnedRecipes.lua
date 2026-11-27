@@ -9,13 +9,8 @@
 -- Why it adds them itself: on Forever the game gives every recipe's info, learned or not
 -- (GetAllRecipeIDs and GetRecipeInfo), but its filtered list never holds an unlearned one, even with
 -- SetShowUnlearned(true) (docs/forever-api.md). Blizzard's list code already draws, sorts,
--- collapses, and selects unlearned recipes (Professions.GenerateCraftingDataProvider,
--- Blizzard_ProfessionsTemplates): so after Blizzard sets the list's data provider, this gives the
+-- collapses, and selects unlearned recipes, so this hands them to RecipeList.lua, which gives the
 -- list a tree of its own in Blizzard's node shapes, and Blizzard's code does the rest.
---
--- How, without making the list redraw for each of hundreds of rows: a tree data provider tells
--- the scroll box watching it to update in full after every insert. So Blizzard's tree is only
--- read, never changed, and ours is built whole before the list sees it, then set once (`build`).
 local _, ns = ...
 
 local _G, ipairs, pairs, type, format, pcall, tostring = _G, ipairs, pairs, type, string.format, pcall, tostring
@@ -28,6 +23,7 @@ local Professions = ns.Professions -- ours; Blizzard's global of the same name i
 
 local professions = ns.modules.Professions
 local internal = professions.internal
+local List = internal.RecipeList
 local module = professions:NewPart({
     key = "unlearnedRecipes", name = L.PROFESSIONS_UNLEARNED, description = L.PROFESSIONS_UNLEARNED_DESC,
     section = L.PROFESSIONS_UNLEARNED, added = "1.6.0",
@@ -109,27 +105,7 @@ professions.notice[#professions.notice + 1] = {
     end,
 }
 
--- Blizzard's groups for the list's top nodes (the local Group enum in Blizzard_Professions.lua:
--- Favorite, Learned, UnlearnedDivider, Unlearned).
-local GROUP_FAVORITE, GROUP_LEARNED = 1, 2
-
-local function craftingPage()
-    local frame = _G.ProfessionsFrame
-    return frame and frame.CraftingPage
-end
-
--- Whether the open list is one of the player's own professions: not a guild's, an NPC's, a link,
--- or runeforging. Probe: each call is Mainline's.
-local function ownList()
-    local T = C_TradeSkillUI
-    if not (T and T.GetAllRecipeIDs and T.GetRecipeInfo and internal.ListHasSkillUps()) then
-        return false
-    end
-    if T.IsTradeSkillLinked and T.IsTradeSkillLinked() then
-        return false
-    end
-    return not (T.IsTradeSkillGuildMember and T.IsTradeSkillGuildMember())
-end
+local craftingPage, ownList = List.Page, List.OwnList
 
 -- The open profession's unlearned recipes -----------------------------------------------------------
 -- Read once per profession (and again after a recipe is learned or the window opens again): each
@@ -207,10 +183,6 @@ end
 -- What the list shows -----------------------------------------------------------------------------
 
 local shown = {} -- recipe ID -> its candidate, for the rows and the page, from the last build
-local theirs -- the provider Blizzard last gave the list, which stays as Blizzard built it
-local ours -- the provider we gave the list in its place, or nil while the list has Blizzard's
-local swapping -- true while we set ours, so our own hook leaves it alone
-local categories = {} -- category ID -> Blizzard's own info for it, from the tree it built
 
 local function filters(db)
     local sources = {}
@@ -253,90 +225,8 @@ local function search()
     return false
 end
 
--- A category's info for our tree: Blizzard's own where its tree has the category, so its header is
--- the same one, and otherwise our own copy in the Learned group, drawn like any other.
-local function categoryOf(id)
-    if categories[id] then
-        return categories[id]
-    end
-    local T = C_TradeSkillUI
-    local info = T.GetCategoryInfo and T.GetCategoryInfo(id)
-    if type(info) ~= "table" then
-        return nil
-    end
-    local own = {}
-    for key, value in pairs(info) do
-        own[key] = value
-    end
-    own.group, own.unlearned = GROUP_LEARNED, false
-    if type(own.uiOrder) ~= "number" then
-        own.uiOrder = 0
-    end
-    return own
-end
-
--- Our nodes for one category, in Blizzard's shapes (AttachTreeDataRecursive): its subcategories,
--- then its recipes between a top and a bottom padding. In the order they're given: our tree has
--- no sort comparators, since Professions.RecipeTree already put them in Blizzard's order.
-local function attach(parent, branch, collapses)
-    local info = branch.info
-    local node = parent:Insert({ categoryInfo = info, group = GROUP_LEARNED })
-    if collapses and collapses[info.categoryID] then
-        node:SetCollapsed(true, false, true)
-    end
-    for _, child in ipairs(branch.categories) do
-        attach(node, child, collapses)
-    end
-    if #branch.recipes > 0 then
-        node:Insert({ topPadding = true, order = -1 })
-        for _, recipe in ipairs(branch.recipes) do
-            node:Insert({ recipeInfo = recipe, order = 0 })
-        end
-        node:Insert({ bottomPadding = true, order = 1 })
-    end
-end
-
--- What Blizzard's tree holds, read without changing it: its Favorites nodes, its learned recipes'
--- infos with their IDs and names (the game's data has some recipes twice, one learned), and its
--- categories' infos. Nil when it lists unlearned recipes itself: then it's left alone.
-local function read(provider)
-    local favorites, learned, ids, names = {}, {}, {}, {}
-    categories = {}
-    local function walk(node)
-        local data = node:GetData()
-        local category, info = data and data.categoryInfo, data and data.recipeInfo
-        if category and category.categoryID then
-            categories[category.categoryID] = category
-        end
-        if info then
-            if not info.learned then
-                return false
-            end
-            learned[#learned + 1] = info
-            ids[info.recipeID] = true
-            if type(info.name) == "string" then
-                names[info.name] = true
-            end
-        end
-        for _, child in ipairs(node:GetNodes()) do
-            if walk(child) == false then
-                return false
-            end
-        end
-    end
-    for _, top in ipairs(provider:GetRootNode():GetNodes()) do
-        local data = top:GetData()
-        if data and data.group == GROUP_FAVORITE then
-            favorites[#favorites + 1] = top
-        elseif walk(top) == false then
-            return nil
-        end
-    end
-    return { favorites = favorites, learned = learned, ids = ids, names = names }
-end
-
 -- The unlearned recipes' infos to show now: those the filters, the search, and Blizzard's list
--- (`has`, from read) leave in. Fills `shown`.
+-- (`has`, what RecipeList.lua read from its tree) leave in. Fills `shown`.
 local function pick(has)
     shown = {}
     local db = module.db
@@ -383,124 +273,37 @@ end
 
 local learnColumn -- the rows' column, below
 
--- A node of Blizzard's tree and what's under it, again in ours, with the same data.
-local function copyNode(parent, source)
-    local node = parent:Insert(source:GetData())
-    if source:IsCollapsed() then
-        node:SetCollapsed(true, false, true)
-    end
-    for _, child in ipairs(source:GetNodes()) do
-        copyNode(node, child)
-    end
-end
-
-local function recipeList()
-    local page = craftingPage()
-    return page and page.RecipeList
-end
-
--- Blizzard's "no results" text follows its own tree, which ours may differ from either way: it
--- goes by whichever tree the list has now (theirs again after ours was empty, too).
-local function noResults()
-    local list = recipeList()
-    local provider = ours or theirs
-    if provider and list and list.NoResultsText then
-        list.NoResultsText:SetShown(provider:IsEmpty())
-    end
-end
-
--- Gives the list `provider` (ours, or Blizzard's back) without our hook taking it for Blizzard's.
-local function give(box, provider, retain)
-    swapping = true
-    box:SetDataProvider(provider, retain)
-    swapping = false
-end
-
--- The list as the two Show checkboxes ask for it. Blizzard's tree is never changed: with both on,
--- or only Show Unlearned, a tree of our own is built whole, off screen, in Blizzard's node shapes
--- (learned and unlearned recipes together in each category), and given to the list once. That's
--- one redraw however many recipes there are, where adding them to the tree the list is watching
--- redrew it for every one.
-local function build(box, retain)
-    local db = module.db
-    local was = ours
-    ours = nil
-    shown = {}
-    local wantLearned, wantUnlearned = db.unlearnedLearned, db.unlearnedShow
-    local has = module.enabled and theirs and not (wantLearned and not wantUnlearned) and ownList()
-        and read(theirs)
-    if not has then
+-- What this part adds to the list, as the two Show checkboxes ask for it: with both on, or only
+-- Show Unlearned, RecipeList.lua builds a tree of learned and unlearned recipes together in each
+-- category (of the unlearned alone with only Show Unlearned). With only Show Learned, or nothing
+-- to add while it's on too, the list stays Blizzard's (or only sorted).
+List.adder = {
+    wants = function()
+        local db = module.db
+        return module.enabled and not (db.unlearnedLearned and not db.unlearnedShow)
+    end,
+    add = function(has)
+        local db = module.db
+        local wantLearned = db.unlearnedLearned
+        local unlearned, searching = {}, false
+        shown = {}
+        -- While one of Blizzard's own filters is on, no unlearned recipe is shown (blizzardNarrows).
+        if db.unlearnedShow and not blizzardNarrows() then
+            unlearned, searching = pick(has)
+        end
+        if wantLearned and #unlearned == 0 then
+            return nil -- nothing to add: Blizzard's as it is
+        end
+        learnColumn:Use(#unlearned > 0)
+        return { learned = wantLearned, recipes = unlearned, searching = searching }
+    end,
+    clear = function()
+        shown = {}
         learnColumn:Use(false)
-        if was and theirs and box:GetDataProvider() == was then
-            give(box, theirs, retain) -- back to Blizzard's
-            noResults()
-        end
-        return
-    end
-    local unlearned, searching = {}, false
-    -- While one of Blizzard's own filters is on, no unlearned recipe is shown (blizzardNarrows).
-    if wantUnlearned and not blizzardNarrows() then
-        unlearned, searching = pick(has)
-    end
-    if wantLearned and #unlearned == 0 then
-        learnColumn:Use(false)
-        if was and box:GetDataProvider() == was then
-            give(box, theirs, retain) -- nothing to add: Blizzard's as it is
-            noResults()
-        end
-        return
-    end
-    local recipes = {}
-    if wantLearned then
-        for i, info in ipairs(has.learned) do
-            recipes[i] = info
-        end
-    end
-    for _, info in ipairs(unlearned) do
-        recipes[#recipes + 1] = info
-    end
-    local page = craftingPage()
-    local collapses = page.GetCollapses and page:GetCollapses()
-    local provider = CreateTreeDataProvider()
-    local root = provider:GetRootNode()
-    if wantLearned then
-        for _, favorite in ipairs(has.favorites) do
-            copyNode(root, favorite)
-        end
-    end
-    -- Not searching, Blizzard leaves out categories without recipes of their own; searching it
-    -- keeps them (discardRootCategories).
-    for _, branch in ipairs(Professions.RecipeTree(recipes, categoryOf, searching)) do
-        attach(root, branch, collapses)
-    end
-    learnColumn:Use(#unlearned > 0)
-    ours = provider
-    give(box, provider, retain)
-    noResults()
-end
+    end,
+}
 
--- After Blizzard sets the list's data provider (ProfessionsCraftingPageMixin:Init, and a rebuild).
-local function onSetDataProvider(box, provider, retain)
-    if swapping or not provider then
-        return
-    end
-    if provider == ours then
-        return -- ours set again (ScrollBox:Rebuild)
-    end
-    theirs = provider
-    build(box, retain)
-end
-
--- Again from Blizzard's last tree, after a filter or option changed.
-local function refresh()
-    local list = recipeList()
-    local box = list and list.ScrollBox
-    if box and theirs then
-        build(box, ScrollBoxConstants and ScrollBoxConstants.RetainScrollPosition)
-    else
-        learnColumn:Use(false)
-    end
-end
+local refresh = List.Refresh
 
 -- The rows ------------------------------------------------------------------------------------------
 -- The skill an unlearned recipe takes to learn, at the right end of its row in its own column
@@ -778,14 +581,9 @@ end
 -- The list, the rows' mixin, and the form are in a load-on-demand Blizzard addon: hooked once
 -- they're there.
 local function hook()
-    local page = craftingPage()
-    local box = page and page.RecipeList and page.RecipeList.ScrollBox
-    if not box then
+    if not List.Hook() then
         return false
     end
-    module:Hook(box, "SetDataProvider", onSetDataProvider)
-    -- Blizzard sets its "no results" text after the provider, from its own tree.
-    module:Hook(page, "Init", noResults)
     module:Hook(Professions.RecipeForm(), "Init", drawLine)
     return Professions.HookRecipeRows(module, ROW_HOOKS)
 end
@@ -821,14 +619,8 @@ function module:OnEnable()
 end
 
 function module:OnDisable()
-    -- The list gets Blizzard's own tree back.
-    local list = recipeList()
-    local box = list and list.ScrollBox
-    if ours and theirs and box and box:GetDataProvider() == ours then
-        give(box, theirs, ScrollBoxConstants and ScrollBoxConstants.RetainScrollPosition)
-        list.NoResultsText:SetShown(theirs:IsEmpty())
-    end
-    ours, theirs = nil, nil
+    -- The list gets Blizzard's own tree back (or only sorted, while Crafting Costs sorts it).
+    refresh()
     shown = {}
     learnColumn:Use(false)
     numbers:HideAll()

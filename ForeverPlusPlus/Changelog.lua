@@ -45,6 +45,10 @@ ns.changelog = {
                     .. "disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By "
                     .. "default only on a character with Enchanting, and Skip Items Worth More Sold "
                     .. "leaves out what a vendor pays more for." },
+                { L.PROFESSIONS_TITLE, "Crafting Costs' Sort Recipe List (off by default) sorts the "
+                    .. "recipes in each category of the professions window by Estimated Profit or "
+                    .. "Total Cost, and shows that number on each row. Pick it in Settings or at the "
+                    .. "bottom of the window's Filter menu." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "

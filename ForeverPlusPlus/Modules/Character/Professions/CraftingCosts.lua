@@ -1,8 +1,10 @@
 -- Professions' Crafting Costs: in the professions window, under the recipe's description, what its
 -- reagents cost in all (each one's price times the count the recipe takes), what the crafted items
 -- are worth, the profit after the auction house's cut, and how old the oldest auction price in
--- them is; and, with Profit in Recipe List, each recipe's profit on its row. On tooltips: what a
--- recipe item's recipe costs to craft, and what filling a Craftsman's Writ costs.
+-- them is; and, with Profit in Recipe List, each recipe's profit on its row. Sort Recipe List
+-- orders each category of the recipe list by that profit or by the cost, from Settings or the
+-- window's Filter menu. On tooltips: what a recipe item's recipe costs to craft, and what filling a
+-- Craftsman's Writ costs.
 --
 -- Auction prices come through ns.Prices (Item Tooltips' Auction Prices, or Auctionator through
 -- it). A reagent a merchant sells costs the merchant's price when that's lower than the auction's;
@@ -26,6 +28,9 @@ local module = professions:NewPart({
     section = L.PROFESSIONS_CRAFTING,
 }, {
     craftingRows = true, -- each recipe's profit on its row of the recipe list
+    -- The recipe list's order in each category: "off" (Blizzard's), "profit" (highest first), or
+    -- "cost" (lowest first).
+    craftingSort = "off",
     craftingTooltip = true, -- a recipe item's tooltip says what crafting it costs
     craftingWrits = true, -- a Craftsman's Writ's tooltip says what filling it costs
     -- Where the crafted item is sold: "auction" (a merchant only when it has no auction price),
@@ -36,10 +41,21 @@ local module = professions:NewPart({
     vendor = {},
 })
 
+-- Sort Recipe List's choices, for its Settings dropdown and the Filter menu alike.
+local SORT_CHOICES = {
+    { "off", L.PROFESSIONS_CRAFTING_SORT_DEFAULT },
+    { "profit", L.PROFESSIONS_CRAFT_PROFIT },
+    { "cost", L.PROFESSIONS_CRAFT_COST },
+}
+
 module:AddOptions({
     {
         key = "craftingRows", name = L.PROFESSIONS_CRAFTING_ROWS, description = L.PROFESSIONS_CRAFTING_ROWS_DESC,
         added = "1.5.0",
+    },
+    {
+        key = "craftingSort", name = L.PROFESSIONS_CRAFTING_SORT, description = L.PROFESSIONS_CRAFTING_SORT_DESC,
+        added = "1.10.0", choices = SORT_CHOICES,
     },
     {
         key = "craftingTooltip", name = L.PROFESSIONS_CRAFTING_TOOLTIP,
@@ -62,9 +78,9 @@ module:AddOptions({
 
 local auctionPrice = ns.Prices.Auction
 
--- The recipe list's profits, kept by recipe ID while it scrolls (see Profit in the recipe list
--- below), and forgotten whenever a price they're made of may have changed.
-local profits = {} -- recipeID -> profit in copper, or false for none
+-- The recipe list's sums, kept by recipe ID while it scrolls and sorts (see Profit in the recipe
+-- list below), and forgotten whenever a price they're made of may have changed.
+local sumsOf = {} -- recipeID -> craftSums' table, or false for none
 
 -- Merchants ----------------------------------------------------------------------------------------
 
@@ -99,7 +115,7 @@ local function recordMerchant()
             vendor[id] = price / ((stack and stack > 0) and stack or 1)
         end
     end
-    wipe(profits) -- a reagent's merchant price may be new
+    wipe(sumsOf) -- a reagent's merchant price may be new
 end
 
 -- Sums ---------------------------------------------------------------------------------------------
@@ -529,7 +545,9 @@ end
 -- It has a column of its own (Professions.NewRowColumn), left of Appearance Icons' mark and Skill-
 -- Ups Left's number while those are in use and further right while they aren't; a long name is cut
 -- short before it, and a row too narrow for both shows no profit. Rows are built again as the list
--- scrolls, so profits are kept by recipe.
+-- scrolls, so the sums are kept by recipe. While Sort Recipe List sorts by profit the column shows
+-- the profit even with Profit in Recipe List off, and while it sorts by cost it shows each recipe's
+-- Total Cost in white instead, so the order can be read off the rows.
 
 local profitColumn = Professions.NewRowColumn(30, 0, 4) -- as wide as each row's text
 
@@ -541,42 +559,89 @@ end)
 
 local waiting = {} -- itemIDs made by a recipe whose item data is loading: { [itemID] = true }
 
-local function rowsOn()
-    return module.enabled and module.db.craftingRows
+-- What the list is sorted by: "profit", "cost", or nil for Blizzard's order.
+local function sorting()
+    local by = module.enabled and module.db.craftingSort
+    return (by == "profit" or by == "cost") and by or nil
 end
 
--- A recipe's profit, or nil. Not kept while the item it makes is still loading, since its
--- merchant price may come with it.
-local function profitOf(recipeID)
-    local profit = profits[recipeID]
-    if profit == nil then
-        local sums = craftSums(recipeID)
+local function rowsOn()
+    return module.enabled and (module.db.craftingRows or sorting() ~= nil)
+end
+
+-- A recipe's sums, or nil. Not kept while the item it makes is still loading, since its merchant
+-- price may come with it.
+local function rowSums(recipeID)
+    local sums = sumsOf[recipeID]
+    if sums == nil then
+        sums = craftSums(recipeID) or false
         if sums and sums.loading then
             waiting[sums.output] = true
-            return nil
+            return sums
         end
-        profit = sums and sums.profit or false
-        profits[recipeID] = profit
+        sumsOf[recipeID] = sums
     end
-    return profit or nil
+    return sums or nil
+end
+
+local function profitOf(recipeID)
+    local sums = rowSums(recipeID)
+    return sums and sums.profit
+end
+
+-- What a craft costs, or nil while a reagent has no price.
+local function costOf(recipeID)
+    local sums = rowSums(recipeID)
+    return sums and not sums.missing and sums.cost or nil
+end
+
+-- The value a row shows and the list sorts by, for a recipe at the rank its row stands for. Not for
+-- a recipe the player doesn't know (Unlearned Recipes' rows): it can't be made yet.
+local function rowValue(info, by)
+    if not (info and info.learned and info.recipeID) then
+        return nil
+    end
+    if by == "cost" then
+        return costOf(info.recipeID)
+    end
+    return profitOf(info.recipeID)
 end
 
 local function profitRow(row, node)
     if not (row and row.Label) then
         return
     end
-    local profit
+    local by, value = sorting(), nil
     if rowsOn() then
-        local info = Professions.RowRecipe(row, node)
-        -- Not on a recipe the player doesn't know (Unlearned Recipes' rows): it can't be made yet.
-        profit = info and info.learned and info.recipeID and profitOf(info.recipeID)
+        value = rowValue(Professions.RowRecipe(row, node), by)
     end
     profitColumn:Use(rowsOn())
-    local text = rowTexts:Set(row, profit)
+    local text = rowTexts:Set(row, value)
     if text then
-        text:SetText(profitColor(profit):WrapTextInColorCode(ns.MoneyShort(profit)))
+        local color = by == "cost" and WHITE or profitColor(value)
+        text:SetText(color:WrapTextInColorCode(ns.MoneyShort(value)))
     end
     profitColumn:Place(row, text, text and text:GetStringWidth())
+end
+
+-- Sort Recipe List ----------------------------------------------------------------------------------
+-- Each category's recipes by profit (highest first) or cost (lowest first), the same numbers the
+-- rows show, through RecipeList.lua, which gives Blizzard's list a copy of its own tree in that
+-- order: the categories, Favorites, and collapsed headers stay as Blizzard has them. A recipe
+-- without a number (a price missing, an enchant's profit, an unlearned recipe) goes after those
+-- with one, in Blizzard's order.
+
+local List = professions.internal.RecipeList
+
+List.order = function()
+    local by = sorting()
+    if not by then
+        return nil
+    end
+    return Professions.RecipeOrder(function(info)
+        -- The list holds a ranked recipe's first rank; its row shows the best rank known.
+        return rowValue(Professions.BestRank(info), by)
+    end, by == "profit")
 end
 
 local ROW_HOOKS = { Init = profitRow }
@@ -586,25 +651,32 @@ local function redrawRows()
     Professions.EachRecipeRow(profitRow)
 end
 
--- The totals and the rows again, once for a burst: prices change many times a second while the
--- auction house is browsed.
+-- The totals, the rows, and the sorted list again, once for a burst: prices change many times a
+-- second while the auction house is browsed.
 local redrawSoon = ns.Frames.Coalesce(function()
     refreshCrafting()
     redrawRows()
+    if sorting() then
+        List.Refresh()
+    end
 end, 0.5, module)
 
--- The rows' mixin is in Blizzard's load-on-demand professions addons: hooked once it's there, and
--- only once the option is on. A row hook does nothing while the part is off.
+-- The rows' mixin and the list are in Blizzard's load-on-demand professions addons: hooked once
+-- they're there, and only once an option needs them. A row hook does nothing while the part is
+-- off, and the list's adds nothing of this part's then.
 local function hookRows()
     if rowsOn() then
         Professions.HookRecipeRows(module, ROW_HOOKS)
+    end
+    if sorting() then
+        List.Hook()
     end
 end
 
 -- Registered once; does nothing while the part is off but forget what it kept. Also how a change
 -- of price source (Use Auctionator's Prices, Auction Prices turned on or off) reaches the totals.
 ns.Prices.OnChanged(function()
-    wipe(profits)
+    wipe(sumsOf)
     if module.enabled then
         redrawSoon()
     end
@@ -612,7 +684,7 @@ end)
 
 -- Auctionator's prices change without telling us, so each time the window opens they're read again.
 local function onTradeSkillShow()
-    wipe(profits)
+    wipe(sumsOf)
     hookRows()
     redrawSoon()
 end
@@ -624,10 +696,43 @@ local function onItemInfo(_, itemID)
     end
 end
 
-module:OnWhile("craftingRows", {
+module:OnWhile(function(db)
+    return db.craftingRows or db.craftingSort ~= "off"
+end, {
     TRADE_SKILL_SHOW = onTradeSkillShow,
     GET_ITEM_INFO_RECEIVED = onItemInfo,
 })
+
+-- The Filter menu ------------------------------------------------------------------------------------
+-- Sort Recipe List at the bottom of the window's Filter menu, under a divider, as a submenu of the
+-- same choices as its Settings dropdown. Only on the crafting page's own list of one of the
+-- player's professions; the crafting orders page's filter menu has the same tag.
+
+local TAG = "MENU_PROFESSIONS_FILTER" -- Professions.SetupFilterMenu, Camelot/Blizzard_Professions.lua
+
+local function addSort(owner, root)
+    local page = module.enabled and List.Page()
+    if not (page and page.RecipeList and owner == page.RecipeList.FilterDropdown and List.OwnList()) then
+        return
+    end
+    root:CreateDivider()
+    local menu = root:CreateButton(L.PROFESSIONS_CRAFTING_SORT)
+    for _, choice in ipairs(SORT_CHOICES) do
+        local value = choice[1]
+        menu:CreateRadio(choice[2], function()
+            return module.db.craftingSort == value
+        end, function()
+            -- Through Core, as the Modules page sets options: OnOptionChanged sorts the list.
+            ns.SetOption(module.name, "craftingSort", value)
+        end)
+    end
+end
+
+-- Added once at load: Blizzard's menus can't take an addition back, so the entries check whether
+-- the part is on each time the menu opens. Probe: Menu.ModifyMenu is Mainline's.
+if Menu and Menu.ModifyMenu then
+    Menu.ModifyMenu(TAG, addSort)
+end
 
 -- Blizzard_Professions is load-on-demand: hook its recipe form once it has loaded. Init runs each
 -- time a recipe is picked.
@@ -661,19 +766,27 @@ function module:OnDisable()
     end
     rowTexts:HideAll()
     profitColumn:Use(false)
-    wipe(profits)
+    wipe(sumsOf)
     wipe(waiting)
+    List.Refresh() -- the list in Blizzard's order again
 end
 
 function module:OnOptionChanged(key)
     if key == "craftingRows" then
-        wipe(profits)
+        wipe(sumsOf)
         wipe(waiting)
         hookRows()
         redrawRows() -- hides every row's profit when they're off
+    elseif key == "craftingSort" then
+        hookRows()
+        List.Refresh() -- sorted, or in Blizzard's order again
+        redrawRows() -- the rows show what the list is sorted by
     elseif key == "craftingSell" then
-        wipe(profits)
+        wipe(sumsOf)
         refreshCrafting()
         redrawRows()
+        if sorting() then
+            List.Refresh()
+        end
     end
 end

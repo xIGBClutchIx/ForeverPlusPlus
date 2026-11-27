@@ -160,7 +160,7 @@ One line here says what each file is for. [docs/architecture.md](docs/architectu
 
 | File | `ns` | For |
 | --- | --- | --- |
-| `Professions.lua` | `Professions` | Profession skills, gathering nodes by name, recipe levels and their bar, and the professions window's recipe rows. |
+| `Professions.lua` | `Professions` | Profession skills, gathering nodes by name, recipe levels and their bar, a sort order for the recipe list, and the professions window's recipe rows. |
 | `Spellbook.lua` | `Spellbook` | The spells the player knows, with every rank. |
 | `Talents.lua` | `Talents` | The talent tabs and the points in each. |
 | `TalentPlan.lua` | `TalentPlan` | An ordered talent plan checked against the tree's rules, share strings, and build links. |
