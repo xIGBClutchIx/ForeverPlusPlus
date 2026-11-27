@@ -16,8 +16,8 @@ local module = ns.NewModule("Professions", L.PROFESSIONS_DESC, {
     enabled = true,
 })
 module.title = L.PROFESSIONS_TITLE
--- Crafting Costs' Sort Recipe List by profit, Without Categories.
-module.presets = { developer = { options = { craftingSort = "profit", craftingFlat = true } } }
+-- Crafting Costs' Sort Recipe List Without Categories, once a sort is picked.
+module.presets = { developer = { options = { craftingFlat = true } } }
 module.category = "character"
 module.added = "1.5.0"
 
