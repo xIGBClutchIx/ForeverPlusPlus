@@ -244,6 +244,15 @@ L.HIDEBETAFEEDBACK_BUTTON_DESC = "Скрывать плавающую кнопк
 L.HIDEBETAFEEDBACK_QUEST = "Скрывать отзывы о заданиях"
 L.HIDEBETAFEEDBACK_QUEST_DESC = "Скрывать кнопки отзывов в окнах заданий."
 
+-- KeepAudioSynced
+L.KEEPAUDIOSYNCED_TITLE = "Синхронизация звука"
+L.KEEPAUDIOSYNCED_DESC = "Когда на компьютере меняется звуковое устройство по умолчанию, например "
+    .. "при подключении наушников, перезапускать звук игры, чтобы он шел на новое устройство, а не на старое."
+L.KEEPAUDIOSYNCED_NOT_DEFAULT = "Работает, только если в \"Устройство воспроизведения\" выбрано системное по умолчанию"
+L.KEEPAUDIOSYNCED_NOT_DEFAULT_DESC = "Если выбрано конкретное устройство, звук игры остается на нем, "
+    .. "и переключаться некуда."
+L.KEEPAUDIOSYNCED_USE_DEFAULT = "Выбрать системное по умолчанию"
+
 -- MovableFramerate
 L.MOVABLEFRAMERATE_TITLE = "Перемещаемый счетчик кадров"
 L.MOVABLEFRAMERATE_DESC = "Перемещать текст частоты кадров (Ctrl+R) и менять его размер в режиме "

@@ -192,6 +192,8 @@
     "CreateSettingsButtonInitializer",
     "IsBetaBuild",
     "IsPublicTestClient",
+    "C_VoiceChat",
+    "Sound_GameSystem_RestartSoundSystem",
     "SELL_PRICE",
     "ITEM_SPELL_TRIGGER_ONEQUIP",
     "GetInventorySlotInfo",

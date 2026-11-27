@@ -211,6 +211,14 @@ L.HIDEBETAFEEDBACK_BUTTON_DESC = "隐藏浮动的错误报告按钮。"
 L.HIDEBETAFEEDBACK_QUEST = "隐藏任务反馈"
 L.HIDEBETAFEEDBACK_QUEST_DESC = "隐藏任务窗口上的反馈按钮。"
 
+-- KeepAudioSynced
+L.KEEPAUDIOSYNCED_TITLE = "保持音频同步"
+L.KEEPAUDIOSYNCED_DESC = "当电脑的默认声音设备改变时（例如插入耳机），重新启动游戏声音，"
+    .. "让它在新设备上播放，而不是留在旧设备上。"
+L.KEEPAUDIOSYNCED_NOT_DEFAULT = "仅在“输出设备”为系统默认时有效"
+L.KEEPAUDIOSYNCED_NOT_DEFAULT_DESC = "选择了具体设备时，游戏声音会一直留在该设备上，没有可跟随的变化。"
+L.KEEPAUDIOSYNCED_USE_DEFAULT = "使用系统默认"
+
 -- MovableFramerate
 L.MOVABLEFRAMERATE_TITLE = "可移动帧率显示"
 L.MOVABLEFRAMERATE_DESC = "像暴雪自己的框体一样，在编辑模式中移动帧数文字（Ctrl+R）并调整其大小。在你移动它之前，"

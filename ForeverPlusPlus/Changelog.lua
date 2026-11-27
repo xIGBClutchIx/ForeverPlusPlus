@@ -114,6 +114,11 @@ ns.changelog = {
                     .. "It puts innkeepers, mailboxes, bankers, auctioneers, your class trainers, the "
                     .. "trainers of your professions, repairers, and more on the world map, each kind "
                     .. "with its own checkbox, and the same ones in the map's filter menu." },
+                { L.KEEPAUDIOSYNCED_TITLE, "A new module, off by default, that restarts the game's "
+                    .. "sound when your computer's default sound device changes, as when you plug in "
+                    .. "headphones, so the game follows it instead of playing on the old one. It works "
+                    .. "while the game's Output Device is the system default, and waits out a "
+                    .. "cinematic or loading screen." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "

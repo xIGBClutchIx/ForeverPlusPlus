@@ -374,6 +374,7 @@ What each module is, in the code's terms (what it does for players is in `README
 - **Bulk Buy**: `BulkBuy`: off by default. After Blizzard's Shift+click on a merchant item (`MerchantItemButton_OnModifiedClick`) opens its `StackSplitFrame`, hides it and opens a frame of its own in the same art, since setting the amount on Blizzard's would taint what its Okay buys with. Stack and Max fill the amount (Max from money, the merchant's stock, and `Bags.Room`); Okay buys `GetMerchantItemMaxStack` at a time, each lot after the bags hold the last. Items with an extended cost, and the controller interface, keep Blizzard's popup.
 - **Auction Totals**: sums `C_AuctionHouse.GetOwnedAuctionInfo` into one line of text on a child of the Auctions page's Cancel Auction button.
 - **Hide Beta Feedback**: beta/PTR only.
+- **Keep Audio Synced**: `KeepAudioSynced`: off by default. On `VOICE_CHAT_OUTPUT_DEVICES_UPDATED` (coalesced), compares `C_VoiceChat.GetAvailableOutputDevices` with the last list and calls `Sound_GameSystem_RestartSoundSystem` when it changed and `Sound_OutputDriverIndex` is 0, waiting out a cinematic, movie, or loading screen. A notice with a button while the Output Device is a named one.
 - **Gathering Tracking**
 - **Gathering Skill Tooltips**: `ProfessionTooltips`.
 - **Auto Stow**
