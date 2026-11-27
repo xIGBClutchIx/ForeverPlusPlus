@@ -169,6 +169,21 @@ L.DISENCHANTICONS_AUCTION_DESC = "Отмечать предметы в спис�
 L.DISENCHANTICONS_LOOT_DESC = "Отмечать предметы в окне добычи и при розыгрыше добычи, которые "
     .. "можно распылить."
 
+-- ItemLevels
+L.ITEMLEVELS_TITLE = "Уровни предметов"
+L.ITEMLEVELS_DESC = "Показывать уровень оружия и доспехов на их значках цветом их качества. "
+    .. "Рубашки и гербовые накидки не отмечаются."
+L.ITEMLEVELS_CORNER_DESC = "В каком углу значка предмета стоит уровень."
+L.ITEMLEVELS_CONFLICT_APPEARANCE = "Модуль «Значки обликов» тоже ставит значок в этот угол, и они "
+    .. "перекрываются. Выберите другой угол для одного из них."
+L.ITEMLEVELS_CONFLICT_DISENCHANT = "Модуль «Значки распыления» тоже ставит значок в этот угол, и они "
+    .. "перекрываются. Выберите другой угол для одного из них."
+L.ITEMLEVELS_BAGS_DESC = "Показывать уровень снаряжения в сумках."
+L.ITEMLEVELS_BANK_DESC = "Показывать уровень снаряжения в банке."
+L.ITEMLEVELS_MERCHANT_DESC = "Показывать уровень снаряжения, которое продает торговец."
+L.ITEMLEVELS_AUCTION_DESC = "Показывать уровень снаряжения в списках аукциона."
+L.ITEMLEVELS_LOOT_DESC = "Показывать уровень снаряжения в окне добычи и при розыгрыше добычи."
+
 -- UnusableItemsTint
 L.UNUSABLEITEMSTINT_TITLE = "Подсветка недоступных предметов"
 L.UNUSABLEITEMSTINT_PART_LOOKUP = "чтение подсказок предметов" -- its row on the Profiler page

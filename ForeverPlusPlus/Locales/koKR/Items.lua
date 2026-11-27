@@ -159,6 +159,21 @@ L.DISENCHANTICONS_AUCTION_DESC = "경매장 목록에서 사서 마력을 추출
 L.DISENCHANTICONS_LOOT_DESC = "전리품창과 전리품 주사위 굴림에서 마력을 추출할 수 있는 아이템을 "
     .. "표시합니다."
 
+-- ItemLevels
+L.ITEMLEVELS_TITLE = "아이템 레벨"
+L.ITEMLEVELS_DESC = "무기와 방어구의 레벨을 아이콘 위에 아이템 품질 색상으로 표시합니다. 속옷과 "
+    .. "휘장은 표시하지 않습니다."
+L.ITEMLEVELS_CORNER_DESC = "레벨을 아이템 아이콘의 어느 모서리에 놓을지 정합니다."
+L.ITEMLEVELS_CONFLICT_APPEARANCE = "'형상 아이콘'도 이 모서리에 아이콘을 표시하므로 둘이 겹칩니다. 둘 중 "
+    .. "하나의 모서리를 바꾸십시오."
+L.ITEMLEVELS_CONFLICT_DISENCHANT = "'마력 추출 아이콘'도 이 모서리에 아이콘을 표시하므로 둘이 겹칩니다. 둘 중 "
+    .. "하나의 모서리를 바꾸십시오."
+L.ITEMLEVELS_BAGS_DESC = "가방에 있는 장비의 레벨을 표시합니다."
+L.ITEMLEVELS_BANK_DESC = "은행에 있는 장비의 레벨을 표시합니다."
+L.ITEMLEVELS_MERCHANT_DESC = "상인이 파는 장비의 레벨을 표시합니다."
+L.ITEMLEVELS_AUCTION_DESC = "경매장 목록에 있는 장비의 레벨을 표시합니다."
+L.ITEMLEVELS_LOOT_DESC = "전리품창과 전리품 주사위 굴림에서 장비의 레벨을 표시합니다."
+
 -- UnusableItemsTint
 L.UNUSABLEITEMSTINT_TITLE = "사용 불가 아이템 색조"
 L.UNUSABLEITEMSTINT_PART_LOOKUP = "아이템 툴팁 읽기" -- its row on the Profiler page

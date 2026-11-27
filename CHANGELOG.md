@@ -21,6 +21,8 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Hide Minimap Buttons**: A new module, off by default, that hides the buttons addons put around the minimap until the mouse is over it, and fades them in and out. Blizzard's Buttons does the same for the calendar, tracking, and addon compartment buttons.
 - **Action Bar Colors**: A new module, off by default, that tints a whole action button red while your target is out of its range, and blue while you can't pay its cost, where the game only reddens the key and tints the icon a faint blue. Out of range comes first, and the pet bar gets the red too.
 - **Short Keybinds**: A new module, off by default, that writes the keys on your action buttons in short, so they fit: SC for Shift-C, MMB for the middle mouse button, N1 for number pad 1. On the action bars, the pet bar, and the extra action button.
+- **Character Window**: Equipped Item Levels shows each item's level on its icon, in its quality's color, and Enchant Marks marks each item that can be enchanted: green when it is, red when it isn't. Both are off by default, and show in the Inspect window too.
+- **Item Levels**: A new module, off by default, that shows the level of weapons and armor on their icons, in their quality's color, in your bags, the bank, at merchants, and in loot, and in the auction house if you turn it on.
 
 ### Changed
 

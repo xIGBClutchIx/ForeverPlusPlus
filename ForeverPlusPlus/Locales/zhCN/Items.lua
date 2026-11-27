@@ -141,6 +141,18 @@ L.DISENCHANTICONS_BANK_DESC = "标记银行中你可以分解的物品。"
 L.DISENCHANTICONS_AUCTION_DESC = "标记拍卖行列表中你可以买来分解的物品。"
 L.DISENCHANTICONS_LOOT_DESC = "在拾取窗口和战利品掷骰中标记你可以分解的物品。"
 
+-- ItemLevels
+L.ITEMLEVELS_TITLE = "物品等级"
+L.ITEMLEVELS_DESC = "在武器和护甲的图标上以其品质颜色显示等级。衬衣和战袍不会标记。"
+L.ITEMLEVELS_CORNER_DESC = "等级显示在物品图标的哪个角落。"
+L.ITEMLEVELS_CONFLICT_APPEARANCE = "“外观图标”也会在这个角落显示图标，两者会重叠。请为其中一个选择别的角落。"
+L.ITEMLEVELS_CONFLICT_DISENCHANT = "“分解图标”也会在这个角落显示图标，两者会重叠。请为其中一个选择别的角落。"
+L.ITEMLEVELS_BAGS_DESC = "显示背包中装备的等级。"
+L.ITEMLEVELS_BANK_DESC = "显示银行中装备的等级。"
+L.ITEMLEVELS_MERCHANT_DESC = "显示商人出售的装备的等级。"
+L.ITEMLEVELS_AUCTION_DESC = "显示拍卖行列表中装备的等级。"
+L.ITEMLEVELS_LOOT_DESC = "在拾取窗口和战利品掷骰中显示装备的等级。"
+
 -- UnusableItemsTint
 L.UNUSABLEITEMSTINT_TITLE = "不可用物品着色"
 L.UNUSABLEITEMSTINT_PART_LOOKUP = "读取物品提示信息" -- its row on the Profiler page

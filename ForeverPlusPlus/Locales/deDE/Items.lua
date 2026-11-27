@@ -174,6 +174,21 @@ L.DISENCHANTICONS_AUCTION_DESC = "Markiert Gegenstände in den Listen des Auktio
     .. "Entzaubern kaufen könntet."
 L.DISENCHANTICONS_LOOT_DESC = "Markiert entzauberbare Gegenstände im Beutefenster und bei Beutewürfen."
 
+-- ItemLevels
+L.ITEMLEVELS_TITLE = "Gegenstandsstufen"
+L.ITEMLEVELS_DESC = "Zeigt die Stufe von Waffen und Rüstung auf ihren Symbolen, in der Farbe ihrer "
+    .. "Qualität. Hemden und Wappenröcke werden nicht markiert."
+L.ITEMLEVELS_CORNER_DESC = "In welcher Ecke des Gegenstandssymbols die Stufe sitzt."
+L.ITEMLEVELS_CONFLICT_APPEARANCE = "Vorlagensymbole setzt sein Symbol ebenfalls in diese Ecke, "
+    .. "sodass sich beide überdecken. Wählt für eines davon eine andere Ecke."
+L.ITEMLEVELS_CONFLICT_DISENCHANT = "Entzauberungssymbole setzt sein Symbol ebenfalls in diese Ecke, "
+    .. "sodass sich beide überdecken. Wählt für eines davon eine andere Ecke."
+L.ITEMLEVELS_BAGS_DESC = "Zeigt die Stufe der Ausrüstung in Euren Taschen."
+L.ITEMLEVELS_BANK_DESC = "Zeigt die Stufe der Ausrüstung in der Bank."
+L.ITEMLEVELS_MERCHANT_DESC = "Zeigt die Stufe der Ausrüstung, die ein Händler verkauft."
+L.ITEMLEVELS_AUCTION_DESC = "Zeigt die Stufe der Ausrüstung in den Listen des Auktionshauses."
+L.ITEMLEVELS_LOOT_DESC = "Zeigt die Stufe der Ausrüstung im Beutefenster und bei Beutewürfen."
+
 -- UnusableItemsTint
 L.UNUSABLEITEMSTINT_TITLE = "Unbenutzbares rot färben"
 L.UNUSABLEITEMSTINT_PART_LOOKUP = "Lesen von Gegenstands-Tooltips" -- its row on the Profiler page

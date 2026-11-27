@@ -165,6 +165,21 @@ L.DISENCHANTICONS_BANK_DESC = "Mark items in the bank you can disenchant."
 L.DISENCHANTICONS_AUCTION_DESC = "Mark items in the auction house's lists you could buy to disenchant."
 L.DISENCHANTICONS_LOOT_DESC = "Mark items in the loot window and on loot rolls you can disenchant."
 
+-- ItemLevels
+L.ITEMLEVELS_TITLE = "Item Levels"
+L.ITEMLEVELS_DESC = "Show the level of weapons and armor on their icons, in the color of their "
+    .. "quality. Shirts and tabards aren't marked."
+L.ITEMLEVELS_CORNER_DESC = "Which corner of the item's icon the level sits in."
+L.ITEMLEVELS_CONFLICT_APPEARANCE = "Appearance Icons puts its icon in this corner too, so the two "
+    .. "overlap. Pick another corner for one of them."
+L.ITEMLEVELS_CONFLICT_DISENCHANT = "Disenchant Icons puts its icon in this corner too, so the two "
+    .. "overlap. Pick another corner for one of them."
+L.ITEMLEVELS_BAGS_DESC = "Show the level of gear in your bags."
+L.ITEMLEVELS_BANK_DESC = "Show the level of gear in the bank."
+L.ITEMLEVELS_MERCHANT_DESC = "Show the level of gear a merchant sells."
+L.ITEMLEVELS_AUCTION_DESC = "Show the level of gear in the auction house's lists."
+L.ITEMLEVELS_LOOT_DESC = "Show the level of gear in the loot window and on loot rolls."
+
 -- UnusableItemsTint
 L.UNUSABLEITEMSTINT_TITLE = "Unusable Items Tint"
 L.UNUSABLEITEMSTINT_PART_LOOKUP = "reading item tooltips" -- its row on the Profiler page

@@ -55,7 +55,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 - **Train All**: Adds a Train All button to the trainer window that learns everything you can learn and afford. Off by default.
 - **XP Bar Text**: Shows your experience on the bar all the time, with the percent, rested XP, and the XP of quests ready to turn in. Its tooltip adds XP per hour and time to level.
 - **Reputation Bar Text**: Shows your reputation on the bar all the time, with the percent and your standing, and gives the bar a tooltip. Optionally moves the bar to the faction you last gained reputation with.
-- **Character Window**: Moves the Equipment, Titles, and Pet tabs to the side, shows your name in class color as the title, and puts a durability bar beside each item. Can color the weapon skills you have equipped.
+- **Character Window**: Moves the Equipment, Titles, and Pet tabs to the side, shows your name in class color as the title, and puts a durability bar beside each item. Can show each item's level and whether it's enchanted, here and when you inspect someone, and color the weapon skills you have equipped.
 - **Durability Warning**: Warns you once when worn gear drops below a durability you pick (25% by default), and again when it breaks: red text, and optionally a chat line and a sound.
 - **Talent Planner**: Plan your talents in the talent window: click talents in order into a saved plan, see the level each point comes at, and get the next one highlighted when you have a point to spend. Keeps several plans, shares them as text, and imports builds from talentsforever.com and wowforevertalents.com.
 - **Professions**: Adds to the professions window, each part with its own checkbox.
@@ -113,6 +113,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 - **Bag Slot Counter**: Shows free bag slots on the backpack button, or each bag's own count, turning orange when few are left and red at 0. With the controller interface, which hides the bag buttons, a backpack button of its own shows the count, placed in Edit Mode.
 - **Disenchant Icons**: Marks the items you can disenchant with the Disenchant icon, in bags, the bank, the auction house, and loot, by default only on a character with Enchanting. Off by default.
 - **Easy Delete**: Types DELETE for you when you destroy a good item, so Yes is a single click. Off by default.
+- **Item Levels**: Shows the level of weapons and armor on their icons, in their quality's color, in bags, the bank, merchants, and loot, and the auction house if you turn it on. Off by default.
 - **Item Tooltips**: Adds lines to item tooltips, each with its own checkbox.
   - **Sell Price**: for the whole stack.
   - **Auction Prices**: from a scan of the auction house, or Auctionator's.

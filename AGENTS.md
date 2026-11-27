@@ -114,7 +114,7 @@ One line here says what each file is for. [docs/architecture.md](docs/architectu
 | File | `ns` | For |
 | --- | --- | --- |
 | `Secret.lua` | `IsReadable`, `IsText`, `IsNumber`, `IsTrue`, `IsTrueOrSecret`, `AurasReadable`, `EachAura`, `HealthStepCurve` | Guards for values that may be secret, and a curve that turns secret health into a widget value. |
-| `Colors.lua` | `Colors` | Shared colors: color codes, class, level range, a level's difficulty (`Difficulty`), faction, and one per stat. |
+| `Colors.lua` | `Colors` | Shared colors: color codes, class, level range, a level's difficulty (`Difficulty`), faction, an item quality (`Quality`), and one per stat. |
 | `Text.lua` | `Text` | Numbers, durations ("3 Seconds", "12m ago"), yards, version compare, and stripping escape codes. |
 | `Money.lua` | `Money`, `MoneyShort` | Copper as coin text. |
 | `Fonts.lua` | `Fonts` | The game's fonts a font dropdown offers. |
@@ -151,7 +151,7 @@ One line here says what each file is for. [docs/architecture.md](docs/architectu
 | `BagClicks.lua` | `BagClicks` | Secure overlays on bag items whose right-click uses an item or casts on it, in Blizzard's bags and a bag addon's. |
 | `BagAddons.lua` | `BagAddons` | The item buttons of the bag addons that replace Blizzard's bags (Baganator, GW2 UI, Bagnon, Bagnonium, BetterBags, ArkInventory), one adapter each, and when they redraw (`EachButton`, `Watch`). |
 | `ItemStats.lua` | `ItemStats` | An item's stats in short keys, and a stat weight score. |
-| `Equipment.lua` | `Equipment` | Slots, what's worn, whether the character can use an item, and what an item would replace. |
+| `Equipment.lua` | `Equipment` | A piece of gear's level (`ItemLevel`), slots, what's worn, whether the character can use an item, and what an item would replace. |
 | `Durability.lua` | `Durability` | How whole each equipped item is, and when a drop should warn. |
 | `Disenchant.lua` | `Disenchant` | Which items disenchant, into what, and their average value. |
 | `NewItems.lua` | `NewItems` | Which items Classic never had (`Has`). |

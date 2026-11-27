@@ -195,6 +195,7 @@ Modules\Items\BagSlotCounter.lua
 Modules\Items\AlreadyKnown.lua
 Modules\Items\AppearanceIcons.lua
 Modules\Items\DisenchantIcons.lua
+Modules\Items\ItemLevels.lua
 Modules\Items\UnusableItemsTint.lua
 Modules\Items\UpgradeArrows\UpgradeArrows.lua
 Modules\Items\UpgradeArrows\Weights.lua
@@ -249,6 +250,7 @@ Modules\Interface\EditModeGlow.lua
 Modules\Interface\ShortKeybinds.lua
 Modules\Character\CharacterWindow\CharacterWindow.lua
 Modules\Character\CharacterWindow\Durability.lua
+Modules\Character\CharacterWindow\Details.lua
 Modules\Character\CharacterWindow\Skills.lua
 Modules\Character\DurabilityWarning.lua
 Modules\Quests\ForeverQuestIcons.lua

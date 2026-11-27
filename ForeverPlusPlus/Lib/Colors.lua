@@ -2,7 +2,7 @@
 -- nameplate and in a tooltip), and color codes for text.
 local _, ns = ...
 
-local format, floor, max = string.format, math.floor, math.max
+local _G, format, floor, max = _G, string.format, math.floor, math.max
 local UnitLevel, GetQuestDifficultyColor, QuestDifficultyColors =
     UnitLevel, GetQuestDifficultyColor, QuestDifficultyColors
 local RECENT_ALLY_FONT_COLOR, UnitClass, C_ClassColor = RECENT_ALLY_FONT_COLOR, UnitClass, C_ClassColor
@@ -107,6 +107,17 @@ function Colors.Class(unit)
     if readable(class) then
         return Colors.ClassToken(class)
     end
+end
+
+local WHITE = { r = 1, g = 1, b = 1 }
+
+---An item quality's color (Enum.ItemQuality: 2 green, 3 blue, ...), Blizzard's own from
+---ITEM_QUALITY_COLORS, read at the call. White for a quality it doesn't have.
+---@param quality number?
+---@return table color with r, g, b
+function Colors.Quality(quality)
+    local colors = _G.ITEM_QUALITY_COLORS
+    return quality and colors and colors[quality] or WHITE
 end
 
 ---A class token's color (a ColorMixin), such as "MAGE"'s, or nil without one.

@@ -38,3 +38,42 @@ ns.Data.autoOpenKept = {
     [22158] = true, -- Pledge of Adoration: Thunder Bluff
     [22157] = true, -- Pledge of Adoration: Undercity
 }
+
+-- Character Window's enchant marks: the items a permanent enchant can go on, by item type
+-- (INVTYPE_*), and weapons by subclass ("weapon:" .. Enum.ItemWeaponSubclass), so a fishing pole,
+-- a wand, or a thrown weapon isn't marked. Read from the spells with a SpellEffect of Effect 53
+-- (enchant item, permanent) and their SpellEquippedItems rows, build 1.60.1.71139: Enchanting,
+-- the Arcanums and Librams, the shoulder inscriptions, armor kits, spurs, shield spikes, weapon
+-- chains, and Engineering's scopes. Forever adds Enchanting's necklace and off-hand enchants.
+-- Rings, trinkets, shirts, and tabards take none. Belts take only Engineering's tinkers, so a
+-- belt without one isn't marked; false keeps play from teaching otherwise.
+ns.Data.enchantable = {
+    INVTYPE_HEAD = true,
+    INVTYPE_NECK = true,
+    INVTYPE_SHOULDER = true,
+    INVTYPE_CLOAK = true,
+    INVTYPE_CHEST = true,
+    INVTYPE_ROBE = true,
+    INVTYPE_WRIST = true,
+    INVTYPE_HAND = true,
+    INVTYPE_WAIST = false,
+    INVTYPE_LEGS = true,
+    INVTYPE_FEET = true,
+    INVTYPE_SHIELD = true,
+    INVTYPE_HOLDABLE = true,
+    ["weapon:0"] = true, -- one-handed axes
+    ["weapon:1"] = true, -- two-handed axes
+    ["weapon:2"] = true, -- bows (scopes)
+    ["weapon:3"] = true, -- guns (scopes)
+    ["weapon:4"] = true, -- one-handed maces
+    ["weapon:5"] = true, -- two-handed maces
+    ["weapon:6"] = true, -- polearms
+    ["weapon:7"] = true, -- one-handed swords
+    ["weapon:8"] = true, -- two-handed swords
+    ["weapon:10"] = true, -- staves
+    ["weapon:13"] = true, -- fist weapons
+    ["weapon:14"] = true, -- miscellaneous
+    ["weapon:15"] = true, -- daggers
+    ["weapon:17"] = true, -- spears
+    ["weapon:18"] = true, -- crossbows (scopes)
+}
