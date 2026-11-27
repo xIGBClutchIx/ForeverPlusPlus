@@ -530,6 +530,7 @@
     "C_PlayerInfo",
     "CanDualWield",
     "GetInventoryItemLink",
+    "GetInventoryItemQuality",
     "UnitStat",
     "GetLFDChoiceOrder",
     "GetLFGDungeonInfo",

@@ -2,8 +2,8 @@
 -- sit across the top of the stats pane move to the side, under the Character, Reputation, and
 -- other tabs, and the pane's header (the portrait tab) goes, so the stats start at the top. The
 -- window's title becomes your level and name in your class color, each item gets a durability bar
--- (Durability.lua), and the Skills tab can show the skills of the weapons you wear in green
--- (Skills.lua).
+-- (Durability.lua) and can show its level and whether it's enchanted (Details.lua), and the Skills
+-- tab can show the skills of the weapons you wear in green (Skills.lua).
 local _, ns = ...
 
 local _G, ipairs, pairs, type, CreateFrame = _G, ipairs, pairs, type, CreateFrame
@@ -19,11 +19,21 @@ local module = ns.NewModule("CharacterWindow", L.CHARACTERWINDOW_DESC, {
     colorTitle = true,
     durability = "always", -- "off", or which items get a bar (Durability.lua)
     weaponSkills = true, -- green skill bars for the weapons worn (Skills.lua)
+    itemLevel = false, -- each item's level on its icon (Details.lua)
+    enchants = false, -- a mark for whether each item is enchanted (Details.lua)
+    inspect = true, -- the item levels and enchant marks in the Inspect window too
 })
 module.title = L.CHARACTERWINDOW_TITLE
 module.category = "character"
 module.internal = {}
 local internal = module.internal
+
+-- The item slots' names, by which edge of the button faces the character.
+internal.SIDES = {
+    RIGHT = { "Head", "Neck", "Shoulder", "Back", "Chest", "Shirt", "Tabard", "Wrist" },
+    LEFT = { "Hands", "Waist", "Legs", "Feet", "Finger0", "Finger1", "Trinket0", "Trinket1" },
+    BOTTOM = { "MainHand", "SecondaryHand", "Ranged" }, -- Ranged only if Forever has the slot
+}
 
 -- Before 0.8.0, Durability Bars was a module of its own, with a Show dropdown. CharacterFrame is
 -- this module's name at that layout; Core's layout version 3 renames it (RENAMED).
@@ -46,8 +56,13 @@ module.options = {
     },
     { key = "colorTitle", name = L.CHARACTERWINDOW_COLORTITLE, description = L.CHARACTERWINDOW_COLORTITLE_DESC },
     {
+        key = "weaponSkills", name = L.CHARACTERWINDOW_WEAPONSKILLS,
+        description = L.CHARACTERWINDOW_WEAPONSKILLS_DESC, added = "0.8.2",
+    },
+    {
         key = "durability", name = L.CHARACTERWINDOW_DURABILITY,
         description = L.CHARACTERWINDOW_DURABILITY_DESC, added = "0.8.0",
+        section = L.CHARACTERWINDOW_SECTION_ITEMS,
         choices = {
             { "always", L.CHARACTERWINDOW_DURABILITY_ALWAYS },
             { "worn", L.CHARACTERWINDOW_DURABILITY_WORN },
@@ -57,8 +72,19 @@ module.options = {
         },
     },
     {
-        key = "weaponSkills", name = L.CHARACTERWINDOW_WEAPONSKILLS,
-        description = L.CHARACTERWINDOW_WEAPONSKILLS_DESC, added = "0.8.2",
+        key = "itemLevel", name = L.CHARACTERWINDOW_ITEMLEVEL, description = L.CHARACTERWINDOW_ITEMLEVEL_DESC,
+        section = L.CHARACTERWINDOW_SECTION_ITEMS, added = "1.10.0",
+    },
+    {
+        key = "enchants", name = L.CHARACTERWINDOW_ENCHANTS, description = L.CHARACTERWINDOW_ENCHANTS_DESC,
+        section = L.CHARACTERWINDOW_SECTION_ITEMS, added = "1.10.0",
+    },
+    {
+        key = "inspect", name = L.CHARACTERWINDOW_INSPECT, description = L.CHARACTERWINDOW_INSPECT_DESC,
+        section = L.CHARACTERWINDOW_SECTION_ITEMS, added = "1.10.0",
+        shown = function(db)
+            return db.itemLevel or db.enchants
+        end,
     },
 }
 
@@ -430,10 +456,12 @@ local function onLevel(_, unit)
     end
 end
 
--- Once the character frame has loaded: the tabs and title, the durability bars, and the skills.
+-- Once the character frame has loaded: the tabs and title, the durability bars, the item details,
+-- and the skills.
 local function load()
     start()
     internal.updateDurability()
+    internal.updateDetails()
     internal.updateWeaponSkills()
 end
 
@@ -455,6 +483,7 @@ function module:OnEnable()
         updateTitle()
         updateLevelLine()
         internal.updateDurability()
+        internal.updateDetails()
         internal.updateWeaponSkills()
     else
         ns.AddOns.WhenLoaded(ADDON, load)
@@ -464,6 +493,7 @@ end
 function module:OnDisable()
     ns.AddOns.Cancel(ADDON, load)
     internal.updateDurability()
+    internal.updateDetails()
     internal.updateWeaponSkills()
     if not started then
         return
@@ -480,6 +510,9 @@ end
 function module:OnOptionChanged(key)
     if key == "durability" then
         internal.updateDurability()
+        return
+    elseif key == "itemLevel" or key == "enchants" or key == "inspect" then
+        internal.updateDetails()
         return
     elseif key == "weaponSkills" then
         internal.updateWeaponSkills()

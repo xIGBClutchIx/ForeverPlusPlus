@@ -19,13 +19,6 @@ local THICKNESS = 3 -- bar width, in pixels
 local GAP = 2 -- space between the bar and the item button
 local INSET = 2 -- how far the bar stops short of the button's ends
 
--- The slot names, by which edge of the button faces inward.
-local SIDES = {
-    RIGHT = { "Head", "Neck", "Shoulder", "Back", "Chest", "Shirt", "Tabard", "Wrist" },
-    LEFT = { "Hands", "Waist", "Legs", "Feet", "Finger0", "Finger1", "Trinket0", "Trinket1" },
-    BOTTOM = { "MainHand", "SecondaryHand", "Ranged" }, -- Ranged only if Forever has the slot
-}
-
 local container -- our frame on the paper doll; bars are children, so they hide with it
 ---@type table<number, table>
 local bars = {} -- inventory slot id -> StatusBar
@@ -85,7 +78,7 @@ local function build()
     -- Read again each time the window opens: at a fresh login the bars are built before the worn
     -- items are there, and no durability event may follow.
     container:SetScript("OnShow", update)
-    for side, names in pairs(SIDES) do
+    for side, names in pairs(internal.SIDES) do
         for i = 1, #names do
             local name = names[i] .. "Slot"
             local button = _G["Character" .. name]

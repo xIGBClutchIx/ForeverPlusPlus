@@ -30,6 +30,16 @@ L.CHARACTERWINDOW_DURABILITY_OFF = "Off"
 L.CHARACTERWINDOW_WEAPONSKILLS = "Equipped Weapon Skills"
 L.CHARACTERWINDOW_WEAPONSKILLS_DESC = "On the Skills tab, color the bars of the weapon skills for "
     .. "the weapons you have equipped green instead of blue."
+L.CHARACTERWINDOW_SECTION_ITEMS = "Items"
+L.CHARACTERWINDOW_ITEMLEVEL = "Item Levels"
+L.CHARACTERWINDOW_ITEMLEVEL_DESC = "Show each item's level on its icon, in the color of its quality."
+L.CHARACTERWINDOW_ENCHANTS = "Enchant Marks"
+L.CHARACTERWINDOW_ENCHANTS_DESC = "Mark each item that can be enchanted, in the corner nearest your "
+    .. "character: green when it is, red when it isn't. Rings, trinkets, shirts, and tabards take no "
+    .. "enchant and aren't marked, and a belt is marked only when it has one."
+L.CHARACTERWINDOW_ENCHANT_MARK = "E" -- one letter for "enchant", on the item's icon
+L.CHARACTERWINDOW_INSPECT = "Inspect Window"
+L.CHARACTERWINDOW_INSPECT_DESC = "Show them on the items of a player you inspect too."
 
 -- Durability Warning
 L.DURABILITYWARNING_TITLE = "Durability Warning"

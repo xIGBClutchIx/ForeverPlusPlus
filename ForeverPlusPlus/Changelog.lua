@@ -45,6 +45,10 @@ ns.changelog = {
                     .. "disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By "
                     .. "default only on a character with Enchanting, and Skip Items Worth More Sold "
                     .. "leaves out what a vendor pays more for." },
+                { L.CHARACTERWINDOW_TITLE, "Item Levels shows each item's level on its icon, in its "
+                    .. "quality's color, and Enchant Marks marks each item that can be enchanted: "
+                    .. "green when it is, red when it isn't. Both are off by default, and show in "
+                    .. "the Inspect window too." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "

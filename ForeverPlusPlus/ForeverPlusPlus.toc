@@ -246,6 +246,7 @@ Modules\Interface\HideZoneText.lua
 Modules\Interface\HideErrors.lua
 Modules\Character\CharacterWindow\CharacterWindow.lua
 Modules\Character\CharacterWindow\Durability.lua
+Modules\Character\CharacterWindow\Details.lua
 Modules\Character\CharacterWindow\Skills.lua
 Modules\Character\DurabilityWarning.lua
 Modules\Quests\ForeverQuestIcons.lua
