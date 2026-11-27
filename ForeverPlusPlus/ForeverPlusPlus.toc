@@ -283,6 +283,7 @@ Modules\Chat\ChatButtonsEveryTab.lua
 Modules\Chat\HideChatTabs.lua
 Modules\Chat\HideCombatLogTab.lua
 Modules\Chat\MovableCombatLogTab.lua
+Modules\Chat\ChatTabResize.lua
 Modules\Chat\WhisperWindow\WhisperWindow.lua
 Modules\Chat\WhisperWindow\Window.lua
 Modules\Units\ClassColors.lua

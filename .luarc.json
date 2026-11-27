@@ -139,6 +139,7 @@
     "GetMoneyString",
     "BreakUpLargeNumbers",
     "IsShiftKeyDown",
+    "IsMouseButtonDown",
     "InRepairMode",
     "IsAltKeyDown",
     "AutoCompleteBox",

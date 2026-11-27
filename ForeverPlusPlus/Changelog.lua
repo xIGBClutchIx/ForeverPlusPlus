@@ -45,6 +45,9 @@ ns.changelog = {
                     .. "disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By "
                     .. "default only on a character with Enchanting, and Skip Items Worth More Sold "
                     .. "leaves out what a vendor pays more for." },
+                { L.CHATTABRESIZE_TITLE, "A new module, off by default, that makes the main chat "
+                    .. "window taller or shorter as you drag its General tab up or down. The height "
+                    .. "lasts until you reload; Edit Mode keeps the one it comes back at." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "

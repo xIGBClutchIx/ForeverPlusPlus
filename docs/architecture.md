@@ -434,6 +434,7 @@ What each module is, in the code's terms (what it does for players is in `README
 - **Hide Chat Tabs**: an alpha on the art and name regions of each window's tab, following Blizzard's fade through `ns.Chat.OnFade`; the new-message glow is left alone.
 - **Hide Combat Log Tab**: the tab scaled to almost nothing while the log is docked.
 - **Movable Combat Log Tab**: clears the log window's `isStaticDocked`, so its tab is drawn among the other windows' in the dock's saved order. The one field written on a Blizzard frame.
+- **Chat Tab Resizing**: `ChatTabResize`: a hook on `ChatFrame1Tab`'s `OnDragStart`, which Blizzard leaves empty for the main window, sizes `ChatFrame1` from its top (`StartSizing("TOP")`) until the button is let go (`IsMouseButtonDown`, as `FCFTab_OnUpdate` watches it). Nothing is written into Edit Mode's layout, which would taint it, so the height lasts until Edit Mode lays the window out again.
 - **Whisper Window**: a folder: the module and its window.
 
 ## API.lua

@@ -164,6 +164,13 @@ L.MOVABLECOMBATLOGTAB_TITLE = "可移动战斗记录标签"
 L.MOVABLECOMBATLOGTAB_DESC = "让战斗记录的标签可以拖到聊天标签中的任意位置，甚至在你创建的标签之后，而不是固定在"
     .. "“综合”之后。"
 
+-- ChatTabResize
+L.CHATTABRESIZE_TITLE = "拖动标签调整聊天大小"
+L.CHATTABRESIZE_DESC = "上下拖动“综合”聊天标签，让主聊天窗口变高或变矮。"
+L.CHATTABRESIZE_NOTICE = "新的高度只保持到重新载入"
+L.CHATTABRESIZE_NOTICE_DESC = "编辑模式保存着聊天窗口的高度，在/reload或更换布局后会恢复它。要保留高度，"
+    .. "请在编辑模式中设置。"
+
 -- HideChatButtons
 L.HIDECHATBUTTONS_TITLE = "隐藏聊天按钮"
 L.HIDECHATBUTTONS_DESC = "隐藏聊天窗口旁的按钮，直到鼠标指向聊天，并随其标签淡入淡出。"
