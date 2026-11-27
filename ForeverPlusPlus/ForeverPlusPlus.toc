@@ -254,6 +254,7 @@ Modules\Quests\QuestTracker\Header.lua
 Modules\Quests\QuestLevels.lua
 Modules\Quests\QuestReputation.lua
 Modules\Quests\QuestItemSparkles.lua
+Modules\Quests\QuestItemButton.lua
 Modules\Quests\QuestPins\QuestPins.lua
 Modules\Quests\QuestPins\Index.lua
 Modules\Quests\QuestPins\Rules.lua

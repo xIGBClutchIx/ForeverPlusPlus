@@ -227,6 +227,32 @@ L.QUESTITEMSPARKLES_NOTICE = "Turning it off takes a restart of the game."
 L.QUESTITEMSPARKLES_NOTICE_DESC = "The game keeps drawing the sparkle until it restarts, even after "
     .. "your own setting is back. A /reload isn't enough."
 
+-- Quest Item Button
+L.QUESTITEMBUTTON_TITLE = "Quest Item Button"
+-- [quotes: KEY_BINDINGS]
+L.QUESTITEMBUTTON_DESC = "A key that uses the item of the quest you're closest to, and a button "
+    .. "showing which item that is. Choose the key in Key Bindings, under Forever++, and move the "
+    .. "button in Edit Mode."
+L.QUESTITEMBUTTON_BINDING = "Use Closest Quest Item" -- in Blizzard's Key Bindings
+L.QUESTITEMBUTTON_NO_KEY = "No key is bound yet" -- a gray row atop the module, with a button
+-- [quotes: KEY_BINDINGS]
+L.QUESTITEMBUTTON_NO_KEY_DESC = "The item is used with a key you choose in Key Bindings, under Forever++."
+L.QUESTITEMBUTTON_BIND = "Key Bindings" -- [game: KEY_BINDINGS]
+L.QUESTITEMBUTTON_COMBAT = "It picks another item only out of combat."
+L.QUESTITEMBUTTON_COMBAT_DESC = "The game lets a key change what it does only out of combat, so in "
+    .. "combat the key and the button keep the item they had. They pick again when combat ends."
+L.QUESTITEMBUTTON_BUTTON = "Show Button"
+L.QUESTITEMBUTTON_BUTTON_DESC = "Show the item the key uses on a button, which you can click too. "
+    .. "Off, only the key uses it."
+L.QUESTITEMBUTTON_SELECTED = "Selected Quest First"
+L.QUESTITEMBUTTON_SELECTED_DESC = "When the quest you picked in the quest tracker or on the map has an "
+    .. "item, use that one, however far away the quest is."
+L.QUESTITEMBUTTON_BAGS = "Quest Items in Your Bags"
+L.QUESTITEMBUTTON_BAGS_DESC = "Also use quest items in your bags that the quest log doesn't list with "
+    .. "a quest, as many older quests' items aren't. With QuestieDB, each is matched to its quest; one "
+    .. "with no quest found is used only when there's nothing else."
+L.QUESTITEMBUTTON_FOR = "Quest:" -- on the button's tooltip, before the quest's name
+
 -- QuestPins
 L.QUESTPINS_TITLE = "Quest Pins"
 L.QUESTPINS_DESC = "Put a ! on the world map where each quest you can still take starts, colored "

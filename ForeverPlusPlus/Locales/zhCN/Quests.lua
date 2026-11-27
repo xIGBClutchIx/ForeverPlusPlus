@@ -188,6 +188,27 @@ L.QUESTITEMSPARKLES_NPCS_DESC = "游戏用同一项设置控制任务物品和NP
 L.QUESTITEMSPARKLES_NOTICE = "关闭它需要重新启动游戏。"
 L.QUESTITEMSPARKLES_NOTICE_DESC = "即使你自己的设置已恢复，游戏仍会继续绘制闪光，直到重新启动。/reload不够。"
 
+-- Quest Item Button
+L.QUESTITEMBUTTON_TITLE = "任务物品按钮"
+-- [quotes: KEY_BINDINGS]
+L.QUESTITEMBUTTON_DESC = "一个使用离你最近的任务的物品的按键，以及一个显示该物品的按钮。"
+    .. "在“按键设置”中Forever++分类下选择按键，并在编辑模式中移动按钮。"
+L.QUESTITEMBUTTON_BINDING = "使用最近任务的物品" -- in Blizzard's Key Bindings
+L.QUESTITEMBUTTON_NO_KEY = "尚未绑定按键" -- a gray row atop the module, with a button
+-- [quotes: KEY_BINDINGS]
+L.QUESTITEMBUTTON_NO_KEY_DESC = "物品由你在“按键设置”中Forever++分类下选择的按键使用。"
+L.QUESTITEMBUTTON_COMBAT = "只在非战斗状态下更换物品。"
+L.QUESTITEMBUTTON_COMBAT_DESC = "游戏只允许在非战斗状态下更改按键的功能，因此战斗中按键和按钮会保留原来的物品。"
+    .. "战斗结束后会重新选择。"
+L.QUESTITEMBUTTON_BUTTON = "显示按钮"
+L.QUESTITEMBUTTON_BUTTON_DESC = "在按钮上显示按键所使用的物品，也可以点击该按钮。关闭时只能用按键使用。"
+L.QUESTITEMBUTTON_SELECTED = "优先选中的任务"
+L.QUESTITEMBUTTON_SELECTED_DESC = "当你在任务追踪或地图上选中的任务有物品时，使用该物品，无论任务有多远。"
+L.QUESTITEMBUTTON_BAGS = "背包中的任务物品"
+L.QUESTITEMBUTTON_BAGS_DESC = "也使用背包中任务日志没有与任务一同列出的任务物品，许多较早任务的物品都是如此。"
+    .. "安装QuestieDB时，每件物品会与其任务对应；找不到任务的物品只在没有其他物品时使用。"
+L.QUESTITEMBUTTON_FOR = "任务：" -- on the button's tooltip, before the quest's name
+
 -- QuestPins
 L.QUESTPINS_TITLE = "任务图钉"
 L.QUESTPINS_DESC = "在世界地图上每个你仍可接取的任务起点处显示一个按类型着色的“!”，并在NPC的提示信息中列出它"

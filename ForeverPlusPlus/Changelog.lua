@@ -45,6 +45,11 @@ ns.changelog = {
                     .. "disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By "
                     .. "default only on a character with Enchanting, and Skip Items Worth More Sold "
                     .. "leaves out what a vendor pays more for." },
+                { L.QUESTITEMBUTTON_TITLE, "A new module, off by default, with a key that uses the "
+                    .. "item of the quest you're closest to, set in Key Bindings under Forever++, "
+                    .. "and a button showing which item that is, which you can move in Edit Mode. "
+                    .. "The quest you selected comes first, and with QuestieDB, quest items in your "
+                    .. "bags are matched to their quests." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "
