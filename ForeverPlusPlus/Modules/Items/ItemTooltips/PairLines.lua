@@ -17,7 +17,7 @@ local ItemTooltip, Text = ns.ItemTooltip, ns.Text
 
 local module = ns.modules.ItemTooltips:NewPart({
     key = "pairLines", name = L.ITEMTOOLTIPS_PAIRLINES, description = L.PAIRLINES_DESC,
-    section = L.PAIRLINES_TITLE, added = "1.9.2",
+    section = L.PAIRLINES_TITLE, added = "1.10.0",
 }, {
     pairLines = true,
 })

@@ -51,7 +51,7 @@ local module = ns.NewModule("NameplateComboPoints", L.NAMEPLATECOMBO_DESC, {
 })
 module.title = L.NAMEPLATECOMBO_TITLE
 module.category = "units"
-module.added = "1.9.2"
+module.added = "1.10.0"
 module.quickToggle = "nameplates"
 
 module.options = {

@@ -92,7 +92,7 @@ module.options = {
     {
         key = "controller", name = L.BAGSLOTCOUNTER_CONTROLLER,
         description = L.BAGSLOTCOUNTER_CONTROLLER_DESC,
-        section = L.BAGSLOTCOUNTER_SECTION_CONTROLLER, added = "1.9.2",
+        section = L.BAGSLOTCOUNTER_SECTION_CONTROLLER, added = "1.10.0",
     },
 }
 

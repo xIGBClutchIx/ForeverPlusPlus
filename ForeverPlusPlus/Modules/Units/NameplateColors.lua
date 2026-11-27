@@ -37,7 +37,7 @@ local module = ns.NewModule("NameplateColors", L.NAMEPLATECOLORS_DESC, {
 })
 module.title = L.NAMEPLATECOLORS_TITLE
 module.category = "units"
-module.added = "1.9.2"
+module.added = "1.10.0"
 module.quickToggle = "nameplates"
 
 -- The colors a kind can have, each unlike the ones Blizzard's own bars mean something by: hostile

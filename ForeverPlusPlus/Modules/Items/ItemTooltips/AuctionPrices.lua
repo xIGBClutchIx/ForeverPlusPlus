@@ -63,7 +63,7 @@ module:AddOptions({
     { key = "hideJunk", name = L.AUCTIONPRICES_JUNK, description = L.AUCTIONPRICES_JUNK_DESC, added = "1.0.1" },
     {
         key = "scanAge", name = L.AUCTIONPRICES_SCAN_AGE, description = L.AUCTIONPRICES_SCAN_AGE_DESC,
-        changed = "1.9.2",
+        changed = "1.10.0",
         choices = {
             { "right", L.PRICE_ALIGN_RIGHT },
             { "inline", L.PRICE_ALIGN_INLINE },
