@@ -19,8 +19,32 @@ local C_NamePlate = C_NamePlate
 
 local L = ns.L
 
+-- What a dot can look like. Each has to be a whole image: a status bar crops its texture itself as
+-- it fills, so a part of a sheet picked with SetTexCoord (the target frame's ComboFrame art) came
+-- out as slivers of the wrong part. The round lights are files the game has always had; the Rogue
+-- points are the modern Rogue bar's atlases, offered only on a client that has them.
+local ICONS = {
+    red = "Interface\\COMMON\\Indicator-Red",
+    yellow = "Interface\\COMMON\\Indicator-Yellow",
+    green = "Interface\\COMMON\\Indicator-Green",
+    rogue = "uf-roguecp-icon-red",
+    rogueBlue = "uf-roguecp-icon-blue",
+}
+local ICON_CHOICES = {
+    { "red", L.PLATES_COLOR_RED },
+    { "yellow", L.PLATES_COLOR_YELLOW },
+    { "green", L.PLATES_COLOR_GREEN },
+}
+if ns.Frames.HasAtlas(ICONS.rogue) then
+    ICON_CHOICES[#ICON_CHOICES + 1] = { "rogue", L.NAMEPLATECOMBO_ICON_ROGUE }
+end
+if ns.Frames.HasAtlas(ICONS.rogueBlue) then
+    ICON_CHOICES[#ICON_CHOICES + 1] = { "rogueBlue", L.NAMEPLATECOMBO_ICON_ROGUE_BLUE }
+end
+
 local module = ns.NewModule("NameplateComboPoints", L.NAMEPLATECOMBO_DESC, {
     enabled = false,
+    icon = "red",
     position = "above",
     size = 100, -- percent
     preview = false, -- Debug: made-up points counting up, on any class
@@ -31,6 +55,7 @@ module.added = "1.9.2"
 module.quickToggle = "nameplates"
 
 module.options = {
+    { key = "icon", name = L.NAMEPLATECOMBO_ICON, description = L.NAMEPLATECOMBO_ICON_DESC, choices = ICON_CHOICES },
     {
         key = "position", name = L.NAMEPLATECOMBO_POSITION, description = L.NAMEPLATECOMBO_POSITION_DESC,
         choices = {
@@ -57,15 +82,10 @@ function module:IsAvailable()
     return class == "ROGUE" or class == "DRUID" or (debug and debug.db and debug.db.enabled) or false
 end
 
--- A dot's art has to be a whole image: a status bar crops its texture itself as it fills, so a part
--- of a sheet picked with SetTexCoord (the target frame's ComboFrame art) came out as slivers of the
--- wrong part. Blizzard's own red combo point from its modern Rogue bar where the client has that
--- atlas, or else the round red light the game has always had.
-local ATLAS = "uf-roguecp-icon-red"
-local TEXTURE = "Interface\\COMMON\\Indicator-Red"
 local DOT_SIZE, GAP = 12, 1
 local DEFAULT_MAX = 5
-local OFFSET = 2 -- between the dots and what they sit beside
+local OFFSET = 2 -- between the dots and the name over them
+local OFFSET_BELOW = 6 -- and under the health bar, whose border and glow reach past its edge
 
 local holder -- our frame, made the first time a target's plate is up
 local dots = {}
@@ -91,7 +111,6 @@ local function build()
         local dot = CreateFrame("StatusBar", nil, holder)
         dot:SetSize(DOT_SIZE, DOT_SIZE)
         dot:SetPoint("LEFT", (i - 1) * (DOT_SIZE + GAP), 0)
-        dot:SetStatusBarTexture(ns.Frames.HasAtlas(ATLAS) and ATLAS or TEXTURE)
         dot:SetMinMaxValues(i - 1, i)
         dot:SetValue(0)
         dots[i] = dot
@@ -143,10 +162,14 @@ local function attach()
     holder:SetParent(frame)
     holder:ClearAllPoints()
     if module.db.position == "below" then
-        holder:SetPoint("TOP", container, "BOTTOM", 0, -OFFSET)
+        holder:SetPoint("TOP", container, "BOTTOM", 0, -OFFSET_BELOW)
     else
         -- Over the name, which sits on the bar: straight on the bar they'd cover it.
         holder:SetPoint("BOTTOM", parts.name or container, "TOP", 0, OFFSET)
+    end
+    local icon = ICONS[module.db.icon] or ICONS.red
+    for _, dot in ipairs(dots) do
+        dot:SetStatusBarTexture(icon)
     end
     holder:SetScale(module.db.size / 100)
     holder:SetFrameLevel(frame:GetFrameLevel() + 5)

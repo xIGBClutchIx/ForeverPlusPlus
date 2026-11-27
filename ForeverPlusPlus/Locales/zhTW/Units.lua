@@ -283,6 +283,10 @@ L.NAMEPLATECOLORS_THREAT_DESC = "被其他玩家標記的怪物維持灰色；�
 L.NAMEPLATECOMBO_TITLE = "名條連擊點數"
 L.NAMEPLATECOMBO_DESC = "在目標的名條上顯示你的連擊點數：每一點顯示一個圓點，沒有連擊點數時不顯示。"
     .. "適用於盜賊和獵豹形態的德魯伊。"
+L.NAMEPLATECOMBO_ICON = "圓點"
+L.NAMEPLATECOMBO_ICON_DESC = "每個連擊點數的外觀。"
+L.NAMEPLATECOMBO_ICON_ROGUE = "盜賊連擊點數（紅色）" -- the modern Rogue bar's combo point art
+L.NAMEPLATECOMBO_ICON_ROGUE_BLUE = "盜賊連擊點數（藍色）"
 L.NAMEPLATECOMBO_POSITION = "位置"
 L.NAMEPLATECOMBO_POSITION_DESC = "圓點在名條上的位置。"
 L.NAMEPLATECOMBO_POSITION_ABOVE = "名字上方"

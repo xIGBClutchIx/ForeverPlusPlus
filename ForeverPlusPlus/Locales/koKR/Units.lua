@@ -314,6 +314,10 @@ L.NAMEPLATECOLORS_THREAT_DESC = "다른 플레이어가 선점한 몬스터는 �
 L.NAMEPLATECOMBO_TITLE = "이름표 연계 점수"
 L.NAMEPLATECOMBO_DESC = "대상의 이름표에 연계 점수를 표시합니다. 점수 하나당 점 하나를 표시하며, 점수가 없으면 표시하지 "
     .. "않습니다. 도적과 표범 변신 중인 드루이드에게 적용됩니다."
+L.NAMEPLATECOMBO_ICON = "점 모양"
+L.NAMEPLATECOMBO_ICON_DESC = "연계 점수 하나를 표시하는 모양입니다."
+L.NAMEPLATECOMBO_ICON_ROGUE = "도적 연계 점수 (붉은색)" -- the modern Rogue bar's combo point art
+L.NAMEPLATECOMBO_ICON_ROGUE_BLUE = "도적 연계 점수 (푸른색)"
 L.NAMEPLATECOMBO_POSITION = "위치"
 L.NAMEPLATECOMBO_POSITION_DESC = "이름표에서 점이 표시되는 위치입니다."
 L.NAMEPLATECOMBO_POSITION_ABOVE = "이름 위"

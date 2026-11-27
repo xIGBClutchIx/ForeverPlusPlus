@@ -31,7 +31,7 @@ local module = ns.NewModule("NameplateColors", L.NAMEPLATECOLORS_DESC, {
     rare = "lightblue",
     elite = "orange",
     caster = "blue",
-    preview = false, -- Debug: every enemy NPC's plate as a made-up kind
+    preview = "off", -- Debug: every enemy NPC's plate as this kind
 })
 module.title = L.NAMEPLATECOLORS_TITLE
 module.category = "units"
@@ -69,6 +69,13 @@ module.options = {
     { key = "caster", name = L.NAMEPLATECOLORS_CASTER, description = L.NAMEPLATECOLORS_CASTER_DESC,
         choices = CHOICES },
     { key = "preview", name = L.NAMEPLATECOLORS_PREVIEW, description = L.NAMEPLATECOLORS_PREVIEW_DESC,
+        choices = {
+            { "off", L.NAMEPLATECOLORS_OFF },
+            { "boss", L.NAMEPLATECOLORS_BOSS },
+            { "rare", L.NAMEPLATECOLORS_RARE },
+            { "elite", L.NAMEPLATECOLORS_ELITE },
+            { "caster", L.NAMEPLATECOLORS_CASTER },
+        },
         debug = true, section = L.DEBUG_SECTION_PREVIEWS },
 }
 module.notice = { text = L.NAMEPLATECOLORS_THREAT, description = L.NAMEPLATECOLORS_THREAT_DESC }
@@ -78,10 +85,6 @@ local unitOf = setmetatable({}, weak) -- bar -> the unit its plate shows
 local blizzardColor = setmetatable({}, weak) -- bar -> { r, g, b } as Blizzard last set it
 local painted = setmetatable({}, weak) -- bar -> true while it shows our color
 local painting = false -- our own SetStatusBarColor, so the hook lets it by
--- Debug's Preview Mob Type Colors: the kind each bar is made out to be, dealt in turn as plates come.
-local PREVIEW_KINDS = { "boss", "rare", "elite", "caster" }
-local previewKind = setmetatable({}, weak)
-local dealt = 0
 
 -- A value read, or nil when it's secret.
 local function read(value)
@@ -161,15 +164,11 @@ local function paint(bar)
         blizzardColor[bar] = { r, g, b }
     end
     local theirs = blizzardColor[bar]
+    -- Debug's Show All Mobs As: every enemy NPC as the one kind picked, whatever it is.
     local kind
-    if module.db.preview then
-        if isEnemyNpc(unit) then
-            if not previewKind[bar] then
-                dealt = dealt % #PREVIEW_KINDS + 1
-                previewKind[bar] = PREVIEW_KINDS[dealt]
-            end
-            kind = previewKind[bar]
-        end
+    local forced = module.db.preview
+    if forced ~= "off" then
+        kind = isEnemyNpc(unit) and forced or nil
     else
         kind = kindOf(unit)
     end
@@ -220,7 +219,7 @@ local handlers = {
             if painted[bar] then
                 restore(bar)
             end
-            unitOf[bar], blizzardColor[bar], previewKind[bar] = nil, nil, nil
+            unitOf[bar], blizzardColor[bar] = nil, nil
         end
     end,
 }

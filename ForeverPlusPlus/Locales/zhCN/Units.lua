@@ -281,6 +281,10 @@ L.NAMEPLATECOLORS_THREAT_DESC = "被其他玩家标记的怪物保持灰色；�
 L.NAMEPLATECOMBO_TITLE = "姓名板连击点数"
 L.NAMEPLATECOMBO_DESC = "在目标的姓名板上显示你的连击点数：每一点显示一个圆点，没有连击点时不显示。"
     .. "适用于潜行者和猎豹形态的德鲁伊。"
+L.NAMEPLATECOMBO_ICON = "圆点"
+L.NAMEPLATECOMBO_ICON_DESC = "每个连击点的外观。"
+L.NAMEPLATECOMBO_ICON_ROGUE = "潜行者连击点（红色）" -- the modern Rogue bar's combo point art
+L.NAMEPLATECOMBO_ICON_ROGUE_BLUE = "潜行者连击点（蓝色）"
 L.NAMEPLATECOMBO_POSITION = "位置"
 L.NAMEPLATECOMBO_POSITION_DESC = "圆点在姓名板上的位置。"
 L.NAMEPLATECOMBO_POSITION_ABOVE = "名字上方"
