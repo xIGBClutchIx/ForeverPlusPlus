@@ -90,6 +90,7 @@ Data\Items.lua
 Data\Buffs.lua
 Data\PointsOfInterest.lua
 Data\ZoneInfo.lua
+Data\Townsfolk.lua
 Lib\Presets.lua
 Lib\Store.lua
 Lib\Profiles.lua
@@ -311,6 +312,8 @@ Modules\Map\GatheringMap\Map.lua
 Modules\Map\GatheringMap\Minimap.lua
 Modules\Map\GatheringMap\Page.lua
 Modules\Map\GatheringMap\Filter.lua
+Modules\Map\Townsfolk\Townsfolk.lua
+Modules\Map\Townsfolk\Index.lua
 API.lua
 Changelog.lua
 Settings\Settings.lua

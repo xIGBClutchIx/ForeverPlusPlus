@@ -134,6 +134,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 - **Square Minimap**: Makes the minimap square, with a border in Blizzard's art (a dozen styles, or none). Minimap buttons and icons follow the square edge. Off by default.
 - **Waypoints**: `/way [zone] x y [note]` puts the game's map pin on a spot (`/way 45.2 67.8`, `/way clear`, `/way share`), with an arrow on screen that points to it, your selected quest, or your corpse. TomTom's `/way` wins if it's installed.
 - **Compass Bar**: A compass across the top of the screen with your selected quest, map pin, corpse, and group on it, and optionally every quest, flight masters, gathering nodes, and rares. Sized in Edit Mode. Off by default.
+- **Townsfolk**: Needs the [QuestieDB](https://github.com/Questie/questiedb) addon. Puts innkeepers, mailboxes, bankers, auctioneers, your class trainers, the trainers of your professions, repairers, and more on the world map, each kind with its own checkbox. Off by default.
 
 ### Quests
 

@@ -391,6 +391,49 @@ L.WAYPOINTS_NO_MAP = "There's no map here. Name a zone: /way Elwynn Forest 45 67
 L.WAYPOINTS_NOT_HERE = "Can't put a waypoint on the %s map." -- zone
 L.WAYPOINTS_UNAVAILABLE = "This client has no map waypoints."
 
+-- Townsfolk. Each kind is named as the minimap's tracking menu names it.
+L.TOWNSFOLK_TITLE = "Townsfolk" -- [game: TOWNSFOLK_TRACKING_TEXT]
+L.TOWNSFOLK_DESC = "Icons on the world map for innkeepers, mailboxes, bankers, auctioneers, your "
+    .. "class trainers, the trainers of your professions, and more, from the QuestieDB addon's data."
+L.TOWNSFOLK_NOTICE = "Only the ones QuestieDB knows of show."
+L.TOWNSFOLK_NOTICE_DESC = "Where they stand comes from QuestieDB's data, which may not have every "
+    .. "mailbox. A trainer's class or profession is read from the title under its name."
+L.TOWNSFOLK_PINS = "Show on World Map"
+L.TOWNSFOLK_PINS_DESC = "Show the icons on zone and city maps. The world map's filter menu has the "
+    .. "same switch."
+-- Smaller headers over its options in Settings
+L.TOWNSFOLK_SECTION_SERVICES = "Services"
+L.TOWNSFOLK_SECTION_TRAINERS = "Trainers"
+L.TOWNSFOLK_SECTION_VENDORS = "Vendors"
+L.TOWNSFOLK_INNKEEPER = "Innkeeper" -- [game: MINIMAP_TRACKING_INNKEEPER]
+L.TOWNSFOLK_INNKEEPER_DESC = "Where to set your hearthstone."
+L.TOWNSFOLK_MAILBOX = "Mailbox" -- [game: MINIMAP_TRACKING_MAILBOX]
+L.TOWNSFOLK_MAILBOX_DESC = "Where to send and collect mail."
+L.TOWNSFOLK_BANKER = "Banker" -- [game: MINIMAP_TRACKING_BANKER]
+L.TOWNSFOLK_BANKER_DESC = "Where to open your bank."
+L.TOWNSFOLK_AUCTIONEER = "Auctioneer" -- [game: MINIMAP_TRACKING_AUCTIONEER]
+L.TOWNSFOLK_AUCTIONEER_DESC = "Where to open the auction house."
+L.TOWNSFOLK_STABLE = "Stable Master" -- [game: MINIMAP_TRACKING_STABLEMASTER]
+L.TOWNSFOLK_STABLE_DESC = "Where a hunter keeps pets."
+L.TOWNSFOLK_BATTLEMASTER = "Battlemaster" -- [game: MINIMAP_TRACKING_BATTLEMASTER]
+L.TOWNSFOLK_BATTLEMASTER_DESC = "Where to join a battleground."
+L.TOWNSFOLK_CLASS = "Class Trainer" -- [game: MINIMAP_TRACKING_TRAINER_CLASS]
+L.TOWNSFOLK_CLASS_DESC = "The trainers of your own class, and a hunter's pet trainers."
+L.TOWNSFOLK_PROFESSION = "Profession Trainers" -- [game: MINIMAP_TRACKING_TRAINER_PROFESSION]
+L.TOWNSFOLK_PROFESSION_DESC = "The trainers of the professions you have."
+L.TOWNSFOLK_ALL_PROFESSIONS = "Every Profession"
+L.TOWNSFOLK_ALL_PROFESSIONS_DESC = "Show the trainers of every profession, to find one to learn."
+L.TOWNSFOLK_REPAIR = "Repair" -- [game: MINIMAP_TRACKING_REPAIR]
+L.TOWNSFOLK_REPAIR_DESC = "Vendors who repair your gear."
+L.TOWNSFOLK_FOOD = "Food & Drink" -- [game: MINIMAP_TRACKING_VENDOR_FOOD]
+L.TOWNSFOLK_FOOD_DESC = "Vendors of food and drink."
+L.TOWNSFOLK_REAGENT = "Reagents" -- [game: MINIMAP_TRACKING_VENDOR_REAGENT]
+L.TOWNSFOLK_REAGENT_DESC = "Vendors of the reagents spells use."
+L.TOWNSFOLK_POISON = "Poisons" -- [game: MINIMAP_TRACKING_VENDOR_POISON]
+L.TOWNSFOLK_POISON_DESC = "Vendors of a rogue's poisons."
+L.TOWNSFOLK_AMMO = "Ammunition" -- [game: MINIMAP_TRACKING_VENDOR_AMMO]
+L.TOWNSFOLK_AMMO_DESC = "Vendors of arrows and bullets."
+
 -- MinimapNodeIcons, removed after 1.4.0: its title stays for its notes in the changelog.
 L.MINIMAPNODEICONS_TITLE = "Minimap Node Icons"
 

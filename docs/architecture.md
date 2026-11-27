@@ -36,6 +36,7 @@ Game data kept by hand, loaded after the locales and before `Lib/`: plain tables
 
 - `PointsOfInterest.lua`: `poiPoints` (by zone map ID, each point a dungeon or raid entrance, flight master, ship, zeppelin, tram, or spirit healer with its place in percent), `poiCities` (the capitals and the zone around each), `poiPlaces` (places of several instances, and the entrances of an instance with several). World Map's Points of Interest draws them, and Zone Info lists a zone's dungeons from them.
 - `ZoneInfo.lua`: `zones` (by zone map ID: levels, fishing skill, herbs, ores, side), `zoneHerbs` and `zoneOres` (short names; the skills are `professionNodes`'), `zoneDungeons` (dungeons in a zone that `poiPoints` doesn't place).
+- `Townsfolk.lua`: `townsfolkClassTrainers` (by class token), `townsfolkProfessionTrainers` (by skill line), and `townsfolkVendors` (food, reagents, poisons, ammunition): words, not IDs, found in the English titles under NPCs' names in QuestieDB's data (Townsfolk).
 
 ## Lib
 
@@ -218,7 +219,7 @@ Generated files, in `Lib/Generated/` (never edited by hand; see Generated data):
 ### `WorldMap.lua`
 
 - `ns.WorldMap`: the world map once its addon has loaded, map data providers, walking up the map tree (`Up`, `Root`), a map's name, a map's size in yards (`Size`), a zone by name (`FindMap`), showing another map in it out of combat (`Show`), Blizzard's map pin (`SetWaypoint`, `CanWaypoint`) and the name it was set with, since the game's pin has no label (`WaypointNote`: the icon Ctrl+clicked or the note after `/way`, while the pin stays at that spot), where the player stands, whether this character has explored a spot of a map (`Explored`, true on a map with nothing to explore), where a quest and the corpse are (`QuestPoint`, `CorpsePoint`), and how far and which way a spot is from the player, also in the next zone (`FromPlayer`), Blizzard's coordinates panel on it and the CVars behind it (`COORDS_CVARS`), and the player's side for map data.
-- The filter menu (the funnel at the map's top right): `AddFilter(order, shown, build)` puts a module's entries under the one Forever++ title, after Blizzard's own, in `order` (World Map 1, Quest Pins 2, Gathering Map 3). `shown()` is asked each time the menu opens, since Blizzard's menus can't take an addition back. `FilterLayer(root, name, get, set, kinds)` is the entry for a layer of icons: a checkbox for the layer, with a checkbox per kind in a submenu that stays open while kinds are switched; a kind with `disabled` text is greyed out with that as its tooltip.
+- The filter menu (the funnel at the map's top right): `AddFilter(order, shown, build)` puts a module's entries under the one Forever++ title, after Blizzard's own, in `order` (World Map 1, Quest Pins 2, Gathering Map 3, Townsfolk 4). `shown()` is asked each time the menu opens, since Blizzard's menus can't take an addition back. `FilterLayer(root, name, get, set, kinds)` is the entry for a layer of icons: a checkbox for the layer, with a checkbox per kind in a submenu that stays open while kinds are switched; a kind with `disabled` text is greyed out with that as its tooltip.
 
 ### `MapTooltip.lua`
 
@@ -300,7 +301,7 @@ Generated files, in `Lib/Generated/` (never edited by hand; see Generated data):
 
 ### `QuestieDB.lua`
 
-- `ns.QuestieDB`: the one place we read the separate QuestieDB addon's quest, NPC, item, and object data, at run time through its `LibQuestieDB` API and never copied into this repo (`docs/questiedb.md`): whether it's there and fits (`Status`, `IsReady`, `Problem`, `OnReady`), records as our own copies with spawns 0-1 on a uiMapID (`Quest`, `Npc`, `Item`, `Object`, `Ids`, `IdsByName`, `UiMapID`, `DropRates`, `QuestDrops` for the creatures that drop a quest's items, and `QuestsUnlockedBy` and `QuestsLeadingTo` for a quest's links the other way, indexed once), every call protected, and `Notices` for a module that needs it, with `Require` to lock one off while it's missing.
+- `ns.QuestieDB`: the one place we read the separate QuestieDB addon's quest, NPC, item, and object data, at run time through its `LibQuestieDB` API and never copied into this repo (`docs/questiedb.md`): whether it's there and fits (`Status`, `IsReady`, `Problem`, `OnReady`), records as our own copies with spawns 0-1 on a uiMapID (`Quest`, `Npc`, `Item`, `Object`, `Ids`, `IdsByName`, `UiMapID`, `DropRates`, `QuestDrops` for the creatures that drop a quest's items, and `QuestsUnlockedBy` and `QuestsLeadingTo` for a quest's links the other way, indexed once), cheap reads for going over every NPC (`NpcFlag` for a flag's bit, `NpcFlags` for one NPC's mask, `HasFlag`) and a text field's untranslated English (`English`, for telling kinds apart by their words), every call protected, and `Notices` for a module that needs it, with `Require` to lock one off while it's missing.
 
 ### `Plugins.lua`
 
@@ -391,6 +392,7 @@ What each module is, in the code's terms (what it does for players is in `README
 - **Waypoints**: `/way` and a waypoint arrow, with the time to arrive from `ns.Arrival`.
 - **Compass Bar**: a compass across the top of the screen, sized in Edit Mode, with the selected quest, the map pin, the corpse, the group, and, as the player picks, quests on the map, flight masters, Gathering Map's nodes through its provider, and rares on it.
 - **Gathering Map**: a folder: the module, which remembers each herb, vein, chest, and fishing pool gathered for the account, its world map and minimap icons, its kinds in the world map's filter menu (`Filter.lua`), and its page of nodes to show or hide for each character.
+- **Townsfolk**: a folder: the module, with its options, its world map icons, and its kinds in the filter menu (`Townsfolk.lua`), and `Index.lua`, which reads QuestieDB once, a few records a frame, into the townsfolk on each map: NPCs by their flags (`QuestieDB.NpcFlags`) and the English title under their name (`QuestieDB.English`, with `Data/Townsfolk.lua`'s words) for which class or profession one trains and what one sells, and the objects named Mailbox.
 - **Combat Alert**
 - **Macro Icon Search**: a search box in the macro icon picker, over the icons of the player's spells and items.
 - **Movable Windows**: drag Blizzard's windows with a key held, and resize one with a key and the mouse wheel (a frame of our own takes the wheel while the key is held, so no Blizzard frame gets a wheel handler), remembered always, for the session, or until closed.

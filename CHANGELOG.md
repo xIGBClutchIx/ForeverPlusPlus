@@ -14,6 +14,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Item Tooltips**: Pair Short Lines (on by default) puts two short lines that follow each other on one row: how an item binds with "Unique", and a shield's armor with its block. Scan Age has a new choice, Beside the Price, which shows "2h ago" on the Auction line instead of a line of its own.
 - **Chat Buttons on Every Tab**: A new module, on by default, that keeps the buttons beside the chat window whichever chat tab is in front: the game's chat menu and channels buttons, and the ones Forever++ adds. The game only shows them on the first tab.
 - **Disenchant Icons**: A new module, off by default, that marks the items you can disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By default only on a character with Enchanting, and Skip Items Worth More Sold leaves out what a vendor pays more for.
+- **Townsfolk**: A new module, off by default, that needs the QuestieDB addon. It puts innkeepers, mailboxes, bankers, auctioneers, your class trainers, the trainers of your professions, repairers, and more on the world map, each kind with its own checkbox, and the same ones in the map's filter menu.
 
 ### Changed
 

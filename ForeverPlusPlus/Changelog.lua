@@ -45,6 +45,10 @@ ns.changelog = {
                     .. "disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By "
                     .. "default only on a character with Enchanting, and Skip Items Worth More Sold "
                     .. "leaves out what a vendor pays more for." },
+                { L.TOWNSFOLK_TITLE, "A new module, off by default, that needs the QuestieDB addon. "
+                    .. "It puts innkeepers, mailboxes, bankers, auctioneers, your class trainers, the "
+                    .. "trainers of your professions, repairers, and more on the world map, each kind "
+                    .. "with its own checkbox, and the same ones in the map's filter menu." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "
