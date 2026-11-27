@@ -149,6 +149,32 @@ L.AUTODISMOUNT_UNSHIFT = "Leave Shapeshift Form"
 L.AUTODISMOUNT_UNSHIFT_DESC = "Leave a shapeshift form, like a druid's Bear or Cat Form, when you "
     .. "cast a spell that can't be cast in it."
 
+-- MountGear
+L.MOUNTGEAR_TITLE = "Mount Speed Gear"
+L.MOUNTGEAR_DESC = "When you mount up, put on the gear in your bags that makes your mount faster, "
+    .. "and put your own gear back on when you get off. Your own gear is remembered through a "
+    .. "reload or logout."
+L.MOUNTGEAR_NOTICE = "Waits for combat to end"
+L.MOUNTGEAR_NOTICE_DESC = "Gear can't be changed in combat, so if you get off your mount in a "
+    .. "fight, your own gear goes back on when the fight ends. A trinket put back on can't be used "
+    .. "for 30 seconds, as with any trinket you put on. Only gear already bound to you is put on."
+L.MOUNTGEAR_TRINKET = "Trinket"
+L.MOUNTGEAR_TRINKET_DESC = "Put on Carrot on a Stick."
+L.MOUNTGEAR_TRINKET_SLOT = "Trinket Slot"
+L.MOUNTGEAR_TRINKET_SLOT_DESC = "Which of your two trinkets Carrot on a Stick takes the place of."
+L.MOUNTGEAR_TRINKET_UPPER = "Upper"
+L.MOUNTGEAR_TRINKET_LOWER = "Lower"
+L.MOUNTGEAR_GLOVES = "Gloves"
+L.MOUNTGEAR_GLOVES_DESC = "Put on gloves enchanted with Riding Skill."
+L.MOUNTGEAR_BOOTS = "Boots"
+L.MOUNTGEAR_BOOTS_DESC = "Put on boots with Mithril Spurs."
+L.MOUNTGEAR_INSTANCES = "In Dungeons and Battlegrounds"
+L.MOUNTGEAR_INSTANCES_DESC = "Change gear inside dungeons, raids, and battlegrounds too. Off, your "
+    .. "own gear stays on there."
+L.MOUNTGEAR_CHAT_DESC = "Say in chat when your own gear couldn't be put back on."
+L.MOUNTGEAR_MISSING = "Couldn't put %s back on: it isn't in your bags." -- an item link
+L.MOUNTGEAR_BAGS_FULL = "Your bags are full, so %s stays on." -- an item link
+
 -- AutoGossip
 L.AUTOGOSSIP_TITLE = "Auto Gossip"
 L.AUTOGOSSIP_DESC = "When an NPC has only one thing to say, or one service beside small talk, "

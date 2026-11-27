@@ -29,6 +29,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Bulk Buy**: A new module, off by default. Shift+click an item at a merchant for a bigger buying popup in place of the game's: type how many, or press Stack for one stack or Max for the most your money, bag space, and the merchant's stock allow, and buy more than one stack at a time.
 - **Professions**: Crafting Costs' Sort Recipe List (off by default) sorts the recipes in each category of the professions window by Estimated Profit or Total Cost, and shows that number on each row. Pick it in Settings or at the bottom of the window's Filter menu.
 - **Quest Item Button**: A new module, off by default, with a key that uses the item of the quest you're closest to, set in Key Bindings under Forever++, and a button showing which item that is, which you can move in Edit Mode. The quest you selected comes first, and with QuestieDB, quest items in your bags are matched to their quests.
+- **Mount Speed Gear**: A new module, off by default, that puts on Carrot on a Stick, gloves enchanted with Riding Skill, and boots with Mithril Spurs from your bags when you mount up, and your own gear back on when you get off, once combat ends. Your own gear is remembered through a reload or logout.
 
 ### Changed
 

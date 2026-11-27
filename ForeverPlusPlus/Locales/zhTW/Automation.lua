@@ -113,6 +113,29 @@ L.AUTODISMOUNT_STAND_DESC = "坐著時施法、拾取或攻擊，就站起來。
 L.AUTODISMOUNT_UNSHIFT = "離開變形形態"
 L.AUTODISMOUNT_UNSHIFT_DESC = "施放無法在變形形態（例如德魯伊的熊形態或獵豹形態）中施放的法術時，離開該形態。"
 
+-- MountGear
+L.MOUNTGEAR_TITLE = "坐騎速度裝備"
+L.MOUNTGEAR_DESC = "騎上坐騎時，從背包換上提高坐騎速度的裝備，下坐騎時換回你原本的裝備。"
+    .. "原本的裝備在重新載入或登出後仍會記住。"
+L.MOUNTGEAR_NOTICE = "等待戰鬥結束"
+L.MOUNTGEAR_NOTICE_DESC = "戰鬥中無法更換裝備，所以如果你在戰鬥中下坐騎，原本的裝備會在戰鬥結束後換回。"
+    .. "重新裝備的飾品在30秒內無法使用，和裝備任何飾品時一樣。只會換上已與你綁定的裝備。"
+L.MOUNTGEAR_TRINKET = "飾品"
+L.MOUNTGEAR_TRINKET_DESC = "換上「棍子上的胡蘿蔔」。"
+L.MOUNTGEAR_TRINKET_SLOT = "飾品欄位"
+L.MOUNTGEAR_TRINKET_SLOT_DESC = "「棍子上的胡蘿蔔」取代你兩個飾品中的哪一個。"
+L.MOUNTGEAR_TRINKET_UPPER = "上方"
+L.MOUNTGEAR_TRINKET_LOWER = "下方"
+L.MOUNTGEAR_GLOVES = "手套"
+L.MOUNTGEAR_GLOVES_DESC = "換上帶有「附魔手套 - 騎乘」的手套。"
+L.MOUNTGEAR_BOOTS = "靴子"
+L.MOUNTGEAR_BOOTS_DESC = "換上裝有「秘銀馬刺」的靴子。"
+L.MOUNTGEAR_INSTANCES = "在地城和戰場中"
+L.MOUNTGEAR_INSTANCES_DESC = "在地城、團隊副本和戰場中也更換裝備。關閉時，你原本的裝備會留在身上。"
+L.MOUNTGEAR_CHAT_DESC = "無法換回你原本的裝備時在聊天中顯示。"
+L.MOUNTGEAR_MISSING = "無法重新裝備%s：它不在你的背包裡。" -- an item link
+L.MOUNTGEAR_BAGS_FULL = "背包已滿，%s仍穿在身上。" -- an item link
+
 -- AutoGossip
 L.AUTOGOSSIP_TITLE = "自動對話"
 L.AUTOGOSSIP_DESC = "當NPC只有一個對話選項，或除了閒聊之外只有一項服務，而且沒有任務時，"

@@ -137,6 +137,33 @@ L.AUTODISMOUNT_UNSHIFT = "Gestalt verlassen"
 L.AUTODISMOUNT_UNSHIFT_DESC = "Verlässt eine Gestalt, etwa die Bären- oder Katzengestalt eines Druiden, "
     .. "wenn Ihr einen Zauber wirkt, der darin nicht gewirkt werden kann."
 
+-- MountGear
+L.MOUNTGEAR_TITLE = "Reittempo-Ausrüstung"
+L.MOUNTGEAR_DESC = "Legt beim Aufsitzen die Ausrüstung aus Euren Taschen an, die Euer Reittier "
+    .. "schneller macht, und beim Absitzen wieder Eure eigene. Eure eigene Ausrüstung wird auch über "
+    .. "ein Neuladen oder Ausloggen hinweg gemerkt."
+L.MOUNTGEAR_NOTICE = "Wartet das Kampfende ab"
+L.MOUNTGEAR_NOTICE_DESC = "Im Kampf lässt sich keine Ausrüstung wechseln. Sitzt Ihr in einem Kampf "
+    .. "ab, wird Eure eigene Ausrüstung daher nach dem Kampf wieder angelegt. Ein wieder angelegter "
+    .. "Schmuck kann 30 Sekunden lang nicht benutzt werden, wie jeder Schmuck, den Ihr anlegt. Nur "
+    .. "Ausrüstung, die bereits an Euch gebunden ist, wird angelegt."
+L.MOUNTGEAR_TRINKET = "Schmuck"
+L.MOUNTGEAR_TRINKET_DESC = "Legt „Karotte am Stiel“ an."
+L.MOUNTGEAR_TRINKET_SLOT = "Schmuckplatz"
+L.MOUNTGEAR_TRINKET_SLOT_DESC = "Welches Eurer beiden Schmuckstücke „Karotte am Stiel“ ersetzt."
+L.MOUNTGEAR_TRINKET_UPPER = "Oben"
+L.MOUNTGEAR_TRINKET_LOWER = "Unten"
+L.MOUNTGEAR_GLOVES = "Handschuhe"
+L.MOUNTGEAR_GLOVES_DESC = "Legt Handschuhe mit „Handschuhe - Reitfertigkeit“ an."
+L.MOUNTGEAR_BOOTS = "Stiefel"
+L.MOUNTGEAR_BOOTS_DESC = "Legt Stiefel mit „Mithrilsporen“ an."
+L.MOUNTGEAR_INSTANCES = "In Dungeons und Schlachtfeldern"
+L.MOUNTGEAR_INSTANCES_DESC = "Wechselt die Ausrüstung auch in Dungeons, Schlachtzügen und auf "
+    .. "Schlachtfeldern. Aus, bleibt dort Eure eigene Ausrüstung angelegt."
+L.MOUNTGEAR_CHAT_DESC = "Nennt im Chat, wenn Eure eigene Ausrüstung nicht wieder angelegt werden konnte."
+L.MOUNTGEAR_MISSING = "%s konnte nicht wieder angelegt werden: Es ist nicht in Euren Taschen." -- an item link
+L.MOUNTGEAR_BAGS_FULL = "Eure Taschen sind voll, daher bleibt %s angelegt." -- an item link
+
 -- AutoGossip
 L.AUTOGOSSIP_TITLE = "Automatischer Dialog"
 L.AUTOGOSSIP_DESC = "Hat ein NSC keine Quests und bietet nur eine Dialogoption oder neben dem Plaudern "

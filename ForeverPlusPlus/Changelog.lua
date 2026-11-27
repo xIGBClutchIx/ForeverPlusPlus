@@ -106,6 +106,10 @@ ns.changelog = {
                     .. "and a button showing which item that is, which you can move in Edit Mode. "
                     .. "The quest you selected comes first, and with QuestieDB, quest items in your "
                     .. "bags are matched to their quests." },
+                { L.MOUNTGEAR_TITLE, "A new module, off by default, that puts on Carrot on a Stick, "
+                    .. "gloves enchanted with Riding Skill, and boots with Mithril Spurs from your "
+                    .. "bags when you mount up, and your own gear back on when you get off, once "
+                    .. "combat ends. Your own gear is remembered through a reload or logout." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "

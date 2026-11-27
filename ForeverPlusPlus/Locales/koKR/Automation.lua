@@ -125,6 +125,31 @@ L.AUTODISMOUNT_UNSHIFT = "변신 해제"
 L.AUTODISMOUNT_UNSHIFT_DESC = "드루이드의 곰 변신이나 표범 변신 등 현재 변신 상태에서 사용할 수 없는 "
     .. "주문을 시전하려 하면 변신을 해제합니다."
 
+-- MountGear
+L.MOUNTGEAR_TITLE = "탈것 속도 장비"
+L.MOUNTGEAR_DESC = "탈것에 오르면 가방에 있는 탈것 속도를 높이는 장비를 착용하고, 내리면 원래 "
+    .. "장비를 다시 착용합니다. 원래 장비는 UI 재시작이나 로그아웃 후에도 기억합니다."
+L.MOUNTGEAR_NOTICE = "전투가 끝날 때까지 기다림"
+L.MOUNTGEAR_NOTICE_DESC = "전투 중에는 장비를 바꿀 수 없으므로, 전투 중에 탈것에서 내리면 전투가 "
+    .. "끝난 뒤 원래 장비를 다시 착용합니다. 다시 착용한 장신구는 다른 장신구를 착용할 때처럼 "
+    .. "30초 동안 사용할 수 없습니다. 이미 귀속된 장비만 착용합니다."
+L.MOUNTGEAR_TRINKET = "장신구"
+L.MOUNTGEAR_TRINKET_DESC = "'당근 달린 지팡이' 아이템을 착용합니다."
+L.MOUNTGEAR_TRINKET_SLOT = "장신구 칸"
+L.MOUNTGEAR_TRINKET_SLOT_DESC = "'당근 달린 지팡이' 아이템이 두 장신구 중 어느 쪽을 대신할지 정합니다."
+L.MOUNTGEAR_TRINKET_UPPER = "위"
+L.MOUNTGEAR_TRINKET_LOWER = "아래"
+L.MOUNTGEAR_GLOVES = "장갑"
+L.MOUNTGEAR_GLOVES_DESC = "'장갑 마법부여 - 숙련된 조련술' 마법이 부여된 장갑을 착용합니다."
+L.MOUNTGEAR_BOOTS = "장화"
+L.MOUNTGEAR_BOOTS_DESC = "'미스릴 박차' 아이템을 붙인 장화를 착용합니다."
+L.MOUNTGEAR_INSTANCES = "던전과 전장에서도"
+L.MOUNTGEAR_INSTANCES_DESC = "던전, 공격대, 전장 안에서도 장비를 바꿉니다. 끄면 그곳에서는 원래 장비를 "
+    .. "그대로 착용합니다."
+L.MOUNTGEAR_CHAT_DESC = "원래 장비를 다시 착용하지 못했을 때 대화창에 알립니다."
+L.MOUNTGEAR_MISSING = "%s 아이템을 다시 착용하지 못했습니다: 가방에 없습니다." -- an item link
+L.MOUNTGEAR_BAGS_FULL = "가방이 가득 차서 %s 아이템을 그대로 착용합니다." -- an item link
+
 -- AutoGossip
 L.AUTOGOSSIP_TITLE = "자동 대화"
 L.AUTOGOSSIP_DESC = "NPC에게 할 말이 하나뿐이거나 잡담 외에 서비스가 하나뿐이고 퀘스트가 없으면 대신 "

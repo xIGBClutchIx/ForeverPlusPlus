@@ -219,6 +219,7 @@ Modules\Automation\AutoConfirm.lua
 Modules\Automation\AutoRelease.lua
 Modules\Automation\SkipCinematics.lua
 Modules\Automation\AutoDismount.lua
+Modules\Automation\MountGear.lua
 Modules\Automation\FishingCast.lua
 Modules\Automation\AutoWeaponBuff.lua
 Modules\Automation\ComprehendScrolls.lua
