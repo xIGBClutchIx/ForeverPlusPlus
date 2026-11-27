@@ -204,7 +204,7 @@ L.COORDS_TENTHS_DESC = "將座標顯示到小數點後一位，例如45.3, 62.8�
     .. "在這裡變更，那裡也會跟著變更。"
 
 -- HideFilterReset
-L.HIDEFILTERRESET_TITLE = "隱藏過濾重置"
+L.HIDEFILTERRESET_TITLE = "隱藏地圖篩選重置按鈕"
 L.HIDEFILTERRESET_DESC = "隱藏世界地圖過濾下拉選單上的重置按鈕，它會在任何過濾條件關閉時出現。"
 
 -- SquareMinimap

@@ -59,7 +59,7 @@ L.CONSOLEVARIABLES_NO_LOCKS = "點擊主控台變數上的鎖，即可讓它的�
 L.CONSOLEVARIABLES_LOCKED_AT = "鎖定為%s：每次登入以及任何東西變更它時，都會恢復為此數值。" -- the locked value
 L.CONSOLEVARIABLES_LOCK_HINT = "<點擊鎖以保留此數值>" -- tooltip of an open lock
 L.CONSOLEVARIABLES_UNLOCK_HINT = "<點擊鎖以停止保留>" -- tooltip of a closed lock
-L.CONSOLEVARIABLES_LOCK_STOPPED = "在你重新載入或再次登入之前不會保留：它無法維持。"
+L.CONSOLEVARIABLES_LOCK_STOPPED = "無法維持鎖定值，已暫停鎖定，直到重新載入介面或再次登入。"
 L.CONSOLEVARIABLES_LOCK_FAILED = "%s無法恢復為鎖定的%s（目前為%s）。它的鎖會等到你重新載入或再次登入。" -- CVar name, the locked value, its value now
 L.CONSOLEVARIABLES_LOCK_FIGHT = "%s一直被其他東西變更。它的鎖會等到你重新載入或再次登入。" -- CVar name
 -- Popular: the section headers, then each CVar's plain name and what it does.
@@ -114,7 +114,7 @@ L.CONSOLEVARIABLES_POP_MAP_FADE = "世界地圖淡化"
 L.CONSOLEVARIABLES_POP_MAP_FADE_DESC = "1會在你移動時淡化世界地圖。0讓它保持不透明。"
 L.CONSOLEVARIABLES_POP_CHAT_SCROLL = "聊天滑鼠滾輪"
 L.CONSOLEVARIABLES_POP_CHAT_SCROLL_DESC = "1會讓滑鼠滾輪捲動聊天。"
-L.CONSOLEVARIABLES_POP_LOOT_SPAM = "完整拾取擲骰"
+L.CONSOLEVARIABLES_POP_LOOT_SPAM = "顯示所有拾取擲骰結果"
 L.CONSOLEVARIABLES_POP_LOOT_SPAM_DESC = "1會在聊天中顯示每位玩家的擲骰；0只顯示贏家。"
 L.CONSOLEVARIABLES_POP_QUEUE = "法術佇列時間"
 L.CONSOLEVARIABLES_POP_QUEUE_DESC = "你可以多早預先排入下一個法術，以毫秒為單位，0到400。預設400。"

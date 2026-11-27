@@ -179,7 +179,7 @@ L.QUESTNAMEPLATES_SIDE_RIGHT = "生命條右側"
 L.QUESTNAMEPLATES_SIZE = "大小"
 L.QUESTNAMEPLATES_SIZE_DESC = "圖示和文字的大小。它們也會隨遊戲的名條大小放大或縮小。"
 L.QUESTNAMEPLATES_TEST = "測試任務圖示"
-L.QUESTNAMEPLATES_TEST_DESC = "在每個生物的名條上顯示虛構的任務進度，每個種類都不同，不需要任務就能看看外觀。"
+L.QUESTNAMEPLATES_TEST_DESC = "在每個生物的名條上顯示不同類型的範例任務進度，沒有接任務也能預覽效果。"
 L.QUESTNAMEPLATES_PART_SCAN = "讀取單位提示資訊" -- its row on the Profiler page
 
 -- Quest Item Sparkles

@@ -203,6 +203,6 @@ L.HIDEBETAFEEDBACK_QUEST = "隱藏任務意見回饋"
 L.HIDEBETAFEEDBACK_QUEST_DESC = "隱藏任務視窗上的意見回饋按鈕。"
 
 -- MovableFramerate
-L.MOVABLEFRAMERATE_TITLE = "可移動幀數"
+L.MOVABLEFRAMERATE_TITLE = "可移動幀率顯示"
 L.MOVABLEFRAMERATE_DESC = "像暴雪本身的框架一樣，在編輯模式中移動幀數文字（Ctrl+R）並調整大小。"
     .. "在你移動它之前，它會留在暴雪原本的位置。"

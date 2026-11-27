@@ -154,7 +154,7 @@ L.MOVABLEWINDOWS_TITLE = "可移動視窗"
 L.MOVABLEWINDOWS_DESC = "按住移動鍵並拖曳暴雪的視窗，例如角色、法術書、專業、好友和背包，"
     .. "把它們放到你想要的位置。"
 L.MOVABLEWINDOWS_NOTICE = "拖曳視窗時避開按鈕、輸入框、滑桿或清單。" -- a gray row atop the module
-L.MOVABLEWINDOWS_NOTICE_DESC = "視窗中的按鈕和清單會自己接收點擊。含有快捷鍵按鈕或其他受保護部分的視窗，"
+L.MOVABLEWINDOWS_NOTICE_DESC = "點擊視窗內的按鈕或清單時，會操作該元件。含有快捷列按鈕或其他受保護元件的視窗，"
     .. "只能在非戰鬥狀態下移動。"
 L.MOVABLEWINDOWS_KEY = "移動鍵"
 L.MOVABLEWINDOWS_KEY_DESC = "拖曳視窗時要按住的按鍵。設為「無」時，只用左鍵拖曳就能移動。"
@@ -167,7 +167,7 @@ L.MOVABLEWINDOWS_REMEMBER_DESC = "移動過的視窗之後在哪裡開啟。"
 L.MOVABLEWINDOWS_REMEMBER_ALWAYS = "永遠" -- kept across sessions
 L.MOVABLEWINDOWS_REMEMBER_SESSION = "關閉之後" -- kept until logout or /reload
 L.MOVABLEWINDOWS_REMEMBER_NEVER = "永不" -- back to Blizzard's place when it closes
-L.MOVABLEWINDOWS_RESET_CLICK = "重置點擊"
+L.MOVABLEWINDOWS_RESET_CLICK = "重置用滑鼠鍵"
 L.MOVABLEWINDOWS_RESET_CLICK_DESC = "按住重置鍵時，用這個按鍵點擊視窗，就能讓它回到原本的位置。"
     .. "按住移動鍵時左鍵點擊則是拖曳。"
 L.MOVABLEWINDOWS_CLICK_RIGHT = "右鍵點擊"

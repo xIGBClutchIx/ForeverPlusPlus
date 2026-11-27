@@ -47,7 +47,7 @@ L.AUTOOPEN_COUNT = "%s x%d" -- item link, how many
 L.AUTOSELLJUNK_TITLE = "自動出售垃圾"
 L.AUTOSELLJUNK_DESC = "與商人交談時，出售背包中的灰色物品，並在聊天中顯示賣得的金額。"
     .. "按住略過按鍵即可略過。"
-L.AUTOSELLJUNK_BUYBACK = "保留所有可買回的物品"
+L.AUTOSELLJUNK_BUYBACK = "確保賣出的物品都能買回"
 L.AUTOSELLJUNK_BUYBACK_DESC = "只出售商人買回清單在你自己賣出的物品之外還放得下的垃圾數量，"
     .. "這樣誤賣的東西仍然可以買回。"
 L.AUTOSELLJUNK_KEY_DESC = "與商人交談時按住此鍵，就不會出售垃圾。"
@@ -104,7 +104,7 @@ L.AUTOSTOW_OUTSIDE_ONLY_DESC = "在地城、團隊副本和戰場中讓武器保
 
 -- AutoDismount
 L.AUTODISMOUNT_TITLE = "自動解除坐騎"
-L.AUTODISMOUNT_DESC = "當某個動作因為你騎著坐騎或坐著而失敗時（例如施法、搭乘飛行或拾取），"
+L.AUTODISMOUNT_DESC = "當某個動作因為你騎著坐騎或坐著而失敗時（例如施法、搭乘飛行路線或拾取），"
     .. "自動下坐騎或站起來。"
 L.AUTODISMOUNT_DISMOUNT = "解除坐騎"
 L.AUTODISMOUNT_DISMOUNT_DESC = "騎乘時施法、與飛行管理員交談或攻擊，就下坐騎。"
@@ -197,10 +197,10 @@ L.SKIPCINEMATICS_RESET_DONE = "已清除看過的動畫紀錄。"
 
 
 -- FishingCast
-L.FISHINGCAST_TITLE = "釣魚施放"
+L.FISHINGCAST_TITLE = "雙擊右鍵拋竿"
 L.FISHINGCAST_DESC = "裝備釣魚竿時，在世界中雙擊右鍵即可施放釣魚。"
-L.FISHINGCAST_SPEED = "雙擊速度"
-L.FISHINGCAST_SPEED_DESC = "第二次右鍵點擊必須在第一次之後多快跟上。"
+L.FISHINGCAST_SPEED = "雙擊間隔"
+L.FISHINGCAST_SPEED_DESC = "兩次右鍵點擊之間允許的最長時間。"
 L.FISHINGCAST_MS = "%d毫秒" -- milliseconds
 L.FISHINGCAST_COMBAT = "戰鬥警告"
 L.FISHINGCAST_COMBAT_DESC = "裝備著釣魚竿進入戰鬥時，警告一次。"

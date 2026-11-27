@@ -59,7 +59,7 @@ L.CONSOLEVARIABLES_NO_LOCKS = "点击控制台变量上的锁，即可在每次�
 L.CONSOLEVARIABLES_LOCKED_AT = "锁定为%s：每次登录时以及有东西更改它时都会恢复。" -- the locked value
 L.CONSOLEVARIABLES_LOCK_HINT = "<点击锁以保持此数值>" -- tooltip of an open lock
 L.CONSOLEVARIABLES_UNLOCK_HINT = "<点击锁以停止保持>" -- tooltip of a closed lock
-L.CONSOLEVARIABLES_LOCK_STOPPED = "在你重新加载或重新登录之前不再保持：它无法维持。"
+L.CONSOLEVARIABLES_LOCK_STOPPED = "无法维持锁定值，已暂停锁定，直到重新加载界面或重新登录。"
 L.CONSOLEVARIABLES_LOCK_FAILED = "%s无法恢复为锁定的%s（当前为%s）。它的锁会等到你重新加载或重新登录。" -- CVar name, the locked value, its value now
 L.CONSOLEVARIABLES_LOCK_FIGHT = "%s不断被其他东西更改。它的锁会等到你重新加载或重新登录。" -- CVar name
 -- Popular: the section headers, then each CVar's plain name and what it does.
