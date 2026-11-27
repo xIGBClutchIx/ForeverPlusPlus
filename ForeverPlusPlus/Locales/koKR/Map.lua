@@ -223,6 +223,14 @@ L.HIDEFILTERRESET_TITLE = "필터 초기화 숨기기"
 L.HIDEFILTERRESET_DESC = "필터가 하나라도 꺼져 있으면 나타나는, 세계 지도 필터 드롭다운의 초기화 버튼을 "
     .. "숨깁니다."
 
+-- HideMinimapButtons
+L.HIDEMINIMAPBUTTONS_TITLE = "미니맵 버튼 숨기기"
+L.HIDEMINIMAPBUTTONS_DESC = "애드온이 미니맵 둘레에 둔 버튼을(Forever++ 버튼도) 마우스가 미니맵이나 그 버튼 위에 "
+    .. "오기 전까지 숨기고, 나타나고 흐려지게 합니다."
+L.HIDEMINIMAPBUTTONS_BLIZZARD = "블리자드 버튼"
+L.HIDEMINIMAPBUTTONS_BLIZZARD_DESC = "달력, 추적, 애드온 보관함 버튼도 같은 방식으로 숨깁니다. 우편 아이콘은 "
+    .. "항상 보입니다."
+
 -- SquareMinimap
 L.SQUAREMINIMAP_TITLE = "사각형 미니맵"
 L.SQUAREMINIMAP_DESC = "미니맵을 사각형으로 만들고 둥근 테두리 대신 사각형 테두리를 씌웁니다. 미니맵 버튼과 "

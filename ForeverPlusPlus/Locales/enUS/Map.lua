@@ -236,6 +236,14 @@ L.HIDEFILTERRESET_TITLE = "Hide Filter Reset"
 L.HIDEFILTERRESET_DESC = "Hide the reset button on the world map's filter dropdown, which shows "
     .. "whenever a filter is off."
 
+-- HideMinimapButtons
+L.HIDEMINIMAPBUTTONS_TITLE = "Hide Minimap Buttons"
+L.HIDEMINIMAPBUTTONS_DESC = "Hide the buttons addons put around the minimap, Forever++'s too, until "
+    .. "the mouse is over the minimap or one of them, and fade them in and out."
+L.HIDEMINIMAPBUTTONS_BLIZZARD = "Blizzard's Buttons"
+L.HIDEMINIMAPBUTTONS_BLIZZARD_DESC = "Hide the calendar, tracking, and addon compartment buttons "
+    .. "the same way. The mail icon always shows."
+
 -- SquareMinimap
 L.SQUAREMINIMAP_TITLE = "Square Minimap"
 L.SQUAREMINIMAP_DESC = "Make the minimap square, with a square border in place of its round frame. "

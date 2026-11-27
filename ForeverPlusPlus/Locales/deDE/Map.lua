@@ -233,6 +233,15 @@ L.HIDEFILTERRESET_TITLE = "Rücksetzknopf der Kartenfilter ausblenden"
 L.HIDEFILTERRESET_DESC = "Blendet den Zurücksetzen-Knopf am Filtermenü der Weltkarte aus, der "
     .. "erscheint, sobald ein Filter aus ist."
 
+-- HideMinimapButtons
+L.HIDEMINIMAPBUTTONS_TITLE = "Minikartenknöpfe ausblenden"
+L.HIDEMINIMAPBUTTONS_DESC = "Blendet die Knöpfe, die Addons um die Minikarte setzen, auch den von "
+    .. "Forever++, aus, bis die Maus über der Minikarte oder einem von ihnen ist, und blendet sie "
+    .. "weich ein und aus."
+L.HIDEMINIMAPBUTTONS_BLIZZARD = "Knöpfe von Blizzard"
+L.HIDEMINIMAPBUTTONS_BLIZZARD_DESC = "Blendet die Knöpfe für Kalender, Aufspüren und das Addon-Fach "
+    .. "ebenso aus. Das Postsymbol bleibt immer sichtbar."
+
 -- SquareMinimap
 L.SQUAREMINIMAP_TITLE = "Quadratische Minikarte"
 L.SQUAREMINIMAP_DESC = "Macht die Minikarte quadratisch, mit einem quadratischen Rand statt ihres "

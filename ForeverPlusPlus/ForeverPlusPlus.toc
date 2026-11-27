@@ -303,6 +303,7 @@ Modules\Map\WorldMap\PointsOfInterest\BlizzardIcons.lua
 Modules\Map\WorldMap\Filter.lua
 Modules\Map\FlightTimer.lua
 Modules\Map\HideFilterReset.lua
+Modules\Map\HideMinimapButtons.lua
 Modules\Map\SquareMinimap.lua
 Modules\Map\Waypoints.lua
 Modules\Map\CompassBar.lua

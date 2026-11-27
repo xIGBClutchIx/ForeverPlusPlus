@@ -206,6 +206,13 @@ L.COORDS_TENTHS_DESC = "坐标精确到十分位，例如45.3, 62.8。这是暴�
 L.HIDEFILTERRESET_TITLE = "隐藏筛选重置按钮"
 L.HIDEFILTERRESET_DESC = "隐藏世界地图过滤器下拉菜单上的重置按钮，它在任何过滤项关闭时都会出现。"
 
+-- HideMinimapButtons
+L.HIDEMINIMAPBUTTONS_TITLE = "隐藏小地图按钮"
+L.HIDEMINIMAPBUTTONS_DESC = "隐藏插件放在小地图周围的按钮（包括Forever++的），直到鼠标指向小地图或其中一个按钮，"
+    .. "并让它们淡入淡出。"
+L.HIDEMINIMAPBUTTONS_BLIZZARD = "暴雪的按钮"
+L.HIDEMINIMAPBUTTONS_BLIZZARD_DESC = "以同样方式隐藏日历、追踪和插件收纳栏按钮。邮件图标始终显示。"
+
 -- SquareMinimap
 L.SQUAREMINIMAP_TITLE = "方形小地图"
 L.SQUAREMINIMAP_DESC = "把小地图变成方形，用方形边框代替圆形框体。小地图按钮和Forever++的小地图图标会沿方形边缘排列。"

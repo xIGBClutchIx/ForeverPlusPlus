@@ -45,6 +45,10 @@ ns.changelog = {
                     .. "disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By "
                     .. "default only on a character with Enchanting, and Skip Items Worth More Sold "
                     .. "leaves out what a vendor pays more for." },
+                { L.HIDEMINIMAPBUTTONS_TITLE, "A new module, off by default, that hides the buttons "
+                    .. "addons put around the minimap until the mouse is over it, and fades them in "
+                    .. "and out. Blizzard's Buttons does the same for the calendar, tracking, and "
+                    .. "addon compartment buttons." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "
