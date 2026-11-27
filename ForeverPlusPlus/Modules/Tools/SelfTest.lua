@@ -707,6 +707,34 @@ local function checkGameData()
     end
 end
 
+-- The game's own strings (ns.GameText, Locales/Game.lua): whether this client has each as a
+-- global. One it lacks shows our own text, in English unless a language file has it, so a language
+-- can only drop its copy of a string that passes here.
+local function checkGameText()
+    section("game text")
+    local keys = ns.gameText or {}
+    local names, missing = {}, {}
+    for key in pairs(keys) do
+        names[#names + 1] = key
+    end
+    sort(names)
+    for _, key in ipairs(names) do
+        local value = _G[keys[key]]
+        if not (type(value) == "string" and value ~= "") then
+            missing[#missing + 1] = key .. "=" .. keys[key]
+        end
+    end
+    info("gametext.locale", text(GetLocale()))
+    if #names == 0 then
+        fail("gametext.keys", "Locales/Game.lua gave no keys")
+    elseif #missing == 0 then
+        pass("gametext.globals", format("all %d are globals of this client", #names))
+    else
+        fail("gametext.globals", format("%d of %d aren't globals here: %s", #missing, #names,
+            tconcat(missing, " ")))
+    end
+end
+
 -- QuestieDB (Lib/QuestieDB.lua): whether the addon is there and answers, with one record of each
 -- kind read through our wrapper, and whether the maps it puts spawns on are this client's maps.
 local function checkQuestieDB()
@@ -773,7 +801,7 @@ end
 -- Running it ---------------------------------------------------------------------------------
 
 local CHECKS = { checkClient, checkSettings, checkFrames, checkCVars, checkTaxi, checkMap,
-    checkSecrets, checkItems, checkPlayers, checkUI, checkSaved, checkGameData, checkQuestieDB }
+    checkSecrets, checkItems, checkPlayers, checkUI, checkSaved, checkGameData, checkGameText, checkQuestieDB }
 
 ---Runs every probe and writes the results to the saved log, starting the recorder.
 ---@return number count how many lines it wrote

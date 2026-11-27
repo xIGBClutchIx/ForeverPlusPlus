@@ -16,4 +16,5 @@ return {
     require("weaponbuffs"),
     require("newitems"),
     require("gametext"),
+    require("gamekeys"),
 }

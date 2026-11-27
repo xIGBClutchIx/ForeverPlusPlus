@@ -230,6 +230,26 @@ for _, key in ipairs(english.order) do
     bound = bound + (english.notes[key].game and 1 or 0)
 end
 eq(marked > 50 and bound > 50, true, ("locales: the notes are found (%d english, %d game)"):format(marked, bound))
+-- Locales/Game.lua, which hands ns.GameText the keys to read from the running game, is the
+-- [game] notes that name a global string: forgetting to run the generator after a note fails here.
+do
+    local given
+    T.load("Locales/Game", { GameText = function(keys) given = keys end })
+    local want, got = {}, {}
+    for _, key in ipairs(english.order) do
+        local tag = english.notes[key].game
+        if tag and not tag:find(".", 1, true) then
+            want[#want + 1] = key .. "=" .. tag
+        end
+    end
+    for key, tag in pairs(given or {}) do
+        got[#got + 1] = key .. "=" .. tag
+    end
+    table.sort(want)
+    table.sort(got)
+    eq(table.concat(got, " "), table.concat(want, " "), "locales: Locales/Game.lua is enUS's [game] notes")
+end
+
 local CHECKS = {
     { "notes", "enUS's notes are right" },
     { "missing", "has every string" },

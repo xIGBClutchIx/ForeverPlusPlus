@@ -17,7 +17,9 @@ Forever++ ships English (`enUS`) and Russian (`ruRU`). A language is a commitmen
 | `Locales/enUS/*.lua` | Every key, in English, a file per category. The source: its comments say whose words each string is. |
 | `Locales/<code>/*.lua` | A language: the same file names, the same key order, UTF-8. Plus `Places.lua` for place names. |
 | `tools/datagen/localenotes.lua` | Reads the notes in the enUS files' comments. |
+| `Locales/Game.lua` | Each `[game]` key with the client's global string for it, for `ns.GameText`. Generated; loaded after every language. |
 | `tools/datagen/gametext.lua` | Writes `tests/data/GameText.lua` from the client's tables. |
+| `tools/datagen/gamekeys.lua` | Writes `Locales/Game.lua` from the notes. |
 | `tests/data/GameText.lua` | The client's own text, in every language we ship, for the tags enUS names, and its names for our places. Generated. |
 | `tests/locales/<code>.txt` | A language's record of the English each string was translated from. |
 | `tests/lib/locales.lua`, `tests/locales.lua` | The checks, and the command that prints them. |
@@ -39,7 +41,10 @@ L.PROFTOOLTIPS_BEAST = "Beast" -- [game: CreatureType.1]
 
 The string is the game's own text, word for word: a stat, a profession, a Blizzard button or setting we mirror, a creature type we match against a tooltip. `TAG` is its name in the client's `GlobalStrings` table, or `Table.ID` for a row's name in another table (only `CreatureType` today).
 
-- Every language uses the client's text for the tag, never its own wording. The test compares them.
+- At run time the string comes from the game itself. `Locales/Game.lua` (generated from these notes) lists each key with its tag, and `ns.GameText` in `Core.lua` reads the client's global string of that name, in the player's language, after the locale files have loaded. So the order is the game's text, then the language file's, then enUS. A language we have no translation for still gets these.
+- An English client keeps enUS's text: the test holds it to the client's English, so a patch can't change it under us unnoticed.
+- A `Table.ID` tag isn't a global of the client's, so a language keeps its own copy of those.
+- A language file may still carry a `[game]` key: it's what shows if the client lacks the global. Then the test holds it to the client's text. Self Test's "game text" section says whether the running client has every global; once it passes on a client, a language can drop its copies.
 - enUS has to equal the client's English too, so a note can't be put on the wrong string.
 - Add the note when a string of ours is the game's name for something. Don't add it to a general word that happens to match one ("None", "Always", "Blue"): the same English is often several things in the game, with different genders and forms in other languages.
 - To find a tag, search the table: `https://wago.tools/db2/GlobalStrings?build=<build>` (or the CSV in `tools/datagen/cache/<build>/GlobalStrings.enUS.csv` after a run).
@@ -99,7 +104,7 @@ Any change to `Locales/enUS/` is also a change to every other language, in the s
 1. **A new key:** add it to enUS with its note if it's the game's (`[game]`, `[quotes]`) or inside an `[english]` block if only a debugger reads it. Then add its translation at the same place in each language's file, and run `lua tests/locales.lua --update <code> KEY`.
 2. **Reworded English:** read each language's translation of that key. Change it if the meaning changed, then `--update` that key. A fix that doesn't touch the meaning (a typo) still needs the `--update`.
 3. **A removed or renamed key:** remove or rename it in each language too; `--update` drops what's gone.
-4. **A new `[game]` or `[quotes]` tag:** run `lua5.1 tools/datagen/generate.lua <build in tools/datagen/BUILD>` so `GameText.lua` has it, and commit that file.
+4. **A new `[game]` or `[quotes]` tag:** run `lua5.1 tools/datagen/generate.lua <build in tools/datagen/BUILD>` so `GameText.lua` and `Locales/Game.lua` have it, and commit both.
 5. Run `lua5.1 tests/run.lua locales`.
 
 A translation written by a model is fine as a first pass, with these rules: take the game's terms from `GameText.lua` or the client's tables, not from memory; keep one word for one thing across the files; and say in the change that it hasn't been read by a native speaker when it hasn't.

@@ -217,7 +217,7 @@ One line here says what each file is for. [docs/architecture.md](docs/architectu
 
 ### Generated data
 
-`lua5.1 tools/datagen/generate.lua [build]` downloads the tables a `wowf` build needs from wago.tools and writes every generated file: Unexplored Areas' and Professions' `Data.lua`, the eight files in `Lib/Generated/`, `tests/data/GameText.lua` (the client's own text in each language we ship, for the locales spec), and `Reference.txt` (what the tables say about data kept by hand, so a new build's diff shows what to check). [docs/architecture.md](docs/architecture.md#generated-data-toolsdatagen) has what each comes from, `summary.lua` and `survey.lua`, and the `table-data.yml` workflow that regenerates for a new build and opens a pull request.
+`lua5.1 tools/datagen/generate.lua [build]` downloads the tables a `wowf` build needs from wago.tools and writes every generated file: Unexplored Areas' and Professions' `Data.lua`, the eight files in `Lib/Generated/`, `tests/data/GameText.lua` (the client's own text in each language we ship, for the locales spec), `Locales/Game.lua` (the keys read from the game at run time), and `Reference.txt` (what the tables say about data kept by hand, so a new build's diff shows what to check). [docs/architecture.md](docs/architecture.md#generated-data-toolsdatagen) has what each comes from, `summary.lua` and `survey.lua`, and the `table-data.yml` workflow that regenerates for a new build and opens a pull request.
 
 - **Never edit a generated file by hand.** Change the generator (one module per file, listed in `generators.lua`) and run it again.
 - `BUILD` is the build they came from. Output is sorted, so the same build gives the same bytes.
@@ -335,7 +335,7 @@ When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or f
 - A new key gets its translation in each language, at the same place in the same file. Reworded English means reading each translation of that key again. Then record it: `lua tests/locales.lua --update <code> KEY`. Never run `--update` to quiet the test without reading the string.
 - Say whose words a string is, in its comment in enUS:
   - No note: ours. A translator words it.
-  - `[game: TAG]`: the game's own text, word for word (a stat, a profession, a Blizzard setting we mirror). Every language uses the client's text for the tag. Not for a general word that happens to match one.
+  - `[game: TAG]`: the game's own text, word for word (a stat, a profession, a Blizzard setting we mirror). At run time it's read from the game in the player's language (`ns.GameText`, from the generated `Locales/Game.lua`), with the language file's copy and then enUS behind it. Not for a general word that happens to match one.
   - `[quotes: TAG]`: a sentence of ours that names something of the game's. Every language writes the client's text for the tag in it.
   - Between `-- [english]` and `-- [/english]`: stays English everywhere. Only what someone debugging reads, or a name that mustn't change.
 - Take the game's terms from `tests/data/GameText.lua` or the client's tables (wago.tools, `&locale=<code>`), never from memory. A new tag means running `tools/datagen/generate.lua` so `GameText.lua` has it.

@@ -33,6 +33,7 @@ Locales\ruRU\Chat.lua
 Locales\ruRU\Map.lua
 Locales\ruRU\Tools.lua
 Locales\ruRU\Places.lua
+Locales\Game.lua
 Data\Instances.lua
 Data\Professions.lua
 Data\Spells.lua

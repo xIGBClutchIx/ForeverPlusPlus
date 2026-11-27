@@ -18,7 +18,7 @@ The detail behind `AGENTS.md`'s project map: what each part of the addon holds, 
 - `ns.SetOption`, `ns.ResetOption` (back to the default, forgetting the choice), and `ns.BaseValue` (what a reset gives, through the profile's preset).
 - `ns.ChangeProfile` (switching the profile in use live, turning the modules off and on again).
 - `ns.OnModuleChanged` (the player turned a module on or off or changed an option, for the public API's callbacks).
-- The locale table `ns.L`.
+- The locale table `ns.L`: `ns.NewLocale(code)` gives a locale file the table to fill (enUS's fallback table, or `ns.L` itself for the client's language), and `ns.GameText(keys)`, called by the generated `Locales/Game.lua` after every language has loaded, writes the client's own global string over each key enUS marks `[game: TAG]`, on any client but an English one. [translations.md](translations.md) has the whole of it.
 
 ## Commands.lua
 

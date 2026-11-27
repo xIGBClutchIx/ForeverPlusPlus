@@ -66,6 +66,27 @@ function ns.NewLocale(locale)
     end
 end
 
+---Takes the strings that are the game's own wording from the game itself: `keys` is each such
+---key with the name of the client's global string for it (Locales/Game.lua, written from the
+---[game: TAG] notes in Locales/enUS/). The client has them in the player's language already, so
+---a language needn't carry them, and one we have no translation for still gets them. It runs
+---after the locale files: the game's text first, then the language's own, then enUS.
+---An English client keeps enUS's text, which the tests hold to the client's English, so nothing
+---there changes under us with a patch. A string the client doesn't have is left as it was.
+---@param keys table our key -> the client's global string name
+function ns.GameText(keys)
+    ns.gameText = keys
+    if GetLocale() == "enUS" then
+        return
+    end
+    for key, tag in pairs(keys) do
+        local text = _G[tag]
+        if type(text) == "string" and text ~= "" then
+            L[key] = text
+        end
+    end
+end
+
 -- Events --------------------------------------------------------------------------------------
 -- One frame for the whole addon. Handlers get (event, ...).
 
