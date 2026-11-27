@@ -5,7 +5,7 @@ local addonName, ns = ...
 
 local pairs, ipairs, next, type, print, format = pairs, ipairs, next, type, print, string.format
 local tonumber, floor, min, max = tonumber, math.floor, math.min, math.max
-local concat, setmetatable = table.concat, setmetatable
+local concat, sort, setmetatable = table.concat, table.sort, setmetatable
 local InCombatLockdown, GetLocale, hooksecurefunc, _G = InCombatLockdown, GetLocale, hooksecurefunc, _G
 
 -- Calls a function so that an error in it is reported but doesn't stop the caller, so one broken
@@ -106,13 +106,24 @@ function ns.Language()
     return decide()
 end
 
----The languages the addon has text in, in the order they load, each as { code, name }: the name
----is the language's own for itself with its code, "Deutsch (deDE)", so it can be told apart even
----where the client's font can't draw it.
+---The languages the addon has text in, each as { code, name }: English first, as the one every
+---string is written in, then the rest by their code. The name is the language's own for itself
+---with its code, "Deutsch (deDE)", so it can be told apart even where the client's font can't draw
+---it.
 ---@return table[]
 function ns.Languages()
-    local list = {}
+    local codes = {}
     for i, code in ipairs(shipped) do
+        codes[i] = code
+    end
+    sort(codes, function(a, b)
+        if (a == "enUS") ~= (b == "enUS") then
+            return a == "enUS"
+        end
+        return a < b
+    end)
+    local list = {}
+    for i, code in ipairs(codes) do
         list[i] = { code, format("%s (%s)", LANGUAGE_NAMES[code] or code, code) }
     end
     return list

@@ -9,12 +9,15 @@ local c = T.Core()
 local core = c.ns
 eq(core.Language(), "enUS", "language: the client's when nothing is chosen")
 eq(core.ChosenLanguage(), nil, "language: and nothing reads as chosen")
-eq(core.NewLocale("deDE"), nil, "language: another language's file stops")
-local names = {}
+eq(core.NewLocale("zhTW"), nil, "language: another language's file stops")
+core.NewLocale("deDE")
+local names, codes = {}, {}
 for _, entry in ipairs(core.Languages()) do
-    names[#names + 1] = entry[2]
+    codes[#codes + 1] = entry[1]
+    names[entry[1]] = entry[2]
 end
-eq(table.concat(names, ", "), "English (enUS), Deutsch (deDE)", "language: each is named in itself, with its code")
+eq(table.concat(codes, " "), "enUS deDE zhTW", "language: English first, then the rest by their code")
+eq(names.enUS .. ", " .. names.deDE, "English (enUS), Deutsch (deDE)", "language: each is named in itself, with its code")
 
 -- A language chosen: its file fills ns.L, and the game's own strings aren't laid over it, since the
 -- client only has them in its own language.
