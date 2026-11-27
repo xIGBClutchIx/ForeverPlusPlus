@@ -229,7 +229,7 @@ L.COORDS_TENTHS_DESC = "Zeigt Koordinaten auf ein Zehntel genau, etwa 45.3, 62.8
     .. "Einstellung in den Interface-Optionen: Eine Änderung hier ändert sie auch dort."
 
 -- HideFilterReset
-L.HIDEFILTERRESET_TITLE = "Filter-Zurücksetzen ausblenden"
+L.HIDEFILTERRESET_TITLE = "Rücksetzknopf der Kartenfilter ausblenden"
 L.HIDEFILTERRESET_DESC = "Blendet den Zurücksetzen-Knopf am Filtermenü der Weltkarte aus, der "
     .. "erscheint, sobald ein Filter aus ist."
 
@@ -275,7 +275,7 @@ L.SQUAREMINIMAP_MAIL_TOPRIGHT = "Oben rechts"
 L.SQUAREMINIMAP_MAIL_BOTTOMLEFT = "Unten links"
 L.SQUAREMINIMAP_MAIL_BOTTOMRIGHT = "Unten rechts"
 L.SQUAREMINIMAP_MAIL_BLIZZARD = "Blizzards Platz"
-L.SQUAREMINIMAP_OTHER = "Ein anderes Addon formt die Minikarte, daher lässt dies sie in Ruhe."
+L.SQUAREMINIMAP_OTHER = "Ein anderes Addon bestimmt bereits die Form der Minikarte."
 L.SQUAREMINIMAP_OTHER_DESC = "Jenes Addon bestimmt die Form der Minikarte. Nutzt seine eigene "
     .. "Einstellung für eine quadratische Minikarte oder schaltet seine Form aus und ladet neu."
 
@@ -412,7 +412,7 @@ L.GATHERINGMAP_OTHER_DESC = "GatherMate2, GatherLite oder Gatherer zeichnet eige
 L.GATHERINGMAP_ONLY_MINE = "Nur meine Berufe"
 L.GATHERINGMAP_ONLY_MINE_DESC = "Zeigt Kräuter nur bei einem Charakter mit Kräuterkunde, Erz nur mit "
     .. "Bergbau und Fischschwärme nur mit Angeln. Truhen erscheinen für alle."
-L.GATHERINGMAP_ONLY_TRACKING = "Nur beim Aufspüren"
+L.GATHERINGMAP_ONLY_TRACKING = "Nur bei aktiver Rohstoffsuche"
 L.GATHERINGMAP_ONLY_TRACKING_DESC = "Zeigt auf der Minikarte Kräuter nur, solange „Kräutersuche“ an ist, "
     .. "und Erz nur, solange „Mineraliensuche“ an ist. Die Weltkarte zeigt sie in jedem Fall."
 L.GATHERINGMAP_EXPORT = "Vorkommen teilen"

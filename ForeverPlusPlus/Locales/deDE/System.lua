@@ -23,8 +23,8 @@ L.ERRORCATCHER_COMMAND = "zeigt die abgefangenen Lua-Fehler"
 L.ERRORCATCHER_CAUGHT = "Fehler abgefangen: %s Gebt /fpp errors ein, um ihn zu sehen." -- first line of the error
 L.ERRORCATCHER_CAUGHT_LOADING = "%d Fehler beim Einloggen abgefangen. Gebt /fpp errors ein, um sie zu "
     .. "sehen."
-L.ERRORCATCHER_OTHER_HANDLER = "Ein anderes Addon, etwa BugGrabber, fängt Lua-Fehler ab, daher sieht "
-    .. "Fehlerfänger nur blockierte Aktionen und Warnungen."
+L.ERRORCATCHER_OTHER_HANDLER = "Ein anderes Addon, etwa BugGrabber, fängt Lua-Fehler ab. Der "
+    .. "Fehlerfänger zeigt daher nur blockierte Aktionen und Warnungen an."
 L.ERRORCATCHER_OTHER_HANDLER_DESC = "Lua-Fehler gehen stattdessen an jenes Addon, etwa in das Fenster "
     .. "von BugSack. Blizzards Fehlerfenster und sein Fenster für blockierte Aktionen bleiben ihm "
     .. "ebenfalls überlassen."
@@ -52,7 +52,7 @@ L.ERRORCATCHER_META = {
 }
 L.ERRORCATCHER_STACK = "Stack:"
 L.ERRORCATCHER_LOCALS = "Lokale Variablen:"
-L.ERRORCATCHER_NO_STACK = "Kein Stack: Blockierte Aktionen und Warnungen bringen keinen mit."
+L.ERRORCATCHER_NO_STACK = "Keine Aufrufliste vorhanden. Blockierte Aktionen und Warnungen liefern keine."
 -- What was going on when an action was blocked, in place of a stack.
 L.ERRORCATCHER_CONTEXT = "Als es passierte:"
 L.ERRORCATCHER_CONTEXT_COMBAT = "Im Kampf: %s"

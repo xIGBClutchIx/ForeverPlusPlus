@@ -75,7 +75,7 @@ L.SLASH_MODULES = "Module (/fpp toggle <name>, /fpp list):"
 L.SLASH_OPEN = "öffnet die Einstellungen"
 L.SLASH_LIST = "listet die Module auf und ob sie an sind"
 L.SLASH_TOGGLE = "schaltet ein Modul oder eines seiner Kontrollkästchen an oder aus"
-L.SLASH_RESET = "alle Einstellungen auf Standard (lädt neu)"
+L.SLASH_RESET = "setzt alle Einstellungen zurück und lädt das Interface neu"
 L.RESET_CONFIRM = "Alle Einstellungen von Forever++ auf Standard zurücksetzen und alles Gespeicherte "
     .. "löschen, etwa Auktionspreise und Flugzeiten? Das Interface wird dabei neu geladen."
 L.SLASH_OPTIONS = "listet seine Optionen und ihre Werte auf"
@@ -99,7 +99,7 @@ L.PROFILES_NAME_EMPTY = "Ein Profil braucht einen Namen."
 L.PROFILES_NAME_TAKEN = "Es gibt schon ein Profil mit dem Namen %s." -- name
 L.PROFILES_DEFAULT_ALWAYS = "Standard ist immer vorhanden und kann weder umbenannt noch gelöscht "
     .. "werden."
-L.SLASH_PROFILE = "listet die Profile auf oder wechselt diesen Charakter zu einem davon"
+L.SLASH_PROFILE = "listet die Profile auf oder wechselt das Profil dieses Charakters"
 L.PROFILES_HEADER = "Profile (/fpp profiles <name> zum Wechseln):"
 L.PROFILES_CHARACTERS = { "%d Charakter", "%d Charaktere" } -- how many use a profile
 L.PROFILES_SWITCHED = "Aktives Profil: %s" -- profile name

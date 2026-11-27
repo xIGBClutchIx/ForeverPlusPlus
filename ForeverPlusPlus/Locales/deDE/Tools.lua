@@ -67,8 +67,8 @@ L.CONSOLEVARIABLES_LOCKED_AT = "Gesperrt auf %s: wird bei jedem Einloggen und be
     .. "zurückgesetzt." -- the locked value
 L.CONSOLEVARIABLES_LOCK_HINT = "<Auf das Schloss klicken, um diesen Wert zu behalten>" -- tooltip of an open lock
 L.CONSOLEVARIABLES_UNLOCK_HINT = "<Auf das Schloss klicken, um ihn nicht mehr zu behalten>" -- tooltip of a closed lock
-L.CONSOLEVARIABLES_LOCK_STOPPED = "Bis zum Neuladen oder nächsten Einloggen nicht gehalten: Er hielt "
-    .. "nicht."
+L.CONSOLEVARIABLES_LOCK_STOPPED = "Der Wert ließ sich nicht beibehalten. Die Sperre bleibt bis zum "
+    .. "Neuladen oder nächsten Einloggen ausgesetzt."
 L.CONSOLEVARIABLES_LOCK_FAILED = "%s konnte nicht auf den gesperrten Wert %s zurückgesetzt werden (er "
     .. "ist %s). Die Sperre wartet bis zum Neuladen oder nächsten Einloggen." -- CVar name, the locked value, its value now
 L.CONSOLEVARIABLES_LOCK_FIGHT = "%s wird ständig von etwas anderem geändert. Die Sperre wartet bis zum "

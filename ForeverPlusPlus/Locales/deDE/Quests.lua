@@ -111,7 +111,7 @@ L.QUESTREPUTATION_SHOW_REWARDS = "Belohnungen"
 L.QUESTREPUTATION_SHOW_DESCRIPTION = "Beschreibung"
 L.QUESTREPUTATION_ICON = "Symbol"
 L.QUESTREPUTATION_ICON_DESC = "Das Symbol auf dem Knopf jeder Fraktion in den Belohnungen der Quest."
-L.QUESTREPUTATION_ICON_NEEDS = "Benötigt „Anzeigen in“ auf „Belohnungen“."
+L.QUESTREPUTATION_ICON_NEEDS = "Wählt unter „Anzeigen in“ die Option „Belohnungen“."
 L.QUESTREPUTATION_ICON_HANDSHAKE = "Handschlag"
 L.QUESTREPUTATION_ICON_BANNER = "Banner Eurer Fraktion"
 
@@ -166,8 +166,9 @@ L.AUTOQUEST_KEY_DESC = "Haltet diese Taste, während Ihr mit einem Questgeber sp
 -- BestQuestReward
 L.BESTQUESTREWARD_TITLE = "Beste Questbelohnung"
 L.BESTQUESTREWARD_CORNER_DESC = "In welcher Ecke des Belohnungssymbols die Goldmünze sitzt."
-L.BESTQUESTREWARD_CONFLICT_ARROW = "Verbesserungspfeile setzt seinen Pfeil bei Questbelohnungen "
-    .. "ebenfalls in diese Ecke, sodass sich beide überdecken. Wählt für eines davon eine andere Ecke."
+L.BESTQUESTREWARD_CONFLICT_ARROW = "Das Modul „Verbesserungspfeile“ markiert Questbelohnungen in "
+    .. "derselben Ecke. Wählt für eines der beiden Module eine andere Ecke, damit sich die Symbole "
+    .. "nicht überdecken."
 L.BESTQUESTREWARD_DESC = "Markiert die Questbelohnung, die beim Händler am meisten einbringt, mit "
     .. "einer Goldmünze, im Questfenster und im Questlog. Sie wird nicht für Euch gewählt."
 
