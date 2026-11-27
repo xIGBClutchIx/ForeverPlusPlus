@@ -23,3 +23,11 @@ QuestDifficultyColors.impossible = { r = "impossible", g = 0, b = 0 }
 eq(ns.Colors.Difficulty(33).r, 33, "a level gets its difficulty color")
 eq(ns.Colors.Difficulty(-1).r, "impossible", "a skull level is the hardest")
 eq(ns.Colors.Difficulty(0).r, "impossible", "so is level 0")
+
+-- An item quality's color is Blizzard's, read at the call, and white without one.
+eq(ns.Colors.Quality(3).r, 1, "no quality colors yet: white")
+ITEM_QUALITY_COLORS = { [3] = { r = 0, g = 0.44, b = 0.87 } }
+eq(ns.Colors.Quality(3).b, 0.87, "a quality gets Blizzard's color")
+eq(ns.Colors.Quality(9).r, 1, "a quality without a color: white")
+eq(ns.Colors.Quality(nil).g, 1, "no quality: white")
+ITEM_QUALITY_COLORS = nil

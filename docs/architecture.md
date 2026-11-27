@@ -70,7 +70,7 @@ Generated files, in `Lib/Generated/` (never edited by hand; see Generated data):
 
 ### `Colors.lua`
 
-- `ns.Colors`: colors modules share, `Colors.Code` for color codes in text, `Colors.Class` for a unit's class color, `Colors.LevelRange` for a level range against the player's, `Colors.Difficulty` for one level's difficulty color (a skull level the hardest), and `Colors.Faction` for Horde red and Alliance blue, and `Colors.STATS`, a color for each stat.
+- `ns.Colors`: colors modules share, `Colors.Code` for color codes in text, `Colors.Class` for a unit's class color, `Colors.LevelRange` for a level range against the player's, `Colors.Difficulty` for one level's difficulty color (a skull level the hardest), `Colors.Faction` for Horde red and Alliance blue, `Colors.Quality` for an item quality's color, and `Colors.STATS`, a color for each stat.
 
 ### `Secret.lua`
 
@@ -179,7 +179,7 @@ Generated files, in `Lib/Generated/` (never edited by hand; see Generated data):
 
 ### `ItemButtons.lua`
 
-- `Walk(module, mark, opts)`: one walk over bags, bank, merchant, auction house, loot, and loot rolls for a module that marks items. `mark(icon, link, place, a, b)` is all the module writes: the walk hooks each window (`walk:Hook`), reads each slot's link, clears a place whose Show On checkbox (`module.db[place]`) is off, and marks again on `walk:Refresh`. With a bag addon (`BagAddons`), its buttons are walked as bags and bank too (`EachAddonBagButton`, `HookAddonBags`), each with its bag and slot, and marked again each time it lays them out. Already Known, Appearance Icons, Disenchant Icons, Unusable Items Tint, Upgrade Arrows, and a plugin's marks (`Lib/Plugins.lua`) all use it; a module's own places (mail, quest rewards, recipe rows) and its item-data events stay in the module.
+- `Walk(module, mark, opts)`: one walk over bags, bank, merchant, auction house, loot, and loot rolls for a module that marks items. `mark(icon, link, place, a, b)` is all the module writes: the walk hooks each window (`walk:Hook`), reads each slot's link, clears a place whose Show On checkbox (`module.db[place]`) is off, and marks again on `walk:Refresh`. With a bag addon (`BagAddons`), its buttons are walked as bags and bank too (`EachAddonBagButton`, `HookAddonBags`), each with its bag and slot, and marked again each time it lays them out. Already Known, Appearance Icons, Disenchant Icons, Item Levels, Unusable Items Tint, Upgrade Arrows, and a plugin's marks (`Lib/Plugins.lua`) all use it; a module's own places (mail, quest rewards, recipe rows) and its item-data events stay in the module.
 - Loot rolls cover the controller interface's roll list too (`GamepadGroupLootRollFrame`, cards laid out as the four roll frames are): `EachPadRoll(fn)` walks its cards and `HookPadRolls(module, fn)` runs after it fills them again.
 - `ns.ItemButtons`: the item buttons in bags, at a merchant, in the auction house's browse list, the loot window, and loot rolls, the bank's shown tab (`EachBankButton`, `HookBank`), quest reward choices (`EachRewardChoice`, `RewardIcon`), hooks that redraw with them (`HookLoot` listens for LOOT_OPENED itself), and our own textures over their icons (`Overlays`, `Tint`, and `PlaceMark` to size and place one from the module's Size, Corner, and Padding), with the options every mark on an item or action button icon shares, built by `CornerOption`, `SizeOption`, `PaddingOption`, and `PlaceOption` (style, then Corner, a size in px, step 2, up to 32, then Padding 0 to 10, 1 by default; then a Show On section of places, bags, bank, merchant, auction, loot, then the module's own), and `PlaceInCorner` and `MarkSize` to put the mark there at its size, in proportion to the icon it's on (the size option is a bag icon's).
 
@@ -275,7 +275,7 @@ Generated files, in `Lib/Generated/` (never edited by hand; see Generated data):
 
 ### `Equipment.lua`
 
-- `ns.Equipment`: the slots an item type goes in, what's worn, whether the character can use an item, the weapon type worn in a slot (`WeaponSubclass`), and the worn items an item would replace, from the client's own item comparison or the slot rules.
+- `ns.Equipment`: a piece of gear's level and quality (`ItemLevel`: false for what isn't gear, a shirt or a tabard among it, and nil while the item isn't cached), the slots an item type goes in, what's worn, whether the character can use an item, the weapon type worn in a slot (`WeaponSubclass`), and the worn items an item would replace, from the client's own item comparison or the slot rules.
 
 ### `Durability.lua`
 
@@ -356,6 +356,7 @@ What each module is, in the code's terms (what it does for players is in `README
 - **Already Known**
 - **Appearance Icons**: uncollected appearances.
 - **Disenchant Icons**: `DisenchantIcons`: off by default. `ns.Disenchant.ForItem` on each item's info, with the tooltip's "Cannot be disenchanted" and red "Disenchanting requires" lines having the last word, through `ItemButtons.Walk` (bags, bank, auction house, loot); Skip Items Worth More Sold compares the vendor price with `Disenchant.Value` at `ns.Prices.Auction`.
+- **Item Levels**: `ItemLevels`: off by default. `ns.Equipment.ItemLevel` on each item, in `ns.Colors.Quality`, as a font string of ours (`ItemButtons.Overlays`) through `ItemButtons.Walk` (bags, bank, merchant, auction house, loot). The same `ItemLevel` as Character Window's item levels.
 - **Unusable Items Tint**
 - **Upgrade Arrows**: a folder: the module and its stat weight templates.
 - **Best Quest Reward**
@@ -407,7 +408,7 @@ What each module is, in the code's terms (what it does for players is in `README
 - **Error Catcher**: while the controller interface is on it also checks the controller navigation's tables (`GamepadMode`, `SmartNavigation`) twice a second with an `ns.Taint` watcher, and notes each value an addon wrote for a blocked action's report.
 - **Minimap Button**: its menu of quick toggles, picked by the player with the Customize button in its settings.
 - **Currency Bar**
-- **Character Window**: a folder: the module, its durability bars, item details (each slot's item level, and an enchant mark read from the link's enchant field, against `ns.Data.enchantable` as an `ns.GameData` set; the Inspect window's slots too, through a hook on `InspectPaperDollItemSlotButton_Update` once `Blizzard_InspectUI` loads), and equipped weapon skill colors. The slots by the side facing the character, `internal.SIDES`, are shared by the bars and the details.
+- **Character Window**: a folder: the module, its durability bars, item details (each slot's item level from `ns.Equipment.ItemLevel`, as Item Levels shows it, and an enchant mark read from the link's enchant field, against `ns.Data.enchantable` as an `ns.GameData` set; the Inspect window's slots too, through a hook on `InspectPaperDollItemSlotButton_Update` once `Blizzard_InspectUI` loads), and equipped weapon skill colors. The slots by the side facing the character, `internal.SIDES`, are shared by the bars and the details.
 - **Durability Warning**: once when worn gear drops below a durability the player picks and again when it breaks: a chat line, red error-frame text, and a sound, each an option.
 - **Forever Quest Icons**
 - **Quest Tracker**: a folder: the module (fonts, the box, fading, and the watch list's sorting and filters) and what it adds to the tracker's Quests header (the quest count, and a button of ours over the title that opens the zone menu). Its line options (dim, progress colors) set only a font string's alpha and color after each update, and the quest tooltip hears `EventRegistry`'s `OnQuestBlockHeader.OnEnter`. It hooks each quest section's own `Update`, never calls the tracker's layout, and writes nothing on Blizzard's frames.

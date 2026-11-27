@@ -11,8 +11,7 @@ local _, ns = ...
 
 local _G, pairs, ipairs, tonumber, CreateFrame = _G, pairs, ipairs, tonumber, CreateFrame
 local setmetatable, pcall = setmetatable, pcall
-local GetInventoryItemLink, GetInventoryItemQuality = GetInventoryItemLink, GetInventoryItemQuality
-local GetInventorySlotInfo = GetInventorySlotInfo
+local GetInventoryItemLink, GetInventorySlotInfo = GetInventoryItemLink, GetInventorySlotInfo
 local C_Item = C_Item
 
 local L = ns.L
@@ -23,8 +22,6 @@ local ENCHANTABLE = ns.GameData.New("enchantable", ns.Data.enchantable, { label 
 
 local INSPECT = "Blizzard_InspectUI"
 local INSET = 2 -- between a mark and the icon's edge
--- A shirt's or a tabard's level says nothing.
-local NO_LEVEL = { Shirt = true, Tabard = true }
 
 -- The corner of the icon nearest the character, by the side the slot's column faces.
 local CORNERS = { RIGHT = "BOTTOMRIGHT", LEFT = "BOTTOMLEFT", BOTTOM = "BOTTOMLEFT" }
@@ -33,7 +30,6 @@ local CORNERS = { RIGHT = "BOTTOMRIGHT", LEFT = "BOTTOMLEFT", BOTTOM = "BOTTOMLE
 ---@field level table the item level's FontString
 ---@field enchant table the enchant mark's FontString
 ---@field slot number
----@field name string the slot's name, "Head"
 
 -- Per window: its slot buttons (weak, they're Blizzard's) -> our marks.
 local player = setmetatable({}, { __mode = "k" })
@@ -64,7 +60,7 @@ local function enchantOf(link)
     return tonumber(link:match("item:%-?%d+:(%d+)")) or 0
 end
 
-local function makeMarks(holder, button, slot, name, side)
+local function makeMarks(holder, button, slot, side)
     local frame = CreateFrame("Frame", nil, holder)
     frame:SetAllPoints(button)
     -- Over the icon and its quality border.
@@ -75,7 +71,7 @@ local function makeMarks(holder, button, slot, name, side)
     local corner = CORNERS[side]
     enchant:SetPoint(corner, corner == "BOTTOMRIGHT" and -INSET or INSET, INSET)
     enchant:SetText(L.CHARACTERWINDOW_ENCHANT_MARK)
-    return { level = level, enchant = enchant, slot = slot, name = name }
+    return { level = level, enchant = enchant, slot = slot }
 end
 
 -- Our marks over every slot button of a window whose buttons are named prefix .. "HeadSlot".
@@ -85,7 +81,7 @@ local function build(holder, marks, prefix)
             local button = _G[prefix .. name .. "Slot"]
             local ok, slot = pcall(GetInventorySlotInfo, name .. "Slot")
             if button and ok and slot then
-                marks[button] = makeMarks(holder, button, slot, name, side)
+                marks[button] = makeMarks(holder, button, slot, side)
             end
         end
     end
@@ -99,19 +95,18 @@ local function show(marks, unit)
         marks.enchant:Hide()
         return
     end
-    local level = module.db.itemLevel and not NO_LEVEL[marks.name]
-        and C_Item.GetDetailedItemLevelInfo(link)
-    if level then
-        local quality = GetInventoryItemQuality(unit, marks.slot)
-        local color = quality and _G.ITEM_QUALITY_COLORS[quality]
-        marks.level:SetText(level)
-        if color then
-            marks.level:SetTextColor(color.r, color.g, color.b)
-        else
-            marks.level:SetTextColor(1, 1, 1)
+    -- Gear only: a shirt's or a tabard's level says nothing (Lib/Equipment.lua).
+    local level, quality
+    if module.db.itemLevel then
+        level, quality = ns.Equipment.ItemLevel(link)
+        if level == nil then
+            waiting = true
         end
-    elseif module.db.itemLevel and not NO_LEVEL[marks.name] then
-        waiting = true
+    end
+    if level then
+        local color = ns.Colors.Quality(quality)
+        marks.level:SetText(level)
+        marks.level:SetTextColor(color.r, color.g, color.b)
     end
     marks.level:SetShown(level and true or false)
 

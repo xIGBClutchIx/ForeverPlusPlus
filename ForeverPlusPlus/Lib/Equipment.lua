@@ -1,5 +1,5 @@
--- What the player wears, and what a piece of gear would replace: the inventory slots an item's
--- type goes in, the worn item in each, whether the character can use an item, and the worn items
+-- What the player wears, and what a piece of gear would replace: a piece of gear's level, the
+-- inventory slots an item's type goes in, the worn item in each, whether the character can use an item, and the worn items
 -- an item competes with (rings and trinkets against the weaker, a two-hander against both hands,
 -- a one-hander against either hand when dual wielding), asked of the client's own item
 -- comparison first (C_TooltipComparison, the "Equipped" tooltips' source; it answers addon code
@@ -14,6 +14,7 @@ local C_Item, C_PlayerInfo, Enum = C_Item, C_PlayerInfo, Enum
 
 local Equipment = {
     WEAPON = 2, -- Enum.ItemClass.Weapon
+    ARMOR = 4, -- Enum.ItemClass.Armor
     FISHING_POLE = 20, -- Enum.ItemWeaponSubclass.Fishingpole
 }
 ns.Equipment = Equipment
@@ -51,6 +52,36 @@ local SLOTS = {
 ---@return number[]?
 function Equipment.Slots(invType)
     return invType and SLOTS[invType] or nil
+end
+
+-- Gear whose level says nothing: a shirt and a tabard are armor, but cosmetic.
+local NO_LEVEL = { INVTYPE_BODY = true, INVTYPE_TABARD = true }
+
+---An item's level and quality, for gear only: a weapon or a piece of armor that's worn (a fishing
+---pole too, not a shirt or a tabard, a bag, a quiver, or ammo). False for anything else, and nil
+---while the game doesn't have the item yet (GET_ITEM_INFO_RECEIVED follows).
+---@param link string an item link or "item:ID"
+---@return number|false|nil level
+---@return number? quality Enum.ItemQuality, with a level
+function Equipment.ItemLevel(link)
+    if not (ns.IsText(link, true) and C_Item.GetItemInfoInstant) then
+        return false
+    end
+    local _, _, _, equipLoc, _, classID = C_Item.GetItemInfoInstant(link)
+    if not (classID == Equipment.WEAPON or classID == Equipment.ARMOR)
+        or not ns.IsText(equipLoc, true) or NO_LEVEL[equipLoc] then
+        return false
+    end
+    local _, _, quality, itemLevel = C_Item.GetItemInfo(link)
+    if not quality then
+        return nil
+    end
+    -- The level the item is, with its upgrades or scaling, where the client says.
+    local level = C_Item.GetDetailedItemLevelInfo and C_Item.GetDetailedItemLevelInfo(link) or itemLevel
+    if not (ns.IsNumber(level) and level > 0) then
+        return false
+    end
+    return level, quality
 end
 
 ---The link of the item worn in a slot, or nil.

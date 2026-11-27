@@ -121,6 +121,40 @@ eq(Equipment.WornType(4), nil, "worn type: an item with no equip location")
 game.worn[5] = "unknown"
 eq(Equipment.WornType(5), nil, "worn type: an item not loaded yet")
 
+-- A piece of gear's level and quality ------------------------------------------------------------
+
+local info = {} -- C_Item.GetItemInfo: link -> { quality, item level }, nil while not cached
+local detailed = {} -- C_Item.GetDetailedItemLevelInfo: link -> level
+C_Item.GetItemInfo = function(link)
+    local entry = info[link]
+    if entry then
+        return "name", link, entry[1], entry[2]
+    end
+end
+C_Item.GetDetailedItemLevelInfo = function(link)
+    return detailed[link]
+end
+game.cachedItems.helm = item(120, "INVTYPE_HEAD", ARMOR, 2)
+game.cachedItems.shirt = item(121, "INVTYPE_BODY", ARMOR, 0)
+game.cachedItems.tabard = item(122, "INVTYPE_TABARD", ARMOR, 0)
+game.cachedItems.potion = item(123, "", 0, 1)
+game.cachedItems.bag = item(124, "INVTYPE_BAG", 1, 0)
+info.helm, info.pole, info.shirt = { 3, 45 }, { 1, 10 }, { 1, 1 }
+detailed.helm = 47
+local level, quality = Equipment.ItemLevel("helm")
+eq(level, 47, "item level: the client's detailed level first")
+eq(quality, 3, "item level: with the item's quality")
+eq((Equipment.ItemLevel("pole")), 10, "item level: the item's own level without a detailed one")
+eq(Equipment.ItemLevel("shirt"), false, "item level: none on a shirt")
+eq(Equipment.ItemLevel("tabard"), false, "item level: none on a tabard")
+eq(Equipment.ItemLevel("potion"), false, "item level: none on what isn't gear")
+eq(Equipment.ItemLevel("bag"), false, "item level: none on a bag")
+eq(Equipment.ItemLevel("blank"), false, "item level: none on armor with no equip location")
+eq(Equipment.ItemLevel("shield"), nil, "item level: nil while the item isn't cached")
+eq(Equipment.ItemLevel(nil), false, "item level: no link")
+info.shield = { 2, 0 }
+eq(Equipment.ItemLevel("shield"), false, "item level: none for a level of 0")
+
 game.dualWield = true
 eq(Equipment.CanDualWield(), true, "dual wield: on")
 game.secret, game.dualWield = SECRET, SECRET

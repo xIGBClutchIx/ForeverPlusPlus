@@ -15,6 +15,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Chat Buttons on Every Tab**: A new module, on by default, that keeps the buttons beside the chat window whichever chat tab is in front: the game's chat menu and channels buttons, and the ones Forever++ adds. The game only shows them on the first tab.
 - **Disenchant Icons**: A new module, off by default, that marks the items you can disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By default only on a character with Enchanting, and Skip Items Worth More Sold leaves out what a vendor pays more for.
 - **Character Window**: Item Levels shows each item's level on its icon, in its quality's color, and Enchant Marks marks each item that can be enchanted: green when it is, red when it isn't. Both are off by default, and show in the Inspect window too.
+- **Item Levels**: A new module, off by default, that shows the level of weapons and armor on their icons, in their quality's color, in your bags, the bank, at merchants, and in loot, and in the auction house if you turn it on.
 
 ### Changed
 
