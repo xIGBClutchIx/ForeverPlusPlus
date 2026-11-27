@@ -183,13 +183,24 @@ L.MINIMAPBUTTON_CLEAR_ALL_KEY_DESC = "錯誤捕捉器開啟時，點擊按鈕清
 
 -- Commands
 L.COMMANDS_TITLE = "斜線指令"
-L.COMMANDS_DESC = "加入簡短的斜線指令：/rl重新載入介面，/clear清空聊天視窗。/way位於「導航點」。"
+L.COMMANDS_DESC = "加入簡短的斜線指令：/rl重新載入介面，/clear清空聊天視窗，/kb設定按鍵，/pull開始"
+    .. "開怪倒數。/way位於「導航點」。"
 L.COMMANDS_RELOAD = "/rl"
 L.COMMANDS_RELOAD_DESC = "/rl會像/reload一樣重新載入介面。若其他插件已使用/rl，則留給該插件。"
 L.COMMANDS_RELOAD_HELP = "重新載入介面" -- a line of /fpp help, like the SLASH_ ones
 L.COMMANDS_CLEAR_HELP = "清空輸入指令的聊天視窗"
 L.COMMANDS_CLEAR = "/clear"
 L.COMMANDS_CLEAR_DESC = "/clear會清空你輸入指令的聊天視窗。若其他插件已使用/clear，則留給該插件。"
+L.COMMANDS_KEYBIND = "/kb"
+L.COMMANDS_KEYBIND_DESC = "/kb會開啟「快速按鍵設定模式」，與「按鍵設定」中的按鈕相同：將滑鼠指向一個動作"
+    .. "按鈕，然後按下按鍵。僅限非戰鬥中。若其他插件已使用/kb，則留給該插件。"
+L.COMMANDS_KEYBIND_HELP = "開啟「快速按鍵設定模式」"
+L.COMMANDS_KEYBIND_BLOCKED = "戰鬥中或編輯模式開啟時無法開啟「快速按鍵設定模式」。"
+L.COMMANDS_PULL = "/pull"
+L.COMMANDS_PULL_DESC = "/pull 10會開始遊戲的開怪計時，也就是/countdown開始的倒數，持續10秒；不寫數字時"
+    .. "也是10秒。/pull 0會停止它。若首領插件或其他插件已使用/pull，則留給該插件。"
+L.COMMANDS_PULL_HELP = "開始遊戲的開怪倒數，不寫數字時為10秒"
+L.COMMANDS_PULL_USAGE = "輸入/pull和倒數的秒數，例如/pull 10；輸入/pull 0停止倒數。"
 
 -- HideBetaFeedback
 L.HIDEBETAFEEDBACK_TITLE = "隱藏測試版意見回饋"

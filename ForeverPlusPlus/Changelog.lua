@@ -45,6 +45,10 @@ ns.changelog = {
                     .. "disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By "
                     .. "default only on a character with Enchanting, and Skip Items Worth More Sold "
                     .. "leaves out what a vendor pays more for." },
+                { L.COMMANDS_TITLE, "/kb opens Quick Keybind Mode, out of combat, and /pull 10 "
+                    .. "starts the game's pull countdown, the one /countdown starts (10 seconds with "
+                    .. "no number, /pull 0 stops it). Both are on by default and left to another addon "
+                    .. "that already has them, such as a boss mod's /pull." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "

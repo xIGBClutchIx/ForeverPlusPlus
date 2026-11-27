@@ -214,8 +214,8 @@ L.MINIMAPBUTTON_CLEAR_ALL_KEY_DESC = "The key to hold while clicking the button 
 
 -- Commands
 L.COMMANDS_TITLE = "Slash Commands"
-L.COMMANDS_DESC = "Add short slash commands: /rl to reload the UI and /clear to empty a chat "
-    .. "window. /way is in Waypoints."
+L.COMMANDS_DESC = "Add short slash commands: /rl to reload the UI, /clear to empty a chat "
+    .. "window, /kb to bind keys, and /pull to start a pull timer. /way is in Waypoints."
 L.COMMANDS_RELOAD = "/rl"
 L.COMMANDS_RELOAD_DESC = "/rl reloads the UI, like /reload. Left to another addon that already "
     .. "has /rl."
@@ -224,6 +224,20 @@ L.COMMANDS_CLEAR_HELP = "empty the chat window it's typed in"
 L.COMMANDS_CLEAR = "/clear"
 L.COMMANDS_CLEAR_DESC = "/clear empties the chat window you type it in. Left to another addon "
     .. "that already has /clear."
+L.COMMANDS_KEYBIND = "/kb"
+-- [quotes: QUICK_KEYBIND_MODE]
+L.COMMANDS_KEYBIND_DESC = "/kb opens Quick Keybind Mode, as its button in the game's Key Bindings "
+    .. "does: point at an action button and press a key. Out of combat only. Left to "
+    .. "another addon that already has /kb."
+L.COMMANDS_KEYBIND_HELP = "open Quick Keybind Mode" -- [quotes: QUICK_KEYBIND_MODE]
+-- [quotes: QUICK_KEYBIND_MODE]
+L.COMMANDS_KEYBIND_BLOCKED = "Quick Keybind Mode can't be opened in combat or while Edit Mode is open."
+L.COMMANDS_PULL = "/pull"
+L.COMMANDS_PULL_DESC = "/pull 10 starts the game's pull timer, the countdown /countdown starts, "
+    .. "for 10 seconds, or 10 when you leave the number out. /pull 0 stops it. Left to a boss mod "
+    .. "or another addon that already has /pull."
+L.COMMANDS_PULL_HELP = "start the game's pull countdown, 10 seconds if no number is given"
+L.COMMANDS_PULL_USAGE = "Type /pull and the seconds to count down, such as /pull 10, or /pull 0 to stop it."
 
 -- HideBetaFeedback
 L.HIDEBETAFEEDBACK_TITLE = "Hide Beta Feedback"

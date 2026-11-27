@@ -173,6 +173,7 @@
     "ChatFrameMenuButton",
     "ChatFrameChannelButton",
     "QuickJoinToastButton",
+    "QuickKeybindFrame",
     "GameTooltip_Hide",
     "StaticPopupDialogs",
     "StaticPopup_Show",
