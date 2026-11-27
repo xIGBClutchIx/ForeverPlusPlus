@@ -8,6 +8,12 @@
 -- (FloatingChatFrame.lua, wow-ui-source's forever branch). So the buttons themselves are faded
 -- here, after the same two calls: an alpha on each, which multiplies with whatever Blizzard gives
 -- the frame they sit in. A faded button still takes clicks, and the mouse over it fades it in.
+--
+-- The main chat window is also let over to the left edge of the screen (Chat.SetMargin): Edit Mode
+-- keeps 32 there for the buttons, which is an empty strip while they're hidden (a CurseForge
+-- comment). Nothing moves by itself; it's the player who drags the window there. With it against
+-- the edge the buttons are off the screen while Blizzard has them on the left, which it decides
+-- as the chat loads (FCF_UpdateButtonSide: on the right when the window's left is at the edge).
 local _, ns = ...
 
 local _G, ipairs = _G, ipairs
@@ -106,9 +112,11 @@ function module:OnEnable()
     self:Hook("FCF_FadeOutChatFrame", onFadeOut)
     -- Blizzard's own note of whether the window is faded in now.
     fadeTo(_G.ChatFrame1.hasBeenFaded and 1 or 0)
+    Chat.SetMargin("left", Chat.MARGIN.left)
 end
 
 function module:OnDisable()
+    Chat.SetMargin("left", nil)
     driver:Hide()
     goal = 1
     set(1)

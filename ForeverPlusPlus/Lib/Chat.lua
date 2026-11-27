@@ -4,7 +4,7 @@
 local _, ns = ...
 
 local _G, ipairs, type, tonumber, gsub, format = _G, ipairs, type, tonumber, string.gsub, string.format
-local select, pairs = select, pairs
+local select, pairs, next = select, pairs, next
 local setmetatable, CreateFrame, UIParent, hooksecurefunc = setmetatable, CreateFrame, UIParent, hooksecurefunc
 local byte, find, match, sub = string.byte, string.find, string.match, string.sub
 local min, max, concat = math.min, math.max, table.concat
@@ -528,6 +528,74 @@ function Chat.RemoveFilter(event, fn)
     local remove = filterApi("RemoveMessageEventFilter", "ChatFrame_RemoveMessageEventFilter")
     if remove then
         remove(event, fn)
+    end
+end
+
+-- The main window's margins ---------------------------------------------------------------------
+-- Edit Mode keeps the main chat window clear of every screen edge by as much as its selection box
+-- reaches past it (EditModeSystemMixin's UpdateClampOffsets, and the box's anchors in
+-- EditModeChatFrameSystemTemplate: 32 left for the buttons, 60 up for the tabs, 25 right, 32 down
+-- for the edit box; build 1.60.1.70205). A module that takes one of those away from the window
+-- takes the margin with it. Only ChatFrame1 is an Edit Mode system: the other windows have none.
+
+---How far past the window its background reaches (FloatingBorderedFrame's Background), so a
+---margin of this puts the background on the screen's edge.
+Chat.MARGIN = { left = -2, bottom = -6 }
+
+local SIDES = { left = 1, right = 2, top = 3, bottom = 4 }
+local margins = {} -- side -> the margin a module asked for
+local theirs = {} -- side -> Blizzard's own, to give back
+local marginsHooked
+
+-- Sets the margins asked for. Also after Blizzard works its own out again, as it does each time
+-- Edit Mode lays the window's selection box out.
+local function applyMargins()
+    local frame = _G.ChatFrame1
+    if not (next(margins) and frame and frame.GetClampRectInsets and frame.SetClampRectInsets) then
+        return
+    end
+    local insets = { frame:GetClampRectInsets() }
+    local changed = false
+    for side, value in pairs(margins) do
+        local i = SIDES[side]
+        if insets[i] ~= value then
+            theirs[side] = insets[i]
+            insets[i] = value
+            changed = true
+        end
+    end
+    if changed then
+        frame:SetClampRectInsets(insets[1], insets[2], insets[3], insets[4])
+    end
+end
+
+---Sets how far the main chat window stays from one edge of the screen, in place of the margin
+---Edit Mode keeps there, or gives Blizzard's back with nil. One module to a side.
+---@param side string "left", "right", "top" or "bottom"
+---@param value? number as SetClampRectInsets takes it: negative keeps the window that far in
+function Chat.SetMargin(side, value)
+    local frame = _G.ChatFrame1
+    if not (SIDES[side] and frame and frame.GetClampRectInsets and frame.SetClampRectInsets) then
+        return
+    end
+    if value ~= nil then
+        margins[side] = value
+        -- Hooked once, since a hook can't be taken off; it does nothing with no margin asked for.
+        if not marginsHooked and hooksecurefunc and frame.UpdateClampOffsets then
+            marginsHooked = true
+            hooksecurefunc(frame, "UpdateClampOffsets", applyMargins)
+        end
+        applyMargins()
+        return
+    end
+    local ours, was = margins[side], theirs[side]
+    margins[side], theirs[side] = nil, nil
+    if ours ~= nil and was ~= nil then
+        local insets = { frame:GetClampRectInsets() }
+        if insets[SIDES[side]] == ours then
+            insets[SIDES[side]] = was
+            frame:SetClampRectInsets(insets[1], insets[2], insets[3], insets[4])
+        end
     end
 end
 
