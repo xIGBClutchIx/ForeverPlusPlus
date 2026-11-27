@@ -36,7 +36,10 @@ ns.changelog = {
                 { L.ITEMTOOLTIPS_TITLE, "Pair Short Lines (on by default) puts two short lines that "
                     .. "follow each other on one row: how an item binds with \"Unique\", and a "
                     .. "shield's armor with its block. Scan Age has a new choice, Beside the Price, "
-                    .. "which shows \"2h ago\" on the Auction line instead of a line of its own." },
+                    .. "which shows \"2h ago\" on the Auction line instead of a line of its own. "
+                    .. "Quests (on by default, with the QuestieDB addon) names the quests an item is "
+                    .. "for, those in your quest log first and those you've done in gray, so old "
+                    .. "quest items you can throw away stand out." },
                 { L.CHATBUTTONSEVERYTAB_TITLE, "A new module, on by default, that keeps the buttons "
                     .. "beside the chat window whichever chat tab is in front: the game's chat "
                     .. "menu and channels buttons, and the ones Forever++ adds. The game only "

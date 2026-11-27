@@ -239,6 +239,18 @@ L.NEWITEM_TITLE = "New in Forever"
 L.NEWITEM_DESC = "Say \"New in Forever\" on an item Classic never had. An item Forever changed but "
     .. "Classic also had isn't marked."
 L.NEWITEM_LINE = "New in Forever" -- the tooltip line
+L.ITEMTOOLTIPS_ITEMQUESTS = "Show Quests"
+L.ITEMQUESTS_TITLE = "Quests"
+L.ITEMQUESTS_DESC = "Name the quests an item is for, from QuestieDB: one it starts, one that asks "
+    .. "for it, or one that gives it to you to use. Quests in your log come first, and a quest "
+    .. "you've done is gray, so an old quest item you can throw away stands out. For an item many "
+    .. "quests ask for, such as cloth, only the quests in your log are named."
+L.ITEMQUESTS_LINE = "Quest" -- the tooltip line's label
+L.ITEMQUESTS_LEVEL_NAME = "%s %s" -- the quest's level ("[12]"), its name
+L.ITEMQUESTS_STATE = "%s %s" -- the quest, where it stands (ITEMQUESTS_IN_LOG or ITEMQUESTS_DONE)
+L.ITEMQUESTS_IN_LOG = "(in log)" -- in the quest log
+L.ITEMQUESTS_DONE = "(done)" -- the quest is done
+L.ITEMQUESTS_MORE = { "%d more quest", "%d more quests" } -- after the lines, the quests not named
 L.ITEMTOOLTIPS_SHORTSTATS = "Short Stat Text"
 L.SHORTSTATS_TITLE = "Short Stat Text"
 L.SHORTSTATS_DESC = "Write an Equip: bonus as a plain stat: \"+29 Spell Power\" for \"Equip: "

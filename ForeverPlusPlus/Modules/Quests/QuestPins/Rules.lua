@@ -2,11 +2,12 @@
 -- what the game says of the player. Unknown restrictions keep a quest shown.
 local _, ns = ...
 
-local type, floor, format = type, math.floor, string.format
+local type, format = type, string.format
 local UnitLevel, UnitRace, UnitClass, UnitFactionGroup = UnitLevel, UnitRace, UnitClass, UnitFactionGroup
 local C_QuestLog = C_QuestLog
 
 local L = ns.L
+local QuestieDB = ns.QuestieDB
 local module = ns.modules.QuestPins
 local internal = module.internal
 
@@ -26,35 +27,10 @@ local PVP_AREAS = ns.GameData.New("questPinsPvpAreas", { [2597] = true, [3277] =
     { label = "Quest Pins: battleground areas" })
 local PVP_TAG = 41
 
--- QuestieDB's race mask: the race ID's own bit for Classic's eight, and bits 33 and 34 for
--- Forever's two Skyborne races, 95 (Alliance) and 96 (Horde), as its raceMaskById has them
--- (QuestieDB src/corrections/enum/expansions.lua, read 2026-11-15). Its Forever data sets a
--- Skyborne's bit on every quest one can take: all 3461 quests for a whole side have it, and so do
--- class quests shared with another race (a Night Elf's druid quests), counted in its data at
--- build commit 4dbb8244. So the bit alone decides. By race ID, not by side: the side isn't
--- always known (early in login), and a guess there would hide or show every quest.
-local CLASSIC_RACES = 8
-local NEW_RACE_BITS = { [95] = 33, [96] = 34 }
-
 -- The client's quest tags for a dungeon or a raid (Classic's: Dungeon, Raid, Heroic, Raid 10 and
 -- 25, Scenario).
 local INSTANCE_TAGS = { [81] = true, [62] = true, [85] = true, [88] = true, [89] = true, [98] = true }
 local tagOf = ns.Quests.Tag
-
--- Whether a mask of races or classes has the bit of an ID (1, 2, 3, ... from the lowest bit).
-local function inMask(mask, id)
-    return floor(mask / 2 ^ (id - 1)) % 2 == 1
-end
-
--- Whether a race mask has the player's race, by its own bit. Never by another race of its side: a
--- Dwarf's quest isn't a Skyborne's. A race the masks have no bit for lets the quest show.
-local function raceInMask(mask, race)
-    if race <= CLASSIC_RACES then
-        return inMask(mask, race)
-    end
-    local bit = NEW_RACE_BITS[race]
-    return not bit or inMask(mask, bit)
-end
 
 local function isInstance(id, info)
     local tag = tagOf(id)
@@ -269,13 +245,13 @@ function internal.Check(id)
     end
     if info.races then
         local _, _, race = UnitRace("player")
-        if race and not raceInMask(info.races, race) then
+        if race and not QuestieDB.HasRace(info.races, race) then
             return false, "race"
         end
     end
     if info.classes then
         local _, _, class = UnitClass("player")
-        if class and not inMask(info.classes, class) then
+        if class and not QuestieDB.HasClass(info.classes, class) then
             return false, "class"
         end
     end

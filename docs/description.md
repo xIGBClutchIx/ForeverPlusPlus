@@ -120,6 +120,7 @@ Everything is on by default except where noted. Each module can be turned off, a
   - **Stat Colors**: each stat in its own color.
   - **Short Stat Text**: "+29 Spell Power" for an Equip: bonus that is a plain stat.
   - **Compare Crafted Gear**: a recipe that makes gear compares it with what you wear.
+  - **Quests**: the quests an item is for, those in your quest log first and those you've done in gray, so old quest items stand out. Needs the QuestieDB addon.
   - **Repair Cost**, **Item Count** across bags and bank, **Disenchant** results and value, and **New in Forever** on items Classic never had: off by default.
 - **Gathering Skill Tooltips**: Shows the skill a herb, ore, skinnable beast, or locked box needs in its tooltip, colored against your skill.
 - **Waylaid Crates**: Helps fill Waylaid Crates: what each bundle costs at auction, and an auction house category listing every item your crates still need.

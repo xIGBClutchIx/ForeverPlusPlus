@@ -17,7 +17,7 @@ local _, ns = ...
 
 local type, pairs, ipairs, pcall, next = type, pairs, ipairs, pcall, next
 local loadstring, setfenv = loadstring, setfenv
-local floor = math.floor
+local floor, min, sort = math.floor, math.min, table.sort
 
 local L = ns.L
 
@@ -36,7 +36,7 @@ local FIELDS = {
     Quest = { "name", "questLevel", "requiredLevel", "requiredMaxLevel", "startedBy", "finishedBy",
         "objectives", "objectivesText", "preQuestGroup", "preQuestSingle", "nextQuestInChain",
         "exclusiveTo", "zoneOrSort", "requiredRaces", "requiredClasses", "sourceItemId",
-        "requiredSkill", "breadcrumbForQuestId", "questFlags", "specialFlags",
+        "requiredSourceItems", "requiredSkill", "breadcrumbForQuestId", "questFlags", "specialFlags",
         "requiredMinRep", "requiredMaxRep", "childQuests", "parentQuest" },
     Npc = { "name", "subName", "minLevel", "maxLevel", "rank", "spawns", "zoneID", "questStarts",
         "questEnds", "friendlyToFaction", "npcFlags" },
@@ -834,6 +834,179 @@ function QuestieDB.QuestsLeadingTo(questID)
     return linked("leadsTo", questID)
 end
 
+-- Races and classes ---------------------------------------------------------------------------
+
+-- QuestieDB's race mask: the race ID's own bit for Classic's eight, and bits 33 and 34 for
+-- Forever's two Skyborne races, 95 (Alliance) and 96 (Horde), as its raceMaskById has them
+-- (QuestieDB src/corrections/enum/expansions.lua, read 2026-11-15). Its Forever data sets a
+-- Skyborne's bit on every quest one can take: all 3461 quests for a whole side have it, and so do
+-- class quests shared with another race (a Night Elf's druid quests), counted in its data at
+-- build commit 4dbb8244. So the bit alone decides. By race ID, not by side: the side isn't
+-- always known (early in login), and a guess there would hide or show every quest.
+local CLASSIC_RACES = 8
+local NEW_RACE_BITS = { [95] = 33, [96] = 34 }
+
+-- Whether a mask has the bit of an ID (1, 2, 3, ... from the lowest bit).
+local function inMask(mask, bitID)
+    return floor(mask / 2 ^ (bitID - 1)) % 2 == 1
+end
+
+---Whether a quest's race mask (`races` of `QuestieDB.Quest`) lets a race (`UnitRace`'s third value)
+---take it, by the race's own bit: a Dwarf's quest isn't a Skyborne's. True for no mask, and for a
+---race the masks have no bit for.
+---@param mask number?
+---@param raceID number
+---@return boolean
+function QuestieDB.HasRace(mask, raceID)
+    if not mask then
+        return true
+    end
+    if raceID <= CLASSIC_RACES then
+        return inMask(mask, raceID)
+    end
+    local bitID = NEW_RACE_BITS[raceID]
+    return not bitID or inMask(mask, bitID)
+end
+
+---Whether a quest's class mask (`classes`) lets a class (`UnitClass`'s third value) take it. True
+---for no mask.
+---@param mask number?
+---@param classID number
+---@return boolean
+function QuestieDB.HasClass(mask, classID)
+    return not mask or inMask(mask, classID)
+end
+
+-- Items and their quests ----------------------------------------------------------------------
+
+-- Item ID -> { [questID] = kind }, from every quest's rows: the items that start it, the items it
+-- asks for (an item objective, or the item a spell objective is cast with), the item its giver hands
+-- over, and the items it needs that aren't objectives. Built a few quests at a time by
+-- IndexItemQuests, since that's a read of four fields of every quest (about 5,900 in 1.1.6, which
+-- tie about 4,000 items to quests). Items name only some of theirs (`relatedQuests`, 755 items), so
+-- this is read from the quests' side.
+local ITEM_FIELDS = { "startedBy", "objectives", "sourceItemId", "requiredSourceItems" }
+local KIND_ORDER = { starts = 1, objective = 2, given = 3, used = 4, related = 5 }
+local itemIndex
+local indexIDs, indexNext -- the quest IDs being read, and the next place in them; nil once done
+local itemQuests = {} -- item ID -> our list, kept: the data can't change without a reload
+
+-- Ties an item to a quest, keeping the kind that says most when it's tied more than one way.
+local function tie(index, itemID, questID, kind)
+    if not id(itemID) then
+        return
+    end
+    local quests = index[itemID]
+    if not quests then
+        quests = {}
+        index[itemID] = quests
+    end
+    local had = quests[questID]
+    if not had or KIND_ORDER[kind] < KIND_ORDER[had] then
+        quests[questID] = kind
+    end
+end
+
+-- The item IDs in one group of a quest's objectives, at `at` in each row.
+local function objectiveItems(groups, group, at, fn)
+    local rows = type(groups) == "table" and groups[group]
+    if type(rows) == "table" then
+        for _, row in ipairs(rows) do
+            if type(row) == "table" then
+                fn(row[at])
+            end
+        end
+    end
+end
+
+---Reads up to `count` more quests into the index of which items are for which quest, and says
+---whether it's whole. Call it a few hundred at a time on later frames, so no one frame reads every
+---quest; `ItemQuests` answers once it's whole. False while QuestieDB isn't ready.
+---@param count number
+---@return boolean done
+function QuestieDB.IndexItemQuests(count)
+    local found = api()
+    if not found then
+        return false
+    end
+    if itemIndex and not indexIDs then
+        return true
+    end
+    local entity = found.Quest
+    if not itemIndex then
+        itemIndex = {}
+        indexIDs, indexNext = ids(try(entity.GetAllIds)), 1
+    end
+    local index = itemIndex
+    local last = min(#indexIDs, indexNext + count - 1)
+    for i = indexNext, last do
+        local questID = indexIDs[i]
+        local values = try(entity.GetAll, questID, ITEM_FIELDS)
+        if type(values) == "table" then
+            for _, itemID in ipairs(group(values[1], 3)) do
+                tie(index, itemID, questID, "starts")
+            end
+            local function asked(itemID)
+                tie(index, itemID, questID, "objective")
+            end
+            objectiveItems(values[2], 3, 1, asked)
+            objectiveItems(values[2], 6, 3, asked)
+            tie(index, values[3], questID, "given")
+            for _, itemID in ipairs(ids(values[4])) do
+                tie(index, itemID, questID, "used")
+            end
+        end
+    end
+    indexNext = last + 1
+    if indexNext > #indexIDs then
+        indexIDs, indexNext = nil, nil
+        return true
+    end
+    return false
+end
+
+---The quests an item is for, ascending by quest ID, as our own list of `{ id, kind }`: `kind` is
+---`"starts"` (the item starts it), `"objective"` (the quest asks for it), `"given"` (its giver hands
+---it over), `"used"` (the quest needs it but doesn't count it), or `"related"` (only the item's
+---own `relatedQuests` names it). Empty for an item tied to none; nil until `IndexItemQuests` is
+---whole, or while QuestieDB isn't ready. Every quest QuestieDB has, for either side and any class.
+---@param itemID number
+---@return table[]|nil
+function QuestieDB.ItemQuests(itemID)
+    local found = api()
+    if not (found and itemIndex and not indexIDs) or type(itemID) ~= "number" then
+        return nil
+    end
+    local list = itemQuests[itemID]
+    if not list then
+        local kinds = {}
+        for questID, kind in pairs(itemIndex[itemID] or {}) do
+            kinds[questID] = kind
+        end
+        local values = try(found.Item.GetAll, itemID, { "startQuest", "relatedQuests" })
+        if type(values) == "table" then
+            local starts = id(values[1])
+            if starts then
+                kinds[starts] = "starts"
+            end
+            for _, questID in ipairs(ids(values[2])) do
+                kinds[questID] = kinds[questID] or "related"
+            end
+        end
+        list = {}
+        for questID, kind in pairs(kinds) do
+            list[#list + 1] = { id = questID, kind = kind }
+        end
+        sort(list, function(a, b) return a.id < b.id end)
+        itemQuests[itemID] = list
+    end
+    local out = {}
+    for i, entry in ipairs(list) do
+        out[i] = { id = entry.id, kind = entry.kind }
+    end
+    return out
+end
+
 -- Settings ------------------------------------------------------------------------------------
 
 ---The gray rows a module that needs QuestieDB puts in `module.notice`: that it needs the addon,
@@ -880,5 +1053,6 @@ end
 ---Forgets what was read and checked, for the tests (a new stub of LibQuestieDB).
 function QuestieDB.Reset()
     lib, status, zones, drops, links = nil, nil, nil, nil, nil
+    itemIndex, indexIDs, indexNext, itemQuests = nil, nil, nil, {}
     waiting, listening = {}, false
 end

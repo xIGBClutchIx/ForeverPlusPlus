@@ -206,6 +206,17 @@ L.PAIRLINES_DESC = "把前后相邻的两个短行放在同一行，第一行靠
 L.NEWITEM_TITLE = "Forever新增"
 L.NEWITEM_DESC = "在经典旧世从未有过的物品上注明“Forever新增”。Forever改动过、但经典旧世也有的物品不会被标记。"
 L.NEWITEM_LINE = "Forever新增" -- the tooltip line
+L.ITEMTOOLTIPS_ITEMQUESTS = "显示任务"
+L.ITEMQUESTS_TITLE = "任务"
+L.ITEMQUESTS_DESC = "根据QuestieDB注明物品用于哪些任务：由它开始的任务、需要它的任务，或交给你使用它的"
+    .. "任务。任务日志中的任务排在最前，已完成的任务显示为灰色，方便找出可以丢弃的旧任务物品。对于许多"
+    .. "任务都需要的物品（例如布料），只列出任务日志中的任务。"
+L.ITEMQUESTS_LINE = "任务" -- the tooltip line's label
+L.ITEMQUESTS_LEVEL_NAME = "%s %s" -- the quest's level ("[12]"), its name
+L.ITEMQUESTS_STATE = "%s%s" -- the quest, where it stands (ITEMQUESTS_IN_LOG or ITEMQUESTS_DONE)
+L.ITEMQUESTS_IN_LOG = "（进行中）" -- in the quest log
+L.ITEMQUESTS_DONE = "（已完成）" -- the quest is done
+L.ITEMQUESTS_MORE = { "还有%d个任务" } -- after the lines, the quests not named
 L.ITEMTOOLTIPS_SHORTSTATS = "简短属性文字"
 L.SHORTSTATS_TITLE = "简短属性文字"
 L.SHORTSTATS_DESC = "把“装备：”效果写成简单的属性：把“装备：提高所有法术和魔法效果所造成的伤害和治疗效果，"

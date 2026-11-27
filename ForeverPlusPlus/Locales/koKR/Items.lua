@@ -231,6 +231,18 @@ L.NEWITEM_TITLE = "Forever 신규"
 L.NEWITEM_DESC = "클래식에 없던 아이템에 \"Forever 신규\"라고 표시합니다. Forever에서 바뀌었지만 클래식에도 "
     .. "있던 아이템은 표시하지 않습니다."
 L.NEWITEM_LINE = "Forever 신규" -- the tooltip line
+L.ITEMTOOLTIPS_ITEMQUESTS = "퀘스트 표시"
+L.ITEMQUESTS_TITLE = "퀘스트"
+L.ITEMQUESTS_DESC = "QuestieDB를 바탕으로 아이템이 어떤 퀘스트에 쓰이는지 표시합니다. 아이템으로 시작하는 "
+    .. "퀘스트, 아이템을 요구하는 퀘스트, 사용하라고 아이템을 주는 퀘스트가 표시됩니다. 퀘스트 목록에 "
+    .. "있는 퀘스트가 먼저 나오고, 완료한 퀘스트는 회색이라 버려도 되는 오래된 퀘스트 아이템이 눈에 "
+    .. "띕니다. 천처럼 많은 퀘스트가 요구하는 아이템에는 퀘스트 목록에 있는 퀘스트만 표시합니다."
+L.ITEMQUESTS_LINE = "퀘스트" -- the tooltip line's label
+L.ITEMQUESTS_LEVEL_NAME = "%s %s" -- the quest's level ("[12]"), its name
+L.ITEMQUESTS_STATE = "%s %s" -- the quest, where it stands (ITEMQUESTS_IN_LOG or ITEMQUESTS_DONE)
+L.ITEMQUESTS_IN_LOG = "(진행 중)" -- in the quest log
+L.ITEMQUESTS_DONE = "(완료)" -- the quest is done
+L.ITEMQUESTS_MORE = { "퀘스트 %d개 더" } -- after the lines, the quests not named
 L.ITEMTOOLTIPS_SHORTSTATS = "짧은 능력치 문구"
 L.SHORTSTATS_TITLE = "짧은 능력치 문구"
 L.SHORTSTATS_DESC = "착용 효과를 간단한 능력치로 씁니다. \"착용 효과: 모든 주문 및 효과에 의한 피해와 치유량이 "
