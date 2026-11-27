@@ -350,7 +350,7 @@ L.NAMEPLATECOMBO_DESC = "Show your combo points on your target's nameplate, one 
     .. "and nothing with none. For Rogues, and Druids in Cat Form."
 L.NAMEPLATECOMBO_POSITION = "Position"
 L.NAMEPLATECOMBO_POSITION_DESC = "Where the dots sit on the nameplate."
-L.NAMEPLATECOMBO_POSITION_ABOVE = "Above the Health Bar"
+L.NAMEPLATECOMBO_POSITION_ABOVE = "Above the Name"
 L.NAMEPLATECOMBO_POSITION_BELOW = "Below the Health Bar"
 L.NAMEPLATECOMBO_SIZE = "Size"
 L.NAMEPLATECOMBO_SIZE_DESC = "How big the dots are."

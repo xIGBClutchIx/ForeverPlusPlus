@@ -1,9 +1,10 @@
 -- Nameplate Combo Points: a Rogue's or a cat Druid's combo points on their target's nameplate,
--- above or below its health bar, one dot a point and nothing at none. A feature request, issue #27.
+-- above its name or below its health bar, one dot a point and nothing at none. A feature request,
+-- issue #27.
 --
 -- Forever has no combo points on nameplates of its own: Blizzard_NamePlates' TOC leaves the Rogue
 -- and Druid ClassNameplateBar files out of this client, so its combo points are only the dots on
--- the target frame (ComboFrame, build 1.60.1.70205). Ours use that frame's own art.
+-- the target frame (ComboFrame, build 1.60.1.70205).
 --
 -- The count may be secret (GetComboPoints is SecretWhenUnitPowerRestricted in the client's API
 -- notes, and our own mana reads secret even out of combat), so it's never compared: each dot is a
@@ -56,10 +57,15 @@ function module:IsAvailable()
     return class == "ROGUE" or class == "DRUID" or (debug and debug.db and debug.db.enabled) or false
 end
 
-local TEXTURE = "Interface\\ComboFrame\\ComboPoint" -- the target frame's dots (ComboFrame.xml)
-local DOT_WIDTH, DOT_HEIGHT, GAP = 8, 16, 2 -- its red dot's part of the art, as Blizzard sizes it
+-- A dot's art has to be a whole image: a status bar crops its texture itself as it fills, so a part
+-- of a sheet picked with SetTexCoord (the target frame's ComboFrame art) came out as slivers of the
+-- wrong part. Blizzard's own red combo point from its modern Rogue bar where the client has that
+-- atlas, or else the round red light the game has always had.
+local ATLAS = "uf-roguecp-icon-red"
+local TEXTURE = "Interface\\COMMON\\Indicator-Red"
+local DOT_SIZE, GAP = 12, 1
 local DEFAULT_MAX = 5
-local OFFSET = 2 -- between the dots and the health bar
+local OFFSET = 2 -- between the dots and what they sit beside
 
 local holder -- our frame, made the first time a target's plate is up
 local dots = {}
@@ -83,18 +89,14 @@ local function build()
     for i = 1, maxPoints() do
         -- Full from point i on, empty before it: the count is only ever handed to the bar.
         local dot = CreateFrame("StatusBar", nil, holder)
-        dot:SetSize(DOT_WIDTH, DOT_HEIGHT)
-        dot:SetPoint("LEFT", (i - 1) * (DOT_WIDTH + GAP), 0)
-        dot:SetStatusBarTexture(TEXTURE)
-        local fill = dot:GetStatusBarTexture()
-        if fill then
-            fill:SetTexCoord(0.375, 0.5625, 0, 1)
-        end
+        dot:SetSize(DOT_SIZE, DOT_SIZE)
+        dot:SetPoint("LEFT", (i - 1) * (DOT_SIZE + GAP), 0)
+        dot:SetStatusBarTexture(ns.Frames.HasAtlas(ATLAS) and ATLAS or TEXTURE)
         dot:SetMinMaxValues(i - 1, i)
         dot:SetValue(0)
         dots[i] = dot
     end
-    holder:SetSize(#dots * DOT_WIDTH + (#dots - 1) * GAP, DOT_HEIGHT)
+    holder:SetSize(#dots * DOT_SIZE + (#dots - 1) * GAP, DOT_SIZE)
 end
 
 local function update()
@@ -128,7 +130,8 @@ end
 local function attach()
     local plate = C_NamePlate.GetNamePlateForUnit("target")
     local frame = plate and plate.UnitFrame
-    local container = frame and ns.Nameplates.Parts(frame).container
+    local parts = frame and ns.Nameplates.Parts(frame)
+    local container = parts and parts.container
     if not container then
         if holder then
             holder:Hide()
@@ -142,7 +145,8 @@ local function attach()
     if module.db.position == "below" then
         holder:SetPoint("TOP", container, "BOTTOM", 0, -OFFSET)
     else
-        holder:SetPoint("BOTTOM", container, "TOP", 0, OFFSET)
+        -- Over the name, which sits on the bar: straight on the bar they'd cover it.
+        holder:SetPoint("BOTTOM", parts.name or container, "TOP", 0, OFFSET)
     end
     holder:SetScale(module.db.size / 100)
     holder:SetFrameLevel(frame:GetFrameLevel() + 5)

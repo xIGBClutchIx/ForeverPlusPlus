@@ -22,8 +22,8 @@ ns.changelog = {
                     .. "each in a color you pick. The game's gray for a tapped mob and its threat "
                     .. "colors come first." },
                 { L.NAMEPLATECOMBO_TITLE, "A new module for Rogues and Druids, off by default, that "
-                    .. "shows your combo points on your target's nameplate, above or below its health "
-                    .. "bar: one dot a point and nothing with none." },
+                    .. "shows your combo points on your target's nameplate, above its name or below "
+                    .. "its health bar: one dot a point and nothing with none." },
                 { L.BAGSLOTCOUNTER_TITLE, "Bag Button on Screen (on by default) shows a backpack "
                     .. "button with your free bag slots while the controller interface is on, "
                     .. "since it hides the bag buttons. Move it in Edit Mode, and point at it for "

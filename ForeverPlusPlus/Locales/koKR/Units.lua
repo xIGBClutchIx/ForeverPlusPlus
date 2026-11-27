@@ -316,7 +316,7 @@ L.NAMEPLATECOMBO_DESC = "대상의 이름표에 연계 점수를 표시합니다
     .. "않습니다. 도적과 표범 변신 중인 드루이드에게 적용됩니다."
 L.NAMEPLATECOMBO_POSITION = "위치"
 L.NAMEPLATECOMBO_POSITION_DESC = "이름표에서 점이 표시되는 위치입니다."
-L.NAMEPLATECOMBO_POSITION_ABOVE = "생명력 막대 위"
+L.NAMEPLATECOMBO_POSITION_ABOVE = "이름 위"
 L.NAMEPLATECOMBO_POSITION_BELOW = "생명력 막대 아래"
 L.NAMEPLATECOMBO_SIZE = "크기"
 L.NAMEPLATECOMBO_SIZE_DESC = "점의 크기입니다."

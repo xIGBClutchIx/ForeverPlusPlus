@@ -344,7 +344,7 @@ L.NAMEPLATECOMBO_DESC = "Zeigt Eure Combopunkte auf der Namensplakette Eures Zie
     .. "Combopunkt und nichts ohne. Für Schurken und Druiden in Katzengestalt."
 L.NAMEPLATECOMBO_POSITION = "Position"
 L.NAMEPLATECOMBO_POSITION_DESC = "Wo die Punkte auf der Namensplakette sitzen."
-L.NAMEPLATECOMBO_POSITION_ABOVE = "Über der Gesundheitsleiste"
+L.NAMEPLATECOMBO_POSITION_ABOVE = "Über dem Namen"
 L.NAMEPLATECOMBO_POSITION_BELOW = "Unter der Gesundheitsleiste"
 L.NAMEPLATECOMBO_SIZE = "Größe"
 L.NAMEPLATECOMBO_SIZE_DESC = "Wie groß die Punkte sind."

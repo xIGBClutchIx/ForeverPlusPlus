@@ -332,7 +332,7 @@ L.NAMEPLATECOMBO_DESC = "Показывать приемы серии на ин�
     .. "прием и ничего, если их нет. Для разбойников и друидов в облике кошки."
 L.NAMEPLATECOMBO_POSITION = "Положение"
 L.NAMEPLATECOMBO_POSITION_DESC = "Где на индикаторе находятся точки."
-L.NAMEPLATECOMBO_POSITION_ABOVE = "Над полосой здоровья"
+L.NAMEPLATECOMBO_POSITION_ABOVE = "Над именем"
 L.NAMEPLATECOMBO_POSITION_BELOW = "Под полосой здоровья"
 L.NAMEPLATECOMBO_SIZE = "Размер"
 L.NAMEPLATECOMBO_SIZE_DESC = "Размер точек."
