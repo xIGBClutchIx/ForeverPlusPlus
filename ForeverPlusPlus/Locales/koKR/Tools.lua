@@ -12,8 +12,8 @@ L.DEBUG_DESC = "모든 모듈의 디버그 옵션과 시험 도구(자체 시험
 L.DEBUG_NOTICE = "디버그를 끄면 모든 디버그 옵션이 기본값으로 돌아갑니다." -- a gray row atop the module
 L.DEBUG_NOTICE_DESC = "여기서 설정한 것이 보이지 않는 곳에서 계속 작동하지 않도록 하기 위해서입니다."
 -- ConsoleVariables
-L.CONSOLEVARIABLES_DESC = "설정의 한 페이지에서 게임의 콘솔 변수(CVar)를 살펴보고 바꾸며, 게임이 접속할 때마다 "
-    .. "되돌리는 것까지 원하는 변수를 잠가 유지합니다."
+L.CONSOLEVARIABLES_DESC = "설정에서 게임의 콘솔 변수(CVar)를 확인하고 변경합니다. 원하는 값을 잠그면 접속할 때 "
+    .. "게임이 초기화하는 변수도 설정한 값으로 유지됩니다."
 L.CONSOLEVARIABLES_CHAT_DESC = "잠근 콘솔 변수를 그 값으로 유지할 수 없으면 대화창에 알립니다."
 -- A gray row atop the module while it's off with console variables locked
 L.CONSOLEVARIABLES_LOCKS_OFF = "이 모듈이 꺼져 있는 동안에는 잠근 콘솔 변수가 유지되지 않습니다."

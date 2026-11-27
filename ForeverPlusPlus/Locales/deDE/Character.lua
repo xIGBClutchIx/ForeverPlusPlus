@@ -83,9 +83,9 @@ L.TALENTPLANNER_PLAN_DESC = "Setzt Talente, ohne sie zu erlernen. Jeder Klick f�
     .. "Reihenfolge einen Punkt hinzu, damit Ihr ihm beim Leveln folgen könnt. Der Plan wird für "
     .. "diesen Charakter gespeichert."
 L.TALENTPLANNER_CLICK = "<Klicken, um einen Punkt hinzuzufügen>\n<Rechtsklick, um einen zu "
-    .. "entfernen>\n<Umschalt halten für jeden Rang>"
-L.TALENTPLANNER_CLICK_MAXED = "<Rechtsklick, um einen zu entfernen>\n<Umschalt halten für jeden "
-    .. "Rang>" -- at its highest rank
+    .. "entfernen>\n<Umschalt halten, um alle Ränge auf einmal hinzuzufügen oder zu entfernen>"
+L.TALENTPLANNER_CLICK_MAXED = "<Rechtsklick, um einen zu entfernen>\n<Umschalt halten, um alle Ränge "
+    .. "auf einmal zu entfernen>" -- at its highest rank
 -- With the controller interface on, where there are no clicks
 -- Each %s is a button as the player's controller shows it (Gamepad.Label): A, then Y
 L.TALENTPLANNER_CLICK_PAD = "<%s, um einen Punkt hinzuzufügen>\n<%s, um einen zu entfernen>"

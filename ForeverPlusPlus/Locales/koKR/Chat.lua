@@ -6,10 +6,10 @@ end
 
 -- ChatCopy
 L.CHATCOPY_TITLE = "대화 복사"
-L.CHATCOPY_DESC = "대화창 옆에 대화 내용을 선택하고 복사할 수 있는 텍스트로 여는 버튼을 더합니다."
+L.CHATCOPY_DESC = "대화창 옆에 버튼을 추가합니다. 버튼을 누르면 대화 내용을 선택하고 복사할 수 있는 창이 열립니다."
 L.CHATCOPY_TOOLTIP = "대화 복사"
 L.CHATCOPY_TOOLTIP_DESC = "대화 내용을 선택하고 복사할 수 있는 텍스트로 엽니다."
-L.CHATCOPY_STAMPS = "시각 클릭"
+L.CHATCOPY_STAMPS = "시간 표시 클릭으로 복사"
 L.CHATCOPY_STAMPS_DESC = "대화 줄의 시각을 클릭하면 그 줄을 복사합니다. 게임의 대화 시각 설정이 켜져 있어야 "
     .. "합니다."
 L.CHATCOPY_STAMPS_PROMPT = "Ctrl+C를 눌러 이 대화 줄을 복사하십시오."

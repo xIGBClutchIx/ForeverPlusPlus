@@ -11,12 +11,12 @@ L.INSTANCES_RANGE = "%d-%d" -- lowest, highest
 
 -- WorldMap: one module, a part each for Points of Interest, Zone Info, Unexplored Areas, and
 -- Coordinates. Each part's title heads its section in Settings, over its Enabled checkbox.
-L.WORLDMAP_DESC = "세계 지도에 주요 관심 지점, 지역 정보 창, 미탐험 지역, 좌표를 더합니다. 아래에 각각 별도의 "
+L.WORLDMAP_DESC = "세계 지도에 관심 지점, 지역 정보 창, 미탐험 지역, 좌표를 더합니다. 아래에 각각 별도의 "
     .. "'사용함' 체크박스가 있습니다."
 
 -- PointsOfInterest. Place names on the map come from the game, or from Data/PointsOfInterest.lua.
 L.WORLDMAP_FILTER_TRAVEL = "배와 비행선" -- one checkbox for both, in the world map's filter menu
-L.POI_TITLE = "주요 관심 지점"
+L.POI_TITLE = "관심 지점"
 -- Debug's button that lists the dungeons the map doesn't place yet
 L.POI_FIND = "새 던전 찾기"
 L.POI_FIND_BUTTON = "찾기"

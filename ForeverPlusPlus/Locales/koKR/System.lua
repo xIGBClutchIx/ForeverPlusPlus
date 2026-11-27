@@ -6,8 +6,8 @@ end
 
 -- ErrorCatcher
 L.ERRORCATCHER_TITLE = "오류 수집기"
-L.ERRORCATCHER_DESC = "Lua 오류와 차단된 동작을 블리자드 오류 창 대신 조용히 수집하고, 나중에 /fpp errors나 "
-    .. "미니맵 버튼으로 복사할 수 있는 창에서 읽게 합니다."
+L.ERRORCATCHER_DESC = "블리자드 오류 창을 띄우지 않고 Lua 오류와 차단된 동작을 수집합니다. /fpp errors를 "
+    .. "입력하거나 미니맵 버튼을 누르면 수집한 내용을 확인하고 복사할 수 있습니다."
 L.ERRORCATCHER_CHAT_DESC = "오류를 수집하면 대화창에 알립니다."
 L.ERRORCATCHER_SOUND_DESC = "오류를 수집하면 소리를 재생합니다. 많아야 10초에 한 번입니다. 소리를 고르면 한 번 "
     .. "재생됩니다."
@@ -22,7 +22,7 @@ L.ERRORCATCHER_COMMAND = "수집한 Lua 오류 표시"
 L.ERRORCATCHER_CAUGHT = "오류를 수집했습니다: %s /fpp errors를 입력하면 볼 수 있습니다." -- first line of the error
 L.ERRORCATCHER_CAUGHT_LOADING = "접속하는 동안 오류 %d개를 수집했습니다. /fpp errors를 입력하면 볼 수 있습니다."
 L.ERRORCATCHER_OTHER_HANDLER = "BugGrabber 같은 다른 애드온이 Lua 오류를 수집하고 있어, '오류 수집기'는 "
-    .. "차단된 동작과 경고만 봅니다."
+    .. "차단된 동작과 경고만 수집합니다."
 L.ERRORCATCHER_OTHER_HANDLER_DESC = "Lua 오류는 대신 그 애드온, 예를 들어 BugSack의 창으로 갑니다. 블리자드 "
     .. "오류 창과 차단된 동작 팝업도 그 애드온에 맡깁니다."
 L.ERRORCATCHER_BLOCKED = "%s: %s 애드온이 보호된 함수 %s 호출을 시도했습니다." -- event, addon, function

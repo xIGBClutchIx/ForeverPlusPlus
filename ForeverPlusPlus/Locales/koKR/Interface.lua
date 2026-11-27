@@ -6,10 +6,10 @@ end
 
 -- Tooltips
 L.TOOLTIPS_TITLE = "툴팁"
-L.TOOLTIPS_DESC = "개체와 아이템 툴팁에 색을 입힙니다. 외곽선과 이름을 직업, 적대 여부, 등급에 따라 칠하고, "
+L.TOOLTIPS_DESC = "개체와 아이템 툴팁에 색을 입힙니다. 외곽선과 이름을 직업, 우호도, 등급에 따라 칠하고, "
     .. "길드, 레벨, 직업을 색으로 표시하며, 플레이어 칭호와 개체가 노리는 대상을 보여 줍니다."
-L.TOOLTIPS_COLOR_CLASS = "직업 (NPC는 적대 여부)"
-L.TOOLTIPS_COLOR_REACTION = "적대 여부"
+L.TOOLTIPS_COLOR_CLASS = "직업 (NPC는 우호도)"
+L.TOOLTIPS_COLOR_REACTION = "우호도"
 L.TOOLTIPS_COLOR_OFF = "블리자드 기본값"
 L.TOOLTIPS_SECTION_BORDERS = "외곽선"
 L.TOOLTIPS_SECTION_TEXT = "글자 색상"
@@ -38,7 +38,7 @@ L.TOOLTIPS_FRIENDS_DESC = "친구 목록에서 친구의 툴팁도 같은 방식
     .. "위 옵션에 맞춰 칠합니다."
 L.TOOLTIPS_PLAYER_TITLE_DESC = "플레이어의 칭호를 이름과 함께 표시합니다."
 L.TOOLTIPS_TARGET = "대상"
-L.TOOLTIPS_TARGET_DESC = "개체가 노리는 대상을 직업이나 적대 여부에 따라 칠한 줄을 더하며, 대상이 나라면 붉은색 "
+L.TOOLTIPS_TARGET_DESC = "개체가 노리는 대상을 직업이나 우호도에 따라 칠한 줄을 더하며, 대상이 나라면 붉은색 "
     .. "\"당신\"으로 표시합니다."
 L.TOOLTIPS_DROP_CHANCE = "퀘스트 아이템 획득 확률"
 L.TOOLTIPS_DROP_CHANCE_DESC = "생물 툴팁의 퀘스트 아이템 줄 뒤에 그 생물이 아이템을 떨어뜨릴 확률을 표시합니다. "

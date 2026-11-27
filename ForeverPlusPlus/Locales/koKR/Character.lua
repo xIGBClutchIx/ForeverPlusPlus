@@ -6,13 +6,13 @@ end
 
 -- CharacterWindow
 L.CHARACTERWINDOW_TITLE = "캐릭터 창"
-L.CHARACTERWINDOW_DESC = "캐릭터 창을 정리합니다. 장비, 칭호, 소환수 옆 탭, 맨 위부터 시작하는 능력치, 직업 "
-    .. "색상의 레벨과 이름, 아이템마다 옆에 붙는 내구도 막대를 더합니다."
-L.CHARACTERWINDOW_SIDETABS = "옆 탭"
+L.CHARACTERWINDOW_DESC = "장비, 칭호, 소환수 탭을 옆으로 옮기고 능력치를 맨 위부터 표시합니다. 제목에는 레벨을 "
+    .. "금색으로, 이름을 직업 색상으로 표시하고 각 아이템 옆에 내구도 막대를 추가합니다."
+L.CHARACTERWINDOW_SIDETABS = "측면 탭"
 L.CHARACTERWINDOW_SIDETABS_DESC = "장비, 칭호, 소환수 탭을 평판, 숙련 등 다른 탭 옆으로 옮기고, 능력치 위의 "
     .. "초상화를 없애 능력치가 맨 위부터 시작하게 합니다. 다른 탭처럼 작동하며, 능력치로 돌아가려면 캐릭터 탭을 "
     .. "고르십시오."
-L.CHARACTERWINDOW_COLORTITLE = "색상 제목"
+L.CHARACTERWINDOW_COLORTITLE = "제목에 색상 적용"
 L.CHARACTERWINDOW_COLORTITLE_DESC = "창 위쪽에 있는 게임의 레벨 줄 대신, 창 제목에 금색 레벨과 직업 색상의 이름을 "
     .. "표시합니다."
 L.CHARACTERWINDOW_TITLE_FORMAT = "%s %s" -- level, name
@@ -40,8 +40,8 @@ L.DURABILITYWARNING_ALERT = "화면 알림"
 L.DURABILITYWARNING_ALERT_DESC = "게임이 \"소지품이 가득 찼습니다.\"라고 알리는 화면 가운데에 붉은색으로 경고를 "
     .. "표시합니다."
 L.DURABILITYWARNING_SOUND_DESC = "경고와 함께 소리를 재생합니다. 소리를 고르면 한 번 재생됩니다."
-L.DURABILITYWARNING_CHAT_DESC = "어떤 아이템이 닳았고 얼마나 남았는지 대화창에 알립니다. 접속할 때 이미 닳아 있던 "
-    .. "장비는 접속이 끝난 뒤 이 줄만 받습니다."
+L.DURABILITYWARNING_CHAT_DESC = "내구도가 낮은 아이템과 남은 내구도를 대화창에 표시합니다. 접속 시 이미 내구도가 "
+    .. "낮은 장비는 접속이 완료된 후 대화창에서만 알립니다."
 L.DURABILITYWARNING_LOW_ITEM = "%s: 내구도 %d%%. 곧 수리하십시오." -- item link, percent
 L.DURABILITYWARNING_LOW_GEAR = "장비 내구도 %d%%. 곧 수리하십시오." -- percent
 L.DURABILITYWARNING_BROKEN_ITEM = "%s: 부서졌습니다. 능력치를 되찾으려면 수리하십시오." -- item link
@@ -68,8 +68,9 @@ L.TALENTPLANNER_PLAN = "특성 계획"
 L.TALENTPLANNER_DONE = "계획 완료"
 L.TALENTPLANNER_PLAN_DESC = "특성을 배우지 않고 배치합니다. 클릭할 때마다 계획에 포인트가 순서대로 더해져, "
     .. "레벨을 올리면서 따라갈 수 있습니다. 계획은 이 캐릭터에 저장됩니다."
-L.TALENTPLANNER_CLICK = "<포인트를 더하려면 클릭>\n<하나 빼려면 오른쪽 클릭>\n<모든 등급을 보려면 Shift 누르기>"
-L.TALENTPLANNER_CLICK_MAXED = "<하나 빼려면 오른쪽 클릭>\n<모든 등급을 보려면 Shift 누르기>" -- at its highest rank
+L.TALENTPLANNER_CLICK = "<포인트를 더하려면 클릭>\n<하나 빼려면 오른쪽 클릭>\n<모든 등급을 한꺼번에 더하거나 빼려면 "
+    .. "Shift 누르기>"
+L.TALENTPLANNER_CLICK_MAXED = "<하나 빼려면 오른쪽 클릭>\n<모든 등급을 한꺼번에 빼려면 Shift 누르기>" -- at its highest rank
 -- With the controller interface on, where there are no clicks
 -- Each %s is a button as the player's controller shows it (Gamepad.Label): A, then Y
 L.TALENTPLANNER_CLICK_PAD = "<포인트를 더하려면 %s>\n<하나 빼려면 %s>"
@@ -116,11 +117,11 @@ L.TALENTPLANNER_IMPORT_CLASS = "다른 직업의 특성 계획입니다."
 L.TALENTPLANNER_IMPORT_INVALID = "이 특성 계획은 이 특성 트리에 맞지 않습니다."
 -- The %s in these three is the site the link is from, such as talentsforever.com.
 L.TALENTPLANNER_IMPORT_OLD = "%s의 이전 버전에서 만든 링크입니다. 그곳에서 열고 링크를 다시 복사하십시오."
-L.TALENTPLANNER_IMPORT_NEW = "이 Forever++가 읽을 수 있는 것보다 새로운 %s 버전에서 만든 링크입니다. 가져오려면 "
+L.TALENTPLANNER_IMPORT_NEW = "현재 Forever++에서 지원하는 버전보다 최신 버전의 %s에서 만든 링크입니다. 가져오려면 "
     .. "Forever++를 업데이트하십시오."
 L.TALENTPLANNER_IMPORT_TREE = "내 특성 트리가 %s에서 그 링크를 만들 때의 트리와 달라, 포인트를 정확히 배치할 수 "
     .. "없습니다."
-L.TALENTPLANNER_IMPORT_RANK = "그 링크는 특성에 그 특성이 가진 것보다 많은 등급을 넣습니다."
+L.TALENTPLANNER_IMPORT_RANK = "링크의 특성 계획에 최대 등급을 초과한 특성이 있습니다."
 L.TALENTPLANNER_IMPORT_POINTS = "그 링크는 특성 포인트 %d개를 쓰는데, 캐릭터가 가진 %d개보다 많습니다."
 L.TALENTPLANNER_DELETE = "계획 삭제"
 L.TALENTPLANNER_DELETE_CONFIRM = "이 특성 계획을 삭제하시겠습니까?"

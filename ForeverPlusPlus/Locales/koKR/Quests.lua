@@ -8,7 +8,7 @@ end
 L.QUESTTRACKER_TITLE = "퀘스트 추적기"
 -- Its rows on the Profiler page.
 L.QUESTTRACKER_PART_FONTS = "글꼴 적용"
-L.QUESTTRACKER_PART_FIT = "상자 크기 맞추기"
+L.QUESTTRACKER_PART_FIT = "배경 크기 조정"
 L.QUESTTRACKER_PART_SORT = "퀘스트 정렬"
 -- Headers over its options in Settings
 L.QUESTTRACKER_SECTION_TEXT = "텍스트"

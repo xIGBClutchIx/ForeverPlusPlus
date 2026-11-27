@@ -65,8 +65,8 @@ L.TALENTPLANNER_PLAN = "規劃天賦"
 L.TALENTPLANNER_DONE = "完成規劃"
 L.TALENTPLANNER_PLAN_DESC = "配置天賦而不學習它們。每次點擊會依序在規劃中加入一點，讓你升級時照著點。"
     .. "規劃會儲存在此角色上。"
-L.TALENTPLANNER_CLICK = "<點擊以加入一點>\n<右鍵點擊以移除一點>\n<按住Shift鍵可一次處理所有等級>"
-L.TALENTPLANNER_CLICK_MAXED = "<右鍵點擊以移除一點>\n<按住Shift鍵可一次處理所有等級>" -- at its highest rank
+L.TALENTPLANNER_CLICK = "<點擊以加入一點>\n<右鍵點擊以移除一點>\n<按住Shift鍵可一次加入或移除所有等級>"
+L.TALENTPLANNER_CLICK_MAXED = "<右鍵點擊以移除一點>\n<按住Shift鍵可一次移除所有等級>" -- at its highest rank
 -- With the controller interface on, where there are no clicks
 -- Each %s is a button as the player's controller shows it (Gamepad.Label): A, then Y
 L.TALENTPLANNER_CLICK_PAD = "<按%s以加入一點>\n<按%s以移除一點>"

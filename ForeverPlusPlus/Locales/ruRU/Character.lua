@@ -79,9 +79,9 @@ L.TALENTPLANNER_DONE = "Готово"
 L.TALENTPLANNER_PLAN_DESC = "Расставлять таланты, не изучая их. Каждый щелчок добавляет очко в план "
     .. "по порядку, чтобы следовать ему по мере роста. План сохраняется для этого персонажа."
 L.TALENTPLANNER_CLICK = "<Щелкните, чтобы добавить очко>\n<Щелкните правой кнопкой мыши, чтобы "
-    .. "убрать очко>\n<Удерживайте Shift, чтобы увидеть все ранги>"
+    .. "убрать очко>\n<Удерживайте Shift, чтобы добавить или убрать все ранги сразу>"
 L.TALENTPLANNER_CLICK_MAXED = "<Щелкните правой кнопкой мыши, чтобы убрать очко>\n<Удерживайте Shift, "
-    .. "чтобы увидеть все ранги>" -- at its highest rank
+    .. "чтобы убрать все ранги сразу>" -- at its highest rank
 -- With the controller interface on, where there are no clicks
 -- Each %s is a button as the player's controller shows it (Gamepad.Label): A, then Y
 L.TALENTPLANNER_CLICK_PAD = "<%s – добавить очко>\n<%s – убрать очко>"
