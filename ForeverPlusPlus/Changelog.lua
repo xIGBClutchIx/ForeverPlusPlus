@@ -152,6 +152,10 @@ ns.changelog = {
                     .. "now share one place and size, so a quest giver's window no longer jumps when "
                     .. "you click a quest. One you moved before keeps its place: the greeting's, or "
                     .. "the quest window's if only that one was moved." },
+                { L.QUESTTRACKER_TITLE, "A quest you accept is followed by the map and arrow "
+                    .. "again, as the game does by itself, instead of being let go when Sort Quests "
+                    .. "moves it. The same goes for the quest you follow when Hide Completed Quests "
+                    .. "or the Zone Menu untracks it." },
             } },
         },
     },
