@@ -218,7 +218,10 @@ L.JUNKDELETE_BUTTON = "Удалить: %s (%s)"
 L.JUNKDELETE_HINT = "<Щелкните, чтобы уничтожить эту стопку>"
 -- the stack's item link, then what a vendor pays for it
 L.JUNKDELETE_DELETED = "Удалено, чтобы освободить место: %s (%s)."
-L.JUNKDELETE_CHAT_DESC = "Сообщать в чате, какая стопка удалена и сколько она стоила."
+L.JUNKDELETE_CONFIRM = "Спрашивать перед удалением"
+L.JUNKDELETE_CONFIRM_DESC = "Спрашивать, прежде чем уничтожить стопку. Если выключить, она уничтожается одним щелчком."
+L.JUNKDELETE_CONFIRM_TEXT = "Уничтожить %s, чтобы освободить место?"
+L.JUNKDELETE_CHAT_DESC ="Сообщать в чате, какая стопка удалена и сколько она стоила."
 
 -- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE,
 -- DISENCHANT_TITLE, STATCOLORS_TITLE, SHORTSTATS_TITLE, NEWITEM_TITLE, CRAFTEDCOMPARE_TITLE, and

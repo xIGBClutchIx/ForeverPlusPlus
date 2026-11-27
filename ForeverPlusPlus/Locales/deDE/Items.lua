@@ -227,7 +227,10 @@ L.JUNKDELETE_BUTTON = "Löschen: %s (%s)"
 L.JUNKDELETE_HINT = "<Klicken, um diesen Stapel zu zerstören>"
 -- the stack's item link, then what a vendor pays for it
 L.JUNKDELETE_DELETED = "Gelöscht, um Platz zu schaffen: %s (%s)."
-L.JUNKDELETE_CHAT_DESC = "Nennt im Chat, welcher Stapel gelöscht wurde und was er wert war."
+L.JUNKDELETE_CONFIRM = "Vor dem Löschen nachfragen"
+L.JUNKDELETE_CONFIRM_DESC = "Fragt nach, bevor der Stapel zerstört wird. Ausgeschaltet zerstört ihn ein Klick."
+L.JUNKDELETE_CONFIRM_TEXT = "%s zerstören, um Platz zu schaffen?"
+L.JUNKDELETE_CHAT_DESC ="Nennt im Chat, welcher Stapel gelöscht wurde und was er wert war."
 
 -- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE,
 -- DISENCHANT_TITLE, STATCOLORS_TITLE, SHORTSTATS_TITLE, NEWITEM_TITLE, CRAFTEDCOMPARE_TITLE, and

@@ -185,7 +185,10 @@ L.JUNKDELETE_BUTTON = "删除：%s（%s）"
 L.JUNKDELETE_HINT = "<点击摧毁这组物品>"
 -- the stack's item link, then what a vendor pays for it
 L.JUNKDELETE_DELETED = "为腾出空间已删除：%s（%s）。"
-L.JUNKDELETE_CHAT_DESC = "在聊天中说明删除了哪组物品以及它值多少钱。"
+L.JUNKDELETE_CONFIRM = "删除前确认"
+L.JUNKDELETE_CONFIRM_DESC = "摧毁这组物品前先询问。关闭后点击一次即摧毁。"
+L.JUNKDELETE_CONFIRM_TEXT = "摧毁%s以腾出空间？"
+L.JUNKDELETE_CHAT_DESC ="在聊天中说明删除了哪组物品以及它值多少钱。"
 
 -- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE,
 -- DISENCHANT_TITLE, STATCOLORS_TITLE, SHORTSTATS_TITLE, NEWITEM_TITLE, CRAFTEDCOMPARE_TITLE, and

@@ -214,6 +214,9 @@ L.JUNKDELETE_BUTTON = "Delete: %s (%s)"
 L.JUNKDELETE_HINT = "<Click to destroy this stack>"
 -- the stack's item link, then what a vendor pays for it
 L.JUNKDELETE_DELETED = "Deleted to make room: %s (%s)."
+L.JUNKDELETE_CONFIRM = "Confirm Before Deleting"
+L.JUNKDELETE_CONFIRM_DESC = "Ask before the stack is destroyed. Turn it off to destroy it with one click."
+L.JUNKDELETE_CONFIRM_TEXT = "Destroy %s to make room?" -- %s: the item's link
 L.JUNKDELETE_CHAT_DESC = "Say in chat which stack was deleted and what it was worth."
 
 -- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE,

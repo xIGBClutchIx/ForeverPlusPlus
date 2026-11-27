@@ -205,7 +205,10 @@ L.JUNKDELETE_BUTTON = "삭제: %s (%s)"
 L.JUNKDELETE_HINT = "<클릭하면 이 묶음을 파괴합니다>"
 -- the stack's item link, then what a vendor pays for it
 L.JUNKDELETE_DELETED = "자리를 만들기 위해 삭제함: %s (%s)."
-L.JUNKDELETE_CHAT_DESC = "어떤 묶음을 삭제했는지와 그 가치를 대화창에 알립니다."
+L.JUNKDELETE_CONFIRM = "삭제 전 확인"
+L.JUNKDELETE_CONFIRM_DESC = "묶음을 파괴하기 전에 확인합니다. 끄면 클릭 한 번으로 파괴합니다."
+L.JUNKDELETE_CONFIRM_TEXT = "자리를 만들기 위해 다음 아이템을 파괴하시겠습니까? %s"
+L.JUNKDELETE_CHAT_DESC ="어떤 묶음을 삭제했는지와 그 가치를 대화창에 알립니다."
 
 -- ItemTooltips (its parts' sections use SELLPRICE_TITLE, REPAIRCOST_TITLE, ITEMCOUNT_TITLE,
 -- DISENCHANT_TITLE, STATCOLORS_TITLE, SHORTSTATS_TITLE, NEWITEM_TITLE, CRAFTEDCOMPARE_TITLE, and

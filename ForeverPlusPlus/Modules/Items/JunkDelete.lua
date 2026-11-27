@@ -5,7 +5,8 @@
 --
 -- DeleteCursorItem has restrictions (Blizzard_APIDocumentationGenerated/GameCursorDocumentation.lua,
 -- wow-ui-source `forever` branch): it needs a click, so it runs only from the button's own OnClick,
--- never by itself. It isn't protected, so a plain button may call it. **Unverified** in game.
+-- or the Yes of the popup the Confirm Before Deleting option asks first, as Blizzard's own delete
+-- popup does. It isn't protected, so a plain button may call it. **Unverified** in game.
 local _, ns = ...
 
 local _G, format, min, max = _G, string.format, math.min, math.max
@@ -18,6 +19,7 @@ local L = ns.L
 
 local module = ns.NewModule("JunkDelete", L.JUNKDELETE_DESC, {
     enabled = false,
+    confirm = true,
     chat = true,
 })
 module.title = L.JUNKDELETE_TITLE
@@ -30,6 +32,7 @@ module.notice = {
 }
 
 module.options = {
+    { key = "confirm", name = L.JUNKDELETE_CONFIRM, description = L.JUNKDELETE_CONFIRM_DESC },
     ns.ChatOption(L.JUNKDELETE_CHAT_DESC),
 }
 
@@ -105,11 +108,11 @@ local function refresh()
 end
 
 -- Destroys the stack the button names, only if its slot still holds it, unlocked, and it's what
--- lands on the cursor. Anything else puts it back and looks again.
-local function onClick()
-    local want = target
+-- lands on the cursor. Anything else puts it back and looks again. It runs from a click: the
+-- button's, or the Yes of the popup the Confirm option asks first.
+local function destroy(want)
     target = nil
-    if not want or InCombatLockdown() or CursorHasItem() then
+    if not module.enabled or InCombatLockdown() or CursorHasItem() then
         refresh()
         return
     end
@@ -135,6 +138,22 @@ local function onClick()
     end
     button:Hide() -- until the bags answer (BAG_UPDATE_DELAYED)
     module:Print(format(L.JUNKDELETE_DELETED, want.link, ns.Money(want.value)))
+end
+
+local function onClick()
+    local want = target
+    if not want then
+        refresh()
+        return
+    end
+    if module.db.confirm then
+        -- The popup names the stack asked about; destroy() checks the slot still holds it.
+        ns.Confirm("JUNKDELETE_CONFIRM", L.JUNKDELETE_CONFIRM_TEXT, function()
+            destroy(want)
+        end, want.link)
+        return
+    end
+    destroy(want)
 end
 
 local function build()
