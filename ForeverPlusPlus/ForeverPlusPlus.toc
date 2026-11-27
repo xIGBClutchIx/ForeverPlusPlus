@@ -279,6 +279,7 @@ Modules\Chat\ChatHistory.lua
 Modules\Chat\ChatArrowKeys.lua
 Modules\Chat\SocialButton.lua
 Modules\Chat\HideChatButtons.lua
+Modules\Chat\ChatButtonsEveryTab.lua
 Modules\Chat\HideChatTabs.lua
 Modules\Chat\HideCombatLogTab.lua
 Modules\Chat\MovableCombatLogTab.lua

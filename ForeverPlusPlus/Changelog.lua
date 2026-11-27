@@ -37,16 +37,16 @@ ns.changelog = {
                     .. "follow each other on one row: how an item binds with \"Unique\", and a "
                     .. "shield's armor with its block. Scan Age has a new choice, Beside the Price, "
                     .. "which shows \"2h ago\" on the Auction line instead of a line of its own." },
+                { L.CHATBUTTONSEVERYTAB_TITLE, "A new module, off by default, that keeps the buttons "
+                    .. "beside the chat window whichever chat tab is in front: the game's chat "
+                    .. "menu and channels buttons, and the ones Forever++ adds. The game only "
+                    .. "shows them on the first tab." },
                 { L.DISENCHANTICONS_TITLE, "A new module, off by default, that marks the items you can "
                     .. "disenchant with the Disenchant icon, in your bags, the bank, the auction house, and loot. By "
                     .. "default only on a character with Enchanting, and Skip Items Worth More Sold "
                     .. "leaves out what a vendor pays more for." },
             } },
             { L.CHANGELOG_CHANGED, {
-                "Chat Copy and Whisper Window: Button on Every Tab (on by default) keeps the "
-                    .. "module's chat button beside the chat window whichever tab is in front. "
-                    .. "Before, it was only there on the first tab, like the game's own chat "
-                    .. "buttons.",
                 { L.HIDECHATBUTTONS_TITLE, "The main chat window can sit at the left edge of the "
                     .. "screen in Edit Mode, without the strip kept for the buttons." },
                 { L.EDITBOXONTOP_TITLE, "The main chat window can sit at the bottom edge of the "

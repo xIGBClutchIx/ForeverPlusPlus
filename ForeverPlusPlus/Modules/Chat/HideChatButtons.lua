@@ -49,12 +49,6 @@ local function buttons()
     if social and social:GetParent() ~= host then
         list[#list + 1] = social
     end
-    -- One of ours that stays on every tab is in the front tab's button frame meanwhile.
-    for _, button in ipairs(Chat.ColumnButtons()) do
-        if button ~= social and button:GetParent() ~= host then
-            list[#list + 1] = button
-        end
-    end
     return list
 end
 

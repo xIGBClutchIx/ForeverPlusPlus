@@ -121,9 +121,12 @@ L.CHAT_BUTTON_FOLDED = "Das Chatfenster ist zu niedrig für seinen Knopf, daher 
 L.CHAT_BUTTON_FOLDED_DESC = "Der Knopf passte nicht über den Sprechblasenknopf neben dem Chatfenster, "
     .. "daher steht er stattdessen unten im Menü dieses Knopfes. Macht das Chatfenster höher, um ihn "
     .. "zurückzuholen."
-L.CHAT_BUTTON_EVERY_TAB = "Knopf auf jedem Reiter"
-L.CHAT_BUTTON_EVERY_TAB_DESC = "Lässt den Knopf neben dem Chatfenster, egal welcher Chatreiter vorn ist. "
-    .. "Die eigenen Chatknöpfe des Spiels gibt es nur auf dem ersten Reiter."
+
+-- ChatButtonsEveryTab
+L.CHATBUTTONSEVERYTAB_TITLE = "Chatknöpfe auf jedem Reiter"
+L.CHATBUTTONSEVERYTAB_DESC = "Lässt die Knöpfe neben dem Chatfenster, egal welcher Chatreiter vorn ist: "
+    .. "die Knöpfe des Spiels für Chatmenü und Kanäle und die, die Forever++ hinzufügt. Das Spiel "
+    .. "zeigt sie nur auf dem ersten Reiter."
 
 -- ChatFont
 L.CHATFONT_TITLE = "Chatschrift"

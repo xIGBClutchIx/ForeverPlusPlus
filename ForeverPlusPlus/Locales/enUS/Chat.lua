@@ -118,9 +118,12 @@ L.CHAT_BUTTON_FOLDED = "The chat window is too short for its button, so it's in 
 L.CHAT_BUTTON_FOLDED_DESC = "The button didn't fit above the speech bubble button beside the chat "
     .. "window, so it's listed at the bottom of that button's menu instead. Make the chat window "
     .. "taller to bring it back."
-L.CHAT_BUTTON_EVERY_TAB = "Button on Every Tab"
-L.CHAT_BUTTON_EVERY_TAB_DESC = "Keep the button beside the chat window whichever chat tab is in front. "
-    .. "The game's own chat buttons are only there on the first tab."
+
+-- ChatButtonsEveryTab
+L.CHATBUTTONSEVERYTAB_TITLE = "Chat Buttons on Every Tab"
+L.CHATBUTTONSEVERYTAB_DESC = "Keep the buttons beside the chat window whichever chat tab is in front: "
+    .. "the game's chat menu and channels buttons, and the ones Forever++ adds. The game only shows "
+    .. "them on the first tab."
 
 -- ChatFont
 L.CHATFONT_TITLE = "Chat Font"

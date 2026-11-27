@@ -43,7 +43,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Professions | Adds to the professions window, each part with its own checkbox. **Recipe Colors**: recipes colored by skill-up chance. **Skill-Ups Left**: how many skill-ups before a recipe turns gray. **Skill Bar**: the levels a recipe turns yellow, green, and gray at, with your skill marked. **Crafting Costs**: reagent cost, value, and profit, from auction prices, what a recipe costs to craft on its tooltip, and what a Craftsman's Writ costs to fill on its own. **Unlearned Recipes**: the recipes you don't know yet in the list, with the skill each takes and the item that teaches it. |
 | Macro Icon Search | Adds a search box to the macro icon picker, over the icons of the spells you know and the items you carry. |
 | **Chat** | |
-| Chat Copy | Adds a button beside the chat window that opens the chat as text you can copy, on every chat tab. Click Timestamps (off by default) copies a single line. |
+| Chat Copy | Adds a button beside the chat window that opens the chat as text you can copy. Click Timestamps (off by default) copies a single line. |
 | Chat Levels | Shows each player's level before their name in chat, [60:Name], colored like a quest of that level. Uses the last level Forever++ saw them at. Off by default. |
 | Chat Sounds | Plays a sound when someone writes in guild, officer, party, or raid chat, each with its own checkbox and sound. Off by default. |
 | Quest Links | Turns the plain-text quests Questie users link in chat into clickable Blizzard quest links. |
@@ -55,6 +55,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Chat History | Shows each chat window's latest lines again after a login or reload, except whispers. |
 | Chat Arrow Keys | Up and Down in the chat box bring back what you sent, and Left and Right move through the text, without holding Alt. |
 | Social Button | Moves the social (Quick Join) button down beside the chat window's other buttons. |
+| Chat Buttons on Every Tab | Keeps the buttons beside the chat window whichever chat tab is in front: the game's chat menu and channels buttons, and the ones Forever++ adds. Off by default. |
 | Hide Chat Buttons | Hides the buttons beside the chat window until the mouse is over the chat, and lets the main chat window sit at the left edge of the screen in Edit Mode. Off by default. |
 | Hide Chat Tabs | Hides the chat windows' tabs until the mouse is over the chat. A tab with a new message still flashes. Off by default. |
 | Hide Combat Log Tab | Takes the Combat Log's tab off the chat window. Off by default. |

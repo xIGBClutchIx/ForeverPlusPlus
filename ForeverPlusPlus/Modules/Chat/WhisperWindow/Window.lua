@@ -826,7 +826,7 @@ local function showButton()
         button:Show()
         -- Before Chat Copy's (20), so on a short chat window whispers keep their button and
         -- copying is the one that goes in the chat menu.
-        ns.Chat.AddButton(module.name, button, 15, nil, module.db.everyTab)
+        ns.Chat.AddButton(module.name, button, 15)
         updateButton()
     elseif button then
         ns.Chat.RemoveButton(module.name)
@@ -873,7 +873,7 @@ function internal.DisableWindow()
 end
 
 function internal.OptionChanged(key)
-    if key == "chatButton" or key == "everyTab" then
+    if key == "chatButton" then
         showButton()
     elseif window and window:IsShown() then
         shownAlpha = nil
