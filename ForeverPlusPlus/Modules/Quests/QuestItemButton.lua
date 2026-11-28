@@ -346,9 +346,10 @@ local function bindingText()
     if not key then
         return ""
     end
-    -- In short ("SC" for Shift-C), so it fits the button; a controller button keeps the game's
-    -- own abbreviated text, its icon.
-    return ns.Keys.Short(key) or GetBindingText(key, nil, true)
+    -- As on action buttons: the game's abbreviated text ("s-C"), cut off at the button's width,
+    -- or in short ("SC") while Short Keybinds is on. A controller button keeps the game's icon.
+    local short = ns.Providers.Get("shortKeybinds") and ns.Keys.Short(key)
+    return short or GetBindingText(key, nil, true)
 end
 
 local editing = false -- Edit Mode is open: the button shows, to be placed
@@ -432,6 +433,10 @@ local function build()
     button.Count:SetPoint("BOTTOMRIGHT", -2, 2)
     button.HotKey = button:CreateFontString(nil, "OVERLAY", "NumberFontNormalSmallGray")
     button.HotKey:SetPoint("TOPRIGHT", -2, -3)
+    -- One line no wider than the button, as Blizzard's action buttons keep their key label.
+    button.HotKey:SetSize(ICON_SIZE - 4, 10)
+    button.HotKey:SetJustifyH("RIGHT")
+    button.HotKey:SetWordWrap(false)
     button:SetScript("OnEnter", onEnter)
     button:SetScript("OnLeave", onLeave)
     button:SetAlpha(0)
@@ -511,6 +516,13 @@ local function wantQuestie()
         QuestieDB.Cancel(onQuestieReady)
     end
 end
+
+-- Short Keybinds turned on or off: the key label follows it.
+ns.Providers.OnChanged("shortKeybinds", function()
+    if module.enabled then
+        draw()
+    end
+end)
 
 function module:OnEnable()
     self:On("QUEST_LOG_UPDATE", queue)

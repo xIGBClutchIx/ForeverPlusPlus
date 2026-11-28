@@ -30,6 +30,7 @@ module.category = "interface"
 module.added = "1.10.0"
 
 local PET_BUTTONS = 10 -- PetActionBar's numButtons (NUM_PET_ACTION_SLOTS)
+local provider = {} -- offered while the module is on; being there is all it says
 
 local pet = setmetatable({}, { __mode = "k" }) -- the pet bar's buttons
 local shortened = setmetatable({}, { __mode = "k" }) -- buttons whose label is ours now
@@ -87,12 +88,15 @@ function module:OnEnable()
         self:Hook(button, method, shorten)
         shorten(button)
     end)
+    -- For a button of our own with a key label (Quest Item Button's), which follows this module.
+    ns.Providers.Set("shortKeybinds", provider)
 end
 
 -- Blizzard's own text back, as its method writes it, on the labels we changed. GetBindingText is
 -- called with 1 as Blizzard's UpdateHotkeys calls it (wowlua-ls expects a string there), which
 -- gives the abbreviated "s-C".
 function module:OnDisable()
+    ns.Providers.Set("shortKeybinds", nil)
     for button in pairs(shortened) do
         local key = bindingKey(button)
         if key then
