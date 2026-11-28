@@ -135,7 +135,9 @@ end
 local ART_HEIGHT = 16 -- the sheet's art is taller than a dot (ComboPointTemplate: 12 by 16)
 local BLANK = "Interface\\Buttons\\WHITE8x8" -- a bar needs a texture to have a fill; never seen
 
-local native -- { gate, sockets, lights = { clip, ... } }, made the first time the look is picked
+-- { bars = the bars the count goes to, shown = every frame of the look }, made the first time
+-- the look is picked.
+local native
 
 -- A frame over `bar`'s fill, as tall as the art, that hides whatever of its children is outside it.
 local function clipOver(bar)
@@ -166,22 +168,33 @@ local function buildNative()
     if native then
         return
     end
-    local gate = CreateFrame("StatusBar", nil, holder)
+    -- Bars of the look's own, each with its fill from the start and never given another texture:
+    -- a clip is anchored to the fill, and over a bar with no texture yet it was anchored to
+    -- nothing, so every light showed whatever the count (in game, 2026-11-27).
+    local function unseenBar(from, to)
+        local bar = CreateFrame("StatusBar", nil, holder)
+        bar:SetStatusBarTexture(BLANK)
+        bar:GetStatusBarTexture():SetAlpha(0)
+        bar:SetMinMaxValues(from, to)
+        bar:SetValue(from)
+        return bar
+    end
+    local gate = unseenBar(0, 1)
     gate:SetAllPoints(holder)
-    gate:SetStatusBarTexture(BLANK)
-    gate:GetStatusBarTexture():SetAlpha(0)
-    gate:SetMinMaxValues(0, 1)
-    gate:SetValue(0)
     local sockets = clipOver(gate)
-    native = { gate = gate, sockets = sockets, lights = {} }
+    native = { bars = { gate }, shown = { gate, sockets } }
     for i, dot in ipairs(dots) do
         local socket = sheetPart(sockets, "BACKGROUND", 0, 0.375, 12)
         socket:SetPoint("TOPLEFT", dot, "TOPLEFT")
-        local clip = clipOver(dot)
+        local bar = unseenBar(i - 1, i)
+        bar:SetAllPoints(dot)
+        local clip = clipOver(bar)
         clip:SetFrameLevel(sockets:GetFrameLevel() + 1)
         local light = sheetPart(clip, "ARTWORK", 0.375, 0.5625, 8)
         light:SetPoint("TOPLEFT", dot, "TOPLEFT", 2, 0)
-        native.lights[i] = clip
+        native.bars[#native.bars + 1] = bar
+        native.shown[#native.shown + 1] = bar
+        native.shown[#native.shown + 1] = clip
     end
 end
 
@@ -194,14 +207,16 @@ local function applyLook()
         buildNative()
     end
     for _, dot in ipairs(dots) do
-        dot:SetStatusBarTexture(isNative and BLANK or ICONS[look] or ICONS.red)
-        dot:GetStatusBarTexture():SetAlpha(isNative and 0 or 1)
+        if not isNative then
+            dot:SetStatusBarTexture(ICONS[look] or ICONS.red)
+        end
+        -- Under the target frame's art the plain dots stay where they are, unseen: the art is
+        -- placed by them.
+        dot:SetAlpha(isNative and 0 or 1)
     end
     if native then
-        native.gate:SetShown(isNative)
-        native.sockets:SetShown(isNative)
-        for _, clip in ipairs(native.lights) do
-            clip:SetShown(isNative)
+        for _, part in ipairs(native.shown) do
+            part:SetShown(isNative)
         end
     end
 end
@@ -221,7 +236,9 @@ local function update()
         dot:SetValue(points)
     end
     if native then
-        native.gate:SetValue(points)
+        for _, bar in ipairs(native.bars) do
+            bar:SetValue(points)
+        end
     end
 end
 
