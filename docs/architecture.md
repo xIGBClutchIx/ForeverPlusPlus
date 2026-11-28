@@ -32,7 +32,7 @@ Game data kept by hand, loaded after the locales and before `Lib/`: plain tables
 - `Professions.lua`: `professionNodes` (herbs and veins: skill line, skill, item), `miningStones`, `sharedSpawns`, `treasureNodes` (chests), `fishingPools`, `fishingBobbers`, `professionTools`, `unskinnedFamilies` (beast families never skinned; `Professions.Skinnable`, with `LearnSkinnable` for what corpses teach) (`Lib/Professions.lua`, `Lib/Gathering.lua`), and `skeletonKeys` (Gathering Skill Tooltips).
 - `Spells.lua`: `spells`, the spell IDs more than one file uses, read with `ns.Data.Spell("FISHING")`, which registers the ID for Self Test.
 - `Items.lua`: `autoOpenKept` (Auto Open Containers).
-- `Buffs.lua`: `smartBuffs` (each class's buffs), `smartBuffStronger`, `smartBuffLevels` (Macros' Smart Buff).
+- `Buffs.lua`: `smartBuffs` (each class's buffs, with whom each one's group version reaches), `smartBuffStronger`, `smartBuffLevels` (Macros' Smart Buff).
 
 - `PointsOfInterest.lua`: `poiPoints` (by zone map ID, each point a dungeon or raid entrance, flight master, ship, zeppelin, tram, or spirit healer with its place in percent), `poiCities` (the capitals and the zone around each), `poiPlaces` (places of several instances, and the entrances of an instance with several). World Map's Points of Interest draws them, and Zone Info lists a zone's dungeons from them.
 - `ZoneInfo.lua`: `zones` (by zone map ID: levels, fishing skill, herbs, ores, side), `zoneHerbs` and `zoneOres` (short names; the skills are `professionNodes`'), `zoneDungeons` (dungeons in a zone that `poiPoints` doesn't place).
@@ -397,7 +397,7 @@ What each module is, in the code's terms (what it does for players is in `README
 - **Spell Ranks**
 - **Train All**: a button of ours beside the trainer window's Train, buying one skill after each answer from the trainer.
 - **Buff Timers**
-- **Macros**: a folder: the module, which makes and deletes its macros and marks their buttons, and its Smart Buff macro as a part.
+- **Macros**: a folder: the module, which makes and deletes its macros and marks their buttons, and its Smart Buff macro as a part (`SmartBuff.lua`), with its Reminder Button. `SmartBuffGroup.lua` holds Smart Buff's rules for Buff Your Group, whom in the group to buff next and when with a group version (`internal.PlanGroup`), with no frames or game calls, for the `smartbuffgroup` spec.
 - **Class Colors**
 - **World Map**: a folder: the module, its quick checkboxes in the world map's filter menu (`Filter.lua`), and a part each for Points of Interest (with its flight points, ley lines, and Blizzard icons in files of their own), Zone Info, Unexplored Areas, and Coordinates, with their map, zone, and map art data.
 - **Flight Timer**

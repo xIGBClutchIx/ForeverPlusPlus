@@ -33,7 +33,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 | Auto Quest | Accepts quests and turns in finished ones as you talk to quest givers. Never picks a reward for you, and pauses while you hold Shift. Off by default. |
 | **Character** | |
 | Buff Timers | Shows the time left under buffs and debuffs as a clock (1:23) instead of rounded minutes. Can sort buffs by time left and hide tracking buffs. |
-| Macros | Makes the macros you turn on and keeps them up to date. Smart Buff casts the right buff at the best rank for your target (Might for Warriors, Wisdom for mana users, and so on), skipping buffs they already have. Off by default. |
+| Macros | Makes the macros you turn on and keeps them up to date. Smart Buff casts the right buff at the best rank for your target (Might for Warriors, Wisdom for mana users, and so on), skipping buffs they already have, and can buff your whole party or raid from one key, with a group version when enough are missing it, and show a button for the next buff. Off by default. |
 | Spell Ranks | Marks action bar spells that have a higher rank you already know, and names the best rank in the tooltip. `/fpp ranks` lists them, and Use Highest Rank (off by default) swaps them for the best rank when you learn a spell. |
 | Train All | Adds a Train All button to the trainer window that learns everything you can learn and afford. Off by default. |
 | XP Bar Text | Shows your experience on the bar all the time, with the percent, rested XP, and the XP of quests ready to turn in. Its tooltip adds XP per hour and time to level. |
