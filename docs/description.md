@@ -99,6 +99,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 - **Currency Bar**: Shows your gold, and optionally currencies, in a small box, with this session's gains and gold per hour in its tooltip. Placed in Edit Mode. Off by default.
 - **Edit Mode Glow**: Dims the blue and gold boxes Edit Mode draws over each frame, so their edges are easier to see and line up. A Show Glow checkbox and slider under the Edit Mode window hide or dim them while you edit. Off by default.
 - **Hide Bag and Menu Bars**: Hides the bag bar and the micro menu until the mouse is over them, or always. Their keys still work. Off by default.
+- **Hide Damage Meter**: Hides the game's Damage Meter until the mouse is over it, and fades it in and out. Show in Combat keeps it in sight all through a fight. Off by default.
 - **Hide Zone Text**: Hides the zone and area names that appear at the top of the screen when you enter one. Off by default.
 - **Hide Error Messages**: Keeps the red errors that repeat while you fight (Out of range, Not enough energy) off the screen, along with their sounds. Off by default.
 - **Hide Stance Bar**: Hides the stance bar. Its keys still work, and Show on Mouseover brings it back under the mouse. Off by default.

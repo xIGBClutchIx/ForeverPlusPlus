@@ -149,6 +149,13 @@ L.HIDEMENUBARS_MICRO_DESC = "隐藏微型菜单：角色信息、法术书、天
 L.HIDEMENUBARS_MOUSEOVER = "鼠标指向时显示"
 L.HIDEMENUBARS_MOUSEOVER_DESC = "鼠标指向隐藏的栏时显示它，可以像平常一样点击。关闭时它一直隐藏。"
 
+-- HideDamageMeter
+L.HIDEDAMAGEMETER_TITLE = "隐藏伤害统计"
+L.HIDEDAMAGEMETER_DESC = "隐藏暴雪的“伤害统计”，直到鼠标指向它。它何时可以显示仍由编辑模式中的“可见性”设置"
+    .. "决定，并且它在编辑模式中会显示。"
+L.HIDEDAMAGEMETER_COMBAT = "战斗中显示"
+L.HIDEDAMAGEMETER_COMBAT_DESC = "整场战斗中都显示伤害统计，战斗结束片刻后再次隐藏。"
+
 -- HideErrors
 L.HIDEERRORS_TITLE = "隐藏错误信息"
 L.HIDEERRORS_DESC = "不在屏幕上方显示战斗中反复出现的红色错误（例如“超出范围”和“能量值不足”），也不播放"

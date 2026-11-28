@@ -184,6 +184,16 @@ L.HIDEMENUBARS_MOUSEOVER = "Show on Mouseover"
 L.HIDEMENUBARS_MOUSEOVER_DESC = "Show a hidden bar while the mouse is over it, where you can click it "
     .. "as usual. Off, it stays hidden."
 
+-- HideDamageMeter
+-- [quotes: DAMAGE_METER_LABEL]
+L.HIDEDAMAGEMETER_TITLE = "Hide Damage Meter"
+-- [quotes: DAMAGE_METER_LABEL, HUD_EDIT_MODE_SETTING_DAMAGE_METER_VISIBILITY]
+L.HIDEDAMAGEMETER_DESC = "Hide Blizzard's Damage Meter until the mouse is over it. Its Visibility "
+    .. "setting in Edit Mode still decides when it can show, and it shows in Edit Mode."
+L.HIDEDAMAGEMETER_COMBAT = "Show in Combat"
+L.HIDEDAMAGEMETER_COMBAT_DESC = "Show the damage meter all through a fight, and hide it again a moment "
+    .. "after the fight ends."
+
 -- HideErrors
 L.HIDEERRORS_TITLE = "Hide Error Messages"
 L.HIDEERRORS_DESC = "Keep the red errors that repeat while you fight, like Out of range and Not "

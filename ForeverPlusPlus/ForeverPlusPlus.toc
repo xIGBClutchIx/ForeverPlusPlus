@@ -254,6 +254,7 @@ Modules\Interface\LootRolls.lua
 Modules\Interface\ActionBarColors.lua
 Modules\Interface\HideStanceBar.lua
 Modules\Interface\HideMenuBars.lua
+Modules\Interface\HideDamageMeter.lua
 Modules\Interface\HideZoneText.lua
 Modules\Interface\HideErrors.lua
 Modules\Interface\EditModeGlow.lua

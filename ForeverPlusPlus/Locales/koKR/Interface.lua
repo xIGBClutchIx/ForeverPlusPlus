@@ -166,6 +166,13 @@ L.HIDEMENUBARS_MOUSEOVER = "마우스를 올리면 표시"
 L.HIDEMENUBARS_MOUSEOVER_DESC = "마우스가 숨긴 막대 위에 있는 동안 막대를 표시해 평소처럼 클릭할 수 있게 합니다. "
     .. "끄면 계속 숨겨 둡니다."
 
+-- HideDamageMeter
+L.HIDEDAMAGEMETER_TITLE = "피해량 측정기 숨기기"
+L.HIDEDAMAGEMETER_DESC = "마우스를 올리기 전까지 블리자드의 '피해량 측정기'를 숨깁니다. 언제 표시될 수 있는지는 "
+    .. "여전히 편집 모드의 '가시성' 설정이 정하며, 편집 모드에서는 표시됩니다."
+L.HIDEDAMAGEMETER_COMBAT = "전투 중 표시"
+L.HIDEDAMAGEMETER_COMBAT_DESC = "전투 내내 피해량 측정기를 표시하고, 전투가 끝나고 잠시 뒤 다시 숨깁니다."
+
 -- HideErrors
 L.HIDEERRORS_TITLE = "오류 메시지 숨기기"
 L.HIDEERRORS_DESC = "\"목표가 사정 거리를 벗어났습니다.\"나 \"기력이 부족합니다.\"처럼 싸우는 동안 되풀이되는 "

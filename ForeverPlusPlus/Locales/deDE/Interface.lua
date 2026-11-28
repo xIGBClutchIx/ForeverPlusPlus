@@ -189,6 +189,15 @@ L.HIDEMENUBARS_MOUSEOVER = "Bei Mausberührung zeigen"
 L.HIDEMENUBARS_MOUSEOVER_DESC = "Zeigt eine ausgeblendete Leiste, solange die Maus darüber ist, sodass "
     .. "Ihr sie wie gewohnt anklicken könnt. Aus bleibt sie verborgen."
 
+-- HideDamageMeter
+L.HIDEDAMAGEMETER_TITLE = "Schadensanzeige ausblenden"
+L.HIDEDAMAGEMETER_DESC = "Blendet Blizzards „Schadensanzeige“ aus, bis die Maus darüber ist. Wann sie "
+    .. "erscheinen kann, entscheidet weiter ihre Einstellung „Sichtbarkeit“ im Bearbeitungsmodus, und "
+    .. "im Bearbeitungsmodus ist sie zu sehen."
+L.HIDEDAMAGEMETER_COMBAT = "Im Kampf zeigen"
+L.HIDEDAMAGEMETER_COMBAT_DESC = "Zeigt die Schadensanzeige während des ganzen Kampfes und blendet sie "
+    .. "kurz nach dem Kampf wieder aus."
+
 -- HideErrors
 L.HIDEERRORS_TITLE = "Fehlermeldungen ausblenden"
 L.HIDEERRORS_DESC = "Hält die roten Fehler, die sich im Kampf wiederholen, etwa „Außer Reichweite.“ "
