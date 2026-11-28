@@ -234,12 +234,13 @@ L.EASYDELETE_DESC = "Tippt beim Zerstören eines guten Gegenstands „LÖSCHEN�
 -- JunkDelete
 L.JUNKDELETE_TITLE = "Plunder-Löschknopf"
 L.JUNKDELETE_DESC = "Zeigt bei vollen Taschen unter dem Beutefenster einen Knopf, der Euren grauen "
-    .. "Stapel mit dem geringsten Händlerwert zerstört, um Platz für die Beute zu schaffen. Der Knopf "
-    .. "nennt den Stapel und seinen Wert."
+    .. "Stapel mit dem geringsten Händlerwert zerstört, um Platz für die Beute zu schaffen. Sein "
+    .. "Tooltip nennt den Stapel und seinen Wert."
 L.JUNKDELETE_NOTICE = "Funktioniert nur außerhalb des Kampfes." -- a gray row atop the module
 L.JUNKDELETE_NOTICE_DESC = "Im Kampf ist der Knopf ausgeblendet, damit ein versehentlicher Klick im "
     .. "Gefecht nie etwas zerstört."
--- the button: the stack (its icon and name), then what a vendor pays for it
+L.JUNKDELETE_LABEL = "Plunder löschen" -- the button, kept short: its tooltip names the stack
+-- the button with Item on the Button on: the stack (its icon and name), then what a vendor pays
 L.JUNKDELETE_BUTTON = "Löschen: %s (%s)"
 L.JUNKDELETE_HINT = "<Klicken, um diesen Stapel zu zerstören>"
 -- the stack's item link, then what a vendor pays for it
@@ -247,6 +248,9 @@ L.JUNKDELETE_DELETED = "Gelöscht, um Platz zu schaffen: %s (%s)."
 L.JUNKDELETE_CONFIRM = "Vor dem Löschen nachfragen"
 L.JUNKDELETE_CONFIRM_DESC = "Fragt nach, bevor der Stapel zerstört wird. Ausgeschaltet zerstört ihn ein Klick."
 L.JUNKDELETE_CONFIRM_TEXT = "%s zerstören, um Platz zu schaffen?"
+L.JUNKDELETE_ONBUTTON = "Gegenstand auf dem Knopf"
+L.JUNKDELETE_ONBUTTON_DESC = "Nennt den Stapel und seinen Wert auf dem Knopf selbst, nicht nur im "
+    .. "Tooltip. Der Knopf wird dadurch breiter."
 L.JUNKDELETE_CHAT_DESC ="Nennt im Chat, welcher Stapel gelöscht wurde und was er wert war."
 -- BulkBuy
 L.BULKBUY_TITLE = "Großeinkauf"

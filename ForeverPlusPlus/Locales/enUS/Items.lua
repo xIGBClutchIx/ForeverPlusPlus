@@ -221,12 +221,13 @@ L.EASYDELETE_DESC = "Type DELETE for you when destroying a good item, so Yes is 
 -- JunkDelete
 L.JUNKDELETE_TITLE = "Junk Delete Button"
 L.JUNKDELETE_DESC = "While your bags are full, show a button below the loot window that destroys your "
-    .. "gray stack worth least to a vendor, to make room for the loot. The button names the stack and "
+    .. "gray stack worth least to a vendor, to make room for the loot. Its tooltip names the stack and "
     .. "its value."
 L.JUNKDELETE_NOTICE = "Works only out of combat." -- a gray row atop the module
 L.JUNKDELETE_NOTICE_DESC = "The button hides in combat, so a stray click in a fight never destroys "
     .. "anything."
--- the button: the stack (its icon and name), then what a vendor pays for it
+L.JUNKDELETE_LABEL = "Delete Junk" -- the button, kept short: its tooltip names the stack
+-- the button with Item on the Button on: the stack (its icon and name), then what a vendor pays
 L.JUNKDELETE_BUTTON = "Delete: %s (%s)"
 L.JUNKDELETE_HINT = "<Click to destroy this stack>"
 -- the stack's item link, then what a vendor pays for it
@@ -234,6 +235,9 @@ L.JUNKDELETE_DELETED = "Deleted to make room: %s (%s)."
 L.JUNKDELETE_CONFIRM = "Confirm Before Deleting"
 L.JUNKDELETE_CONFIRM_DESC = "Ask before the stack is destroyed. Turn it off to destroy it with one click."
 L.JUNKDELETE_CONFIRM_TEXT = "Destroy %s to make room?" -- %s: the item's link
+L.JUNKDELETE_ONBUTTON = "Item on the Button"
+L.JUNKDELETE_ONBUTTON_DESC = "Name the stack and its value on the button itself, not only in its "
+    .. "tooltip. The button gets wider."
 L.JUNKDELETE_CHAT_DESC = "Say in chat which stack was deleted and what it was worth."
 -- BulkBuy
 L.BULKBUY_TITLE = "Bulk Buy"

@@ -1,7 +1,9 @@
 -- Junk Delete Button: while the bags are full and the loot window still holds an item, a button
 -- below it destroys the gray stack worth least to a vendor (ns.Bags.CheapestJunk), so there's room
--- to take the loot. The button names the stack and its value, and one click destroys that stack
--- and no other: the slot is read again at the click, and nothing happens if it changed.
+-- to take the loot. The button is short, no wider than the loot window, and its tooltip, above it,
+-- names the stack and its value (Item on the Button writes them on its face instead, as wide as
+-- they need). One click destroys that stack and no other: the slot is read again at the click,
+-- and nothing happens if it changed.
 --
 -- DeleteCursorItem has restrictions (Blizzard_APIDocumentationGenerated/GameCursorDocumentation.lua,
 -- wow-ui-source `forever` branch): it needs a click, so it runs only from the button's own OnClick,
@@ -20,6 +22,7 @@ local L = ns.L
 local module = ns.NewModule("JunkDelete", L.JUNKDELETE_DESC, {
     enabled = false,
     confirm = true,
+    onButton = false,
     chat = true,
 })
 module.title = L.JUNKDELETE_TITLE
@@ -34,13 +37,17 @@ module.notice = {
 
 module.options = {
     { key = "confirm", name = L.JUNKDELETE_CONFIRM, description = L.JUNKDELETE_CONFIRM_DESC },
+    { key = "onButton", name = L.JUNKDELETE_ONBUTTON, description = L.JUNKDELETE_ONBUTTON_DESC,
+        added = "1.10.0" },
     ns.ChatOption(L.JUNKDELETE_CHAT_DESC),
 }
 
-local MIN_WIDTH, MAX_WIDTH, PADDING = 120, 320, 40
+-- MAX_WIDTH is Item on the Button's; the short label is kept to the loot window's width, or
+-- LOOT_WIDTH when that can't be read.
+local MIN_WIDTH, MAX_WIDTH, LOOT_WIDTH, PADDING = 100, 320, 200, 40
 
 local button -- ours, below the loot window, made the first time it's needed
-local target -- { bag, slot, link, count, itemID, value }: the stack the button names, or nil
+local target -- { bag, slot, link, count, itemID, value, name }: the stack the button names, or nil
 
 local function poor()
     return Enum and Enum.ItemQuality and Enum.ItemQuality.Poor or 0
@@ -71,8 +78,13 @@ local function showTooltip(self)
     if not target then
         return
     end
-    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-    GameTooltip:SetBagItem(target.bag, target.slot) -- Blizzard's own, with its Sell Price line
+    -- Above the button, so it covers neither the loot window nor the button.
+    GameTooltip:SetOwner(self, "ANCHOR_TOP")
+    GameTooltip:SetText(target.name)
+    -- Item Tooltips' price line: "Sell Price x3:" in white, the whole stack's value at the right.
+    local quantity = GRAY_FONT_COLOR:WrapTextInColorCode(format(L.PRICE_QUANTITY, target.count))
+    GameTooltip:AddDoubleLine(format(L.PRICE_LINE, L.SELLPRICE_TITLE, quantity), ns.Money(target.value),
+        1, 1, 1, 1, 1, 1)
     local green = GREEN_FONT_COLOR
     GameTooltip:AddLine(L.JUNKDELETE_HINT, green.r, green.g, green.b)
     GameTooltip:Show()
@@ -86,10 +98,8 @@ local function refresh()
     if wanted() then
         local bag, slot, info, value = ns.Bags.CheapestJunk(ns.Prices.Vendor)
         if bag then
-            target = {
-                bag = bag, slot = slot, link = info.hyperlink, count = info.stackCount,
-                itemID = info.itemID, value = value,
-            }
+            -- The name in gray, after its icon: the tooltip's title, and the button's face with
+            -- Item on the Button on.
             local name = C_Item.GetItemNameByID(info.itemID) or info.hyperlink
             local color = _G.ITEM_QUALITY_COLORS and _G.ITEM_QUALITY_COLORS[poor()]
             if color and color.hex then
@@ -98,8 +108,19 @@ local function refresh()
             if info.iconFileID then
                 name = format("|T%s:0|t %s", info.iconFileID, name)
             end
-            button:SetText(format(L.JUNKDELETE_BUTTON, name, ns.Money(value)))
-            button:SetWidth(min(MAX_WIDTH, max(MIN_WIDTH, button:GetTextWidth() + PADDING)))
+            target = {
+                bag = bag, slot = slot, link = info.hyperlink, count = info.stackCount,
+                itemID = info.itemID, value = value, name = name,
+            }
+            local widest = MAX_WIDTH
+            if module.db.onButton then
+                button:SetText(format(L.JUNKDELETE_BUTTON, name, ns.Money(value)))
+            else
+                button:SetText(L.JUNKDELETE_LABEL)
+                local lootWidth = _G.LootFrame:GetWidth()
+                widest = ns.IsNumber(lootWidth) and lootWidth > MIN_WIDTH and lootWidth or LOOT_WIDTH
+            end
+            button:SetWidth(min(widest, max(MIN_WIDTH, button:GetTextWidth() + PADDING)))
         end
     end
     button:SetShown(target ~= nil)
@@ -180,6 +201,10 @@ end
 function module:IsAvailable()
     return DeleteCursorItem ~= nil and C_Container ~= nil and C_Container.PickupContainerItem ~= nil
         and GetNumLootItems ~= nil
+end
+
+function module:OnOptionChanged()
+    refresh()
 end
 
 function module:OnEnable()

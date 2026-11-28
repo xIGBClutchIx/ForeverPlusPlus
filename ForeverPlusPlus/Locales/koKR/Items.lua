@@ -213,11 +213,12 @@ L.EASYDELETE_DESC = "좋은 아이템을 파괴할 때 '지금파괴'를 대신 
 -- JunkDelete
 L.JUNKDELETE_TITLE = "잡동사니 삭제 버튼"
 L.JUNKDELETE_DESC = "가방이 가득 차면 전리품 창 아래에 버튼을 표시해, 상인 판매가가 가장 낮은 회색 아이템 "
-    .. "묶음을 파괴하여 전리품을 넣을 자리를 만듭니다. 버튼에 그 묶음과 가치가 표시됩니다."
+    .. "묶음을 파괴하여 전리품을 넣을 자리를 만듭니다. 버튼의 툴팁에 그 묶음과 가치가 표시됩니다."
 L.JUNKDELETE_NOTICE = "전투 중이 아닐 때만 작동합니다." -- a gray row atop the module
 L.JUNKDELETE_NOTICE_DESC = "전투 중에는 버튼이 숨겨지므로, 전투 중 실수로 클릭해도 아무것도 파괴되지 "
     .. "않습니다."
--- the button: the stack (its icon and name), then what a vendor pays for it
+L.JUNKDELETE_LABEL = "잡동사니 삭제" -- the button, kept short: its tooltip names the stack
+-- the button with Item on the Button on: the stack (its icon and name), then what a vendor pays
 L.JUNKDELETE_BUTTON = "삭제: %s (%s)"
 L.JUNKDELETE_HINT = "<클릭하면 이 묶음을 파괴합니다>"
 -- the stack's item link, then what a vendor pays for it
@@ -225,6 +226,9 @@ L.JUNKDELETE_DELETED = "자리를 만들기 위해 삭제함: %s (%s)."
 L.JUNKDELETE_CONFIRM = "삭제 전 확인"
 L.JUNKDELETE_CONFIRM_DESC = "묶음을 파괴하기 전에 확인합니다. 끄면 클릭 한 번으로 파괴합니다."
 L.JUNKDELETE_CONFIRM_TEXT = "자리를 만들기 위해 다음 아이템을 파괴하시겠습니까? %s"
+L.JUNKDELETE_ONBUTTON = "버튼에 아이템 표시"
+L.JUNKDELETE_ONBUTTON_DESC = "묶음과 그 가치를 툴팁뿐 아니라 버튼 자체에도 표시합니다. 버튼이 그만큼 "
+    .. "넓어집니다."
 L.JUNKDELETE_CHAT_DESC ="어떤 묶음을 삭제했는지와 그 가치를 대화창에 알립니다."
 -- BulkBuy
 L.BULKBUY_TITLE = "대량 구매"
