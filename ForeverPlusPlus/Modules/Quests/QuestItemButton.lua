@@ -14,6 +14,11 @@
 -- no quest. The choice is made again as the log, the bags, or the zone change, and every few
 -- seconds as you move while there's more than one.
 --
+-- With Only Near Its Quest, a quest known to be far is left out, the selected one too: further
+-- than the slider's yards, on another continent by the game's word, or with every place QuestieDB
+-- lists for it on another map than your zone's. A quest nothing gives a place for stays in, and
+-- so does every quest where your own place can't be read, as in a dungeon.
+--
 -- The key clicks a secure action button whose `item` is the item's ID. Its attributes can only be
 -- set out of combat, so in combat the key and the button keep the item they had; both pick again
 -- once combat ends. The button only shows and hides out of combat for the same reason: it's faded
@@ -34,8 +39,10 @@ local isNumber = ns.IsNumber
 local module = ns.NewModule("QuestItemButton", L.QUESTITEMBUTTON_DESC, {
     enabled = false,
     button = true, -- show the item on a button, not only on the key
-    selected = true, -- the selected quest's item first, however far
+    selected = true, -- the selected quest's item first, before a closer quest's
     bags = true, -- quest items in the bags, not only the quest log's
+    near = false, -- leave out a quest known to be further than nearYards, or in another zone
+    nearYards = 500,
     scale = 100, -- percent
     x = 0, -- the button's offset from the center of the screen
     y = -150,
@@ -76,6 +83,15 @@ module.options = {
     { key = "button", name = L.QUESTITEMBUTTON_BUTTON, description = L.QUESTITEMBUTTON_BUTTON_DESC },
     { key = "selected", name = L.QUESTITEMBUTTON_SELECTED, description = L.QUESTITEMBUTTON_SELECTED_DESC },
     { key = "bags", name = L.QUESTITEMBUTTON_BAGS, description = L.QUESTITEMBUTTON_BAGS_DESC },
+    {
+        key = "near", name = L.QUESTITEMBUTTON_NEAR, description = L.QUESTITEMBUTTON_NEAR_DESC,
+        slider = "nearYards",
+    },
+    {
+        key = "nearYards", name = L.QUESTITEMBUTTON_NEAR_YARDS,
+        description = L.QUESTITEMBUTTON_NEAR_YARDS_DESC, requires = "near",
+        min = 100, max = 2000, step = 100, format = ns.Text.Yards,
+    },
 }
 
 local button -- the secure button, made once
@@ -87,6 +103,7 @@ local candidates = {} -- { itemID, questID? } in the order found: the quest log'
 local quests = {} -- quest ID -> QuestieDB's quest, or false: read once while the module is on
 local points = {} -- quest ID -> its map point (WorldMap.QuestPoint), or false
 local spots = {} -- quest ID -> QuestieDB spawns on spotsMap, or false
+local elsewhere = {} -- quest ID -> true when QuestieDB lists places for it, and none on spotsMap
 local spotsMap -- the zone map spots and points were worked out on
 local recheck = ns.Frames.Timer(module)
 
@@ -212,15 +229,22 @@ end
 -- Distance ---------------------------------------------------------------------------------------
 
 -- What QuestieDB says the quest has you go to (its creatures and objects, and those that drop its
--- items), as spawns on `mapID`.
+-- items), as spawns on `mapID`. And whether it's elsewhere: QuestieDB lists a place for it, on a
+-- map or inside a dungeon, and none of them is on `mapID`.
 local function questieSpots(questID, mapID)
     local quest = questOf(questID)
     if not quest then
-        return false
+        return false, false
     end
-    local list = {}
+    local list, known = {}, false
     local function addSpawns(entity)
-        for _, spawn in ipairs(entity and entity.spawns or {}) do
+        if not entity then
+            return
+        end
+        if (entity.spawns and #entity.spawns > 0) or (entity.instances and #entity.instances > 0) then
+            known = true
+        end
+        for _, spawn in ipairs(entity.spawns or {}) do
             if #list >= MAX_SPOTS then
                 return
             end
@@ -251,39 +275,48 @@ local function questieSpots(questID, mapID)
             end
         end
     end
-    return #list > 0 and list or false
+    return #list > 0 and list or false, known and #list == 0
 end
 
--- How far the quest is in yards, or nil when nothing says. `here` is where the player stands on
--- their zone's map: { mapID, x, y, width, height }, or nil where it can't be read.
+-- How far the quest is in yards, or nil when nothing says, and then true when it's known to be
+-- far all the same: on another continent, or all of it on other maps than the player's zone.
+-- `here` is where the player stands on their zone's map: { mapID, x, y, width, height }, or nil
+-- where it can't be read.
 local function distance(questID, here)
     local get = C_QuestLog.GetDistanceSqToQuest
+    local offContinent = false
     if get then
         local squared, onContinent = get(questID)
-        if isNumber(squared) and squared > 0
-            and not (ns.IsReadable(onContinent) and onContinent == false) then
-            return sqrt(squared)
+        if isNumber(squared) and squared > 0 then
+            if ns.IsReadable(onContinent) and onContinent == false then
+                offContinent = true
+            else
+                return sqrt(squared)
+            end
         end
     end
-    local point = points[questID]
-    if point == nil then
-        point = WorldMap.QuestPoint(questID) or false
-        points[questID] = point
-    end
-    local yards = point and WorldMap.FromPlayer(point)
-    if yards then
-        return yards
+    -- Not for a quest on another continent: its point is the way there (a boat), not the quest.
+    if not offContinent then
+        local point = points[questID]
+        if point == nil then
+            point = WorldMap.QuestPoint(questID) or false
+            points[questID] = point
+        end
+        local yards = point and WorldMap.FromPlayer(point)
+        if yards then
+            return yards
+        end
     end
     if not (here and here.width and QuestieDB.IsReady()) then
-        return nil
+        return nil, offContinent
     end
     local list = spots[questID]
     if list == nil then
-        list = questieSpots(questID, here.mapID)
+        list, elsewhere[questID] = questieSpots(questID, here.mapID)
         spots[questID] = list
     end
     if not list then
-        return nil
+        return nil, offContinent or elsewhere[questID] == true
     end
     local best
     for _, spot in ipairs(list) do
@@ -301,6 +334,7 @@ local function whereAmI()
     if mapID ~= spotsMap then
         spotsMap = mapID
         wipe(spots)
+        wipe(elsewhere)
         wipe(points)
     end
     if not mapID then
@@ -311,25 +345,40 @@ local function whereAmI()
 end
 
 -- The candidate to use: the selected quest's, then the nearest quest's, then one with no distance
--- known, then an item with no quest, each in the order found.
+-- known, then an item with no quest, each in the order found. With Only Near Its Quest, never
+-- one whose quest is known to be far.
 local function choose()
     local selected = module.db.selected and ns.Quests.Selected()
-    local here = #candidates > 1 and whereAmI() or nil
+    local limit = module.db.near and module.db.nearYards or nil
+    local several = #candidates > 1
+    local here = (several or limit) and whereAmI() or nil
     local best, bestRank, bestYards
     for _, candidate in ipairs(candidates) do
         local questID = candidate.questID
-        local rank, yards = 4, nil
-        if questID and questID == selected then
-            rank = 1
-        elseif questID then
-            yards = #candidates > 1 and distance(questID, here) or nil
-            rank = yards and 2 or 3
+        local rank, yards, far = 4, nil, nil
+        if questID then
+            -- The selected quest's distance only matters to the limit, and a lone quest's too.
+            if limit or (several and questID ~= selected) then
+                yards, far = distance(questID, here)
+            end
+            rank = questID == selected and 1 or (yards and 2 or 3)
         end
-        if not best or rank < bestRank or (rank == bestRank and yards and yards < bestYards) then
+        local tooFar = limit and (far or (yards and yards > limit))
+        if not tooFar and (not best or rank < bestRank
+            or (rank == bestRank and yards and bestYards and yards < bestYards)) then
             best, bestRank, bestYards = candidate, rank, yards
         end
     end
     return best
+end
+
+-- Whether moving can change the choice: there's more than one to choose from, or a quest's item
+-- that Only Near Its Quest may take away or bring back.
+local function moves()
+    if #candidates > 1 then
+        return true
+    end
+    return module.db.near and candidates[1] ~= nil and candidates[1].questID ~= nil
 end
 
 -- The button --------------------------------------------------------------------------------------
@@ -469,7 +518,7 @@ local function update()
     if wanted ~= current or wantedQuest ~= currentQuest then
         apply()
     end
-    if #candidates > 1 then
+    if moves() then
         recheck:Start(RECHECK, update)
     else
         recheck:Cancel()
@@ -487,6 +536,7 @@ local function onQuestieReady()
     if module.enabled then
         wipe(quests)
         wipe(spots)
+        wipe(elsewhere)
         queue()
     end
 end
@@ -500,10 +550,11 @@ local function onEditMode(active)
     draw()
 end
 
--- QuestieDB only matches bag items to quests, so it's asked for (and loaded, if it loads on
--- demand) only while Quest Items in Your Bags is on.
+-- QuestieDB matches bag items to quests, and says where a quest is when the game doesn't, so
+-- it's asked for (and loaded, if it loads on demand) only while Quest Items in Your Bags or Only
+-- Near Its Quest is on.
 local function wantQuestie()
-    if module.db.bags then
+    if module.db.bags or module.db.near then
         QuestieDB.OnReady(onQuestieReady)
     else
         QuestieDB.Cancel(onQuestieReady)
@@ -547,6 +598,7 @@ function module:OnDisable()
     wipe(quests)
     wipe(points)
     wipe(spots)
+    wipe(elsewhere)
     spotsMap, wanted, wantedQuest, editing = nil, nil, nil, false
     if button then
         button:SetAlpha(0)
@@ -563,7 +615,10 @@ function module:OnOptionChanged(key)
     if key == "bags" then
         wantQuestie()
         queue()
-    elseif key == "selected" then
+    elseif key == "near" then
+        wantQuestie()
+        update()
+    elseif key == "selected" or key == "nearYards" then
         update()
     else
         apply()

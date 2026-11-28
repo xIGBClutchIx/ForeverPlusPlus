@@ -223,10 +223,16 @@ L.QUESTITEMBUTTON_COMBAT_DESC = "遊戲只允許在非戰鬥中變更按鍵的�
 L.QUESTITEMBUTTON_BUTTON = "顯示按鈕"
 L.QUESTITEMBUTTON_BUTTON_DESC = "在按鈕上顯示按鍵使用的物品，也可以點擊該按鈕。關閉時只有按鍵會使用它。"
 L.QUESTITEMBUTTON_SELECTED = "優先已選擇的任務"
-L.QUESTITEMBUTTON_SELECTED_DESC = "當你在任務追蹤或地圖上選擇的任務有物品時，使用該物品，不論任務有多遠。"
+L.QUESTITEMBUTTON_SELECTED_DESC = "當你在任務追蹤或地圖上選擇的任務有物品時，優先使用該物品，而不是較近任務的物品。"
 L.QUESTITEMBUTTON_BAGS = "背包中的任務物品"
 L.QUESTITEMBUTTON_BAGS_DESC = "也使用背包中任務日誌沒有與任務一起列出的任務物品，許多較舊任務的物品都是如此。"
     .. "安裝QuestieDB時，每件物品會對應到它的任務；找不到任務的物品只在沒有其他物品時使用。"
+L.QUESTITEMBUTTON_NEAR = "僅在任務附近"
+L.QUESTITEMBUTTON_NEAR_DESC = "當你離任務指引的地點超過此距離，或任務在其他區域時，不使用該任務的物品，"
+    .. "這樣按鈕就不會因為世界另一端的任務而出現。沒有任何位置資訊的任務視為在附近，你在地城中時"
+    .. "所有任務也是如此。"
+L.QUESTITEMBUTTON_NEAR_YARDS = "距離"
+L.QUESTITEMBUTTON_NEAR_YARDS_DESC = "離任務指引的地點多遠以內仍使用其物品。"
 L.QUESTITEMBUTTON_FOR = "任務：" -- on the button's tooltip, before the quest's name
 
 -- QuestPins

@@ -266,11 +266,20 @@ L.QUESTITEMBUTTON_BUTTON_DESC = "Zeigt den Gegenstand, den die Taste benutzt, au
     .. "die Ihr auch anklicken könnt. Aus benutzt ihn nur die Taste."
 L.QUESTITEMBUTTON_SELECTED = "Ausgewählte Quest zuerst"
 L.QUESTITEMBUTTON_SELECTED_DESC = "Hat die Quest, die Ihr in der Questverfolgung oder auf der Karte "
-    .. "ausgewählt habt, einen Gegenstand, wird dieser benutzt, egal wie weit die Quest entfernt ist."
+    .. "ausgewählt habt, einen Gegenstand, wird dieser vor dem einer näheren Quest benutzt."
 L.QUESTITEMBUTTON_BAGS = "Questgegenstände in Euren Taschen"
 L.QUESTITEMBUTTON_BAGS_DESC = "Benutzt auch Questgegenstände in Euren Taschen, die das Questlog nicht "
     .. "bei einer Quest aufführt, wie bei vielen älteren Quests. Mit QuestieDB wird jeder seiner Quest "
     .. "zugeordnet; einer ohne gefundene Quest wird nur benutzt, wenn es nichts anderes gibt."
+L.QUESTITEMBUTTON_NEAR = "Nur in der Nähe der Quest"
+L.QUESTITEMBUTTON_NEAR_DESC = "Lässt den Gegenstand einer Quest weg, solange Ihr weiter als diese "
+    .. "Entfernung von dem Ort entfernt seid, an den die Quest Euch führt, oder sie in einem anderen "
+    .. "Gebiet liegt, damit die Schaltfläche nicht wegen einer Quest am anderen Ende der Welt "
+    .. "erscheint. Eine Quest, deren Ort nichts kennt, gilt als nah, ebenso jede Quest, solange Ihr "
+    .. "in einem Dungeon seid."
+L.QUESTITEMBUTTON_NEAR_YARDS = "Entfernung"
+L.QUESTITEMBUTTON_NEAR_YARDS_DESC = "Wie weit von dem Ort entfernt, an den seine Quest Euch führt, ein "
+    .. "Gegenstand noch benutzt wird."
 L.QUESTITEMBUTTON_FOR = "Quest:" -- on the button's tooltip, before the quest's name
 
 -- QuestPins

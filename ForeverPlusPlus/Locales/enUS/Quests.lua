@@ -266,11 +266,18 @@ L.QUESTITEMBUTTON_BUTTON_DESC = "Show the item the key uses on a button, which y
     .. "Off, only the key uses it."
 L.QUESTITEMBUTTON_SELECTED = "Selected Quest First"
 L.QUESTITEMBUTTON_SELECTED_DESC = "When the quest you picked in the quest tracker or on the map has an "
-    .. "item, use that one, however far away the quest is."
+    .. "item, use that one before a closer quest's."
 L.QUESTITEMBUTTON_BAGS = "Quest Items in Your Bags"
 L.QUESTITEMBUTTON_BAGS_DESC = "Also use quest items in your bags that the quest log doesn't list with "
     .. "a quest, as many older quests' items aren't. With QuestieDB, each is matched to its quest; one "
     .. "with no quest found is used only when there's nothing else."
+L.QUESTITEMBUTTON_NEAR = "Only Near Its Quest"
+L.QUESTITEMBUTTON_NEAR_DESC = "Leave out a quest's item while you're further than this from where "
+    .. "the quest takes you, or it's in another zone, so the button isn't up for a quest across the "
+    .. "world. A quest nothing gives a place for counts as near, and so does every quest while "
+    .. "you're in a dungeon."
+L.QUESTITEMBUTTON_NEAR_YARDS = "Distance"
+L.QUESTITEMBUTTON_NEAR_YARDS_DESC = "How far from where its quest takes you an item is still used."
 L.QUESTITEMBUTTON_FOR = "Quest:" -- on the button's tooltip, before the quest's name
 
 -- QuestPins
