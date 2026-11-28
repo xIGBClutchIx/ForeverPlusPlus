@@ -51,7 +51,8 @@ L.DRUIDMANABAR_FORM_COLOR_DESC = "Fill the mana bar a lighter blue, so it never 
 -- PlayerPortrait
 L.PLAYERPORTRAIT_TITLE = "Player Portrait"
 L.PLAYERPORTRAIT_DESC = "Put the dragon the target frame shows around an elite or rare enemy "
-    .. "around your own portrait, and draw the level circle on the player frame smaller."
+    .. "around your own portrait, and around a player you target, and draw the level circle on the "
+    .. "player or target frame smaller."
 L.PLAYERPORTRAIT_CHAIN = "Dragon"
 L.PLAYERPORTRAIT_CHAIN_DESC = "Which of the target frame's dragons to show around your portrait. "
     .. "It isn't shown while you're in a vehicle."
@@ -62,6 +63,13 @@ L.PLAYERPORTRAIT_CHAIN_RAREELITE = "Rare Elite" -- [game: MAP_LEGEND_RAREELITE]
 L.PLAYERPORTRAIT_LEVEL_SIZE = "Level Size"
 L.PLAYERPORTRAIT_LEVEL_SIZE_DESC = "How big the level circle and number on the player frame are, "
     .. "against the size Blizzard draws them. At 100% they're left as Blizzard draws them."
+L.PLAYERPORTRAIT_TARGET_CHAIN = "Target Dragon"
+L.PLAYERPORTRAIT_TARGET_CHAIN_DESC = "Which of the dragons to show around the portrait of a player "
+    .. "you target. A creature keeps the dragon the game gives it."
+L.PLAYERPORTRAIT_TARGET_LEVEL_SIZE = "Target Level Size"
+L.PLAYERPORTRAIT_TARGET_LEVEL_SIZE_DESC = "How big the level circle and number on the target frame "
+    .. "are, whoever your target is, against the size Blizzard draws them. At 100% they're left as "
+    .. "Blizzard draws them."
 -- ClassColors
 L.CLASSCOLORS_TITLE = "Class Colors" -- [game: CLASS_COLORS]
 L.CLASSCOLORS_DESC = "Show players' health bars and names in their class color on the player, "

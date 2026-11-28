@@ -166,7 +166,9 @@ ns.changelog = {
                     .. "target frame shows around an elite or rare enemy around your own portrait, "
                     .. "the elite's gold one unless you pick the rare's or the rare elite's, and draws "
                     .. "the level circle on the player frame smaller, at 80% unless you pick another "
-                    .. "size." },
+                    .. "size. Target Dragon puts one around a player you target too, and Target "
+                    .. "Level Size sizes the level circle on the target frame; the target frame is "
+                    .. "left as it is until you set them." },
                 { L.QUESTNAMEPLATES_TITLE, "Three new options for how the icon and count look. "
                     .. "Quest Icon can show the quest exclamation mark on every quest creature in "
                     .. "place of an icon for the kind of objective, Text Color makes the count white "

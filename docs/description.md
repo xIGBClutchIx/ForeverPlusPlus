@@ -185,7 +185,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 - **Nameplate Combo Points**: Rogues and Druids only: shows your combo points on your target's nameplate, above its name or below its health bar, in the game's own combo point art, and nothing with none.
 - **NPC Nameplates**: Always shows friendly NPCs' names and titles, with the health bar only when they're hurt or in combat. Options for sizes, a level badge, and where buffs sit.
 - **Player Nameplates**: Always shows friendly players' names and guilds, with the health bar only when they're hurt or in combat. Options for sizes, a level badge, class icons, dimming players outside your group, guild, and friends, and a name and health bar color for group members, friends, and enemy players. In dungeons and raids the game keeps Blizzard's own friendly plates.
-- **Player Portrait**: Puts the target frame's elite or rare dragon around your own portrait, and draws the level circle on the player frame smaller. Off by default.
+- **Player Portrait**: Puts the target frame's elite or rare dragon around your own portrait, and around a player you target if you pick one for them, and draws the level circle on the player or target frame smaller. Off by default.
 - **Simplified Dungeon Nameplates**: Turns on the game's Simplified nameplates only inside dungeons and raids, for the kinds you pick. Off by default.
 - **Target Markers**: Hold a key and a ring of raid icons opens at your mouse, like the ping wheel: point at one and let go to mark your target, or hold Shift for a world marker. Works in combat. Off by default.
 
