@@ -64,7 +64,9 @@ local MIN_WIDTH, MAX_WIDTH, LOOT_WIDTH, PADDING = 100, 320, 200, 40
 -- "128-redbutton-delete"), in Forever's own gold-edged drawing of it where the client has that.
 local ART = "128-redbutton-delete"
 local CORNER_SIZE = 24 -- the close button's, when its own size can't be read
-local NUDGE_X, NUDGE_Y = 8, 2 -- right and up from the close button's plain mirror (see placeCorner)
+-- How the corner button differs from a plain mirror of the close button, so the two look alike
+-- (see placeCorner): how much bigger its frame is, and how far right and up it sits.
+local FIT, NUDGE_X, NUDGE_Y = 1.08, 2.7, 2.3
 
 local button -- ours, below the loot window, made the first time it's needed
 local corner -- ours, in the loot window's top left corner, made with it
@@ -112,18 +114,25 @@ local function showTooltip(self)
 end
 
 -- Puts the corner button where the close button is, mirrored: as big on screen, as far in from
--- the left edge as the close button is from the right, and level with it. From where the close
--- button really is on screen, not from its anchor: the loot window draws it bigger and further
--- in than the template's 24 by 24 at the corner says (in game, 2026-11-27).
+-- the window's left edge as the close button is from its right, and level with it. Read from
+-- where the close button is on screen each time, since the window places it.
+--
+-- A plain mirror (the close button's own size, the same distance from the frame's edge) doesn't
+-- look like one. Measured on screenshots of this client, pixel by pixel (2026-11-27):
+--   - at the same frame size the delete art's button is 29 by 28 pixels where the close art's is
+--     32 by 30: it has a wider clear margin in its image. So ours is FIT times the size;
+--   - the plain mirror's button began 2 pixels outside the window's left border and 2 below the
+--     close button's top, where the close button ends 1 inside the right border: the window's
+--     art doesn't sit the same on both sides of its frame. So ours goes NUDGE_X right and
+--     NUDGE_Y up, which also takes back what the bigger frame adds to its margins.
+-- A nudge of 8 right was 6 pixels too many (in game, 2026-11-27).
 local function placeCorner()
     local loot = _G.LootFrame
     local close = loot and loot.ClosePanelButton
     if not (close and close:IsShown()) then
         return
     end
-    -- Its art, not its frame: Forever draws the close button's art at the art's own size (32),
-    -- past the edges of the 24 by 24 button under it, so a button the frame's size came out
-    -- smaller and nearer the corner than the one it mirrors (in game, 2026-11-27).
+    -- Its art where that has a place of its own, else its frame: they measured the same here.
     local art = close.GetNormalTexture and close:GetNormalTexture()
     local shown = art and art:GetRight() and art or close
     local scale, closeScale = loot:GetEffectiveScale(), close:GetEffectiveScale()
@@ -136,11 +145,8 @@ local function placeCorner()
     end
     -- The close button's edges and size in the loot window's own units.
     local ratio = closeScale / scale
-    corner:SetSize(width * ratio, height * ratio)
+    corner:SetSize(width * ratio * FIT, height * ratio * FIT)
     corner:ClearAllPoints()
-    -- The window's art isn't the same on both sides of its frame, so the plain mirror sat on the
-    -- left border and a little low: moved in and up to sit as the close button does (measured
-    -- from a screenshot, 2026-11-27).
     corner:SetPoint("TOPLEFT", loot, "TOPLEFT", right - closeRight * ratio + NUDGE_X,
         closeTop * ratio - top + NUDGE_Y)
 end
