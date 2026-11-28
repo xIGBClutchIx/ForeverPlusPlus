@@ -23,7 +23,8 @@ ns.changelog = {
                     .. "colors come first." },
                 { L.NAMEPLATECOMBO_TITLE, "A new module for Rogues and Druids, on by default, that "
                     .. "shows your combo points on your target's nameplate, above its name or below "
-                    .. "its health bar: one dot a point and nothing with none." },
+                    .. "its health bar, drawn as the target frame draws them, with a plain light "
+                    .. "for each point as another choice. Nothing shows with no points." },
                 { L.BAGSLOTCOUNTER_TITLE, "Bag Button on Screen (on by default) shows a backpack "
                     .. "button with your free bag slots while the controller interface is on, "
                     .. "since it hides the bag buttons. Move it in Edit Mode, and point at it for "
@@ -68,7 +69,9 @@ ns.changelog = {
                     .. "that already has them, such as a boss mod's /pull." },
                 { L.QUESTPINS_TITLE, "Quest Details with Shift (on by default): hold Shift over a "
                     .. "pin to see what each of its quests asks, who it's turned in to, and the "
-                    .. "quest it leads to, from QuestieDB." },
+                    .. "quest it leads to with its level and difficulty color, from QuestieDB. "
+                    .. "Under it: Without Holding Shift, a checkbox for each of the three, and how "
+                    .. "many quests get details." },
                 { L.CHATTABRESIZE_TITLE, "A new module, on by default, that makes the main chat "
                     .. "window taller or shorter as you drag its General tab up or down. Save to Edit "
                     .. "Mode (on by default) saves the new height in your Edit Mode layout, so it "

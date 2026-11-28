@@ -54,12 +54,14 @@ function MapTooltip.Side(side)
 end
 
 ---A white label on the left and its value at the right edge, as Blizzard's Sell Price line:
----"Gathered:" and "3 times".
+---"Gathered:" and "3 times". With `color` ({ r, g, b }), the value is in it where the color says
+---something, as a quest's title in the color of how hard it is.
 ---@param label string
 ---@param value string
+---@param color? table
 ---@return table line
-function MapTooltip.Pair(label, value)
-    return { label, HIGHLIGHT_FONT_COLOR, right = value }
+function MapTooltip.Pair(label, value, color)
+    return { label, HIGHLIGHT_FONT_COLOR, right = value, rightColor = color }
 end
 
 ---Adds lines to a tooltip already showing, such as Blizzard's own for a minimap dot: each a
@@ -75,7 +77,8 @@ function MapTooltip.AddLines(tooltip, lines)
             text, color = line[1], line[2]
         end
         if type(line) == "table" and line.right then
-            tooltip:AddDoubleLine(text, line.right, color.r, color.g, color.b, white.r, white.g, white.b)
+            local right = line.rightColor or white
+            tooltip:AddDoubleLine(text, line.right, color.r, color.g, color.b, right.r, right.g, right.b)
         else
             tooltip:AddLine(text, color.r, color.g, color.b, true)
         end

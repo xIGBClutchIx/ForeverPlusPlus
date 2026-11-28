@@ -200,29 +200,35 @@ local function addDetails(lines, id, info)
     if not quest then
         return
     end
-    for _, text in ipairs(quest.objectivesText) do
-        if type(text) == "string" and text ~= "" then
-            lines[#lines + 1] = MapTooltip.Detail(ns.Quests.Text(text))
+    local db = module.db
+    if db.detailObjectives then
+        for _, text in ipairs(quest.objectivesText) do
+            if type(text) == "string" and text ~= "" then
+                lines[#lines + 1] = MapTooltip.Detail(ns.Quests.Text(text))
+            end
         end
     end
-    local finisher = finisherName(quest)
+    local finisher = db.detailTurnIn and finisherName(quest)
     if finisher then
         lines[#lines + 1] = MapTooltip.Pair(L.QUESTPINS_DETAIL_TURN_IN, finisher)
     end
-    if quest.next then
-        lines[#lines + 1] = MapTooltip.Pair(L.QUESTPINS_DETAIL_NEXT, internal.Title(quest.next))
+    if db.detailNext and quest.next then
+        -- As a quest's own line: its level, and the color of how hard it is for the player.
+        local line = questLine(quest.next)
+        lines[#lines + 1] = MapTooltip.Pair(L.QUESTPINS_DETAIL_NEXT, line[1], line[2])
     end
 end
-
-local DETAILED = 3 -- the most quests of one pin that get their details; the rest are a title each
 
 local function tooltipLines(info)
     local db = module.db
     local lines = {}
     local most = db.tooltipMax
+    -- The most quests of one pin that get their details; the rest are a title each.
+    local DETAILED = db.detailCount
     -- Shift (or the controller interface, as every map tooltip's extra lines) gives each quest its
-    -- details under its title, the pin's own title being the first quest's.
-    if db.tooltipDetails and ns.Keys.Detail() then
+    -- details under its title, the pin's own title being the first quest's. Without Holding Shift
+    -- gives them always.
+    if db.tooltipDetails and (db.detailsAlways or ns.Keys.Detail()) then
         for i, id in ipairs(info.quests) do
             if i > most then
                 lines[#lines + 1] = MapTooltip.Note(format(L.QUESTPINS_MORE, #info.quests - most))

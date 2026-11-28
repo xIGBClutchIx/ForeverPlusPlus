@@ -32,6 +32,11 @@ local module = ns.NewModule("QuestPins", L.QUESTPINS_DESC, {
     upcomingLevels = 3,
     tooltipGiver = true,
     tooltipDetails = true, -- each quest's objectives, who takes it back, and its next quest, with Shift
+    detailsAlways = false, -- the details with no key held
+    detailObjectives = true, -- what a quest asks
+    detailTurnIn = true, -- who takes it back
+    detailNext = true, -- the quest it leads to
+    detailCount = 3, -- the most quests of one pin that get their details
     tooltipMax = 8, -- the most quests a pin's tooltip lists
     normal = true,
     repeatable = false,
@@ -137,6 +142,18 @@ module.options = {
         section = TOOLTIPS },
     { key = "tooltipDetails", name = L.QUESTPINS_TOOLTIP_DETAILS, description = L.QUESTPINS_TOOLTIP_DETAILS_DESC,
         section = TOOLTIPS, added = "1.10.0" },
+    { key = "detailsAlways", name = L.QUESTPINS_DETAILS_ALWAYS, description = L.QUESTPINS_DETAILS_ALWAYS_DESC,
+        section = TOOLTIPS, added = "1.10.0", requires = "tooltipDetails" },
+    { key = "detailObjectives", name = L.QUESTPINS_DETAILS_OBJECTIVES,
+        description = L.QUESTPINS_DETAILS_OBJECTIVES_DESC,
+        section = TOOLTIPS, added = "1.10.0", requires = "tooltipDetails" },
+    { key = "detailTurnIn", name = L.QUESTPINS_DETAILS_TURN_IN, description = L.QUESTPINS_DETAILS_TURN_IN_DESC,
+        section = TOOLTIPS, added = "1.10.0", requires = "tooltipDetails" },
+    { key = "detailNext", name = L.QUESTPINS_DETAILS_NEXT, description = L.QUESTPINS_DETAILS_NEXT_DESC,
+        section = TOOLTIPS, added = "1.10.0", requires = "tooltipDetails" },
+    { key = "detailCount", name = L.QUESTPINS_DETAILS_COUNT, description = L.QUESTPINS_DETAILS_COUNT_DESC,
+        section = TOOLTIPS, added = "1.10.0", requires = "tooltipDetails", min = 1, max = 10, step = 1,
+        format = "%d" },
     { key = "tooltipMax", name = L.QUESTPINS_TOOLTIP_MAX, description = L.QUESTPINS_TOOLTIP_MAX_DESC,
         section = TOOLTIPS, min = 3, max = 20, step = 1, format = "%d" },
     ns.ChatOption(L.QUESTPINS_CHAT_DESC),
