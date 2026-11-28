@@ -56,6 +56,10 @@ ns.changelog = {
                 { L.UNDIMMEDEDITBOX_TITLE, "A new module, off by default, that keeps the box you "
                     .. "type chat in at full strength while you aren't typing. It needs the game's "
                     .. "Chat Style set to IM Style, which is what keeps the box on screen." },
+                { L.CHATLINKTOOLTIPS_TITLE, "A new module, on by default, that shows the tooltip of "
+                    .. "an item, spell, quest, or other link in chat while the mouse is over it, "
+                    .. "without clicking it. Position puts it at the cursor (the default) or in the "
+                    .. "tooltip's usual spot." },
                 { L.CHATBUTTONSEVERYTAB_TITLE, "A new module, on by default, that keeps the buttons "
                     .. "beside the chat window whichever chat tab is in front: the game's chat "
                     .. "menu and channels buttons, and the ones Forever++ adds. The game only "

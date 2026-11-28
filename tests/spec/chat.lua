@@ -19,6 +19,23 @@ ITEM_QUALITY_COLORS = nil
 eq(Chat.Colored("|Hplayer:Bob|h[Bob]|h |TIcon:0|tx", 1, 1, 1), "|cffffffff[Bob] x|r",
     "colored drops links and textures")
 eq(Chat.Colored("a||rb", 1, 1, 1), "|cffffffffa||rb|r", "colored keeps an escaped pipe")
+-- Chat.HasTooltip: only the kinds of link the game's tooltip shows
+eq(Chat.HasTooltip("item:6948:0:0:0:0:0:0:0:60"), true, "has tooltip: an item")
+eq(Chat.HasTooltip("spell:133"), true, "has tooltip: a spell")
+eq(Chat.HasTooltip("quest:783:1"), true, "has tooltip: a quest")
+eq(Chat.HasTooltip("enchant:7418"), true, "has tooltip: an enchant")
+eq(Chat.HasTooltip("player:Bob:12:WHISPER:BOB"), false, "has tooltip: not a player")
+eq(Chat.HasTooltip("channel:CHANNEL:1"), false, "has tooltip: not a channel")
+eq(Chat.HasTooltip("addon:Other:copy"), false, "has tooltip: not an addon's link")
+eq(Chat.HasTooltip("urlIndex:24"), false, "has tooltip: not a URL")
+eq(Chat.HasTooltip("garrmission:1"), false, "has tooltip: not a kind the click hands elsewhere")
+eq(Chat.HasTooltip("item"), false, "has tooltip: a kind with nothing after it")
+eq(Chat.HasTooltip("itemx:1"), false, "has tooltip: the whole kind, not its start")
+eq(Chat.HasTooltip(""), false, "has tooltip: empty")
+eq(Chat.HasTooltip(nil), false, "has tooltip: nil")
+T.game.secret = "<secret>"
+eq(Chat.HasTooltip(T.game.secret), false, "has tooltip: a secret link is left alone")
+T.game.secret = nil
 -- Chat.TimestampFormat and Chat.Stamp, as Blizzard's chat setting and BetterDate give them
 eq(Chat.Stamp(), "", "no stamp while chat timestamps are off")
 time, date = function() return 0 end, function(fmt) return "D(" .. fmt .. ")" end

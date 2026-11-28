@@ -291,6 +291,7 @@ Modules\Chat\ChatFont.lua
 Modules\Chat\ChatBorder.lua
 Modules\Chat\EditBoxOnTop.lua
 Modules\Chat\UndimmedEditBox.lua
+Modules\Chat\ChatLinkTooltips.lua
 Modules\Chat\PersistentChat.lua
 Modules\Chat\ChatHistory.lua
 Modules\Chat\ChatArrowKeys.lua
