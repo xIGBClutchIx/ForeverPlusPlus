@@ -37,6 +37,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Wide Vendor Window**: A new module, off by default, that shows 20 items on each page of a vendor's window instead of 10, in a window about twice as wide. It stays its usual size with the controller interface.
 - **Macros**: Smart Buff has two new options, both off by default. Buff Your Group: with no friendly target to buff, the macro buffs you, then each member of your party or raid in range who is missing a buff from you. Group Buffs, under it and on with it, casts a buff's group version, such as Prayer of Fortitude or a Greater Blessing, when at least 3 in range are missing it (Group Buffs At sets how many) and you have its reagent. Reminder Button shows a button with the next buff and who gets it, out of combat; click it to cast, and move it in Edit Mode.
 - **Player Portrait**: A new module, off by default, that puts the dragon the target frame shows around an elite or rare enemy around your own portrait, the elite's gold one unless you pick the rare's or the rare elite's, and draws the level circle on the player frame smaller, at 80% unless you pick another size.
+- **Quest Nameplates**: Three new options for how the icon and count look. Quest Icon can show the quest exclamation mark on every quest creature in place of an icon for the kind of objective, Text Color makes the count white instead of gold, and Outline draws a thin or thick outline around it. Each keeps today's look by default.
 
 ### Changed
 

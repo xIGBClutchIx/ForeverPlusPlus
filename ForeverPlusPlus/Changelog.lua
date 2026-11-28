@@ -164,6 +164,11 @@ ns.changelog = {
                     .. "the elite's gold one unless you pick the rare's or the rare elite's, and draws "
                     .. "the level circle on the player frame smaller, at 80% unless you pick another "
                     .. "size." },
+                { L.QUESTNAMEPLATES_TITLE, "Three new options for how the icon and count look. "
+                    .. "Quest Icon can show the quest exclamation mark on every quest creature in "
+                    .. "place of an icon for the kind of objective, Text Color makes the count white "
+                    .. "instead of gold, and Outline draws a thin or thick outline around it. Each "
+                    .. "keeps today's look by default." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.AUTOSCREENSHOT_TITLE, "On by default now. If you never turned it on or off, "
