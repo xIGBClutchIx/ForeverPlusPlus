@@ -150,6 +150,35 @@ local function showTooltip(self)
     GameTooltip:Show()
 end
 
+local highlightAtlas -- the atlas our corner button's highlight has now
+
+-- The corner button's highlight: the close button's own art for it (read from the close button,
+-- so it's whichever this client gives it), as big as the close button, and over our button as
+-- the close button's is over it. Our frame is FIT times the close button's and NUDGE_Y higher
+-- for the same rows of button (see placeCorner), so the glow is the close button's size, in the
+-- middle across, and NUDGE_Y down from our top. Without that art the delete art's own highlight
+-- stays.
+local function placeHighlight(close, width, height)
+    local theirs = close.GetHighlightTexture and close:GetHighlightTexture()
+    local atlas = theirs and theirs.GetAtlas and theirs:GetAtlas()
+    if not ns.IsText(atlas, true) then
+        atlas = ns.Frames.FirstAtlas("redbutton-highlight-c60", "RedButton-Highlight")
+    end
+    if not atlas then
+        return
+    end
+    if atlas ~= highlightAtlas then
+        corner:SetHighlightAtlas(atlas, "ADD")
+        highlightAtlas = atlas
+    end
+    local highlight = corner:GetHighlightTexture()
+    if highlight then
+        highlight:ClearAllPoints()
+        highlight:SetSize(width, height)
+        highlight:SetPoint("TOP", corner, "TOP", 0, -NUDGE_Y)
+    end
+end
+
 -- Puts the corner button where the close button is, mirrored: as big on screen, as far in from
 -- the window's left edge as the close button is from its right, and level with it. Read from
 -- where the close button is on screen each time, since the window places it.
@@ -162,6 +191,10 @@ end
 --     close button's top, where the close button ends 1 inside the right border: the window's
 --     art doesn't sit the same on both sides of its frame. So ours goes NUDGE_X right and
 --     NUDGE_Y up, which also takes back what the bigger frame adds to its margins.
+-- The glow under the mouse is the close button's own (placeHighlight above), not the delete
+-- art's, which lit the whole button, border and all, where the close button's glows inside its
+-- border (in game, 2026-11-27).
+--
 -- A nudge of 8 right was 6 pixels too many (in game, 2026-11-27). At 2.7 the two red faces were
 -- exact mirrors and the same size, top and bottom on the same rows, but our lit left edge stood
 -- a pixel outside the window border's own lit line: one more pixel right (about 0.9 here, a unit
@@ -190,6 +223,7 @@ local function placeCorner()
     corner:ClearAllPoints()
     corner:SetPoint("TOPLEFT", loot, "TOPLEFT", right - closeRight * ratio + NUDGE_X,
         closeTop * ratio - top + NUDGE_Y)
+    placeHighlight(close, width * ratio, height * ratio)
 end
 
 local function refresh()
