@@ -223,6 +223,7 @@ Modules\Automation\SkipCinematics.lua
 Modules\Automation\AutoDismount.lua
 Modules\Automation\MountGear.lua
 Modules\Automation\FishingCast.lua
+Modules\Automation\FishingKey.lua
 Modules\Automation\AutoWeaponBuff.lua
 Modules\Automation\ComprehendScrolls.lua
 Modules\Automation\AutoScreenshot.lua

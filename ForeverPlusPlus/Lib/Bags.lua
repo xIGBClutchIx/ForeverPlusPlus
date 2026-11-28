@@ -1,4 +1,4 @@
--- What's in the player's bags: walking every slot, counting the free ones, finding the gray
+-- What's in the player's bags: walking every slot, counting the free ones and finding one, the gray
 -- stack worth least, and how many more of an item fit. One place for which bags there are, so a
 -- build that moves a bag index is fixed here. The buttons Blizzard draws for them are
 -- Lib/ItemButtons.lua's.
@@ -56,6 +56,25 @@ end
 local function ordinary(bag)
     local _, family = C_Container.GetContainerNumFreeSlots(bag)
     return family == nil or family == 0
+end
+
+---The first empty slot in a bag that takes anything (not a quiver, a herb bag, or the reagent
+---bag), for gear taken off: its bag and slot, or nil when the bags are full.
+---@return number|nil bag
+---@return number|nil slot
+function Bags.FreeSlot()
+    local checked = {} -- bag -> whether it takes anything
+    return Bags.Each(function(bag, slot, info)
+        if info ~= nil then
+            return nil
+        end
+        if checked[bag] == nil then
+            checked[bag] = ordinary(bag)
+        end
+        if checked[bag] then
+            return bag, slot
+        end
+    end)
 end
 
 ---The gray stack in the ordinary bags worth least to a vendor, the whole stack counted: its bag,

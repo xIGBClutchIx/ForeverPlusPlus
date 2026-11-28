@@ -16,10 +16,10 @@
 -- player is put on, since unbound gear would ask first.
 local _, ns = ...
 
-local pairs, select, type, tonumber, format, concat = pairs, select, type, tonumber, string.format, table.concat
-local IsMounted, CursorHasItem, GetCursorInfo, ClearCursor = IsMounted, CursorHasItem, GetCursorInfo, ClearCursor
+local pairs, select, type, tonumber, format = pairs, select, type, tonumber, string.format
+local IsMounted, CursorHasItem, GetCursorInfo = IsMounted, CursorHasItem, GetCursorInfo
 local PickupInventoryItem, IsInventoryItemLocked = PickupInventoryItem, IsInventoryItemLocked
-local C_Container, C_Item, C_PaperDollInfo = C_Container, C_Item, C_PaperDollInfo
+local C_Container, C_Item = C_Container, C_Item
 
 local L = ns.L
 
@@ -87,20 +87,7 @@ local function fields(link)
     return out
 end
 
--- Which item this is, the same however it's linked and whatever level the character is: the item,
--- its enchant, gems, and suffix.
-local function itemKey(link)
-    local parts = fields(link)
-    if not parts then
-        return nil
-    end
-    local key = {}
-    for i = 1, 7 do
-        local value = parts[i]
-        key[i] = (value == nil or value == "") and "0" or value
-    end
-    return concat(key, ":")
-end
+local itemKey = ns.Equipment.ItemKey
 
 -- Whether a link is mount speed gear for this inventory slot.
 local function isMountGear(link, slot)
@@ -132,37 +119,7 @@ local function findInBags(test)
     end)
 end
 
--- A free slot in a bag that takes anything: bag, slot.
-local function freeSlot()
-    return ns.Bags.Each(function(bag, slot, info)
-        if info == nil then
-            local _, family = C_Container.GetContainerNumFreeSlots(bag)
-            if family == nil or family == 0 then
-                return bag, slot
-            end
-        end
-    end)
-end
-
--- Swaps the item in a bag slot with what's worn in an inventory slot. False when the client
--- wouldn't (the item can't go there, or one of them is locked), with the cursor left empty.
-local function swap(bag, bagSlot, invSlot)
-    C_Container.PickupContainerItem(bag, bagSlot)
-    if not CursorHasItem() then
-        return false
-    end
-    local fits = not C_PaperDollInfo or not C_PaperDollInfo.CursorCanGoInSlot
-        or ns.IsTrue(C_PaperDollInfo.CursorCanGoInSlot(invSlot))
-    if not fits or ns.IsTrueOrSecret(IsInventoryItemLocked(invSlot)) then
-        ClearCursor()
-        return false
-    end
-    PickupInventoryItem(invSlot)
-    if CursorHasItem() then
-        ClearCursor()
-    end
-    return true
-end
+local swap = ns.Equipment.Swap
 
 -- Putting on and taking off -------------------------------------------------------------------
 
@@ -214,21 +171,13 @@ local function takeOff(slot)
         return true
     end
     if record.back == false then
-        -- The slot was empty: the gear goes into the bags.
-        local bag, bagSlot = freeSlot()
-        if not bag then
+        -- The slot was empty: the gear goes into the bags. Refused, it stays remembered for the
+        -- next try.
+        local done = ns.Equipment.Unequip(slot)
+        if done == "full" then
             module.db.worn[slot] = nil
             module:Print(format(L.MOUNTGEAR_BAGS_FULL, worn))
-            return false
-        end
-        PickupInventoryItem(slot)
-        if not CursorHasItem() then
-            return false -- refused: it stays remembered for the next try
-        end
-        C_Container.PickupContainerItem(bag, bagSlot)
-        if CursorHasItem() then
-            ClearCursor() -- refused too
-        else
+        elseif done then
             module.db.worn[slot] = nil
         end
         return false

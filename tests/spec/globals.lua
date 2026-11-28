@@ -24,7 +24,8 @@ local WRITES = {
 local DYNAMIC = {
     ["ForeverPlusPlus/Lib/Slash.lua"] = '"SLASH_" .. key .. "1"', -- slash commands a module adds
     ["ForeverPlusPlus/Modules/Units/TargetMarkers.lua"] = '"BINDING_NAME_" .. BINDING',
-    ["ForeverPlusPlus/Modules/Quests/QuestItemButton.lua"] = '"BINDING_NAME_" .. BINDING',}
+    ["ForeverPlusPlus/Modules/Quests/QuestItemButton.lua"] = '"BINDING_NAME_" .. BINDING',
+    ["ForeverPlusPlus/Modules/Automation/FishingKey.lua"] = '"BINDING_NAME_" .. binding',}
 
 -- Lua 5.1 as the game has it: no io, os, require, dofile, or loadfile. A file that needs one of
 -- the game's own (os.time, strsplit, ...) lists it in .luarc.json.

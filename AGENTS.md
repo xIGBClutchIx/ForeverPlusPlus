@@ -65,11 +65,11 @@ Load order is the TOC's: `Core.lua`, `Commands.lua`, `Locales/`, `Data/`, `Lib/`
 | Path | What it is |
 | --- | --- |
 | `ForeverPlusPlus.toc` | Metadata and load order. |
-| `Bindings.xml` | Keys in Blizzard's Key Bindings, under Forever++ (Target Markers' ring). The game loads it by itself; it isn't in the TOC. |
+| `Bindings.xml` | Keys in Blizzard's Key Bindings, under Forever++ (Target Markers' ring, Quest Item Button, Fishing Key's two). The game loads it by itself; it isn't in the TOC. |
 | `Core.lua` | The shared `ns`: events, modules and parts, saved settings, hooks, timers, migrations, printing, and the locale table `ns.L`. |
 | `Commands.lua` | `/fpp` and its subcommands, `/fpp set` and `toggle`, and the Defaults popup's resets (`ns.ApplyPreset`, `ns.UsePreset`). |
 | `Locales/<language>/*.lua` | Player-facing text, a file per category. `enUS/` has every key and is the fallback, and its comments say whose words each string is. Another language (`ruRU/`, `zhCN/`, `zhTW/`, `deDE/`, `koKR/`) has every key outside enUS's `[english]` blocks, and `Places.lua` for place names. |
-| `Data/*.lua` | Game data kept by hand, in one place so a patch's change is one edit: plain tables on `ns.Data`, with where each came from. `Instances.lua` (the dungeons and raids, and their map art), `Professions.lua` (herbs, veins, chests, pools, tools, skeleton keys), `Spells.lua` (spell IDs more than one file uses, through `ns.Data.Spell`), `Items.lua` (the containers Auto Open Containers leaves), `Buffs.lua` (Smart Buff's), `PointsOfInterest.lua` (where dungeon entrances, flight masters, boats, and spirit healers are on each zone's map), `ZoneInfo.lua` (each zone's levels, fishing skill, herbs, and ores), `Townsfolk.lua` (the words in NPC titles that tell trainers and vendors apart). No logic. |
+| `Data/*.lua` | Game data kept by hand, in one place so a patch's change is one edit: plain tables on `ns.Data`, with where each came from. `Instances.lua` (the dungeons and raids, and their map art), `Professions.lua` (herbs, veins, chests, pools, fishing gear, tools, skeleton keys), `Spells.lua` (spell IDs more than one file uses, through `ns.Data.Spell`), `Items.lua` (the containers Auto Open Containers leaves), `Buffs.lua` (Smart Buff's), `PointsOfInterest.lua` (where dungeon entrances, flight masters, boats, and spirit healers are on each zone's map), `ZoneInfo.lua` (each zone's levels, fishing skill, herbs, and ores), `Townsfolk.lua` (the words in NPC titles that tell trainers and vendors apart). No logic. |
 | `Lib/*.lua` | Shared services any module can use. They cost nothing until a module uses them. |
 | `Modules/<Category>/` | One change each. |
 | `API.lua` | The public API, `ForeverPlusPlusAPI.v1`. |
@@ -118,7 +118,7 @@ One line here says what each file is for. [docs/architecture.md](docs/architectu
 | `Text.lua` | `Text` | Numbers, durations ("3 Seconds", "12m ago"), yards, version compare, and stripping escape codes. |
 | `Money.lua` | `Money`, `MoneyShort` | Copper as coin text. |
 | `Fonts.lua` | `Fonts` | The game's fonts a font dropdown offers. |
-| `Keys.lua` | `Keys` | The Skip Key dropdown and whether its key is held, and a key binding in short for a button's label (`Short`). |
+| `Keys.lua` | `Keys` | The Skip Key dropdown and whether its key is held, a key binding in short for a button's label (`Short`), and opening Key Bindings (`OpenBindings`). |
 | `Gamepad.lua` | `Gamepad` | The controller interface: whether it's on (`On`), the notices of a module it hides or limits, its buttons by where they sit (`BUTTON`), reading one and a press of one (`Down`, `Press`), how the player's controller labels one, and click hints written for it. |
 | `Sounds.lua` | `Sounds` | The alert sounds every Sound dropdown offers, the dropdown itself (`Option`), and playing one. |
 | `RealmTime.lua` | `RealmTime` | Realm time moved to the player's clock. |
@@ -146,12 +146,12 @@ One line here says what each file is for. [docs/architecture.md](docs/architectu
 | File | `ns` | For |
 | --- | --- | --- |
 | `ItemTooltip.lua` | `ItemTooltip` | Our lines on item tooltips, kept together at the sell price (`OnInfo`, `OnPrices`, `AddInfo`, `AddPrice`), and a color a module gives an item's tooltip border in place of its quality's (`OnBorderColor`, `BorderColor`). |
-| `Bags.lua` | `Bags` | Walking every slot of the player's bags (`Each`), the free slots, how many more of an item fit (`Room`), which bag is the reagent bag, and the gray stack worth least to a vendor (`CheapestJunk`). |
+| `Bags.lua` | `Bags` | Walking every slot of the player's bags (`Each`), the free slots and the first of them (`FreeSlot`), how many more of an item fit (`Room`), which bag is the reagent bag, and the gray stack worth least to a vendor (`CheapestJunk`). |
 | `ItemButtons.lua` | `ItemButtons` | The item buttons in bags (a bag addon's too), bank, merchant, auction house, loot, and rolls, our marks on them, one walk over all of those for a module that marks items (`Walk`), and the options every mark shares. |
 | `BagClicks.lua` | `BagClicks` | Secure overlays on bag items whose right-click uses an item or casts on it, in Blizzard's bags and a bag addon's. |
 | `BagAddons.lua` | `BagAddons` | The item buttons of the bag addons that replace Blizzard's bags (Baganator, GW2 UI, Bagnon, Bagnonium, BetterBags, ArkInventory), one adapter each, and when they redraw (`EachButton`, `Watch`). |
 | `ItemStats.lua` | `ItemStats` | An item's stats in short keys, and a stat weight score. |
-| `Equipment.lua` | `Equipment` | A piece of gear's level (`ItemLevel`), slots, what's worn, whether the character can use an item, and what an item would replace. |
+| `Equipment.lua` | `Equipment` | A piece of gear's level (`ItemLevel`), slots, what's worn, which item a link is (`ItemKey`), putting gear on from the bags and taking it off (`Swap`, `Unequip`), whether the character can use an item, and what an item would replace. |
 | `Durability.lua` | `Durability` | How whole each equipped item is, and when a drop should warn. |
 | `Disenchant.lua` | `Disenchant` | Which items disenchant, into what, and their average value. |
 | `NewItems.lua` | `NewItems` | Which items Classic never had (`Has`). |
@@ -301,7 +301,7 @@ When unsure whether an API exists, check it in game (`/dump C_Foo`, `/api`) or f
 | `ForeverPlusPlusDB`, `ForeverPlusPlusPlayersDB`, `ForeverPlusPlusCharDB` | Saved variables. |
 | `ForeverPlusPlusAPI` | The public API, set only by `API.lua`. |
 | `SLASH_FOREVERPLUSPLUS*`, `SlashCmdList.FOREVERPLUSPLUS*` | `/fpp`, and commands a module adds only while its option is on (`/way`, `/rl`). |
-| `ForeverPlusPlusScreenshotButton`, `ForeverPlusPlusSmartBuffButton`, `ForeverPlusPlusMarkerButton`, `ForeverPlusPlusQuestItemButton` | Buttons a key binding or `/click` needs by name. |
+| `ForeverPlusPlusScreenshotButton`, `ForeverPlusPlusSmartBuffButton`, `ForeverPlusPlusMarkerButton`, `ForeverPlusPlusQuestItemButton`, `ForeverPlusPlusFishingButton` | Buttons a key binding or `/click` needs by name. |
 | `BINDING_HEADER_FOREVERPLUSPLUS`, `BINDING_NAME_CLICK ...` | Blizzard's Key Bindings reads them. |
 | `ForeverPlusPlusErrorCatcher`, `ForeverPlusPlusChatCopy`, `ForeverPlusPlusWhisperWindow` | Windows Escape closes; `UISpecialFrames` holds names (`ns.Frames.CloseOnEscape`). |
 | `GetMinimapShape` | Set by Square Minimap only while it squares the minimap and no other addon defines it. |

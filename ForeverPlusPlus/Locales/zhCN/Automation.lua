@@ -232,6 +232,32 @@ L.FISHINGCAST_COMBAT_TEXT = "你装备着鱼竿。"
 L.FISHINGCAST_LOUDER = "突出鱼漂水声"
 L.FISHINGCAST_LOUDER_DESC = "钓鱼时调高音效、调低音乐，让水花声更容易听到。停止钓鱼后恢复你自己的音量。"
 
+-- FishingKey
+L.FISHINGKEY_TITLE = "钓鱼按键"
+L.FISHINGKEY_DESC = "一个用来钓鱼的按键：第一次按下时从背包中装备鱼竿，之后施放钓鱼，鱼漂在水上时则拾取它。"
+    .. "第二个按键会换回你自己的武器和装备。在“按键设置”中Forever++分类下选择这两个按键。"
+L.FISHINGKEY_BINDING = "钓鱼并拾取" -- in Blizzard's Key Bindings
+L.FISHINGKEY_BACK_BINDING = "换回自己的装备" -- in Blizzard's Key Bindings
+L.FISHINGKEY_NO_KEY = "尚未绑定按键" -- a gray row atop the module, with a button
+-- [quotes: KEY_BINDINGS]
+L.FISHINGKEY_NO_KEY_DESC = "这一切都使用你在“按键设置”中Forever++分类下选择的按键。"
+L.FISHINGKEY_COMBAT = "只在非战斗状态下更换装备"
+L.FISHINGKEY_COMBAT_DESC = "游戏只允许在非战斗状态下更换装备和更改按键的功能。战斗中按下按键，会在战斗结束后更换装备；"
+    .. "战斗中按键保持原来的功能。"
+L.FISHINGKEY_INTERACT = "开启交互键"
+L.FISHINGKEY_INTERACT_DESC = "按键通过游戏的交互键拾取鱼漂，而交互键只在游戏的“开启交互按键”设置开启时有效。"
+    .. "如果你关闭了它，只在你手持鱼竿时开启它（并让它能够到你的鱼漂），卸下鱼竿后恢复你自己的设置。"
+    .. "如果你已开启，则不做任何更改。"
+L.FISHINGKEY_GEAR = "钓鱼装备"
+L.FISHINGKEY_GEAR_DESC = "装备鱼竿时，也装备背包中为钓鱼加成而穿戴的装备，例如钓鱼帽。只限已与你绑定的装备。"
+L.FISHINGKEY_SHIFT = "Shift换回装备"
+L.FISHINGKEY_SHIFT_DESC = "按住Shift按下按键时，会像第二个按键一样换回你自己的武器和装备。"
+L.FISHINGKEY_CHAT_DESC = "没有可装备的鱼竿，或无法换回你自己的装备时，在聊天中说明。"
+L.FISHINGKEY_NO_POLE = "你的背包里没有鱼竿。"
+L.FISHINGKEY_UNBOUND = "%s装备后会与你绑定，第一次请自己装备它。" -- an item link
+L.FISHINGKEY_BAGS_FULL = "背包已满，%s仍然穿在身上。" -- an item link
+L.FISHINGKEY_MISSING = "无法重新装备%s：它不在你的背包里。" -- an item link
+
 -- AutoWeaponBuff
 L.AUTOWEAPONBUFF_TITLE = "自动武器强化"
 L.AUTOWEAPONBUFF_DESC = "右键点击背包中的磨刀石、平衡石、油、毒药或鱼饵，或在动作条上使用它们，即可直接用在"

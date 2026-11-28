@@ -38,18 +38,11 @@ local BINDING = "CLICK " .. BUTTON .. ":LeftButton"
 BINDING_HEADER_FOREVERPLUSPLUS = ns.title
 _G["BINDING_NAME_" .. BINDING] = L.TARGETMARKERS_BINDING
 
-local function openKeyBindings()
-    if Settings and Settings.OpenToCategory and Settings.KEYBINDINGS_CATEGORY_ID then
-        ns.Chat.QuietRefusals() -- opening Settings from an addon prints a harmless yellow line
-        Settings.OpenToCategory(Settings.KEYBINDINGS_CATEGORY_ID)
-    end
-end
-
 module.notice = {
     ns.Gamepad.LimitedNotice(), -- the ring opens at the mouse and reads which way it moves
     {
         text = L.TARGETMARKERS_NO_KEY, description = L.TARGETMARKERS_NO_KEY_DESC,
-        button = L.TARGETMARKERS_BIND, fn = openKeyBindings,
+        button = L.TARGETMARKERS_BIND, fn = ns.Keys.OpenBindings,
         shown = function() return module.db.enabled and not GetBindingKey(BINDING) end,
     },
 }

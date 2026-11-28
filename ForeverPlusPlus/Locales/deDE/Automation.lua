@@ -274,6 +274,41 @@ L.FISHINGCAST_LOUDER = "Lauterer Schwimmer"
 L.FISHINGCAST_LOUDER_DESC = "Dreht beim Angeln die Soundeffekte lauter und die Musik leiser, damit "
     .. "das Platschen gut zu hören ist. Eure eigenen Lautstärken kehren zurück, wenn Ihr aufhört."
 
+-- FishingKey
+L.FISHINGKEY_TITLE = "Angeltaste"
+L.FISHINGKEY_DESC = "Eine Taste zum Angeln: Der erste Druck nimmt eine Angelrute aus Euren Taschen, "
+    .. "danach wirkt sie „Angeln“ und plündert den Schwimmer, solange er im Wasser ist. Eine zweite "
+    .. "Taste legt Eure eigenen Waffen und Eure Ausrüstung wieder an. Wählt beide in der "
+    .. "„Tastaturbelegung“ unter Forever++."
+L.FISHINGKEY_BINDING = "Angeln und plündern" -- in Blizzard's Key Bindings
+L.FISHINGKEY_BACK_BINDING = "Eigene Ausrüstung wieder anlegen" -- in Blizzard's Key Bindings
+L.FISHINGKEY_NO_KEY = "Noch keine Taste belegt" -- a gray row atop the module, with a button
+L.FISHINGKEY_NO_KEY_DESC = "All das funktioniert mit Tasten, die Ihr in der „Tastaturbelegung“ "
+    .. "unter Forever++ wählt."
+L.FISHINGKEY_COMBAT = "Wechselt Ausrüstung nur außerhalb des Kampfes"
+L.FISHINGKEY_COMBAT_DESC = "Das Spiel lässt Ausrüstung und das, was eine Taste tut, nur außerhalb "
+    .. "des Kampfes ändern. Ein Druck im Kampf wechselt Eure Ausrüstung, sobald der Kampf endet, und "
+    .. "im Kampf tut die Taste weiter, was sie vorher tat."
+L.FISHINGKEY_INTERACT = "Interaktionstaste einschalten"
+L.FISHINGKEY_INTERACT_DESC = "Die Taste plündert Euren Schwimmer über die Interaktionstaste des "
+    .. "Spiels, die nur funktioniert, solange die Spieleinstellung „Interaktionstaste aktivieren“ an "
+    .. "ist. Ist sie bei Euch aus, wird sie (mit einer Reichweite bis zu Eurem Schwimmer) nur "
+    .. "eingeschaltet, solange Ihr eine Angelrute in den Händen haltet, und Eure eigene Einstellung "
+    .. "kehrt zurück, sobald die Angelrute abgelegt wird. Ist sie an, wird nichts geändert."
+L.FISHINGKEY_GEAR = "Angelausrüstung"
+L.FISHINGKEY_GEAR_DESC = "Legt mit der Angelrute auch die Ausrüstung aus Euren Taschen an, die man "
+    .. "für ihren Angelbonus trägt, etwa einen Angelhut. Nur Ausrüstung, die bereits an Euch "
+    .. "gebunden ist."
+L.FISHINGKEY_SHIFT = "Umschalt legt Ausrüstung zurück"
+L.FISHINGKEY_SHIFT_DESC = "Haltet Ihr beim Drücken der Taste Umschalt gedrückt, werden Eure eigenen "
+    .. "Waffen und Eure Ausrüstung wieder angelegt, wie mit der zweiten Taste."
+L.FISHINGKEY_CHAT_DESC = "Nennt im Chat, wenn keine Angelrute zum Anlegen da ist oder Eure eigene "
+    .. "Ausrüstung nicht wieder angelegt werden konnte."
+L.FISHINGKEY_NO_POLE = "In Euren Taschen ist keine Angelrute."
+L.FISHINGKEY_UNBOUND = "%s würde an Euch gebunden, also legt es beim ersten Mal selbst an." -- an item link
+L.FISHINGKEY_BAGS_FULL = "Eure Taschen sind voll, daher bleibt %s angelegt." -- an item link
+L.FISHINGKEY_MISSING = "%s konnte nicht wieder angelegt werden: Es ist nicht in Euren Taschen." -- an item link
+
 
 -- AutoWeaponBuff
 L.AUTOWEAPONBUFF_TITLE = "Automatische Waffenbuffs"

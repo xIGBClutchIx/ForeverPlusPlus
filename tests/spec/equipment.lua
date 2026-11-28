@@ -85,6 +85,17 @@ eq(Equipment.LinkKey(nil), nil, "link key: nothing stays nothing")
 eq(Equipment.LinkKey(12), 12, "link key: a number stays as it is")
 eq(Equipment.LinkKey("|cffffffff|Hitem:2589:::::|h[Linen Cloth]|h|r"), "item:2589", "link key: only the item")
 
+-- Item keys: the item, enchant, gems, and suffix, empty fields as 0, and nothing after (the level
+-- field changes on a level up).
+local blade = "|cff1eff00|Hitem:6541:12734::::::5:60:::|h[Blade]|h|r"
+eq(Equipment.ItemKey(blade), "6541:12734:0:0:0:0:0", "item key: the item and enchant, the rest as 0")
+eq(Equipment.ItemKey("|cff1eff00|Hitem:6541:12734::::::5:59:::|h[Blade]|h|r"), Equipment.ItemKey(blade),
+    "item key: the same at another level")
+eq(Equipment.ItemKey("item:6256"), "6256:0:0:0:0:0:0", "item key: a short link is filled out")
+eq(Equipment.ItemKey("item:1:2:3:4:5:6:7"), "1:2:3:4:5:6:7", "item key: every field kept")
+eq(Equipment.ItemKey(nil), nil, "item key: nothing for nothing")
+eq(Equipment.ItemKey("Linen Cloth"), nil, "item key: nothing for a name")
+
 -- By GUID: worn when its location is an equipment slot.
 places.onMe, places.inBag = "worn", "bag"
 eq(Equipment.IsWornGUID("onMe"), true, "worn guid: in an equipment slot")

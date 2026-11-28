@@ -63,17 +63,10 @@ local FRAME_ATLAS = "UI-QuestTrackerButton-QuestItem-Frame"
 local FRAME_SIZE = ICON_SIZE * 42 / 26
 local SAMPLE_ICON = "Interface\\Icons\\INV_Misc_QuestionMark"
 
-local function openKeyBindings()
-    if Settings and Settings.OpenToCategory and Settings.KEYBINDINGS_CATEGORY_ID then
-        ns.Chat.QuietRefusals() -- opening Settings from an addon prints a harmless yellow line
-        Settings.OpenToCategory(Settings.KEYBINDINGS_CATEGORY_ID)
-    end
-end
-
 module.notice = {
     {
         text = L.QUESTITEMBUTTON_NO_KEY, description = L.QUESTITEMBUTTON_NO_KEY_DESC,
-        button = L.QUESTITEMBUTTON_BIND, fn = openKeyBindings,
+        button = L.QUESTITEMBUTTON_BIND, fn = ns.Keys.OpenBindings,
         shown = function() return module.db.enabled and not GetBindingKey(BINDING) end,
     },
     { text = L.QUESTITEMBUTTON_COMBAT, description = L.QUESTITEMBUTTON_COMBAT_DESC },

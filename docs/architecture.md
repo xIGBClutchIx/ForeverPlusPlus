@@ -29,7 +29,7 @@ The detail behind `AGENTS.md`'s project map: what each part of the addon holds, 
 Game data kept by hand, loaded after the locales and before `Lib/`: plain tables on `ns.Data` and nothing else, each with a comment saying where it came from. The Lib file or module that uses a table makes the `ns.GameData` set from it, so play still teaches over it and Self Test still checks its IDs. A patch's change is an edit here.
 
 - `Instances.lua`: `instances` (each dungeon and raid: instance ID, English name, lowest and highest level, raid flag, by a short key; `Lib/Instances.lua`) and `dungeonArt` (the old map textures of each, by the same key, with Dire Maul's and Scarlet Monastery's wings; `Lib/DungeonMaps.lua`).
-- `Professions.lua`: `professionNodes` (herbs and veins: skill line, skill, item), `miningStones`, `sharedSpawns`, `treasureNodes` (chests), `fishingPools`, `fishingBobbers`, `professionTools`, `unskinnedFamilies` (beast families never skinned; `Professions.Skinnable`, with `LearnSkinnable` for what corpses teach) (`Lib/Professions.lua`, `Lib/Gathering.lua`), and `skeletonKeys` (Gathering Skill Tooltips).
+- `Professions.lua`: `professionNodes` (herbs and veins: skill line, skill, item), `miningStones`, `sharedSpawns`, `treasureNodes` (chests), `fishingPools`, `fishingBobbers`, `fishingGear` (Fishing Key), `professionTools`, `unskinnedFamilies` (beast families never skinned; `Professions.Skinnable`, with `LearnSkinnable` for what corpses teach) (`Lib/Professions.lua`, `Lib/Gathering.lua`), and `skeletonKeys` (Gathering Skill Tooltips).
 - `Spells.lua`: `spells`, the spell IDs more than one file uses, read with `ns.Data.Spell("FISHING")`, which registers the ID for Self Test.
 - `Items.lua`: `autoOpenKept` (Auto Open Containers).
 - `Buffs.lua`: `smartBuffs` (each class's buffs, with whom each one's group version reaches), `smartBuffStronger`, `smartBuffLevels` (Macros' Smart Buff).
@@ -88,6 +88,7 @@ Generated files, in `Lib/Generated/` (never edited by hand; see Generated data):
 ### `Keys.lua`
 
 - `ns.Keys`: the Skip Key dropdown and whether its key is held (`IsDown`). With the controller interface on, a held trigger stands in for the key (`Gamepad.TriggerHeld`), and `Detail()` says whether what shows only with Shift shows now: Shift, or always with the controller interface on.
+- `OpenBindings()` opens Blizzard's Key Bindings, for the button of a module's "No key is bound yet" notice (Target Markers, Quest Item Button, Fishing Key).
 - `Short(binding)` is a key binding as the game stores it ("SHIFT-C", "CTRL-BUTTON4") in short for a label on a small button ("SC", "CM4"), built from the binding's own key names and each language's letters, never from the game's localized text; nil for a controller button.
 
 ### `Gamepad.lua`
@@ -167,7 +168,7 @@ Generated files, in `Lib/Generated/` (never edited by hand; see Generated data):
 
 - `ns.Bags`: what's in the player's bags.
 - `Each(fn, reagent)` calls `fn(bag, slot, info)` for every slot of the backpack and the four bags (the reagent bag too with `reagent`), `info` nil for an empty slot. It stops at the first `fn` that returns something and returns that.
-- `FreeSlots()` counts the free slots of the bags that take anything (not a quiver's or the reagent bag's).
+- `FreeSlots()` counts the free slots of the bags that take anything (not a quiver's or the reagent bag's), and `FreeSlot()` gives the first of them (bag, slot), for gear taken off.
 - `CheapestJunk(price)` returns the bag, slot, info, and whole-stack value of the gray stack worth least to a vendor, in the bags that take anything: Poor quality, a vendor buys it, not locked, and `price(link)` knows its price. The first of equal ones wins. Junk Delete Button's pick.
 - `Room(itemID, stackSize)` says how many more of an item fit: the room left in its unlocked stacks, and a full stack per free slot of a bag that takes it (any bag that takes anything, and one of its kind, such as a quiver for arrows). Not the reagent bag, so it may say less than fits, never more.
 - `LAST` and `REAGENT` are the bag indices, the one place they're written down.
@@ -282,6 +283,7 @@ Generated files, in `Lib/Generated/` (never edited by hand; see Generated data):
 ### `Equipment.lua`
 
 - `ns.Equipment`: a piece of gear's level and quality (`ItemLevel`: false for what isn't gear, a shirt or a tabard among it, and nil while the item isn't cached), the slots an item type goes in, what's worn, whether the character can use an item, the weapon type worn in a slot (`WeaponSubclass`), and the worn items an item would replace, from the client's own item comparison or the slot rules.
+- Changing gear, out of combat, for Mount Speed Gear and Fishing Key: `ItemKey(link)` names an item by item, enchant, gems, and suffix (not the level field, which changes on a level up), for a record of what gear replaced; `Swap(bag, slot, invSlot)` swaps a bag slot with an inventory slot as Blizzard's equipment manager does (pick up one, then the other), so full bags don't matter; `Unequip(invSlot)` takes what's worn into the first free bag slot (`Bags.FreeSlot`), "full" when there's none.
 
 ### `Durability.lua`
 
@@ -389,8 +391,9 @@ What each module is, in the code's terms (what it does for players is in `README
 - **Auto Release**
 - **Skip Cinematics**
 - **Auto Dismount**
-- **Mount Speed Gear** (`MountGear`): swaps a bag slot with an inventory slot (pick up one, then the other, as Blizzard's equipment manager does), so full bags don't matter, and keeps what it replaced per character (`worn`) by item, enchant, gems, and suffix, so a reload while mounted still puts it back. Its trinkets and enchants are `ns.GameData` sets seeded from `Data/Items.lua`.
+- **Mount Speed Gear** (`MountGear`): swaps a bag slot with an inventory slot (`Equipment.Swap`), so full bags don't matter, and keeps what it replaced per character (`worn`) by `Equipment.ItemKey` (item, enchant, gems, and suffix), so a reload while mounted still puts it back. Its trinkets and enchants are `ns.GameData` sets seeded from `Data/Items.lua`.
 - **Fishing Cast**
+- **Fishing Key** (`FishingKey`): its own module beside Fishing Cast, since it's another way in (a key, not a double click) with gear and a game setting of its own, and either works without the other. Two keys in `Bindings.xml`, the left and right clicks of one secure action button (`ForeverPlusPlusFishingButton`). The left click's `*type1` is the Fishing spell while a pole is in the main hand, set out of combat in `PreClick`, and an empty `*type1` instead starts putting the gear on (the pole by item level, the off-hand into the bags first, then `ns.Data.fishingGear` as an `ns.GameData` set); the right click, or Shift with the left, puts it back, main hand before off-hand. While the Fishing channel is up, the left key's keys get an override binding to `INTERACTTARGET`, which interacts with the soft interact target, the bobber (out of combat only, through `ns.AfterCombat`). It holds `softTargetInteract` at 3 (and `SoftTargetInteractRange` at least 30) through `ns.CVars` while a pole is in hand, only when the player's value doesn't already have the interact key on, and tracks `saved` so a reload puts it back. What the gear replaced is kept per character (`worn`), as Mount Speed Gear does.
 - **Auto Weapon Buff**
 - **Comprehend Scrolls**
 - **Auto Screenshot**

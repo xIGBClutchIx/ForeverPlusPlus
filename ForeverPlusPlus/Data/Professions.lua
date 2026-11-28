@@ -133,6 +133,16 @@ ns.Data.fishingPools = {
 -- Bobber, object 35591; unverified on Forever.
 ns.Data.fishingBobbers = { [35591] = true }
 
+-- Gear worn for its Fishing bonus, which Fishing Key puts on with the pole: item ID -> true.
+-- Classic's fishing gear; each ID is in build 1.60.1.71139's ItemSparse under this name, but the
+-- client's tables don't link them to their Fishing Skill spells, so the bonus is Classic's,
+-- unverified on Forever. Poles are told by their weapon subclass, not listed.
+ns.Data.fishingGear = {
+    [7996] = true, -- Worn Fishing Hat
+    [19972] = true, -- Lucky Fishing Hat
+    [19969] = true, -- Nat Pagle's Extreme Anglin' Boots
+}
+
 -- Profession tools a character can equip but carries for their profession, not to fight with:
 -- item ID -> the skill line. Classic's IDs (Classic Era 1.15 item data). Fishing poles are told
 -- by their weapon subclass instead, so every pole counts.
