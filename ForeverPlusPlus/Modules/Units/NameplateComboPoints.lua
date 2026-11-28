@@ -37,8 +37,17 @@ local PLAIN = {
 -- A socketed look is Blizzard's own art in layers, each `{ atlas, x, y }` from the point's middle:
 -- `empty` shows for every point once there's one (the socket), `full` over it for a point held.
 local SOCKETED = {}
-if HasAtlas("ClassOverlay-ComboPoint") and HasAtlas("ClassOverlay-ComboPoint-Off") then
-    -- The nameplates' own points before the class bars were redrawn: a red point in a dark socket.
+-- A red point in a dark socket, as the class bars had them before they were redrawn. The player
+-- frame's pair first (ComboPoints-ComboPoint over ComboPoints-PointBg, 20 by 21): the nameplates'
+-- own (ClassOverlay-ComboPoint, 20 by 20) is cut a row short of its circle at the top and bottom
+-- in this client's atlas (in game, 2026-11-27), so it's only what's used without the other.
+if HasAtlas("ComboPoints-ComboPoint") and HasAtlas("ComboPoints-PointBg") then
+    SOCKETED.classic = {
+        gap = 2,
+        empty = { { "ComboPoints-PointBg" } },
+        full = { { "ComboPoints-ComboPoint" } },
+    }
+elseif HasAtlas("ClassOverlay-ComboPoint") and HasAtlas("ClassOverlay-ComboPoint-Off") then
     SOCKETED.classic = {
         gap = 2,
         empty = { { "ClassOverlay-ComboPoint-Off" } },
