@@ -225,12 +225,13 @@ L.EASYDELETE_DESC = "Вводить за вас слово УДАЛИТЬ при
 -- JunkDelete
 L.JUNKDELETE_TITLE = "Кнопка удаления хлама"
 L.JUNKDELETE_DESC = "Когда сумки заполнены, показывать под окном добычи кнопку, которая уничтожает "
-    .. "самую дешевую у торговца стопку серых предметов, чтобы освободить место для добычи. На кнопке "
-    .. "видны стопка и ее цена."
+    .. "самую дешевую у торговца стопку серых предметов, чтобы освободить место для добычи. В "
+    .. "подсказке кнопки видны стопка и ее цена."
 L.JUNKDELETE_NOTICE = "Работает только вне боя." -- a gray row atop the module
 L.JUNKDELETE_NOTICE_DESC = "В бою кнопка скрыта, чтобы случайный щелчок во время боя ничего не "
     .. "уничтожил."
--- the button: the stack (its icon and name), then what a vendor pays for it
+L.JUNKDELETE_LABEL = "Удалить хлам" -- the button, kept short: its tooltip names the stack
+-- the button with Item on the Button on: the stack (its icon and name), then what a vendor pays
 L.JUNKDELETE_BUTTON = "Удалить: %s (%s)"
 L.JUNKDELETE_HINT = "<Щелкните, чтобы уничтожить эту стопку>"
 -- the stack's item link, then what a vendor pays for it
@@ -238,6 +239,9 @@ L.JUNKDELETE_DELETED = "Удалено, чтобы освободить мест
 L.JUNKDELETE_CONFIRM = "Спрашивать перед удалением"
 L.JUNKDELETE_CONFIRM_DESC = "Спрашивать, прежде чем уничтожить стопку. Если выключить, она уничтожается одним щелчком."
 L.JUNKDELETE_CONFIRM_TEXT = "Уничтожить %s, чтобы освободить место?"
+L.JUNKDELETE_ONBUTTON = "Предмет на кнопке"
+L.JUNKDELETE_ONBUTTON_DESC = "Показывать стопку и ее цену на самой кнопке, а не только в подсказке. "
+    .. "Кнопка станет шире."
 L.JUNKDELETE_CHAT_DESC ="Сообщать в чате, какая стопка удалена и сколько она стоила."
 -- BulkBuy
 L.BULKBUY_TITLE = "Оптовая покупка"

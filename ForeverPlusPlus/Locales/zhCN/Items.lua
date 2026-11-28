@@ -191,10 +191,11 @@ L.EASYDELETE_DESC = "摧毁优秀物品时自动替你输入DELETE，只需点�
 -- JunkDelete
 L.JUNKDELETE_TITLE = "垃圾删除按钮"
 L.JUNKDELETE_DESC = "背包已满时，在拾取窗口下方显示一个按钮，摧毁卖给商人最不值钱的一组灰色物品，"
-    .. "为拾取腾出空间。按钮上会显示这组物品及其价值。"
+    .. "为拾取腾出空间。按钮的提示中会显示这组物品及其价值。"
 L.JUNKDELETE_NOTICE = "仅在非战斗状态下有效。" -- a gray row atop the module
 L.JUNKDELETE_NOTICE_DESC = "战斗中按钮会隐藏，因此战斗中的误点不会摧毁任何东西。"
--- the button: the stack (its icon and name), then what a vendor pays for it
+L.JUNKDELETE_LABEL = "删除垃圾" -- the button, kept short: its tooltip names the stack
+-- the button with Item on the Button on: the stack (its icon and name), then what a vendor pays
 L.JUNKDELETE_BUTTON = "删除：%s（%s）"
 L.JUNKDELETE_HINT = "<点击摧毁这组物品>"
 -- the stack's item link, then what a vendor pays for it
@@ -202,6 +203,8 @@ L.JUNKDELETE_DELETED = "为腾出空间已删除：%s（%s）。"
 L.JUNKDELETE_CONFIRM = "删除前确认"
 L.JUNKDELETE_CONFIRM_DESC = "摧毁这组物品前先询问。关闭后点击一次即摧毁。"
 L.JUNKDELETE_CONFIRM_TEXT = "摧毁%s以腾出空间？"
+L.JUNKDELETE_ONBUTTON = "按钮上显示物品"
+L.JUNKDELETE_ONBUTTON_DESC = "在按钮上直接写出这组物品及其价值，而不只是在提示中。按钮会因此变宽。"
 L.JUNKDELETE_CHAT_DESC ="在聊天中说明删除了哪组物品以及它值多少钱。"
 -- BulkBuy
 L.BULKBUY_TITLE = "批量购买"
