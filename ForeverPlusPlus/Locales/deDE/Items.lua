@@ -233,7 +233,7 @@ L.EASYDELETE_DESC = "Tippt beim Zerstören eines guten Gegenstands „LÖSCHEN�
 
 -- JunkDelete
 L.JUNKDELETE_TITLE = "Plunder-Löschknopf"
-L.JUNKDELETE_DESC = "Zeigt bei vollen Taschen unter dem Beutefenster einen Knopf, der Euren grauen "
+L.JUNKDELETE_DESC = "Zeigt bei vollen Taschen am Beutefenster einen Knopf, der Euren grauen "
     .. "Stapel mit dem geringsten Händlerwert zerstört, um Platz für die Beute zu schaffen. Sein "
     .. "Tooltip nennt den Stapel und seinen Wert."
 L.JUNKDELETE_NOTICE = "Funktioniert nur außerhalb des Kampfes." -- a gray row atop the module
@@ -248,6 +248,11 @@ L.JUNKDELETE_DELETED = "Gelöscht, um Platz zu schaffen: %s (%s)."
 L.JUNKDELETE_CONFIRM = "Vor dem Löschen nachfragen"
 L.JUNKDELETE_CONFIRM_DESC = "Fragt nach, bevor der Stapel zerstört wird. Ausgeschaltet zerstört ihn ein Klick."
 L.JUNKDELETE_CONFIRM_TEXT = "%s zerstören, um Platz zu schaffen?"
+L.JUNKDELETE_PLACE = "Knopf"
+L.JUNKDELETE_PLACE_DESC = "Wo der Knopf sitzt: ein kleiner roter Knopf oben links im Beutefenster, "
+    .. "gegenüber dem Schließen-Knopf, oder ein breiterer unter dem Fenster."
+L.JUNKDELETE_PLACE_CORNER = "In der Ecke"
+L.JUNKDELETE_PLACE_BELOW = "Unter dem Fenster"
 L.JUNKDELETE_ONBUTTON = "Gegenstand auf dem Knopf"
 L.JUNKDELETE_ONBUTTON_DESC = "Nennt den Stapel und seinen Wert auf dem Knopf selbst, nicht nur im "
     .. "Tooltip. Der Knopf wird dadurch breiter."

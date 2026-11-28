@@ -196,7 +196,7 @@ L.EASYDELETE_DESC = "摧毀好物品時自動替你輸入「DELETE」，只要�
 
 -- JunkDelete
 L.JUNKDELETE_TITLE = "垃圾刪除按鈕"
-L.JUNKDELETE_DESC = "背包已滿時，在拾取視窗下方顯示一個按鈕，摧毀賣給商人最不值錢的一組灰色物品，"
+L.JUNKDELETE_DESC = "背包已滿時，在拾取視窗上顯示一個按鈕，摧毀賣給商人最不值錢的一組灰色物品，"
     .. "為拾取騰出空間。按鈕的提示中會顯示這組物品及其價值。"
 L.JUNKDELETE_NOTICE = "僅限非戰鬥狀態。" -- a gray row atop the module
 L.JUNKDELETE_NOTICE_DESC = "戰鬥中按鈕會隱藏，因此戰鬥中的誤點不會摧毀任何東西。"
@@ -209,6 +209,10 @@ L.JUNKDELETE_DELETED = "為騰出空間已刪除：%s（%s）。"
 L.JUNKDELETE_CONFIRM = "刪除前確認"
 L.JUNKDELETE_CONFIRM_DESC = "摧毀這組物品前先詢問。關閉後點擊一次即摧毀。"
 L.JUNKDELETE_CONFIRM_TEXT = "摧毀%s以騰出空間？"
+L.JUNKDELETE_PLACE = "按鈕"
+L.JUNKDELETE_PLACE_DESC = "按鈕的位置：拾取視窗左上角的紅色小按鈕，與關閉按鈕相對，或視窗下方較寬的按鈕。"
+L.JUNKDELETE_PLACE_CORNER = "在角落"
+L.JUNKDELETE_PLACE_BELOW = "在視窗下方"
 L.JUNKDELETE_ONBUTTON = "按鈕上顯示物品"
 L.JUNKDELETE_ONBUTTON_DESC = "在按鈕上直接寫出這組物品及其價值，而不只是在提示中。按鈕會因此變寬。"
 L.JUNKDELETE_CHAT_DESC ="在聊天中顯示刪除了哪組物品以及它值多少錢。"

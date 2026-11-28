@@ -220,7 +220,7 @@ L.EASYDELETE_DESC = "Type DELETE for you when destroying a good item, so Yes is 
 
 -- JunkDelete
 L.JUNKDELETE_TITLE = "Junk Delete Button"
-L.JUNKDELETE_DESC = "While your bags are full, show a button below the loot window that destroys your "
+L.JUNKDELETE_DESC = "While your bags are full, show a button on the loot window that destroys your "
     .. "gray stack worth least to a vendor, to make room for the loot. Its tooltip names the stack and "
     .. "its value."
 L.JUNKDELETE_NOTICE = "Works only out of combat." -- a gray row atop the module
@@ -235,6 +235,11 @@ L.JUNKDELETE_DELETED = "Deleted to make room: %s (%s)."
 L.JUNKDELETE_CONFIRM = "Confirm Before Deleting"
 L.JUNKDELETE_CONFIRM_DESC = "Ask before the stack is destroyed. Turn it off to destroy it with one click."
 L.JUNKDELETE_CONFIRM_TEXT = "Destroy %s to make room?" -- %s: the item's link
+L.JUNKDELETE_PLACE = "Button"
+L.JUNKDELETE_PLACE_DESC = "Where the button is: a small red button in the loot window's top left corner, "
+    .. "across from its close button, or a wider one below the window."
+L.JUNKDELETE_PLACE_CORNER = "In the Corner"
+L.JUNKDELETE_PLACE_BELOW = "Below the Window"
 L.JUNKDELETE_ONBUTTON = "Item on the Button"
 L.JUNKDELETE_ONBUTTON_DESC = "Name the stack and its value on the button itself, not only in its "
     .. "tooltip. The button gets wider."

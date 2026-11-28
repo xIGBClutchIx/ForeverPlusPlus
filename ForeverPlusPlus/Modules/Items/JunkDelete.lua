@@ -1,9 +1,11 @@
 -- Junk Delete Button: while the bags are full and the loot window still holds an item, a button
--- below it destroys the gray stack worth least to a vendor (ns.Bags.CheapestJunk), so there's room
--- to take the loot. The button is short, no wider than the loot window, and its tooltip, above it,
--- names the stack and its value (Item on the Button writes them on its face instead, as wide as
--- they need). One click destroys that stack and no other: the slot is read again at the click,
--- and nothing happens if it changed.
+-- on it destroys the gray stack worth least to a vendor (ns.Bags.CheapestJunk), so there's room
+-- to take the loot. By default it's a small red button in the loot window's top left corner, the
+-- mirror of its close button, in Blizzard's own delete button art. Or a panel button below the
+-- window: short, no wider than the loot window (Item on the Button writes the stack and its value
+-- on its face instead, as wide as they need). Either one's tooltip, above it, names the stack
+-- and its value. One click destroys that stack and no other: the slot is read again at the
+-- click, and nothing happens if it changed.
 --
 -- DeleteCursorItem has restrictions (Blizzard_APIDocumentationGenerated/GameCursorDocumentation.lua,
 -- wow-ui-source `forever` branch): it needs a click, so it runs only from the button's own OnClick,
@@ -12,7 +14,7 @@
 local _, ns = ...
 
 local _G, format, min, max = _G, string.format, math.min, math.max
-local C_Container, C_Item = C_Container, C_Item
+local C_Container, C_Item, CreateFrame = C_Container, C_Item, CreateFrame
 local GetNumLootItems, GetLootSlotType = GetNumLootItems, GetLootSlotType
 local GetCursorInfo, CursorHasItem, ClearCursor = GetCursorInfo, CursorHasItem, ClearCursor
 local DeleteCursorItem, InCombatLockdown, GameTooltip = DeleteCursorItem, InCombatLockdown, GameTooltip
@@ -22,6 +24,7 @@ local L = ns.L
 local module = ns.NewModule("JunkDelete", L.JUNKDELETE_DESC, {
     enabled = false,
     confirm = true,
+    place = "corner", -- "corner" (the loot window's top left) or "below" it
     onButton = false,
     chat = true,
 })
@@ -37,8 +40,19 @@ module.notice = {
 
 module.options = {
     { key = "confirm", name = L.JUNKDELETE_CONFIRM, description = L.JUNKDELETE_CONFIRM_DESC },
-    { key = "onButton", name = L.JUNKDELETE_ONBUTTON, description = L.JUNKDELETE_ONBUTTON_DESC,
-        added = "1.10.0" },
+    {
+        key = "place", name = L.JUNKDELETE_PLACE, description = L.JUNKDELETE_PLACE_DESC,
+        choices = {
+            { "corner", L.JUNKDELETE_PLACE_CORNER },
+            { "below", L.JUNKDELETE_PLACE_BELOW },
+        },
+    },
+    {
+        key = "onButton", name = L.JUNKDELETE_ONBUTTON, description = L.JUNKDELETE_ONBUTTON_DESC,
+        shown = function(db)
+            return db.place == "below"
+        end,
+    },
     ns.ChatOption(L.JUNKDELETE_CHAT_DESC),
 }
 
@@ -46,7 +60,13 @@ module.options = {
 -- LOOT_WIDTH when that can't be read.
 local MIN_WIDTH, MAX_WIDTH, LOOT_WIDTH, PADDING = 100, 320, 200, 40
 
+-- Blizzard's red square button with a delete mark (the character list's, buttonArtKit
+-- "128-redbutton-delete"), in Forever's own gold-edged drawing of it where the client has that.
+local ART = "128-redbutton-delete"
+local CORNER_SIZE = 24 -- the close button's, when its own size can't be read
+
 local button -- ours, below the loot window, made the first time it's needed
+local corner -- ours, in the loot window's top left corner, made with it
 local target -- { bag, slot, link, count, itemID, value, name }: the stack the button names, or nil
 
 local function poor()
@@ -113,7 +133,9 @@ local function refresh()
                 itemID = info.itemID, value = value, name = name,
             }
             local widest = MAX_WIDTH
-            if module.db.onButton then
+            if module.db.place ~= "below" then
+                widest = MIN_WIDTH -- unseen: the corner button is the one showing
+            elseif module.db.onButton then
                 button:SetText(format(L.JUNKDELETE_BUTTON, name, ns.Money(value)))
             else
                 button:SetText(L.JUNKDELETE_LABEL)
@@ -123,9 +145,16 @@ local function refresh()
             button:SetWidth(min(widest, max(MIN_WIDTH, button:GetTextWidth() + PADDING)))
         end
     end
-    button:SetShown(target ~= nil)
-    if target and GameTooltip:GetOwner() == button then
-        showTooltip(button)
+    local below = module.db.place == "below"
+    button:SetShown(target ~= nil and below)
+    corner:SetShown(target ~= nil and not below)
+    local owner = GameTooltip:GetOwner()
+    if owner == button or owner == corner then
+        if target and owner:IsShown() then
+            showTooltip(owner)
+        else
+            GameTooltip:Hide()
+        end
     end
 end
 
@@ -159,6 +188,7 @@ local function destroy(want)
         return
     end
     button:Hide() -- until the bags answer (BAG_UPDATE_DELAYED)
+    corner:Hide()
     module:Print(format(L.JUNKDELETE_DELETED, want.link, ns.Money(want.value)))
 end
 
@@ -191,6 +221,35 @@ local function build()
         GameTooltip:Hide()
     end)
     button:Hide()
+
+    -- The corner button: the close button's mirror, its size and how far it sits from the
+    -- corner read from it (UIPanelCloseButtonDefaultAnchors puts it at the top right).
+    corner = CreateFrame("Button", nil, loot)
+    local close = loot.ClosePanelButton
+    local width, height, x, y = CORNER_SIZE, CORNER_SIZE, 0, 0
+    if close then
+        local w, h = close:GetSize()
+        if ns.IsNumber(w) and w > 0 and ns.IsNumber(h) and h > 0 then
+            width, height = w, h
+        end
+        local point, _, _, px, py = close:GetPoint(1)
+        if point == "TOPRIGHT" and ns.IsNumber(px) and ns.IsNumber(py) then
+            x, y = -px, py
+        end
+        corner:SetFrameLevel(close:GetFrameLevel())
+    end
+    corner:SetSize(width, height)
+    corner:SetPoint("TOPLEFT", loot, "TOPLEFT", x, y)
+    local own = ns.Frames.HasAtlas(ART .. "-c60") and "-c60" or ""
+    corner:SetNormalAtlas(ART .. own)
+    corner:SetPushedAtlas(ART .. "-pressed" .. own)
+    corner:SetHighlightAtlas(ART .. "-highlight", "ADD")
+    corner:SetScript("OnClick", onClick)
+    corner:SetScript("OnEnter", showTooltip)
+    corner:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+    end)
+    corner:Hide()
 end
 
 local function onLoot()
@@ -218,6 +277,7 @@ function module:OnEnable()
         target = nil
         if button then
             button:Hide()
+            corner:Hide()
         end
     end)
     self:On("PLAYER_REGEN_ENABLED", refresh)
@@ -228,5 +288,6 @@ function module:OnDisable()
     target = nil
     if button then
         button:Hide()
+        corner:Hide()
     end
 end

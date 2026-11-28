@@ -103,12 +103,12 @@ ns.changelog = {
                     .. "weapons and armor on their icons, in their quality's color, in your bags, "
                     .. "the bank, at merchants, and in loot, and in the auction house if you turn "
                     .. "it on. Text Size sets how big the levels are." },
-                { L.JUNKDELETE_TITLE, "A new module, off by default, that shows a button below the "
-                    .. "loot window while your bags are full. A click destroys your gray stack worth "
-                    .. "least to a vendor, named with its value in the button's tooltip, so there's "
-                    .. "room for the loot. It asks first unless you turn Confirm Before Deleting off, "
-                    .. "and Item on the Button names the stack on the button itself. Out of combat "
-                    .. "only." },
+                { L.JUNKDELETE_TITLE, "A new module, off by default, that shows a small red button "
+                    .. "in the loot window's top left corner while your bags are full. A click "
+                    .. "destroys your gray stack worth least to a vendor, named with its value in the "
+                    .. "button's tooltip, so there's room for the loot. It asks first unless you turn "
+                    .. "Confirm Before Deleting off. Button moves it below the window as a wider "
+                    .. "button, where Item on the Button names the stack on it. Out of combat only." },
                 { L.BULKBUY_TITLE, "A new module, on by default. Shift+click an item at a merchant for "
                     .. "a bigger buying popup in place of the game's: type how many, or press Stack for "
                     .. "one stack or Max for the most your money, bag space, and the merchant's stock "

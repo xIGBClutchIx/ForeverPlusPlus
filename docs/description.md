@@ -126,7 +126,7 @@ Everything is on by default except where noted. Each module can be turned off, a
   - **Compare Crafted Gear**: a recipe that makes gear compares it with what you wear.
   - **Quests**: the quests an item is for, those in your quest log first and those you've done in gray, so old quest items stand out. Needs the QuestieDB addon.
   - **Repair Cost**, **Item Count** across bags and bank, **Disenchant** results and value, and **New in Forever** on items Classic never had: off by default.
-- **Junk Delete Button**: While your bags are full, shows a button below the loot window that destroys your gray stack worth least to a vendor, named with its value in the button's tooltip, to make room for the loot. Out of combat only. Off by default.
+- **Junk Delete Button**: While your bags are full, shows a small button in the loot window's corner that destroys your gray stack worth least to a vendor, named with its value in the button's tooltip, to make room for the loot. Out of combat only. Off by default.
 - **Gathering Skill Tooltips**: Shows the skill a herb, ore, skinnable beast, or locked box needs in its tooltip, colored against your skill.
 - **Waylaid Crates**: Helps fill Waylaid Crates: what each bundle costs at auction, and an auction house category listing every item your crates still need.
 - **Unusable Items Tint**: Tints red the icons of items you can't use, in bags, the bank, and merchants, and optionally the auction house and loot.
