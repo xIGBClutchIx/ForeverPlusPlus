@@ -120,10 +120,15 @@ local function placeCorner()
     if not (close and close:IsShown()) then
         return
     end
+    -- Its art, not its frame: Forever draws the close button's art at the art's own size (32),
+    -- past the edges of the 24 by 24 button under it, so a button the frame's size came out
+    -- smaller and nearer the corner than the one it mirrors (in game, 2026-11-27).
+    local art = close.GetNormalTexture and close:GetNormalTexture()
+    local shown = art and art:GetRight() and art or close
     local scale, closeScale = loot:GetEffectiveScale(), close:GetEffectiveScale()
     local right, top = loot:GetRight(), loot:GetTop()
-    local closeRight, closeTop = close:GetRight(), close:GetTop()
-    local width, height = close:GetSize()
+    local closeRight, closeTop = shown:GetRight(), shown:GetTop()
+    local width, height = shown:GetSize()
     if not (scale and scale > 0 and closeScale and right and top and closeRight and closeTop
         and width and width > 0 and height and height > 0) then
         return
