@@ -20,6 +20,7 @@ local module = ns.NewModule("CharacterWindow", L.CHARACTERWINDOW_DESC, {
     durability = "always", -- "off", or which items get a bar (Durability.lua)
     weaponSkills = true, -- green skill bars for the weapons worn (Skills.lua)
     itemLevel = false, -- each item's level on its icon (Details.lua)
+    itemLevelSize = 14, -- that text's height in pixels; Blizzard's number font is 14
     enchants = false, -- a mark for whether each item is enchanted (Details.lua)
     inspect = true, -- the item levels and enchant marks in the Inspect window too
 })
@@ -75,6 +76,12 @@ module.options = {
     {
         key = "itemLevel", name = L.CHARACTERWINDOW_ITEMLEVEL, description = L.CHARACTERWINDOW_ITEMLEVEL_DESC,
         section = L.CHARACTERWINDOW_SECTION_ITEMS, added = "1.10.0",
+    },
+    {
+        key = "itemLevelSize", name = L.CHARACTERWINDOW_ITEMLEVEL_SIZE,
+        description = L.CHARACTERWINDOW_ITEMLEVEL_SIZE_DESC,
+        section = L.CHARACTERWINDOW_SECTION_ITEMS, added = "1.10.0", requires = "itemLevel",
+        min = 8, max = 32, step = 2, format = L.ICONMARK_PIXELS,
     },
     {
         key = "enchants", name = L.CHARACTERWINDOW_ENCHANTS, description = L.CHARACTERWINDOW_ENCHANTS_DESC,
@@ -512,7 +519,7 @@ function module:OnOptionChanged(key)
     if key == "durability" then
         internal.updateDurability()
         return
-    elseif key == "itemLevel" or key == "enchants" or key == "inspect" then
+    elseif key == "itemLevel" or key == "itemLevelSize" or key == "enchants" or key == "inspect" then
         internal.updateDetails()
         return
     elseif key == "weaponSkills" then

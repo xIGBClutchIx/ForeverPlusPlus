@@ -33,6 +33,8 @@ L.CHARACTERWINDOW_WEAPONSKILLS_DESC = "На вкладке навыков окр
 L.CHARACTERWINDOW_SECTION_ITEMS = "Предметы"
 L.CHARACTERWINDOW_ITEMLEVEL = "Уровни надетых предметов"
 L.CHARACTERWINDOW_ITEMLEVEL_DESC = "Показывать уровень каждого предмета на его значке цветом его качества."
+L.CHARACTERWINDOW_ITEMLEVEL_SIZE = "Размер текста"
+L.CHARACTERWINDOW_ITEMLEVEL_SIZE_DESC = "Насколько крупный текст уровней предметов."
 L.CHARACTERWINDOW_ENCHANTS = "Метки чар"
 L.CHARACTERWINDOW_ENCHANTS_DESC = "Отмечать каждый предмет, который можно зачаровать, в углу ближе к "
     .. "персонажу: зеленым, если он зачарован, красным, если нет. Кольца, аксессуары, рубашки и "

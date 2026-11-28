@@ -20,6 +20,7 @@ local module = ns.NewModule("ItemLevels", L.ITEMLEVELS_DESC, {
     enabled = false,
     corner = "TOPLEFT", -- clear of Appearance Icons (top right) and a stack's count (bottom right)
     padding = 1, -- how far the level sits in from its corner, in pixels
+    size = 14, -- the text's height in pixels; Blizzard's number font is 14
     bags = true,
     bank = true,
     merchant = true,
@@ -63,6 +64,7 @@ module.options = {
         },
     }),
     ItemButtons.PaddingOption(),
+    ItemButtons.SizeOption(L.ITEMLEVELS_SIZE, L.ITEMLEVELS_SIZE_DESC),
     ItemButtons.PlaceOption("bags", L.ITEMLEVELS_BAGS_DESC),
     ItemButtons.PlaceOption("bank", L.ITEMLEVELS_BANK_DESC),
     ItemButtons.PlaceOption("merchant", L.ITEMLEVELS_MERCHANT_DESC),
@@ -70,8 +72,9 @@ module.options = {
     ItemButtons.PlaceOption("loot", L.ITEMLEVELS_LOOT_DESC),
 }
 
--- Below this width an icon gets the smaller number font: the auction house's list icons.
+-- Below this width an icon gets text two pixels smaller: the auction house's list icons.
 local SMALL_ICON = 30
+local SMALLEST = 8 -- the least a small icon's text shrinks to, the slider's own least
 
 local waiting = {} -- itemID -> true while the game doesn't have the item yet
 
@@ -101,7 +104,15 @@ local walk = ItemButtons.Walk(module, function(icon, link)
     end
     local width = icon:GetWidth()
     local small = ns.IsNumber(width) and width > 0 and width < SMALL_ICON
-    text:SetFontObject(small and "NumberFontNormalSmall" or "NumberFontNormal")
+    -- Blizzard's number font and its outline, at the player's size.
+    local size = module.db.size
+    if small and size - 2 >= SMALLEST then
+        size = size - 2
+    end
+    local path, _, flags = text:GetFont()
+    if path then
+        text:SetFont(path, size, flags)
+    end
     local color = ns.Colors.Quality(quality)
     text:SetTextColor(color.r, color.g, color.b)
     text:SetText(level)

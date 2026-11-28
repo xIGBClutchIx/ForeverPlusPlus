@@ -92,11 +92,11 @@ ns.changelog = {
                 { L.CHARACTERWINDOW_TITLE, "Equipped Item Levels shows each item's level on its icon, "
                     .. "in its quality's color, and Enchant Marks marks each item that can be enchanted: "
                     .. "green when it is, red when it isn't. Both are off by default, and show in "
-                    .. "the Inspect window too." },
+                    .. "the Inspect window too. Text Size sets how big the levels are." },
                 { L.ITEMLEVELS_TITLE, "A new module, off by default, that shows the level of "
                     .. "weapons and armor on their icons, in their quality's color, in your bags, "
                     .. "the bank, at merchants, and in loot, and in the auction house if you turn "
-                    .. "it on." },
+                    .. "it on. Text Size sets how big the levels are." },
                 { L.JUNKDELETE_TITLE, "A new module, off by default, that shows a button below the "
                     .. "loot window while your bags are full. A click destroys your gray stack worth "
                     .. "least to a vendor, named on the button with its value, so there's room for "

@@ -30,6 +30,8 @@ L.CHARACTERWINDOW_WEAPONSKILLS_DESC = "숙련 탭에서 장착한 무기의 무�
 L.CHARACTERWINDOW_SECTION_ITEMS = "아이템"
 L.CHARACTERWINDOW_ITEMLEVEL = "착용 아이템 레벨"
 L.CHARACTERWINDOW_ITEMLEVEL_DESC = "각 아이템의 레벨을 아이콘 위에 아이템 품질 색상으로 표시합니다."
+L.CHARACTERWINDOW_ITEMLEVEL_SIZE = "글자 크기"
+L.CHARACTERWINDOW_ITEMLEVEL_SIZE_DESC = "아이템 레벨 글자의 크기입니다."
 L.CHARACTERWINDOW_ENCHANTS = "마법부여 표시"
 L.CHARACTERWINDOW_ENCHANTS_DESC = "마법부여할 수 있는 아이템의 캐릭터 쪽 모서리에 표시합니다. "
     .. "마법부여되어 있으면 녹색, 아니면 빨간색입니다. 반지, 장신구, 속옷, 휘장은 마법부여할 수 없어 "

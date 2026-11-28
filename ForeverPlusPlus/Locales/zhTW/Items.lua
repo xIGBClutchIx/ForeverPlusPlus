@@ -149,6 +149,8 @@ L.DISENCHANTICONS_LOOT_DESC = "標示拾取視窗和拾取擲骰中可以分解�
 L.ITEMLEVELS_TITLE = "物品等級"
 L.ITEMLEVELS_DESC = "在武器和護甲的圖示上以其品質顏色顯示等級。襯衣和外袍不會標示。"
 L.ITEMLEVELS_CORNER_DESC = "等級位於物品圖示的哪個角落。"
+L.ITEMLEVELS_SIZE = "文字大小"
+L.ITEMLEVELS_SIZE_DESC = "等級文字的大小。拍賣場的小圖示上會略小一些。"
 L.ITEMLEVELS_CONFLICT_APPEARANCE = "「外觀圖示」也會在這個角落顯示圖示，兩者會重疊。"
     .. "請為其中一個選擇其他角落。"
 L.ITEMLEVELS_CONFLICT_DISENCHANT = "「分解圖示」也會在這個角落顯示圖示，兩者會重疊。"

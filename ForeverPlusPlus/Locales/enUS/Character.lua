@@ -33,6 +33,8 @@ L.CHARACTERWINDOW_WEAPONSKILLS_DESC = "On the Skills tab, color the bars of the 
 L.CHARACTERWINDOW_SECTION_ITEMS = "Items"
 L.CHARACTERWINDOW_ITEMLEVEL = "Equipped Item Levels" -- not "Item Levels": that's the module for bags
 L.CHARACTERWINDOW_ITEMLEVEL_DESC = "Show each equipped item's level on its icon, in the color of its quality."
+L.CHARACTERWINDOW_ITEMLEVEL_SIZE = "Text Size"
+L.CHARACTERWINDOW_ITEMLEVEL_SIZE_DESC = "How big the item levels' text is."
 L.CHARACTERWINDOW_ENCHANTS = "Enchant Marks"
 L.CHARACTERWINDOW_ENCHANTS_DESC = "Mark each item that can be enchanted, in the corner nearest your "
     .. "character: green when it is, red when it isn't. Rings, trinkets, shirts, and tabards take no "

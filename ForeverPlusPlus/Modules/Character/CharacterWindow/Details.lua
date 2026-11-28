@@ -105,6 +105,11 @@ local function show(marks, unit)
     end
     if level then
         local color = ns.Colors.Quality(quality)
+        -- Blizzard's number font and its outline, at the player's size.
+        local path, _, flags = marks.level:GetFont()
+        if path then
+            marks.level:SetFont(path, module.db.itemLevelSize, flags)
+        end
         marks.level:SetText(level)
         marks.level:SetTextColor(color.r, color.g, color.b)
     end
