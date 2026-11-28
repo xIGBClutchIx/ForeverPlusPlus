@@ -7,7 +7,7 @@ local _, ns = ...
 
 local ipairs, pairs, setmetatable, tonumber, unpack, floor, max = ipairs, pairs, setmetatable, tonumber,
     unpack, math.floor, math.max
-local tostring, type = tostring, type
+local _G, tostring, type = _G, tostring, type
 local CreateFrame, C_TooltipInfo, C_QuestLog, UnitName = CreateFrame, C_TooltipInfo, C_QuestLog,
     UnitName
 local UnitIsPlayer, UnitGUID = UnitIsPlayer, UnitGUID
@@ -24,8 +24,11 @@ local module = ns.NewModule("QuestNameplates", L.QUESTNAMEPLATES_DESC, {
     completed = true, -- keep a green check on creatures whose objective is done
     completedCount = true, -- and its final count beside it
     drops = true, -- creatures that only drop a quest's item too, with QuestieDB
+    icon = "type", -- "type" (an icon for the kind of objective) or "exclamation" (the quest mark)
     side = "left", -- which side of the bar: "left" or "right"
     size = 90, -- a percent, of ICON_SIZE; 90 since the icon grew with the nameplate size
+    color = "gold", -- the count's color: "gold" or "white"; a finished objective's is green either way
+    outline = "none", -- the count's outline: "none", "thin", or "thick"
     testIcons = false, -- debug: made-up progress on every creature's plate
 })
 module.title = L.QUESTNAMEPLATES_TITLE
@@ -36,9 +39,63 @@ module.quickToggle = "nameplates"
 module.notice = ns.CVars.OffNotice(module, "nameplateShowEnemies", L.QUESTNAMEPLATES_BLIZZARD_OFF,
     L.QUESTNAMEPLATES_BLIZZARD_OFF_DESC)
 
+-- Blizzard's quest atlases, the first this client has (probed: names change between builds).
+-- `default` is the plain quest icon; the others are the cursor icons Blizzard shows over that
+-- kind of target, by the objective type C_QuestLog.GetQuestObjectives reports. `exclamation` is
+-- the Icon option's quest mark, which stands in for every kind but a finished one's check:
+-- `QuestNormal` and `smallquestbang` are the minimap's object icons (UiTextureAtlas 647 in build
+-- 1.60.1.71139's UiTextureAtlasMember, wago.tools).
+local ATLASES = {
+    default = { "QuestObjective", "QuestNormal", "quest-icon-exclamation" },
+    monster = { "Crosshair_Attack_32", "worldquest-icon-pvp-ffa" },
+    player = { "worldquest-icon-pvp-ffa", "Crosshair_Attack_32" },
+    item = { "Crosshair_Pickup_32", "Crosshair_Take_32", "Crosshair_Loot_32" },
+    object = { "Crosshair_Interact_32", "Crosshair_Gossip_32" },
+    done = { "common-icon-checkmark", "UI-QuestTracker-Tracker-Check", "ui-questtracker-tracker-check" },
+    exclamation = { "QuestNormal", "smallquestbang" },
+}
+
+-- The count's font, by the Outline option: Blizzard's nameplate font families, which keep a font
+-- for every alphabet when only their height is set. `none` is the plates' own (slug rendering, no
+-- outline) and `thin` the one Blizzard's plates switch to when the name sits on the bar (slug,
+-- outline NORMAL). No slug family has a thick outline, so `thick` is the FRIZQT family with
+-- THICK (Blizzard_Fonts_Shared, the `forever` UI source, build 71139).
+local FONTS = {
+    none = "SystemFont_NamePlate",
+    thin = "SystemFont_NamePlate_Outlined",
+    thick = "SystemFont_OutlineThick_Huge2",
+}
+
+local COLORS = {
+    gold = { 1, 0.82, 0 },
+    white = { 1, 1, 1 },
+}
+
+-- A dropdown's choices, leaving out any whose art or font this client hasn't got. The first is
+-- today's look, which is always there.
+local function iconChoices()
+    local choices = { { "type", L.QUESTNAMEPLATES_ICON_TYPE } }
+    if ns.Frames.FirstAtlas(unpack(ATLASES.exclamation)) then
+        choices[#choices + 1] = { "exclamation", L.QUESTNAMEPLATES_ICON_EXCLAMATION }
+    end
+    return choices
+end
+
+local function outlineChoices()
+    local choices = { { "none", L.QUESTNAMEPLATES_OUTLINE_NONE } }
+    if _G[FONTS.thin] then
+        choices[#choices + 1] = { "thin", L.QUESTNAMEPLATES_OUTLINE_THIN }
+    end
+    if _G[FONTS.thick] then
+        choices[#choices + 1] = { "thick", L.QUESTNAMEPLATES_OUTLINE_THICK }
+    end
+    return choices
+end
+
 module.options = {
     {
         key = "progress", name = L.QUESTNAMEPLATES_PROGRESS, description = L.QUESTNAMEPLATES_PROGRESS_DESC,
+        section = L.QUESTNAMEPLATES_SECTION_PROGRESS,
         choices = {
             { "count", L.QUESTNAMEPLATES_PROGRESS_COUNT },
             { "remaining", L.QUESTNAMEPLATES_PROGRESS_REMAINING },
@@ -64,12 +121,27 @@ module.options = {
         added = "1.6.0",
     },
     {
+        key = "icon", name = L.QUESTNAMEPLATES_ICON, description = L.QUESTNAMEPLATES_ICON_DESC,
+        section = L.QUESTNAMEPLATES_SECTION_ICON, choices = iconChoices(), added = "1.10.0",
+    },
+    {
         key = "side", name = L.QUESTNAMEPLATES_SIDE, description = L.QUESTNAMEPLATES_SIDE_DESC,
+        section = L.QUESTNAMEPLATES_SECTION_ICON,
         choices = { { "left", L.QUESTNAMEPLATES_SIDE_LEFT }, { "right", L.QUESTNAMEPLATES_SIDE_RIGHT } },
     },
     {
         key = "size", name = L.QUESTNAMEPLATES_SIZE, description = L.QUESTNAMEPLATES_SIZE_DESC,
+        section = L.QUESTNAMEPLATES_SECTION_ICON,
         min = 50, max = 200, step = 10, format = "%d%%", changed = "1.2.0", -- 90% by default, not 100%
+    },
+    {
+        key = "color", name = L.QUESTNAMEPLATES_COLOR, description = L.QUESTNAMEPLATES_COLOR_DESC,
+        section = L.QUESTNAMEPLATES_SECTION_TEXT, added = "1.10.0",
+        choices = { { "gold", L.QUESTNAMEPLATES_COLOR_GOLD }, { "white", L.QUESTNAMEPLATES_COLOR_WHITE } },
+    },
+    {
+        key = "outline", name = L.QUESTNAMEPLATES_OUTLINE, description = L.QUESTNAMEPLATES_OUTLINE_DESC,
+        section = L.QUESTNAMEPLATES_SECTION_TEXT, choices = outlineChoices(), added = "1.10.0",
     },
     {
         key = "testIcons", name = L.QUESTNAMEPLATES_TEST, description = L.QUESTNAMEPLATES_TEST_DESC,
@@ -87,17 +159,6 @@ local GAP = 2 -- between the icon and the count
 local PAD = 8 -- between the column and the health bar
 local ELITE_PAD = 2 -- between the column and an elite's dragon
 local LIFT = 2 -- the column sits a little above the bar's middle, which looks centered
--- Blizzard's quest atlases, the first this client has (probed: names change between builds).
--- `default` is the plain quest icon; the others are the cursor icons Blizzard shows over that
--- kind of target, by the objective type C_QuestLog.GetQuestObjectives reports.
-local ATLASES = {
-    default = { "QuestObjective", "QuestNormal", "quest-icon-exclamation" },
-    monster = { "Crosshair_Attack_32", "worldquest-icon-pvp-ffa" },
-    player = { "worldquest-icon-pvp-ffa", "Crosshair_Attack_32" },
-    item = { "Crosshair_Pickup_32", "Crosshair_Take_32", "Crosshair_Loot_32" },
-    object = { "Crosshair_Interact_32", "Crosshair_Gossip_32" },
-    done = { "common-icon-checkmark", "UI-QuestTracker-Tracker-Check", "ui-questtracker-tracker-check" },
-}
 
 local indicators = setmetatable({}, { __mode = "k" }) -- Blizzard unit frame -> our indicator
 local atlases = {} -- objective type -> the atlas found, or false
@@ -382,9 +443,7 @@ local function create(frame)
     local box = CreateFrame("Frame", nil, frame)
     box:Hide()
     box.icon = box:CreateTexture(nil, "OVERLAY")
-    box.text = box:CreateFontString(nil, "OVERLAY")
-    -- The nameplate font family (a font per alphabet), sized the way Blizzard's plates are.
-    box.text:SetFontObject("SystemFont_NamePlate")
+    box.text = box:CreateFontString(nil, "OVERLAY") -- its font is set as it's laid out
     return box
 end
 
@@ -433,7 +492,9 @@ local function place(box, frame, current, needed, kind, percent)
         end
     end
     local size = floor(ICON_SIZE * scale + 0.5)
-    local name = findAtlas(kind)
+    local done = kind == "done"
+    -- The quest mark stands in for the kind's icon, but a finished objective keeps its check.
+    local name = findAtlas(db.icon == "exclamation" and not done and "exclamation" or kind)
     if name then
         box.icon:SetAtlas(name, false)
     else
@@ -441,15 +502,17 @@ local function place(box, frame, current, needed, kind, percent)
     end
     box.icon:SetSize(size, size)
     local text = box.text
+    -- The nameplate font family (a font per alphabet), sized the way Blizzard's plates are: the
+    -- font object first, since setting one puts its own height back.
+    text:SetFontObject(_G[FONTS[db.outline]] and FONTS[db.outline] or FONTS.none)
     if text.SetFontHeight then
         text:SetFontHeight(TEXT_SIZE * scale)
     end
     local label
-    local done = kind == "done"
     if done then
         text:SetTextColor(0.1, 1, 0.1)
     else
-        text:SetTextColor(1, 0.82, 0)
+        text:SetTextColor(unpack(COLORS[db.color] or COLORS.gold))
     end
     -- A finished objective has nothing remaining, so it shows its count either way.
     if db.progress == "count" or (done and db.progress == "remaining") then

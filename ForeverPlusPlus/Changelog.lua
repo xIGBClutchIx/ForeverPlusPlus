@@ -155,6 +155,11 @@ ns.changelog = {
                     .. "At sets how many) and you have its reagent. Reminder Button shows a button "
                     .. "with the next buff and who gets it, out of combat; click it to cast, and "
                     .. "move it in Edit Mode." },
+                { L.QUESTNAMEPLATES_TITLE, "Three new options for how the icon and count look. "
+                    .. "Quest Icon can show the quest exclamation mark on every quest creature in "
+                    .. "place of an icon for the kind of objective, Text Color makes the count white "
+                    .. "instead of gold, and Outline draws a thin or thick outline around it. Each "
+                    .. "keeps today's look by default." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.AUTOSCREENSHOT_TITLE, "On by default now. If you never turned it on or off, "
