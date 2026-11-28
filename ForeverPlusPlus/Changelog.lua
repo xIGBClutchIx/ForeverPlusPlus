@@ -125,7 +125,9 @@ ns.changelog = {
                 { L.TOWNSFOLK_TITLE, "A new module, off by default, that needs the QuestieDB addon. "
                     .. "It puts innkeepers, mailboxes, bankers, auctioneers, your class trainers, the "
                     .. "trainers of your professions, repairers, and more on the world map, each kind "
-                    .. "with its own checkbox, and the same ones in the map's filter menu." },
+                    .. "with its own checkbox, and the same ones in the map's filter menu. On "
+                    .. "Continent Maps (off by default) shows them zoomed out too, and with the "
+                    .. "OpenMap addon's map they always show there." },
                 { L.KEEPAUDIOSYNCED_TITLE, "A new module, on by default, that restarts the game's "
                     .. "sound when your computer's default sound device changes, as when you plug in "
                     .. "headphones, so the game follows it instead of playing on the old one. It works "

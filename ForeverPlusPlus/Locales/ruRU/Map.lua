@@ -406,6 +406,8 @@ L.TOWNSFOLK_NOTICE_DESC = "Где они стоят, берется из дан�
 L.TOWNSFOLK_PINS = "Показывать на карте мира"
 L.TOWNSFOLK_PINS_DESC = "Показывать значки на картах зон и городов. В меню фильтров карты мира есть "
     .. "такой же переключатель."
+L.TOWNSFOLK_CONTINENTS_DESC = "Показывать их также на картах континентов, где значков сразу очень "
+    .. "много. С картой модификации OpenMap они видны там всегда: при отдалении это карта континента."
 -- Smaller headers over its options in Settings
 L.TOWNSFOLK_SECTION_SERVICES = "Услуги"
 L.TOWNSFOLK_SECTION_TRAINERS = "Учителя"

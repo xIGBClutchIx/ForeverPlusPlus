@@ -21,6 +21,20 @@ function WorldMap.Get()
     return ns.AddOns.IsLoaded(ADDON) and WorldMapFrame or nil
 end
 
+---Whether the world map shows the OpenMap addon's stitched map now: one view over many zones,
+---drawn over Blizzard's map, which it keeps on the zone or continent under the middle of the view.
+---So zoomed out the map underneath is a continent, and icons kept to zone maps would be gone.
+---Through its public API (`OpenMapAPI.IsStitched`, its docs/api.md). False without the addon.
+---@return boolean
+function WorldMap.Stitched()
+    local api = _G.OpenMapAPI
+    if type(api) ~= "table" or type(api.IsStitched) ~= "function" then
+        return false
+    end
+    local ok, stitched = pcall(api.IsStitched)
+    return ok and stitched and true or false
+end
+
 ---Shows another map in the world map, as picking it in the map's own dropdown does. Not in
 ---combat: the map it then lays out has pins the game protects there.
 ---

@@ -412,6 +412,8 @@ L.TOWNSFOLK_NOTICE_DESC = "Where they stand comes from QuestieDB's data, which m
 L.TOWNSFOLK_PINS = "Show on World Map"
 L.TOWNSFOLK_PINS_DESC = "Show the icons on zone and city maps. The world map's filter menu has the "
     .. "same switch."
+L.TOWNSFOLK_CONTINENTS_DESC = "Also show them on continent maps, which is a lot of icons at once. "
+    .. "With the OpenMap addon's map they always show there, since zoomed out it is a continent's map."
 -- Smaller headers over its options in Settings
 L.TOWNSFOLK_SECTION_SERVICES = "Services"
 L.TOWNSFOLK_SECTION_TRAINERS = "Trainers"

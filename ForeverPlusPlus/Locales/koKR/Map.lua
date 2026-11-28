@@ -388,6 +388,8 @@ L.TOWNSFOLK_NOTICE_DESC = "위치는 QuestieDB의 데이터에서 가져오며, 
 L.TOWNSFOLK_PINS = "세계 지도에 표시"
 L.TOWNSFOLK_PINS_DESC = "지역과 도시 지도에 아이콘을 표시합니다. 세계 지도의 필터 메뉴에도 같은 스위치가 "
     .. "있습니다."
+L.TOWNSFOLK_CONTINENTS_DESC = "대륙 지도에도 표시합니다. 한꺼번에 아이콘이 아주 많아집니다. OpenMap 애드온의 "
+    .. "지도에서는 항상 표시됩니다. 축소하면 대륙 지도이기 때문입니다."
 -- Smaller headers over its options in Settings
 L.TOWNSFOLK_SECTION_SERVICES = "편의 시설"
 L.TOWNSFOLK_SECTION_TRAINERS = "상급자"

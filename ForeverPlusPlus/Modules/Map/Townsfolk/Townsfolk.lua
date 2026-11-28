@@ -11,7 +11,7 @@
 local _, ns = ...
 
 local ipairs, select = ipairs, select
-local UnitClass = UnitClass
+local UnitClass, C_Map, Enum = UnitClass, C_Map, Enum
 
 local L = ns.L
 local QuestieDB, MapPins, MapTooltip = ns.QuestieDB, ns.MapPins, ns.MapTooltip
@@ -20,6 +20,7 @@ local module = ns.NewModule("Townsfolk", L.TOWNSFOLK_DESC, {
     enabled = false,
     pins = true, -- the world map's filter menu switches this one
     size = 80, -- percent of PIXELS
+    continents = false, -- on continent maps too; many icons at once
     innkeeper = true,
     mailbox = true,
     banker = true,
@@ -85,6 +86,7 @@ local SECTION = {
 local options = {
     { key = "pins", name = L.TOWNSFOLK_PINS, description = L.TOWNSFOLK_PINS_DESC },
     MapPins.SizeOption("size", nil, { requires = "pins" }),
+    MapPins.ContinentOption("continents", nil, { requires = "pins", description = L.TOWNSFOLK_CONTINENTS_DESC }),
 }
 for _, kind in ipairs(KINDS) do
     options[#options + 1] = { key = kind.key, name = kind.name, description = kind.desc,
@@ -135,28 +137,47 @@ local function friendly(entry, side)
     return to ~= nil and (to == "AH" or to == side)
 end
 
-local function fill(mapID, add)
-    local list = internal.byMap[mapID]
-    if not list then
-        return
+-- The maps whose townsfolk show on a map: its own, and on a continent's map, with On Continent
+-- Maps, those of every zone under it. With the OpenMap addon's stitched map up, a continent's
+-- always: zoomed out, the map under its view is a continent, and the icons would be gone. The
+-- world map never: it's too wide for them.
+local function mapsFor(mapID, db)
+    local maps = { mapID }
+    local info = C_Map.GetMapInfo and C_Map.GetMapInfo(mapID)
+    local types = Enum.UIMapType
+    if info and types and info.mapType == types.Continent
+        and (db.continents or ns.WorldMap.Stitched()) and C_Map.GetMapChildrenInfo then
+        for _, child in ipairs(C_Map.GetMapChildrenInfo(mapID, nil, true) or {}) do
+            maps[#maps + 1] = child.mapID
+        end
     end
+    return maps
+end
+
+local function fill(mapID, add)
     local db = module.db
     local side = ns.WorldMap.PlayerSide()
     local size = PIXELS * db.size / 100
-    for _, spot in ipairs(list) do
-        local entry = spot.entry
-        local kind = friendly(entry, side) and kindOf(entry, db)
-        if kind then
-            -- The name, its kind at the right unless that's the name (a mailbox), and its title
-            -- under it when that says more (a trainer's "Expert Blacksmith"; an innkeeper's title
-            -- is only "Innkeeper").
-            local name, title = entry.name or kind.name, entry.title
-            add(spot.x, spot.y, {
-                atlas = atlasOf(kind), size = size, title = name,
-                kind = name ~= kind.name and kind.name or nil,
-                lines = title and title ~= kind.name and { MapTooltip.Detail(title) } or nil,
-                waypoint = true,
-            })
+    for _, zone in ipairs(mapsFor(mapID, db)) do
+        for _, spot in ipairs(internal.byMap[zone] or {}) do
+            local entry = spot.entry
+            local kind = friendly(entry, side) and kindOf(entry, db)
+            local x, y = spot.x, spot.y
+            if kind and zone ~= mapID then
+                x, y = MapPins.Translate(zone, mapID, x, y)
+            end
+            if kind and x then
+                -- The name, its kind at the right unless that's the name (a mailbox), and its
+                -- title under it when that says more (a trainer's "Expert Blacksmith"; an
+                -- innkeeper's title is only "Innkeeper").
+                local name, title = entry.name or kind.name, entry.title
+                add(x, y, {
+                    atlas = atlasOf(kind), size = size, title = name,
+                    kind = name ~= kind.name and kind.name or nil,
+                    lines = title and title ~= kind.name and { MapTooltip.Detail(title) } or nil,
+                    waypoint = true,
+                })
+            end
         end
     end
 end

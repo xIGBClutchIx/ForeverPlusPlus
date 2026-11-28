@@ -355,6 +355,8 @@ L.TOWNSFOLK_NOTICE = "只顯示QuestieDB知道的。"
 L.TOWNSFOLK_NOTICE_DESC = "他們所在的位置來自QuestieDB的資料，其中可能沒有每一個郵箱。訓練師的職業或專業是從其名字下方的頭銜讀出的。"
 L.TOWNSFOLK_PINS = "在世界地圖上顯示"
 L.TOWNSFOLK_PINS_DESC = "在區域和城市地圖上顯示圖示。世界地圖的過濾選單中也有相同的開關。"
+L.TOWNSFOLK_CONTINENTS_DESC = "也在大陸地圖上顯示，那樣會同時出現很多圖示。使用OpenMap插件的地圖時一律在那裡顯示，"
+    .. "因為縮小後它就是大陸地圖。"
 -- Smaller headers over its options in Settings
 L.TOWNSFOLK_SECTION_SERVICES = "服務"
 L.TOWNSFOLK_SECTION_TRAINERS = "訓練師"

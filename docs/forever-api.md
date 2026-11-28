@@ -663,6 +663,15 @@ The install holds one language (enUS here), so the client folder can't answer wh
 - The Russian client's words differ from the usual guesses: item quality 4 (Epic) is "Превосходное", a talent's rank is "Уровень %d/%d", "Off" is "Откл.", an NPC is "NPC".
 - `Locales/ruRU/` is held to these by the `locales` spec, through `tests/data/GameText.lua` ([translations.md](translations.md)). An NPC's title under its name (a stable master's) isn't in any of them: it comes from the server.
 
+## The OpenMap addon's map
+
+OpenMap (openmap-world/openmap) draws one stitched view of the whole world over Blizzard's world map. Read from its `docs/api.md` and `ARCHITECTURE.md` at commit 216ca6e (2026-11-27); nothing here is checked in game. **[web]**
+
+- The map underneath (`WorldMapFrame:GetMapID()`) follows the view: once the view has been still a moment, OpenMap calls `SetMapID` with the zone or continent under its middle. So zoomed out the map is a continent, and zoomed in it's one zone while the view shows its neighbours too.
+- Icons an addon puts on the canvas at positions on that map only show for that one map. Icons placed through HereBeDragons are moved by OpenMap itself to their place on the stitched map; ours go through a map data provider, so they aren't.
+- `OpenMapAPI` is its public API, a global: `IsStitched()` says whether its map is up, `CanvasFromWorldPos(continent, x, y)` (version 2) gives a world position's place on the canvas, outside 0..1 where the view shows past the map underneath, and `OpenMap_ViewChanged` is called as the view moves (CallbackHandler).
+- We use only `IsStitched` so far (`ns.WorldMap.Stitched`): Townsfolk shows on a continent's map while it's true. Showing every layer's icons from neighbouring zones would mean placing them by `CanvasFromWorldPos` in `Lib/MapPins.lua`.
+
 ## Open questions
 
 Check these in the live client and move them up with a tag and date:

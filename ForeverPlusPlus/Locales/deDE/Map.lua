@@ -416,6 +416,9 @@ L.TOWNSFOLK_NOTICE_DESC = "Wo sie stehen, kommt aus den Daten von QuestieDB, die
 L.TOWNSFOLK_PINS = "Auf der Weltkarte anzeigen"
 L.TOWNSFOLK_PINS_DESC = "Zeigt die Symbole auf Zonen- und Stadtkarten. Das Filtermenü der Weltkarte "
     .. "hat denselben Schalter."
+L.TOWNSFOLK_CONTINENTS_DESC = "Zeigt sie auch auf Kontinentkarten an, was sehr viele Symbole auf "
+    .. "einmal sind. Mit der Karte des Addons OpenMap sind sie dort immer zu sehen, da sie "
+    .. "herausgezoomt eine Kontinentkarte ist."
 -- Smaller headers over its options in Settings
 L.TOWNSFOLK_SECTION_SERVICES = "Dienste"
 L.TOWNSFOLK_SECTION_TRAINERS = "Lehrer"
