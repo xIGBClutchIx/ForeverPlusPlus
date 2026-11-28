@@ -14,16 +14,27 @@
 -- change. In combat it can't be, and auras can't be read either: a new target there gets what the
 -- macro last held, and when that's the wrong buff for them, the buttons show a warning and the
 -- game's red error text says so.
+--
+-- With Buff Your Group on, the macro's fallback isn't only you: it's whoever in your party or raid
+-- SmartBuffGroup.lua picks, you first, among those alive, in sight, and in range of the buff, whose
+-- auras can be read. Group Buffs there casts a buff's group version when enough of them would get
+-- it. Range changes with no event, so the group is looked at again every few seconds out of combat.
+-- The Reminder Button shows what a press would cast now and on whom, and casts it when clicked: a
+-- secure button whose attributes change only out of combat, under a frame the game itself hides in
+-- combat, so it never shows a stale buff there.
 local _, ns = ...
 
 local ipairs, pairs, format, huge = ipairs, pairs, string.format, math.huge
 local sort, concat = table.sort, table.concat
-local tonumber, tostring, min = tonumber, tostring, math.min
+local tonumber, tostring, min, max = tonumber, tostring, math.min, math.max
 local UnitClass, UnitLevel, UnitExists, UnitCanAssist = UnitClass, UnitLevel, UnitExists, UnitCanAssist
 local UnitIsDeadOrGhost, UnitIsUnit, InCombatLockdown = UnitIsDeadOrGhost, UnitIsUnit, InCombatLockdown
 local UnitName, CreateFrame = UnitName, CreateFrame
 local GetTime, C_Spell = GetTime, C_Spell
 local UnitPowerType, Enum = UnitPowerType, Enum
+local IsInGroup, IsInRaid, GetNumGroupMembers = IsInGroup, IsInRaid, GetNumGroupMembers
+local UnitIsConnected, UnitIsVisible = UnitIsConnected, UnitIsVisible
+local RegisterStateDriver, UIParent, GameTooltip = RegisterStateDriver, UIParent, GameTooltip
 
 local L = ns.L
 local Frames, Spellbook, Talents = ns.Frames, ns.Spellbook, ns.Talents
@@ -37,7 +48,18 @@ local module = macros:NewPart({
 }, {
     smartBuff = true,
     smartBuffRecast = 50, -- percent of a buff's full length left below which it counts as missing
+    smartBuffGroup = false, -- the fallback buffs your party or raid too, not only you
+    smartBuffWide = true, -- a buff's group version when enough in the group would get it
+    smartBuffWideMin = 3, -- how many
+    smartBuffReminder = false, -- a button showing what the macro casts next
+    smartBuffX = 0, -- the Reminder Button's offset from the center of the screen
+    smartBuffY = -180,
+    smartBuffScale = 100, -- percent
 })
+
+local function playersText(value)
+    return format(ns.Text.Plural(L.MACROS_SMARTBUFF_WIDE_MIN_FORMAT, value), value)
+end
 
 module:AddOptions({
     {
@@ -46,11 +68,33 @@ module:AddOptions({
         min = 0, max = 90, step = 5,
         format = function(value) return L.MACROS_SMARTBUFF_RECAST_FORMAT:format(value) end,
     },
+    {
+        key = "smartBuffGroup", name = L.MACROS_SMARTBUFF_GROUP,
+        description = L.MACROS_SMARTBUFF_GROUP_DESC, added = "1.10.0",
+    },
+    {
+        key = "smartBuffWide", name = L.MACROS_SMARTBUFF_WIDE,
+        description = L.MACROS_SMARTBUFF_WIDE_DESC, requires = "smartBuffGroup",
+        slider = "smartBuffWideMin", added = "1.10.0",
+    },
+    {
+        key = "smartBuffWideMin", name = L.MACROS_SMARTBUFF_WIDE_MIN,
+        description = L.MACROS_SMARTBUFF_WIDE_MIN_DESC, requires = "smartBuffWide",
+        min = 2, max = 10, step = 1, format = playersText, added = "1.10.0",
+    },
+    {
+        key = "smartBuffReminder", name = L.MACROS_SMARTBUFF_REMINDER,
+        description = L.MACROS_SMARTBUFF_REMINDER_DESC, added = "1.10.0",
+    },
 })
 
 local NAME = L.MACROS_SMARTBUFF_MACRO -- the macro's name, at most 16 letters
 local BUTTON_NAME = "ForeverPlusPlusSmartBuffButton" -- a global name, since /click needs one
 local DELAY = 0.1 -- seconds to wait for a burst of changes to settle
+local GROUP_DELAY = 0.5 -- the same for the group's auras, which a raid changes often
+local RANGE_RECHECK = 2 -- seconds between looks at who in the group is in range, out of combat
+local ICON_SIZE = 28
+local SAMPLE_ICON = "Interface\\Icons\\INV_Misc_QuestionMark"
 
 -- Each class's buffs, the one it prefers first, with `who` can get each, its `group`, and the
 -- `stronger` buffs that count as having it. Kept by hand in Data/Buffs.lua, which explains them.
@@ -86,10 +130,14 @@ local OWN_TREES = {
 local playerClass
 local ranks -- spell name -> its known ranks (Lib/Spellbook.lua), or nil until read
 local incomplete = false
-local written -- what the macro holds: { target = cast or false, self = cast or false }
+-- What the macro holds: { target = the target's single cast or false, self = the fallback's cast
+-- or false, selfUnit = whom the fallback buffs }.
+local written
 local lastBody -- the text refresh last wrote, so our own edit's UPDATE_MACROS is let pass
 local checkTimer = Frames.Timer(module)
+local rangeTimer = Frames.Timer(module)
 local button -- ours, clicked by the macro (explain)
+local shown -- what a press casts now, for the Reminder Button: { cast, unit, id }, or nil
 
 local function classOf(unit)
     local _, class = UnitClass(unit)
@@ -219,9 +267,9 @@ end
 
 -- What the unit should get from you: the macro text that casts it, or nil when there's nothing
 -- left to give. With `auras`, buffs they have are skipped; the second result is when the soonest
--- of those runs low (seconds from now), to look again then, and the third the name of the first
--- buff that suits them they already have. `trace` (for /fpp buffs) is filled with how each was
--- judged.
+-- of those runs low (seconds from now), to look again then, the third the name of the first buff
+-- that suits them they already have, and the fourth the buff's entry in Data/Buffs.lua. `trace`
+-- (for /fpp buffs) is filled with how each was judged.
 local function pick(unit, isSelf, auras, trace)
     local list = BUFFS[playerClass]
     if not list then
@@ -283,6 +331,7 @@ local function pick(unit, isSelf, auras, trace)
     -- Wisdom.
     local mana = usesMana(unit, isSelf)
     local cast, blocked -- what to cast, or the first buff that suits them they already have
+    local chosen -- the entry `cast` casts
     for pass = 1, 2 do
         for _, entry in ipairs(list) do
             local suits = fits(entry, kind, isSelf)
@@ -297,6 +346,7 @@ local function pick(unit, isSelf, auras, trace)
                 end
                 if not matched then
                     cast = castText(name, unit)
+                    chosen = cast and entry
                 elseif pass == 1 then
                     blocked = blocked or matched
                 end
@@ -322,7 +372,132 @@ local function pick(unit, isSelf, auras, trace)
                 low = low, matched = matched, mine = aura and aura.mine, suits = fits(entry, kind, isSelf) }
         end
     end
-    return cast, soonest, blocked
+    return cast, soonest, blocked, chosen
+end
+
+-- The group --------------------------------------------------------------------------------------
+
+-- The name of an entry's group version, when it has one that reaches others (Data/Buffs.lua).
+local function wideName(entry)
+    local id = entry.reach and entry.stronger and entry.stronger[1]
+    return id and nameOf(id) or nil, id
+end
+
+-- Whether you can cast an entry's group version now: you know it, and the game doesn't refuse it
+-- for anything but mana, which the single buff needs too (a missing reagent, mostly).
+local function canWide(entry)
+    local name = wideName(entry)
+    if not (name and ranks and ranks[name]) then
+        return false
+    end
+    if not C_Spell.IsSpellUsable then
+        return true
+    end
+    local usable, noMana = C_Spell.IsSpellUsable(name)
+    if readable(usable) and usable then
+        return true
+    end
+    return readable(noMana) and noMana == true
+end
+
+-- Whether the unit is in range of the spell. Unknown counts as in range: the game says if not.
+local function inRange(name, unit)
+    if not (name and C_Spell.IsSpellInRange) then
+        return true
+    end
+    local result = C_Spell.IsSpellInRange(name, unit)
+    return not (readable(result) and result == false)
+end
+
+-- The group's unit tokens but yours, in the order the game lists them.
+local function groupUnits()
+    local list = {}
+    if IsInRaid() then
+        local count = GetNumGroupMembers()
+        count = readable(count) and tonumber(count) or 0
+        for i = 1, count do
+            list[#list + 1] = "raid" .. i
+        end
+    elseif IsInGroup() then
+        for i = 1, 4 do
+            list[#list + 1] = "party" .. i
+        end
+    end
+    local units = {}
+    for _, unit in ipairs(list) do
+        -- Identity can be secret; unknown counts as you, and is skipped.
+        if isTrue(UnitExists(unit)) and not ns.IsTrueOrSecret(UnitIsUnit(unit, "player")) then
+            units[#units + 1] = unit
+        end
+    end
+    return units
+end
+
+-- Whether the macro buffs the group: Buff Your Group on, in a group, as a class with buffs for others.
+local function buffsGroup()
+    return module.db.smartBuffGroup and IsInGroup() and givesOthers()
+end
+
+-- With Buff Your Group: you and the group, each as SmartBuffGroup.lua wants them, with `cast` the
+-- single buff the macro would give them. A member whose auras can't be read gets nothing: better
+-- to skip them than to buff them again. Also when the soonest of their buffs runs low.
+local function readGroup(ownCast, ownEntry)
+    local members = {
+        { unit = "player", cast = ownCast, entry = ownEntry, class = playerClass, ready = ownEntry ~= nil },
+    }
+    local soonest = huge
+    for _, unit in ipairs(groupUnits()) do
+        local member = { unit = unit, class = classOf(unit), ready = false }
+        if isTrue(UnitIsConnected(unit)) and not ns.IsTrueOrSecret(UnitIsDeadOrGhost(unit)) then
+            local auras = aurasOf(unit)
+            if auras then
+                local cast, soon, _, entry = pick(unit, false, auras)
+                soonest = min(soonest, soon or huge)
+                member.cast, member.entry = cast, entry
+                member.ready = entry ~= nil and isTrue(UnitIsVisible(unit))
+                    and inRange(spellName(entry), unit)
+            end
+        end
+        members[#members + 1] = member
+    end
+    return members, soonest
+end
+
+-- The group version of `entry` cast on `unit`, as { cast, unit, id }, when it's in range and they
+-- can take a rank you know.
+local function wideCast(entry, unit)
+    local name, id = wideName(entry)
+    local cast = name and inRange(name, unit) and castText(name, unit)
+    return cast and { cast = cast, unit = unit, id = id } or nil
+end
+
+-- With Buff Your Group: what the macro casts with no target to buff, as { cast, unit, id } or nil,
+-- when the soonest buff in the group runs low, and the group with which of them are better buffed
+-- with a group version, for the target.
+local function planGroup(ownCast, ownEntry)
+    local members, soonest = readGroup(ownCast, ownEntry)
+    local db = module.db
+    local minimum = db.smartBuffWide and db.smartBuffWideMin or nil
+    local index, wide, wideFor = internal.PlanGroup(members, minimum, canWide)
+    local member = index and members[index]
+    if not member then
+        return nil, soonest, members, wideFor
+    end
+    local choice = wide and wideCast(member.entry, member.unit)
+    return choice or { cast = member.cast, unit = member.unit, id = member.entry.id }, soonest,
+        members, wideFor
+end
+
+-- The target's buff as its group version, when the target is in the group and enough of those it
+-- would reach are missing it.
+local function wideForTarget(entry, members, wideFor)
+    for index, member in ipairs(members) do
+        if wideFor[index] and member.entry == entry and member.unit ~= "player"
+            and isTrue(UnitIsUnit("target", member.unit)) then
+            return wideCast(entry, "target")
+        end
+    end
+    return nil
 end
 
 -- Whether the target is someone the macro buffs: a friendly unit other than you, alive.
@@ -344,16 +519,17 @@ local function iconSpell()
     return nil
 end
 
--- The macro: the target's buff on a friendly target that can get one, else yours on you. Each
--- press clicks our button first, which says on screen why it can't buff them.
-local function body(target, own)
+-- The macro: the target's buff on a friendly target that can get one, else the fallback's (yours
+-- on you, or with Buff Your Group one of the group's). Each press clicks our button first, which
+-- says on screen why it can't buff them.
+local function body(target, fallback)
     local click = "\n/click " .. BUTTON_NAME
     if target then
         return format("#showtooltip%s\n/cast [@target,help,nodead] %s%s", click, target,
-            own and format("; [@player] %s", own) or "")
+            fallback and format("; [@%s] %s", fallback.unit, fallback.cast) or "")
     end
-    if own then
-        return format("#showtooltip%s\n/cast [@player] %s", click, own)
+    if fallback then
+        return format("#showtooltip%s\n/cast [@%s] %s", click, fallback.unit, fallback.cast)
     end
     local icon = iconSpell()
     return (icon and format("#showtooltip %s", icon) or "#showtooltip") .. click
@@ -365,6 +541,8 @@ local function explain()
         return
     end
     local own = written and written.self
+    -- The fallback buffs someone in your group, not you: the messages say so.
+    local group = own and written.selfUnit ~= "player"
     -- Only a friendly, living target is someone to buff. An enemy, a dead one, or none: the macro
     -- buffs you, so it says something only when you have everything.
     if givesOthers() and friendlyTarget() then
@@ -376,21 +554,168 @@ local function explain()
         local name = UnitName("target")
         name = ns.IsText(name, true) and name or L.MACROS_SMARTBUFF_TARGET
         if blocked then -- the buff that suits them most, already on them
-            local text = own and L.MACROS_SMARTBUFF_HAS_SELF or L.MACROS_SMARTBUFF_HAS
+            local text = group and L.MACROS_SMARTBUFF_HAS_GROUP
+                or own and L.MACROS_SMARTBUFF_HAS_SELF or L.MACROS_SMARTBUFF_HAS
             Frames.ErrorMessage(format(text, name, blocked))
             return
         end
         local text
         if pick("target", false, nil) then -- what they'd get if they had none of your buffs
-            text = own and L.MACROS_SMARTBUFF_HAS_ALL_SELF or L.MACROS_SMARTBUFF_HAS_ALL
+            text = group and L.MACROS_SMARTBUFF_HAS_ALL_GROUP
+                or own and L.MACROS_SMARTBUFF_HAS_ALL_SELF or L.MACROS_SMARTBUFF_HAS_ALL
         else
-            text = own and L.MACROS_SMARTBUFF_CANT_SELF or L.MACROS_SMARTBUFF_CANT
+            text = group and L.MACROS_SMARTBUFF_CANT_GROUP
+                or own and L.MACROS_SMARTBUFF_CANT_SELF or L.MACROS_SMARTBUFF_CANT
         end
         Frames.ErrorMessage(format(text, name))
     elseif not own then
-        Frames.ErrorMessage(L.MACROS_SMARTBUFF_NOTHING)
+        Frames.ErrorMessage(buffsGroup() and L.MACROS_SMARTBUFF_NOTHING_GROUP
+            or L.MACROS_SMARTBUFF_NOTHING)
     end
 end
+
+-- The Reminder Button ----------------------------------------------------------------------------
+
+local holder -- hidden by the game in combat, so the button never needs hiding there
+local reminder -- the secure button, made once
+local editing = false -- Edit Mode is open: the button shows, to be placed
+
+local function reminderOn()
+    return module.enabled and module.db.smartBuffReminder
+end
+
+-- Who `unit` is, for the button: "You", or their name in their class's color.
+local function unitText(unit)
+    if unit == "player" then
+        return L.MACROS_SMARTBUFF_YOU
+    end
+    local name = UnitName(unit)
+    if not ns.IsText(name, true) then
+        return L.MACROS_SMARTBUFF_TARGET
+    end
+    local color = ns.Colors.Class(unit)
+    return color and ns.Colors.Text(color, name) or name
+end
+
+-- What the button shows: the spell's icon and name, and whom it's for. Plain textures and text.
+local function drawReminder()
+    local choice = shown
+    local icon = choice and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(choice.id)
+    reminder.icon:SetTexture(readable(icon) and icon or SAMPLE_ICON)
+    reminder.who:SetText(choice and unitText(choice.unit) or L.MACROS_SMARTBUFF_YOU)
+    reminder.spell:SetText(choice and nameOf(choice.id) or L.MACROS_SMARTBUFF)
+    local width = max(reminder.who:GetStringWidth(), reminder.spell:GetStringWidth())
+    reminder:SetWidth(ICON_SIZE + width + 26)
+end
+
+local function placeReminder()
+    if not reminder or InCombatLockdown() then
+        return
+    end
+    reminder:SetScale(module.db.smartBuffScale / 100)
+    ns.EditMode.Place(reminder, module.db.smartBuffX, module.db.smartBuffY)
+end
+
+local function onReminderEnter(self)
+    if not shown then
+        return
+    end
+    GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+    GameTooltip:SetSpellByID(shown.id)
+    GameTooltip:Show()
+end
+
+local function onReminderLeave()
+    GameTooltip:Hide()
+end
+
+local function buildReminder()
+    holder = CreateFrame("Frame", nil, UIParent, "SecureHandlerStateTemplate")
+    RegisterStateDriver(holder, "visibility", "[combat] hide; show")
+    reminder = CreateFrame("Button", nil, holder, "SecureActionButtonTemplate, BackdropTemplate")
+    reminder:SetSize(160, ICON_SIZE + 12)
+    reminder:SetFrameStrata("MEDIUM")
+    -- Down and up, so it acts on whichever the player's "Cast action keybinds on key down" says.
+    reminder:RegisterForClicks("AnyUp", "AnyDown")
+    -- The tooltip's own border and background, as Blizzard's small boxes have.
+    local backdrop = _G.BACKDROP_TOOLTIP_16_16_5555
+    if reminder.SetBackdrop and type(backdrop) == "table" then
+        reminder:SetBackdrop(backdrop)
+        reminder:SetBackdropColor(0, 0, 0, 0.8)
+    end
+    reminder.icon = reminder:CreateTexture(nil, "ARTWORK")
+    reminder.icon:SetSize(ICON_SIZE, ICON_SIZE)
+    reminder.icon:SetPoint("LEFT", 6, 0)
+    local highlight = reminder:CreateTexture(nil, "HIGHLIGHT")
+    highlight:SetTexture("Interface\\Buttons\\ButtonHilight-Square")
+    highlight:SetBlendMode("ADD")
+    highlight:SetAllPoints(reminder.icon)
+    reminder.who = reminder:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    reminder.who:SetPoint("TOPLEFT", reminder.icon, "TOPRIGHT", 8, -1)
+    reminder.spell = reminder:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    reminder.spell:SetPoint("BOTTOMLEFT", reminder.icon, "BOTTOMRIGHT", 8, 2)
+    reminder:SetScript("OnEnter", onReminderEnter)
+    reminder:SetScript("OnLeave", onReminderLeave)
+    reminder:Hide()
+end
+
+-- Puts what a press casts now on the button, out of combat: a macro of one /cast, as the Smart
+-- Buff macro's, so its ranks read the same.
+local function syncReminder()
+    ns.AfterCombat(function()
+        if not reminder then
+            return
+        end
+        local choice = reminderOn() and shown or nil
+        local text = choice and format("/cast [@%s] %s", choice.unit, choice.cast) or nil
+        reminder:SetAttribute("type", text and "macro" or nil)
+        reminder:SetAttribute("macrotext", text)
+        drawReminder()
+        reminder:SetShown(reminderOn() and (choice ~= nil or editing))
+    end)
+end
+
+-- Edit Mode shows the button, with a question mark while nobody needs a buff, so it can be placed.
+local function onEditMode(active)
+    editing = active and true or false
+    syncReminder()
+end
+
+-- The button made, placed, and given to Edit Mode, or taken from it, as Reminder Button says.
+local function wantReminder()
+    ns.AfterCombat(function()
+        if reminderOn() then
+            if not reminder then
+                buildReminder()
+            end
+            placeReminder()
+            ns.EditMode.Register(reminder, L.MACROS_SMARTBUFF_REMINDER, function(x, y)
+                module.db.smartBuffX, module.db.smartBuffY = x, y
+            end, {
+                onChange = onEditMode,
+                reset = function()
+                    -- Forgotten: the default spot, today's or a later one.
+                    module.db.smartBuffX, module.db.smartBuffY = nil, nil
+                    placeReminder()
+                end,
+                scale = {
+                    min = 50, max = 200, step = 10, format = "%d%%",
+                    get = function() return module.db.smartBuffScale end,
+                    set = function(value)
+                        module.db.smartBuffScale = value
+                        placeReminder()
+                    end,
+                },
+            })
+        elseif reminder then
+            ns.EditMode.Unregister(reminder)
+            editing = false
+        end
+        syncReminder()
+    end)
+end
+
+-- Refreshing the macro -----------------------------------------------------------------------------
 
 local refresh
 
@@ -443,18 +768,35 @@ function refresh(targetChanged)
         ranks, complete = Spellbook.Ranks()
         incomplete = not complete
     end
-    local target, soonTarget = nil, huge
+    local target, soonTarget, targetEntry = nil, huge, nil
     if givesOthers() and friendlyTarget() then
-        target, soonTarget = pick("target", false, aurasOf("target"))
+        local _
+        target, soonTarget, _, targetEntry = pick("target", false, aurasOf("target"))
     end
-    local own, soonOwn = pick("player", true, aurasOf("player"))
-    local text = body(target, own)
+    local own, soonOwn, _, ownEntry = pick("player", true, aurasOf("player"))
+    local fallback = own and { cast = own, unit = "player", id = ownEntry.id } or nil
+    local targetChoice = target and { cast = target, unit = "target", id = targetEntry.id } or nil
+    local soonGroup = huge
+    if buffsGroup() then
+        local members, wideFor
+        fallback, soonGroup, members, wideFor = planGroup(own, ownEntry)
+        targetChoice = target and wideForTarget(targetEntry, members, wideFor) or targetChoice
+        rangeTimer:Start(RANGE_RECHECK, function() refresh() end)
+    else
+        rangeTimer:Cancel()
+    end
+    local text = body(targetChoice and targetChoice.cast, fallback)
     if internal.Write(NAME, text) then
         lastBody = text
-        written = { target = target or false, self = own or false }
-        internal.Mark(NAME, not (target or own) and "none" or nil)
+        written = { target = target or false, self = fallback and fallback.cast or false,
+            selfUnit = fallback and fallback.unit }
+        internal.Mark(NAME, not (target or fallback) and "none" or nil)
     end
-    lookAgain(min(soonTarget or huge, soonOwn or huge))
+    shown = targetChoice or fallback
+    if reminder then
+        syncReminder()
+    end
+    lookAgain(min(soonTarget or huge, soonOwn or huge, soonGroup))
 end
 
 local queue = Frames.Coalesce(refresh, DELAY, module)
@@ -492,6 +834,23 @@ local function onLoaded()
     end
 end
 
+-- With Buff Your Group: the group's auras, members joining and leaving, and coming back online.
+-- Slower to settle than your own, since a raid's auras change all the time.
+local queueGroup = Frames.Coalesce(refresh, GROUP_DELAY, module)
+
+local function onGroupAura(_, unit)
+    -- Unfiltered, so the unit token itself is checked: a party or raid member's, not yours.
+    if ns.IsText(unit, true) and (unit:sub(1, 5) == "party" or unit:sub(1, 4) == "raid") then
+        queueGroup()
+    end
+end
+
+module:OnWhile("smartBuffGroup", {
+    UNIT_AURA = onGroupAura,
+    GROUP_ROSTER_UPDATE = queueGroup,
+    UNIT_CONNECTION = queueGroup,
+})
+
 function module:OnReady()
     queue()
 end
@@ -523,16 +882,22 @@ function module:OnEnable()
     if ns.HasEvent("TRAIT_CONFIG_UPDATED") then
         self:On("TRAIT_CONFIG_UPDATED", queue)
     end
+    wantReminder()
     queue()
 end
 
 function module:OnDisable()
-    written, ranks, lastBody = nil, nil, nil
+    written, ranks, lastBody, shown = nil, nil, nil, nil
     internal.Delete(NAME)
+    wantReminder()
 end
 
 function module:OnOptionChanged(key)
-    if key == "smartBuffRecast" then
+    if key == "smartBuffReminder" then
+        wantReminder()
+        queue()
+    elseif key == "smartBuffRecast" or key == "smartBuffGroup" or key == "smartBuffWide"
+        or key == "smartBuffWideMin" then
         queue()
     end
 end

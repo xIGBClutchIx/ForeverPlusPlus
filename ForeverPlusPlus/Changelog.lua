@@ -146,6 +146,15 @@ ns.changelog = {
                 { L.WIDEVENDOR_TITLE, "A new module, off by default, that shows 20 items on each "
                     .. "page of a vendor's window instead of 10, in a window about twice as wide. "
                     .. "It stays its usual size with the controller interface." },
+                { L.MACROS_TITLE, "Smart Buff has two new options, both off by default. Buff "
+                    .. "Your Group: with no friendly target to buff, the macro buffs you, then each "
+                    .. "member of your party or raid in range who is missing a buff from you. Group "
+                    .. "Buffs, under it and on with it, casts a buff's group version, such as "
+                    .. "Prayer of Fortitude or a Greater Blessing, when at least 3 in range are "
+                    .. "missing it (Group Buffs "
+                    .. "At sets how many) and you have its reagent. Reminder Button shows a button "
+                    .. "with the next buff and who gets it, out of combat; click it to cast, and "
+                    .. "move it in Edit Mode." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.AUTOSCREENSHOT_TITLE, "On by default now. If you never turned it on or off, "

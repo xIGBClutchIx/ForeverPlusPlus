@@ -409,6 +409,7 @@
     "Ambiguate",
     "UnitTokenFromGUID",
     "UnitIsVisible",
+    "RegisterStateDriver",
     "LOCALIZED_CLASS_NAMES_MALE",
     "LOCALIZED_CLASS_NAMES_FEMALE",
     "BNSendWhisper",

@@ -230,6 +230,7 @@ Modules\Character\SpellRanks.lua
 Modules\Character\TrainAll.lua
 Modules\Character\BuffTimers.lua
 Modules\Character\Macros\Macros.lua
+Modules\Character\Macros\SmartBuffGroup.lua
 Modules\Character\Macros\SmartBuff.lua
 Modules\Character\Professions\Professions.lua
 Modules\Character\Professions\Data.lua
