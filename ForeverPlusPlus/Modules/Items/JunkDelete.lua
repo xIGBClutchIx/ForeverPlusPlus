@@ -64,6 +64,7 @@ local MIN_WIDTH, MAX_WIDTH, LOOT_WIDTH, PADDING = 100, 320, 200, 40
 -- "128-redbutton-delete"), in Forever's own gold-edged drawing of it where the client has that.
 local ART = "128-redbutton-delete"
 local CORNER_SIZE = 24 -- the close button's, when its own size can't be read
+local NUDGE_X, NUDGE_Y = 8, 2 -- right and up from the close button's plain mirror (see placeCorner)
 
 local button -- ours, below the loot window, made the first time it's needed
 local corner -- ours, in the loot window's top left corner, made with it
@@ -137,7 +138,11 @@ local function placeCorner()
     local ratio = closeScale / scale
     corner:SetSize(width * ratio, height * ratio)
     corner:ClearAllPoints()
-    corner:SetPoint("TOPLEFT", loot, "TOPLEFT", right - closeRight * ratio, closeTop * ratio - top)
+    -- The window's art isn't the same on both sides of its frame, so the plain mirror sat on the
+    -- left border and a little low: moved in and up to sit as the close button does (measured
+    -- from a screenshot, 2026-11-27).
+    corner:SetPoint("TOPLEFT", loot, "TOPLEFT", right - closeRight * ratio + NUDGE_X,
+        closeTop * ratio - top + NUDGE_Y)
 end
 
 local function refresh()
