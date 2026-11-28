@@ -152,6 +152,13 @@ L.HIDEMENUBARS_MICRO_DESC = "隱藏微型選單：角色、法術書、天賦等
 L.HIDEMENUBARS_MOUSEOVER = "滑鼠指向時顯示"
 L.HIDEMENUBARS_MOUSEOVER_DESC = "滑鼠指向隱藏的列時顯示它，讓你可以照常點擊。關閉時，它會一直隱藏。"
 
+-- HideDamageMeter
+L.HIDEDAMAGEMETER_TITLE = "隱藏傷害量表"
+L.HIDEDAMAGEMETER_DESC = "隱藏暴雪的「傷害量表」，直到滑鼠指向它。它何時能顯示仍由編輯模式中的「能見度」設定"
+    .. "決定，而且它在編輯模式中會顯示。"
+L.HIDEDAMAGEMETER_COMBAT = "戰鬥中顯示"
+L.HIDEDAMAGEMETER_COMBAT_DESC = "整場戰鬥都顯示傷害量表，戰鬥結束片刻後再次隱藏。"
+
 -- HideErrors
 L.HIDEERRORS_TITLE = "隱藏錯誤訊息"
 L.HIDEERRORS_DESC = "讓戰鬥中不斷重複的紅色錯誤訊息（例如超出射程和能量不足）及其音效，"

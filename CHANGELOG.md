@@ -39,6 +39,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Player Portrait**: A new module, off by default, that puts the dragon the target frame shows around an elite or rare enemy around your own portrait, the elite's gold one unless you pick the rare's or the rare elite's, and draws the level circle on the player frame smaller, at 80% unless you pick another size.
 - **Quest Nameplates**: Three new options for how the icon and count look. Quest Icon can show the quest exclamation mark on every quest creature in place of an icon for the kind of objective, Text Color makes the count white instead of gold, and Outline draws a thin or thick outline around it. Each keeps today's look by default.
 - **Fishing Key**: A new module, off by default, for fishing with one key, set in Key Bindings under Forever++. Its first press puts on a fishing pole from your bags, and fishing gear such as a fishing hat; after that it casts Fishing, and while your bobber is out it loots it. A second key, or Shift with the first, puts your own weapons and gear back on, remembered through a reload or logout. It loots through the game's Interact Key: if your Enable Interact Key setting is off, it's turned on only while the pole is in your hands, and your own setting comes back after. Gear changes out of combat only.
+- **Hide Damage Meter**: A new module, off by default, that hides the game's Damage Meter until the mouse is over it, and fades it in and out. Show in Combat (on by default) keeps it in sight all through a fight.
 
 ### Changed
 

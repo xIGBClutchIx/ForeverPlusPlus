@@ -179,6 +179,9 @@ ns.changelog = {
                     .. "Interact Key setting is off, it's turned on only while the pole is in your "
                     .. "hands, and your own setting comes back after. Gear changes out of combat "
                     .. "only." },
+                { L.HIDEDAMAGEMETER_TITLE, "A new module, off by default, that hides the game's "
+                    .. "Damage Meter until the mouse is over it, and fades it in and out. Show in "
+                    .. "Combat (on by default) keeps it in sight all through a fight." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.AUTOSCREENSHOT_TITLE, "On by default now. If you never turned it on or off, "
