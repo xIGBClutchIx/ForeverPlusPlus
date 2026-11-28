@@ -48,6 +48,20 @@ L.DRUIDMANABAR_FORM_COLOR = "Lighter Blue"
 L.DRUIDMANABAR_FORM_COLOR_DESC = "Fill the mana bar a lighter blue, so it never looks like the "
     .. "player frame's own dark blue mana bar, which sits right above it in caster form with Show "
     .. "in Every Form on."
+-- PlayerPortrait
+L.PLAYERPORTRAIT_TITLE = "Player Portrait"
+L.PLAYERPORTRAIT_DESC = "Put the dragon the target frame shows around an elite or rare enemy "
+    .. "around your own portrait, and draw the level circle on the player frame smaller."
+L.PLAYERPORTRAIT_CHAIN = "Dragon"
+L.PLAYERPORTRAIT_CHAIN_DESC = "Which of the target frame's dragons to show around your portrait. "
+    .. "It isn't shown while you're in a vehicle."
+L.PLAYERPORTRAIT_CHAIN_OFF = "Off"
+L.PLAYERPORTRAIT_CHAIN_ELITE = "Elite" -- [game: ELITE]
+L.PLAYERPORTRAIT_CHAIN_RARE = "Rare" -- [game: MAP_LEGEND_RARE]
+L.PLAYERPORTRAIT_CHAIN_RAREELITE = "Rare Elite" -- [game: MAP_LEGEND_RAREELITE]
+L.PLAYERPORTRAIT_LEVEL_SIZE = "Level Size"
+L.PLAYERPORTRAIT_LEVEL_SIZE_DESC = "How big the level circle and number on the player frame are, "
+    .. "against the size Blizzard draws them. At 100% they're left as Blizzard draws them."
 -- ClassColors
 L.CLASSCOLORS_TITLE = "Class Colors" -- [game: CLASS_COLORS]
 L.CLASSCOLORS_DESC = "Show players' health bars and names in their class color on the player, "

@@ -38,6 +38,15 @@ L.DRUIDMANABAR_TEXT_DESC = "像游戏的“状态文字”设置在其他状态�
 L.DRUIDMANABAR_FORM_COLOR = "浅蓝色"
 L.DRUIDMANABAR_FORM_COLOR_DESC = "用较浅的蓝色填充法力条，使它不会被误认作玩家框体自己的深蓝色法力条。开启"
     .. "“在所有形态下显示”时，施法者形态下那条法力条就在它正上方。"
+-- PlayerPortrait
+L.PLAYERPORTRAIT_TITLE = "玩家头像"
+L.PLAYERPORTRAIT_DESC = "在你的头像周围显示目标框体在精英或稀有敌人周围显示的龙，并把玩家框体上的等级圆圈"
+    .. "画得更小。"
+L.PLAYERPORTRAIT_CHAIN = "龙"
+L.PLAYERPORTRAIT_CHAIN_DESC = "在你的头像周围显示目标框体的哪一种龙。你在载具中时不显示。"
+L.PLAYERPORTRAIT_CHAIN_OFF = "关闭"
+L.PLAYERPORTRAIT_LEVEL_SIZE = "等级大小"
+L.PLAYERPORTRAIT_LEVEL_SIZE_DESC = "玩家框体上等级圆圈和数字相对于暴雪默认大小的尺寸。为100%时保持暴雪的原样。"
 
 -- ClassColors
 L.CLASSCOLORS_DESC = "在玩家、目标、焦点、小队和目标的目标框体上，以职业颜色显示玩家的生命条和名字，NPC的"

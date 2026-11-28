@@ -36,6 +36,7 @@ What changed in each release of Forever++. The same notes show in game under Set
 - **Keep Audio Synced**: A new module, on by default, that restarts the game's sound when your computer's default sound device changes, as when you plug in headphones, so the game follows it instead of playing on the old one. It works while the game's Output Device is the system default, and waits out a cinematic or loading screen.
 - **Wide Vendor Window**: A new module, off by default, that shows 20 items on each page of a vendor's window instead of 10, in a window about twice as wide. It stays its usual size with the controller interface.
 - **Macros**: Smart Buff has two new options, both off by default. Buff Your Group: with no friendly target to buff, the macro buffs you, then each member of your party or raid in range who is missing a buff from you. Group Buffs, under it and on with it, casts a buff's group version, such as Prayer of Fortitude or a Greater Blessing, when at least 3 in range are missing it (Group Buffs At sets how many) and you have its reagent. Reminder Button shows a button with the next buff and who gets it, out of combat; click it to cast, and move it in Edit Mode.
+- **Player Portrait**: A new module, off by default, that puts the dragon the target frame shows around an elite or rare enemy around your own portrait, the elite's gold one unless you pick the rare's or the rare elite's, and draws the level circle on the player frame smaller, at 80% unless you pick another size.
 
 ### Changed
 
