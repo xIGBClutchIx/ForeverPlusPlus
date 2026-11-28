@@ -1,6 +1,6 @@
 -- Nameplate Combo Points: a Rogue's or a cat Druid's combo points on their target's nameplate,
 -- above its name or below its health bar, one dot a point and nothing at none. A feature request,
--- issue #27.
+-- issue #27. Drawn as the target frame draws them by default, or as a plain light.
 --
 -- Forever has no combo points on nameplates of its own: Blizzard_NamePlates' TOC leaves the Rogue
 -- and Druid ClassNameplateBar files out of this client, so its combo points are only the dots on
@@ -30,7 +30,14 @@ local ICONS = {
     rogue = "uf-roguecp-icon-red",
     rogueBlue = "uf-roguecp-icon-blue",
 }
+-- The target frame's own points (ComboPointTemplate, Blizzard_UnitFrame's ComboFrame.xml): a dark
+-- socket for every point and a red light in each one held. A sheet, so not a status bar's
+-- texture: see The target frame's look below.
+local NATIVE = "target"
+local NATIVE_ART = "Interface\\ComboFrame\\ComboPoint"
+
 local ICON_CHOICES = {
+    { NATIVE, L.NAMEPLATECOMBO_ICON_TARGET },
     { "red", L.PLATES_COLOR_RED },
     { "yellow", L.PLATES_COLOR_YELLOW },
     { "green", L.PLATES_COLOR_GREEN },
@@ -44,7 +51,7 @@ end
 
 local module = ns.NewModule("NameplateComboPoints", L.NAMEPLATECOMBO_DESC, {
     enabled = true, -- only Rogues and Druids have the module at all (IsAvailable)
-    icon = "red",
+    icon = NATIVE, -- as the target frame draws them
     position = "below", -- above the name is where the plate's debuffs go
     size = 100, -- percent
     preview = false, -- Debug: made-up points counting up, on any class
@@ -118,6 +125,78 @@ local function build()
     holder:SetSize(#dots * DOT_SIZE + (#dots - 1) * GAP, DOT_SIZE)
 end
 
+-- The target frame's look ---------------------------------------------------------------------
+-- Its art is one sheet (a socket, a red light, a shine), which a status bar can't draw a part of.
+-- So the art is plain textures, and the bars only say how much of them shows, still with no
+-- count compared: a bar's fill is as wide as its dot from its point on and has no width before
+-- it, and a frame that clips what's in it is stretched over that fill, with the light inside.
+-- The sockets are in one such frame over a bar that fills from the first point on, so with no
+-- points there's nothing, as the target frame hides its own.
+local ART_HEIGHT = 16 -- the sheet's art is taller than a dot (ComboPointTemplate: 12 by 16)
+local BLANK = "Interface\\Buttons\\WHITE8x8" -- a bar needs a texture to have a fill; never seen
+
+local native -- { gate, sockets, lights = { clip, ... } }, made the first time the look is picked
+
+-- A frame over `bar`'s fill, as tall as the art, that hides whatever of its children is outside it.
+local function clipOver(bar)
+    local fill = bar:GetStatusBarTexture()
+    local clip = CreateFrame("Frame", nil, holder)
+    clip:SetClipsChildren(true)
+    clip:SetPoint("TOPLEFT", fill, "TOPLEFT")
+    clip:SetPoint("BOTTOMRIGHT", fill, "BOTTOMRIGHT", 0, DOT_SIZE - ART_HEIGHT)
+    return clip
+end
+
+local function buildNative()
+    if native then
+        return
+    end
+    local gate = CreateFrame("StatusBar", nil, holder)
+    gate:SetAllPoints(holder)
+    gate:SetStatusBarTexture(BLANK)
+    gate:GetStatusBarTexture():SetAlpha(0)
+    gate:SetMinMaxValues(0, 1)
+    gate:SetValue(0)
+    local sockets = clipOver(gate)
+    native = { gate = gate, sockets = sockets, lights = {} }
+    for i, dot in ipairs(dots) do
+        local socket = sockets:CreateTexture(nil, "BACKGROUND")
+        socket:SetTexture(NATIVE_ART)
+        socket:SetTexCoord(0, 0.375, 0, 1)
+        socket:SetSize(12, ART_HEIGHT)
+        socket:SetPoint("TOPLEFT", dot, "TOPLEFT")
+        local clip = clipOver(dot)
+        clip:SetFrameLevel(sockets:GetFrameLevel() + 1)
+        local light = clip:CreateTexture(nil, "ARTWORK")
+        light:SetTexture(NATIVE_ART)
+        light:SetTexCoord(0.375, 0.5625, 0, 1)
+        light:SetSize(8, ART_HEIGHT)
+        light:SetPoint("TOPLEFT", dot, "TOPLEFT", 2, 0)
+        native.lights[i] = clip
+    end
+end
+
+-- Each dot as the look picked draws it: its own art in the bar, or the bar unseen under the
+-- target frame's art.
+local function applyLook()
+    local look = module.db.icon
+    local isNative = look == NATIVE
+    if isNative then
+        buildNative()
+    end
+    for _, dot in ipairs(dots) do
+        dot:SetStatusBarTexture(isNative and BLANK or ICONS[look] or ICONS.red)
+        dot:GetStatusBarTexture():SetAlpha(isNative and 0 or 1)
+    end
+    if native then
+        native.gate:SetShown(isNative)
+        native.sockets:SetShown(isNative)
+        for _, clip in ipairs(native.lights) do
+            clip:SetShown(isNative)
+        end
+    end
+end
+
 local function update()
     if not holder or not holder:IsShown() then
         return
@@ -131,6 +210,9 @@ local function update()
     end
     for _, dot in ipairs(dots) do
         dot:SetValue(points)
+    end
+    if native then
+        native.gate:SetValue(points)
     end
 end
 
@@ -167,10 +249,7 @@ local function attach()
         -- Over the name, which sits on the bar: straight on the bar they'd cover it.
         holder:SetPoint("BOTTOM", parts.name or container, "TOP", 0, OFFSET)
     end
-    local icon = ICONS[module.db.icon] or ICONS.red
-    for _, dot in ipairs(dots) do
-        dot:SetStatusBarTexture(icon)
-    end
+    applyLook()
     holder:SetScale(module.db.size / 100)
     holder:SetFrameLevel(frame:GetFrameLevel() + 5)
     holder:SetScript("OnUpdate", module.db.preview and onUpdate or nil)

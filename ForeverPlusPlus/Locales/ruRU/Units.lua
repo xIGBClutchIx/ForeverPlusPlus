@@ -332,6 +332,7 @@ L.NAMEPLATECOMBO_DESC = "Показывать приемы серии на ин�
     .. "прием и ничего, если их нет. Для разбойников и друидов в облике кошки."
 L.NAMEPLATECOMBO_ICON = "Точка"
 L.NAMEPLATECOMBO_ICON_DESC = "Как выглядит каждый прием серии."
+L.NAMEPLATECOMBO_ICON_TARGET = "Как на рамке цели"
 L.NAMEPLATECOMBO_ICON_ROGUE = "Прием разбойника, красный" -- the modern Rogue bar's combo point art
 L.NAMEPLATECOMBO_ICON_ROGUE_BLUE = "Прием разбойника, синий"
 L.NAMEPLATECOMBO_POSITION = "Положение"

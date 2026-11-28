@@ -344,6 +344,7 @@ L.NAMEPLATECOMBO_DESC = "Zeigt Eure Combopunkte auf der Namensplakette Eures Zie
     .. "Combopunkt und nichts ohne. Für Schurken und Druiden in Katzengestalt."
 L.NAMEPLATECOMBO_ICON = "Punkt"
 L.NAMEPLATECOMBO_ICON_DESC = "Wie jeder Combopunkt aussieht."
+L.NAMEPLATECOMBO_ICON_TARGET = "Wie am Zielfenster"
 L.NAMEPLATECOMBO_ICON_ROGUE = "Schurkenpunkt, rot" -- the modern Rogue bar's combo point art
 L.NAMEPLATECOMBO_ICON_ROGUE_BLUE = "Schurkenpunkt, blau"
 L.NAMEPLATECOMBO_POSITION = "Position"

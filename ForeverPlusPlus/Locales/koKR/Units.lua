@@ -316,6 +316,7 @@ L.NAMEPLATECOMBO_DESC = "대상의 이름표에 연계 점수를 표시합니다
     .. "않습니다. 도적과 표범 변신 중인 드루이드에게 적용됩니다."
 L.NAMEPLATECOMBO_ICON = "점 모양"
 L.NAMEPLATECOMBO_ICON_DESC = "연계 점수 하나를 표시하는 모양입니다."
+L.NAMEPLATECOMBO_ICON_TARGET = "대상 창 모양"
 L.NAMEPLATECOMBO_ICON_ROGUE = "도적 연계 점수 (붉은색)" -- the modern Rogue bar's combo point art
 L.NAMEPLATECOMBO_ICON_ROGUE_BLUE = "도적 연계 점수 (푸른색)"
 L.NAMEPLATECOMBO_POSITION = "위치"
