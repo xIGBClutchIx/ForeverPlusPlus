@@ -351,7 +351,7 @@ L.NAMEPLATECOMBO_DESC = "Show your combo points on your target's nameplate, one 
     .. "and nothing with none. For Rogues, and Druids in Cat Form."
 L.NAMEPLATECOMBO_ICON = "Dot"
 L.NAMEPLATECOMBO_ICON_DESC = "What each point looks like."
-L.NAMEPLATECOMBO_ICON_TARGET = "Target Frame's" -- the combo points as the target frame draws them
+L.NAMEPLATECOMBO_ICON_CLASSIC = "Classic Point" -- the nameplates' older combo point art: a red point in a dark socket
 L.NAMEPLATECOMBO_ICON_ROGUE = "Rogue Point, Red" -- the modern Rogue bar's combo point art
 L.NAMEPLATECOMBO_ICON_ROGUE_BLUE = "Rogue Point, Blue"
 L.NAMEPLATECOMBO_POSITION = "Position"

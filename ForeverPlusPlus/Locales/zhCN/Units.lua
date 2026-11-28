@@ -283,7 +283,7 @@ L.NAMEPLATECOMBO_DESC = "在目标的姓名板上显示你的连击点数：每�
     .. "适用于潜行者和猎豹形态的德鲁伊。"
 L.NAMEPLATECOMBO_ICON = "圆点"
 L.NAMEPLATECOMBO_ICON_DESC = "每个连击点的外观。"
-L.NAMEPLATECOMBO_ICON_TARGET = "目标框体的样式"
+L.NAMEPLATECOMBO_ICON_CLASSIC = "经典连击点"
 L.NAMEPLATECOMBO_ICON_ROGUE = "潜行者连击点（红色）" -- the modern Rogue bar's combo point art
 L.NAMEPLATECOMBO_ICON_ROGUE_BLUE = "潜行者连击点（蓝色）"
 L.NAMEPLATECOMBO_POSITION = "位置"

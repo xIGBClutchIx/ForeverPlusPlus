@@ -23,8 +23,9 @@ ns.changelog = {
                     .. "colors come first." },
                 { L.NAMEPLATECOMBO_TITLE, "A new module for Rogues and Druids, on by default, that "
                     .. "shows your combo points on your target's nameplate, above its name or below "
-                    .. "its health bar, drawn as the target frame draws them, with a plain light "
-                    .. "for each point as another choice. Nothing shows with no points." },
+                    .. "its health bar, in the game's own combo point art: a red point in a dark "
+                    .. "socket, the Rogue bar's points, or a plain light. Nothing shows with no "
+                    .. "points." },
                 { L.BAGSLOTCOUNTER_TITLE, "Bag Button on Screen (on by default) shows a backpack "
                     .. "button with your free bag slots while the controller interface is on, "
                     .. "since it hides the bag buttons. Move it in Edit Mode, and point at it for "

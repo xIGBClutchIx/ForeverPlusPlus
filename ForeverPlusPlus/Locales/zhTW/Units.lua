@@ -285,7 +285,7 @@ L.NAMEPLATECOMBO_DESC = "在目標的名條上顯示你的連擊點數：每一�
     .. "適用於盜賊和獵豹形態的德魯伊。"
 L.NAMEPLATECOMBO_ICON = "圓點"
 L.NAMEPLATECOMBO_ICON_DESC = "每個連擊點數的外觀。"
-L.NAMEPLATECOMBO_ICON_TARGET = "目標框架的樣式"
+L.NAMEPLATECOMBO_ICON_CLASSIC = "經典連擊點數"
 L.NAMEPLATECOMBO_ICON_ROGUE = "盜賊連擊點數（紅色）" -- the modern Rogue bar's combo point art
 L.NAMEPLATECOMBO_ICON_ROGUE_BLUE = "盜賊連擊點數（藍色）"
 L.NAMEPLATECOMBO_POSITION = "位置"

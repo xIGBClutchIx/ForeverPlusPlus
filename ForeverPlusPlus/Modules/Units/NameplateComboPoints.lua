@@ -1,57 +1,84 @@
 -- Nameplate Combo Points: a Rogue's or a cat Druid's combo points on their target's nameplate,
--- above its name or below its health bar, one dot a point and nothing at none. A feature request,
--- issue #27. Drawn as the target frame draws them by default, or as a plain light.
+-- above its name or below its health bar, and nothing at none. A feature request, issue #27.
 --
 -- Forever has no combo points on nameplates of its own: Blizzard_NamePlates' TOC leaves the Rogue
 -- and Druid ClassNameplateBar files out of this client, so its combo points are only the dots on
--- the target frame (ComboFrame, build 1.60.1.70205).
+-- the target frame (ComboFrame, build 1.60.1.70205). This is laid out as that bar is where the
+-- game has it (ClassNameplateBarRogueFrame, Blizzard_ClassNameplateBar_Rogue.xml): 20 by 20
+-- points, its own scale of 0.7 whatever the plate's (ignoreParentScale), and Blizzard's art for
+-- them, which this client still has: the nameplates' own older points (ClassOverlay-ComboPoint)
+-- and the Rogue bar's (uf-roguecp). The target frame's art (Interface\ComboFrame\ComboPoint) is a
+-- 32 by 16 sheet made for one size: on a nameplate it was jagged and cut off however it was
+-- drawn (in game, 2026-11-27), so it isn't offered.
 --
 -- The count may be secret (GetComboPoints is SecretWhenUnitPowerRestricted in the client's API
--- notes, and our own mana reads secret even out of combat), so it's never compared: each dot is a
--- status bar that runs from one point to the next, and the count goes straight to SetValue. A dot
--- is then full or empty by the bar's own drawing, and no points draws nothing.
+-- notes, and our own mana reads secret even out of combat), so it's never compared: the count
+-- goes straight to status bars, one for each point, running from one point to the next, and a
+-- bar's own drawing says whether its point shows. See Looks below.
 local _, ns = ...
 
 local select, ipairs, type, tostring, floor = select, ipairs, type, tostring, math.floor
 local CreateFrame, UnitClass, UnitPowerMax, GetComboPoints = CreateFrame, UnitClass, UnitPowerMax, GetComboPoints
 local GetTime = GetTime
-local C_NamePlate = C_NamePlate
+local C_NamePlate, C_Texture = C_NamePlate, C_Texture
 
 local L = ns.L
+local HasAtlas = ns.Frames.HasAtlas
 
--- What a dot can look like. Each has to be a whole image: a status bar crops its texture itself as
--- it fills, so a part of a sheet picked with SetTexCoord (the target frame's ComboFrame art) came
--- out as slivers of the wrong part. The round lights are files the game has always had; the Rogue
--- points are the modern Rogue bar's atlases, offered only on a client that has them.
-local ICONS = {
+-- Looks -----------------------------------------------------------------------------------------
+-- A plain look is one image, the bar's own texture: the round lights the game has always had.
+-- A status bar crops its texture itself as it fills, so it has to be a whole image.
+local PLAIN = {
     red = "Interface\\COMMON\\Indicator-Red",
     yellow = "Interface\\COMMON\\Indicator-Yellow",
     green = "Interface\\COMMON\\Indicator-Green",
-    rogue = "uf-roguecp-icon-red",
-    rogueBlue = "uf-roguecp-icon-blue",
 }
--- The target frame's own points (ComboPointTemplate, Blizzard_UnitFrame's ComboFrame.xml): a dark
--- socket for every point and a red light in each one held. A sheet, so not a status bar's
--- texture: see The target frame's look below.
-local NATIVE = "target"
-local NATIVE_ART = "Interface\\ComboFrame\\ComboPoint"
 
-local ICON_CHOICES = {
-    { NATIVE, L.NAMEPLATECOMBO_ICON_TARGET },
+-- A socketed look is Blizzard's own art in layers, each `{ atlas, x, y }` from the point's middle:
+-- `empty` shows for every point once there's one (the socket), `full` over it for a point held.
+local SOCKETED = {}
+if HasAtlas("ClassOverlay-ComboPoint") and HasAtlas("ClassOverlay-ComboPoint-Off") then
+    -- The nameplates' own points before the class bars were redrawn: a red point in a dark socket.
+    SOCKETED.classic = {
+        gap = 2,
+        empty = { { "ClassOverlay-ComboPoint-Off" } },
+        full = { { "ClassOverlay-ComboPoint" } },
+    }
+end
+if HasAtlas("uf-roguecp-bg") and HasAtlas("uf-roguecp-bg-dis") then
+    -- The Rogue bar's, as RogueComboPointTemplate lays them out (RogueComboPointBar.xml).
+    local function rogue(icon)
+        return {
+            gap = 4,
+            empty = { { "uf-roguecp-bg-shadow", 0, -4 }, { "uf-roguecp-bg-dis" } },
+            full = { { "uf-roguecp-bg" }, { icon } },
+        }
+    end
+    if HasAtlas("uf-roguecp-icon-red") then
+        SOCKETED.rogue = rogue("uf-roguecp-icon-red")
+    end
+    if HasAtlas("uf-roguecp-icon-blue") then
+        SOCKETED.rogueBlue = rogue("uf-roguecp-icon-blue")
+    end
+end
+
+local ICON_CHOICES = {}
+for _, choice in ipairs({
+    { "classic", L.NAMEPLATECOMBO_ICON_CLASSIC },
+    { "rogue", L.NAMEPLATECOMBO_ICON_ROGUE },
+    { "rogueBlue", L.NAMEPLATECOMBO_ICON_ROGUE_BLUE },
     { "red", L.PLATES_COLOR_RED },
     { "yellow", L.PLATES_COLOR_YELLOW },
     { "green", L.PLATES_COLOR_GREEN },
-}
-if ns.Frames.HasAtlas(ICONS.rogue) then
-    ICON_CHOICES[#ICON_CHOICES + 1] = { "rogue", L.NAMEPLATECOMBO_ICON_ROGUE }
-end
-if ns.Frames.HasAtlas(ICONS.rogueBlue) then
-    ICON_CHOICES[#ICON_CHOICES + 1] = { "rogueBlue", L.NAMEPLATECOMBO_ICON_ROGUE_BLUE }
+}) do
+    if SOCKETED[choice[1]] or PLAIN[choice[1]] then
+        ICON_CHOICES[#ICON_CHOICES + 1] = choice
+    end
 end
 
 local module = ns.NewModule("NameplateComboPoints", L.NAMEPLATECOMBO_DESC, {
     enabled = true, -- only Rogues and Druids have the module at all (IsAvailable)
-    icon = NATIVE, -- as the target frame draws them
+    icon = ICON_CHOICES[1][1], -- Blizzard's own points where the client has the art
     position = "below", -- above the name is where the plate's debuffs go
     size = 100, -- percent
     preview = false, -- Debug: made-up points counting up, on any class
@@ -89,13 +116,21 @@ function module:IsAvailable()
     return class == "ROGUE" or class == "DRUID" or (debug and debug.db and debug.db.enabled) or false
 end
 
-local DOT_SIZE, GAP = 12, 1
+local BAR_SCALE = 0.7 -- ClassNameplateBarRogueFrame's own scale, with the plate's ignored
+local POINT = 20 -- a socketed point (RogueComboPointTemplate: 20 by 20)
+local PLAIN_POINT, PLAIN_GAP = 14, 2 -- a plain light, and between two
+local ROOM = 8 -- kept clear around the points for art that reaches past them (the shadow)
 local DEFAULT_MAX = 5
-local OFFSET = 2 -- between the dots and the name over them
+local OFFSET = 2 -- between the points and the name over them
 local OFFSET_BELOW = 6 -- and under the health bar, whose border and glow reach past its edge
+local BLANK = "Interface\\Buttons\\WHITE8x8" -- a bar needs a texture to have a fill; never seen
 
 local holder -- our frame, made the first time a target's plate is up
-local dots = {}
+-- One for each point: { slot = where it is, dot = the plain look's bar, bar = the socketed looks'
+-- unseen bar, empty = a frame for the socket's art, full = one for the held point's }.
+local points = {}
+local gate -- the unseen bar that fills from the first point on, which the sockets show with
+local bars = {} -- every bar the count goes to
 
 -- How many points the player can hold, or five when the client won't say.
 local function maxPoints()
@@ -107,233 +142,144 @@ local function maxPoints()
     return DEFAULT_MAX
 end
 
+-- A bar the count goes to that draws nothing itself: only how wide its fill is matters.
+local function unseenBar(from, to)
+    local bar = CreateFrame("StatusBar", nil, holder)
+    bar:SetStatusBarTexture(BLANK)
+    bar:GetStatusBarTexture():SetAlpha(0)
+    bar:SetMinMaxValues(from, to)
+    bar:SetValue(from)
+    bars[#bars + 1] = bar
+    return bar
+end
+
+-- A frame stretched over `bar`'s fill, with room above and below, that hides whatever of its
+-- children is outside it: nothing while the bar is empty, since the fill then has no width, and
+-- everything once it's full. That is how art that isn't a bar's own texture follows a count
+-- nothing may compare. The bar has its fill before this is anchored to it: over a bar with no
+-- texture yet the frame was anchored to nothing, and every point showed (in game, 2026-11-27).
+local function clipOver(bar)
+    local fill = bar:GetStatusBarTexture()
+    local clip = CreateFrame("Frame", nil, holder)
+    clip:SetClipsChildren(true)
+    clip:SetPoint("TOPLEFT", fill, "TOPLEFT", 0, ROOM)
+    clip:SetPoint("BOTTOMRIGHT", fill, "BOTTOMRIGHT", 0, -ROOM)
+    return clip
+end
+
 local function build()
     if holder then
         return
     end
     holder = CreateFrame("Frame")
     holder:Hide()
+    -- As Blizzard's class nameplate bars: one size on screen, whatever the plate's scale.
+    holder:SetIgnoreParentScale(true)
+    -- Wider than the points by the room, so art past the first and last isn't cut off.
+    gate = unseenBar(0, 1)
+    gate:SetPoint("TOPLEFT", -ROOM, 0)
+    gate:SetPoint("BOTTOMRIGHT", ROOM, 0)
+    local sockets = clipOver(gate)
     for i = 1, maxPoints() do
+        local slot = CreateFrame("Frame", nil, holder)
         -- Full from point i on, empty before it: the count is only ever handed to the bar.
-        local dot = CreateFrame("StatusBar", nil, holder)
-        dot:SetSize(DOT_SIZE, DOT_SIZE)
-        dot:SetPoint("LEFT", (i - 1) * (DOT_SIZE + GAP), 0)
+        local dot = CreateFrame("StatusBar", nil, slot)
+        dot:SetAllPoints(slot)
         dot:SetMinMaxValues(i - 1, i)
         dot:SetValue(0)
-        dots[i] = dot
-    end
-    holder:SetSize(#dots * DOT_SIZE + (#dots - 1) * GAP, DOT_SIZE)
-end
-
--- The target frame's look ---------------------------------------------------------------------
--- Its art is one sheet (a socket, a red light, a shine), which a status bar can't draw a part of.
--- So the art is plain textures, and the bars only say how much of them shows, still with no
--- count compared: a bar's fill is as wide as its dot from its point on and has no width before
--- it, and a frame that clips what's in it is stretched over that fill, with the light inside.
--- The sockets are in one such frame over a bar that fills from the first point on, so with no
--- points there's nothing, as the target frame hides its own.
-local ART_HEIGHT = 16 -- the sheet's art is taller than a dot (ComboPointTemplate: 12 by 16)
-local BLANK = "Interface\\Buttons\\WHITE8x8" -- a bar needs a texture to have a fill; never seen
-
--- { bars = the bars the count goes to, shown = every frame of the look }, made the first time
--- the look is picked.
-local native
-
-local ROOM = 4 -- kept clear above and below a dot for art taller than it, so none of it is cut off
-
--- A frame over `bar`'s fill, with room above and below for the art, that hides whatever of its
--- children is outside it. Only up and down: its width is the fill's, which is what hides a point.
-local function clipOver(bar)
-    local fill = bar:GetStatusBarTexture()
-    local clip = CreateFrame("Frame", nil, holder)
-    clip:SetClipsChildren(true)
-    clip:SetPoint("TOPLEFT", fill, "TOPLEFT", 0, ROOM)
-    clip:SetPoint("BOTTOMRIGHT", fill, "BOTTOMRIGHT", 0, DOT_SIZE - ART_HEIGHT - ROOM)
-    return clip
-end
-
--- A texture for a socket or a light, off the pixel grid as Blizzard's own class bars set theirs
--- (RogueComboPointBar.xml: snapToPixelGrid false, texelSnappingBias 0): a nameplate is scaled to
--- sizes that aren't whole pixels, and snapped, each point landed a pixel off its neighbors.
-local function artTexture(parent, layer)
-    local texture = parent:CreateTexture(nil, layer)
-    if texture.SetSnapToPixelGrid then
-        texture:SetSnapToPixelGrid(false)
-        texture:SetTexelSnappingBias(0)
-    end
-    return texture
-end
-
--- The looks with a socket behind each point. The target frame's is a small sheet (32 by 16), so
--- it's rough at a nameplate's size however it's drawn; the Rogue bar's art is made to be scaled.
--- `socket` and `light` are an atlas each, or for the sheet the part of it and its size.
-local SOCKET_ATLAS = "uf-roguecp-bg"
-local SOCKETED = {
-    [NATIVE] = {
-        socket = { 0, 0.375, 12 }, light = { 0.375, 0.5625, 8 }, lightX = 2,
-    },
-}
-if ns.Frames.HasAtlas(SOCKET_ATLAS) then
-    SOCKETED.rogue = { socket = SOCKET_ATLAS, light = ICONS.rogue }
-    SOCKETED.rogueBlue = { socket = SOCKET_ATLAS, light = ICONS.rogueBlue }
-end
-
--- How wide one atlas is beside another, for a light sized to its socket as Blizzard drew them.
-local function atlasRatio(atlas, beside)
-    local a, b = C_Texture.GetAtlasInfo(atlas), C_Texture.GetAtlasInfo(beside)
-    if a and b and a.width and b.width and b.width > 0 then
-        return a.width / b.width
-    end
-    return 0.6
-end
-
--- Gives a texture its art for a look, on its dot: a part of the sheet at the sheet's own size
--- from the dot's top left, or an atlas in the dot's middle.
-local function skin(texture, dot, art, offsetX, size)
-    texture:ClearAllPoints()
-    -- The sheet is drawn just as the target frame draws it (ComboPointTemplate sets nothing but
-    -- the file and the part): on the pixel grid, at the size it was made for (see fitScale).
-    -- Smoothed and off the grid it was jagged and lost its top row (in game, 2026-11-27).
-    local sheet = type(art) == "table"
-    if texture.SetSnapToPixelGrid then
-        texture:SetSnapToPixelGrid(sheet)
-        texture:SetTexelSnappingBias(sheet and 0.5 or 0)
-    end
-    if sheet then
-        texture:SetTexture(NATIVE_ART)
-        texture:SetTexCoord(art[1], art[2], 0, 1)
-        texture:SetSize(art[3], ART_HEIGHT)
-        texture:SetPoint("TOPLEFT", dot, "TOPLEFT", offsetX or 0, 0)
-    else
-        texture:SetAtlas(art)
-        texture:SetSize(size, size)
-        texture:SetPoint("CENTER", dot, "CENTER")
-    end
-end
-
-local function buildNative()
-    if native then
-        return
-    end
-    -- Bars of the look's own, each with its fill from the start and never given another texture:
-    -- a clip is anchored to the fill, and over a bar with no texture yet it was anchored to
-    -- nothing, so every light showed whatever the count (in game, 2026-11-27).
-    local function unseenBar(from, to)
-        local bar = CreateFrame("StatusBar", nil, holder)
-        bar:SetStatusBarTexture(BLANK)
-        bar:GetStatusBarTexture():SetAlpha(0)
-        bar:SetMinMaxValues(from, to)
-        bar:SetValue(from)
-        return bar
-    end
-    local gate = unseenBar(0, 1)
-    gate:SetAllPoints(holder)
-    local sockets = clipOver(gate)
-    native = { bars = { gate }, shown = { gate, sockets }, points = {} }
-    for i, dot in ipairs(dots) do
+        bars[#bars + 1] = dot
         local bar = unseenBar(i - 1, i)
-        bar:SetAllPoints(dot)
-        local clip = clipOver(bar)
-        clip:SetFrameLevel(sockets:GetFrameLevel() + 1)
-        native.points[i] = {
-            dot = dot,
-            socket = artTexture(sockets, "BACKGROUND"),
-            light = artTexture(clip, "ARTWORK"),
-        }
-        native.bars[#native.bars + 1] = bar
-        native.shown[#native.shown + 1] = bar
-        native.shown[#native.shown + 1] = clip
+        bar:SetAllPoints(slot)
+        local full = clipOver(bar)
+        full:SetFrameLevel(sockets:GetFrameLevel() + 1)
+        points[i] = { slot = slot, dot = dot, bar = bar, empty = sockets, full = full, art = {} }
     end
 end
 
--- Each dot as the look picked draws it: its own art in the bar, or the bar unseen under a
--- socket and a light.
+-- The art of one layer list on a point, in textures kept for it: each an atlas at its own size,
+-- off the pixel grid as Blizzard's class bars set theirs (snapToPixelGrid false, texelSnappingBias
+-- 0), since a nameplate doesn't sit on whole pixels. The art drawn at twice the size is used
+-- where the client has it, at the plain one's size, so it stays sharp when Size makes it bigger.
+local function dress(point, key, layers)
+    local parent = point[key]
+    for i, layer in ipairs(layers) do
+        local name = key .. i
+        local texture = point.art[name]
+        if not texture then
+            texture = parent:CreateTexture(nil, "ARTWORK", nil, i)
+            if texture.SetSnapToPixelGrid then
+                texture:SetSnapToPixelGrid(false)
+                texture:SetTexelSnappingBias(0)
+            end
+            point.art[name] = texture
+        end
+        local atlas = layer[1]
+        local info = C_Texture.GetAtlasInfo(atlas)
+        texture:SetAtlas(HasAtlas(atlas .. "-2x") and atlas .. "-2x" or atlas)
+        texture:SetSize(info and info.width or POINT, info and info.height or POINT)
+        texture:ClearAllPoints()
+        texture:SetPoint("CENTER", point.slot, "CENTER", layer[2] or 0, layer[3] or 0)
+        texture:Show()
+    end
+end
+
+-- The points as the look picked draws them, laid out in a row in the middle of the holder.
 local function applyLook()
     local look = module.db.icon
     local socketed = SOCKETED[look]
-    if socketed then
-        buildNative()
-        local lightSize = type(socketed.light) == "string"
-            and DOT_SIZE * atlasRatio(socketed.light, socketed.socket) or nil
-        for _, point in ipairs(native.points) do
-            skin(point.socket, point.dot, socketed.socket, 0, DOT_SIZE)
-            skin(point.light, point.dot, socketed.light, socketed.lightX, lightSize)
+    local size = socketed and POINT or PLAIN_POINT
+    local gap = socketed and socketed.gap or PLAIN_GAP
+    holder:SetSize(#points * size + (#points - 1) * gap, size)
+    for i, point in ipairs(points) do
+        point.slot:SetSize(size, size)
+        point.slot:ClearAllPoints()
+        point.slot:SetPoint("LEFT", (i - 1) * (size + gap), 0)
+        for _, texture in pairs(point.art) do
+            texture:Hide()
         end
-    end
-    for _, dot in ipairs(dots) do
-        if not socketed then
-            dot:SetStatusBarTexture(ICONS[look] or ICONS.red)
+        if socketed then
+            dress(point, "empty", socketed.empty)
+            dress(point, "full", socketed.full)
+        else
+            point.dot:SetStatusBarTexture(PLAIN[look] or PLAIN.red)
         end
-        -- Under a socketed look the plain dots stay where they are, unseen: the art is placed
-        -- by them.
-        dot:SetAlpha(socketed and 0 or 1)
+        point.dot:SetShown(not socketed)
+        point.bar:SetShown(socketed ~= nil)
+        point.full:SetShown(socketed ~= nil)
     end
-    if native then
-        for _, part in ipairs(native.shown) do
-            part:SetShown(socketed ~= nil)
-        end
-    end
+    gate:SetShown(socketed ~= nil)
+    points[1].empty:SetShown(socketed ~= nil)
+    holder:SetScale(BAR_SCALE * module.db.size / 100)
 end
 
 local function update()
     if not holder or not holder:IsShown() then
         return
     end
-    local points
+    local count
     if module.db.preview then
         -- Debug's preview: none, then one more each second up to them all, and round again.
-        points = floor(GetTime()) % (#dots + 1)
+        count = floor(GetTime()) % (#points + 1)
     else
-        points = GetComboPoints("player", "target")
+        count = GetComboPoints("player", "target")
     end
-    for _, dot in ipairs(dots) do
-        dot:SetValue(points)
-    end
-    if native then
-        for _, bar in ipairs(native.bars) do
-            bar:SetValue(points)
-        end
+    for _, bar in ipairs(bars) do
+        bar:SetValue(count)
     end
 end
 
--- The dots' scale. A nameplate is scaled by the game (bigger for the target, and by the player's
--- nameplate size), which stretched the target frame's small art until it was jagged. So at 100%
--- the dots are as big on screen as the ones on the target frame, whatever the plate's scale:
--- the art is then drawn at the size it was made for. Size scales from there.
-local fitted -- the plate's scale the dots were last fitted to
-
-local function fitScale()
-    local parent = holder and holder:GetParent()
-    if not parent then
-        return
-    end
-    local plate, screen = parent:GetEffectiveScale(), UIParent:GetEffectiveScale()
-    if not (plate and plate > 0 and screen and screen > 0) then
-        return
-    end
-    fitted = plate
-    holder:SetScale(screen / plate * module.db.size / 100)
-end
-
--- The plate's scale eases to its new size after a change of target, and the preview's points
--- change with the clock, so both are looked at a few times a second while the dots show.
+-- The preview's points change with the clock, not with an event.
 local sinceTick = 0
 local function onUpdate(_, elapsed)
     sinceTick = sinceTick + elapsed
     if sinceTick >= 0.25 then
         sinceTick = 0
-        local parent = holder:GetParent()
-        if parent and parent:GetEffectiveScale() ~= fitted then
-            fitScale()
-        end
-        if module.db.preview then
-            update()
-        end
+        update()
     end
 end
 
--- Puts the dots on the target's plate, or hides them without one (no target, a plate off screen,
--- or a friendly plate the game forbids addons).
+-- Puts the points on the target's plate, or hides them without one (no target, a plate off
+-- screen, or a friendly plate the game forbids addons).
 local function attach()
     local plate = C_NamePlate.GetNamePlateForUnit("target")
     local frame = plate and plate.UnitFrame
@@ -356,19 +302,18 @@ local function attach()
         holder:SetPoint("BOTTOM", parts.name or container, "TOP", 0, OFFSET)
     end
     applyLook()
-    fitScale()
     holder:SetFrameLevel(frame:GetFrameLevel() + 5)
-    holder:SetScript("OnUpdate", onUpdate)
+    holder:SetScript("OnUpdate", module.db.preview and onUpdate or nil)
     holder:Show()
     update()
 end
 
 -- Debug's button: what the client gives for the target's combo points, and whether it can be read.
 local function printPoints()
-    local points = GetComboPoints("player", "target")
+    local count = GetComboPoints("player", "target")
     local plate = C_NamePlate.GetNamePlateForUnit("target")
     ns.Print(L.NAMEPLATECOMBO_PRINT_LINE:format(
-        ns.IsReadable(points) and tostring(points) or "secret", maxPoints(),
+        ns.IsReadable(count) and tostring(count) or "secret", maxPoints(),
         tostring(plate ~= nil and plate.UnitFrame ~= nil)))
 end
 
@@ -382,7 +327,7 @@ module.debugActions = {
 local handlers = {
     -- The target's plate may come up after it was targeted, or go while it still is.
     OnAdded = attach,
-    -- Plates are pooled: the dots come off before this one shows another unit.
+    -- Plates are pooled: the points come off before this one shows another unit.
     OnRemoved = function(_, frame)
         if holder and holder:GetParent() == frame then
             holder:Hide()
