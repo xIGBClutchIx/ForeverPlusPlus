@@ -48,6 +48,7 @@ local module = ns.NewModule("Tooltips", L.TOOLTIPS_DESC, {
     title = true,
     target = true,
     itemLevel = false, -- a player's average item level; another player's needs an inspect
+    itemLevelColor = true, -- that number in the color of the quality most of their gear is
     spec = true, -- a player's talent tree with the most points
     talentPoints = true, -- with the specialization, the points in each tree
     healthText = "both", -- on the health bar: "off", "percent", "value", "both"
@@ -105,6 +106,8 @@ module.options = {
         section = L.TOOLTIPS_SECTION_LINES },
     { key = "itemLevel", name = L.TOOLTIPS_ITEM_LEVEL, description = L.TOOLTIPS_ITEM_LEVEL_DESC,
         section = L.TOOLTIPS_SECTION_LINES, added = "1.10.0" },
+    { key = "itemLevelColor", name = L.TOOLTIPS_ITEM_LEVEL_COLOR, description = L.TOOLTIPS_ITEM_LEVEL_COLOR_DESC,
+        section = L.TOOLTIPS_SECTION_LINES, added = "1.10.0", requires = "itemLevel" },
     { key = "spec", name = L.TOOLTIPS_SPEC, description = L.TOOLTIPS_SPEC_DESC,
         section = L.TOOLTIPS_SECTION_LINES, added = "1.10.0" },
     { key = "talentPoints", name = L.TOOLTIPS_TALENT_POINTS, description = L.TOOLTIPS_TALENT_POINTS_DESC,
@@ -435,7 +438,10 @@ end
 local function addInspectLines(tooltip, entry)
     local db = module.db
     if db.itemLevel and ns.IsNumber(entry.itemLevel) then
-        tooltip:AddDoubleLine(L.TOOLTIPS_ITEM_LEVEL_LINE, tostring(entry.itemLevel), 1, 1, 1, 1, 1, 1)
+        -- In the color of the quality most of their gear is, as an item's name is colored.
+        local color = ns.Colors.Quality(db.itemLevelColor and entry.quality or nil)
+        tooltip:AddDoubleLine(L.TOOLTIPS_ITEM_LEVEL_LINE, tostring(entry.itemLevel), 1, 1, 1,
+            color.r, color.g, color.b)
     end
     local best, total = nil, 0
     if db.spec and entry.tabs then
@@ -464,6 +470,7 @@ local function ownEntry()
     end
     return {
         itemLevel = ns.IsNumber(level) and level > 0 and floor(level) or nil,
+        quality = ns.Inspect.UnitQuality("player"),
         tabs = ns.Talents.Tabs(),
     }
 end

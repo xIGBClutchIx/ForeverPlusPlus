@@ -56,6 +56,9 @@ L.TOOLTIPS_ITEM_LEVEL = "Item Level" -- [game: STAT_AVERAGE_ITEM_LEVEL]
 L.TOOLTIPS_ITEM_LEVEL_DESC = "Add a line with a player's average item level. For another player "
     .. "the game is asked when you point at them, out of combat and close by, and the answer is "
     .. "kept for a few minutes, so the line shows a moment after the tooltip."
+L.TOOLTIPS_ITEM_LEVEL_COLOR = "Color by Gear Quality"
+L.TOOLTIPS_ITEM_LEVEL_COLOR_DESC = "Color the item level like an item of the quality most of their "
+    .. "gear is: purple for mostly epic gear, blue for mostly rare."
 L.TOOLTIPS_SPEC = "Specialization" -- [game: SPECIALIZATION]
 L.TOOLTIPS_SPEC_DESC = "Add a line with a player's specialization: the talent tree they've spent "
     .. "the most points in. Another player's talents are asked for as their item level is."

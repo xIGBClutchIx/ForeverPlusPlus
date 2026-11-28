@@ -37,7 +37,9 @@ ns.changelog = {
                     .. "default, Item Level off. Item Level and "
                     .. "Specialization add a player's average item level and the talent tree they've "
                     .. "spent the most points in, with the points in each tree; another player's are "
-                    .. "asked for when you point at them, out of combat and close by. Health Text "
+                    .. "asked for when you point at them, out of combat and close by. Color by Gear "
+                    .. "Quality (on by default) colors the item level like an item of the quality "
+                    .. "most of their gear is. Health Text "
                     .. "writes a unit's health on the tooltip's health bar, as a percentage, a "
                     .. "number, or both." },
                 { L.ITEMTOOLTIPS_TITLE, "Pair Short Lines (on by default) puts two short lines that "

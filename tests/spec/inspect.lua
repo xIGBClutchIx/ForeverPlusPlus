@@ -64,6 +64,12 @@ full[18] = 77
 eq(Inspect.Average(full, true), 61, "inspect: a ranged item adds a slot (1037 / 17)")
 eq(Inspect.Average({}), nil, "inspect: nothing worn, no average")
 
+-- The quality most of the gear is.
+eq(Inspect.TypicalQuality({ 4, 4, 4, 3, 2 }), 4, "inspect: mostly epic gear is epic")
+eq(Inspect.TypicalQuality({ 5, 3, 3, 3, 2, 2 }), 3, "inspect: one legendary doesn't make blue gear orange")
+eq(Inspect.TypicalQuality({ 3, 4 }), 3, "inspect: an even split takes the lower quality")
+eq(Inspect.TypicalQuality({}), nil, "inspect: nothing worn, no quality")
+
 -- A request, and its answer.
 local got = {}
 local function remember(entry, guid)

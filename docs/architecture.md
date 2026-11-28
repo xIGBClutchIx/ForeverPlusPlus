@@ -292,7 +292,7 @@ Generated files, in `Lib/Generated/` (never edited by hand; see Generated data):
 
 ### `Inspect.lua`
 
-- `ns.Inspect`: another player's average item level and talent tabs, from the server's answer to `NotifyInspect`. `Request(unit, fn)` asks (one at a time, 1.5 seconds apart, never in combat, out of range, or while Blizzard's inspect window has one going) and calls `fn(entry, guid)` on `INSPECT_READY`; `Get(guid)` returns an answer kept for five minutes. The item level is `C_PaperDollInfo.GetInspectItemLevel`, or else `Average` of the worn items' levels. It never calls `ClearInspectPlayer`. Used by Tooltips.
+- `ns.Inspect`: another player's average item level, the quality most of their gear is (`UnitQuality`, the middle one by `TypicalQuality`, for coloring the level with no item levels kept by hand), and talent tabs, from the server's answer to `NotifyInspect`. `Request(unit, fn)` asks (one at a time, 1.5 seconds apart, never in combat, out of range, or while Blizzard's inspect window has one going) and calls `fn(entry, guid)` on `INSPECT_READY`; `Get(guid)` returns an answer kept for five minutes. The item level is `C_PaperDollInfo.GetInspectItemLevel`, or else `Average` of the worn items' levels. It never calls `ClearInspectPlayer`. Used by Tooltips.
 
 ### `ActionButtons.lua`
 

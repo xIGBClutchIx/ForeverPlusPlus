@@ -59,6 +59,47 @@ function Inspect.Average(levels, twoHanded)
     return floor(sum / slots)
 end
 
+---The quality a set of worn items is mostly of: the middle one of `qualities` in order (the lower
+---of the two middle ones for an even count), so a few better or worse pieces don't move it. For
+---coloring an average item level as an item is colored, with no item levels kept by hand that a
+---patch would raise. Nil for none.
+---@param qualities number[] Enum.ItemQuality values
+---@return number?
+function Inspect.TypicalQuality(qualities)
+    local sorted = {}
+    for i, quality in ipairs(qualities) do
+        sorted[i] = quality
+    end
+    if #sorted == 0 then
+        return nil
+    end
+    table.sort(sorted)
+    return sorted[floor((#sorted + 1) / 2)]
+end
+
+---The quality most of what `unit` wears is of (`TypicalQuality`), for the player or a unit whose
+---inspect answer is in. Nil when nothing can be read.
+---@param unit string
+---@return number?
+function Inspect.UnitQuality(unit)
+    local get = _G.GetInventoryItemQuality
+    if not get then
+        return nil
+    end
+    local qualities = {}
+    local function add(slot)
+        local quality = get(unit, slot)
+        if ns.IsNumber(quality) then
+            qualities[#qualities + 1] = quality
+        end
+    end
+    for _, slot in ipairs(SLOTS) do
+        add(slot)
+    end
+    add(RANGED)
+    return Inspect.TypicalQuality(qualities)
+end
+
 -- The item level of what `unit` wears, and whether every item could be read. Blizzard's own number
 -- first (C_PaperDollInfo.GetInspectItemLevel, in this build's API docs but unseen in game), and
 -- otherwise worked out from the items' links.
@@ -106,7 +147,7 @@ local function fresh(entry)
     return entry and GetTime() - entry.time < entry.keep
 end
 
----The answer kept for a player's GUID: `{ itemLevel, tabs }` (either may be nil), or nil when
+---The answer kept for a player's GUID: `{ itemLevel, quality, tabs }` (any may be nil), or nil when
 ---there's none or it's too old.
 ---@param guid string
 ---@return table?
@@ -160,6 +201,7 @@ onReady = function(_, guid)
     local level, whole = itemLevel(unit)
     local entry = {
         itemLevel = level,
+        quality = Inspect.UnitQuality(unit),
         tabs = ns.Talents and ns.Talents.Tabs(ns.Talents.INSPECT) or nil,
         time = GetTime(),
         keep = whole and KEEP or KEEP_PARTIAL,
