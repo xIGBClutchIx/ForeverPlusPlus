@@ -116,7 +116,9 @@ function module:IsAvailable()
     return class == "ROGUE" or class == "DRUID" or (debug and debug.db and debug.db.enabled) or false
 end
 
-local BAR_SCALE = 0.7 -- ClassNameplateBarRogueFrame's own scale, with the plate's ignored
+-- The points' own scale at 100%, with the plate's ignored. ClassNameplateBarRogueFrame's is 0.7,
+-- made for retail's bigger nameplates: beside Forever's it was too big (in game, 2026-11-27).
+local BAR_SCALE = 0.5
 local POINT = 20 -- a socketed point (RogueComboPointTemplate: 20 by 20)
 local PLAIN_POINT, PLAIN_GAP = 14, 2 -- a plain light, and between two
 local ROOM = 8 -- kept clear around the points for art that reaches past them (the shadow)
