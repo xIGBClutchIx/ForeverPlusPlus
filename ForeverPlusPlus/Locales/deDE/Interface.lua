@@ -255,7 +255,11 @@ L.MOVABLEWINDOWS_NOTICE = "Zieht ein Fenster überall, nur nicht an einem Knopf,
 L.MOVABLEWINDOWS_NOTICE_DESC = "Knöpfe und Listen in einem Fenster nehmen den Klick selbst an. Ein "
     .. "Fenster mit Aktionsknöpfen oder anderen geschützten Teilen lässt sich nur außerhalb des "
     .. "Kampfes verschieben."
-L.MOVABLEWINDOWS_KEY = "Verschiebetaste"
+L.MOVABLEWINDOWS_OPENMAP = "Die Weltkarte bleibt OpenMap überlassen, das sie selbst verschiebt." -- a gray row atop the module
+L.MOVABLEWINDOWS_OPENMAP_DESC = "Mit dem Addon OpenMap verschiebt dieses Modul die Weltkarte nicht, "
+    .. "damit OpenMap ihren Platz behält und ihn zurücksetzen kann. Ein hier gewählter Platz gilt "
+    .. "wieder, sobald OpenMap fehlt."
+L.MOVABLEWINDOWS_KEY ="Verschiebetaste"
 L.MOVABLEWINDOWS_KEY_DESC = "Die Taste, die Ihr beim Ziehen eines Fensters haltet. Mit „Keine“ "
     .. "verschiebt es schon das Ziehen mit der linken Maustaste."
 L.MOVABLEWINDOWS_AREA = "Ziehen an"

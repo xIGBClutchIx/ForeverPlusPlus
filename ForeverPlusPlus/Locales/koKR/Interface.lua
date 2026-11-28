@@ -224,7 +224,11 @@ L.MOVABLEWINDOWS_DESC = "이동 키를 누른 채 캐릭터, 마법책, 전문 �
 L.MOVABLEWINDOWS_NOTICE = "버튼, 입력창, 슬라이더, 목록이 아닌 곳을 잡고 창을 끌어 옮기십시오." -- a gray row atop the module
 L.MOVABLEWINDOWS_NOTICE_DESC = "창 안의 버튼과 목록은 클릭을 직접 받습니다. 행동 단축 버튼이나 다른 보호된 "
     .. "요소가 있는 창은 전투 중이 아닐 때만 움직입니다."
-L.MOVABLEWINDOWS_KEY = "이동 키"
+L.MOVABLEWINDOWS_OPENMAP = "세계 지도는 OpenMap이 직접 옮기므로 그대로 둡니다." -- a gray row atop the module
+L.MOVABLEWINDOWS_OPENMAP_DESC = "OpenMap 애드온이 있으면 이 모듈은 세계 지도를 옮기지 않으므로, "
+    .. "OpenMap이 자리를 기억하고 되돌릴 수 있습니다. 여기서 정한 자리는 OpenMap이 없어지면 다시 "
+    .. "쓰입니다."
+L.MOVABLEWINDOWS_KEY ="이동 키"
 L.MOVABLEWINDOWS_KEY_DESC = "창을 끌어 옮기는 동안 누르고 있을 키입니다. '없음'이면 왼쪽 버튼만으로 "
     .. "끌어도 움직입니다."
 L.MOVABLEWINDOWS_AREA = "끌 수 있는 곳"

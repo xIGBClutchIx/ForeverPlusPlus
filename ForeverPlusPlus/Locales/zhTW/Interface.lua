@@ -208,7 +208,10 @@ L.MOVABLEWINDOWS_DESC = "按住移動鍵並拖曳暴雪的視窗，例如角色�
 L.MOVABLEWINDOWS_NOTICE = "拖曳視窗時避開按鈕、輸入框、滑桿或清單。" -- a gray row atop the module
 L.MOVABLEWINDOWS_NOTICE_DESC = "點擊視窗內的按鈕或清單時，會操作該元件。含有快捷列按鈕或其他受保護元件的視窗，"
     .. "只能在非戰鬥狀態下移動。"
-L.MOVABLEWINDOWS_KEY = "移動鍵"
+L.MOVABLEWINDOWS_OPENMAP = "世界地圖交給OpenMap，由它自己移動。" -- a gray row atop the module
+L.MOVABLEWINDOWS_OPENMAP_DESC = "使用OpenMap插件時，此模組不移動世界地圖，讓OpenMap保存它的位置並能"
+    .. "將其復原。在這裡為它設定的位置會在不再使用OpenMap時恢復。"
+L.MOVABLEWINDOWS_KEY ="移動鍵"
 L.MOVABLEWINDOWS_KEY_DESC = "拖曳視窗時要按住的按鍵。設為「無」時，只用左鍵拖曳就能移動。"
 L.MOVABLEWINDOWS_AREA = "拖曳位置"
 L.MOVABLEWINDOWS_AREA_DESC = "可以抓住視窗的位置：視窗中任何不是按鈕、清單或模型的地方，或只限上方的標題列。"

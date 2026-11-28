@@ -107,6 +107,11 @@ local RESET_BUTTONS = { right = "RightButton", middle = "MiddleButton", left = "
 module.notice = {
     { text = L.MOVABLEWINDOWS_NOTICE, description = L.MOVABLEWINDOWS_NOTICE_DESC },
     ns.Gamepad.LimitedNotice(), -- a drag, a held key, and the mouse wheel
+    -- The world map is OpenMap's while it's there (see OWNED).
+    {
+        text = L.MOVABLEWINDOWS_OPENMAP, description = L.MOVABLEWINDOWS_OPENMAP_DESC,
+        shown = function() return ns.WorldMap.OpenMap() ~= nil end,
+    },
 }
 
 -- The windows, by global name. Most load with Blizzard's load-on-demand addons, so they're looked
@@ -137,6 +142,10 @@ local NAMES = {
     "SocialUIFrame",
     -- The Escape menu: a panel the panel manager doesn't anchor (centerFrameSkipAnchoring).
     "GameMenuFrame",
+    -- Forever's Legacy window (its rewards, challenges, and Legacy tree): a left panel of the
+    -- load-on-demand Blizzard_LegacySystem (Blizzard_LegacySystemRegistration.lua), so it's here
+    -- once that loads.
+    "LegacySystemFrame",
     -- The small zone map (Shift+M) hangs from its tab, which Blizzard drags only once it's
     -- unlocked from the tab's menu (Blizzard_BattlefieldMap.lua); the rest is map canvas, which
     -- keeps its clicks. So the tab is what moves, locked or not.
@@ -150,6 +159,20 @@ local NAMES = {
 local FULL_SCREEN = {
     WorldMapFrame = function(frame) return frame.IsMaximized and frame:IsMaximized() end,
 }
+
+-- Windows another addon moves and keeps a place for itself, by name: while it's there, the window
+-- is its own, neither hooked nor placed, so the two don't put it back over each other and the
+-- addon's own reset works. A place saved here stays saved, for if that addon goes. The OpenMap
+-- addon drags the world map by its title bar, puts its saved place back each time Blizzard lays
+-- the map out, and resets it from its settings (its Map/Window.lua).
+local OWNED = {
+    WorldMapFrame = function() return ns.WorldMap.OpenMap() ~= nil end,
+}
+
+local function owned(name)
+    local other = OWNED[name]
+    return other and other() or false
+end
 -- Windows that take turns in one place keep one place and size between them: window name -> the
 -- name it's kept under. Talking to an NPC, its greeting (GossipFrame) gives way to a quest's text
 -- (QuestFrame) and back as the player clicks through, in the panel manager's left slot, and both
@@ -227,7 +250,7 @@ local function scaleOf(name)
 end
 
 local function canMove(frame)
-    if InCombatLockdown() and frame:IsProtected() then
+    if InCombatLockdown() and frame:IsProtected() or owned(nameOf[frame]) then
         return false
     end
     local fullScreen = FULL_SCREEN[nameOf[frame]]
@@ -447,7 +470,10 @@ end
 
 local function hook(name)
     local frame = _G[name]
-    if type(frame) ~= "table" or nameOf[frame] or not frame.HookScript then
+    -- By the time this first runs (the module turns on at login) every addon that loads with the
+    -- game has, so one that owns the window is already there. canMove asks again for one that
+    -- came later.
+    if type(frame) ~= "table" or nameOf[frame] or not frame.HookScript or owned(name) then
         return
     end
     nameOf[frame] = name

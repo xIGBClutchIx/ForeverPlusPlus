@@ -245,6 +245,10 @@ L.MOVABLEWINDOWS_DESC = "Hold the move key and drag Blizzard's windows, like you
 L.MOVABLEWINDOWS_NOTICE = "Drag a window anywhere but on a button, box, slider, or list." -- a gray row atop the module
 L.MOVABLEWINDOWS_NOTICE_DESC = "Buttons and lists inside a window take the click themselves. A "
     .. "window with action buttons or other protected parts in it moves only out of combat."
+L.MOVABLEWINDOWS_OPENMAP = "The world map is left to OpenMap, which moves it itself." -- a gray row atop the module
+L.MOVABLEWINDOWS_OPENMAP_DESC = "With the OpenMap addon, this module doesn't move the world map, "
+    .. "so OpenMap keeps its place and can put it back. A place you gave it here comes back if "
+    .. "OpenMap is gone."
 L.MOVABLEWINDOWS_KEY = "Move Key"
 L.MOVABLEWINDOWS_KEY_DESC = "The key to hold while you drag a window. With None, dragging with "
     .. "the left button alone moves it."
