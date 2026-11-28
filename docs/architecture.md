@@ -194,7 +194,7 @@ Generated files, in `Lib/Generated/` (never edited by hand; see Generated data):
 
 ### `BagAddons.lua`
 
-- `ns.BagAddons`: the item buttons of bag addons that replace Blizzard's bags, for `BagClicks` and `ItemButtons`: Baganator, GW2 UI, Bagnon, Bagnonium, BetterBags, and ArkInventory. Each makes the player's live bag buttons from `ContainerFrameItemButtonTemplate`, so each says its bag and slot.
+- `ns.BagAddons`: the item buttons of bag addons that replace Blizzard's bags, for `BagClicks` and `ItemButtons`: Baganator, GW2 UI, Bagnon, Bagnonium, BetterBags, and ArkInventory. Each makes the player's live bag buttons from `ContainerFrameItemButtonTemplate`, so each says its bag and slot. `ShowsItemLevels()` says whether one that's drawing the bags shows item levels itself (an adapter's `itemLevels`: Baganator and BetterBags do by default), for a module that would draw the same thing over it.
 - No module or setting of its own: it does something only while a module that uses `BagClicks` or `ItemButtons.Walk` is on, and only for an addon that's loaded.
 - Each addon is one adapter in its `ADAPTERS` list: `get` (its handle while loaded and drawing the bags), `each` (its live buttons, leaving out another character's and a bank seen away from a banker), `windows`, `bankOpen`, `listen` (a callback of its own for a redraw), and `hookButtons` (buttons whose OnShow and OnHide say it laid them out). Adding an addon is one more adapter and its check in `tests/spec/bagaddons.lua`.
 - `Loaded()` says whether one is there; `EachButton(fn)` calls `fn(button, bag, slot, bank, art)` for each such button on screen (`art` the button that draws the icon when that's another); `BankShown()` says whether its bank is open at a banker; `Watch(module, fn)` calls `fn` while the module is on when their windows show or hide, they lay their items out again, and on BAG_UPDATE_DELAYED.
@@ -369,7 +369,7 @@ What each module is, in the code's terms (what it does for players is in `README
 - **Already Known**
 - **Appearance Icons**: uncollected appearances.
 - **Disenchant Icons**: `DisenchantIcons`: off by default. `ns.Disenchant.ForItem` on each item's info, with the tooltip's "Cannot be disenchanted" and red "Disenchanting requires" lines having the last word, through `ItemButtons.Walk` (bags, bank, auction house, loot); Skip Items Worth More Sold compares the vendor price with `Disenchant.Value` at `ns.Prices.Auction`.
-- **Item Levels**: `ItemLevels`: off by default. `ns.Equipment.ItemLevel` on each item, in `ns.Colors.Quality`, as a font string of ours (`ItemButtons.Overlays`) through `ItemButtons.Walk` (bags, bank, merchant, auction house, loot). The same `ItemLevel` as Character Window's item levels.
+- **Item Levels**: `ItemLevels`: off by default. `ns.Equipment.ItemLevel` on each item, in `ns.Colors.Quality`, as a font string of ours (`ItemButtons.Overlays`) through `ItemButtons.Walk` (bags, bank, merchant, auction house, loot). The same `ItemLevel` as Character Window's item levels. A bag addon that draws item levels itself (`BagAddons.ShowsItemLevels`) keeps its bags to its own unless `overAddon` is on, through the walk's `addonBags`.
 - **Unusable Items Tint**
 - **Upgrade Arrows**: a folder: the module and its stat weight templates.
 - **Best Quest Reward**

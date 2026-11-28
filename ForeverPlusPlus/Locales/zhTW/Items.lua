@@ -160,6 +160,9 @@ L.ITEMLEVELS_BANK_DESC = "顯示銀行中裝備的等級。"
 L.ITEMLEVELS_MERCHANT_DESC = "顯示商人販售的裝備的等級。"
 L.ITEMLEVELS_AUCTION_DESC = "顯示拍賣場清單中裝備的等級。"
 L.ITEMLEVELS_LOOT_DESC = "在拾取視窗和拾取擲骰中顯示裝備的等級。"
+L.ITEMLEVELS_OVER_ADDON = "也在背包插件的背包中顯示"
+L.ITEMLEVELS_OVER_ADDON_DESC = "Baganator和BetterBags會在自己的背包中顯示物品等級，並有各自的大小和位置設定，"
+    .. "所以這些背包交給它們處理。開啟後也會在那裡顯示Forever++的等級。"
 
 -- UnusableItemsTint
 L.UNUSABLEITEMSTINT_TITLE = "無法使用物品染色"

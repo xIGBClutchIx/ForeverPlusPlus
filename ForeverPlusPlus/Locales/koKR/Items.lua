@@ -175,6 +175,9 @@ L.ITEMLEVELS_BANK_DESC = "은행에 있는 장비의 레벨을 표시합니다."
 L.ITEMLEVELS_MERCHANT_DESC = "상인이 파는 장비의 레벨을 표시합니다."
 L.ITEMLEVELS_AUCTION_DESC = "경매장 목록에 있는 장비의 레벨을 표시합니다."
 L.ITEMLEVELS_LOOT_DESC = "전리품창과 전리품 주사위 굴림에서 장비의 레벨을 표시합니다."
+L.ITEMLEVELS_OVER_ADDON = "가방 애드온의 가방에도 표시"
+L.ITEMLEVELS_OVER_ADDON_DESC = "Baganator와 BetterBags는 자체 가방에 아이템 레벨을 직접 표시하고 크기와 위치 "
+    .. "설정도 따로 있으므로, 그 가방은 해당 애드온에 맡깁니다. 켜면 그곳에도 Forever++의 레벨을 표시합니다."
 
 -- UnusableItemsTint
 L.UNUSABLEITEMSTINT_TITLE = "사용 불가 아이템 색조"

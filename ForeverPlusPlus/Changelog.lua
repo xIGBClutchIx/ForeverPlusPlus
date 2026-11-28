@@ -106,7 +106,9 @@ ns.changelog = {
                 { L.ITEMLEVELS_TITLE, "A new module, off by default, that shows the level of "
                     .. "weapons and armor on their icons, in their quality's color, in your bags, "
                     .. "the bank, at merchants, and in loot, and in the auction house if you turn "
-                    .. "it on. Text Size sets how big the levels are." },
+                    .. "it on. Text Size sets how big the levels are. Baganator's and BetterBags' "
+                    .. "bags are left to those addons' own item levels unless you turn In a Bag "
+                    .. "Addon's Bags Too on." },
                 { L.JUNKDELETE_TITLE, "A new module, off by default, that shows a small red button "
                     .. "in the loot window's top left corner while your bags have no room for "
                     .. "something in it. A click "

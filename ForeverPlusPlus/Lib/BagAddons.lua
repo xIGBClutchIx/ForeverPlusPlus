@@ -62,8 +62,11 @@ local ADAPTERS = {}
 -- GetBagID. The buttons are pooled and change slots each time it lays a view out, so nothing is
 -- kept per button. A view laid out fires ViewComplete on Baganator.CallbackRegistry, which it
 -- puts on its global for other addons (its own skins listen) but doesn't list in API/.
+-- It draws an item's level on its buttons itself, by default in the top left corner (its
+-- Core/Config.lua: icon_top_left_corner_array defaults to "junk", "item_level").
 ADAPTERS[#ADAPTERS + 1] = {
     name = "Baganator",
+    itemLevels = true,
     get = function()
         local b = loaded("Baganator") and global("Baganator")
         local skins = type(b) == "table" and type(b.API) == "table" and b.API.Skins
@@ -187,8 +190,10 @@ ADAPTERS[#ADAPTERS + 1] = bagnon("Bagnonium")
 -- section's header) say slot 0. It draws the bags again on its messages bags/Draw/Backpack/Done
 -- and bags/Draw/Bank/Done, which plugins hear with the Events module's RegisterMessage. It has
 -- no view of another character's bags, and shows its bank only at a banker.
+-- It draws an item's level itself, on by default (its core/constants.lua: itemLevel.enabled).
 ADAPTERS[#ADAPTERS + 1] = {
     name = "BetterBags",
+    itemLevels = true,
     get = function()
         local ace = loaded("BetterBags") and _G.LibStub and _G.LibStub("AceAddon-3.0", true)
         local bb = ace and ace:GetAddon("BetterBags", true)
@@ -295,6 +300,20 @@ end
 function BagAddons.Loaded()
     for _, adapter in ipairs(ADAPTERS) do
         if adapter.get() then
+            return true
+        end
+    end
+    return false
+end
+
+---Whether a bag addon that's drawing the bags shows item levels on its buttons itself (an
+---adapter's `itemLevels`: Baganator and BetterBags do by default), so a mark of ours for the same
+---thing would sit on top of its own. Whether the player has that turned off in the bag addon
+---isn't known here.
+---@return boolean
+function BagAddons.ShowsItemLevels()
+    for _, adapter in ipairs(ADAPTERS) do
+        if adapter.itemLevels and adapter.get() then
             return true
         end
     end

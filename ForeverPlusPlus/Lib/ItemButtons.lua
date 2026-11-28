@@ -671,14 +671,16 @@ local PLACES = { "bags", "bank", "merchant", "auction", "loot" }
 ---merchant's item index; false too when the Buyback tab draws on the same buttons), auction (the
 ---link with the row's random suffix, `a` the item ID), or loot (`a` the loot slot, nil for a loot
 ---roll). A place is on while `module.db[place]` is, the key its Show On checkbox has
----(`PlaceOption`), unless `opts.shows(place)` answers. Make it once, as the file loads.
+---(`PlaceOption`), unless `opts.shows(place)` answers. With `opts.addonBags`, a bag addon's bags
+---and bank are marked only while it answers true, for a mark the bag addon may draw itself (an
+---item's level). Make it once, as the file loads.
 ---
 ---`walk:Hook()` from OnEnable hooks each window; `walk:Refresh()` marks what's open, then and
 ---after the answers or the options changed; `walk:Stop()` from OnDisable stops waiting for the
 ---auction house. Taking the marks off then is the module's (`Overlays:HideAll`).
 ---@param module table
 ---@param mark fun(icon: table?, link: string|false|nil, place: string, a?: any, b?: any)
----@param opts? { places: string[]?, shows: (fun(place: string): any)? } `places` for fewer than all five
+---@param opts? { places: string[]?, shows: (fun(place: string): any)?, addonBags: (fun(): any)? } `places` for fewer than all five
 ---@return table walk
 function ItemButtons.Walk(module, mark, opts)
     local has = {}
@@ -706,6 +708,10 @@ function ItemButtons.Walk(module, mark, opts)
     -- another slot then.
     local function updateAddonBags()
         local bags, bank, linkOf = shows("bags"), shows("bank"), _G.C_Container.GetContainerItemLink
+        -- Left to the bag addon: off there as an unchecked place is, so a mark made before goes.
+        if opts and opts.addonBags and not opts.addonBags() then
+            bags, bank = false, false
+        end
         ItemButtons.EachAddonBagButton(function(_, icon, bag, slot, inBank)
             local place = inBank and "bank" or "bags"
             if has[place] then

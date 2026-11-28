@@ -47,6 +47,7 @@ local function walk()
 end
 
 eq(BagAddons.Loaded(), false, "bagaddons: none loaded")
+eq(BagAddons.ShowsItemLevels(), false, "bagaddons: and none drawing item levels of its own")
 same(walk(), {}, "bagaddons: no buttons without one")
 eq(BagAddons.BankShown(), false, "bagaddons: no bank without one")
 
@@ -76,6 +77,7 @@ Baganator = {
 eq(BagAddons.Loaded(), false, "bagaddons: Baganator's global without the addon loaded")
 loadedAddOns.Baganator = true
 eq(BagAddons.Loaded(), true, "bagaddons: Baganator loaded")
+eq(BagAddons.ShowsItemLevels(), true, "bagaddons: Baganator draws item levels itself")
 same(walk(), { "0:1", "5:2", "6:7:bank" },
     "bagaddons: Baganator's live buttons on screen, not pooled, faded out, cached, or bag slots")
 eq(BagAddons.BankShown(), false, "bagaddons: Baganator's bank closed")

@@ -1,6 +1,7 @@
 -- Item Levels: the level of weapons and armor on their icons, in the color of their quality, in
--- your bags and bank (a bag addon's too), at merchants, in the auction house, and in the loot
--- window and loot rolls, each with its own checkbox. Top left by default, as most item level
+-- your bags and bank (a bag addon's too, unless it shows item levels itself, as Baganator and
+-- BetterBags do: then only with In a Bag Addon's Bags Too), at merchants, in the auction house,
+-- and in the loot window and loot rolls, each with its own checkbox. Top left by default, as most item level
 -- addons put it, where Upgrade Arrows' arrow also goes (it's off by default; a conflict row says
 -- so). Off by default.
 --
@@ -26,6 +27,7 @@ local module = ns.NewModule("ItemLevels", L.ITEMLEVELS_DESC, {
     merchant = true,
     auction = false, -- its icons are small
     loot = true,
+    overAddon = false, -- in the bags of a bag addon that draws item levels itself, too
 })
 module.title = L.ITEMLEVELS_TITLE
 module.presets = { developer = { options = { corner = "BOTTOMLEFT" } } }
@@ -70,6 +72,14 @@ module.options = {
     ItemButtons.PlaceOption("merchant", L.ITEMLEVELS_MERCHANT_DESC),
     ItemButtons.PlaceOption("auction", L.ITEMLEVELS_AUCTION_DESC),
     ItemButtons.PlaceOption("loot", L.ITEMLEVELS_LOOT_DESC),
+    {
+        -- Only with a bag addon that has item levels of its own: there's nothing to choose without.
+        key = "overAddon", name = L.ITEMLEVELS_OVER_ADDON, description = L.ITEMLEVELS_OVER_ADDON_DESC,
+        section = L.ICONMARK_SECTION_SHOW,
+        shown = function()
+            return ns.BagAddons.ShowsItemLevels()
+        end,
+    },
 }
 
 -- Below this width an icon gets text two pixels smaller: the auction house's list icons.
@@ -117,7 +127,14 @@ local walk = ItemButtons.Walk(module, function(icon, link)
     text:SetTextColor(color.r, color.g, color.b)
     text:SetText(level)
     ItemButtons.PlaceInCorner(text, icon, module.db.corner, module.db.padding)
-end)
+end, {
+    -- A bag addon that draws item levels itself (Baganator, BetterBags) keeps its bags to its
+    -- own, with its own size and place, unless the player asks for ours there too: by default
+    -- both sat in the top left corner, one over the other (issue #44).
+    addonBags = function()
+        return module.db.overAddon or not ns.BagAddons.ShowsItemLevels()
+    end,
+})
 
 -- Module ----------------------------------------------------------------------------------------
 

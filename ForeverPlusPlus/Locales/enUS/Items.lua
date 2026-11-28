@@ -181,6 +181,10 @@ L.ITEMLEVELS_BANK_DESC = "Show the level of gear in the bank."
 L.ITEMLEVELS_MERCHANT_DESC = "Show the level of gear a merchant sells."
 L.ITEMLEVELS_AUCTION_DESC = "Show the level of gear in the auction house's lists."
 L.ITEMLEVELS_LOOT_DESC = "Show the level of gear in the loot window and on loot rolls."
+L.ITEMLEVELS_OVER_ADDON = "In a Bag Addon's Bags Too"
+L.ITEMLEVELS_OVER_ADDON_DESC = "Baganator and BetterBags show item levels in their own bags, with "
+    .. "their own settings for size and place, so those bags are left to them. Turn this on to show "
+    .. "Forever++'s levels there too."
 
 -- UnusableItemsTint
 L.UNUSABLEITEMSTINT_TITLE = "Unusable Items Tint"

@@ -190,6 +190,10 @@ L.ITEMLEVELS_BANK_DESC = "Zeigt die Stufe der Ausrüstung in der Bank."
 L.ITEMLEVELS_MERCHANT_DESC = "Zeigt die Stufe der Ausrüstung, die ein Händler verkauft."
 L.ITEMLEVELS_AUCTION_DESC = "Zeigt die Stufe der Ausrüstung in den Listen des Auktionshauses."
 L.ITEMLEVELS_LOOT_DESC = "Zeigt die Stufe der Ausrüstung im Beutefenster und bei Beutewürfen."
+L.ITEMLEVELS_OVER_ADDON = "Auch in den Taschen eines Taschen-Addons"
+L.ITEMLEVELS_OVER_ADDON_DESC = "Baganator und BetterBags zeigen Gegenstandsstufen in ihren eigenen "
+    .. "Taschen selbst an, mit eigenen Einstellungen für Größe und Position, daher bleiben diese "
+    .. "Taschen ihnen überlassen. Aktiviert dies, um dort auch die Stufen von Forever++ zu zeigen."
 
 -- UnusableItemsTint
 L.UNUSABLEITEMSTINT_TITLE = "Unbenutzbares rot färben"

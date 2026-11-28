@@ -185,6 +185,10 @@ L.ITEMLEVELS_BANK_DESC = "Показывать уровень снаряжени
 L.ITEMLEVELS_MERCHANT_DESC = "Показывать уровень снаряжения, которое продает торговец."
 L.ITEMLEVELS_AUCTION_DESC = "Показывать уровень снаряжения в списках аукциона."
 L.ITEMLEVELS_LOOT_DESC = "Показывать уровень снаряжения в окне добычи и при розыгрыше добычи."
+L.ITEMLEVELS_OVER_ADDON = "И в сумках модификации сумок"
+L.ITEMLEVELS_OVER_ADDON_DESC = "Baganator и BetterBags сами показывают уровни предметов в своих сумках, "
+    .. "со своими настройками размера и места, поэтому эти сумки оставлены им. Включите, чтобы "
+    .. "показывать там и уровни Forever++."
 
 -- UnusableItemsTint
 L.UNUSABLEITEMSTINT_TITLE = "Подсветка недоступных предметов"
