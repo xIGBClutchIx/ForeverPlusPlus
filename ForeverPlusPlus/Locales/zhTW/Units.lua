@@ -38,6 +38,15 @@ L.DRUIDMANABAR_TEXT_DESC = "像遊戲的「狀態數值」設定在其他條上�
 L.DRUIDMANABAR_FORM_COLOR = "較淺的藍色"
 L.DRUIDMANABAR_FORM_COLOR_DESC = "以較淺的藍色填滿法力條，讓它不會和玩家框架本身的深藍色法力條混淆；"
     .. "開啟「所有形態皆顯示」時，在人形態下那條就位於它的正上方。"
+-- PlayerPortrait
+L.PLAYERPORTRAIT_TITLE = "玩家頭像"
+L.PLAYERPORTRAIT_DESC = "在你的頭像周圍顯示目標框架在精英或稀有敵人周圍顯示的龍，並把玩家框架上的等級圓圈"
+    .. "畫得更小。"
+L.PLAYERPORTRAIT_CHAIN = "龍"
+L.PLAYERPORTRAIT_CHAIN_DESC = "在你的頭像周圍顯示目標框架的哪一種龍。你在載具中時不顯示。"
+L.PLAYERPORTRAIT_CHAIN_OFF = "關閉"
+L.PLAYERPORTRAIT_LEVEL_SIZE = "等級大小"
+L.PLAYERPORTRAIT_LEVEL_SIZE_DESC = "玩家框架上等級圓圈和數字相對於暴雪原本大小的比例。為100%時保持暴雪的原樣。"
 -- ClassColors
 L.CLASSCOLORS_DESC = "在玩家、目標、專注目標、隊伍和目標的目標框架上，以職業顏色顯示玩家的生命條和名字，"
     .. "NPC的生命條依態度著色，好友名單和查詢名單中的名字也以職業顏色顯示。"

@@ -155,6 +155,11 @@ ns.changelog = {
                     .. "At sets how many) and you have its reagent. Reminder Button shows a button "
                     .. "with the next buff and who gets it, out of combat; click it to cast, and "
                     .. "move it in Edit Mode." },
+                { L.PLAYERPORTRAIT_TITLE, "A new module, off by default, that puts the dragon the "
+                    .. "target frame shows around an elite or rare enemy around your own portrait, "
+                    .. "the elite's gold one unless you pick the rare's or the rare elite's, and draws "
+                    .. "the level circle on the player frame smaller, at 80% unless you pick another "
+                    .. "size." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.AUTOSCREENSHOT_TITLE, "On by default now. If you never turned it on or off, "

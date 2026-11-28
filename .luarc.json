@@ -77,6 +77,8 @@
     "ChatFrame_OpenChat",
     "CurveConstants",
     "PlayerFrame",
+    "PlayerLevelText",
+    "WhiteLargeNumberFont",
     "UNIT_FRAME_SHOW_HEALTH_ONLY",
     "AbbreviateLargeNumbers",
     "UnitGUID",
