@@ -162,7 +162,8 @@ end
 
 -- Tooltip -----------------------------------------------------------------------------------------
 
-local function questLine(id)
+-- A quest's title with its level, and the color of how hard it is for the player.
+local function questTitle(id)
     local title = internal.Title(id)
     local level = internal.Level(id)
     local color = HIGHLIGHT_FONT_COLOR
@@ -170,7 +171,11 @@ local function questLine(id)
         title = format("%s %s", ns.Quests.LevelTag(id, level), title)
         color = GetQuestDifficultyColor(level)
     end
-    return { title, color }
+    return title, color
+end
+
+local function questLine(id)
+    return { questTitle(id) }
 end
 
 local function giverName(info)
@@ -214,8 +219,8 @@ local function addDetails(lines, id, info)
     end
     if db.detailNext and quest.next then
         -- As a quest's own line: its level, and the color of how hard it is for the player.
-        local line = questLine(quest.next)
-        lines[#lines + 1] = MapTooltip.Pair(L.QUESTPINS_DETAIL_NEXT, line[1], line[2])
+        local title, color = questTitle(quest.next)
+        lines[#lines + 1] = MapTooltip.Pair(L.QUESTPINS_DETAIL_NEXT, title, color)
     end
 end
 
