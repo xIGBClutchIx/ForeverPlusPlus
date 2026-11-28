@@ -110,6 +110,31 @@ local function showTooltip(self)
     GameTooltip:Show()
 end
 
+-- Puts the corner button where the close button is, mirrored: as big on screen, as far in from
+-- the left edge as the close button is from the right, and level with it. From where the close
+-- button really is on screen, not from its anchor: the loot window draws it bigger and further
+-- in than the template's 24 by 24 at the corner says (in game, 2026-11-27).
+local function placeCorner()
+    local loot = _G.LootFrame
+    local close = loot and loot.ClosePanelButton
+    if not (close and close:IsShown()) then
+        return
+    end
+    local scale, closeScale = loot:GetEffectiveScale(), close:GetEffectiveScale()
+    local right, top = loot:GetRight(), loot:GetTop()
+    local closeRight, closeTop = close:GetRight(), close:GetTop()
+    local width, height = close:GetSize()
+    if not (scale and scale > 0 and closeScale and right and top and closeRight and closeTop
+        and width and width > 0 and height and height > 0) then
+        return
+    end
+    -- The close button's edges and size in the loot window's own units.
+    local ratio = closeScale / scale
+    corner:SetSize(width * ratio, height * ratio)
+    corner:ClearAllPoints()
+    corner:SetPoint("TOPLEFT", loot, "TOPLEFT", right - closeRight * ratio, closeTop * ratio - top)
+end
+
 local function refresh()
     if not button then
         return
@@ -147,6 +172,9 @@ local function refresh()
     end
     local below = module.db.place == "below"
     button:SetShown(target ~= nil and below)
+    if target and not below then
+        placeCorner()
+    end
     corner:SetShown(target ~= nil and not below)
     local owner = GameTooltip:GetOwner()
     if owner == button or owner == corner then
@@ -222,24 +250,14 @@ local function build()
     end)
     button:Hide()
 
-    -- The corner button: the close button's mirror, its size and how far it sits from the
-    -- corner read from it (UIPanelCloseButtonDefaultAnchors puts it at the top right).
+    -- The corner button: the close button's mirror. Placed each time it shows (placeCorner).
     corner = CreateFrame("Button", nil, loot)
     local close = loot.ClosePanelButton
-    local width, height, x, y = CORNER_SIZE, CORNER_SIZE, 0, 0
     if close then
-        local w, h = close:GetSize()
-        if ns.IsNumber(w) and w > 0 and ns.IsNumber(h) and h > 0 then
-            width, height = w, h
-        end
-        local point, _, _, px, py = close:GetPoint(1)
-        if point == "TOPRIGHT" and ns.IsNumber(px) and ns.IsNumber(py) then
-            x, y = -px, py
-        end
         corner:SetFrameLevel(close:GetFrameLevel())
     end
-    corner:SetSize(width, height)
-    corner:SetPoint("TOPLEFT", loot, "TOPLEFT", x, y)
+    corner:SetSize(CORNER_SIZE, CORNER_SIZE)
+    corner:SetPoint("TOPLEFT", loot, "TOPLEFT", 2, 1)
     local own = ns.Frames.HasAtlas(ART .. "-c60") and "-c60" or ""
     corner:SetNormalAtlas(ART .. own)
     corner:SetPushedAtlas(ART .. "-pressed" .. own)
