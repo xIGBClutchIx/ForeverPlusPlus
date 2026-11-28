@@ -42,6 +42,7 @@ Everything is on by default except where noted. Each module can be turned off, a
 - **Auto Weapon Buff**: Right-clicking a sharpening stone, weightstone, oil, poison, or fishing lure puts it straight onto your weapon, main hand first. Not in combat. Off by default.
 - **Comprehend Scrolls**: For Mages: right-clicking a scroll that needs Comprehension casts Comprehend Scroll on it. Not in combat.
 - **Fishing Cast**: Double right-click with a fishing pole equipped to cast Fishing. Louder Bobber turns sound effects up while you fish. Never in combat. Off by default.
+- **Fishing Key**: One key, set in Key Bindings under Forever++, puts on a fishing pole (and fishing gear) from your bags, then casts Fishing and loots the bobber; a second key, or Shift with the first, puts your own gear back. Turns on the game's Interact Key only while the pole is in hand, if yours is off. Off by default.
 - **Fast Loot**: With auto loot on, takes everything at once instead of waiting for the loot window.
 - **Gathering Tracking**: Keeps Find Minerals or Find Herbs on after logging in, zoning, or dying, and can swap between the two every few seconds, silently if you like. A Dwarf can add Find Treasure.
 - **Mount Speed Gear**: Puts on Carrot on a Stick, Riding Skill gloves, and Mithril Spurs boots from your bags when you mount up, and your own gear back when you get off, once out of combat. Off by default.

@@ -29,6 +29,7 @@
     "SetOverrideBindingSpell",
     "ClearOverrideBindings",
     "SetOverrideBindingClick",
+    "SetOverrideBinding",
     "GetBindingKey",
     "WorldFrame",
     "GetInventoryItemID",

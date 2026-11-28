@@ -1,5 +1,7 @@
 -- What the player wears, and what a piece of gear would replace: a piece of gear's level, the
--- inventory slots an item's type goes in, the worn item in each, whether the character can use an item, and the worn items
+-- inventory slots an item's type goes in, the worn item in each, which item a link is (ItemKey),
+-- putting gear on from the bags and taking it off (Swap, Unequip), whether the character can use
+-- an item, and the worn items
 -- an item competes with (rings and trinkets against the weaker, a two-hander against both hands,
 -- a one-hander against either hand when dual wielding), asked of the client's own item
 -- comparison first (C_TooltipComparison, the "Equipped" tooltips' source; it answers addon code
@@ -10,7 +12,10 @@ local _, ns = ...
 local _G, ipairs, type, pcall, select, format = _G, ipairs, type, pcall, select, string.format
 local GetInventoryItemLink, UnitLevel = GetInventoryItemLink, UnitLevel
 local CanDualWield, GetInventoryItemID = CanDualWield, GetInventoryItemID
+local CursorHasItem, ClearCursor, PickupInventoryItem = CursorHasItem, ClearCursor, PickupInventoryItem
+local IsInventoryItemLocked, concat = IsInventoryItemLocked, table.concat
 local C_Item, C_PlayerInfo, Enum = C_Item, C_PlayerInfo, Enum
+local C_Container, C_PaperDollInfo = C_Container, C_PaperDollInfo
 
 local Equipment = {
     WEAPON = 2, -- Enum.ItemClass.Weapon
@@ -104,6 +109,80 @@ function Equipment.LinkKey(link)
         return link
     end
     return (key:gsub(":+$", ""))
+end
+
+---Which item a link is, the same however it's linked and whatever level the character is: the
+---item, its enchant, gems, and suffix (`6541:12734:0:0:0:0:0`). Not the whole link, whose level
+---field changes on a level up, so a record of gear put on survives one. Nil for something that
+---isn't an item link.
+---@param link string
+---@return string?
+function Equipment.ItemKey(link)
+    local body = ns.IsText(link, true) and link:match("item:([^|]+)")
+    if not body then
+        return nil
+    end
+    local key, count = {}, 0
+    for value in (body .. ":"):gmatch("([^:]*):") do
+        count = count + 1
+        if count > 7 then
+            break
+        end
+        key[count] = value == "" and "0" or value
+    end
+    for i = count + 1, 7 do
+        key[i] = "0"
+    end
+    return concat(key, ":")
+end
+
+---Swaps the item in a bag slot with what's worn in an inventory slot (or puts it in an empty one),
+---as Blizzard's equipment manager does: pick up the bag item, then the inventory slot, so the worn
+---item lands where the other came from and full bags don't matter. False when the client
+---wouldn't (the item can't go there, or one of them is locked), with the cursor left empty. Not
+---in combat: the caller waits for it to end.
+---@param bag number
+---@param bagSlot number
+---@param invSlot number
+---@return boolean
+function Equipment.Swap(bag, bagSlot, invSlot)
+    C_Container.PickupContainerItem(bag, bagSlot)
+    if not CursorHasItem() then
+        return false
+    end
+    local fits = not C_PaperDollInfo or not C_PaperDollInfo.CursorCanGoInSlot
+        or ns.IsTrue(C_PaperDollInfo.CursorCanGoInSlot(invSlot))
+    if not fits or ns.IsTrueOrSecret(IsInventoryItemLocked(invSlot)) then
+        ClearCursor()
+        return false
+    end
+    PickupInventoryItem(invSlot)
+    if CursorHasItem() then
+        ClearCursor()
+    end
+    return true
+end
+
+---Takes off what's worn in an inventory slot into the first free slot of a bag that takes
+---anything (Bags.FreeSlot). True when it went, "full" when there's no room, false when the client
+---refused (the cursor is left empty). Not in combat.
+---@param invSlot number
+---@return boolean|string
+function Equipment.Unequip(invSlot)
+    local bag, bagSlot = ns.Bags.FreeSlot()
+    if not bag then
+        return "full"
+    end
+    PickupInventoryItem(invSlot)
+    if not CursorHasItem() then
+        return false
+    end
+    C_Container.PickupContainerItem(bag, bagSlot)
+    if CursorHasItem() then
+        ClearCursor()
+        return false
+    end
+    return true
 end
 
 ---Whether this exact item (by link, suffix and enchant included) is worn.

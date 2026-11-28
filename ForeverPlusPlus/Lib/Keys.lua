@@ -2,7 +2,7 @@
 -- Auto Repair, Auto Sell Junk, Auto Release), to let something through (Skip Cinematics), to
 -- pick another action (Minimap Button, World Map's Zone Info), or to drag (Movable Windows), so
 -- each offers the same choices under the same names. And a key binding in short, for a label on a
--- small button (Short Keybinds).
+-- small button (Short Keybinds), and opening Key Bindings for a module's own key (OpenBindings).
 local _, ns = ...
 
 local type, concat, _G = type, table.concat, _G
@@ -140,6 +140,16 @@ function Keys.Short(binding)
         return nil
     end
     return concat(modifiers) .. key
+end
+
+---Opens Blizzard's Key Bindings in Settings, for a notice's button on a module whose key is
+---listed there (Bindings.xml, under Forever++). Does nothing on a client without it.
+function Keys.OpenBindings()
+    local settings = _G.Settings
+    if settings and settings.OpenToCategory and settings.KEYBINDINGS_CATEGORY_ID then
+        ns.Chat.QuietRefusals() -- opening Settings from an addon prints a harmless yellow line
+        settings.OpenToCategory(settings.KEYBINDINGS_CATEGORY_ID)
+    end
 end
 
 ---Moves an old "hold Shift" checkbox setting of `saved[module]` to a key setting: Shift while it

@@ -302,6 +302,41 @@ L.FISHINGCAST_COMBAT_TEXT = "You have a fishing pole equipped."
 L.FISHINGCAST_LOUDER = "Louder Bobber"
 L.FISHINGCAST_LOUDER_DESC = "While you fish, turn sound effects up and music down so the splash is easy to hear. Your own volumes come back after you stop."
 
+-- FishingKey
+L.FISHINGKEY_TITLE = "Fishing Key"
+-- [quotes: KEY_BINDINGS]
+L.FISHINGKEY_DESC = "One key for fishing: its first press takes a fishing pole from your bags, "
+    .. "and then it casts Fishing and, while your bobber is out, loots it. A second key puts your "
+    .. "own weapons and gear back on. Choose both in Key Bindings, under Forever++."
+L.FISHINGKEY_BINDING = "Fish and Loot" -- in Blizzard's Key Bindings
+L.FISHINGKEY_BACK_BINDING = "Put Your Own Gear Back On" -- in Blizzard's Key Bindings
+L.FISHINGKEY_NO_KEY = "No key is bound yet" -- a gray row atop the module, with a button
+-- [quotes: KEY_BINDINGS]
+L.FISHINGKEY_NO_KEY_DESC = "Everything here works with keys you choose in Key Bindings, under Forever++."
+L.FISHINGKEY_BIND = "Key Bindings" -- [game: KEY_BINDINGS]
+L.FISHINGKEY_COMBAT = "Changes gear only out of combat"
+L.FISHINGKEY_COMBAT_DESC = "The game lets gear and what a key does change only out of combat. A "
+    .. "press in combat changes your gear once combat ends, and in combat the key keeps doing what "
+    .. "it did before."
+L.FISHINGKEY_INTERACT = "Turn On the Interact Key"
+-- [quotes: ENABLE_INTERACT_TEXT]
+L.FISHINGKEY_INTERACT_DESC = "The key loots your bobber through the game's interact key, which works "
+    .. "only while the game's Enable Interact Key setting is on. If yours is off, turn it on (and let "
+    .. "it reach as far as your bobber) only while a fishing pole is in your hands, and put your own "
+    .. "setting back when the pole comes off. If yours is on, nothing is changed."
+L.FISHINGKEY_GEAR = "Fishing Gear"
+L.FISHINGKEY_GEAR_DESC = "Put on the gear in your bags that's worn for its Fishing bonus, such as a "
+    .. "fishing hat, along with the pole. Only gear already bound to you."
+L.FISHINGKEY_SHIFT = "Shift Puts Your Gear Back"
+L.FISHINGKEY_SHIFT_DESC = "Holding Shift as you press the key puts your own weapons and gear back "
+    .. "on, as the second key does."
+L.FISHINGKEY_CHAT_DESC = "Say in chat when there's no fishing pole to put on, or your own gear "
+    .. "couldn't be put back on."
+L.FISHINGKEY_NO_POLE = "There's no fishing pole in your bags."
+L.FISHINGKEY_UNBOUND = "%s would bind to you, so put it on yourself the first time." -- an item link
+L.FISHINGKEY_BAGS_FULL = "Your bags are full, so %s stays on." -- an item link
+L.FISHINGKEY_MISSING = "Couldn't put %s back on: it isn't in your bags." -- an item link
+
 
 -- AutoWeaponBuff
 L.AUTOWEAPONBUFF_TITLE = "Auto Weapon Buff"

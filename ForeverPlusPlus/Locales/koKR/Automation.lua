@@ -256,6 +256,33 @@ L.FISHINGCAST_LOUDER = "찌 소리 키우기"
 L.FISHINGCAST_LOUDER_DESC = "낚시하는 동안 효과음을 키우고 배경음악을 줄여 물 튀는 소리를 잘 들리게 합니다. "
     .. "낚시를 멈추면 원래 음량으로 돌아갑니다."
 
+-- FishingKey
+L.FISHINGKEY_TITLE = "낚시 키"
+L.FISHINGKEY_DESC = "낚시용 키 하나: 처음 누르면 가방에서 낚싯대를 꺼내 장착하고, 그다음부터는 낚시를 "
+    .. "시전하며, 찌가 물에 떠 있는 동안에는 찌를 줍습니다. 두 번째 키는 원래 무기와 장비를 다시 "
+    .. "착용합니다. 두 키 모두 단축키 설정의 Forever++ 항목에서 고릅니다."
+L.FISHINGKEY_BINDING = "낚시하고 줍기" -- in Blizzard's Key Bindings
+L.FISHINGKEY_BACK_BINDING = "원래 장비 다시 착용" -- in Blizzard's Key Bindings
+L.FISHINGKEY_NO_KEY = "아직 지정된 키가 없습니다" -- a gray row atop the module, with a button
+L.FISHINGKEY_NO_KEY_DESC = "모든 기능은 단축키 설정의 Forever++ 항목에서 고른 키로 작동합니다."
+L.FISHINGKEY_COMBAT = "장비는 전투 중이 아닐 때만 바꿈"
+L.FISHINGKEY_COMBAT_DESC = "게임은 전투 중이 아닐 때만 장비와 키의 동작을 바꿀 수 있게 합니다. 전투 중에 "
+    .. "누르면 전투가 끝난 뒤 장비를 바꾸며, 전투 중에는 키가 하던 동작을 그대로 합니다."
+L.FISHINGKEY_INTERACT = "상호작용 키 켜기"
+L.FISHINGKEY_INTERACT_DESC = "키는 게임의 상호작용 키로 찌를 줍는데, 이 키는 게임의 상호작용 단축키 활성화 "
+    .. "설정이 켜져 있을 때만 작동합니다. 이 설정이 꺼져 있으면 낚싯대를 들고 있는 동안에만 켜고(찌까지 "
+    .. "닿게 하며), 낚싯대를 벗으면 원래 설정으로 되돌립니다. 이미 켜져 있으면 아무것도 바꾸지 않습니다."
+L.FISHINGKEY_GEAR = "낚시 장비"
+L.FISHINGKEY_GEAR_DESC = "낚싯대와 함께, 낚시 보너스 때문에 착용하는 가방 속 장비(낚시 모자 등)도 "
+    .. "착용합니다. 이미 귀속된 장비만 착용합니다."
+L.FISHINGKEY_SHIFT = "Shift로 장비 되돌리기"
+L.FISHINGKEY_SHIFT_DESC = "Shift를 누른 채 키를 누르면 두 번째 키처럼 원래 무기와 장비를 다시 착용합니다."
+L.FISHINGKEY_CHAT_DESC = "착용할 낚싯대가 없거나 원래 장비를 다시 착용하지 못했을 때 대화창에 알립니다."
+L.FISHINGKEY_NO_POLE = "가방에 낚싯대가 없습니다."
+L.FISHINGKEY_UNBOUND = "%s 아이템은 착용하면 귀속되므로 처음에는 직접 착용하세요." -- an item link
+L.FISHINGKEY_BAGS_FULL = "가방이 가득 차서 %s 아이템을 그대로 착용합니다." -- an item link
+L.FISHINGKEY_MISSING = "%s 아이템을 다시 착용하지 못했습니다: 가방에 없습니다." -- an item link
+
 
 -- AutoWeaponBuff
 L.AUTOWEAPONBUFF_TITLE = "자동 무기 강화"

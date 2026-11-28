@@ -5,4 +5,8 @@
     <!-- Quest Item Button's key (Modules/Quests/QuestItemButton.lua): it clicks a secure button
          that uses the closest quest's item. -->
     <Binding name="CLICK ForeverPlusPlusQuestItemButton:LeftButton" category="ADDONS"/>
+    <!-- Fishing Key's two keys (Modules/Automation/FishingKey.lua): the left click of its secure
+         button puts the fishing pole on, casts, and loots; the right click puts the gear back. -->
+    <Binding name="CLICK ForeverPlusPlusFishingButton:LeftButton" category="ADDONS"/>
+    <Binding name="CLICK ForeverPlusPlusFishingButton:RightButton" category="ADDONS"/>
 </Bindings>

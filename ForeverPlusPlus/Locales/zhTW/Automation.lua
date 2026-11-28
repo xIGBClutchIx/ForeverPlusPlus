@@ -231,6 +231,32 @@ L.FISHINGCAST_COMBAT_TEXT = "你裝備著釣魚竿。"
 L.FISHINGCAST_LOUDER = "加大浮標音量"
 L.FISHINGCAST_LOUDER_DESC = "釣魚時調高音效、調低音樂，讓水花聲更容易聽見。停止釣魚後會恢復你原本的音量。"
 
+-- FishingKey
+L.FISHINGKEY_TITLE = "釣魚按鍵"
+L.FISHINGKEY_DESC = "一個用來釣魚的按鍵：第一次按下時從背包裝備釣魚竿，之後施放釣魚，浮標在水上時則拾取它。"
+    .. "第二個按鍵會換回你原本的武器和裝備。在「按鍵設定」中Forever++底下選擇這兩個按鍵。"
+L.FISHINGKEY_BINDING = "釣魚並拾取" -- in Blizzard's Key Bindings
+L.FISHINGKEY_BACK_BINDING = "換回原本的裝備" -- in Blizzard's Key Bindings
+L.FISHINGKEY_NO_KEY = "尚未設定按鍵" -- a gray row atop the module, with a button
+-- [quotes: KEY_BINDINGS]
+L.FISHINGKEY_NO_KEY_DESC = "這一切都使用你在「按鍵設定」中Forever++底下選擇的按鍵。"
+L.FISHINGKEY_COMBAT = "只在非戰鬥中更換裝備"
+L.FISHINGKEY_COMBAT_DESC = "遊戲只允許在非戰鬥中更換裝備和變更按鍵的作用。戰鬥中按下按鍵，會在戰鬥結束後更換裝備；"
+    .. "戰鬥中按鍵維持原本的作用。"
+L.FISHINGKEY_INTERACT = "開啟互動鍵"
+L.FISHINGKEY_INTERACT_DESC = "按鍵透過遊戲的互動鍵拾取浮標，而互動鍵只在遊戲的「啟用互動鍵」設定開啟時有效。"
+    .. "如果你關閉了它，只在你手持釣魚竿時開啟它（並讓它能碰到你的浮標），卸下釣魚竿後恢復你原本的設定。"
+    .. "如果你已開啟，則不做任何變更。"
+L.FISHINGKEY_GEAR = "釣魚裝備"
+L.FISHINGKEY_GEAR_DESC = "裝備釣魚竿時，也裝備背包中為了釣魚加成而穿戴的裝備，例如釣魚帽。只限已與你綁定的裝備。"
+L.FISHINGKEY_SHIFT = "Shift換回裝備"
+L.FISHINGKEY_SHIFT_DESC = "按住Shift按下按鍵時，會像第二個按鍵一樣換回你原本的武器和裝備。"
+L.FISHINGKEY_CHAT_DESC = "沒有可裝備的釣魚竿，或無法換回你原本的裝備時，在聊天中顯示。"
+L.FISHINGKEY_NO_POLE = "你的背包裡沒有釣魚竿。"
+L.FISHINGKEY_UNBOUND = "%s裝備後會與你綁定，第一次請自己裝備它。" -- an item link
+L.FISHINGKEY_BAGS_FULL = "背包已滿，%s仍穿在身上。" -- an item link
+L.FISHINGKEY_MISSING = "無法重新裝備%s：它不在你的背包裡。" -- an item link
+
 
 -- AutoWeaponBuff
 L.AUTOWEAPONBUFF_TITLE = "自動武器強化"

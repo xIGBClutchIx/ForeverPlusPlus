@@ -155,6 +155,15 @@ ns.changelog = {
                     .. "At sets how many) and you have its reagent. Reminder Button shows a button "
                     .. "with the next buff and who gets it, out of combat; click it to cast, and "
                     .. "move it in Edit Mode." },
+                { L.FISHINGKEY_TITLE, "A new module, off by default, for fishing with one key, set "
+                    .. "in Key Bindings under Forever++. Its first press puts on a fishing pole from "
+                    .. "your bags, and fishing gear such as a fishing hat; after that it casts "
+                    .. "Fishing, and while your bobber is out it loots it. A second key, or Shift with "
+                    .. "the first, puts your own weapons and gear back on, remembered through a "
+                    .. "reload or logout. It loots through the game's Interact Key: if your Enable "
+                    .. "Interact Key setting is off, it's turned on only while the pole is in your "
+                    .. "hands, and your own setting comes back after. Gear changes out of combat "
+                    .. "only." },
             } },
             { L.CHANGELOG_CHANGED, {
                 { L.AUTOSCREENSHOT_TITLE, "On by default now. If you never turned it on or off, "

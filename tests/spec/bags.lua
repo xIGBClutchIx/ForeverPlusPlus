@@ -1,4 +1,4 @@
--- Bags: walking every slot of the player's bags, and counting the free ones.
+-- Bags: walking every slot of the player's bags, and counting the free ones and finding one.
 local T = ...
 local ns, eq, same = T.ns, T.eq, T.same
 
@@ -48,6 +48,13 @@ eq(Bags.Each(function() end), nil, "bags: a walk nothing stops returns nil")
 -- The backpack's 4, bag 1's 2 (no family is an ordinary bag), bag 4's 1; not the quiver's 9, the
 -- bag that gave no answer, or the reagent bag's 7.
 eq(Bags.FreeSlots(), 7, "bags: free slots in the bags that take anything")
+
+-- The first empty slot, for gear taken off: the backpack's second, unless the backpack takes only
+-- its own kind, when no other bag has an empty slot.
+same({ Bags.FreeSlot() }, { 0, 2 }, "bags: the first empty slot in a bag that takes anything")
+free[0] = { 4, 1 }
+eq(Bags.FreeSlot(), nil, "bags: none in a bag that takes only its own kind")
+free[0] = { 4, 0 }
 
 -- The cheapest gray stack: bag 0 has gray 100 (2 at 30c, 60c) and gray 101 (1 at 40c), a white
 -- 102 worth 1c, a gray 103 a vendor won't buy, a locked gray 104, and a gray 105 with no price
