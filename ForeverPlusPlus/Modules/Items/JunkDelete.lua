@@ -1,6 +1,6 @@
--- Junk Delete Button: while the bags are full and the loot window still holds an item, a button
--- on it destroys the gray stack worth least to a vendor (ns.Bags.CheapestJunk), so there's room
--- to take the loot. By default it's a small red button in the loot window's top left corner, the
+-- Junk Delete Button: while the loot window still holds an item the bags have no room for, a
+-- button on it destroys the gray stack worth least to a vendor (ns.Bags.CheapestJunk), so there's
+-- room to take the loot. By default it's a small red button in the loot window's top left corner, the
 -- mirror of its close button, in Blizzard's own delete button art. Or a panel button below the
 -- window: short, no wider than the loot window (Item on the Button writes the stack and its value
 -- on its face instead, as wide as they need). Either one's tooltip, above it, names the stack
@@ -13,9 +13,10 @@
 -- popup does. It isn't protected, so a plain button may call it. **Unverified** in game.
 local _, ns = ...
 
-local _G, format, min, max = _G, string.format, math.min, math.max
+local _G, format, min, max, select = _G, string.format, math.min, math.max, select
 local C_Container, C_Item, CreateFrame = C_Container, C_Item, CreateFrame
 local GetNumLootItems, GetLootSlotType = GetNumLootItems, GetLootSlotType
+local GetLootSlotLink, GetLootSlotInfo = GetLootSlotLink, GetLootSlotInfo
 local GetCursorInfo, CursorHasItem, ClearCursor = GetCursorInfo, CursorHasItem, ClearCursor
 local DeleteCursorItem, InCombatLockdown, GameTooltip = DeleteCursorItem, InCombatLockdown, GameTooltip
 
@@ -76,16 +77,52 @@ local function poor()
     return Enum and Enum.ItemQuality and Enum.ItemQuality.Poor or 0
 end
 
--- Whether the loot window still holds an item, which needs a bag slot. Money and currency don't.
-local function itemLeft()
+-- Whether the bags take the item in a loot slot: true or false, or nil when the game doesn't
+-- say what it is yet. By the item, not by a count of free slots: a stack of the same thing with
+-- room takes it with no slot free, a quiver or a herb bag takes only its own kind, and the
+-- reagent bag takes a reagent (ns.Bags.Room).
+local function lootFits(index)
+    local link = GetLootSlotLink and GetLootSlotLink(index)
+    if not ns.IsText(link, true) then
+        return nil
+    end
+    local itemID = C_Item.GetItemInfoInstant(link)
+    -- Probe: GetItemMaxStackSizeByID is Mainline's; GetItemInfo's eighth value is the same.
+    local stack = itemID and (C_Item.GetItemMaxStackSizeByID and C_Item.GetItemMaxStackSizeByID(itemID)
+        or select(8, C_Item.GetItemInfo(link)))
+    if not (itemID and ns.IsNumber(stack) and stack > 0) then
+        return nil
+    end
+    local quantity = GetLootSlotInfo and select(3, GetLootSlotInfo(index))
+    if not (ns.IsNumber(quantity) and quantity > 0) then
+        quantity = 1
+    end
+    return ns.Bags.Room(itemID, stack) >= quantity
+end
+
+-- Whether the loot window still holds an item the bags won't take, which is when deleting junk
+-- helps. Money and currency need no room. An item the game doesn't name yet goes by whether any
+-- slot is free at all. The button showed with free slots when this only asked whether the
+-- ordinary bags had none (reported 2026-11-27): they can have none while the loot still fits.
+local function lootNeedsRoom()
     local kind = Enum and Enum.LootSlotType and Enum.LootSlotType.Item
     local count = GetNumLootItems()
     if not (kind and ns.IsNumber(count)) then
         return false
     end
+    local full -- no free slot in the ordinary bags; asked once, and only when it's needed
     for i = 1, count do
         if GetLootSlotType(i) == kind then
-            return true
+            local fits = lootFits(i)
+            if fits == nil then
+                if full == nil then
+                    full = ns.Bags.FreeSlots() == 0
+                end
+                fits = not full
+            end
+            if not fits then
+                return true
+            end
         end
     end
     return false
@@ -94,7 +131,7 @@ end
 local function wanted()
     local loot = _G.LootFrame
     return module.enabled and loot ~= nil and loot:IsShown() and not InCombatLockdown()
-        and not ns.Gamepad.On() and ns.Bags.FreeSlots() == 0 and itemLeft()
+        and not ns.Gamepad.On() and lootNeedsRoom()
 end
 
 local function showTooltip(self)

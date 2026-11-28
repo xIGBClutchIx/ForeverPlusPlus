@@ -108,7 +108,8 @@ ns.changelog = {
                     .. "the bank, at merchants, and in loot, and in the auction house if you turn "
                     .. "it on. Text Size sets how big the levels are." },
                 { L.JUNKDELETE_TITLE, "A new module, off by default, that shows a small red button "
-                    .. "in the loot window's top left corner while your bags are full. A click "
+                    .. "in the loot window's top left corner while your bags have no room for "
+                    .. "something in it. A click "
                     .. "destroys your gray stack worth least to a vendor, named with its value in the "
                     .. "button's tooltip, so there's room for the loot. It asks first unless you turn "
                     .. "Confirm Before Deleting off. Button moves it below the window as a wider "

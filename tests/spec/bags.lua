@@ -109,6 +109,16 @@ Bags = ns.Bags
 eq(Bags.Room(10, 20), 25, "bags: room for an item, its stacks and the free slots of bags that take anything")
 eq(Bags.Room(30, 200), 800, "bags: and a quiver's free slots for arrows")
 eq(Bags.Room(99, 1), 1, "bags: an item of one a stack fits once a free slot")
+-- A crafting reagent also goes in the reagent bag: its stack of 15 there takes 5 more, and each
+-- of its 6 free slots a stack. Only on the game's own word, so an item not loaded yet isn't counted.
+local reagents = { [10] = true }
+C_Item.GetItemInfo = function(id)
+    return "name", "link", 1, 1, 1, "type", "subtype", 20, "", 1, 1, 7, 0, 0, 0, nil, reagents[id] or false
+end
+eq(Bags.Room(10, 20), 150, "bags: and the reagent bag's stacks and free slots for a crafting reagent")
+eq(Bags.Room(99, 1), 1, "bags: but not for an item that isn't one")
+C_Item.GetItemInfo = function() end
+eq(Bags.Room(10, 20), 25, "bags: nor before the game has the item's data")
 bit = hadBit
 C_Item = hadItem
 

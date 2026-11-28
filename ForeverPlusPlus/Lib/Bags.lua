@@ -4,7 +4,7 @@
 -- Lib/ItemButtons.lua's.
 local _, ns = ...
 
-local type, bit = type, bit
+local type, bit, select = type, bit, select
 local C_Container, C_Item = C_Container, C_Item
 
 local Bags = {}
@@ -113,9 +113,20 @@ function Bags.CheapestJunk(price)
     return bestBag, bestSlot, bestInfo, best
 end
 
+-- Whether the reagent bag takes an item: the game's own word that it's a crafting reagent
+-- (C_Item.GetItemInfo's 17th value). False while the game hasn't the item's data yet, so room is
+-- never said that isn't there.
+local function isReagent(itemID)
+    if not (C_Item and C_Item.GetItemInfo) then
+        return false
+    end
+    return select(17, C_Item.GetItemInfo(itemID)) == true
+end
+
 ---How many more of an item fit in the bags: what its own stacks there have room for, and a full
----stack in each free slot of a bag that takes it, one that takes anything or one of its own kind
----(arrows in a quiver). The reagent bag isn't counted, so it may say less than fits, never more.
+---stack in each free slot of a bag that takes it: one that takes anything, one of its own kind
+---(arrows in a quiver), and the reagent bag for a crafting reagent. Never more than fits; less
+---while the game hasn't loaded the item, when the reagent bag isn't counted.
 ---@param itemID number
 ---@param stackSize number how many make a full stack of it
 ---@return number
@@ -126,19 +137,25 @@ function Bags.Room(itemID, stackSize)
     local family = C_Item and C_Item.GetItemFamily and C_Item.GetItemFamily(itemID)
     family = type(family) == "number" and family or 0
     local room = 0
-    for bag = 0, Bags.LAST do
-        local slots, bagFamily = C_Container.GetContainerNumFreeSlots(bag)
-        local takes = bagFamily == nil or bagFamily == 0
-            or (family ~= 0 and bit and bit.band(family, bagFamily) ~= 0)
-        if takes then
-            room = room + (type(slots) == "number" and slots or 0) * stackSize
-            for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
-                local info = C_Container.GetContainerItemInfo(bag, slot)
-                if info and info.itemID == itemID and not info.isLocked and (info.stackCount or 0) < stackSize then
-                    room = room + stackSize - (info.stackCount or 0)
-                end
+    -- A bag's free slots, a stack each, and what its stacks of the item still take.
+    local function count(bag)
+        local slots = C_Container.GetContainerNumFreeSlots(bag)
+        room = room + (type(slots) == "number" and slots or 0) * stackSize
+        for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
+            local info = C_Container.GetContainerItemInfo(bag, slot)
+            if info and info.itemID == itemID and not info.isLocked and (info.stackCount or 0) < stackSize then
+                room = room + stackSize - (info.stackCount or 0)
             end
         end
+    end
+    for bag = 0, Bags.LAST do
+        local _, bagFamily = C_Container.GetContainerNumFreeSlots(bag)
+        if bagFamily == nil or bagFamily == 0 or (family ~= 0 and bit and bit.band(family, bagFamily) ~= 0) then
+            count(bag)
+        end
+    end
+    if isReagent(itemID) then
+        count(Bags.REAGENT)
     end
     return room
 end
