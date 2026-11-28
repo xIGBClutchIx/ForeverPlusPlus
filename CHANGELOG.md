@@ -46,6 +46,8 @@ What changed in each release of Forever++. The same notes show in game under Set
 
 - **Buff Timers**: Sort Buffs and Hide Tracking Buffs no longer raise a "Cannot anchor to itself" error with an interface addon that lays the buffs out itself, such as ShestakUI, and now sort and close up the buffs in that addon's own layout.
 - **Movable Windows**: An NPC's greeting window and the quest window it opens now share one place and size, so a quest giver's window no longer jumps when you click a quest. One you moved before keeps its place: the greeting's, or the quest window's if only that one was moved.
+- **Movable Windows**: The Legacy window moves too.
+- **Movable Windows**: With the OpenMap addon, the world map is left to OpenMap, which moves it and keeps its place itself, so its own reset works again. A place you gave the map here comes back if you remove OpenMap.
 - **Quest Tracker**: A quest you accept is followed by the map and arrow again, as the game does by itself, instead of being let go when Sort Quests moves it. The same goes for the quest you follow when Hide Completed Quests or the Zone Menu untracks it.
 ## 1.9.1 (2026-11-25)
 

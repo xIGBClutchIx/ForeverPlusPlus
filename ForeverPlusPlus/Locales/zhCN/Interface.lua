@@ -205,7 +205,10 @@ L.MOVABLEWINDOWS_DESC = "按住移动键并拖动暴雪的窗口（例如角色�
 L.MOVABLEWINDOWS_NOTICE = "拖动窗口时，不要点在按钮、输入框、滑块或列表上。" -- a gray row atop the module
 L.MOVABLEWINDOWS_NOTICE_DESC = "窗口中的按钮和列表会自己接收点击。含有动作按钮或其他受保护部件的窗口只能在非"
     .. "战斗状态下移动。"
-L.MOVABLEWINDOWS_KEY = "移动键"
+L.MOVABLEWINDOWS_OPENMAP = "世界地图交给OpenMap，由它自己移动。" -- a gray row atop the module
+L.MOVABLEWINDOWS_OPENMAP_DESC = "使用OpenMap插件时，此模块不移动世界地图，让OpenMap保存它的位置并能"
+    .. "将其复原。在这里为它设定的位置会在不再使用OpenMap时恢复。"
+L.MOVABLEWINDOWS_KEY ="移动键"
 L.MOVABLEWINDOWS_KEY_DESC = "拖动窗口时需要按住的键。设为“无”时，只用鼠标左键拖动即可移动。"
 L.MOVABLEWINDOWS_AREA = "拖动位置"
 L.MOVABLEWINDOWS_AREA_DESC = "可以从哪里抓住窗口：窗口中任何不是按钮、列表或模型的地方，或只限顶部的标题栏。"
