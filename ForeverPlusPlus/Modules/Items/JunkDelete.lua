@@ -66,7 +66,7 @@ local ART = "128-redbutton-delete"
 local CORNER_SIZE = 24 -- the close button's, when its own size can't be read
 -- How the corner button differs from a plain mirror of the close button, so the two look alike
 -- (see placeCorner): how much bigger its frame is, and how far right and up it sits.
-local FIT, NUDGE_X, NUDGE_Y = 1.08, 2.7, 2.3
+local FIT, NUDGE_X, NUDGE_Y = 1.08, 3.6, 2.3
 
 local button -- ours, below the loot window, made the first time it's needed
 local corner -- ours, in the loot window's top left corner, made with it
@@ -125,7 +125,11 @@ end
 --     close button's top, where the close button ends 1 inside the right border: the window's
 --     art doesn't sit the same on both sides of its frame. So ours goes NUDGE_X right and
 --     NUDGE_Y up, which also takes back what the bigger frame adds to its margins.
--- A nudge of 8 right was 6 pixels too many (in game, 2026-11-27).
+-- A nudge of 8 right was 6 pixels too many (in game, 2026-11-27). At 2.7 the two red faces were
+-- exact mirrors and the same size, top and bottom on the same rows, but our lit left edge stood
+-- a pixel outside the window border's own lit line: one more pixel right (about 0.9 here, a unit
+-- being some 1.15 pixels in those screenshots) puts it on that line, as the close button's
+-- right edge sits on the border's pixels.
 local function placeCorner()
     local loot = _G.LootFrame
     local close = loot and loot.ClosePanelButton
