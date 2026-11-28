@@ -13,7 +13,10 @@ local module = ns.NewModule("WorldMap", L.WORLDMAP_DESC, {
 })
 module.title = L.WORLDMAP_TITLE
 module.category = "map"
-module.presets = { developer = { options = { zoneDungeons = "key", fishing = "key", ore = "key" } } }
+-- Zone Info's dungeons and all four professions only while the detail key is held.
+module.presets = { developer = { options = {
+    zoneDungeons = "key", fishing = "key", herbs = "key", ore = "key", skinning = "key",
+} } }
 module.added = "0.8.0"
 
 -- Before 0.8.0 each part was a module of its own. World Map is on if any of them was, each part's
