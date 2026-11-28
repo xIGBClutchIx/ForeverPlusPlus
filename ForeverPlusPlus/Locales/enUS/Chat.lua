@@ -226,6 +226,16 @@ L.UNDIMMEDEDITBOX_NOT_IM = "Needs \"Chat Style\" set to \"IM Style\""
 L.UNDIMMEDEDITBOX_NOT_IM_DESC = "With another chat style the game hides the edit box until you "
     .. "type, so there is nothing to keep bright."
 
+-- ChatLinkTooltips
+L.CHATLINKTOOLTIPS_TITLE = "Chat Link Tooltips"
+L.CHATLINKTOOLTIPS_DESC = "Show the tooltip of an item, spell, quest, or other link in chat while "
+    .. "the mouse is over it, without clicking it."
+L.CHATLINKTOOLTIPS_POSITION = "Position"
+L.CHATLINKTOOLTIPS_POSITION_DESC = "Where the tooltip shows: at your mouse, or in the usual spot of "
+    .. "the game's tooltips."
+L.CHATLINKTOOLTIPS_AT_CURSOR = "At the Cursor"
+L.CHATLINKTOOLTIPS_AT_DEFAULT = "Usual Spot"
+
 -- WhisperWindow
 L.WHISPERWINDOW_TITLE = "Whisper Window"
 L.WHISPERWINDOW_DESC = "Keep whispers in a window of their own, a conversation per person, with a "

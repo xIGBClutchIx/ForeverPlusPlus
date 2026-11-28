@@ -65,6 +65,29 @@ function Chat.EachWindow(module, fn)
     end
 end
 
+-- The kinds of link the game's tooltip shows. A click on any other kind does something else
+-- (whispers a player, opens a channel or a window, copies a URL), or the link is an addon's own.
+-- Every kind here falls through Blizzard's link handlers to ItemRefTooltip:SetHyperlink when it's
+-- clicked, as SetItemRef does (ItemRefHandlers.lua and ItemRefHandlersShared.lua, wow-ui-source's
+-- `forever` branch, read 2026-11-27). Battle pets get a tooltip of their own, and Forever has none.
+local TOOLTIP_LINKS = {
+    item = true, spell = true, enchant = true, quest = true, achievement = true, talent = true,
+    currency = true, instancelock = true,
+}
+
+---Whether a chat link (the part between |H and |h, as OnHyperlinkEnter is given it) is of a kind
+---the game's tooltip shows: an item, spell, enchant, quest, achievement, talent, currency, or
+---instance lock. False for a player, a channel, an addon's link, or a link that can't be read.
+---@param link any
+---@return boolean
+function Chat.HasTooltip(link)
+    if not ns.IsText(link, true) then
+        return false
+    end
+    local kind = match(link, "^([^:]+):")
+    return kind ~= nil and TOOLTIP_LINKS[kind] == true
+end
+
 -- Blizzard's fade --------------------------------------------------------------------------------
 -- Blizzard fades a chat window's tabs, background, and scroll bar in as the mouse comes over it
 -- and out again a second after it leaves: FCF_OnUpdate calls FCF_FadeInChatFrame and

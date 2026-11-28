@@ -224,6 +224,16 @@ L.UNDIMMEDEDITBOX_NOT_IM = "Нужно выбрать \"Система мгно�
 L.UNDIMMEDEDITBOX_NOT_IM_DESC = "При другом стиле чата игра скрывает поле ввода, пока вы не начнете "
     .. "печатать, так что затемнять нечего."
 
+-- ChatLinkTooltips
+L.CHATLINKTOOLTIPS_TITLE = "Подсказки ссылок в чате"
+L.CHATLINKTOOLTIPS_DESC = "Показывать подсказку предмета, заклинания, задания или другой ссылки в "
+    .. "чате, пока на нее наведена мышь, без щелчка."
+L.CHATLINKTOOLTIPS_POSITION = "Положение"
+L.CHATLINKTOOLTIPS_POSITION_DESC = "Где показывать подсказку: у курсора мыши или на обычном месте "
+    .. "подсказок игры."
+L.CHATLINKTOOLTIPS_AT_CURSOR = "У курсора"
+L.CHATLINKTOOLTIPS_AT_DEFAULT = "На обычном месте"
+
 -- WhisperWindow
 L.WHISPERWINDOW_TITLE = "Окно шепота"
 L.WHISPERWINDOW_DESC = "Держать шепот в отдельном окне – по разговору на каждого собеседника, с полем "

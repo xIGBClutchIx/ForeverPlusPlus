@@ -212,6 +212,15 @@ L.UNDIMMEDEDITBOX_NOT_IM = "\"대화창 스타일\"이 \"메신저 스타일\"�
 L.UNDIMMEDEDITBOX_NOT_IM_DESC = "다른 대화창 스타일에서는 입력할 때까지 게임이 입력창을 숨기므로 "
     .. "밝게 유지할 것이 없습니다."
 
+-- ChatLinkTooltips
+L.CHATLINKTOOLTIPS_TITLE = "대화 링크 툴팁"
+L.CHATLINKTOOLTIPS_DESC = "대화창의 아이템, 주문, 퀘스트 등의 링크에 마우스를 올리면 클릭하지 "
+    .. "않아도 그 툴팁을 표시합니다."
+L.CHATLINKTOOLTIPS_POSITION = "위치"
+L.CHATLINKTOOLTIPS_POSITION_DESC = "툴팁이 표시될 위치: 마우스 위치, 또는 게임 툴팁의 평소 자리."
+L.CHATLINKTOOLTIPS_AT_CURSOR = "커서 위치"
+L.CHATLINKTOOLTIPS_AT_DEFAULT = "평소 자리"
+
 -- WhisperWindow
 L.WHISPERWINDOW_TITLE = "귓속말 창"
 L.WHISPERWINDOW_DESC = "귓속말을 사람마다 대화 하나씩, 답장할 입력창과 함께 별도의 창에 모아 둡니다. 대화는 "

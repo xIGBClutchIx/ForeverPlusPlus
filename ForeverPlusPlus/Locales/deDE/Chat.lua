@@ -234,6 +234,16 @@ L.UNDIMMEDEDITBOX_NOT_IM = "Benötigt \"Chatstil\" auf \"Sofortnachrichtenstil\"
 L.UNDIMMEDEDITBOX_NOT_IM_DESC = "Bei einem anderen Chatstil blendet das Spiel das Eingabefeld aus, "
     .. "bis Ihr tippt, es gibt also nichts hell zu halten."
 
+-- ChatLinkTooltips
+L.CHATLINKTOOLTIPS_TITLE = "Tooltips für Chatlinks"
+L.CHATLINKTOOLTIPS_DESC = "Zeigt den Tooltip eines Gegenstands, Zaubers, einer Quest oder eines "
+    .. "anderen Links im Chat, solange die Maus darüber ist, ohne dass Ihr ihn anklickt."
+L.CHATLINKTOOLTIPS_POSITION = "Position"
+L.CHATLINKTOOLTIPS_POSITION_DESC = "Wo der Tooltip erscheint: an Eurer Maus oder an der üblichen "
+    .. "Stelle der Tooltips des Spiels."
+L.CHATLINKTOOLTIPS_AT_CURSOR = "Am Mauszeiger"
+L.CHATLINKTOOLTIPS_AT_DEFAULT = "Übliche Stelle"
+
 -- WhisperWindow
 L.WHISPERWINDOW_TITLE = "Flüsterfenster"
 L.WHISPERWINDOW_DESC = "Hält Flüstern in einem eigenen Fenster, ein Gespräch pro Person, mit einem "

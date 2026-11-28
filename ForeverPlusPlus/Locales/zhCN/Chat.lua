@@ -196,6 +196,14 @@ L.UNDIMMEDEDITBOX_DESC = "不输入时，让聊天输入框保持完全显示，
 L.UNDIMMEDEDITBOX_NOT_IM = "需要将“聊天风格”设为“即时通讯风格”"
 L.UNDIMMEDEDITBOX_NOT_IM_DESC = "使用其他聊天风格时，游戏会在你输入前隐藏输入框，因此无需保持明亮。"
 
+-- ChatLinkTooltips
+L.CHATLINKTOOLTIPS_TITLE = "聊天链接提示"
+L.CHATLINKTOOLTIPS_DESC = "鼠标指向聊天中的物品、法术、任务或其他链接时，显示它的提示信息，无需点击。"
+L.CHATLINKTOOLTIPS_POSITION = "位置"
+L.CHATLINKTOOLTIPS_POSITION_DESC = "提示信息显示的位置：鼠标处，或游戏提示信息的默认位置。"
+L.CHATLINKTOOLTIPS_AT_CURSOR = "跟随鼠标"
+L.CHATLINKTOOLTIPS_AT_DEFAULT = "默认位置"
+
 -- WhisperWindow
 L.WHISPERWINDOW_TITLE = "悄悄话窗口"
 L.WHISPERWINDOW_DESC = "把悄悄话放在单独的窗口中，每人一个对话，并带有回复框。对话会为每个角色保存。"
