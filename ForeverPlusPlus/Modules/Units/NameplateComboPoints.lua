@@ -147,6 +147,21 @@ local function clipOver(bar)
     return clip
 end
 
+-- A part of the sheet as a texture. The sheet is small (32 by 16) and a nameplate is scaled to
+-- sizes that aren't whole pixels, so it's drawn smoothed and off the pixel grid: snapped, each
+-- point landed a pixel off its neighbors and the edges came out jagged (in game, 2026-11-27).
+local function sheetPart(parent, layer, left, right, width)
+    local texture = parent:CreateTexture(nil, layer)
+    texture:SetTexture(NATIVE_ART, nil, nil, "TRILINEAR")
+    texture:SetTexCoord(left, right, 0, 1)
+    texture:SetSize(width, ART_HEIGHT)
+    if texture.SetSnapToPixelGrid then
+        texture:SetSnapToPixelGrid(false)
+        texture:SetTexelSnappingBias(0)
+    end
+    return texture
+end
+
 local function buildNative()
     if native then
         return
@@ -160,17 +175,11 @@ local function buildNative()
     local sockets = clipOver(gate)
     native = { gate = gate, sockets = sockets, lights = {} }
     for i, dot in ipairs(dots) do
-        local socket = sockets:CreateTexture(nil, "BACKGROUND")
-        socket:SetTexture(NATIVE_ART)
-        socket:SetTexCoord(0, 0.375, 0, 1)
-        socket:SetSize(12, ART_HEIGHT)
+        local socket = sheetPart(sockets, "BACKGROUND", 0, 0.375, 12)
         socket:SetPoint("TOPLEFT", dot, "TOPLEFT")
         local clip = clipOver(dot)
         clip:SetFrameLevel(sockets:GetFrameLevel() + 1)
-        local light = clip:CreateTexture(nil, "ARTWORK")
-        light:SetTexture(NATIVE_ART)
-        light:SetTexCoord(0.375, 0.5625, 0, 1)
-        light:SetSize(8, ART_HEIGHT)
+        local light = sheetPart(clip, "ARTWORK", 0.375, 0.5625, 8)
         light:SetPoint("TOPLEFT", dot, "TOPLEFT", 2, 0)
         native.lights[i] = clip
     end
