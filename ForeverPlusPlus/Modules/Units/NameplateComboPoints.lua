@@ -191,8 +191,16 @@ end
 -- from the dot's top left, or an atlas in the dot's middle.
 local function skin(texture, dot, art, offsetX, size)
     texture:ClearAllPoints()
-    if type(art) == "table" then
-        texture:SetTexture(NATIVE_ART, nil, nil, "TRILINEAR")
+    -- The sheet is drawn just as the target frame draws it (ComboPointTemplate sets nothing but
+    -- the file and the part): on the pixel grid, at the size it was made for (see fitScale).
+    -- Smoothed and off the grid it was jagged and lost its top row (in game, 2026-11-27).
+    local sheet = type(art) == "table"
+    if texture.SetSnapToPixelGrid then
+        texture:SetSnapToPixelGrid(sheet)
+        texture:SetTexelSnappingBias(sheet and 0.5 or 0)
+    end
+    if sheet then
+        texture:SetTexture(NATIVE_ART)
         texture:SetTexCoord(art[1], art[2], 0, 1)
         texture:SetSize(art[3], ART_HEIGHT)
         texture:SetPoint("TOPLEFT", dot, "TOPLEFT", offsetX or 0, 0)
@@ -288,13 +296,39 @@ local function update()
     end
 end
 
--- The preview's points change with the clock, not with an event.
+-- The dots' scale. A nameplate is scaled by the game (bigger for the target, and by the player's
+-- nameplate size), which stretched the target frame's small art until it was jagged. So at 100%
+-- the dots are as big on screen as the ones on the target frame, whatever the plate's scale:
+-- the art is then drawn at the size it was made for. Size scales from there.
+local fitted -- the plate's scale the dots were last fitted to
+
+local function fitScale()
+    local parent = holder and holder:GetParent()
+    if not parent then
+        return
+    end
+    local plate, screen = parent:GetEffectiveScale(), UIParent:GetEffectiveScale()
+    if not (plate and plate > 0 and screen and screen > 0) then
+        return
+    end
+    fitted = plate
+    holder:SetScale(screen / plate * module.db.size / 100)
+end
+
+-- The plate's scale eases to its new size after a change of target, and the preview's points
+-- change with the clock, so both are looked at a few times a second while the dots show.
 local sinceTick = 0
 local function onUpdate(_, elapsed)
     sinceTick = sinceTick + elapsed
     if sinceTick >= 0.25 then
         sinceTick = 0
-        update()
+        local parent = holder:GetParent()
+        if parent and parent:GetEffectiveScale() ~= fitted then
+            fitScale()
+        end
+        if module.db.preview then
+            update()
+        end
     end
 end
 
@@ -322,9 +356,9 @@ local function attach()
         holder:SetPoint("BOTTOM", parts.name or container, "TOP", 0, OFFSET)
     end
     applyLook()
-    holder:SetScale(module.db.size / 100)
+    fitScale()
     holder:SetFrameLevel(frame:GetFrameLevel() + 5)
-    holder:SetScript("OnUpdate", module.db.preview and onUpdate or nil)
+    holder:SetScript("OnUpdate", onUpdate)
     holder:Show()
     update()
 end
