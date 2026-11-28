@@ -17,6 +17,10 @@ L.INSTANCES_RANGE = "%d-%d" -- lowest, highest
 L.WORLDMAP_TITLE = "World Map" -- [game: WORLDMAP_BUTTON]
 L.WORLDMAP_DESC = "Add to the world map: points of interest, a zone info panel, unexplored areas, "
     .. "and coordinates. Each has its own Enabled checkbox below."
+L.WORLDMAP_OPENMAP = "Icons Across OpenMap's Map"
+L.WORLDMAP_OPENMAP_DESC = "With the OpenMap addon, show every Forever++ icon from the zones beside "
+    .. "the one in the middle of its map too, not only that zone's: quests, gathering nodes, "
+    .. "townsfolk, and points of interest."
 
 -- PointsOfInterest. Place names on the map come from the game, or from Data/PointsOfInterest.lua.
 L.WORLDMAP_FILTER_TRAVEL = "Boats and Zeppelins" -- one checkbox for both, in the world map's filter menu

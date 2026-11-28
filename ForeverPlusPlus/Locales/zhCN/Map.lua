@@ -12,6 +12,9 @@ L.INSTANCES_RANGE = "%d-%d" -- lowest, highest
 -- WorldMap: one module, a part each for Points of Interest, Zone Info, Unexplored Areas, and
 -- Coordinates. Each part's title heads its section in Settings, over its Enabled checkbox.
 L.WORLDMAP_DESC = "在世界地图上添加：关注点、区域信息面板、未探索区域和坐标。每一项在下方都有自己的“启用”复选框。"
+L.WORLDMAP_OPENMAP = "图标遍布OpenMap地图"
+L.WORLDMAP_OPENMAP_DESC = "使用OpenMap插件时，除了其地图中央的区域，也显示周围区域的所有Forever++图标：任务、"
+    .. "采集点、城镇居民和关注点。"
 
 -- PointsOfInterest. Place names on the map come from the game, or from Data/PointsOfInterest.lua.
 L.WORLDMAP_FILTER_TRAVEL = "船只和飞艇" -- one checkbox for both, in the world map's filter menu

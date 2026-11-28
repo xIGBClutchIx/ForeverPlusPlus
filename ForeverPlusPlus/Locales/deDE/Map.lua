@@ -13,6 +13,10 @@ L.INSTANCES_RANGE = "%d-%d" -- lowest, highest
 -- Coordinates. Each part's title heads its section in Settings, over its Enabled checkbox.
 L.WORLDMAP_DESC = "Ergänzt die Weltkarte um interessante Orte, ein Zoneninfo-Feld, unerforschte "
     .. "Gebiete und Koordinaten. Jedes hat unten sein eigenes Kontrollkästchen „Aktiviert“."
+L.WORLDMAP_OPENMAP = "Symbole auf der ganzen OpenMap-Karte"
+L.WORLDMAP_OPENMAP_DESC = "Zeigt mit dem Addon OpenMap alle Symbole von Forever++ auch aus den Zonen "
+    .. "neben der in der Mitte seiner Karte, nicht nur aus dieser: Quests, Sammelstellen, "
+    .. "Stadtbewohner und interessante Orte."
 
 -- PointsOfInterest. Place names on the map come from the game, or from Data/PointsOfInterest.lua.
 L.WORLDMAP_FILTER_TRAVEL = "Schiffe und Zeppeline" -- one checkbox for both, in the world map's filter menu

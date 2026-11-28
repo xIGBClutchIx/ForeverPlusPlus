@@ -13,6 +13,10 @@ L.INSTANCES_RANGE = "%d-%d" -- lowest, highest
 -- Coordinates. Each part's title heads its section in Settings, over its Enabled checkbox.
 L.WORLDMAP_DESC = "Добавить на карту мира достопримечательности, панель сведений о зоне, "
     .. "неисследованные места и координаты. У каждой части свой флажок «Включено» ниже."
+L.WORLDMAP_OPENMAP = "Значки по всей карте OpenMap"
+L.WORLDMAP_OPENMAP_DESC = "С модификацией OpenMap показывать все значки Forever++ и из зон рядом с той, "
+    .. "что в середине ее карты, а не только из нее: задания, места сбора, горожан и "
+    .. "достопримечательности."
 
 -- PointsOfInterest. Place names on the map come from the game, or from Data/PointsOfInterest.lua.
 L.WORLDMAP_FILTER_TRAVEL = "Корабли и дирижабли" -- one checkbox for both, in the world map's filter menu

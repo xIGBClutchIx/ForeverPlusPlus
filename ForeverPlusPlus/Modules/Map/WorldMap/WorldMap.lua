@@ -9,6 +9,7 @@ local L = ns.L
 
 local module = ns.NewModule("WorldMap", L.WORLDMAP_DESC, {
     enabled = true,
+    openMap = true, -- with the OpenMap addon, every Forever++ icon from the zones beside the view's too
 })
 module.title = L.WORLDMAP_TITLE
 module.category = "map"
@@ -65,3 +66,30 @@ end)
 
 -- Each part's own shared table, by its checkbox's key, for its files to share.
 module.internal = {}
+
+-- The OpenMap addon's map shows many zones at once, and ns.MapPins draws every layer's icons
+-- over all of them (Quest Pins', Gathering Map's, and Townsfolk's too, not only this module's).
+-- The checkbox is here since this is the world map's module, and only shows with OpenMap
+-- installed. With this module off, the icons are drawn as they are with it checked.
+module.options = {
+    {
+        key = "openMap", name = L.WORLDMAP_OPENMAP, description = L.WORLDMAP_OPENMAP_DESC, added = "1.10.0",
+        shown = function()
+            return ns.WorldMap.OpenMap() ~= nil
+        end,
+    },
+}
+
+function module:OnEnable()
+    ns.MapPins.SetSeamless(self.db.openMap)
+end
+
+function module:OnDisable()
+    ns.MapPins.SetSeamless(true)
+end
+
+function module:OnOptionChanged(key)
+    if key == "openMap" then
+        ns.MapPins.SetSeamless(self.db.openMap)
+    end
+end

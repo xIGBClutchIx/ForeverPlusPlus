@@ -13,6 +13,9 @@ L.INSTANCES_RANGE = "%d-%d" -- lowest, highest
 -- Coordinates. Each part's title heads its section in Settings, over its Enabled checkbox.
 L.WORLDMAP_DESC = "세계 지도에 관심 지점, 지역 정보 창, 미탐험 지역, 좌표를 더합니다. 아래에 각각 별도의 "
     .. "'사용함' 체크박스가 있습니다."
+L.WORLDMAP_OPENMAP = "OpenMap 지도 전체에 아이콘"
+L.WORLDMAP_OPENMAP_DESC = "OpenMap 애드온을 쓸 때, 지도 가운데 지역뿐 아니라 그 옆 지역들의 Forever++ 아이콘도 "
+    .. "모두 표시합니다: 퀘스트, 채집 지점, 마을 주민, 관심 지점."
 
 -- PointsOfInterest. Place names on the map come from the game, or from Data/PointsOfInterest.lua.
 L.WORLDMAP_FILTER_TRAVEL = "배와 비행선" -- one checkbox for both, in the world map's filter menu

@@ -27,12 +27,47 @@ end
 ---Through its public API (`OpenMapAPI.IsStitched`, its docs/api.md). False without the addon.
 ---@return boolean
 function WorldMap.Stitched()
-    local api = _G.OpenMapAPI
-    if type(api) ~= "table" or type(api.IsStitched) ~= "function" then
+    local api = WorldMap.OpenMap()
+    if not api then
         return false
     end
     local ok, stitched = pcall(api.IsStitched)
     return ok and stitched and true or false
+end
+
+---The OpenMap addon's public API (`OpenMapAPI`, major version 1), or nil without the addon.
+---@return table?
+function WorldMap.OpenMap()
+    local api = _G.OpenMapAPI
+    if type(api) == "table" and api.major == 1 and type(api.IsStitched) == "function" then
+        return api
+    end
+end
+
+---A point of one map (x and y from 0 to 1) on the map under OpenMap's stitched view, `hostMap`,
+---through the stitched world (`WorldFromMap`, then `MapFromWorld`): outside 0 to 1 where the point
+---is past that map's edges, which the view shows too. Nil when OpenMap can't place it, or its
+---stitched map isn't up.
+---@param fromMap number
+---@param hostMap number
+---@param x number
+---@param y number
+---@return number? x
+---@return number? y
+function WorldMap.OnStitched(fromMap, hostMap, x, y)
+    local api = WorldMap.OpenMap()
+    if not (api and type(api.WorldFromMap) == "function" and type(api.MapFromWorld) == "function") then
+        return nil
+    end
+    local ok, u, v = pcall(api.WorldFromMap, fromMap, x, y)
+    if not (ok and u and v) then
+        return nil
+    end
+    local hx, hy
+    ok, hx, hy = pcall(api.MapFromWorld, hostMap, u, v)
+    if ok and hx and hy then
+        return hx, hy
+    end
 end
 
 ---Shows another map in the world map, as picking it in the map's own dropdown does. Not in

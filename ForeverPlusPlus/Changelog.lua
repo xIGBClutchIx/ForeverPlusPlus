@@ -122,6 +122,11 @@ ns.changelog = {
                     .. "gloves enchanted with Riding Skill, and boots with Mithril Spurs from your "
                     .. "bags when you mount up, and your own gear back on when you get off, once "
                     .. "combat ends. Your own gear is remembered through a reload or logout." },
+                { L.WORLDMAP_TITLE, "With the OpenMap addon, Forever++'s icons show across its whole "
+                    .. "map: quests, gathering nodes, townsfolk, and points of interest from the zones "
+                    .. "beside the one in the middle of the view too, where only that zone's showed. "
+                    .. "Icons Across OpenMap's Map (on by default, shown with OpenMap installed) "
+                    .. "turns it off." },
                 { L.TOWNSFOLK_TITLE, "A new module, off by default, that needs the QuestieDB addon. "
                     .. "It puts innkeepers, mailboxes, bankers, auctioneers, your class trainers, the "
                     .. "trainers of your professions, repairers, and more on the world map, each kind "

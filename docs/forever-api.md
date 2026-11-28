@@ -670,7 +670,8 @@ OpenMap (openmap-world/openmap) draws one stitched view of the whole world over 
 - The map underneath (`WorldMapFrame:GetMapID()`) follows the view: once the view has been still a moment, OpenMap calls `SetMapID` with the zone or continent under its middle. So zoomed out the map is a continent, and zoomed in it's one zone while the view shows its neighbours too.
 - Icons an addon puts on the canvas at positions on that map only show for that one map. Icons placed through HereBeDragons are moved by OpenMap itself to their place on the stitched map; ours go through a map data provider, so they aren't.
 - `OpenMapAPI` is its public API, a global: `IsStitched()` says whether its map is up, `CanvasFromWorldPos(continent, x, y)` (version 2) gives a world position's place on the canvas, outside 0..1 where the view shows past the map underneath, and `OpenMap_ViewChanged` is called as the view moves (CallbackHandler).
-- We use only `IsStitched` so far (`ns.WorldMap.Stitched`): Townsfolk shows on a continent's map while it's true. Showing every layer's icons from neighbouring zones would mean placing them by `CanvasFromWorldPos` in `Lib/MapPins.lua`.
+- `WorldFromMap(uiMapID, x, y)` gives a map point's place on the stitched world (`u, v`), and `MapFromWorld(uiMapID, u, v)` that place on a map, outside 0..1 when it's off it. Together they put a neighbouring zone's point on the map underneath (`ns.WorldMap.OnStitched`).
+- What we do with it: while `IsStitched()` (`ns.WorldMap.Stitched`), `Lib/MapPins.lua` asks every layer for the maps beside the one underneath too and places their icons past its edges, up to one map width out, and Townsfolk shows on a continent's map. World Map's Icons Across OpenMap's Map turns the first off.
 
 ## Open questions
 

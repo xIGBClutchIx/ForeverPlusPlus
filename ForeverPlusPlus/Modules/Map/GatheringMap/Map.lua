@@ -29,8 +29,9 @@ local function continentOf(zone)
     return found
 end
 
--- The tables pins are given, kept from one draw to the next: pin i shows infos[i].
-local infos = {}
+-- The tables pins are given, kept from one draw to the next, one for each node: a draw can ask
+-- for more than one map (Lib/MapPins.lua, with the OpenMap addon), so they aren't kept by count.
+local infos = setmetatable({}, { __mode = "k" })
 
 -- Ctrl+click puts Blizzard's map pin on the node, as the game's own Ctrl+click drops one (on its
 -- zone map, where the node is, also from a continent map); Shift+right-click forgets it.
@@ -53,11 +54,11 @@ local function linesFor(info)
     return internal.TooltipLines(info.node)
 end
 
-local function infoFor(i, node, size, zone)
-    local info = infos[i]
+local function infoFor(node, size, zone)
+    local info = infos[node]
     if not info then
         info = { ctrlClick = ctrlClick, shiftClick = shiftClick, shiftHint = ns.L.GATHERINGMAP_FORGET_HINT }
-        infos[i] = info
+        infos[node] = info
     end
     info.node, info.zone = node, zone
     internal.Look(node, info, "world")
@@ -72,14 +73,12 @@ end
 local function fill(mapID, add)
     local db = module.db
     local shown = internal.ShownOnWorld
-    local count = 0
     local own = db.nodes[mapID]
     if own then
         local size = MAP_PIXELS * db.mapSize / 100
         for _, node in pairs(own) do
             if shown(node) then
-                count = count + 1
-                add(node.x, node.y, infoFor(count, node, size, mapID))
+                add(node.x, node.y, infoFor(node, size, mapID))
             end
         end
     end
@@ -97,8 +96,7 @@ local function fill(mapID, add)
                 if shown(node) then
                     local x, y = MapPins.Translate(zone, mapID, node.x, node.y)
                     if x then
-                        count = count + 1
-                        add(x, y, infoFor(count, node, size, zone))
+                        add(x, y, infoFor(node, size, zone))
                     end
                 end
             end

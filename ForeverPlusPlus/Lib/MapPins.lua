@@ -114,6 +114,62 @@ function MapPins.Translate(fromMap, toMap, x, y)
     end
 end
 
+-- The OpenMap addon's map ---------------------------------------------------------------------
+-- OpenMap draws one view over many zones and keeps Blizzard's map on the zone under its middle
+-- (docs/forever-api.md). A layer is asked for that one map's icons, so the zones beside it would
+-- be bare. While its stitched map is up, every layer is asked for the neighbouring maps too, and
+-- their icons go where OpenMap says those spots are on the map underneath, past its edges.
+-- Only on a zone's map: a continent's already holds what a layer shows zoomed out.
+
+local seamless = true -- MapPins.SetSeamless
+-- How far past the map underneath a neighbour's icon is still drawn, in that map's own widths:
+-- about what the view shows around a zone before OpenMap moves the map on to the next one.
+local REACH = 1
+
+---Whether our icons from the zones beside the one under OpenMap's view are drawn too (on unless
+---the player turns it off; World Map has the checkbox).
+---@param on boolean
+function MapPins.SetSeamless(on)
+    on = on and true or false
+    if seamless ~= on then
+        seamless = on
+        MapPins.RefreshMap()
+    end
+end
+
+local besides = {} -- map ID -> the maps beside it, once asked; the map tree doesn't change
+
+-- The maps beside a zone's: the other maps right under its continent, and the zone's own when
+-- `mapID` is a map inside one (a city's). None for a continent's map or anything above it.
+local function mapsBeside(mapID)
+    local list = besides[mapID]
+    if list then
+        return list
+    end
+    list = {}
+    besides[mapID] = list
+    local types = Enum.UIMapType
+    local top, info = mapID, C_Map.GetMapInfo(mapID)
+    if not (types and info and info.mapType > types.Continent and C_Map.GetMapChildrenInfo) then
+        return list
+    end
+    -- Up to the map right under the continent.
+    local parent = info.parentMapID and C_Map.GetMapInfo(info.parentMapID)
+    while parent and parent.mapType > types.Continent do
+        top = parent.mapID
+        parent = parent.parentMapID and C_Map.GetMapInfo(parent.parentMapID)
+    end
+    if not (parent and parent.mapType == types.Continent) then
+        return list
+    end
+    for _, child in ipairs(C_Map.GetMapChildrenInfo(parent.mapID, nil, false) or {}) do
+        if child.mapID ~= mapID then
+            list[#list + 1] = child.mapID
+        end
+    end
+    return list
+end
+
 -- Pins ----------------------------------------------------------------------------------------
 
 local IsShiftKeyDown, IsControlKeyDown = IsShiftKeyDown, IsControlKeyDown
@@ -216,7 +272,7 @@ local function onMouseUp(pin, button)
             if type(title) == "table" then
                 title = title[1]
             end
-            ns.WorldMap.SetWaypoint(pin.mapID, pin.x, pin.y, title)
+            ns.WorldMap.SetWaypoint(pin.mapID, pin.mapX, pin.mapY, title)
         end
     elseif IsShiftKeyDown() and info.shiftClick then
         info.shiftClick(pin, button)
@@ -427,7 +483,10 @@ function MapPins.SetArt(pin, info)
     end
 end
 
-function Layer:Add(map, x, y, info)
+-- `x` and `y` are where the pin goes on the map shown. A pin from a map beside it (see The
+-- OpenMap addon's map) also says which map it's of and where on that one (`fromMap`, `fromX`,
+-- `fromY`), which is where its `waypoint` goes.
+function Layer:Add(map, x, y, info, fromMap, fromX, fromY)
     self.count = self.count + 1
     local pin = self.pins[self.count]
     if not pin then
@@ -435,7 +494,7 @@ function Layer:Add(map, x, y, info)
         self.pins[self.count] = pin
     end
     pin.x, pin.y, pin.info = x, y, info
-    pin.mapID = map:GetMapID() -- for `waypoint`
+    pin.mapID, pin.mapX, pin.mapY = fromMap or map:GetMapID(), fromX or x, fromY or y -- for `waypoint`
     MapPins.SetArt(pin, info)
     -- Where Blizzard's own dungeon entrance icons go: above the map art and areas, below quests.
     local manager = map.GetPinFrameLevelsManager and map:GetPinFrameLevelsManager()
@@ -460,6 +519,17 @@ function Layer:Draw()
     self.fill(mapID, function(x, y, info)
         self:Add(map, x, y, info)
     end)
+    if not (seamless and WorldMap.Stitched()) then
+        return
+    end
+    for _, beside in ipairs(mapsBeside(mapID)) do
+        self.fill(beside, function(x, y, info)
+            local hx, hy = WorldMap.OnStitched(beside, mapID, x, y)
+            if hx and hx > -REACH and hx < 1 + REACH and hy > -REACH and hy < 1 + REACH then
+                self:Add(map, hx, hy, info, beside, x, y)
+            end
+        end)
+    end
 end
 
 function Layer:Place()
