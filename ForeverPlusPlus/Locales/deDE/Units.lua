@@ -65,8 +65,11 @@ L.PLAYERPORTRAIT_TARGET_CHAIN_DESC = "Welcher der Drachen um das Porträt eines 
     .. "den du anvisierst. Eine Kreatur behält den Drachen, den das Spiel ihr gibt."
 L.PLAYERPORTRAIT_TARGET_LEVEL_SIZE = "Stufengröße des Ziels"
 L.PLAYERPORTRAIT_TARGET_LEVEL_SIZE_DESC = "Wie groß Stufenkreis und Stufenzahl im Zielfenster sind, "
-    .. "wer auch immer dein Ziel ist, gemessen an der Größe, in der Blizzard sie zeichnet. Bei 100 % "
-    .. "bleiben sie, wie Blizzard sie zeichnet."
+    .. "gemessen an der Größe, in der Blizzard sie zeichnet. Bei 100 % bleiben sie, wie Blizzard sie "
+    .. "zeichnet."
+L.PLAYERPORTRAIT_TARGET_LEVEL_PLAYERS = "Stufengröße des Ziels nur bei Spielern"
+L.PLAYERPORTRAIT_TARGET_LEVEL_PLAYERS_DESC = "Wendet die Stufengröße des Ziels nur an, solange dein "
+    .. "Ziel ein Spieler ist. Die Stufe einer Kreatur bleibt, wie Blizzard sie zeichnet."
 -- ClassColors
 L.CLASSCOLORS_DESC = "Zeigt die Gesundheitsleisten und Namen von Spielern in ihrer Klassenfarbe im "
     .. "Spieler-, Ziel-, Fokus-, Gruppen- und Ziel-des-Ziels-Fenster, die Leisten von NSCs nach ihrer "

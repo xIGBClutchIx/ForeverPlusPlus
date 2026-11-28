@@ -50,8 +50,10 @@ L.PLAYERPORTRAIT_LEVEL_SIZE_DESC = "玩家框架上等級圓圈和數字相對�
 L.PLAYERPORTRAIT_TARGET_CHAIN = "目標的龍"
 L.PLAYERPORTRAIT_TARGET_CHAIN_DESC = "在你選取的玩家的頭像周圍顯示哪一種龍。生物保留遊戲給它的龍。"
 L.PLAYERPORTRAIT_TARGET_LEVEL_SIZE = "目標等級大小"
-L.PLAYERPORTRAIT_TARGET_LEVEL_SIZE_DESC = "無論你的目標是誰，目標框架上等級圓圈和數字相對於暴雪原本大小的比例。"
-    .. "為100%時保持暴雪的原樣。"
+L.PLAYERPORTRAIT_TARGET_LEVEL_SIZE_DESC = "目標框架上等級圓圈和數字相對於暴雪原本大小的比例。為100%時保持"
+    .. "暴雪的原樣。"
+L.PLAYERPORTRAIT_TARGET_LEVEL_PLAYERS = "目標等級大小僅用於玩家"
+L.PLAYERPORTRAIT_TARGET_LEVEL_PLAYERS_DESC = "僅在你的目標是玩家時使用目標等級大小。生物的等級保持暴雪的原樣。"
 -- ClassColors
 L.CLASSCOLORS_DESC = "在玩家、目標、專注目標、隊伍和目標的目標框架上，以職業顏色顯示玩家的生命條和名字，"
     .. "NPC的生命條依態度著色，好友名單和查詢名單中的名字也以職業顏色顯示。"

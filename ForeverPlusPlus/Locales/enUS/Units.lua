@@ -68,8 +68,10 @@ L.PLAYERPORTRAIT_TARGET_CHAIN_DESC = "Which of the dragons to show around the po
     .. "you target. A creature keeps the dragon the game gives it."
 L.PLAYERPORTRAIT_TARGET_LEVEL_SIZE = "Target Level Size"
 L.PLAYERPORTRAIT_TARGET_LEVEL_SIZE_DESC = "How big the level circle and number on the target frame "
-    .. "are, whoever your target is, against the size Blizzard draws them. At 100% they're left as "
-    .. "Blizzard draws them."
+    .. "are, against the size Blizzard draws them. At 100% they're left as Blizzard draws them."
+L.PLAYERPORTRAIT_TARGET_LEVEL_PLAYERS = "Target Level Size on Players Only"
+L.PLAYERPORTRAIT_TARGET_LEVEL_PLAYERS_DESC = "Use Target Level Size only while your target is a "
+    .. "player. A creature's level is left as Blizzard draws it."
 -- ClassColors
 L.CLASSCOLORS_TITLE = "Class Colors" -- [game: CLASS_COLORS]
 L.CLASSCOLORS_DESC = "Show players' health bars and names in their class color on the player, "

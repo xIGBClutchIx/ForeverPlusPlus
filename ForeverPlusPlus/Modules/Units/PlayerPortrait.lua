@@ -32,7 +32,8 @@ local module = ns.NewModule("PlayerPortrait", L.PLAYERPORTRAIT_DESC, {
     chain = "elite",
     levelSize = 80, -- percent of Blizzard's level circle and number; 100 leaves Blizzard's alone
     targetChain = "off", -- around a player you target
-    targetLevelSize = 100, -- the target frame's, whoever the target is
+    targetLevelSize = 100, -- the target frame's
+    targetLevelPlayers = false, -- that size only while the target is a player
 })
 module.title = L.PLAYERPORTRAIT_TITLE
 module.category = "units"
@@ -75,7 +76,8 @@ local target = {
     textShown = true, circleShown = true, skullShown = false, follows = {},
 }
 
--- Whether the target is a player: only then does the target frame get our dragon.
+-- Whether the target is a player: only then does the target frame get our dragon, and with
+-- Target Level Size on Players Only, our level.
 local targetPlayer = false
 
 -- The parts of Blizzard's player frame we sit in, or nil on a client without them: the
@@ -112,6 +114,15 @@ end
 
 function target.wanted()
     return targetPlayer
+end
+
+-- Whether the frame's level is ours to draw now. Asked only while the module is on.
+function player.levelWanted()
+    return true
+end
+
+function target.levelWanted()
+    return targetPlayer or not module.db.targetLevelPlayers
 end
 
 function module:IsAvailable()
@@ -156,6 +167,12 @@ module.options = {
         min = 50, max = 200, step = 10, format = "%d%%",
         available = hasTargetFrame, needs = L.SETTINGS_NEEDS_CLIENT,
     },
+    {
+        key = "targetLevelPlayers",
+        name = L.PLAYERPORTRAIT_TARGET_LEVEL_PLAYERS,
+        description = L.PLAYERPORTRAIT_TARGET_LEVEL_PLAYERS_DESC,
+        available = hasTargetFrame, needs = L.SETTINGS_NEEDS_CLIENT,
+    },
 }
 
 local function atlasInfo(atlas)
@@ -197,7 +214,7 @@ local function updateShown(side)
         side.chain:SetAlpha(wanted and 1 or 0)
     end
     local on = module.enabled and side.circle ~= nil and module.db[side.sizeKey] ~= 100
-        and side.levelSize == module.db[side.sizeKey]
+        and side.levelSize == module.db[side.sizeKey] and side.levelWanted()
     if side.circle then
         side.circle:SetAlpha(on and side.circleShown and 1 or 0)
         side.level:SetAlpha(on and side.textShown and 1 or 0)
