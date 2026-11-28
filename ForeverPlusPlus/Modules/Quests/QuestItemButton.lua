@@ -343,7 +343,12 @@ end
 
 local function bindingText()
     local key = GetBindingKey(BINDING)
-    return key and GetBindingText(key, nil, true) or "" -- abbreviated, as on action buttons
+    if not key then
+        return ""
+    end
+    -- In short ("SC" for Shift-C), so it fits the button; a controller button keeps the game's
+    -- own abbreviated text, its icon.
+    return ns.Keys.Short(key) or GetBindingText(key, nil, true)
 end
 
 local editing = false -- Edit Mode is open: the button shows, to be placed
