@@ -129,7 +129,7 @@ ns.changelog = {
                     .. "item of the quest you're closest to, set in Key Bindings under Forever++, "
                     .. "and a button showing which item that is, which you can move in Edit Mode. "
                     .. "The quest you selected comes first, and with QuestieDB, quest items in your "
-                    .. "bags are matched to their quests. Only Near Its Quest, off by default, "
+                    .. "bags are matched to their quests. Only Near Its Quest, on by default, "
                     .. "leaves out the item of a quest that is further away than the distance you "
                     .. "set, or in another zone." },
                 { L.MOUNTGEAR_TITLE, "A new module, off by default, that puts on Carrot on a Stick, "
